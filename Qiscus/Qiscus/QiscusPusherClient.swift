@@ -44,7 +44,7 @@ open class QiscusPusherClient: NSObject {
         self.pusherChannels.append(event)
         let subscribe = self.pusher!.subscribe(event.channel)
         
-        print("Qiscus listen to event: \(event.event) on channel: \(event.channel)")
+        Qiscus.printLog(text: "Qiscus listen to event: \(event.event) on channel: \(event.channel)")
         let _ = subscribe.bind(eventName: event.event, callback: { (data: Any?) -> Void in
             switch event.event{
             case "newmessage":

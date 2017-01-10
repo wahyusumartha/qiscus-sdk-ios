@@ -29,10 +29,9 @@ public extension UIImageView {
             self.image = nil
         }
         imageForUrl(url: url, header: header, useCache: useCache, completionHandler:{(image: UIImage?, url: String) in
-            print("image url: \(url)    ---   image is nil = \(image == nil)")
             if image != nil {
                 if maskImage != nil{
-                    print("here")
+                    Qiscus.printLog(text: "here")
                     returnImage = UIImageView.maskImage(image!, mask: maskImage!)
                 }else{
                     returnImage = image!
@@ -92,7 +91,7 @@ public extension UIImageView {
                     
                         if (error != nil) {
                             completionHandler(nil, urlString)
-                            print("[QiscusAsyncImageView] : \(error)")
+                            Qiscus.printLog(text: "[QiscusAsyncImageView] : \(error)")
                             return
                         }
                         
@@ -110,7 +109,7 @@ public extension UIImageView {
                                 DispatchQueue.main.async(execute: {() in
                                     completionHandler(nil, urlString)
                                 })
-                                print("[QiscusAsyncImageView] : Can't get image from URL: \(url)")
+                                Qiscus.printLog(text: "[QiscusAsyncImageView] : Can't get image from URL: \(url)")
                             }
                             return
                         }

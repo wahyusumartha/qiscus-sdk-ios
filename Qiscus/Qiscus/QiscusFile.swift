@@ -446,7 +446,7 @@ open class QiscusFile: Object {
     }
     private func downloadMiniImage(){
         let manager = Alamofire.SessionManager.default
-        print("[Qiscus] Downloading miniImage for url \(self.fileURL)")
+        Qiscus.printLog(text: "Downloading miniImage for url \(self.fileURL)")
         
         var thumbMiniPath = self.fileURL.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
         if self.fileType == .video{
@@ -468,7 +468,7 @@ open class QiscusFile: Object {
         
         manager.request(thumbMiniPath, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
             .responseData(completionHandler: { response in
-                print("[Qiscus] download miniImage result: \(response)")
+                Qiscus.printLog(text: "download miniImage result: \(response)")
                 if let data = response.data {
                     if let image = UIImage(data: data) {
                         var thumbImage = UIImage()
@@ -492,7 +492,7 @@ open class QiscusFile: Object {
             }).downloadProgress(closure: { progressData in
                 let progress = CGFloat(progressData.fractionCompleted)
                 DispatchQueue.main.async(execute: {
-                    print("[Qiscus] Download miniImage progress: \(progress)")
+                    Qiscus.printLog(text: "Download miniImage progress: \(progress)")
                 })
             })
     }

@@ -228,11 +228,11 @@ open class QiscusUser: Object {
     }
     fileprivate func downloadAvatar(){
         let manager = Alamofire.SessionManager.default
-        print("[Qiscus] Downloading avatar for user \(self.userEmail)")
+        Qiscus.printLog(text: "Downloading avatar for user \(self.userEmail)")
         
         manager.request(self.userAvatarURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
             .responseData(completionHandler: { response in
-                print("[Qiscus] download avatar result: \(response)")
+                Qiscus.printLog(text: "download avatar result: \(response)")
                 if let data = response.data {
                     if let image = UIImage(data: data) {
                         var thumbImage = UIImage()
@@ -266,7 +266,7 @@ open class QiscusUser: Object {
             }).downloadProgress(closure: { progressData in
                 let progress = CGFloat(progressData.fractionCompleted)
                 DispatchQueue.main.async(execute: {
-                    print("[Qiscus] Download avatar progress: \(progress)")
+                    Qiscus.printLog(text: "Download avatar progress: \(progress)")
                 })
             })
     }

@@ -1,36 +1,30 @@
 //
-//  QChatCellLeft.swift
+//  QCellTextLeft.swift
 //  Example
 //
-//  Created by Ahmad Athaullah on 12/29/16.
-//  Copyright © 2016 Ahmad Athaullah. All rights reserved.
+//  Created by Ahmad Athaullah on 1/3/17.
+//  Copyright © 2017 Ahmad Athaullah. All rights reserved.
 //
 
 import UIKit
 
-open class QChatCellLeft: UITableViewCell {
-
+class QCellTextLeft: QChatCell {
+    let maxWidth:CGFloat = 190
+    let minWidth:CGFloat = 80
+    
     @IBOutlet weak var userNameLabel: UILabel!
-    @IBOutlet weak var avatarImageBase: UIImageView!
-    @IBOutlet weak var avatarImage: UIImageView!
+    @IBOutlet weak var balloonView: UIImageView!
     @IBOutlet weak var textView: UITextView!
     @IBOutlet weak var dateLabel: UILabel!
-    @IBOutlet weak var balloonView: UIImageView!
     
     @IBOutlet weak var balloonTopMargin: NSLayoutConstraint!
     @IBOutlet weak var leftMargin: NSLayoutConstraint!
     @IBOutlet weak var cellHeight: NSLayoutConstraint!
+    @IBOutlet weak var textLeading: NSLayoutConstraint!
     @IBOutlet weak var textViewWidth: NSLayoutConstraint!
     @IBOutlet weak var textViewHeight: NSLayoutConstraint!
-    @IBOutlet weak var textLeading: NSLayoutConstraint!
     
-    var comment = QiscusComment()
-    var cellPos = CellTypePosition.single
-    let maxWidth:CGFloat = 190
-    let minWidth:CGFloat = 80
-    var indexPath:IndexPath?
-    
-    var linkTextAttributesLeft:[String: Any]{
+    var linkTextAttributes:[String: Any]{
         get{
             return [
                 NSForegroundColorAttributeName: QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor,
@@ -39,19 +33,12 @@ open class QChatCellLeft: UITableViewCell {
             ]
         }
     }
-    
-    
-    override open func awakeFromNib() {
+    override func awakeFromNib() {
         super.awakeFromNib()
-        
-        self.selectionStyle = .none
         textView.contentInset = UIEdgeInsets.zero
-        avatarImage.layer.cornerRadius = 19
-        avatarImage.clipsToBounds = true
-        avatarImage.contentMode = .scaleAspectFill
     }
-
-    open func setupCell(){
+    
+    open override func setupCell(){
         let user = self.comment.sender
         
         switch cellPos {
@@ -76,7 +63,7 @@ open class QChatCellLeft: UITableViewCell {
         textView.isUserInteractionEnabled = false
         textView.text = comment.commentText as String
         textView.textColor = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
-        textView.linkTextAttributes = linkTextAttributesLeft
+        textView.linkTextAttributes = linkTextAttributes
         
         let textSize = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
         
@@ -111,37 +98,13 @@ open class QChatCellLeft: UITableViewCell {
         
         // last cell
         if cellPos == .last || cellPos == .single{
-            if user != nil{
-                if QiscusHelper.isFileExist(inLocalPath: user!.userAvatarLocalPath){
-                    avatarImage.image = UIImage.init(contentsOfFile: user!.userAvatarLocalPath)
-                }else{
-                    avatarImage.loadAsync(user!.userAvatarURL, placeholderImage: Qiscus.image(named: "in_chat_avatar"))
-                }
-                avatarImage.isHidden = false
-                avatarImageBase.isHidden = false
-            }
-            leftMargin.constant = 34
+            leftMargin.constant = 42
             textLeading.constant = 23
         }else{
-            avatarImage.isHidden = true
-            avatarImageBase.isHidden = true
             textLeading.constant = 8
-            leftMargin.constant = 49
+            leftMargin.constant = 57
         }
         
         textView.layoutIfNeeded()
-    }
-    open override func becomeFirstResponder() -> Bool {
-        return true
-    }
-    open func resend(){
-        if QiscusCommentClient.sharedInstance.commentDelegate != nil{
-            QiscusCommentClient.sharedInstance.commentDelegate?.performResendMessage(onIndexPath: self.indexPath!)
-        }
-    }
-    open func deleteComment(){
-        if QiscusCommentClient.sharedInstance.commentDelegate != nil{
-            QiscusCommentClient.sharedInstance.commentDelegate?.performDeleteMessage(onIndexPath: self.indexPath!)
-        }
     }
 }

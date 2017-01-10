@@ -257,37 +257,25 @@ open class QiscusComment: Object {
             return commentData.first
         }
     }
-    open class func getAllComment(_ topicId: Int, limit:Int, firstLoad:Bool = false)->[QiscusComment]{ // USED
+    open class func getAllComment(_ topicId: Int, limit:Int = 0, firstLoad:Bool = false)->[QiscusComment]{ // USED
         if firstLoad {
             //QiscusComment.deleteAllFailedMessage()
         }
         var allComment = [QiscusComment]()
         let realm = try! Realm()
         
-        let sortProperties = [SortDescriptor(property: "commentCreatedAt", ascending: false), SortDescriptor(property: "commentId", ascending: false)]
+        let sortProperties = [SortDescriptor(property: "commentCreatedAt", ascending: false), SortDescriptor(property: "commentId", ascending: true)]
         let searchQuery:NSPredicate = NSPredicate(format: "commentTopicId == %d",topicId)
         let commentData = realm.objects(QiscusComment.self).filter(searchQuery).sorted(by: sortProperties)
         
-        var needSync = false
         
         if(commentData.count > 0){
-            var i:Int = 0
             dataLoop: for comment in commentData{
-                if !comment.commentIsSynced {
-                    needSync = true
-                }
-                if(i >= limit){
-                    break dataLoop
-                }else{
-                    allComment.insert(comment, at: 0)
-                }
-                i += 1
+                allComment.insert(comment, at: 0)
             }
         }
-        if needSync {
-            QiscusCommentClient.sharedInstance.syncMessage(topicId)
-        }
-        print("OK from getAllComment")
+        
+        Qiscus.printLog(text: "OK from getAllComment")
         return allComment
     }
     open class func getAllComment(_ topicId: Int)->[QiscusComment]{
@@ -320,6 +308,31 @@ open class QiscusComment: Object {
                     allComment.append(grouppedMessage)
                     grouppedMessage = [QiscusComment]()
                     firstCommentInGroup = comment
+                    grouppedMessage.append(comment)
+                }
+                if( i == commentData.count){
+                    allComment.append(grouppedMessage)
+                }
+                i += 1
+            }
+        }
+        return allComment
+    }
+    open class func grouppedComment(inTopicId topicId:Int, firstLoad:Bool = true)->[[QiscusComment]]{
+        var allComment = [[QiscusComment]]()
+        let commentData = QiscusComment.getAllComment(topicId, firstLoad: firstLoad)
+        
+        if(commentData.count > 0){
+            var first = commentData.first!
+            var grouppedMessage = [QiscusComment]()
+            var i:Int = 1
+            for comment in commentData{
+                if(comment.commentDate == first.commentDate) && (comment.commentSenderEmail == first.commentSenderEmail){
+                    grouppedMessage.append(comment)
+                }else{
+                    allComment.append(grouppedMessage)
+                    grouppedMessage = [QiscusComment]()
+                    first = comment
                     grouppedMessage.append(comment)
                 }
                 if( i == commentData.count){
@@ -422,9 +435,10 @@ open class QiscusComment: Object {
             if let file = QiscusFile.getCommentFileWithComment(self){
                 switch file.fileType {
                 case .audio:
-                    newSize.height = 82
+                    newSize.height = 88
                     break
                 case .document:
+                    newSize.height = 70
                     break
                 case .media:
                     newSize.height = 140
@@ -519,8 +533,8 @@ open class QiscusComment: Object {
         let timeArr = String(dateTimeArr.last!).characters.split(separator: "Z")
         let timeString = String(timeArr.first!)
         let dateTimeString = "\(dateString) \(timeString) +0000"
-        print("dateTimeString: \(dateTimeString)")
-        print("commentid: \(comment.commentId)")
+        Qiscus.printLog(text: "dateTimeString: \(dateTimeString)")
+        Qiscus.printLog(text: "commentid: \(comment.commentId)")
         
         let rawDateFormatter = DateFormatter()
         rawDateFormatter.locale = Locale(identifier: "en_US_POSIX")
@@ -540,7 +554,7 @@ open class QiscusComment: Object {
         }
         let isSaved = comment.saveComment(true)
         if isSaved{
-            print("[Qiscus] New comment saved")
+            Qiscus.printLog(text: "New comment saved")
         }
         
         return isSaved
@@ -597,7 +611,7 @@ open class QiscusComment: Object {
     
     open class func getCommentFromJSON(_ data: JSON, topicId:Int, saved:Bool) -> Bool{ // USED
         let comment = QiscusComment()
-        print("getCommentFromJSON: \(data)")
+        Qiscus.printLog(text: "getCommentFromJSON: \(data)")
         comment.commentTopicId = topicId
         comment.commentSenderEmail = data["email"].stringValue
         comment.commentStatusRaw = QiscusCommentStatus.delivered.rawValue
@@ -634,8 +648,8 @@ open class QiscusComment: Object {
         let timeArr = String(dateTimeArr.last!).characters.split(separator: "Z")
         let timeString = String(timeArr.first!)
         let dateTimeString = "\(dateString) \(timeString) +0000"
-        print("dateTimeString: \(dateTimeString)")
-        print("commentid: \(comment.commentId)")
+        Qiscus.printLog(text: "dateTimeString: \(dateTimeString)")
+        Qiscus.printLog(text: "commentid: \(comment.commentId)")
         
         let rawDateFormatter = DateFormatter()
         rawDateFormatter.locale = Locale(identifier: "en_US_POSIX")
@@ -943,6 +957,7 @@ open class QiscusComment: Object {
                 }
                 comment.commentIsDeleted = self.commentIsDeleted
             }
+            comment.updateCommentCellSize()
             return comment
         }
     }

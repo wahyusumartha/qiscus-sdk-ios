@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="QChatFooterRight" customModule="Qiscus" customModuleProvider="target"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionReusableView opaque="NO" multipleTouchEnabled="YES" contentMode="center" id="U6b-Vx-4bR" customClass="QChatFooterRight" customModule="Qiscus" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="50"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <subviews>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="in_chat_avatar_border" translatesAutoresizingMaskIntoConstraints="NO" id="tgP-sa-cHl">
+                    <rect key="frame" x="270" y="0.0" width="42" height="42"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="42" id="YUl-0h-c2v"/>
+                        <constraint firstAttribute="width" constant="42" id="bLm-eZ-nq2"/>
+                    </constraints>
+                </imageView>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="in_chat_avatar" translatesAutoresizingMaskIntoConstraints="NO" id="wLc-Dc-ebD">
+                    <rect key="frame" x="272" y="2" width="38" height="38"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="38" id="dsf-hU-Jkx"/>
+                        <constraint firstAttribute="height" constant="38" id="e2f-ej-O0w"/>
+                    </constraints>
+                </imageView>
+            </subviews>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="tgP-sa-cHl" secondAttribute="trailing" constant="8" id="6pg-Hk-kBL"/>
+                <constraint firstItem="wLc-Dc-ebD" firstAttribute="centerX" secondItem="tgP-sa-cHl" secondAttribute="centerX" id="Aea-zR-VrP"/>
+                <constraint firstAttribute="top" secondItem="tgP-sa-cHl" secondAttribute="top" id="Jl9-W0-kj3"/>
+                <constraint firstItem="wLc-Dc-ebD" firstAttribute="centerY" secondItem="tgP-sa-cHl" secondAttribute="centerY" id="zSD-Pc-Iv6"/>
+            </constraints>
+            <connections>
+                <outlet property="avatarImage" destination="wLc-Dc-ebD" id="fT1-0K-cTg"/>
+            </connections>
+        </collectionReusableView>
+    </objects>
+    <resources>
+        <image name="in_chat_avatar" width="46" height="46"/>
+        <image name="in_chat_avatar_border" width="50" height="50"/>
+    </resources>
+</document>
