@@ -540,7 +540,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
                 let channel = "r/\(roomId)/\(notifTopicId)/\(QiscusMe.sharedInstance.email)/d"
                 let message: String = "\(commentId):\(json["unique_temp_id"].stringValue)";
                 let data: Data = message.data(using: .utf8)!
-                Qiscus.realtimeThread.sync {
+                Qiscus.realtimeThread.async {
                     Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: true, completion: {(succeeded, error) -> Void in
                             if succeeded {
                                 DispatchQueue.main.async {
@@ -578,10 +578,11 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
                                 showToast = true
                             }
                         }
+                        /*
                         let channel = "r/\(roomId)/\(notifTopicId)/\(QiscusMe.sharedInstance.email)/r"
                         let message: String = "\(commentId):\(json["unique_temp_id"].stringValue)";
                         let data: Data = message.data(using: .utf8)!
-                        Qiscus.realtimeThread.sync {
+                        Qiscus.realtimeThread.async {
                             Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: true, completion: {(succeeded, error) -> Void in
                                 if succeeded {
                                     DispatchQueue.main.async {
@@ -592,7 +593,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
                                 }
                             })
                         }
-                        
+                        */
                     }
                     
                     if showToast && Qiscus.sharedInstance.config.showToasterMessage{
