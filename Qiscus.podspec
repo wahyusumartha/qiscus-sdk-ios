@@ -32,6 +32,6 @@ s.dependency 'ImageViewer'
 s.dependency 'SwiftMQTT'
 s.dependency 'IQAudioRecorderController'
 
-s.ios.frameworks = 'UIKit', 'AVFoundation', MobileCoreServices, 'Photos'
+s.frameworks = 'UIKit', 'AVFoundation', 'MobileCoreServices', 'Photos'
 
 end
