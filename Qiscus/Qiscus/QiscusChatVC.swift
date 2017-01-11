@@ -198,6 +198,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        unreadIndexPath = [IndexPath]()
         bottomButton.isHidden = true
         self.isPresence = true
         self.comments = [[QiscusComment]]()
