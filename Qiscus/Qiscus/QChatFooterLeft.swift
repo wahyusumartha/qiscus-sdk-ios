@@ -18,8 +18,7 @@ class QChatFooterLeft: UICollectionReusableView {
         super.awakeFromNib()
         avatarImage.layer.cornerRadius = 19
         avatarImage.clipsToBounds = true
-        self.isUserInteractionEnabled = true
-        addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(QChatFooterLeft.showMenu)))
+        self.isUserInteractionEnabled = false
     }
     
     func setup(withComent comment:QiscusComment){
@@ -34,27 +33,4 @@ class QChatFooterLeft: UICollectionReusableView {
         }
     }
     
-    override func copy(_ sender: Any?) {
-        let text = self.comment.commentText
-        let board = UIPasteboard.general
-        board.string = text
-        let menu = UIMenuController.shared
-        menu.setMenuVisible(false, animated: true)
-    }
-    
-    func showMenu() {
-        becomeFirstResponder()
-        let menu = UIMenuController.shared
-        if !menu.isMenuVisible {
-            menu.setMenuVisible(true, animated: true)
-        }
-    }
-    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
-        if comment.commentType == QiscusCommentType.text{
-            if action == #selector(QChatFooterLeft.copy(_:)) {
-                return true
-            }
-        }
-        return false
-    }
 }
