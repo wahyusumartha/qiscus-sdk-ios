@@ -38,6 +38,7 @@ open class QiscusComment: Object {
     open dynamic var commentIsSynced:Bool = false
     open dynamic var commentBeforeId:Int = 0
     open dynamic var commentCellHeight:CGFloat = 0
+    open dynamic var commentTextWidth:CGFloat = 0
     open dynamic var commentRow:Int = 0
     open dynamic var commentSection:Int = 0
     
@@ -50,7 +51,13 @@ open class QiscusComment: Object {
             return IndexPath(row: self.commentRow, section: self.commentSection)
         }
     }
-    
+    open var isOwnMessage:Bool{
+        if self.commentSenderEmail == QiscusConfig.sharedInstance.USER_EMAIL{
+            return true
+        }else{
+            return false
+        }
+    }
     open var roomId:Int{
         get{
             var roomId:Int = 0
@@ -250,37 +257,25 @@ open class QiscusComment: Object {
             return commentData.first
         }
     }
-    open class func getAllComment(_ topicId: Int, limit:Int, firstLoad:Bool = false)->[QiscusComment]{ // USED
+    open class func getAllComment(_ topicId: Int, limit:Int = 0, firstLoad:Bool = false)->[QiscusComment]{ // USED
         if firstLoad {
             //QiscusComment.deleteAllFailedMessage()
         }
         var allComment = [QiscusComment]()
         let realm = try! Realm()
         
-        let sortProperties = [SortDescriptor(property: "commentCreatedAt", ascending: false), SortDescriptor(property: "commentId", ascending: false)]
+        let sortProperties = [SortDescriptor(property: "commentCreatedAt", ascending: false), SortDescriptor(property: "commentId", ascending: true)]
         let searchQuery:NSPredicate = NSPredicate(format: "commentTopicId == %d",topicId)
         let commentData = realm.objects(QiscusComment.self).filter(searchQuery).sorted(by: sortProperties)
         
-        var needSync = false
         
         if(commentData.count > 0){
-            var i:Int = 0
             dataLoop: for comment in commentData{
-                if !comment.commentIsSynced {
-                    needSync = true
-                }
-                if(i >= limit){
-                    break dataLoop
-                }else{
-                    allComment.insert(comment, at: 0)
-                }
-                i += 1
+                allComment.insert(comment, at: 0)
             }
         }
-        if needSync {
-            QiscusCommentClient.sharedInstance.syncMessage(topicId)
-        }
-        print("OK from getAllComment")
+        
+        Qiscus.printLog(text: "OK from getAllComment")
         return allComment
     }
     open class func getAllComment(_ topicId: Int)->[QiscusComment]{
@@ -313,6 +308,31 @@ open class QiscusComment: Object {
                     allComment.append(grouppedMessage)
                     grouppedMessage = [QiscusComment]()
                     firstCommentInGroup = comment
+                    grouppedMessage.append(comment)
+                }
+                if( i == commentData.count){
+                    allComment.append(grouppedMessage)
+                }
+                i += 1
+            }
+        }
+        return allComment
+    }
+    open class func grouppedComment(inTopicId topicId:Int, firstLoad:Bool = true)->[[QiscusComment]]{
+        var allComment = [[QiscusComment]]()
+        let commentData = QiscusComment.getAllComment(topicId, firstLoad: firstLoad)
+        
+        if(commentData.count > 0){
+            var first = commentData.first!
+            var grouppedMessage = [QiscusComment]()
+            var i:Int = 1
+            for comment in commentData{
+                if(comment.commentDate == first.commentDate) && (comment.commentSenderEmail == first.commentSenderEmail){
+                    grouppedMessage.append(comment)
+                }else{
+                    allComment.append(grouppedMessage)
+                    grouppedMessage = [QiscusComment]()
+                    first = comment
                     grouppedMessage.append(comment)
                 }
                 if( i == commentData.count){
@@ -405,10 +425,39 @@ open class QiscusComment: Object {
             self.commentSection = indexPath.section
         }
     }
-    open func updateCommentCellHeight(_ newHeight:CGFloat){
+    open func updateCommentCellSize(){
+        var newSize = CGSize()
+        switch self.commentType {
+        case .text:
+            newSize = self.calculateTextSizeForComment()
+            break
+        case .attachment:
+            if let file = QiscusFile.getCommentFileWithComment(self){
+                switch file.fileType {
+                case .audio:
+                    newSize.height = 88
+                    break
+                case .document:
+                    newSize.height = 70
+                    break
+                case .media:
+                    newSize.height = 140
+                    break
+                case .others:
+                    newSize.height = 70
+                    break
+                case .video:
+                    newSize.height = 140
+                    break
+                }
+            }
+            break
+        }
+
         let realm = try! Realm()
         try! realm.write {
-            self.commentCellHeight = newHeight
+            self.commentCellHeight = newSize.height - 5
+            self.commentTextWidth = newSize.width
         }
     }
     open class func getLastSyncCommentId(_ topicId:Int)->Int?{ //USED
@@ -484,8 +533,8 @@ open class QiscusComment: Object {
         let timeArr = String(dateTimeArr.last!).characters.split(separator: "Z")
         let timeString = String(timeArr.first!)
         let dateTimeString = "\(dateString) \(timeString) +0000"
-        print("dateTimeString: \(dateTimeString)")
-        print("commentid: \(comment.commentId)")
+        Qiscus.printLog(text: "dateTimeString: \(dateTimeString)")
+        Qiscus.printLog(text: "commentid: \(comment.commentId)")
         
         let rawDateFormatter = DateFormatter()
         rawDateFormatter.locale = Locale(identifier: "en_US_POSIX")
@@ -505,7 +554,7 @@ open class QiscusComment: Object {
         }
         let isSaved = comment.saveComment(true)
         if isSaved{
-            print("[Qiscus] New comment saved")
+            Qiscus.printLog(text: "New comment saved")
         }
         
         return isSaved
@@ -562,7 +611,7 @@ open class QiscusComment: Object {
     
     open class func getCommentFromJSON(_ data: JSON, topicId:Int, saved:Bool) -> Bool{ // USED
         let comment = QiscusComment()
-        print("getCommentFromJSON: \(data)")
+        Qiscus.printLog(text: "getCommentFromJSON: \(data)")
         comment.commentTopicId = topicId
         comment.commentSenderEmail = data["email"].stringValue
         comment.commentStatusRaw = QiscusCommentStatus.delivered.rawValue
@@ -599,8 +648,8 @@ open class QiscusComment: Object {
         let timeArr = String(dateTimeArr.last!).characters.split(separator: "Z")
         let timeString = String(timeArr.first!)
         let dateTimeString = "\(dateString) \(timeString) +0000"
-        print("dateTimeString: \(dateTimeString)")
-        print("commentid: \(comment.commentId)")
+        Qiscus.printLog(text: "dateTimeString: \(dateTimeString)")
+        Qiscus.printLog(text: "commentid: \(comment.commentId)")
         
         let rawDateFormatter = DateFormatter()
         rawDateFormatter.locale = Locale(identifier: "en_US_POSIX")
@@ -655,7 +704,7 @@ open class QiscusComment: Object {
         
         if commentData.count > 0 {
             let commentObject = commentData.last!
-            let searchAll = NSPredicate(format: "commentId <= %d AND commentStatusRaw < %d", commentObject.commentId, commentObject.commentStatusRaw)
+            let searchAll = NSPredicate(format: "commentId <= %d AND commentStatusRaw < %d AND commentTopicId == %d", commentObject.commentId, toStatus.rawValue, commentObject.commentTopicId)
             let commentsData = realm.objects(QiscusComment.self).filter(searchAll)
             
             if commentsData.count > 0 {
@@ -663,24 +712,20 @@ open class QiscusComment: Object {
                     if eachComment.commentUniqueId == orUniqueId && eachComment.commentId != commentId{
                         eachComment.updateCommentId(commentId)
                     }
+                    if eachComment.commentStatus.rawValue < toStatus.rawValue || eachComment.commentStatus == .failed{
                     eachComment.updateCommentStatus(toStatus)
                     comments.append(eachComment)
+                    }
                 }
                 return comments
             }else{
-                for eachComment in commentData{
-                    if eachComment.commentUniqueId == orUniqueId && eachComment.commentId != commentId{
-                        eachComment.updateCommentId(commentId)
-                    }
-                    eachComment.updateCommentStatus(toStatus)
-                    comments.append(eachComment)
-                }
-                return comments
+                return nil
             }
         }else{
             return nil
         }
     }
+
     open func updateCommentStatus(_ status: QiscusCommentStatus){
         if(self.commentStatusRaw < status.rawValue) || self.commentStatus == .failed{
             let realm = try! Realm()
@@ -830,6 +875,7 @@ open class QiscusComment: Object {
             try! realm.write {
                 realm.add(self)
             }
+            self.updateCommentCellSize()
             return true
         }else{
             let comment = commentData.first!
@@ -888,6 +934,7 @@ open class QiscusComment: Object {
             try! realm.write {
                 realm.add(self)
             }
+            self.updateCommentCellSize()
             return self
         }else{
             let comment = commentData.first!
@@ -911,6 +958,7 @@ open class QiscusComment: Object {
                 }
                 comment.commentIsDeleted = self.commentIsDeleted
             }
+            comment.updateCommentCellSize()
             return comment
         }
     }
@@ -999,5 +1047,27 @@ open class QiscusComment: Object {
                 realm.delete(comments)
             }
         }
+    }
+    
+    open func calculateTextSizeForComment() -> CGSize {
+        var size = CGSize()
+        let textView = UITextView()
+        textView.font = UIFont.systemFont(ofSize: 14)
+        textView.dataDetectorTypes = .all
+        textView.linkTextAttributes = [
+            NSForegroundColorAttributeName: QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor,
+            NSUnderlineColorAttributeName: QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor,
+            NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue
+        ]
+        
+        let maxWidth:CGFloat = 190
+        
+        textView.text = self.commentText
+        let textSize = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
+        
+        size.height = textSize.height + 18
+        size.width = textSize.width
+        
+        return size
     }
 }

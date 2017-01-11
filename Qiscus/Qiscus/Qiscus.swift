@@ -33,6 +33,9 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
     
     open var toastMessageAct:((_ roomId:Int, _ comment:QiscusComment)->Void)?
     
+    static var realtimeThread = DispatchQueue(label: "qiscusRealtime")
+    static var logThread = DispatchQueue(label: "qiscusLog", attributes: .concurrent)
+    
     open class var isLoggedIn:Bool{
         get{
             if !Qiscus.sharedInstance.connected {
@@ -93,33 +96,40 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         NotificationCenter.default.removeObserver(self, name: .UIApplicationDidBecomeActive, object: nil)
         let center = NotificationCenter.default
         center.addObserver(self, selector: #selector(Qiscus.applicationDidBecomeActife), name: .UIApplicationDidBecomeActive, object: nil)
-        Qiscus.sharedInstance.mqtt = MQTTSession(host: "mqtt.qiscus.com", port: 1885, clientID: "iosMQTT-\(QiscusMe.sharedInstance.id)", cleanSession: false, keepAlive: 60, useSSL: true)
-        Qiscus.sharedInstance.mqtt?.delegate = Qiscus.sharedInstance
-        Qiscus.sharedInstance.mqtt?.connect(completion: { (succeeded, error) -> Void in
-            if succeeded {
-                print("[Qiscus] Realtime socket connected")
-            }else{
-                print("[Qiscus] Realtime socket connect error: \(error)")
+        Qiscus.realtimeThread.sync {
+            Qiscus.sharedInstance.mqtt = MQTTSession(host: "mqtt.qiscus.com", port: 1885, clientID: "iosMQTT-\(QiscusMe.sharedInstance.id)", cleanSession: false, keepAlive: 60, useSSL: true)
+            Qiscus.sharedInstance.mqtt?.delegate = Qiscus.sharedInstance
+            Qiscus.sharedInstance.mqtt?.connect(completion: { (succeeded, error) -> Void in
+                if succeeded {
+                    Qiscus.printLog(text: "Realtime socket connected")
+                }else{
+                    Qiscus.printLog(text: "Realtime socket connect error: \(error)")
+                }
+            })
+            if !Qiscus.sharedInstance.mqttChannel.contains("\(QiscusMe.sharedInstance.token)/c"){
+                Qiscus.sharedInstance.mqttChannel.append("\(QiscusMe.sharedInstance.token)/c")
             }
-        })
-        if !Qiscus.sharedInstance.mqttChannel.contains("\(QiscusMe.sharedInstance.token)/c"){
-            Qiscus.sharedInstance.mqttChannel.append("\(QiscusMe.sharedInstance.token)/c")
-        }
-        var channels = [String: MQTTQoS]()
-        for channel in Qiscus.sharedInstance.mqttChannel{
-            channels[channel] = MQTTQoS.atLeastOnce
-        }
-        Qiscus.sharedInstance.mqtt?.subscribe(to: channels, completion: {(succeeded, error) -> Void in
-            if succeeded {
-                print("[Qiscus] Realtime chat comment subscribed")
+            var channels = [String: MQTTQoS]()
+            for channel in Qiscus.sharedInstance.mqttChannel{
+                channels[channel] = MQTTQoS.atLeastOnce
             }
-        })
-        let rooms = QiscusRoom.getAllRoom()
-        for room in rooms{
-            let deliveryChannel = "r/\(room.roomId)/\(room.roomLastCommentTopicId)/+/d"
-            let readChannel = "r/\(room.roomId)/\(room.roomLastCommentTopicId)/+/r"
-            Qiscus.addMqttChannel(channel: deliveryChannel)
-            Qiscus.addMqttChannel(channel: readChannel)
+            Qiscus.sharedInstance.mqtt?.subscribe(to: channels, completion: {(succeeded, error) -> Void in
+                if succeeded {
+                    Qiscus.printLog(text: "Realtime chat comment subscribed")
+                }
+            })
+        }
+        
+        DispatchQueue.main.async {
+            let rooms = QiscusRoom.getAllRoom()
+            for room in rooms{
+                let deliveryChannel = "r/\(room.roomId)/\(room.roomLastCommentTopicId)/+/d"
+                let readChannel = "r/\(room.roomId)/\(room.roomLastCommentTopicId)/+/r"
+                Qiscus.realtimeThread.sync {
+                    Qiscus.addMqttChannel(channel: deliveryChannel)
+                    Qiscus.addMqttChannel(channel: readChannel)
+                }
+            }
         }
     }
     open class func setup(withAppId appId:String, userEmail:String, userKey:String, username:String? = nil, avatarURL:String? = nil, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true){
@@ -137,10 +147,6 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
             QiscusCommentClient.sharedInstance.configDelegate = delegate
         }
         var needLogin = false
-        print("QiscusMe.isLoggedIn: \(QiscusMe.isLoggedIn)")
-        print("QiscusMe.sharedInstance.email: \(QiscusMe.sharedInstance.email)")
-        print("userEmail: \(userEmail)")
-        
         
         if QiscusMe.isLoggedIn {
             if email != QiscusMe.sharedInstance.email{
@@ -149,7 +155,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         }else{
             needLogin = true
         }
-        print("needLogin: \(needLogin))")
+        
         if needLogin {
             Qiscus.clear()
             QiscusCommentClient.sharedInstance.loginOrRegister(userEmail, password: userKey, username: username, avatarURL: avatarURL)
@@ -185,10 +191,6 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
             QiscusCommentClient.sharedInstance.configDelegate = delegate
             QiscusCommentClient.sharedInstance.configDelegate!.qiscusConnected()
         }
-        
-        print("QiscusMe.isLoggedIn: \(QiscusMe.isLoggedIn)")
-        print("QiscusMe.sharedInstance.email: \(QiscusMe.sharedInstance.email)")
-        print("userEmail: \(userEmail)")
     }
     
     /**
@@ -488,21 +490,15 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
             
             DispatchQueue.main.async {
                 if reachability.isReachableViaWiFi {
-                    print("Qiscus connected via wifi")
+                    Qiscus.printLog(text: "connected via wifi")
                 } else {
-                    print("Qiscus connected via cellular data")
+                    Qiscus.printLog(text: "connected via cellular data")
                 }
                 Qiscus.sharedInstance.connected = true
-                Qiscus.sharedInstance.mqtt?.connect(completion:  { (succeeded, error) -> Void in
-                    if succeeded {
-                        print("[Qiscus] Realtime socket connected")
-                    }else{
-                        print("[Qiscus] Realtime socket connect error: \(error)")
-                    }
-                })
+
                 Qiscus.sharedInstance.RealtimeConnect()
                 if QiscusChatVC.sharedInstance.isPresence {
-                    print("try to sync after connected")
+                    Qiscus.printLog(text: "try to sync after connected")
                     QiscusChatVC.sharedInstance.syncData()
                 }
             }
@@ -510,20 +506,19 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         Qiscus.sharedInstance.reachability?.whenUnreachable = { reachability in
             
             DispatchQueue.main.async {
-                print("Qiscus disconnected")
+                Qiscus.printLog(text: "disconnected")
                 Qiscus.sharedInstance.connected = false
             }
         }
         do {
             try  Qiscus.sharedInstance.reachability?.startNotifier()
         } catch {
-            print("Unable to start notifier")
+            Qiscus.printLog(text: "Unable to start network notifier")
         }
     }
     
 // MARK: - MQTT delegate
     public func mqttDidReceive(message data: Data, in topic: String, from session: MQTTSession){
-        print("[Qiscus] receive message in channel: \(topic)")
         let channelArr = topic.characters.split(separator: "/")
         let lastChannelPart = String(channelArr.last!)
         
@@ -545,14 +540,19 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
                 let channel = "r/\(roomId)/\(notifTopicId)/\(QiscusMe.sharedInstance.email)/d"
                 let message: String = "\(commentId):\(json["unique_temp_id"].stringValue)";
                 let data: Data = message.data(using: .utf8)!
-                Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: true, completion: {(succeeded, error) -> Void in
-                        if succeeded {
-                            if let thisComment = QiscusComment.getCommentById(commentId) {
-                                thisComment.updateCommentStatus(.delivered)
+                Qiscus.realtimeThread.async {
+                    Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: true, completion: {(succeeded, error) -> Void in
+                            if succeeded {
+                                DispatchQueue.main.async {
+                                    if let thisComment = QiscusComment.getCommentById(commentId) {
+                                        thisComment.updateCommentStatus(.delivered)
+                                    }
+                                }
                             }
                         }
-                    }
-                )
+                    )
+                }
+                
                 
                     
                 if isSaved{
@@ -578,18 +578,22 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
                                 showToast = true
                             }
                         }
+                        /*
                         let channel = "r/\(roomId)/\(notifTopicId)/\(QiscusMe.sharedInstance.email)/r"
                         let message: String = "\(commentId):\(json["unique_temp_id"].stringValue)";
                         let data: Data = message.data(using: .utf8)!
-                        
-                        
-                        Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: true, completion: {(succeeded, error) -> Void in
-                            if succeeded {
-                                if let thisComment = QiscusComment.getCommentById(commentId) {
-                                    thisComment.updateCommentStatus(.read)
+                        Qiscus.realtimeThread.async {
+                            Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: true, completion: {(succeeded, error) -> Void in
+                                if succeeded {
+                                    DispatchQueue.main.async {
+                                        if let thisComment = QiscusComment.getCommentById(commentId) {
+                                            thisComment.updateCommentStatus(.read)
+                                        }
+                                    }
                                 }
-                            }
-                        })
+                            })
+                        }
+                        */
                     }
                     
                     if showToast && Qiscus.sharedInstance.config.showToasterMessage{
@@ -634,13 +638,27 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
                         switch message {
                             case "1":
                                 if let user = QiscusUser.getUserWithEmail(userEmail) {
-                                    QiscusChatVC.sharedInstance.startTypingIndicator(withUser: user.userFullName)
+                                    let userFullName = user.userFullName
+                                    if !QiscusChatVC.sharedInstance.isTypingOn || (QiscusChatVC.sharedInstance.typingIndicatorUser != userFullName){
+                                        QiscusChatVC.sharedInstance.startTypingIndicator(withUser: user.userFullName)
+                                    }
                                 }else{
-                                    QiscusChatVC.sharedInstance.startTypingIndicator(withUser: userEmail)
+                                    if !QiscusChatVC.sharedInstance.isTypingOn || (QiscusChatVC.sharedInstance.typingIndicatorUser != userEmail){
+                                        QiscusChatVC.sharedInstance.startTypingIndicator(withUser: userEmail)
+                                    }
                                 }
                                 break
                             default:
-                                QiscusChatVC.sharedInstance.stopTypingIndicator()
+                                if let user = QiscusUser.getUserWithEmail(userEmail) {
+                                    let userFullName = user.userFullName
+                                    if QiscusChatVC.sharedInstance.isTypingOn && (QiscusChatVC.sharedInstance.typingIndicatorUser == userFullName){
+                                        QiscusChatVC.sharedInstance.stopTypingIndicator()
+                                    }
+                                }else{
+                                    if QiscusChatVC.sharedInstance.isTypingOn && (QiscusChatVC.sharedInstance.typingIndicatorUser == userEmail){
+                                        QiscusChatVC.sharedInstance.stopTypingIndicator()
+                                    }
+                                }
                         }
                 }
                 }
@@ -654,6 +672,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
                 if let comments = QiscusComment.updateCommentStatus(withId: commentId, orUniqueId: commentUniqueId, toStatus: .delivered){
                     if QiscusChatVC.sharedInstance.isPresence && (QiscusChatVC.sharedInstance.topicId == topicId){
                         QiscusCommentClient.sharedInstance.commentDelegate?.commentDidChangeStatus(Comments: comments, toStatus: .delivered)
+                        Qiscus.printLog(text: "Change comment status to delivered")
                     }
                 }
                 break
@@ -666,57 +685,58 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
                 if let comments = QiscusComment.updateCommentStatus(withId: commentId, orUniqueId: commentUniqueId, toStatus: .read){
                     if QiscusChatVC.sharedInstance.isPresence && (QiscusChatVC.sharedInstance.topicId == topicId){
                         QiscusCommentClient.sharedInstance.commentDelegate?.commentDidChangeStatus(Comments: comments, toStatus: .read)
+                        Qiscus.printLog(text: "change comment status to read")
                     }
                 }
                 break
             default:
-                print("[Qiscus] Realtime socket receive message in unknown topic: \(topic)")
+                Qiscus.printLog(text: "Realtime socket receive message in unknown topic: \(topic)")
                 break
         }
     }
     public func mqttDidDisconnect(session: MQTTSession){
-        if let reachable = Qiscus.sharedInstance.reachability {
-            if reachable.isReachable{
-                print("[Qiscus] Realtime server disconnected, reconnecting ...")
-                if Qiscus.sharedInstance.connected{
-                    Qiscus.sharedInstance.RealtimeConnect()
-                }else{
-                    print("[Qiscus] No internet connection")
-                }
-            }
-        }
-        
+        Qiscus.printLog(text: "Realtime server disconnected")
     }
     public func mqttSocketErrorOccurred(session: MQTTSession){
     
     }
     public class func deleteMqttChannel(channel: String) {
-        if Qiscus.sharedInstance.mqttChannel.contains(channel){
-            Qiscus.sharedInstance.mqtt?.unSubscribe(from: channel, completion: {(succeeded, error) -> Void in
-                if succeeded {
-                    Qiscus.sharedInstance.mqttChannel = Qiscus.sharedInstance.mqttChannel.filter() { $0 != channel }
-                    print("[Qiscus] Realtime channel \(channel) unsubscribed")
-                }
-            })
+        Qiscus.realtimeThread.sync {
+            if Qiscus.sharedInstance.mqttChannel.contains(channel){
+                Qiscus.sharedInstance.mqtt?.unSubscribe(from: channel, completion: {(succeeded, error) -> Void in
+                    if succeeded {
+                        Qiscus.sharedInstance.mqttChannel = Qiscus.sharedInstance.mqttChannel.filter() { $0 != channel }
+                        Qiscus.printLog(text: "Realtime channel \(channel) unsubscribed")
+                    }
+                })
+            }
         }
     }
     public class func addMqttChannel(channel: String){
-        var isExist = false
-        for channelName in Qiscus.sharedInstance.mqttChannel {
-            if channelName == channel {
-                isExist = true
-            }
-        }
-        if !isExist{
-            Qiscus.sharedInstance.mqtt?.subscribe(to: channel, delivering: .atLeastOnce, completion: {(succeeded, error) -> Void in
-                if succeeded {
-                    Qiscus.sharedInstance.mqttChannel.append(channel)
-                    print("[Qiscus] Realtime channel \(channel) subscribed")
+        //Qiscus.realtimeThread.sync {
+            var isExist = false
+            for channelName in Qiscus.sharedInstance.mqttChannel {
+                if channelName == channel {
+                    isExist = true
                 }
-            })
-        }
+            }
+            if !isExist{
+                Qiscus.sharedInstance.mqtt?.subscribe(to: channel, delivering: .atLeastOnce, completion: {(succeeded, error) -> Void in
+                    if succeeded {
+                        Qiscus.sharedInstance.mqttChannel.append(channel)
+                        Qiscus.printLog(text: "Realtime channel \(channel) subscribed")
+                    }
+                })
+            }
+        //}
+        
     }
     func applicationDidBecomeActife(){
         Qiscus.sharedInstance.RealtimeConnect()
+    }
+    class func printLog(text:String){
+        Qiscus.logThread.async{
+            print("[Qiscus]: \(text)")
+        }
     }
 }

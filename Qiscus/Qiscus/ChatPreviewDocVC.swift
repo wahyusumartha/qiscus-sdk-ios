@@ -75,7 +75,7 @@ open class ChatPreviewDocVC: UIViewController, UIWebViewDelegate, WKNavigationDe
     override open func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if let objectSender = object as? WKWebView {
             if (keyPath! == "estimatedProgress") && (objectSender == self.webView) {
-                print("progress webview: \(self.webView.estimatedProgress)")
+                Qiscus.printLog(text: "progress webview: \(self.webView.estimatedProgress)")
                 progressView.isHidden = self.webView.estimatedProgress == 1
                 progressView.setProgress(Float(self.webView.estimatedProgress), animated: true)
             }else{
@@ -86,13 +86,13 @@ open class ChatPreviewDocVC: UIViewController, UIWebViewDelegate, WKNavigationDe
         }
     }
     open func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        print("finish navigation")
+        Qiscus.printLog(text: "finish navigation")
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + Double(Int64(0.2 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)) { () -> Void in
             self.progressView.progress = 0.0
         }
     }
     open func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        print("fail \(error.localizedDescription)")
+        Qiscus.printLog(text: "fail \(error.localizedDescription)")
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + Double(Int64(0.2 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)) { () -> Void in
             self.progressView.progress = 0.0
             //self.setupTableMessage(error.localizedDescription)

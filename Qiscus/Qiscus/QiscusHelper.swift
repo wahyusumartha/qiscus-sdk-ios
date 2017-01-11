@@ -25,137 +25,69 @@ open class QCommentIndexPath{
 open class QiscusHelper: NSObject {
     open class func properIndexPathOf(comment: QiscusComment, inGroupedComment:[[QiscusComment]])-> QiscusIndexPathData{
         
-        var i = 0
         let dataIndexPath = QiscusIndexPathData()
         var stopSearch = false
-        
+        print("section count: \(inGroupedComment.count)")
         if inGroupedComment.count == 0{
             stopSearch = true
             dataIndexPath.section = 0
             dataIndexPath.row = 0
             dataIndexPath.newGroup = true
-        }
-        else if comment.commentBeforeId == 0 {
-            stopSearch = true
-            let firstComment = inGroupedComment[0][0]
-            
-            if firstComment.commentId > comment.commentId && comment.commentId > 0{
-                dataIndexPath.section = 0
-                dataIndexPath.row = 0
-                if firstComment.commentDate == comment.commentDate {
-                    dataIndexPath.newGroup = false
-                }else{
-                    dataIndexPath.newGroup = true
-                }
-            }else{
-                let prevComment = QiscusHelper.getLastCommentInGroup(groupComment: inGroupedComment)
-                
-                if comment.commentDate == prevComment.commentDate {
-                    dataIndexPath.section = inGroupedComment.count - 1
-                    dataIndexPath.row = inGroupedComment[inGroupedComment.count - 1].count
-                }else{
-                    dataIndexPath.section = inGroupedComment.count
-                    dataIndexPath.row = 0
-                    dataIndexPath.newGroup = true
-                }
-            }
         }else{
-            
-            let firstComment = inGroupedComment[0][0]
-            if firstComment.commentId > comment.commentId && comment.commentId > 0{
-                dataIndexPath.section = 0
-                dataIndexPath.row = 0
-                if firstComment.commentDate == comment.commentDate {
-                    dataIndexPath.newGroup = false
-                }else{
-                    dataIndexPath.newGroup = true
-                }
-                stopSearch = true
-            }else{
-                groupDataLoop: for commentGroup in inGroupedComment {
-                    var j = 0
-                    dataLoop: for commentTarget in commentGroup{
-                        if(comment.commentBeforeId == commentTarget.commentId ){
-                            if comment.commentDate == commentTarget.commentDate {
-                                dataIndexPath.section = i
-                                dataIndexPath.row = j+1
-                                stopSearch = true
-                                break dataLoop
+            groupDataLoop: for i in (0..<inGroupedComment.count).reversed(){
+                let comments = inGroupedComment[i]
+                dataLoop: for j in (0..<comments.count).reversed() {
+                    let target = comments[j]
+                    if target.commentId < comment.commentId {
+                        if comment.commentDate == target.commentDate && comment.commentSenderEmail == target.commentSenderEmail{
+                            stopSearch = true
+                            dataIndexPath.section = i
+                            dataIndexPath.row = j + 1
+                            dataIndexPath.newGroup = false
+                        }else{
+                            var after: QiscusComment? = nil
+                            if j == comments.count - 1 {
+                                if i < (inGroupedComment.count - 1){
+                                    after = inGroupedComment[i+1][0]
+                                }
                             }else{
-                                dataIndexPath.section = i + 1
-                                dataIndexPath.row = 0
-                                if i == (inGroupedComment.count - 1) && j == (commentGroup.count - 1){
-                                    dataIndexPath.newGroup = true
-                                    stopSearch = true
-                                    break dataLoop
-                                }else{
-                                    let nextComment = inGroupedComment[i+1][0]
-                                    if comment.commentDate != nextComment.commentDate{
-                                        dataIndexPath.newGroup = true
-                                    }
-                                    stopSearch = true
-                                    break dataLoop
-                                }
+                                after = comments[j + 1]
                             }
-                        }
-                        else{
-                            if comment.commentId < commentTarget.commentId {
-                                if comment.commentDate == commentTarget.commentDate {
-                                    dataIndexPath.row = j
-                                    dataIndexPath.section = i
+                            stopSearch = true
+                            dataIndexPath.row = 0
+                            dataIndexPath.section = i + 1
+                            if after == nil {
+                                dataIndexPath.newGroup = true
+                            }else{
+                                if after!.commentSenderEmail == comment.commentSenderEmail{
                                     dataIndexPath.newGroup = false
-                                    stopSearch = true
                                 }else{
-                                    var prevComment = QiscusComment()
-                                    stopSearch = true
-                                    if j == 0 {
-                                        let lastRowInPreviousComment = inGroupedComment[i-1].count - 1
-                                        prevComment = inGroupedComment[i - 1][lastRowInPreviousComment]
-                                        if prevComment.commentDate == comment.commentDate {
-                                            dataIndexPath.section = i - 1
-                                            dataIndexPath.row = lastRowInPreviousComment + 1
-                                            dataIndexPath.newGroup = false
-                                        }else{
-                                            dataIndexPath.section = i - 1
-                                            dataIndexPath.row = 0
-                                            dataIndexPath.newGroup = true
-                                        }
-                                        stopSearch = true
-                                    }
+                                    dataIndexPath.newGroup = true
                                 }
                             }
                         }
-                        j += 1
+                        break dataLoop
                     }
-                    if stopSearch {
-                        break groupDataLoop
-                    }
-                    i += 1
+                }
+                if stopSearch{
+                    break groupDataLoop
                 }
             }
         }
-        if !stopSearch{
-            let prevComment = QiscusHelper.getLastCommentInGroup(groupComment: inGroupedComment)
-            if comment.commentDate == prevComment.commentDate {
-                dataIndexPath.section = inGroupedComment.count - 1
-                dataIndexPath.row = inGroupedComment[inGroupedComment.count - 1].count
-            }else{
-                dataIndexPath.section = inGroupedComment.count
-                dataIndexPath.row = 0
-                dataIndexPath.newGroup = true
-            }
-        }
+        print("row: \(dataIndexPath.row)")
+        print("section: \(dataIndexPath.section)")
+        print("newGroup: \(dataIndexPath.newGroup)")
         return dataIndexPath
     }
     
     open class func getIndexPathOfComment(comment: QiscusComment, inGroupedComment:[[QiscusComment]])-> QiscusSearchIndexPathData{
         
-        var i = 0
         let dataIndexPath = QiscusSearchIndexPathData()
-        groupDataLoop: for commentGroup in inGroupedComment {
-            var j = 0
-            var stopSearch = false
-            dataLoop: for commentTarget in commentGroup{
+        var stopSearch = false
+        groupDataLoop: for i in (0..<inGroupedComment.count).reversed(){
+            let comments = inGroupedComment[i]
+            dataLoop: for j in (0..<comments.count).reversed(){
+                let commentTarget = comments[j]
                 if((comment.commentUniqueId != "") && (comment.commentUniqueId == commentTarget.commentUniqueId) ) || comment.commentId == commentTarget.commentId {
                     dataIndexPath.section = i
                     dataIndexPath.row = j
@@ -163,12 +95,10 @@ open class QiscusHelper: NSObject {
                     stopSearch = true
                     break dataLoop
                 }
-                j += 1
             }
-            if stopSearch {
+            if stopSearch{
                 break groupDataLoop
             }
-            i += 1
         }
         return dataIndexPath
     }
@@ -222,5 +152,17 @@ open class QiscusHelper: NSObject {
             
             return dateFormatter.string(from: date)
         }
+    }
+    
+    open class func isFileExist(inLocalPath path:String)->Bool{
+        var check:Bool = false
+        
+        let checkValidation = FileManager.default
+        
+        if (path != "" && checkValidation.fileExists(atPath:path))
+        {
+            check = true
+        }
+        return check
     }
 }

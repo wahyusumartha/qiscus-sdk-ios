@@ -15,7 +15,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         self.title = "Qiscus Test"
         let button = UIButton(frame: CGRect(x: 50,y: 100,width: 200,height: 60))
-        button.setTitle("Test Qiscus Chat", for: UIControlState())
+        button.setTitle("Test Qiscus Chat 2", for: UIControlState())
         button.backgroundColor = UIColor.black
         self.view.addSubview(button)
         button.addTarget(self, action: #selector(ViewController.goToChat), for: .touchUpInside)
@@ -27,7 +27,7 @@ class ViewController: UIViewController {
     }
 
     func goToChat(){
-        let greyColor = UIColor(red: 0.4, green: 0.4, blue: 0.4, alpha: 1)
+        let greyColor = UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1)
         Qiscus.style.color.leftBaloonColor = greyColor
         Qiscus.style.color.welcomeIconColor = UIColor(red: 0.6, green: 0.6, blue: 0.6, alpha: 1)
         Qiscus.style.color.leftBaloonTextColor = UIColor.white
@@ -68,7 +68,7 @@ class ViewController: UIViewController {
         //Qiscus.iCloudUploadActive(true)
 
         //Qiscus.chat(withTopicId: 133, target: self, readOnly: true)
-        Qiscus.chat(withUsers: ["085747455300@qiscuswa.com"] , target: self, optionalDataCompletion: { optionalData in
+        Qiscus.chat(withUsers: ["085747455300@qiscuswa.com"] , target: self, title: "Chat 2", optionalDataCompletion: { optionalData in
             print("optionalData from Example view: \(optionalData)")
         })
         //Qiscus.lockChat()

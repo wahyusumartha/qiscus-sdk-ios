@@ -63,7 +63,7 @@ open class QiscusMe: NSObject {
 
 
     open class func saveData(fromJson json:JSON)->QiscusMe{
-        print("jsonFron saveData: \(json)")
+        Qiscus.printLog(text: "jsonFron saveData: \(json)")
         QiscusMe.sharedInstance.id = json["id"].intValue
         QiscusMe.sharedInstance.email = json["email"].stringValue
         QiscusMe.sharedInstance.userName = json["username"].stringValue
