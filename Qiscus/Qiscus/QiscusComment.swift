@@ -725,6 +725,7 @@ open class QiscusComment: Object {
             return nil
         }
     }
+
     open func updateCommentStatus(_ status: QiscusCommentStatus){
         if(self.commentStatusRaw < status.rawValue) || self.commentStatus == .failed{
             let realm = try! Realm()

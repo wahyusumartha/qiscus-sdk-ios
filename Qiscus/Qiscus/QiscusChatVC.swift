@@ -34,6 +34,8 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     @IBOutlet weak var unlockButton: UIButton!
     @IBOutlet weak var emptyChatImage: UIImageView!
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var bottomButton: UIButton!
+    @IBOutlet weak var unreadIndicator: UILabel!
     
     // MARK: - Constrain
     @IBOutlet weak var minInputHeight: NSLayoutConstraint!
@@ -86,6 +88,25 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     var typingIndicatorUser:String = ""
     var isTypingOn:Bool = false
     
+    var unreadIndexPath = [IndexPath](){
+        didSet{
+            if unreadIndexPath.count > 99 {
+                unreadIndicator.text = "99+"
+            }else{
+                unreadIndicator.text = "\(unreadIndexPath.count)"
+            }
+            if unreadIndexPath.count == 0 {
+                unreadIndicator.isHidden = true
+            }else{
+                if isLastRowVisible {
+                    unreadIndicator.isHidden = true
+                }else{
+                    unreadIndicator.isHidden = false
+                }
+            }
+        }
+    }
+    
     var bundle:Bundle {
         get{
             return Qiscus.bundle
@@ -107,19 +128,14 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             return IndexPath(row: indexPath.row, section: indexPath.section)
         }
     }
-    var isLastRowVisible: Bool {
-        get{
-            if self.comments.count > 0{
-                let lastSection = self.comments.count - 1
-                let lastRow = self.comments[lastSection].count - 1
-                let indexPaths = self.collectionView.indexPathsForVisibleItems
-                for indexPath in indexPaths{
-                    if indexPath.section == lastSection && indexPath.row == lastRow{
-                        return true
-                    }
-                }
+    var isLastRowVisible: Bool = false {
+        didSet{
+            bottomButton.isHidden = isLastRowVisible
+            if unreadIndexPath.count > 0 {
+                unreadIndicator.isHidden = isLastRowVisible
+            }else{
+                unreadIndicator.isHidden = true
             }
-            return false
         }
     }
     
@@ -146,6 +162,12 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     // MARK: - UI Lifecycle
     override open func viewDidLoad() {
         super.viewDidLoad()
+        bottomButton.setImage(Qiscus.image(named: "bottom")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        bottomButton.layer.cornerRadius = 17.5
+        bottomButton.clipsToBounds = true
+        unreadIndicator.isHidden = true
+        unreadIndicator.layer.cornerRadius = 11.5
+        unreadIndicator.clipsToBounds = true
         backgroundView.image = Qiscus.image(named: "chat_bg")
         collectionView.decelerationRate = UIScrollViewDecelerationRateNormal
         self.emptyChatImage.image = Qiscus.image(named: "empty_messages")?.withRenderingMode(.alwaysTemplate)
@@ -176,6 +198,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        bottomButton.isHidden = true
         self.isPresence = true
         self.comments = [[QiscusComment]]()
         self.collectionView.reloadData()
@@ -455,10 +478,9 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     
     
     func scrollToBottom(_ animated:Bool = false){
-        if self.comments.count > 0{
-            let bottomPoint = CGPoint(x: 0, y: collectionView.contentSize.height)
-            collectionView.setContentOffset(bottomPoint, animated: animated)
-        }
+        let bottomPoint = CGPoint(x: 0, y: collectionView.contentSize.height - collectionView.bounds.size.height)
+        print("contentHeight: \(collectionView.contentSize.height)")
+        collectionView.setContentOffset(bottomPoint, animated: animated)
     }
     func scrollToIndexPath(_ indexPath:IndexPath, position: UICollectionViewScrollPosition, animated:Bool, delayed:Bool = true){
         
@@ -492,9 +514,9 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     func loadData(){
         
         if(self.topicId > 0){
-            self.comments = QiscusComment.groupAllCommentByDate(self.topicId,limit:20,firstLoad: true)
             self.comments = QiscusComment.grouppedComment(inTopicId: self.topicId, firstLoad: true)
             Qiscus.printLog(text: "self comments: \n\(self.comments)")
+            self.showLoading("Load Data ...")
             let room = QiscusRoom.getRoom(withLastTopicId: self.topicId)
             
             if self.optionalDataCompletion != nil && room != nil{
@@ -503,13 +525,12 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             self.subscribeRealtime(onRoom: room)
             if self.comments.count > 0 {
                 self.collectionView.reloadData()
-                scrollToBottom()
+                scrollToBotomFromNoData()
                 self.welcomeView.isHidden = true
-                
+                dismissLoading()
                 commentClient.syncMessage(self.topicId)
             }else{
                 self.welcomeView.isHidden = false
-                self.showLoading("Load Data ...")
                 commentClient.getListComment(topicId: self.topicId, commentId: 0, triggerDelegate: true)
             }
         }else{
@@ -518,14 +539,14 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                 if self.users.count == 1 {
                     if let room = QiscusRoom.getRoom(self.distincId, andUserEmail: self.users.first!){
                         self.topicId = room.roomLastCommentTopicId
-                        self.comments = QiscusComment.groupAllCommentByDate(self.topicId,limit:20,firstLoad: true)
                         self.comments = QiscusComment.grouppedComment(inTopicId: self.topicId, firstLoad: true)
                         Qiscus.printLog(text: "self comments: \n\(self.comments)")
                         self.subscribeRealtime(onRoom: room)
                         
                         if self.comments.count > 0 {
+                            self.collectionView.isHidden = true
                             self.collectionView.reloadData()
-                            scrollToBottom()
+                            scrollToBotomFromNoData()
                             self.welcomeView.isHidden = true
                             if self.optionalDataCompletion != nil{
                                 self.optionalDataCompletion!(room.optionalData)
@@ -816,18 +837,48 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         
     }
     open func didFinishLoadMore(){
+        if comments.count > 0{
+            let first = comments[0][0]
+            self.comments = QiscusComment.grouppedComment(inTopicId: topicId, firstLoad: true)
+            var indexPath = IndexPath(row: 0, section: 0)
+            let indexPathSearch = QiscusHelper.getIndexPathOfComment(comment: first, inGroupedComment: self.comments)
+            if indexPathSearch.found{
+                indexPath.row = indexPathSearch.row
+                indexPath.section = indexPathSearch.section
+            }
+            self.showLoading("Load data ...")
+            collectionView.reloadData()
+            let delay = 0.1 * Double(NSEC_PER_SEC)
+            let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
+            DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                self.collectionView.scrollToItem(at: indexPath, at: .top, animated: false)
+            })
+            self.dismissLoading()
+        }
         self.loadMoreControl.endRefreshing()
     }
     open func finishedLoadFromAPI(_ topicId: Int){
-        self.dismissLoading()
+        
         let room = QiscusRoom.getRoom(withLastTopicId: self.topicId)
         self.subscribeRealtime(onRoom: room)
-        if self.comments.count == 0 && loadWithUser{
-            loadWithUser = false
-            self.topicId = topicId
-            
-            self.loadData()
-        }
+        self.topicId = topicId
+        self.comments = QiscusComment.grouppedComment(inTopicId: topicId, firstLoad: true)
+        collectionView.isHidden = true
+        collectionView.reloadData()
+        
+        scrollToBotomFromNoData()
+        self.dismissLoading()
+    }
+    open func scrollToBotomFromNoData(){
+        welcomeView.isHidden = true
+        let delay = 0.1 * Double(NSEC_PER_SEC)
+        let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
+        DispatchQueue.main.asyncAfter(deadline: time, execute: {
+            if self.comments.count > 0 {
+                self.scrollToBottom()
+                self.collectionView.isHidden = false
+            }
+        })
     }
     open func didFailedLoadDataFromAPI(_ error: String){
         self.dismissLoading()
@@ -868,12 +919,14 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                     var newCommentGroup = [QiscusComment]()
                     newCommentGroup.append(singleComment)
                     self.comments.insert(newCommentGroup, at: indexPathData.section)
+                    unreadIndexPath.append(indexPath)
                     self.collectionView.performBatchUpdates({
                         self.collectionView.insertSections(indexSet)
                         self.collectionView.insertItems(at: [indexPath])
                     }, completion: nil)
                 }else{
                     self.comments[indexPathData.section].insert(singleComment, at: indexPathData.row)
+                    unreadIndexPath.append(indexPath)
                     self.collectionView.performBatchUpdates({
                         self.collectionView.insertItems(at: [indexPath])
                     }, completion: nil)
@@ -957,76 +1010,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             self.showNoConnectionToast()
         }
     }
-    func tapMediaDisplay(_ sender: ChatTapRecognizer){
-        if let delegate = self.cellDelegate{
-            delegate.didTapMediaCell(URL(string: "file://\(sender.fileLocalPath)")!, mediaName: sender.fileName)
-        }else{
-            var currentIndex = 0
-            self.galleryItems = [QiscusGalleryItem]()
-            var i = 0
-            for groupComment in self.comments{
-                for singleComment in groupComment {
-                    if singleComment.commentType != QiscusCommentType.text {
-                        let file = QiscusFile.getCommentFile(singleComment.commentFileId)
-                        if file?.fileType == QFileType.media || file?.fileType == .video{
-                            if file!.isLocalFileExist(){
-                                if file?.fileLocalPath == sender.fileLocalPath{
-                                    currentIndex = i
-                                }
-                                i += 1
-                                if file?.fileType == .media {
-                                    let urlString = "file://\((file?.fileLocalPath)!)"
-                                    if let url = URL(string: urlString) {
-                                        if let data = try? Data(contentsOf: url) {
-                                            let image = UIImage(data: data)!
-                                            if file?.fileLocalPath == sender.fileLocalPath{
-                                                self.selectedImage = image
-                                            }
-                                            let item = QiscusGalleryItem()
-                                            item.image = image
-                                            item.isVideo = false
-                                            self.galleryItems.append(item)
-                                        }
-                                    }
-                                }else{
-                                    let urlString = "file://\((file?.fileLocalPath)!)"
-                                    let urlThumb = "file://\((file?.fileThumbPath)!)"
-                                    if let url = URL(string: urlThumb) {
-                                        if let data = try? Data(contentsOf: url) {
-                                            let image = UIImage(data: data)!
-                                            if file?.fileLocalPath == sender.fileLocalPath{
-                                                self.selectedImage = image
-                                            }
-                                            let item = QiscusGalleryItem()
-                                            item.image = image
-                                            item.isVideo = true
-                                            item.url = urlString
-                                            self.galleryItems.append(item)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-            let closeButton = UIButton(frame: CGRect(origin: CGPoint.zero, size: CGSize(width: 20, height: 20)))
-            closeButton.setImage(Qiscus.image(named: "close")?.withRenderingMode(.alwaysTemplate), for: UIControlState())
-            closeButton.tintColor = UIColor.white
-            closeButton.imageView?.contentMode = .scaleAspectFit
-            
-            let seeAllButton = UIButton(frame: CGRect(origin: CGPoint.zero, size: CGSize(width: 20, height: 20)))
-            seeAllButton.setTitle("", for: UIControlState())
-            seeAllButton.setImage(Qiscus.image(named: "viewmode")?.withRenderingMode(.alwaysTemplate), for: UIControlState())
-            seeAllButton.tintColor = UIColor.white
-            seeAllButton.imageView?.contentMode = .scaleAspectFit
-
-            let gallery = GalleryViewController(startIndex: currentIndex, itemsDatasource: self, displacedViewsDatasource: nil, configuration: self.galleryConfiguration())
-            self.presentImageGallery(gallery)
-        }
-    }
-
     func uploadImage(){
         self.view.endEditing(true)
         if Qiscus.sharedInstance.connected{
@@ -1280,7 +1263,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                 let firstComment = self.comments[0][0]
                 
                 if firstComment.commentBeforeId > 0 {
-                    commentClient.loadMoreComment(fromCommentId: firstComment.commentId, topicId: self.topicId, limit: 10)
+                    commentClient.getListComment(topicId: topicId, commentId: firstComment.commentId, loadMore: true)
                 }else{
                     self.loadMoreControl.endRefreshing()
                     self.loadMoreControl.isEnabled = false
@@ -1338,6 +1321,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         self.navigationController?.navigationBar.tintColor = self.tintColor
         let _ = self.view
         self.sendButton.tintColor = self.topColor
+        self.bottomButton.tintColor = self.topColor
         self.documentButton.tintColor = self.bottomColor
         self.galeryButton.tintColor = self.bottomColor
         self.cameraButton.tintColor = self.bottomColor
@@ -1352,6 +1336,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         self.navigationController?.navigationBar.tintColor = tintColor
         let _ = self.view
         self.sendButton.tintColor = self.topColor
+        self.bottomButton.tintColor = self.topColor
         self.documentButton.tintColor = self.bottomColor
         self.galeryButton.tintColor = self.bottomColor
         self.cameraButton.tintColor = self.bottomColor
@@ -1651,6 +1636,30 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
 
         if let targetCell = cell as? QChatCell{
             targetCell.setupCell()
+            if !targetCell.comment.isOwnMessage && targetCell.comment.commentStatus == QiscusCommentStatus.delivered{
+                publishDelivered(comment: targetCell.comment)
+                var i = 0
+                for index in unreadIndexPath{
+                    if index.row == indexPath.row && index.section == indexPath.section{
+                        unreadIndexPath.remove(at: i)
+                        updateComment(onIndexPath: indexPath)
+                        break
+                    }
+                    i += 1
+                }
+            }
+        }
+        if indexPath.section == (comments.count - 1){
+            if indexPath.row == comments[indexPath.section].count - 1{
+                isLastRowVisible = true
+            }
+        }
+    }
+    public func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if indexPath.section == (comments.count - 1){
+            if indexPath.row == comments[indexPath.section].count - 1{
+                isLastRowVisible = false
+            }
         }
     }
     public func collectionView(_ collectionView: UICollectionView, shouldShowMenuForItemAt indexPath: IndexPath) -> Bool {
@@ -1770,16 +1779,28 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             if firstComment.commentDate != firstCommentBefore.commentDate{
                 height = 35
             }
+        }else{
+            height = 35
         }
         return CGSize(width: collectionView.bounds.size.width, height: height)
     }
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
         var height = CGFloat(0)
+        var width = CGFloat(0)
         let firstComment = self.comments[section][0]
         if !firstComment.isOwnMessage{
             height = 44
+            width = 44
         }
-        return CGSize(width: collectionView.bounds.size.width, height: height)
+        return CGSize(width: width, height: height)
+    }
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        let firstComment = self.comments[section][0]
+        if firstComment.isOwnMessage{
+            return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        }else{
+            return UIEdgeInsets(top: 0, left: 0, bottom: -44, right: 0)
+        }
     }
     // MARK: - UICollectionViewDelegateFlowLayout
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -1788,14 +1809,37 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             let comment = self.comments[indexPath.section][indexPath.row]
             let cellTypePosition = QChatCellHelper.getCellPosition(ofIndexPath: indexPath, inGroupOfComment: self.comments)
             height = comment.commentCellHeight
-            if (cellTypePosition == .last || cellTypePosition == .single) && !comment.isOwnMessage{
-                height -= 44
-            }
             if cellTypePosition == .first || cellTypePosition == .single{
                 height += 20
             }
         }
         return CGSize(width: collectionView.bounds.size.width, height: height)
     }
-    
+    @IBAction func goToBottomTapped(_ sender: UIButton) {
+        scrollToBottom(true)
+    }
+    func publishDelivered(comment:QiscusComment){
+        if let room = QiscusRoom.getRoom(withLastTopicId: self.topicId){
+            let channel = "r/\(room.roomId)/\(topicId)/\(QiscusMe.sharedInstance.email)/r"
+            let message: String = "\(comment.commentId):\(comment.commentUniqueId)";
+            let data: Data = message.data(using: .utf8)!
+            Qiscus.realtimeThread.async {
+                Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: true, completion: {(succeeded, error) -> Void in
+                    if succeeded {
+                        DispatchQueue.main.async {
+                            if let targetComment = QiscusComment.getCommentById(comment.commentId) {
+                                targetComment.updateCommentStatus(.read)
+                            }
+                        }
+                    }
+                })
+            }
+        }
+    }
+    func updateComment(onIndexPath indexPath:IndexPath){
+        let comment = self.comments[indexPath.section][indexPath.row]
+        if let updatedComment = QiscusComment.getCommentById(comment.commentId){
+            self.comments[indexPath.section][indexPath.row] = updatedComment
+        }
+    }
 }

@@ -638,10 +638,10 @@ open class QiscusCommentClient: NSObject {
                                         self.commentDelegate?.gotNewComment(newComments)
                                     }
                                     if triggerDelegate{
-                                        let syncData = QSyncNotifData()
-                                        syncData.newMessageCount = newMessageCount
-                                        syncData.topicId = topicId
-                                        self.commentDelegate?.finishedLoadFromAPI(topicId)
+//                                        let syncData = QSyncNotifData()
+//                                        syncData.newMessageCount = newMessageCount
+//                                        syncData.topicId = topicId
+//                                        //self.commentDelegate?.finishedLoadFromAPI(topicId)
                                     }
                                 })
                             }
@@ -706,7 +706,7 @@ open class QiscusCommentClient: NSObject {
                             }
                         }
                         if newComments.count > 0 {
-                            self.commentDelegate?.gotNewComment(newComments)
+                            //self.commentDelegate?.gotNewComment(newComments)
                         }
                         if loadMore {
                             self.commentDelegate?.didFinishLoadMore()
@@ -805,7 +805,7 @@ open class QiscusCommentClient: NSObject {
             }
         })
     }
-    open func getListComment(withUsers users:[String], triggerDelegate:Bool = false, loadMore:Bool = false, distincId:String? = nil, optionalData:String? = nil,optionalDataCompletion: @escaping (String) -> Void){ //USED
+    open func getListComment(withUsers users:[String], triggerDelegate:Bool = true, loadMore:Bool = false, distincId:String? = nil, optionalData:String? = nil,optionalDataCompletion: @escaping (String) -> Void){ //USED
         let manager = Alamofire.SessionManager.default
         let loadURL = QiscusConfig.ROOM_REQUEST_URL
 
@@ -858,7 +858,7 @@ open class QiscusCommentClient: NSObject {
                             }
                         }
                         if newComments.count > 0 {
-                            self.commentDelegate?.gotNewComment(newComments)
+                            //self.commentDelegate?.gotNewComment(newComments)
                         }
                         if loadMore {
                             self.commentDelegate?.didFinishLoadMore()

@@ -27,7 +27,7 @@ open class QiscusHelper: NSObject {
         
         let dataIndexPath = QiscusIndexPathData()
         var stopSearch = false
-        
+        print("section count: \(inGroupedComment.count)")
         if inGroupedComment.count == 0{
             stopSearch = true
             dataIndexPath.section = 0
@@ -57,7 +57,7 @@ open class QiscusHelper: NSObject {
                             dataIndexPath.row = 0
                             dataIndexPath.section = i + 1
                             if after == nil {
-                                dataIndexPath.newGroup = false
+                                dataIndexPath.newGroup = true
                             }else{
                                 if after!.commentSenderEmail == comment.commentSenderEmail{
                                     dataIndexPath.newGroup = false
@@ -74,17 +74,20 @@ open class QiscusHelper: NSObject {
                 }
             }
         }
+        print("row: \(dataIndexPath.row)")
+        print("section: \(dataIndexPath.section)")
+        print("newGroup: \(dataIndexPath.newGroup)")
         return dataIndexPath
     }
     
     open class func getIndexPathOfComment(comment: QiscusComment, inGroupedComment:[[QiscusComment]])-> QiscusSearchIndexPathData{
         
-        var i = 0
         let dataIndexPath = QiscusSearchIndexPathData()
-        groupDataLoop: for commentGroup in inGroupedComment {
-            var j = 0
-            var stopSearch = false
-            dataLoop: for commentTarget in commentGroup{
+        var stopSearch = false
+        groupDataLoop: for i in (0..<inGroupedComment.count).reversed(){
+            let comments = inGroupedComment[i]
+            dataLoop: for j in (0..<comments.count).reversed(){
+                let commentTarget = comments[j]
                 if((comment.commentUniqueId != "") && (comment.commentUniqueId == commentTarget.commentUniqueId) ) || comment.commentId == commentTarget.commentId {
                     dataIndexPath.section = i
                     dataIndexPath.row = j
@@ -92,12 +95,10 @@ open class QiscusHelper: NSObject {
                     stopSearch = true
                     break dataLoop
                 }
-                j += 1
             }
-            if stopSearch {
+            if stopSearch{
                 break groupDataLoop
             }
-            i += 1
         }
         return dataIndexPath
     }
