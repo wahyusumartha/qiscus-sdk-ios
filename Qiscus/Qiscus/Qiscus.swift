@@ -137,7 +137,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
             }
         }
     }
-    open class func setup(withAppId appId:String, userEmail:String, userKey:String, username:String? = nil, avatarURL:String? = nil, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true){
+    open class func setup(withAppId appId:String, userEmail:String, userKey:String, username:String, avatarURL:String? = nil, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true){
         Qiscus.checkDatabaseMigration()
         var requestProtocol = "https"
         if !secureURl {
