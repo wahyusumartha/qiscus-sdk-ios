@@ -26,7 +26,7 @@ public enum QiscusCommentStatus:Int{
 open class QiscusComment: Object {
     // MARK: - Dynamic Variable
     open dynamic var localId:Int = 0
-    open dynamic var commentId:Int = Int.max
+    open dynamic var commentId:Int = 0
     open dynamic var commentText:String = ""
     open dynamic var commentCreatedAt: Double = 0
     open dynamic var commentUniqueId: String = ""
