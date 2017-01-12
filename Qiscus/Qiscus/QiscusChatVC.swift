@@ -98,11 +98,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             if unreadIndexPath.count == 0 {
                 unreadIndicator.isHidden = true
             }else{
-                if isLastRowVisible {
-                    unreadIndicator.isHidden = true
-                }else{
-                    unreadIndicator.isHidden = false
-                }
+                unreadIndicator.isHidden = isLastRowVisible
             }
         }
     }
@@ -423,16 +419,17 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         let keyboardHeight: CGFloat = keyboardSize.height
         let animateDuration = info[UIKeyboardAnimationDurationUserInfoKey] as! Double
         
-        //let goToRow = self.lastVisibleRow
-        let lastSection = self.comments.count - 1
-        let lastRow = self.comments[lastSection].count - 1
-        let lastIndexPath = IndexPath(row: lastRow, section: lastSection)
-        
         UIView.animate(withDuration: animateDuration, delay: 0, options: UIViewAnimationOptions(), animations: {
             self.inputBarBottomMargin.constant = 0 - keyboardHeight
             self.view.layoutIfNeeded()
             if self.isLastRowVisible {
-                self.collectionView.scrollToItem(at: lastIndexPath, at: .bottom, animated: true)
+                let delay = 0.1 * Double(NSEC_PER_SEC)
+                let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
+                DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                    if self.comments.count > 0 {
+                        self.scrollToBottom()
+                    }
+                })
             }
         }, completion: nil)
         
@@ -480,7 +477,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     
     func scrollToBottom(_ animated:Bool = false){
         let bottomPoint = CGPoint(x: 0, y: collectionView.contentSize.height - collectionView.bounds.size.height)
-        print("contentHeight: \(collectionView.contentSize.height)")
         collectionView.setContentOffset(bottomPoint, animated: animated)
     }
     func scrollToIndexPath(_ indexPath:IndexPath, position: UICollectionViewScrollPosition, animated:Bool, delayed:Bool = true){
@@ -840,21 +836,42 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     open func didFinishLoadMore(){
         if comments.count > 0{
             let first = comments[0][0]
-            self.comments = QiscusComment.grouppedComment(inTopicId: topicId, firstLoad: true)
-            var indexPath = IndexPath(row: 0, section: 0)
-            let indexPathSearch = QiscusHelper.getIndexPathOfComment(comment: first, inGroupedComment: self.comments)
-            if indexPathSearch.found{
-                indexPath.row = indexPathSearch.row
-                indexPath.section = indexPathSearch.section
+            let newComments = QiscusComment.grouppedComment(inTopicId: topicId, fromComment: first)
+            var mergeLastGroup = false
+            if newComments.count > 0{
+                var i = 0
+                let lastGroupComment = newComments.last!
+                let lastComment = lastGroupComment.last!
+                if lastComment.commentDate == first.commentDate && lastComment.commentSenderEmail == first.commentSenderEmail{
+                    mergeLastGroup = true
+                }
+                collectionView.performBatchUpdates({
+                    var i = 0
+                    for newGroupComment in newComments{
+                        if i == (newComments.count - 1) && mergeLastGroup {
+                            var indexPaths = [IndexPath]()
+                            var j = 0
+                            for newComment in newGroupComment{
+                                self.comments[i].insert(newComment, at: j)
+                                indexPaths.append(IndexPath(row: j, section: i))
+                                j += 1
+                            }
+                            self.collectionView.insertItems(at: indexPaths)
+                        }else{
+                            self.comments.insert(newGroupComment, at: i)
+                            var indexPaths = [IndexPath]()
+                            for j in 0..<newGroupComment.count{
+                                indexPaths.append(IndexPath(row: j, section: i))
+                            }
+                            self.collectionView.insertSections(IndexSet(integer: i))
+                            self.collectionView.insertItems(at: indexPaths)
+                        }
+                        i += 1
+                    }
+                }, completion: nil)
             }
-            self.showLoading("Load data ...")
-            collectionView.reloadData()
-            let delay = 0.1 * Double(NSEC_PER_SEC)
-            let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
-            DispatchQueue.main.asyncAfter(deadline: time, execute: {
-                self.collectionView.scrollToItem(at: indexPath, at: .top, animated: false)
-            })
-            self.dismissLoading()
+        }else{
+            loadData()
         }
         self.loadMoreControl.endRefreshing()
     }
@@ -897,7 +914,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             firstLoad = false
             refresh = true
         }
-        if isLastRowVisible && !needScroolToBottom{
+        if isLastRowVisible{
             needScroolToBottom = true
         }
         if comments.count == 1 && !needScroolToBottom{
@@ -920,14 +937,18 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                     var newCommentGroup = [QiscusComment]()
                     newCommentGroup.append(singleComment)
                     self.comments.insert(newCommentGroup, at: indexPathData.section)
-                    unreadIndexPath.append(indexPath)
+                    if !singleComment.isOwnMessage{
+                        unreadIndexPath.append(indexPath)
+                    }
                     self.collectionView.performBatchUpdates({
                         self.collectionView.insertSections(indexSet)
                         self.collectionView.insertItems(at: [indexPath])
                     }, completion: nil)
                 }else{
                     self.comments[indexPathData.section].insert(singleComment, at: indexPathData.row)
-                    unreadIndexPath.append(indexPath)
+                    if !singleComment.isOwnMessage{
+                        unreadIndexPath.append(indexPath)
+                    }
                     self.collectionView.performBatchUpdates({
                         self.collectionView.insertItems(at: [indexPath])
                     }, completion: nil)
@@ -966,7 +987,11 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             self.collectionView.reloadData()
         }
         if needScroolToBottom{
-            scrollToBottom()
+            let delay = 0.1 * Double(NSEC_PER_SEC)
+            let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
+            DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                self.scrollToBottom()
+            })
         }
     }
     
@@ -1658,6 +1683,9 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     }
     public func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if indexPath.section == (comments.count - 1){
+            if let targetCell = cell as? QChatCell{
+                targetCell.clearContext()
+            }
             if indexPath.row == comments[indexPath.section].count - 1{
                 isLastRowVisible = false
             }

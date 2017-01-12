@@ -88,7 +88,12 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
     
     open class func clear(){
         QiscusMe.clear()
-        QiscusComment.deleteAll()
+        let realm = try! Realm()
+        try! realm.write {
+            realm.deleteAll()
+        }
+        Qiscus.deleteAllFiles()
+        Qiscus.sharedInstance.mqtt?.disconnect()
     }
     
     // need Documentation
@@ -133,6 +138,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         }
     }
     open class func setup(withAppId appId:String, userEmail:String, userKey:String, username:String? = nil, avatarURL:String? = nil, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true){
+        Qiscus.checkDatabaseMigration()
         var requestProtocol = "https"
         if !secureURl {
             requestProtocol = "http"
@@ -167,7 +173,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         }
     }
     open class func setup(withURL baseUrl:String, userEmail:String, id:Int, username:String, userKey:String, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true, realTimeKey:String){
-        
+        Qiscus.checkDatabaseMigration()
         let email = userEmail.lowercased()
         
         QiscusMe.sharedInstance.baseUrl = "\(baseUrl)/api/v2/mobile"
@@ -202,6 +208,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
      - returns: **QiscusChatVC**
      */
     open class func chatView(withTopicId topicId:Int, readOnly:Bool = false, title:String = "Chat", subtitle:String = "")->QiscusChatVC{
+        Qiscus.checkDatabaseMigration()
         Qiscus.sharedInstance.isPushed = true
         QiscusUIConfiguration.sharedInstance.chatUsers = [String]()
         QiscusUIConfiguration.sharedInstance.topicId = topicId
@@ -225,6 +232,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
      - parameter subtitle: **String** text to show as chat subtitle (Optional), Default value : "" (empty string).
      */
     open class func chat(withTopicId topicId:Int, target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = ""){
+        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -254,7 +262,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
      - parameter subtitle: **String** text to show as chat subtitle (Optional), Default value : "" (empty string).
      */
     open class func chatVC(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil)->QiscusChatVC{
-        
+        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -289,7 +297,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
     */
     
     open class func chat(withRoomId roomId:Int, target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil,optionalDataCompletion: @escaping (String) -> Void){
-        
+        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -322,7 +330,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         target.navigationController?.present(navController, animated: true, completion: nil)
     }
     open class func chat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil,optionalDataCompletion: @escaping (String) -> Void){
-        
+        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -357,6 +365,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
      No Documentation
     */
     open class func chatView(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = "")->QiscusChatVC{
+        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -381,6 +390,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
      No Documentation
      */
     open class func chatView(withRoomId roomId:Int, readOnly:Bool = false, title:String = "Chat", subtitle:String = "")->QiscusChatVC{
+        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -738,5 +748,55 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         Qiscus.logThread.async{
             print("[Qiscus]: \(text)")
         }
+    }
+    class func deleteAllFiles(){
+        let fileManager = FileManager.default
+        let dirPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] 
+        let qiscusDirPath = "\(dirPath)/Qiscus"
+        
+        do {
+            let filePaths = try fileManager.contentsOfDirectory(atPath: qiscusDirPath)
+            for filePath in filePaths {
+                try fileManager.removeItem(atPath: NSTemporaryDirectory() + filePath)
+            }
+        } catch let error as NSError {
+            Qiscus.printLog(text: "Could not clear temp folder: \(error.debugDescription)")
+        }
+    }
+    
+    class func checkDatabaseMigration(){
+        let currentSchema:UInt64 = 1
+        var configuration = Realm.Configuration()
+        
+        configuration.schemaVersion = currentSchema
+        configuration.migrationBlock = { migration, oldSchemaVersion in
+            Qiscus.printLog(text: "Need migration to QiscusDB schema: \(currentSchema) \nfrom schema: \(oldSchemaVersion)")
+            
+            if (oldSchemaVersion < currentSchema){
+                print("schema lama \(oldSchemaVersion)")
+                //Deleting Realm Files
+                let realmURL = Realm.Configuration.defaultConfiguration.fileURL!
+                let realmManagement = realmURL.appendingPathExtension("management")
+                
+                
+                let realmURLs = [
+                    realmURL,
+                    realmURL.appendingPathExtension("lock"),
+                    realmManagement.appendingPathComponent("access_control.control.mx"),
+                    realmManagement.appendingPathComponent("access_control.write.mx")
+                ]
+                
+                for URL in realmURLs {
+                    do {
+                        try FileManager.default.removeItem(at: URL)
+                    } catch {
+                        // handle error
+                        print("no realm files")
+                    }
+                }
+                
+            }
+        }
+        Realm.Configuration.defaultConfiguration = configuration
     }
 }

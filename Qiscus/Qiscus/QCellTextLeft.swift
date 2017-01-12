@@ -107,4 +107,10 @@ class QCellTextLeft: QChatCell {
         
         textView.layoutIfNeeded()
     }
+    override func clearContext() {
+        textView.text = ""
+        textViewWidth.constant = 0
+        textViewHeight.constant = 0
+        textView.layoutIfNeeded()
+    }
 }

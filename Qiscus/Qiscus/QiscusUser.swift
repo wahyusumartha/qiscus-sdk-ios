@@ -249,7 +249,15 @@ open class QiscusUser: Object {
                         }
                         
                         let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
-                        let thumbPath = "\(documentsPath)/\(fileName)"
+                        let directoryPath = "\(documentsPath)/Qiscus"
+                        if !FileManager.default.fileExists(atPath: directoryPath){
+                            do {
+                                try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
+                            } catch let error as NSError {
+                                Qiscus.printLog(text: error.localizedDescription);
+                            }
+                        }
+                        let thumbPath = "/Qiscus\(documentsPath)/\(fileName)"
                         
                         if fileExt == "png" || fileExt == "png_" {
                             try? UIImagePNGRepresentation(thumbImage)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])

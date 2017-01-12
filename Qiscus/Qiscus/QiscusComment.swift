@@ -257,7 +257,7 @@ open class QiscusComment: Object {
             return commentData.first
         }
     }
-    open class func getAllComment(_ topicId: Int, limit:Int = 0, firstLoad:Bool = false)->[QiscusComment]{ // USED
+    open class func getAllComment(_ topicId: Int, limit:Int = 0, fromComment:QiscusComment? = nil, firstLoad:Bool = false)->[QiscusComment]{ // USED
         if firstLoad {
             //QiscusComment.deleteAllFailedMessage()
         }
@@ -265,7 +265,12 @@ open class QiscusComment: Object {
         let realm = try! Realm()
         
         let sortProperties = [SortDescriptor(property: "commentCreatedAt", ascending: false), SortDescriptor(property: "commentId", ascending: true)]
-        let searchQuery:NSPredicate = NSPredicate(format: "commentTopicId == %d",topicId)
+        
+        var searchQuery:NSPredicate = NSPredicate(format: "commentTopicId == %d",topicId)
+        
+        if fromComment != nil{
+            searchQuery = NSPredicate(format: "commentTopicId == %d AND commentId < %d",topicId, fromComment!.commentId)
+        }
         let commentData = realm.objects(QiscusComment.self).filter(searchQuery).sorted(by: sortProperties)
         
         
@@ -318,10 +323,11 @@ open class QiscusComment: Object {
         }
         return allComment
     }
-    open class func grouppedComment(inTopicId topicId:Int, firstLoad:Bool = true)->[[QiscusComment]]{
+    open class func grouppedComment(inTopicId topicId:Int, fromComment:QiscusComment? = nil ,firstLoad:Bool = true)->[[QiscusComment]]{
         var allComment = [[QiscusComment]]()
-        let commentData = QiscusComment.getAllComment(topicId, firstLoad: firstLoad)
         
+        let commentData = QiscusComment.getAllComment(topicId, fromComment: fromComment, firstLoad: firstLoad)
+
         if(commentData.count > 0){
             var first = commentData.first!
             var grouppedMessage = [QiscusComment]()

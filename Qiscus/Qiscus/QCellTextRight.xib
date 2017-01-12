@@ -21,7 +21,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="50"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Ahmad Athaullah" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zyI-vO-LjO">
-                                <rect key="frame" x="133" y="0.0" width="200" height="20"/>
+                                <rect key="frame" x="163" y="0.0" width="200" height="20"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="200" id="Nyy-06-PgC"/>
                                     <constraint firstAttribute="height" constant="20" id="aJH-bu-xAf"/>
@@ -76,7 +76,7 @@
                             <constraint firstItem="Y5e-NR-8ZE" firstAttribute="top" secondItem="rAs-kr-Uob" secondAttribute="top" id="dR5-dc-iRl"/>
                             <constraint firstItem="LrG-8y-Xg3" firstAttribute="bottom" secondItem="rAs-kr-Uob" secondAttribute="bottom" id="hGJ-X2-91f"/>
                             <constraint firstItem="LrG-8y-Xg3" firstAttribute="trailing" secondItem="357-PI-l7m" secondAttribute="trailing" constant="-22" id="s0J-4h-5XD"/>
-                            <constraint firstItem="zyI-vO-LjO" firstAttribute="trailing" secondItem="Eer-Qp-BWs" secondAttribute="trailing" constant="-60" id="sva-ya-qhr"/>
+                            <constraint firstItem="zyI-vO-LjO" firstAttribute="trailing" secondItem="Eer-Qp-BWs" secondAttribute="trailing" constant="-30" id="sva-ya-qhr"/>
                         </constraints>
                         <edgeInsets key="layoutMargins" top="0.0" left="8" bottom="0.0" right="8"/>
                     </view>

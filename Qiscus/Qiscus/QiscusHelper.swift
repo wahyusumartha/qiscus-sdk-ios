@@ -27,7 +27,6 @@ open class QiscusHelper: NSObject {
         
         let dataIndexPath = QiscusIndexPathData()
         var stopSearch = false
-        print("section count: \(inGroupedComment.count)")
         if inGroupedComment.count == 0{
             stopSearch = true
             dataIndexPath.section = 0
@@ -74,9 +73,6 @@ open class QiscusHelper: NSObject {
                 }
             }
         }
-        print("row: \(dataIndexPath.row)")
-        print("section: \(dataIndexPath.section)")
-        print("newGroup: \(dataIndexPath.newGroup)")
         return dataIndexPath
     }
     

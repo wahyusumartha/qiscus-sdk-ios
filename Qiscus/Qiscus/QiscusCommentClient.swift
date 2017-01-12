@@ -224,9 +224,18 @@ open class QiscusCommentClient: NSObject {
                         Qiscus.printLog(text: "Download completed")
                         
                         let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
+                        let directoryPath = "\(documentsPath)/Qiscus"
+                        if !FileManager.default.fileExists(atPath: directoryPath){
+                            do {
+                                try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
+                            } catch let error as NSError {
+                                Qiscus.printLog(text: error.localizedDescription);
+                            }
+                        }
+                        
                         let fileName = "\(comment.commentId)-Q-\(file.fileName as String)"
-                        let path = "\(documentsPath)/\(fileName)"
-                        let thumbPath = "\(documentsPath)/thumb_\(fileName)"
+                        let path = "\(documentsPath)/Qiscus/\(fileName)"
+                        let thumbPath = "\(documentsPath)/Qiscus/thumb_\(fileName)"
                         
                         if (file.fileExtension == "png" || file.fileExtension == "png_") {
                             try? UIImagePNGRepresentation(image)!.write(to: URL(fileURLWithPath: path), options: [.atomic])
@@ -247,8 +256,16 @@ open class QiscusCommentClient: NSObject {
                         })
                     }else{
                         let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
-                        let path = "\(documentsPath)/\(file.fileName as String)"
-                        let thumbPath = "\(documentsPath)/thumb_\(file.fileCommentId).png"
+                        let directoryPath = "\(documentsPath)/Qiscus"
+                        if !FileManager.default.fileExists(atPath: directoryPath){
+                            do {
+                                try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
+                            } catch let error as NSError {
+                                Qiscus.printLog(text: error.localizedDescription);
+                            }
+                        }
+                        let path = "\(documentsPath)/Qiscus/\(file.fileName as String)"
+                        let thumbPath = "\(documentsPath)/Qiscus/thumb_\(file.fileCommentId).png"
                         
                         try? data.write(to: URL(fileURLWithPath: path), options: [.atomic])
                         
@@ -280,7 +297,15 @@ open class QiscusCommentClient: NSObject {
                     }
                 }else{
                     let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
-                    let path = "\(documentsPath)/\(file.fileName as String)"
+                    let directoryPath = "\(documentsPath)/Qiscus"
+                    if !FileManager.default.fileExists(atPath: directoryPath){
+                        do {
+                            try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
+                        } catch let error as NSError {
+                            Qiscus.printLog(text: error.localizedDescription);
+                        }
+                    }
+                    let path = "\(documentsPath)/Qiscus/\(file.fileName as String)"
                     //print
                     try! data.write(to: URL(fileURLWithPath: path), options: [.atomic])
                     

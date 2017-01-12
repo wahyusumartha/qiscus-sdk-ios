@@ -67,4 +67,7 @@ class QChatCell: UICollectionViewCell {
     open func downloadingMedia(withPercentage percentage:Int){
         // implementation will be overrided on child class
     }
+    func clearContext(){
+        
+    }
 }
