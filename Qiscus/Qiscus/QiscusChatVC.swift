@@ -475,10 +475,15 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     
     func scrollToBottom(_ animated:Bool = false){
         let bottomPoint = CGPoint(x: 0, y: collectionView.contentSize.height - collectionView.bounds.size.height)
-        isLastRowVisible = true
+        
         if collectionView.contentSize.height > collectionView.bounds.size.height{
             collectionView.setContentOffset(bottomPoint, animated: animated)
         }
+        let delay = 0.1 * Double(NSEC_PER_SEC)
+        let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
+        DispatchQueue.main.asyncAfter(deadline: time, execute: {
+            self.isLastRowVisible = true
+        })
     }
     func scrollToIndexPath(_ indexPath:IndexPath, position: UICollectionViewScrollPosition, animated:Bool, delayed:Bool = true){
         
