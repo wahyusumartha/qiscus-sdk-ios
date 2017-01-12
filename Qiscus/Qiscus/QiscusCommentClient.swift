@@ -737,9 +737,9 @@ open class QiscusCommentClient: NSObject {
                             self.commentDelegate?.didFinishLoadMore()
                         }
                     }
-                    if triggerDelegate{
+                    //if triggerDelegate{
                         self.commentDelegate?.finishedLoadFromAPI(topicId)
-                    }
+                    //}
                 }else if error != nil{
                     Qiscus.printLog(text: "error getListComment: \(error)")
                     if triggerDelegate{
@@ -812,21 +812,21 @@ open class QiscusCommentClient: NSObject {
                         }
                     }
                     
-                    if triggerDelegate{
+                    //if triggerDelegate{
                         self.commentDelegate?.finishedLoadFromAPI(topicId)
-                    }
+                    //}
                     optionalDataCompletion(room.optionalData)
                 }else if error != nil{
                     Qiscus.printLog(text: "error getRoom: \(error)")
-                    if triggerDelegate{
+                    //if triggerDelegate{
                         self.commentDelegate?.didFailedLoadDataFromAPI("failed to load message with error \(error)")
-                    }
+                    //}
                 }
                 
             }else{
-                if triggerDelegate {
+                //if triggerDelegate {
                     self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message, connection error")
-                }
+               // }
             }
         })
     }
@@ -900,9 +900,9 @@ open class QiscusCommentClient: NSObject {
                         let _ = user.saveUser()
                     }
                     
-                    if triggerDelegate{
+                    //if triggerDelegate{
                         self.commentDelegate?.finishedLoadFromAPI(topicId)
-                    }
+                    //}
                     optionalDataCompletion(room.optionalData)
                 }else if error != nil{
                     Qiscus.printLog(text: "error getListComment: \(error)")
