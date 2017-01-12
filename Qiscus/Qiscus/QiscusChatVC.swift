@@ -473,11 +473,12 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         }
     }
     
-    
-    
     func scrollToBottom(_ animated:Bool = false){
         let bottomPoint = CGPoint(x: 0, y: collectionView.contentSize.height - collectionView.bounds.size.height)
-        collectionView.setContentOffset(bottomPoint, animated: animated)
+        isLastRowVisible = true
+        if collectionView.contentSize.height > collectionView.bounds.size.height{
+            collectionView.setContentOffset(bottomPoint, animated: animated)
+        }
     }
     func scrollToIndexPath(_ indexPath:IndexPath, position: UICollectionViewScrollPosition, animated:Bool, delayed:Bool = true){
         
