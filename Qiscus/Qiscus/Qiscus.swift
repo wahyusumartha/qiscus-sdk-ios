@@ -556,7 +556,11 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
                             if succeeded {
                                 DispatchQueue.main.async {
                                     if let thisComment = QiscusComment.getCommentById(commentId) {
-                                        thisComment.updateCommentStatus(.delivered)
+                                        if !thisComment.isOwnMessage{
+                                            thisComment.updateCommentStatus(.delivered)
+                                        }else{
+                                            thisComment.updateCommentStatus(.sent)
+                                        }
                                     }
                                 }
                             }

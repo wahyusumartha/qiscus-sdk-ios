@@ -703,6 +703,9 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                                 if let cell = collectionView.cellForItem(at: indexPath) as? QChatCell{
                                     cell.updateStatus(toStatus: toStatus)
                                 }
+                                if indexPath.section == self.comments.count - 1 && indexPath.row == self.comments[self.comments.count - 1].count{
+                                    isLastRowVisible = true
+                                }
                             }
                         }
                     }
@@ -716,6 +719,9 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             DispatchQueue.main.async {
                 self.comments[indexPath.section][indexPath.row] = comment
                 self.collectionView.reloadItems(at: [indexPath])
+                if indexPath.section == self.comments.count - 1 && indexPath.row == self.comments[self.comments.count - 1].count - 1{
+                    self.isLastRowVisible = true
+                }
             }
         }
     }
@@ -1700,12 +1706,25 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         }
     }
     public func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if let targetCell = cell as? QChatCell{
+            targetCell.clearContext()
+        }
         if indexPath.section == (comments.count - 1){
-            if let targetCell = cell as? QChatCell{
-                targetCell.clearContext()
-            }
+            
             if indexPath.row == comments[indexPath.section].count - 1{
-                isLastRowVisible = false
+                let visibleIndexPath = collectionView.indexPathsForVisibleItems
+                if visibleIndexPath.count > 0{
+                    var visible = false
+                    for visibleIndex in visibleIndexPath{
+                        if visibleIndex.row == indexPath.row && visibleIndex.section == indexPath.section{
+                            visible = true
+                            break
+                        }
+                    }
+                    isLastRowVisible = visible
+                }else{
+                    isLastRowVisible = true
+                }
             }
         }
     }
