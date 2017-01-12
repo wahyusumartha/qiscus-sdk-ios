@@ -138,7 +138,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     var lastVisibleRow:IndexPath?{
         get{
             let indexPaths = collectionView.indexPathsForVisibleItems
-            return indexPaths.last!
+            return indexPaths.last
         }
     }
     var UTIs:[String]{
@@ -839,7 +839,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             let newComments = QiscusComment.grouppedComment(inTopicId: topicId, fromComment: first)
             var mergeLastGroup = false
             if newComments.count > 0{
-                var i = 0
                 let lastGroupComment = newComments.last!
                 let lastComment = lastGroupComment.last!
                 if lastComment.commentDate == first.commentDate && lastComment.commentSenderEmail == first.commentSenderEmail{
@@ -883,12 +882,13 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         self.comments = QiscusComment.grouppedComment(inTopicId: topicId, firstLoad: true)
         collectionView.isHidden = true
         collectionView.reloadData()
-        
+        if self.comments.count > 0{
+            welcomeView.isHidden = true
+        }
         scrollToBotomFromNoData()
         self.dismissLoading()
     }
     open func scrollToBotomFromNoData(){
-        welcomeView.isHidden = true
         let delay = 0.1 * Double(NSEC_PER_SEC)
         let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
         DispatchQueue.main.asyncAfter(deadline: time, execute: {
@@ -903,94 +903,106 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     }
     open func gotNewComment(_ comments:[QiscusComment]){
         var refresh = false
-        if self.comments.count == 0 {
-            refresh = true
-        }
-
-        var needScroolToBottom = false
         
-        if firstLoad{
-            needScroolToBottom = true
-            firstLoad = false
-            refresh = true
-        }
-        if isLastRowVisible{
-            needScroolToBottom = true
-        }
-        if comments.count == 1 && !needScroolToBottom{
-            let firstComment = comments[0]
-            if firstComment.commentSenderEmail == QiscusConfig.sharedInstance.USER_EMAIL{
+        if self.comments.count > 0 {
+            var needScroolToBottom = false
+            
+            if firstLoad{
+                needScroolToBottom = true
+                firstLoad = false
+                refresh = true
+            }
+            if isLastRowVisible{
                 needScroolToBottom = true
             }
-        }
-        self.welcomeView.isHidden = true
-        
-        for singleComment in comments{
-            if singleComment.commentTopicId == self.topicId {
-                let indexPathData = QiscusHelper.properIndexPathOf(comment: singleComment, inGroupedComment: self.comments)
-                
-                let indexPath = IndexPath(row: indexPathData.row, section: indexPathData.section)
-                let indexSet = IndexSet(integer: indexPathData.section)
-                singleComment.updateCommmentIndexPath(indexPath: indexPath)
-                
-                if indexPathData.newGroup {
-                    var newCommentGroup = [QiscusComment]()
-                    newCommentGroup.append(singleComment)
-                    self.comments.insert(newCommentGroup, at: indexPathData.section)
-                    if !singleComment.isOwnMessage{
-                        unreadIndexPath.append(indexPath)
-                    }
-                    self.collectionView.performBatchUpdates({
-                        self.collectionView.insertSections(indexSet)
-                        self.collectionView.insertItems(at: [indexPath])
-                    }, completion: nil)
-                }else{
-                    self.comments[indexPathData.section].insert(singleComment, at: indexPathData.row)
-                    if !singleComment.isOwnMessage{
-                        unreadIndexPath.append(indexPath)
-                    }
-                    self.collectionView.performBatchUpdates({
-                        self.collectionView.insertItems(at: [indexPath])
-                    }, completion: nil)
+            if comments.count == 1 && !needScroolToBottom{
+                let firstComment = comments[0]
+                if firstComment.commentSenderEmail == QiscusConfig.sharedInstance.USER_EMAIL{
+                    needScroolToBottom = true
                 }
-                
-                var indexPathToReload = [IndexPath]()
+            }
+            self.welcomeView.isHidden = true
+            if self.comments.count == 0 {
+                refresh = true
+                needScroolToBottom = false
+            }
+            for singleComment in comments{
+                if singleComment.commentTopicId == self.topicId {
+                    let indexPathData = QiscusHelper.properIndexPathOf(comment: singleComment, inGroupedComment: self.comments)
                     
-                if indexPath.row > 0 {
-                    let indexPathBefore = IndexPath(row: indexPath.row - 1, section: indexPath.section)
-                    indexPathToReload.append(indexPathBefore)
-                }else if indexPath.section > 0 {
-                    let rowBefore = self.comments[indexPath.section - 1].count - 1
-                    let indexPathBefore = IndexPath(row: rowBefore, section: indexPath.section)
-                    indexPathToReload.append(indexPathBefore)
-                }
-                if indexPath.row < (self.comments[indexPath.section].count - 1){
-                    let indexPathAfter = IndexPath(row: indexPath.row + 1, section: indexPath.section)
-                    indexPathToReload.append(indexPathAfter)
-                }else if indexPath.section < (self.comments.count - 1){
-                    let indexPathAfter = IndexPath(row: 0, section: indexPath.section + 1)
-                    indexPathToReload.append(indexPathAfter)
-                }
-                if indexPathToReload.count > 0 {
-                    for reloadIndexPath in indexPathToReload{
-                        if self.comments.count > reloadIndexPath.section{
-                            if self.comments[reloadIndexPath.section].count > reloadIndexPath.row{
-                                self.collectionView.reloadItems(at: [reloadIndexPath])
-                                
+                    let indexPath = IndexPath(row: indexPathData.row, section: indexPathData.section)
+                    let indexSet = IndexSet(integer: indexPathData.section)
+                    singleComment.updateCommmentIndexPath(indexPath: indexPath)
+                    
+                    if indexPathData.newGroup {
+                        var newCommentGroup = [QiscusComment]()
+                        newCommentGroup.append(singleComment)
+                        self.comments.insert(newCommentGroup, at: indexPathData.section)
+                        if !singleComment.isOwnMessage{
+                            unreadIndexPath.append(indexPath)
+                        }
+                        self.collectionView.performBatchUpdates({
+                            self.collectionView.insertSections(indexSet)
+                            self.collectionView.insertItems(at: [indexPath])
+                        }, completion: nil)
+                    }else{
+                        self.comments[indexPathData.section].insert(singleComment, at: indexPathData.row)
+                        if !singleComment.isOwnMessage{
+                            unreadIndexPath.append(indexPath)
+                        }
+                        self.collectionView.performBatchUpdates({
+                            self.collectionView.insertItems(at: [indexPath])
+                        }, completion: nil)
+                    }
+                    
+                    var indexPathToReload = [IndexPath]()
+                    
+                    if indexPath.row > 0 {
+                        let indexPathBefore = IndexPath(row: indexPath.row - 1, section: indexPath.section)
+                        indexPathToReload.append(indexPathBefore)
+                    }else if indexPath.section > 0 {
+                        let rowBefore = self.comments[indexPath.section - 1].count - 1
+                        let indexPathBefore = IndexPath(row: rowBefore, section: indexPath.section)
+                        indexPathToReload.append(indexPathBefore)
+                    }
+                    if indexPath.row < (self.comments[indexPath.section].count - 1){
+                        let indexPathAfter = IndexPath(row: indexPath.row + 1, section: indexPath.section)
+                        indexPathToReload.append(indexPathAfter)
+                    }else if indexPath.section < (self.comments.count - 1){
+                        let indexPathAfter = IndexPath(row: 0, section: indexPath.section + 1)
+                        indexPathToReload.append(indexPathAfter)
+                    }
+                    if indexPathToReload.count > 0 {
+                        for reloadIndexPath in indexPathToReload{
+                            if self.comments.count > reloadIndexPath.section{
+                                if self.comments[reloadIndexPath.section].count > reloadIndexPath.row{
+                                    self.collectionView.reloadItems(at: [reloadIndexPath])
+                                    
+                                }
                             }
                         }
                     }
                 }
             }
-        }
-        if refresh {
-            self.collectionView.reloadData()
-        }
-        if needScroolToBottom{
+            if refresh {
+                self.collectionView.reloadData()
+            }
+            if needScroolToBottom{
+                let delay = 0.1 * Double(NSEC_PER_SEC)
+                let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
+                DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                    self.scrollToBottom()
+                })
+            }
+        }else{
+            self.comments = QiscusComment.grouppedComment(inTopicId: self.topicId, firstLoad: true)
+            collectionView.reloadData()
+            welcomeView.isHidden = true
             let delay = 0.1 * Double(NSEC_PER_SEC)
             let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
             DispatchQueue.main.asyncAfter(deadline: time, execute: {
                 self.scrollToBottom()
+                self.collectionView.isHidden = false
             })
         }
     }

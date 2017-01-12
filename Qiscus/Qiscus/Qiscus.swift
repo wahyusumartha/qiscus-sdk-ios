@@ -38,6 +38,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
     
     open class var isLoggedIn:Bool{
         get{
+            Qiscus.checkDatabaseMigration()
             if !Qiscus.sharedInstance.connected {
                 Qiscus.setupReachability()
             }
