@@ -65,7 +65,7 @@ open class QiscusCommentClient: NSObject {
             Qiscus.printLog(text: "login url: \(QiscusConfig.LOGIN_REGISTER)")
             Qiscus.printLog(text: "post parameters: \(parameters)")
             Qiscus.printLog(text: "post headers: \(QiscusConfig.sharedInstance.requestHeader)")
-            let request = manager.request(QiscusConfig.LOGIN_REGISTER, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+            let request = manager.request(QiscusConfig.LOGIN_REGISTER, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                 Qiscus.printLog(text: "login register result: \(response)")
                 Qiscus.printLog(text: "login url: \(QiscusConfig.LOGIN_REGISTER)")
                 Qiscus.printLog(text: "post parameters: \(parameters)")
@@ -131,7 +131,7 @@ open class QiscusCommentClient: NSObject {
             parameters["room_id"] = roomId as AnyObject?
         }
         DispatchQueue.global().async(execute: {
-            let request = manager.request(QiscusConfig.postCommentURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {response in
+            let request = manager.request(QiscusConfig.postCommentURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {response in
                 Qiscus.printLog(text: "post message result: \(response)")
                 Qiscus.printLog(text: "post url: \(QiscusConfig.postCommentURL)")
                 Qiscus.printLog(text: "post parameters: \(parameters)")
@@ -662,23 +662,17 @@ open class QiscusCommentClient: NSObject {
                                     if newComments.count > 0 {
                                         self.commentDelegate?.gotNewComment(newComments)
                                     }
-                                    if triggerDelegate{
-//                                        let syncData = QSyncNotifData()
-//                                        syncData.newMessageCount = newMessageCount
-//                                        syncData.topicId = topicId
-//                                        //self.commentDelegate?.finishedLoadFromAPI(topicId)
-                                    }
                                 })
                             }
                         }else if error != nil{
                             if triggerDelegate{
-                                self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message with error \(error)")
+                                self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message with error \(error)", data:error)
                             }
                             Qiscus.printLog(text: "error sync message: \(error)")
                         }
                     }else{
                         if triggerDelegate{
-                            self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message, connection error")
+                            self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message, connection error", data:nil)
                         }
                         Qiscus.printLog(text: "error sync message")
                     }
@@ -730,26 +724,18 @@ open class QiscusCommentClient: NSObject {
                                 }
                             }
                         }
-                        if newComments.count > 0 {
-                            //self.commentDelegate?.gotNewComment(newComments)
-                        }
+
                         if loadMore {
                             self.commentDelegate?.didFinishLoadMore()
                         }
                     }
-                    //if triggerDelegate{
-                        self.commentDelegate?.finishedLoadFromAPI(topicId)
-                    //}
+                    self.commentDelegate?.finishedLoadFromAPI(topicId)
                 }else if error != nil{
                     Qiscus.printLog(text: "error getListComment: \(error)")
-                    if triggerDelegate{
-                        self.commentDelegate?.didFailedLoadDataFromAPI("failed to load message with error \(error)")
-                    }
+                    self.commentDelegate?.didFailedLoadDataFromAPI("\(error)", data:error)
                 }
             }else{
-                if triggerDelegate {
-                    self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message, connection error")
-                }
+                self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message, connection error", data:nil)
             }
         })
     }
@@ -812,21 +798,15 @@ open class QiscusCommentClient: NSObject {
                         }
                     }
                     
-                    //if triggerDelegate{
-                        self.commentDelegate?.finishedLoadFromAPI(topicId)
-                    //}
+                    self.commentDelegate?.finishedLoadFromAPI(topicId)
                     optionalDataCompletion(room.optionalData)
                 }else if error != nil{
                     Qiscus.printLog(text: "error getRoom: \(error)")
-                    //if triggerDelegate{
-                        self.commentDelegate?.didFailedLoadDataFromAPI("failed to load message with error \(error)")
-                    //}
+                    self.commentDelegate?.didFailedLoadDataFromAPI("failed to load message with error \(error)", data: error)
                 }
                 
             }else{
-                //if triggerDelegate {
-                    self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message, connection error")
-               // }
+                self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message, connection error", data:nil)
             }
         })
     }
@@ -847,7 +827,7 @@ open class QiscusCommentClient: NSObject {
             parameters["options"] = optionalData! as AnyObject
         }
         Qiscus.printLog(text: "get or create room parameters: \(parameters)")
-        manager.request(loadURL, method: .post, parameters: parameters, encoding: JSONEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+        manager.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
             if let response = responseData.result.value {
                 Qiscus.printLog(text: "get or create room api response:\n\(response)")
                 let json = JSON(response)
@@ -900,21 +880,15 @@ open class QiscusCommentClient: NSObject {
                         let _ = user.saveUser()
                     }
                     
-                    //if triggerDelegate{
-                        self.commentDelegate?.finishedLoadFromAPI(topicId)
-                    //}
+                    self.commentDelegate?.finishedLoadFromAPI(topicId)
                     optionalDataCompletion(room.optionalData)
                 }else if error != nil{
                     Qiscus.printLog(text: "error getListComment: \(error)")
-                    if triggerDelegate{
-                        self.commentDelegate?.didFailedLoadDataFromAPI("failed to load message with error \(error)")
-                    }
+                    self.commentDelegate?.didFailedLoadDataFromAPI("\(error)", data:error)
                 }
                 
             }else{
-                if triggerDelegate {
-                    self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message, connection error")
-                }
+                self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message, connection error", data:nil)
             }
         })
     }
