@@ -21,6 +21,7 @@ open class QLoadingViewController: UIViewController {
     open var isPresence = false
     open var isBlocking = false
     open var interuptLoadingAction:()->Void = ({})
+    open var dismissImmediately: Bool = false
     
     fileprivate init() {
         super.init(nibName: "QLoadingViewController", bundle: Qiscus.bundle)

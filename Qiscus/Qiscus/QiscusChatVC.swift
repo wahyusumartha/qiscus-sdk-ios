@@ -12,6 +12,7 @@ import AVFoundation
 import Photos
 import ImageViewer
 import IQAudioRecorderController
+import SwiftyJSON
 
 open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate, GalleryItemsDatasource, IQAudioRecorderViewControllerDelegate, AVAudioPlayerDelegate, ChatCellAudioDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
     
@@ -515,11 +516,10 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     
     // MARK: - Load DataSource
     func loadData(){
-        
         if(self.topicId > 0){
             self.comments = QiscusComment.grouppedComment(inTopicId: self.topicId, firstLoad: true)
             Qiscus.printLog(text: "self comments: \n\(self.comments)")
-            self.showLoading("Load Data ...")
+            
             let room = QiscusRoom.getRoom(withLastTopicId: self.topicId)
             
             if self.optionalDataCompletion != nil && room != nil{
@@ -530,10 +530,10 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                 self.collectionView.reloadData()
                 scrollToBotomFromNoData()
                 self.welcomeView.isHidden = true
-                dismissLoading()
                 commentClient.syncMessage(self.topicId)
             }else{
                 self.welcomeView.isHidden = false
+                self.showLoading("Load Data ...")
                 commentClient.getListComment(topicId: self.topicId, commentId: 0, triggerDelegate: true)
             }
         }else{
@@ -562,7 +562,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                             }
                             self.showLoading("Load Data ...")
                             commentClient.getListComment(topicId: self.topicId, commentId: 0, triggerDelegate: true)
-                            
                         }
                     }else{
                         self.showLoading("Load Data ...")
@@ -589,8 +588,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                     if self.comments.count > 0 {
                         self.topicId = room.roomLastCommentTopicId
                         self.collectionView.reloadData()
-                        
-                        scrollToBottom()
+                        scrollToBotomFromNoData()
                         self.welcomeView.isHidden = true
                         if self.optionalDataCompletion != nil{
                             self.optionalDataCompletion!(room.optionalData)
@@ -617,8 +615,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                         }
                     })
                 }
-                
-                
             }
         }
     }
@@ -910,8 +906,20 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             }
         })
     }
-    open func didFailedLoadDataFromAPI(_ error: String){
+    open func didFailedLoadDataFromAPI(_ error: String, data:JSON?){
         self.dismissLoading()
+        var errorMessage = "Failed to load room data"
+        print("error data: \(data)")
+        if data != nil{
+            if let error = data!["detailed_messages"].array {
+                if let message = error[0].string {
+                    errorMessage = message
+                }
+            }else if let error = data!["message"].string {
+                errorMessage = error
+            }
+        }
+        QToasterSwift.toast(target: self, text: errorMessage, backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
     }
     open func gotNewComment(_ comments:[QiscusComment]){
         var refresh = false

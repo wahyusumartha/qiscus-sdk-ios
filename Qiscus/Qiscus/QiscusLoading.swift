@@ -12,7 +12,7 @@ public extension UIViewController{
     public func showQiscusLoading(withText text:String? = nil, andProgress progress:Float? = nil, isBlocking:Bool = false){
         let loadingView = QLoadingViewController.sharedInstance
         if loadingView.isPresence{
-            loadingView.dismiss(animated: false, completion: nil)
+            self.dismissQiscusLoading()
         }
         loadingView.modalTransitionStyle = .crossDissolve
         loadingView.modalPresentationStyle = .overCurrentContext
@@ -34,13 +34,24 @@ public extension UIViewController{
             loadingView.percentageLabel.text = "\(percentage)%"
             loadingView.percentageLabel.isHidden = false
         }
-        loadingView.isPresence = true
-        self.present(loadingView, animated: false)
+        
+        self.present(loadingView, animated: false, completion: {
+            if QLoadingViewController.sharedInstance.dismissImmediately{
+                self.dismissQiscusLoading()
+            }else{
+                loadingView.isPresence = true
+            }
+        })
     }
     public func dismissQiscusLoading(){
         let loadingView = QLoadingViewController.sharedInstance
         if loadingView.isPresence{
-            loadingView.dismiss(animated: false, completion: nil)
+            loadingView.dismiss(animated: false, completion: {
+                loadingView.dismissImmediately = false
+                loadingView.isPresence = false
+            })
+        }else{
+            QLoadingViewController.sharedInstance.dismissImmediately = true
         }
     }
 }
