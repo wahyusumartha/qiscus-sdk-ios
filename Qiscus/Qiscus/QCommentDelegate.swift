@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SwiftyJSON
 
 public protocol QCommentDelegate {
     func didSuccesPostComment(_ comment:QiscusComment)
@@ -20,7 +21,7 @@ public protocol QCommentDelegate {
     func didFailedPostFile(_ comment:QiscusComment)
     func finishedLoadFromAPI(_ topicId: Int)
     func gotNewComment(_ comments:[QiscusComment])
-    func didFailedLoadDataFromAPI(_ error: String)
+    func didFailedLoadDataFromAPI(_ error: String, data:JSON?)
     func didFinishLoadMore()
     func commentDidChangeStatus(Comments comments:[QiscusComment], toStatus: QiscusCommentStatus)
     func performResendMessage(onIndexPath: IndexPath)
