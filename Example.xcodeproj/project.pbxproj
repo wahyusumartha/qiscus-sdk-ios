@@ -32,6 +32,10 @@
 		392C85B71E1F46030059D5BD /* QCellFileRight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 392C85B51E1F46030059D5BD /* QCellFileRight.swift */; };
 		392C85B81E1F46030059D5BD /* QCellFileRight.xib in Resources */ = {isa = PBXBuildFile; fileRef = 392C85B61E1F46030059D5BD /* QCellFileRight.xib */; };
 		392C85BA1E1F73A20059D5BD /* QCellAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 392C85B91E1F73A20059D5BD /* QCellAudio.swift */; };
+		395291251E28559B004BD6B4 /* goToChatVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395291211E28559B004BD6B4 /* goToChatVC.swift */; };
+		395291261E28559B004BD6B4 /* goToChatVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 395291221E28559B004BD6B4 /* goToChatVC.xib */; };
+		395291271E28559B004BD6B4 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395291231E28559B004BD6B4 /* MainView.swift */; };
+		395291281E28559B004BD6B4 /* MainView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 395291241E28559B004BD6B4 /* MainView.xib */; };
 		3957C7C91E08E30B003E1E9F /* QiscusLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3957C7C81E08E30B003E1E9F /* QiscusLoading.swift */; };
 		395E08111D43A9200021370F /* QiscusPusherClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395E08101D43A9200021370F /* QiscusPusherClient.swift */; };
 		395E08131D43B8850021370F /* QiscusRoomDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395E08121D43B8850021370F /* QiscusRoomDelegate.swift */; };
@@ -154,6 +158,10 @@
 		392C85B51E1F46030059D5BD /* QCellFileRight.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QCellFileRight.swift; path = Qiscus/QCellFileRight.swift; sourceTree = "<group>"; };
 		392C85B61E1F46030059D5BD /* QCellFileRight.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = QCellFileRight.xib; path = Qiscus/QCellFileRight.xib; sourceTree = "<group>"; };
 		392C85B91E1F73A20059D5BD /* QCellAudio.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QCellAudio.swift; path = Qiscus/QCellAudio.swift; sourceTree = "<group>"; };
+		395291211E28559B004BD6B4 /* goToChatVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = goToChatVC.swift; sourceTree = "<group>"; };
+		395291221E28559B004BD6B4 /* goToChatVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = goToChatVC.xib; sourceTree = "<group>"; };
+		395291231E28559B004BD6B4 /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		395291241E28559B004BD6B4 /* MainView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainView.xib; sourceTree = "<group>"; };
 		3957C7C81E08E30B003E1E9F /* QiscusLoading.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusLoading.swift; path = Qiscus/QiscusLoading.swift; sourceTree = "<group>"; };
 		395E08101D43A9200021370F /* QiscusPusherClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusPusherClient.swift; path = Qiscus/QiscusPusherClient.swift; sourceTree = "<group>"; };
 		395E08121D43B8850021370F /* QiscusRoomDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusRoomDelegate.swift; path = Qiscus/QiscusRoomDelegate.swift; sourceTree = "<group>"; };
@@ -351,6 +359,10 @@
 		39F1F6AB1D3B90E200FF1C8C /* Example */ = {
 			isa = PBXGroup;
 			children = (
+				395291211E28559B004BD6B4 /* goToChatVC.swift */,
+				395291221E28559B004BD6B4 /* goToChatVC.xib */,
+				395291231E28559B004BD6B4 /* MainView.swift */,
+				395291241E28559B004BD6B4 /* MainView.xib */,
 				39F1F6AC1D3B90E200FF1C8C /* AppDelegate.swift */,
 				39F1F6AE1D3B90E200FF1C8C /* ViewController.swift */,
 				39F1F6B01D3B90E200FF1C8C /* Main.storyboard */,
@@ -566,8 +578,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				39F1F6BA1D3B90E200FF1C8C /* LaunchScreen.storyboard in Resources */,
+				395291261E28559B004BD6B4 /* goToChatVC.xib in Resources */,
 				39F1F6B71D3B90E200FF1C8C /* Assets.xcassets in Resources */,
 				39F1F6B21D3B90E200FF1C8C /* Main.storyboard in Resources */,
+				395291281E28559B004BD6B4 /* MainView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -679,6 +693,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				395291251E28559B004BD6B4 /* goToChatVC.swift in Sources */,
+				395291271E28559B004BD6B4 /* MainView.swift in Sources */,
 				39F1F6AF1D3B90E200FF1C8C /* ViewController.swift in Sources */,
 				39F1F6AD1D3B90E200FF1C8C /* AppDelegate.swift in Sources */,
 			);
