@@ -27,7 +27,6 @@
                 <outlet property="inputText" destination="f4G-BC-QRU" id="mRD-c3-FEW"/>
                 <outlet property="linkDescription" destination="eCb-g1-vRR" id="LYj-jj-GCB"/>
                 <outlet property="linkImage" destination="p31-yC-gta" id="SyG-Qk-8Rj"/>
-                <outlet property="linkLoadingView" destination="5BK-hl-f4S" id="E2u-SP-5Pc"/>
                 <outlet property="linkPreviewContainer" destination="Iri-p2-CXX" id="MqI-mu-lP3"/>
                 <outlet property="linkPreviewTopMargin" destination="pIV-fs-oOs" id="QdC-GD-MtU"/>
                 <outlet property="linkTitle" destination="OBI-GP-cgm" id="vxR-n7-kNS"/>
@@ -159,6 +158,10 @@
                 <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Iri-p2-CXX" userLabel="LinkPreview">
                     <rect key="frame" x="-0.5" y="604" width="375" height="65"/>
                     <subviews>
+                        <view alpha="0.75" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qCp-Dm-gzO" userLabel="background">
+                            <rect key="frame" x="0.0" y="-0.5" width="375" height="65"/>
+                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zIt-Wi-HAz">
                             <rect key="frame" x="0.0" y="0.0" width="375" height="1"/>
                             <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
@@ -166,17 +169,9 @@
                                 <constraint firstAttribute="height" constant="1" id="da7-kK-sn2"/>
                             </constraints>
                         </view>
-                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="loading1" translatesAutoresizingMaskIntoConstraints="NO" id="5BK-hl-f4S">
-                            <rect key="frame" x="280" y="9.5" width="45" height="45"/>
-                            <color key="tintColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
-                            <constraints>
-                                <constraint firstAttribute="width" constant="45" id="4ou-ni-kea"/>
-                                <constraint firstAttribute="height" constant="45" id="jFy-nc-0ur"/>
-                            </constraints>
-                        </imageView>
-                        <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing aliqua." textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="eCb-g1-vRR">
+                        <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" text="Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing aliqua." textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eCb-g1-vRR">
                             <rect key="frame" x="65" y="10" width="142" height="50"/>
-                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="142" id="wnL-Dj-7LX"/>
                             </constraints>
@@ -200,6 +195,7 @@
                         </imageView>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Link Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OBI-GP-cgm">
                             <rect key="frame" x="70" y="0.0" width="142" height="20"/>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="142" id="aQi-cK-XJV"/>
                                 <constraint firstAttribute="height" constant="20" id="grp-sW-Zuh"/>
@@ -220,25 +216,27 @@
                             </connections>
                         </button>
                     </subviews>
-                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     <constraints>
                         <constraint firstItem="86U-Ny-vae" firstAttribute="centerY" secondItem="Iri-p2-CXX" secondAttribute="centerY" id="5Qv-MT-oCu"/>
                         <constraint firstItem="zIt-Wi-HAz" firstAttribute="width" secondItem="Iri-p2-CXX" secondAttribute="width" id="7VW-Gb-MVc"/>
                         <constraint firstItem="p31-yC-gta" firstAttribute="leading" secondItem="Iri-p2-CXX" secondAttribute="leading" constant="10" id="BuA-PA-Hs7"/>
-                        <constraint firstAttribute="trailing" secondItem="5BK-hl-f4S" secondAttribute="trailing" constant="50" id="OzN-1N-nR5"/>
                         <constraint firstAttribute="bottom" secondItem="eCb-g1-vRR" secondAttribute="bottom" constant="5" id="PB6-GW-xvQ"/>
                         <constraint firstItem="OBI-GP-cgm" firstAttribute="leading" secondItem="Iri-p2-CXX" secondAttribute="leading" constant="70" id="PMu-eP-Nvb"/>
                         <constraint firstItem="zIt-Wi-HAz" firstAttribute="top" secondItem="Iri-p2-CXX" secondAttribute="top" id="RRt-oo-2aP"/>
-                        <constraint firstItem="5BK-hl-f4S" firstAttribute="centerY" secondItem="Iri-p2-CXX" secondAttribute="centerY" id="Uhh-JR-mVc"/>
+                        <constraint firstItem="qCp-Dm-gzO" firstAttribute="height" secondItem="Iri-p2-CXX" secondAttribute="height" id="SmC-jQ-ng4"/>
                         <constraint firstAttribute="height" constant="65" id="WNO-EU-KQr"/>
                         <constraint firstAttribute="trailing" secondItem="fXW-VP-NxR" secondAttribute="trailing" constant="10" id="X25-1d-3fa"/>
                         <constraint firstItem="OBI-GP-cgm" firstAttribute="top" secondItem="Iri-p2-CXX" secondAttribute="top" id="a65-t1-EpN"/>
                         <constraint firstItem="zIt-Wi-HAz" firstAttribute="centerX" secondItem="Iri-p2-CXX" secondAttribute="centerX" id="g6e-hh-gow"/>
+                        <constraint firstItem="qCp-Dm-gzO" firstAttribute="centerX" secondItem="Iri-p2-CXX" secondAttribute="centerX" id="idL-fX-yrl"/>
                         <constraint firstItem="eCb-g1-vRR" firstAttribute="leading" secondItem="OBI-GP-cgm" secondAttribute="leading" constant="-5" id="ie6-kf-tLF"/>
                         <constraint firstItem="86U-Ny-vae" firstAttribute="leading" secondItem="Iri-p2-CXX" secondAttribute="leading" id="kQ7-dK-cvf"/>
                         <constraint firstItem="p31-yC-gta" firstAttribute="centerY" secondItem="Iri-p2-CXX" secondAttribute="centerY" id="ky9-iw-07x"/>
+                        <constraint firstItem="qCp-Dm-gzO" firstAttribute="width" secondItem="Iri-p2-CXX" secondAttribute="width" id="teG-ui-jOm"/>
                         <constraint firstItem="fXW-VP-NxR" firstAttribute="top" secondItem="Iri-p2-CXX" secondAttribute="top" constant="10" id="tx4-sk-xNT"/>
                         <constraint firstItem="eCb-g1-vRR" firstAttribute="top" secondItem="OBI-GP-cgm" secondAttribute="bottom" constant="-10" id="wZ7-99-dCz"/>
+                        <constraint firstItem="qCp-Dm-gzO" firstAttribute="centerY" secondItem="Iri-p2-CXX" secondAttribute="centerY" id="zjh-Cu-FpX"/>
                     </constraints>
                 </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wZm-gC-isB">
@@ -357,6 +355,5 @@
         <image name="ic_open_archived" width="40" height="40"/>
         <image name="ic_pick_picture" width="30" height="30"/>
         <image name="link" width="55" height="55"/>
-        <image name="loading1" width="80" height="80"/>
     </resources>
 </document>
