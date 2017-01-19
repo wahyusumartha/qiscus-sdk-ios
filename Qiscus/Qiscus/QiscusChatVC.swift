@@ -101,7 +101,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                 hideLinkContainer()
                 linkData = nil
             }else{
-                linkPreviewContainer.isHidden = false
+                getLinkPreview(url: linkToPreview)
             }
         }
     }
@@ -114,7 +114,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             }else{
                 print("url: \(linkToPreview)")
                 if !permanentlyDisableLink{
-                    getLinkPreview(url: linkToPreview)
+                    showLink = true
                 }
             }
         }
@@ -229,7 +229,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         }
     }
     override open func viewWillAppear(_ animated: Bool) {
-        linkPreviewContainer.isHidden = true
         super.viewWillAppear(animated)
         unreadIndexPath = [IndexPath]()
         bottomButton.isHidden = true
@@ -443,11 +442,10 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         self.inputBarBottomMargin.constant = 0
         UIView.animate(withDuration: animateDuration, delay: 0, options: UIViewAnimationOptions(), animations: {
             self.view.layoutIfNeeded()
-        }, completion: { _ in
             if goToRow != nil {
                 self.scrollToIndexPath(goToRow!, position: .bottom, animated: true, delayed:  false)
             }
-        })
+        }, completion: nil)
     }
     func keyboardChange(_ notification: Notification){
         let info:NSDictionary = (notification as NSNotification).userInfo! as NSDictionary
@@ -458,7 +456,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         self.inputBarBottomMargin.constant = 0 - keyboardHeight
         UIView.animate(withDuration: animateDuration, delay: 0, options: UIViewAnimationOptions(), animations: {
             self.view.layoutIfNeeded()
-        }, completion: {_ in
             if self.isLastRowVisible {
                 let delay = 0.1 * Double(NSEC_PER_SEC)
                 let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
@@ -468,7 +465,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                     }
                 })
             }
-        })
+        }, completion: nil)
         
     }
     
@@ -1078,7 +1075,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     func unlockChat(){
         self.archievedNotifTop.constant = 65
         UIView.animate(withDuration: 0.6, animations: {
-            self.archievedNotifView.layoutIfNeeded()
+            self.view.layoutIfNeeded()
             }, completion: { _ in
                 self.archievedNotifView.isHidden = true
         })
@@ -1087,7 +1084,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         self.archievedNotifView.isHidden = false
         self.archievedNotifTop.constant = 0
         UIView.animate(withDuration: 0.6, animations: {
-            self.archievedNotifView.layoutIfNeeded()
+            self.view.layoutIfNeeded()
             }
         )
     }
@@ -1973,27 +1970,20 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             self.linkImage.loadAsync(linkData.linkImageURL)
             self.linkDescription.text = linkData.linkDescription
             self.linkTitle.text = linkData.linkTitle
-            self.showLink = true
             self.linkData = linkData
             self.linkPreviewTopMargin.constant = -65
-            UIView.animate(withDuration: 1, animations: {
-                self.linkPreviewContainer.layoutIfNeeded()
+            UIView.animate(withDuration: 0.65, animations: {
+                self.view.layoutIfNeeded()
             }, completion: nil)
         }, withFailCompletion: {
             self.showLink = false
         })
     }
     func hideLinkContainer(){
-        if linkPreviewTopMargin.constant > 0 {
-            self.linkPreviewTopMargin.constant = 0
-            UIView.animate(withDuration: 1, animations: {
-                self.linkPreviewContainer.layoutIfNeeded()
-            }, completion: { _ in
-                self.linkPreviewContainer.isHidden = true
-            })
-        }else{
-            self.linkPreviewContainer.isHidden = true
-        }
+        self.linkPreviewTopMargin.constant = 0
+        UIView.animate(withDuration: 0.65, animations: {
+            self.view.layoutIfNeeded()
+        }, completion: nil)
     }
     
     // MARK: - ChatCellDelegate
