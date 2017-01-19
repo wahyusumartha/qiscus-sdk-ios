@@ -180,7 +180,6 @@ class QCellTextRight: QChatCell {
                     // data already stored on local db
                     self.linkTitle.text = linkData.linkTitle
                     self.linkDescription.text = linkData.linkDescription
-                    Qiscus.printLog(text: "link to view : \(linkData.linkURL)\nWith imageURL: \(linkData.linkImageURL)")
                     if let image = linkData.thumbImage{
                         self.linkImage.image = image
                     }else if linkData.linkImageURL != ""{
