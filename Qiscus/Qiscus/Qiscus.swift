@@ -103,7 +103,14 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         let center = NotificationCenter.default
         center.addObserver(self, selector: #selector(Qiscus.applicationDidBecomeActife), name: .UIApplicationDidBecomeActive, object: nil)
         Qiscus.realtimeThread.sync {
-            Qiscus.sharedInstance.mqtt = MQTTSession(host: "mqtt.qiscus.com", port: 1885, clientID: "iosMQTT-\(QiscusMe.sharedInstance.id)", cleanSession: false, keepAlive: 60, useSSL: true)
+            let appName = Bundle.main.infoDictionary![kCFBundleNameKey as String] as! String
+            var deviceID = "000"
+            if let vendorIdentifier = UIDevice.current.identifierForVendor {
+                 deviceID = vendorIdentifier.uuidString
+            }
+            let clientID = "iosMQTT-\(appName)-\(deviceID)-\(QiscusMe.sharedInstance.id)"
+            Qiscus.printLog(text: "Realtime client id: \(clientID)")
+            Qiscus.sharedInstance.mqtt = MQTTSession(host: "mqtt.qiscus.com", port: 1885, clientID: clientID, cleanSession: false, keepAlive: 60, useSSL: true)
             Qiscus.sharedInstance.mqtt?.delegate = Qiscus.sharedInstance
             Qiscus.sharedInstance.mqtt?.connect(completion: { (succeeded, error) -> Void in
                 if succeeded {
