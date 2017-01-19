@@ -257,7 +257,7 @@ open class QiscusUser: Object {
                                 Qiscus.printLog(text: error.localizedDescription);
                             }
                         }
-                        let thumbPath = "/Qiscus\(documentsPath)/\(fileName)"
+                        let thumbPath = "\(directoryPath)/\(fileName)"
                         
                         if fileExt == "png" || fileExt == "png_" {
                             try? UIImagePNGRepresentation(thumbImage)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])

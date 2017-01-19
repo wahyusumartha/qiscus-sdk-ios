@@ -304,6 +304,10 @@ open class QiscusFile: Object {
         if url.range(of: ".") != nil{
             let fileNameArr = url.characters.split(separator: ".")
             ext = String(fileNameArr.last!).lowercased()
+            if ext.contains("?"){
+                let newArr = ext.characters.split(separator: "?")
+                ext = String(newArr.first!).lowercased()
+            }
         }
         return ext
     }

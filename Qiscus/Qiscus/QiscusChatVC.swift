@@ -14,7 +14,7 @@ import ImageViewer
 import IQAudioRecorderController
 import SwiftyJSON
 
-open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate, GalleryItemsDatasource, IQAudioRecorderViewControllerDelegate, AVAudioPlayerDelegate, ChatCellAudioDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
+open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate, GalleryItemsDatasource, IQAudioRecorderViewControllerDelegate, AVAudioPlayerDelegate, ChatCellDelegate,ChatCellAudioDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
     
     static let sharedInstance = QiscusChatVC()
     
@@ -37,12 +37,18 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var bottomButton: UIButton!
     @IBOutlet weak var unreadIndicator: UILabel!
+    @IBOutlet weak var linkPreviewContainer: UIView!
+    @IBOutlet weak var linkLoadingView: UIImageView!
+    @IBOutlet weak var linkDescription: UITextView!
+    @IBOutlet weak var linkImage: UIImageView!
+    @IBOutlet weak var linkTitle: UILabel!
     
     // MARK: - Constrain
     @IBOutlet weak var minInputHeight: NSLayoutConstraint!
     @IBOutlet weak var archievedNotifTop: NSLayoutConstraint!
     @IBOutlet weak var inputBarBottomMargin: NSLayoutConstraint!
     @IBOutlet weak var collectionViewBottomConstrain: NSLayoutConstraint!
+    @IBOutlet weak var linkPreviewTopMargin: NSLayoutConstraint!
     
     
     // MARK: - View Attributes
@@ -88,6 +94,32 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     var loadingView = QLoadingViewController.sharedInstance
     var typingIndicatorUser:String = ""
     var isTypingOn:Bool = false
+    var linkData:QiscusLinkData?
+    
+    var showLink:Bool = false{
+        didSet{
+            if !showLink{
+                hideLinkContainer()
+                linkData = nil
+            }else{
+                linkPreviewContainer.isHidden = false
+            }
+        }
+    }
+    var permanentlyDisableLink:Bool = false
+    var linkToPreview:String = ""{
+        didSet{
+            if linkToPreview == ""{
+                showLink = false
+                permanentlyDisableLink = false
+            }else{
+                print("url: \(linkToPreview)")
+                if !permanentlyDisableLink{
+                    getLinkPreview(url: linkToPreview)
+                }
+            }
+        }
+    }
     
     var unreadIndexPath = [IndexPath](){
         didSet{
@@ -167,6 +199,10 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         unreadIndicator.clipsToBounds = true
         backgroundView.image = Qiscus.image(named: "chat_bg")
         collectionView.decelerationRate = UIScrollViewDecelerationRateNormal
+        linkPreviewContainer.layer.shadowColor = UIColor.black.cgColor
+        linkPreviewContainer.layer.shadowOpacity = 0.6
+        linkPreviewContainer.layer.shadowOffset = CGSize(width: -5, height: 0)
+
         self.emptyChatImage.image = Qiscus.image(named: "empty_messages")?.withRenderingMode(.alwaysTemplate)
         self.emptyChatImage.tintColor = self.bottomColor
         commentClient.commentDelegate = self
@@ -194,6 +230,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         }
     }
     override open func viewWillAppear(_ animated: Bool) {
+        linkPreviewContainer.isHidden = true
         super.viewWillAppear(animated)
         unreadIndexPath = [IndexPath]()
         bottomButton.isHidden = true
@@ -455,11 +492,16 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     }
     open func valueChanged(value:String){
         if value == "" {
-            sendButton.isEnabled = false
-            //sendButton.setBackgroundImage(self.sendOffImage, for: UIControlState())
+            linkToPreview = ""
         }else{
             sendButton.isEnabled = true
-            //sendButton.setBackgroundImage(self.sendOnImage, for: UIControlState())
+            if let link = QiscusHelper.getFirstLinkInString(text: value){
+                if link != linkToPreview{
+                    linkToPreview = link
+                }
+            }else{
+                linkToPreview = ""
+            }
         }
     }
     open func chatInputDidEndEditing(chatInput input: ChatInputText) {
@@ -1057,10 +1099,13 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     func sendMessage(){
         if Qiscus.sharedInstance.connected{
             let value = inputText.value.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            commentClient.postMessage(message: value, topicId: self.topicId)
+            
+            commentClient.postMessage(message: value, topicId: self.topicId, linkData: self.linkData)
             inputText.clearValue()
             inputText.text = ""
             sendButton.isEnabled = false
+            showLink = false
+            
             self.scrollToBottom()
             self.minInputHeight.constant = 25
             self.inputText.layoutIfNeeded()
@@ -1808,7 +1853,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             break
         }
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! QChatCell
-        cell.prepareCell(withComment: comment, cellPos: cellTypePosition, indexPath: indexPath)
+        cell.prepareCell(withComment: comment, cellPos: cellTypePosition, indexPath: indexPath, cellDelegate: self)
         if let audioCell = cell as? QCellAudio{
             audioCell.delegate = self
             return audioCell
@@ -1914,6 +1959,53 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         let comment = self.comments[indexPath.section][indexPath.row]
         if let updatedComment = QiscusComment.getCommentById(comment.commentId){
             self.comments[indexPath.section][indexPath.row] = updatedComment
+        }
+    }
+    @IBAction func hideLinkPreview(_ sender: UIButton) {
+        permanentlyDisableLink = true
+        showLink = false
+    }
+    func getLinkPreview(url:String){
+        var urlToCheck = url.lowercased()
+        if !urlToCheck.contains("http"){
+            urlToCheck = "http://\(url.lowercased())"
+        }
+        commentClient.getLinkMetadata(url: urlToCheck, withCompletion: {linkData in
+            print("LinkData: \(linkData)")
+            self.linkImage.loadAsync(linkData.linkImageURL)
+            self.linkDescription.text = linkData.linkDescription
+            self.linkTitle.text = linkData.linkTitle
+            self.showLink = true
+            self.linkData = linkData
+            UIView.animate(withDuration: 2, animations: {
+                self.linkPreviewTopMargin.constant = -65
+                self.linkPreviewContainer.layoutIfNeeded()
+            }, completion: nil)
+        }, withFailCompletion: {
+            self.showLink = false
+        })
+    }
+    func hideLinkContainer(){
+        if linkPreviewTopMargin.constant > 0 {
+            UIView.animate(withDuration: 2, animations: {
+                self.linkPreviewTopMargin.constant = 0
+                self.linkPreviewContainer.layoutIfNeeded()
+            }, completion: { _ in
+                self.linkPreviewContainer.isHidden = true
+            })
+        }else{
+            self.linkPreviewContainer.isHidden = true
+        }
+    }
+    
+    // MARK: - ChatCellDelegate
+    func didChangeSize(onCell cell:QChatCell){
+        if let indexPath = cell.indexPath {
+            if indexPath.section < self.comments.count{
+                if indexPath.row < self.comments[indexPath.section].count{
+                    collectionView.reloadItems(at: [indexPath])
+                }
+            }
         }
     }
 }

@@ -41,7 +41,17 @@ open class QiscusComment: Object {
     open dynamic var commentTextWidth:CGFloat = 0
     open dynamic var commentRow:Int = 0
     open dynamic var commentSection:Int = 0
+    open dynamic var showLink:Bool = false
     
+    open var commentLink:String? {
+        get{
+            if let url = QiscusHelper.getFirstLinkInString(text: commentText){
+                return url
+            }else{
+                return nil
+            }
+        }
+    }
     open var sender : QiscusUser? {
         let user = QiscusUser.getUserWithEmail(self.commentSenderEmail)
         return user
@@ -431,11 +441,30 @@ open class QiscusComment: Object {
             self.commentSection = indexPath.section
         }
     }
+    open class func updateCommmentShowLink(show:Bool, commentId:Int){
+        if let comment = QiscusComment.getCommentById(commentId){
+            let realm = try! Realm()
+            try! realm.write {
+                comment.showLink = show
+            }
+            comment.updateCommentCellSize()
+        }
+    }
+    open func updateCommmentShowLink(show:Bool){
+        let realm = try! Realm()
+        try! realm.write {
+            self.showLink = show
+        }
+        self.updateCommentCellSize()
+    }
     open func updateCommentCellSize(){
         var newSize = CGSize()
         switch self.commentType {
         case .text:
             newSize = self.calculateTextSizeForComment()
+            if self.showLink{
+                newSize.height += 73
+            }
             break
         case .attachment:
             if let file = QiscusFile.getCommentFileWithComment(self){
@@ -526,6 +555,7 @@ open class QiscusComment: Object {
         */
         let topicId = data["topic_id"].intValue
         let comment = QiscusComment()
+        
         comment.commentTopicId = topicId
         comment.commentSenderEmail = data["email"].stringValue
         comment.commentStatusRaw = QiscusCommentStatus.delivered.rawValue
@@ -557,6 +587,13 @@ open class QiscusComment: Object {
         }
         if QiscusComment.isValidCommentIdExist(comment.commentBeforeId) || QiscusComment.countCommentOntTopic(topicId) == 0{
             comment.commentIsSynced = true
+        }
+        if comment.commentType == QiscusCommentType.text && comment.commentLink != nil{
+            if let disableLink = data["disable_link_preview"].bool{
+                comment.showLink = !disableLink
+            }else{
+                comment.showLink = true
+            }
         }
         let isSaved = comment.saveComment(true)
         if isSaved{
@@ -622,6 +659,8 @@ open class QiscusComment: Object {
         comment.commentSenderEmail = data["email"].stringValue
         comment.commentStatusRaw = QiscusCommentStatus.delivered.rawValue
         comment.commentBeforeId = data["comment_before_id"].intValue
+        
+        
         var created_at:String = ""
         var usernameAs:String = ""
         if(data["message"] != nil){
@@ -670,6 +709,14 @@ open class QiscusComment: Object {
         if QiscusComment.isValidCommentIdExist(comment.commentBeforeId) || QiscusComment.countCommentOntTopic(topicId) == 0{
             comment.commentIsSynced = true
         }
+        if comment.commentType == QiscusCommentType.text && comment.commentLink != nil{
+            if let disableLink = data["disable_link_preview"].bool{
+                comment.showLink = !disableLink
+            }else{
+                comment.showLink = true
+            }
+        }
+        
         let isSaved = comment.saveComment(true)
         return isSaved
     }
@@ -790,7 +837,7 @@ open class QiscusComment: Object {
         }
     }
     // Create New Comment
-    open class func newCommentWithMessage(message:String, inTopicId:Int)->QiscusComment{
+    open class func newCommentWithMessage(message:String, inTopicId:Int, showLink:Bool = false)->QiscusComment{
         let realm = try! Realm()
         let searchQuery = NSPredicate(format: "commentTopicId == %d", inTopicId)
         let commentData = realm.objects(QiscusComment.self).filter(searchQuery).sorted(byProperty: "commentId")
@@ -799,7 +846,6 @@ open class QiscusComment: Object {
         if commentData.count > 0 {
             lastComentInTopic = commentData.last!
         }
-        
         
         let comment = QiscusComment()
         let time = Double(Date().timeIntervalSince1970)
@@ -816,6 +862,7 @@ open class QiscusComment: Object {
         comment.commentStatusRaw = QiscusCommentStatus.sending.rawValue
         comment.commentIsSynced = false
         comment.commentBeforeId = lastComentInTopic.commentId
+        comment.showLink = showLink
         return comment.saveComment()
     }
     

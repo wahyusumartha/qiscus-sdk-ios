@@ -770,7 +770,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
     }
     
     class func checkDatabaseMigration(){
-        let currentSchema:UInt64 = 1
+        let currentSchema:UInt64 = 2
         var configuration = Realm.Configuration()
         
         configuration.schemaVersion = currentSchema

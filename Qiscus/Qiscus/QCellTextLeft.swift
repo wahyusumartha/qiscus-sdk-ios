@@ -24,6 +24,16 @@ class QCellTextLeft: QChatCell {
     @IBOutlet weak var textViewWidth: NSLayoutConstraint!
     @IBOutlet weak var textViewHeight: NSLayoutConstraint!
     
+    @IBOutlet weak var LinkContainer: UIView!
+    @IBOutlet weak var linkDescription: UITextView!
+    @IBOutlet weak var linkTitle: UILabel!
+    @IBOutlet weak var linkImage: UIImageView!
+    
+    @IBOutlet weak var linkHeight: NSLayoutConstraint!
+    @IBOutlet weak var textTopMargin: NSLayoutConstraint!
+    @IBOutlet weak var ballonHeight: NSLayoutConstraint!
+    
+    
     var linkTextAttributes:[String: Any]{
         get{
             return [
@@ -36,6 +46,12 @@ class QCellTextLeft: QChatCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         textView.contentInset = UIEdgeInsets.zero
+        LinkContainer.isHidden = true
+        LinkContainer.layer.cornerRadius = 4
+        LinkContainer.clipsToBounds = true
+        
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QCellTextLeft.openLink))
+        LinkContainer.addGestureRecognizer(tapRecognizer)
     }
     
     open override func setupCell(){
@@ -105,12 +121,81 @@ class QCellTextLeft: QChatCell {
             leftMargin.constant = 57
         }
         
+        if comment.showLink{
+            if let url = comment.commentLink{
+                self.linkTitle.text = "Load data ..."
+                self.linkDescription.text = "Load url description"
+                self.linkImage.image = Qiscus.image(named: "link")
+                self.LinkContainer.isHidden = false
+                self.ballonHeight.constant = 83
+                self.textTopMargin.constant = 73
+                self.linkHeight.constant = 65
+                textViewWidth.constant = maxWidth
+                
+                var urlToCheck = url.lowercased()
+                if !urlToCheck.contains("http"){
+                    urlToCheck = "http://\(url.lowercased())"
+                }
+                
+                if let linkData = QiscusLinkData.getLinkData(fromURL: urlToCheck){
+                    // data already stored on local db
+                    self.linkTitle.text = linkData.linkTitle
+                    self.linkDescription.text = linkData.linkDescription
+                    if let image = linkData.thumbImage{
+                        self.linkImage.image = image
+                    }else if linkData.linkImageURL != ""{
+                        self.linkImage.loadAsync(linkData.linkImageURL, placeholderImage: Qiscus.image(named: "link"))
+                        linkData.downloadThumbImage()
+                    }else{
+                        self.linkImage.image = Qiscus.image(named: "link")
+                    }
+                }else{
+                    // call from API
+                    
+                    QiscusCommentClient.sharedInstance.getLinkMetadata(url: urlToCheck, synchronous: false, withCompletion: { linkData in
+                        self.linkTitle.text = linkData.linkTitle
+                        self.linkDescription.text = linkData.linkDescription
+                        self.linkImage.loadAsync(linkData.linkImageURL, placeholderImage: Qiscus.image(named: "link"))
+                        linkData.saveLink()
+                    }, withFailCompletion: {
+                        self.linkTitle.text = "Not Found"
+                        self.linkDescription.text = "No description found"
+                        self.linkImage.image = Qiscus.image(named: "link")
+                        self.comment.updateCommmentShowLink(show: false)
+                        self.chatCellDelegate?.didChangeSize(onCell: self)
+                    })
+                }
+            }
+        }else{
+            self.linkTitle.text = ""
+            self.linkDescription.text = ""
+            self.linkImage.image = Qiscus.image(named: "link")
+            self.LinkContainer.isHidden = true
+            self.ballonHeight.constant = 10
+            self.textTopMargin.constant = 0
+            self.linkHeight.constant = 0
+        }
         textView.layoutIfNeeded()
+        
     }
     override func clearContext() {
         textView.text = ""
         textViewWidth.constant = 0
         textViewHeight.constant = 0
         textView.layoutIfNeeded()
+        LinkContainer.isHidden = true
+    }
+    func openLink(){
+        if comment.showLink{
+            if let url = comment.commentLink{
+                var urlToCheck = url.lowercased()
+                if !urlToCheck.contains("http"){
+                    urlToCheck = "http://\(url.lowercased())"
+                }
+                if let urlToOpen = URL(string: urlToCheck){
+                    UIApplication.shared.openURL(urlToOpen)
+                }
+            }
+        }
     }
 }

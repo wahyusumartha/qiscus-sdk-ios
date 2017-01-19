@@ -8,17 +8,14 @@
 
 import UIKit
 protocol ChatCellDelegate {
-//    func didTapPlayButton(_ button: UIButton, onCell cell: UICollectionViewCell)
-//    func didTapPauseButton(_ button: UIButton, onCell cell: UICollectionViewCell)
-//    func didTapDownloadButton(_ button: UIButton, onCell cell: UICollectionViewCell)
-//    func didStartSeekTimeSlider(_ slider: UISlider, onCell cell: UICollectionViewCell)
-//    func didEndSeekTimeSlider(_ slider: UISlider, onCell cell: UICollectionViewCell)
-    func didTapCell(withComment comment:QiscusComment)
+    func didChangeSize(onCell cell:QChatCell)
 }
 class QChatCell: UICollectionViewCell {
     var indexPath:IndexPath?
     var cellPos = CellTypePosition.single
     var comment = QiscusComment()
+    var chatCellDelegate:ChatCellDelegate?
+    
     var file:QiscusFile?{
         get{
             return QiscusFile.getCommentFileWithComment(comment)
@@ -33,10 +30,11 @@ class QChatCell: UICollectionViewCell {
     func setupCell(){
         // implementation will be overrided on child class
     }
-    func prepareCell(withComment comment:QiscusComment, cellPos:CellTypePosition, indexPath: IndexPath){
+    func prepareCell(withComment comment:QiscusComment, cellPos:CellTypePosition, indexPath: IndexPath, cellDelegate:ChatCellDelegate? = nil){
         self.cellPos = cellPos
         self.comment = comment
         self.indexPath = indexPath
+        self.chatCellDelegate = cellDelegate
     }
     func updateStatus(toStatus status:QiscusCommentStatus){
         // implementation will be overrided on child class

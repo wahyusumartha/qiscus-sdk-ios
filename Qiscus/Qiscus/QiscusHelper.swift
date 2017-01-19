@@ -161,4 +161,23 @@ open class QiscusHelper: NSObject {
         }
         return check
     }
+    open class func getFirstLinkInString(text:String)->String?{
+        let pattern = "((?:http|https)://)?(?:www\\.)?([a-zA-Z0-9./]+[.][a-zA-Z0-9./]{2,3}([a-zA-Z0-9./-]+)?((\\?)+[a-zA-Z0-9./-_&]*)*)"
+        do {
+            let regex = try NSRegularExpression(pattern: pattern, options: NSRegularExpression.Options(rawValue: 0))
+            let nsstr = text as NSString
+            let all = NSRange(location: 0, length: nsstr.length)
+            var matches = [String]()
+            regex.enumerateMatches(in: text, options: NSRegularExpression.MatchingOptions.init(rawValue: 0), range: all, using: { (result, flags, _) in
+                matches.append(nsstr.substring(with: result!.range))
+            })
+            if matches.count > 0 {
+                return matches[0]
+            }else{
+                return nil
+            }
+        } catch {
+            return nil
+        }
+    }
 }

@@ -44,6 +44,117 @@ open class QiscusCommentClient: NSObject {
     open var roomDelegate: QiscusRoomDelegate?
     open var configDelegate: QiscusConfigDelegate?
     
+    open var linkRequest: Alamofire.Request?
+    
+    open func getLinkMetadata(url:String, synchronous:Bool = true, withCompletion: @escaping (QiscusLinkData)->Void, withFailCompletion: @escaping ()->Void){
+        if linkRequest != nil && synchronous{
+            linkRequest?.cancel()
+        }
+        let parameters:[String: AnyObject] =  [
+            "url" : url as AnyObject
+        ]
+        Qiscus.printLog(text: "getLinkMetadata for url: \(url)")
+        if synchronous{
+            self.linkRequest = Alamofire.request(QiscusConfig.LINK_METADATA_URL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                Qiscus.printLog(text: "getLinkMetadata response: \n\(responseData)")
+                if let response = responseData.result.value {
+                    let json = JSON(response)
+                    var title = ""
+                    var description = ""
+                    var imageURL = ""
+                    var linkURL = ""
+                    
+                    if json["results"]["metadata"].exists(){
+                        let metadata = json["results"]["metadata"]
+                        if let desc = metadata["description"].string{
+                            description = desc
+                        }
+                        if let metaTitle = metadata["title"].string{
+                            title = metaTitle
+                        }
+                        if let image = metadata["image"].string{
+                            imageURL = image
+                        }
+                        if let url = json["results"]["url"].string{
+                            linkURL = url
+                        }
+                    }
+                    if title != ""{
+                        let linkData = QiscusLinkData()
+                        linkData.linkURL = linkURL
+                        if description != "" {
+                            linkData.linkDescription = description
+                        }else{
+                            linkData.linkDescription = "No description available for this site"
+                        }
+                        linkData.linkTitle = title
+                        linkData.linkImageURL = imageURL
+                        DispatchQueue.main.async {
+                            withCompletion(linkData)
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            withFailCompletion()
+                        }
+                    }
+                }else{
+                    DispatchQueue.main.async {
+                        withFailCompletion()
+                    }
+                }
+                self.linkRequest = nil
+            })
+        }else{
+            Alamofire.request(QiscusConfig.LINK_METADATA_URL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                Qiscus.printLog(text: "getLinkMetadata response: \n\(responseData)")
+                if let response = responseData.result.value {
+                    let json = JSON(response)
+                    var title = ""
+                    var description = ""
+                    var imageURL = ""
+                    var linkURL = ""
+                    
+                    if json["results"]["metadata"].exists(){
+                        let metadata = json["results"]["metadata"]
+                        if let desc = metadata["description"].string{
+                            description = desc
+                        }
+                        if let metaTitle = metadata["title"].string{
+                            title = metaTitle
+                        }
+                        if let image = metadata["image"].string{
+                            imageURL = image
+                        }
+                        if let url = json["results"]["url"].string{
+                            linkURL = url
+                        }
+                    }
+                    if title != ""{
+                        let linkData = QiscusLinkData()
+                        linkData.linkURL = linkURL
+                        if description != "" {
+                            linkData.linkDescription = description
+                        }else{
+                            linkData.linkDescription = "No description available for this site"
+                        }
+                        linkData.linkTitle = title
+                        linkData.linkImageURL = imageURL
+                        DispatchQueue.main.async {
+                            withCompletion(linkData)
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            withFailCompletion()
+                        }
+                    }
+                }else{
+                    DispatchQueue.main.async {
+                        withFailCompletion()
+                    }
+                }
+            })
+        }
+    }
     // MARK: - Login or register
     open func loginOrRegister(_ email:String = "", password:String = "", username:String? = nil, avatarURL:String? = nil){
         let manager = Alamofire.SessionManager.default
@@ -108,12 +219,16 @@ open class QiscusCommentClient: NSObject {
     }
     
     // MARK: - Comment Methode
-    open func postMessage(message: String, topicId: Int, roomId:Int? = nil){ //USED
-        let comment = QiscusComment.newCommentWithMessage(message: message, inTopicId: topicId)
-        self.postComment(comment, roomId: roomId)
+    open func postMessage(message: String, topicId: Int, roomId:Int? = nil, linkData:QiscusLinkData? = nil){ //USED
+        var showLink = false
+        if linkData != nil{
+            showLink = true
+        }
+        let comment = QiscusComment.newCommentWithMessage(message: message, inTopicId: topicId, showLink: showLink)
+        self.postComment(comment, roomId: roomId, linkData:linkData)
         self.commentDelegate?.gotNewComment([comment])
     }
-    open func postComment(_ comment:QiscusComment, file:QiscusFile? = nil, roomId:Int? = nil){ //USED
+    open func postComment(_ comment:QiscusComment, file:QiscusFile? = nil, roomId:Int? = nil, linkData:QiscusLinkData? = nil){ //USED
         
         let manager = Alamofire.SessionManager.default
         var parameters:[String: AnyObject] = [String: AnyObject]()
@@ -127,6 +242,10 @@ open class QiscusCommentClient: NSObject {
         if QiscusConfig.sharedInstance.requestHeader == nil{
             parameters["token"] = qiscus.config.USER_TOKEN as AnyObject?
         }
+        if linkData == nil{
+            parameters["disable_link_preview"] = true as AnyObject
+        }
+        
         if roomId != nil {
             parameters["room_id"] = roomId as AnyObject?
         }
