@@ -162,7 +162,7 @@ open class QiscusHelper: NSObject {
         return check
     }
     open class func getFirstLinkInString(text:String)->String?{
-        let pattern = "((?:http|https)://)?(?:www\\.)?([a-zA-Z0-9./]+[.][a-zA-Z0-9./]{2,3}([a-zA-Z0-9./-]+)?((\\?)+[a-zA-Z0-9./-_&]*)*)"
+        let pattern = "((?:http|https)://)?(?:www\\.)?([a-zA-Z0-9./]+[.][a-zA-Z0-9/]{2,3})+([a-zA-Z0-9./-]+)?((\\?)+[a-zA-Z0-9./-_&]*)*"
         do {
             let regex = try NSRegularExpression(pattern: pattern, options: NSRegularExpression.Options(rawValue: 0))
             let nsstr = text as NSString
