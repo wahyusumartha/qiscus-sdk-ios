@@ -38,7 +38,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     @IBOutlet weak var bottomButton: UIButton!
     @IBOutlet weak var unreadIndicator: UILabel!
     @IBOutlet weak var linkPreviewContainer: UIView!
-    @IBOutlet weak var linkLoadingView: UIImageView!
     @IBOutlet weak var linkDescription: UITextView!
     @IBOutlet weak var linkImage: UIImageView!
     @IBOutlet weak var linkTitle: UILabel!
@@ -1977,7 +1976,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             self.linkTitle.text = linkData.linkTitle
             self.showLink = true
             self.linkData = linkData
-            UIView.animate(withDuration: 2, animations: {
+            UIView.animate(withDuration: 4, animations: {
                 self.linkPreviewTopMargin.constant = -65
                 self.linkPreviewContainer.layoutIfNeeded()
             }, completion: nil)
