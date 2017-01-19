@@ -440,14 +440,14 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         
         let animateDuration = info[UIKeyboardAnimationDurationUserInfoKey] as! Double
         let goToRow = self.lastVisibleRow
-        
+        self.inputBarBottomMargin.constant = 0
         UIView.animate(withDuration: animateDuration, delay: 0, options: UIViewAnimationOptions(), animations: {
-            self.inputBarBottomMargin.constant = 0
             self.view.layoutIfNeeded()
+        }, completion: { _ in
             if goToRow != nil {
                 self.scrollToIndexPath(goToRow!, position: .bottom, animated: true, delayed:  false)
             }
-            }, completion: nil)
+        })
     }
     func keyboardChange(_ notification: Notification){
         let info:NSDictionary = (notification as NSNotification).userInfo! as NSDictionary
@@ -455,10 +455,10 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         
         let keyboardHeight: CGFloat = keyboardSize.height
         let animateDuration = info[UIKeyboardAnimationDurationUserInfoKey] as! Double
-        
+        self.inputBarBottomMargin.constant = 0 - keyboardHeight
         UIView.animate(withDuration: animateDuration, delay: 0, options: UIViewAnimationOptions(), animations: {
-            self.inputBarBottomMargin.constant = 0 - keyboardHeight
             self.view.layoutIfNeeded()
+        }, completion: {_ in
             if self.isLastRowVisible {
                 let delay = 0.1 * Double(NSEC_PER_SEC)
                 let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
@@ -468,7 +468,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                     }
                 })
             }
-        }, completion: nil)
+        })
         
     }
     
@@ -1076,18 +1076,17 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         self.dismissQiscusLoading()
     }
     func unlockChat(){
+        self.archievedNotifTop.constant = 65
         UIView.animate(withDuration: 0.6, animations: {
-            self.archievedNotifTop.constant = 65
             self.archievedNotifView.layoutIfNeeded()
             }, completion: { _ in
                 self.archievedNotifView.isHidden = true
         })
     }
     func lockChat(){
-        self.archievedNotifTop.constant = 65
         self.archievedNotifView.isHidden = false
+        self.archievedNotifTop.constant = 0
         UIView.animate(withDuration: 0.6, animations: {
-            self.archievedNotifTop.constant = 0
             self.archievedNotifView.layoutIfNeeded()
             }
         )
@@ -1976,8 +1975,8 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             self.linkTitle.text = linkData.linkTitle
             self.showLink = true
             self.linkData = linkData
-            UIView.animate(withDuration: 4, animations: {
-                self.linkPreviewTopMargin.constant = -65
+            self.linkPreviewTopMargin.constant = -65
+            UIView.animate(withDuration: 1, animations: {
                 self.linkPreviewContainer.layoutIfNeeded()
             }, completion: nil)
         }, withFailCompletion: {
@@ -1986,8 +1985,8 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     }
     func hideLinkContainer(){
         if linkPreviewTopMargin.constant > 0 {
-            UIView.animate(withDuration: 2, animations: {
-                self.linkPreviewTopMargin.constant = 0
+            self.linkPreviewTopMargin.constant = 0
+            UIView.animate(withDuration: 1, animations: {
                 self.linkPreviewContainer.layoutIfNeeded()
             }, completion: { _ in
                 self.linkPreviewContainer.isHidden = true
