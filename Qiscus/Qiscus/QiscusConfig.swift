@@ -58,6 +58,9 @@ open class QiscusConfig: NSObject {
     open class var LOGIN_REGISTER:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/login_or_register"
     }
+    open class var CREATE_NEW_ROOM:String{
+        return "\(QiscusConfig.sharedInstance.BASE_URL)/create_room"
+    }
     open class var ROOM_REQUEST_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/get_or_create_room_with_target"
     }
