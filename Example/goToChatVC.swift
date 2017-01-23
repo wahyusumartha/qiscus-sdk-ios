@@ -28,9 +28,20 @@ class goToChatVC: UIViewController {
     }
 
     @IBAction func goToChat(_ sender: UIButton) {
-        Qiscus.chat(withUsers: [targetField.text!] , target: self, title: "SampleChat", optionalDataCompletion: { optionalData in
-            print("optionalData from Example view: \(optionalData)")
-        })
+        if targetField.text! != "" {
+            let emailData = targetField.text!.characters.split(separator: ",")
+            if emailData.count > 1 {
+                var emails = [String]()
+                for email in emailData{
+                    emails.append(String(email).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines))
+                }
+                Qiscus.createChat(withUsers:emails, target:self, title:"New Group Chat", subtitle: "Always new chat")
+            }else{
+                Qiscus.chat(withUsers: [targetField.text!] , target: self, title: "SampleChat", optionalDataCompletion: { optionalData in
+                    print("optionalData from Example view: \(optionalData)")
+                })
+            }
+        }
     }
     
     @IBAction func logOut(_ sender: UIButton) {
