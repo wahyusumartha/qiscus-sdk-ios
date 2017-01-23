@@ -94,6 +94,9 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     var typingIndicatorUser:String = ""
     var isTypingOn:Bool = false
     var linkData:QiscusLinkData?
+    var message:String?
+    var newChat:Bool = false
+    var roomName:String?
     
     var showLink:Bool = false{
         didSet{
@@ -554,43 +557,100 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     
     // MARK: - Load DataSource
     func loadData(){
-        if(self.topicId > 0){
-            self.comments = QiscusComment.grouppedComment(inTopicId: self.topicId, firstLoad: true)
-            Qiscus.printLog(text: "self comments: \n\(self.comments)")
-            
-            let room = QiscusRoom.getRoom(withLastTopicId: self.topicId)
-            
-            if self.optionalDataCompletion != nil && room != nil{
-                self.optionalDataCompletion!(room!.optionalData)
-            }
-            self.subscribeRealtime(onRoom: room)
-            if self.comments.count > 0 {
-                self.collectionView.reloadData()
-                scrollToBotomFromNoData()
-                self.welcomeView.isHidden = true
-                commentClient.syncMessage(self.topicId)
-            }else{
-                self.welcomeView.isHidden = false
-                self.showLoading("Load Data ...")
-                commentClient.getListComment(topicId: self.topicId, commentId: 0, triggerDelegate: true)
-            }
+        if newChat {
+            self.showLoading("Load Data ...")
+            commentClient.createNewRoom(withUsers: users, optionalData: self.optionalData, withMessage: self.message)
         }else{
-            if self.users.count > 0 {
-                loadWithUser = true
-                if self.users.count == 1 {
-                    if let room = QiscusRoom.getRoom(self.distincId, andUserEmail: self.users.first!){
-                        self.topicId = room.roomLastCommentTopicId
-                        self.comments = QiscusComment.grouppedComment(inTopicId: self.topicId, firstLoad: true)
-                        Qiscus.printLog(text: "self comments: \n\(self.comments)")
-                        self.subscribeRealtime(onRoom: room)
-                        
+            if(self.topicId > 0){
+                self.comments = QiscusComment.grouppedComment(inTopicId: self.topicId, firstLoad: true)
+                Qiscus.printLog(text: "self comments: \n\(self.comments)")
+                
+                let room = QiscusRoom.getRoom(withLastTopicId: self.topicId)
+                
+                if self.optionalDataCompletion != nil && room != nil{
+                    self.optionalDataCompletion!(room!.optionalData)
+                }
+                self.subscribeRealtime(onRoom: room)
+                if self.comments.count > 0 {
+                    self.collectionView.reloadData()
+                    scrollToBotomFromNoData()
+                    self.welcomeView.isHidden = true
+                    commentClient.syncMessage(self.topicId)
+                    if message != nil {
+                        commentClient.postMessage(message: self.message!, topicId: self.topicId)
+                        self.message = nil
+                    }
+                }else{
+                    self.welcomeView.isHidden = false
+                    self.showLoading("Load Data ...")
+                    commentClient.getListComment(topicId: self.topicId, commentId: 0, triggerDelegate: true, message:self.message)
+                    self.message = nil
+                }
+            }
+            else{
+                if self.users.count > 0 {
+                    loadWithUser = true
+                    if self.users.count == 1 {
+                        if let room = QiscusRoom.getRoom(self.distincId, andUserEmail: self.users.first!){
+                            self.topicId = room.roomLastCommentTopicId
+                            self.comments = QiscusComment.grouppedComment(inTopicId: self.topicId, firstLoad: true)
+                            Qiscus.printLog(text: "self comments: \n\(self.comments)")
+                            self.subscribeRealtime(onRoom: room)
+                            
+                            if self.comments.count > 0 {
+                                self.collectionView.isHidden = true
+                                self.collectionView.reloadData()
+                                scrollToBotomFromNoData()
+                                self.welcomeView.isHidden = true
+                                if self.optionalDataCompletion != nil{
+                                    self.optionalDataCompletion!(room.optionalData)
+                                }
+                                commentClient.syncMessage(self.topicId)
+                            }else{
+                                self.welcomeView.isHidden = false
+                                if self.optionalDataCompletion != nil{
+                                    self.optionalDataCompletion!(room.optionalData)
+                                }
+                                self.showLoading("Load Data ...")
+                                commentClient.getListComment(topicId: self.topicId, commentId: 0, triggerDelegate: true)
+                            }
+                            if message != nil {
+                                commentClient.postMessage(message: self.message!, topicId: self.topicId)
+                                self.message = nil
+                            }
+                        }else{
+                            self.showLoading("Load Data ...")
+                            commentClient.getListComment(withUsers: users, triggerDelegate: true, distincId: self.distincId, optionalData:self.optionalData, withMessage: self.message, optionalDataCompletion: {optionalData
+                                in
+                                if self.optionalDataCompletion != nil{
+                                    self.optionalDataCompletion!(optionalData)
+                                }
+                                Qiscus.printLog(text: "optional data from getListComment: \(optionalData)")
+                            })
+                        }
+                    }else{
+                        self.showLoading("Load Data ...")
+                        commentClient.getListComment(withUsers: users, triggerDelegate: true, distincId: self.distincId, optionalData:self.optionalData, withMessage: self.message, optionalDataCompletion: {optionalData
+                            in
+                            if self.optionalDataCompletion != nil{
+                                self.optionalDataCompletion!(optionalData)
+                            }
+                        })
+                    }
+                }else{
+                    if let room = QiscusRoom.getRoomById(self.roomId){
+                        self.comments = QiscusComment.groupAllCommentByDateInRoom(self.roomId, limit: 20, firstLoad: true)
                         if self.comments.count > 0 {
-                            self.collectionView.isHidden = true
+                            self.topicId = room.roomLastCommentTopicId
                             self.collectionView.reloadData()
                             scrollToBotomFromNoData()
                             self.welcomeView.isHidden = true
                             if self.optionalDataCompletion != nil{
                                 self.optionalDataCompletion!(room.optionalData)
+                            }
+                            if message != nil {
+                                commentClient.postMessage(message: self.message!, topicId: self.topicId)
+                                self.message = nil
                             }
                             commentClient.syncMessage(self.topicId)
                         }else{
@@ -599,59 +659,21 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                                 self.optionalDataCompletion!(room.optionalData)
                             }
                             self.showLoading("Load Data ...")
-                            commentClient.getListComment(topicId: self.topicId, commentId: 0, triggerDelegate: true)
+                            commentClient.getRoom(withID: self.roomId, triggerDelegate: true, withMessage: self.message, optionalDataCompletion: {optionalData in
+                                if self.optionalDataCompletion != nil{
+                                    self.optionalDataCompletion!(optionalData)
+                                }
+                            })
                         }
-                    }else{
-                        self.showLoading("Load Data ...")
-                        commentClient.getListComment(withUsers: users, triggerDelegate: true, distincId: self.distincId, optionalData:self.optionalData, optionalDataCompletion: {optionalData
-                            in
-                            if self.optionalDataCompletion != nil{
-                                self.optionalDataCompletion!(optionalData)
-                            }
-                            Qiscus.printLog(text: "optional data from getListComment: \(optionalData)")
-                        })
-                    }
-                }else{
-                    self.showLoading("Load Data ...")
-                    commentClient.getListComment(withUsers: users, triggerDelegate: true, distincId: self.distincId, optionalData:self.optionalData, optionalDataCompletion: {optionalData
-                        in
-                        if self.optionalDataCompletion != nil{
-                            self.optionalDataCompletion!(optionalData)
-                        }
-                    })
-                }
-            }else{
-                if let room = QiscusRoom.getRoomById(self.roomId){
-                    self.comments = QiscusComment.groupAllCommentByDateInRoom(self.roomId, limit: 20, firstLoad: true)
-                    if self.comments.count > 0 {
-                        self.topicId = room.roomLastCommentTopicId
-                        self.collectionView.reloadData()
-                        scrollToBotomFromNoData()
-                        self.welcomeView.isHidden = true
-                        if self.optionalDataCompletion != nil{
-                            self.optionalDataCompletion!(room.optionalData)
-                        }
-                        commentClient.syncMessage(self.topicId)
                     }else{
                         self.welcomeView.isHidden = false
-                        if self.optionalDataCompletion != nil{
-                            self.optionalDataCompletion!(room.optionalData)
-                        }
                         self.showLoading("Load Data ...")
-                        commentClient.getRoom(withID: self.roomId, triggerDelegate: true, optionalDataCompletion: {optionalData in
+                        commentClient.getRoom(withID: self.roomId, triggerDelegate: true, withMessage: self.message, optionalDataCompletion: {optionalData in
                             if self.optionalDataCompletion != nil{
                                 self.optionalDataCompletion!(optionalData)
                             }
                         })
                     }
-                }else{
-                    self.welcomeView.isHidden = false
-                    self.showLoading("Load Data ...")
-                    commentClient.getRoom(withID: self.roomId, triggerDelegate: true, optionalDataCompletion: {optionalData in
-                        if self.optionalDataCompletion != nil{
-                            self.optionalDataCompletion!(optionalData)
-                        }
-                    })
                 }
             }
         }
@@ -921,8 +943,10 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         self.loadMoreControl.endRefreshing()
     }
     open func finishedLoadFromAPI(_ topicId: Int){
-        
         let room = QiscusRoom.getRoom(withLastTopicId: self.topicId)
+        if newChat {
+            newChat = false
+        }
         self.subscribeRealtime(onRoom: room)
         self.topicId = topicId
         self.comments = QiscusComment.grouppedComment(inTopicId: topicId, firstLoad: true)
