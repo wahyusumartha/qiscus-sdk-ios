@@ -215,7 +215,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
      - parameter subtitle: **String** text to show as chat subtitle (Optional), Default value : "" (empty string).
      - returns: **QiscusChatVC**
      */
-    open class func chatView(withTopicId topicId:Int, readOnly:Bool = false, title:String = "Chat", subtitle:String = "")->QiscusChatVC{
+    open class func chatView(withTopicId topicId:Int, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
         Qiscus.checkDatabaseMigration()
         Qiscus.sharedInstance.isPushed = true
         QiscusUIConfiguration.sharedInstance.chatUsers = [String]()
@@ -227,6 +227,8 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         if QiscusChatVC.sharedInstance.isPresence {
             QiscusChatVC.sharedInstance.goBack()
         }
+        QiscusChatVC.sharedInstance.newChat = false
+        QiscusChatVC.sharedInstance.message = withMessage
         
         return QiscusChatVC.sharedInstance
     }
@@ -239,7 +241,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
      - parameter title: **String** text to show as chat title (Optional), Default value : "Chat".
      - parameter subtitle: **String** text to show as chat subtitle (Optional), Default value : "" (empty string).
      */
-    open class func chat(withTopicId topicId:Int, target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = ""){
+    open class func chat(withTopicId topicId:Int, target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", withMessage:String? = nil){
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -252,6 +254,8 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
 
         let chatVC = QiscusChatVC.sharedInstance
+        chatVC.message = withMessage
+        chatVC.newChat = false
         let navController = UINavigationController()
         navController.viewControllers = [chatVC]
         
@@ -269,7 +273,8 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
      - parameter title: **String** text to show as chat title (Optional), Default value : "Chat".
      - parameter subtitle: **String** text to show as chat subtitle (Optional), Default value : "" (empty string).
      */
-    open class func chatVC(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil)->QiscusChatVC{
+
+    open class func chatVC(withUsers users:[String], readOnly:Bool = false, title:String = "Chat", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -290,9 +295,8 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         }
         chatVC.optionalData = optionalData
         chatVC.optionalDataCompletion = {_ in }
-        
-        let navController = UINavigationController()
-        navController.viewControllers = [chatVC]
+        chatVC.message = withMessage
+        chatVC.newChat = false
         
         if QiscusChatVC.sharedInstance.isPresence {
             QiscusChatVC.sharedInstance.goBack()
@@ -300,11 +304,12 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         
         return chatVC
     }
+    
     /**
      No Documentation
     */
     
-    open class func chat(withRoomId roomId:Int, target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil,optionalDataCompletion: @escaping (String) -> Void){
+    open class func chat(withRoomId roomId:Int, target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil,optionalDataCompletion: @escaping (String) -> Void){
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -327,7 +332,8 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         chatVC.roomId = roomId
         chatVC.optionalData = optionalData
         chatVC.optionalDataCompletion = optionalDataCompletion
-        
+        chatVC.message = withMessage
+        chatVC.newChat = false
         let navController = UINavigationController()
         navController.viewControllers = [chatVC]
         
@@ -337,7 +343,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         
         target.navigationController?.present(navController, animated: true, completion: nil)
     }
-    open class func chat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil,optionalDataCompletion: @escaping (String) -> Void){
+    open class func chat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil,optionalDataCompletion: @escaping (String) -> Void){
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -359,7 +365,8 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         }
         chatVC.optionalData = optionalData
         chatVC.optionalDataCompletion = optionalDataCompletion
-        
+        chatVC.message = withMessage
+        chatVC.newChat = false
         let navController = UINavigationController()
         navController.viewControllers = [chatVC]
         
@@ -372,7 +379,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
     /** 
      No Documentation
     */
-    open class func chatView(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = "")->QiscusChatVC{
+    open class func chatView(withUsers users:[String], readOnly:Bool = false, title:String = "Chat", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -385,8 +392,8 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
         let chatVC = QiscusChatVC.sharedInstance
-        let navController = UINavigationController()
-        navController.viewControllers = [chatVC]
+        chatVC.message = withMessage
+        chatVC.newChat = false
         
         if QiscusChatVC.sharedInstance.isPresence {
             QiscusChatVC.sharedInstance.goBack()
@@ -397,7 +404,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
     /**
      No Documentation
      */
-    open class func chatView(withRoomId roomId:Int, readOnly:Bool = false, title:String = "Chat", subtitle:String = "")->QiscusChatVC{
+    open class func chatView(withRoomId roomId:Int, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -411,9 +418,9 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         
         let chatVC = QiscusChatVC.sharedInstance
         chatVC.roomId = roomId
-        let navController = UINavigationController()
-        navController.viewControllers = [chatVC]
-        
+        chatVC.message = withMessage
+        chatVC.newChat = false
+       
         if QiscusChatVC.sharedInstance.isPresence {
             QiscusChatVC.sharedInstance.goBack()
         }
@@ -810,5 +817,68 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
             }
         }
         Realm.Configuration.defaultConfiguration = configuration
+    }
+    
+    // MARK: - Create NEW Chat
+    open class func createChatView(withUsers users:[String], readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
+        Qiscus.checkDatabaseMigration()
+        if !Qiscus.sharedInstance.connected {
+            Qiscus.setupReachability()
+        }
+        
+        Qiscus.sharedInstance.isPushed = true
+        QiscusUIConfiguration.sharedInstance.chatUsers = users
+        QiscusUIConfiguration.sharedInstance.topicId = 0
+        QiscusUIConfiguration.sharedInstance.readOnly = readOnly
+        QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
+        QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
+        
+        let chatVC = QiscusChatVC.sharedInstance
+        if distinctId != nil{
+            chatVC.distincId = distinctId!
+        }else{
+            chatVC.distincId = ""
+        }
+        chatVC.optionalData = optionalData
+        chatVC.optionalDataCompletion = {_ in }
+        chatVC.message = withMessage
+        chatVC.newChat = true
+
+        if QiscusChatVC.sharedInstance.isPresence {
+            QiscusChatVC.sharedInstance.goBack()
+        }
+        
+        return chatVC
+    }
+    open class func createChat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil){
+        Qiscus.checkDatabaseMigration()
+        if !Qiscus.sharedInstance.connected {
+            Qiscus.setupReachability()
+        }
+        
+        Qiscus.sharedInstance.isPushed = false
+        QiscusUIConfiguration.sharedInstance.chatUsers = users
+        QiscusUIConfiguration.sharedInstance.topicId = 0
+        QiscusUIConfiguration.sharedInstance.readOnly = readOnly
+        QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
+        QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
+        
+        let chatVC = QiscusChatVC.sharedInstance
+        if distinctId != nil{
+            chatVC.distincId = distinctId!
+        }else{
+            chatVC.distincId = ""
+        }
+        chatVC.optionalData = optionalData
+        chatVC.optionalDataCompletion = {_ in }
+        chatVC.message = withMessage
+        chatVC.newChat = true
+        let navController = UINavigationController()
+        navController.viewControllers = [chatVC]
+        
+        if QiscusChatVC.sharedInstance.isPresence {
+            QiscusChatVC.sharedInstance.goBack()
+        }
+        target.navigationController?.present(navController, animated: true, completion: nil)
     }
 }
