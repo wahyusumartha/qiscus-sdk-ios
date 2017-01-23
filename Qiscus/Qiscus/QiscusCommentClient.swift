@@ -801,7 +801,7 @@ open class QiscusCommentClient: NSObject {
         }
     }
     
-    open func getListComment(topicId: Int, commentId: Int, triggerDelegate:Bool = false, loadMore:Bool = false){ //USED
+    open func getListComment(topicId: Int, commentId: Int, triggerDelegate:Bool = false, loadMore:Bool = false, message:String? = nil){ //USED
         let manager = Alamofire.SessionManager.default
         var parameters:[String: AnyObject]? = nil
         var loadURL = ""
@@ -847,6 +847,9 @@ open class QiscusCommentClient: NSObject {
                         if loadMore {
                             self.commentDelegate?.didFinishLoadMore()
                         }
+                        if message != nil{
+                            QiscusCommentClient.sharedInstance.postMessage(message: message!, topicId: topicId)
+                        }
                     }
                     self.commentDelegate?.finishedLoadFromAPI(topicId)
                 }else if error != nil{
@@ -858,7 +861,7 @@ open class QiscusCommentClient: NSObject {
             }
         })
     }
-    open func getRoom(withID roomId:Int, triggerDelegate:Bool = false, optionalDataCompletion: @escaping (String) -> Void){
+    open func getRoom(withID roomId:Int, triggerDelegate:Bool = false, withMessage:String? = nil, optionalDataCompletion: @escaping (String) -> Void){
         let manager = Alamofire.SessionManager.default
         let loadURL = QiscusConfig.ROOM_REQUEST_ID_URL
         
@@ -918,6 +921,10 @@ open class QiscusCommentClient: NSObject {
                     }
                     
                     self.commentDelegate?.finishedLoadFromAPI(topicId)
+                    if let message = withMessage {
+                        self.postMessage(message: message, topicId: topicId)
+                        QiscusChatVC.sharedInstance.message = nil
+                    }
                     optionalDataCompletion(room.optionalData)
                 }else if error != nil{
                     Qiscus.printLog(text: "error getRoom: \(error)")
@@ -929,7 +936,8 @@ open class QiscusCommentClient: NSObject {
             }
         })
     }
-    open func getListComment(withUsers users:[String], triggerDelegate:Bool = true, loadMore:Bool = false, distincId:String? = nil, optionalData:String? = nil,optionalDataCompletion: @escaping (String) -> Void){ //USED
+    
+    open func getListComment(withUsers users:[String], triggerDelegate:Bool = true, loadMore:Bool = false, distincId:String? = nil, optionalData:String? = nil, withMessage:String? = nil,optionalDataCompletion: @escaping (String) -> Void){ //USED
         let manager = Alamofire.SessionManager.default
         let loadURL = QiscusConfig.ROOM_REQUEST_URL
 
@@ -1000,6 +1008,10 @@ open class QiscusCommentClient: NSObject {
                     }
                     
                     self.commentDelegate?.finishedLoadFromAPI(topicId)
+                    if withMessage != nil {
+                        self.postMessage(message: withMessage!, topicId: topicId)
+                        QiscusChatVC.sharedInstance.message = nil
+                    }
                     optionalDataCompletion(room.optionalData)
                 }else if error != nil{
                     Qiscus.printLog(text: "error getListComment: \(error)")
@@ -1011,6 +1023,79 @@ open class QiscusCommentClient: NSObject {
             }
         })
     }
+    
+    // MARK: - Create New Room
+    open func createNewRoom(withUsers users:[String], optionalData:String? = nil, withMessage:String? = nil){ //USED
+        let manager = Alamofire.SessionManager.default
+        let loadURL = QiscusConfig.CREATE_NEW_ROOM
+        
+        var parameters:[String : AnyObject] =  [
+            "name" : QiscusUIConfiguration.sharedInstance.copyright.chatTitle as AnyObject,
+            "participants" : users as AnyObject,
+            "token"  : qiscus.config.USER_TOKEN as AnyObject
+        ]
+
+        if optionalData != nil{
+            parameters["options"] = optionalData! as AnyObject
+        }
+        Qiscus.printLog(text: "create new room parameters: \(parameters)")
+        manager.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+            if let response = responseData.result.value {
+                Qiscus.printLog(text: "create New room api response:\n\(response)")
+                let json = JSON(response)
+                let results = json["results"]
+                let error = json["error"]
+                
+                if results != nil{
+                    Qiscus.printLog(text: "getListComment with user response: \(responseData)")
+                    let roomData = json["results"]["room"]
+                    let room = QiscusRoom.getRoom(roomData)
+                    let topicId = room.roomLastCommentTopicId
+
+                    QiscusUIConfiguration.sharedInstance.topicId = topicId
+                    QiscusChatVC.sharedInstance.topicId = topicId
+                    var newMessageCount: Int = 0
+                    let comments = json["results"]["comments"].arrayValue
+                    if comments.count > 0 {
+                        var newComments = [QiscusComment]()
+                        for comment in comments {
+                            let isSaved = QiscusComment.getCommentFromJSON(comment, topicId: topicId, saved: true)
+                            if let thisComment = QiscusComment.getCommentById(QiscusComment.getCommentIdFromJSON(comment)){
+                                thisComment.updateCommentStatus(QiscusCommentStatus.delivered)
+                                if isSaved {
+                                    newMessageCount += 1
+                                    newComments.insert(thisComment, at: 0)
+                                }
+                            }
+                        }
+                    }
+                    
+                    let participants = roomData["participants"].arrayValue
+                    for participant in participants{
+                        let user = QiscusUser()
+                        user.userEmail = participant["email"].stringValue
+                        user.userFullName = participant["username"].stringValue
+                        user.userAvatarURL = participant["avatar_url"].stringValue
+                        
+                        let _ = user.saveUser()
+                    }
+                    
+                    self.commentDelegate?.finishedLoadFromAPI(topicId)
+                    if withMessage != nil {
+                        self.postMessage(message: withMessage!, topicId: topicId)
+                        QiscusChatVC.sharedInstance.message = nil
+                    }
+                }else if error != nil{
+                    Qiscus.printLog(text: "error getListComment: \(error)")
+                    self.commentDelegate?.didFailedLoadDataFromAPI("\(error)", data:error)
+                }
+                
+            }else{
+                self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message, connection error", data:nil)
+            }
+        })
+    }
+    
     // MARK: - Load More
     open func loadMoreComment(fromCommentId commentId:Int, topicId:Int, limit:Int = 10){
         let comments = QiscusComment.loadMoreComment(fromCommentId: commentId, topicId: topicId, limit: limit)
