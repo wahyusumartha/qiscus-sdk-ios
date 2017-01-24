@@ -38,7 +38,6 @@
 		395291271E28559B004BD6B4 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395291231E28559B004BD6B4 /* MainView.swift */; };
 		395291281E28559B004BD6B4 /* MainView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 395291241E28559B004BD6B4 /* MainView.xib */; };
 		3957C7C91E08E30B003E1E9F /* QiscusLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3957C7C81E08E30B003E1E9F /* QiscusLoading.swift */; };
-		395E08111D43A9200021370F /* QiscusPusherClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395E08101D43A9200021370F /* QiscusPusherClient.swift */; };
 		395E08131D43B8850021370F /* QiscusRoomDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395E08121D43B8850021370F /* QiscusRoomDelegate.swift */; };
 		397D8E0D1E039202002C1E13 /* QLoadingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 397D8E0B1E039202002C1E13 /* QLoadingViewController.swift */; };
 		397D8E0E1E039202002C1E13 /* QLoadingViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 397D8E0C1E039202002C1E13 /* QLoadingViewController.xib */; };
@@ -73,7 +72,6 @@
 		39E195F21DBDE9CC000DDF76 /* QToasterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E195EF1DBDE9CC000DDF76 /* QToasterView.swift */; };
 		39EE983D1E15EDA0008BC225 /* QChatCellHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39EE983C1E15EDA0008BC225 /* QChatCellHelper.swift */; };
 		39F1F6AD1D3B90E200FF1C8C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F1F6AC1D3B90E200FF1C8C /* AppDelegate.swift */; };
-		39F1F6AF1D3B90E200FF1C8C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F1F6AE1D3B90E200FF1C8C /* ViewController.swift */; };
 		39F1F6B21D3B90E200FF1C8C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 39F1F6B01D3B90E200FF1C8C /* Main.storyboard */; };
 		39F1F6B71D3B90E200FF1C8C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 39F1F6B61D3B90E200FF1C8C /* Assets.xcassets */; };
 		39F1F6BA1D3B90E200FF1C8C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 39F1F6B81D3B90E200FF1C8C /* LaunchScreen.storyboard */; };
@@ -165,7 +163,6 @@
 		395291231E28559B004BD6B4 /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		395291241E28559B004BD6B4 /* MainView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainView.xib; sourceTree = "<group>"; };
 		3957C7C81E08E30B003E1E9F /* QiscusLoading.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusLoading.swift; path = Qiscus/QiscusLoading.swift; sourceTree = "<group>"; };
-		395E08101D43A9200021370F /* QiscusPusherClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusPusherClient.swift; path = Qiscus/QiscusPusherClient.swift; sourceTree = "<group>"; };
 		395E08121D43B8850021370F /* QiscusRoomDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusRoomDelegate.swift; path = Qiscus/QiscusRoomDelegate.swift; sourceTree = "<group>"; };
 		397D8E0B1E039202002C1E13 /* QLoadingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QLoadingViewController.swift; path = Qiscus/QLoadingViewController.swift; sourceTree = "<group>"; };
 		397D8E0C1E039202002C1E13 /* QLoadingViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = QLoadingViewController.xib; path = Qiscus/QLoadingViewController.xib; sourceTree = "<group>"; };
@@ -204,7 +201,6 @@
 		39EE983C1E15EDA0008BC225 /* QChatCellHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QChatCellHelper.swift; path = Qiscus/QChatCellHelper.swift; sourceTree = "<group>"; };
 		39F1F6A91D3B90E200FF1C8C /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		39F1F6AC1D3B90E200FF1C8C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		39F1F6AE1D3B90E200FF1C8C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		39F1F6B11D3B90E200FF1C8C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		39F1F6B61D3B90E200FF1C8C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		39F1F6B91D3B90E200FF1C8C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -366,7 +362,6 @@
 				395291231E28559B004BD6B4 /* MainView.swift */,
 				395291241E28559B004BD6B4 /* MainView.xib */,
 				39F1F6AC1D3B90E200FF1C8C /* AppDelegate.swift */,
-				39F1F6AE1D3B90E200FF1C8C /* ViewController.swift */,
 				39F1F6B01D3B90E200FF1C8C /* Main.storyboard */,
 				39F1F6B61D3B90E200FF1C8C /* Assets.xcassets */,
 				39F1F6B81D3B90E200FF1C8C /* LaunchScreen.storyboard */,
@@ -400,7 +395,6 @@
 				39F1F7431D3B931E00FF1C8C /* QProgressData.swift */,
 				39F1F7441D3B931E00FF1C8C /* QSyncNotifData.swift */,
 				39F1F7401D3B930700FF1C8C /* QiscusCommentClient.swift */,
-				395E08101D43A9200021370F /* QiscusPusherClient.swift */,
 			);
 			name = Service;
 			sourceTree = "<group>";
@@ -698,7 +692,6 @@
 			files = (
 				395291251E28559B004BD6B4 /* goToChatVC.swift in Sources */,
 				395291271E28559B004BD6B4 /* MainView.swift in Sources */,
-				39F1F6AF1D3B90E200FF1C8C /* ViewController.swift in Sources */,
 				39F1F6AD1D3B90E200FF1C8C /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -710,7 +703,6 @@
 				392C85AD1E1E2A5D0059D5BD /* QCellAudioRight.swift in Sources */,
 				39128CA71D6C357E00C3BEA2 /* ChatFileButton.swift in Sources */,
 				39F1F73B1D3B92E800FF1C8C /* QiscusUser.swift in Sources */,
-				395E08111D43A9200021370F /* QiscusPusherClient.swift in Sources */,
 				39D92CED1E1CD2CE00F36A1A /* QCellMediaLeft.swift in Sources */,
 				392015A01D425148005561C2 /* QiscusHelper.swift in Sources */,
 				39AABC8B1DFA9B8E00FD3BCD /* QiscusGalleryItem.swift in Sources */,
