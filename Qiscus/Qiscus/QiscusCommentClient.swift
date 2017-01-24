@@ -1143,4 +1143,40 @@ open class QiscusCommentClient: NSObject {
             self.getListComment(topicId: topicId, commentId: commentId, loadMore: true)
         }
     }
+    
+    // MARK: - Message Status
+    open func publishMessageStatus(onComment commentId:Int, roomId:Int, status:QiscusCommentStatus, withCompletion: @escaping ()->Void){
+        if status == QiscusCommentStatus.delivered || status == QiscusCommentStatus.read{
+            let manager = Alamofire.SessionManager.default
+            let loadURL = QiscusConfig.UPDATE_COMMENT_STATUS_URL
+            
+            var parameters:[String : AnyObject] =  [
+                "token" : QiscusUIConfiguration.sharedInstance.copyright.chatTitle as AnyObject,
+                "room_id" : roomId as AnyObject,
+            ]
+            
+            if status == QiscusCommentStatus.delivered{
+                parameters["last_comment_received_id"] = commentId as AnyObject
+            }else{
+                parameters["last_comment_read_id"] = commentId as AnyObject
+            }
+            manager.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                if let response = responseData.result.value {
+                    Qiscus.printLog(text: "get or create room api response:\n\(response)")
+                    let json = JSON(response)
+                    let results = json["results"]
+                    let error = json["error"]
+                    
+                    if results != nil{
+                        Qiscus.printLog(text: "success change comment status on \(commentId) to \(status)")
+                        withCompletion()
+                    }else if error != nil{
+                        Qiscus.printLog(text: "error update message status: \(error)")
+                    }
+                }else{
+                    Qiscus.printLog(text: "error update message status")
+                }
+            })
+        }
+    }
 }

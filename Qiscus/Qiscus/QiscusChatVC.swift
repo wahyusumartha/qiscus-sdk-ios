@@ -762,15 +762,13 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                 let indexPath = comment.commentIndexPath
                 if indexPath.section < self.comments.count{
                     if indexPath.row < self.comments[indexPath.section].count{
-                        if comment.commentStatus != self.comments[indexPath.section][indexPath.row].commentStatus{
-                            self.comments[indexPath.section][indexPath.row] = comment
-                            if comment.isOwnMessage {
-                                if let cell = collectionView.cellForItem(at: indexPath) as? QChatCell{
-                                    cell.updateStatus(toStatus: toStatus)
-                                }
-                                if indexPath.section == self.comments.count - 1 && indexPath.row == self.comments[self.comments.count - 1].count{
-                                    isLastRowVisible = true
-                                }
+                        self.comments[indexPath.section][indexPath.row] = comment
+                        if comment.isOwnMessage {
+                            if let cell = collectionView.cellForItem(at: indexPath) as? QChatCell{
+                                cell.updateStatus(toStatus: toStatus)
+                            }
+                            if indexPath.section == self.comments.count - 1 && indexPath.row == self.comments[self.comments.count - 1].count{
+                                isLastRowVisible = true
                             }
                         }
                     }
@@ -1767,8 +1765,8 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
 
         if let targetCell = cell as? QChatCell{
             targetCell.setupCell()
-            if !targetCell.comment.isOwnMessage && targetCell.comment.commentStatus == QiscusCommentStatus.delivered{
-                publishDelivered(comment: targetCell.comment)
+            if !targetCell.comment.isOwnMessage && targetCell.comment.commentStatus != QiscusCommentStatus.read{
+                publishRead(comment: targetCell.comment)
                 var i = 0
                 for index in unreadIndexPath{
                     if index.row == indexPath.row && index.section == indexPath.section{
@@ -1965,23 +1963,10 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     @IBAction func goToBottomTapped(_ sender: UIButton) {
         scrollToBottom(true)
     }
-    func publishDelivered(comment:QiscusComment){
-        if let room = QiscusRoom.getRoom(withLastTopicId: self.topicId){
-            let channel = "r/\(room.roomId)/\(topicId)/\(QiscusMe.sharedInstance.email)/r"
-            let message: String = "\(comment.commentId):\(comment.commentUniqueId)";
-            let data: Data = message.data(using: .utf8)!
-            Qiscus.realtimeThread.async {
-                Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: true, completion: {(succeeded, error) -> Void in
-                    if succeeded {
-                        DispatchQueue.main.async {
-                            if let targetComment = QiscusComment.getCommentById(comment.commentId) {
-                                targetComment.updateCommentStatus(.read)
-                            }
-                        }
-                    }
-                })
-            }
-        }
+    func publishRead(comment:QiscusComment){
+        commentClient.publishMessageStatus(onComment: comment.commentId, roomId: comment.roomId, status: .read, withCompletion: {
+            comment.updateCommentStatus(.read)
+        })
     }
     func updateComment(onIndexPath indexPath:IndexPath){
         let comment = self.comments[indexPath.section][indexPath.row]

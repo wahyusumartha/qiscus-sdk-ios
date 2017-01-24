@@ -502,26 +502,13 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
                 let roomId = json["room_id"].intValue
                 let isPushed = Qiscus.sharedInstance.isPushed
                 
-                let channel = "r/\(roomId)/\(notifTopicId)/\(QiscusMe.sharedInstance.email)/d"
-                let message: String = "\(commentId):\(json["unique_temp_id"].stringValue)";
-                let data: Data = message.data(using: .utf8)!
-                Qiscus.realtimeThread.async {
-                    Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: true, completion: {(succeeded, error) -> Void in
-                            if succeeded {
-                                Qiscus.printLog(text: "send delivered for message with comment_id:\(commentId)")
-                                DispatchQueue.main.async {
-                                    if let thisComment = QiscusComment.getCommentById(commentId) {
-                                        if !thisComment.isOwnMessage{
-                                            thisComment.updateCommentStatus(.delivered)
-                                        }else{
-                                            thisComment.updateCommentStatus(.sent)
-                                        }
-                                    }
-                                }
-                            }
+                QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: commentId, roomId: roomId, status: .delivered, withCompletion: {
+                    if let thisComment = QiscusComment.getCommentById(commentId) {
+                        if !thisComment.isOwnMessage{
+                            thisComment.updateCommentStatus(.delivered)
                         }
-                    )
-                }
+                    }
+                })
                 
                 if isSaved{
                     let newMessage = QiscusComment.getCommentById(commentId)

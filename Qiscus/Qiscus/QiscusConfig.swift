@@ -55,6 +55,9 @@ open class QiscusConfig: NSObject {
     open class var UPLOAD_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/upload"
     }
+    open class var UPDATE_COMMENT_STATUS_URL:String{
+        return "\(QiscusConfig.sharedInstance.BASE_URL)/update_comment_status"
+    }
     open class var LOGIN_REGISTER:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/login_or_register"
     }
