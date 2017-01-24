@@ -37,9 +37,7 @@ class goToChatVC: UIViewController {
                 }
                 Qiscus.createChat(withUsers:emails, target:self, title:"New Group Chat", subtitle: "Always new chat")
             }else{
-                Qiscus.chat(withUsers: [targetField.text!] , target: self, title: "SampleChat", optionalDataCompletion: { optionalData in
-                    print("optionalData from Example view: \(optionalData)")
-                })
+                Qiscus.chat(withUsers: [targetField.text!] , target: self, title: "SampleChat")
             }
         }
     }
