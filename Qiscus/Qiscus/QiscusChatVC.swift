@@ -566,7 +566,9 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                 Qiscus.printLog(text: "self comments: \n\(self.comments)")
                 
                 let room = QiscusRoom.getRoom(withLastTopicId: self.topicId)
-                
+                if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                    roomDelegate.didFinishLoadRoom(onRoom: room!)
+                }
                 if self.optionalDataCompletion != nil && room != nil{
                     self.optionalDataCompletion!(room!.optionalData)
                 }
@@ -592,6 +594,9 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                     loadWithUser = true
                     if self.users.count == 1 {
                         if let room = QiscusRoom.getRoom(self.distincId, andUserEmail: self.users.first!){
+                            if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                                roomDelegate.didFinishLoadRoom(onRoom: room)
+                            }
                             self.topicId = room.roomLastCommentTopicId
                             self.comments = QiscusComment.grouppedComment(inTopicId: self.topicId, firstLoad: true)
                             Qiscus.printLog(text: "self comments: \n\(self.comments)")
@@ -618,7 +623,8 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                                 commentClient.postMessage(message: self.message!, topicId: self.topicId)
                                 self.message = nil
                             }
-                        }else{
+                        }
+                        else{
                             self.showLoading("Load Data ...")
                             commentClient.getListComment(withUsers: users, triggerDelegate: true, distincId: self.distincId, optionalData:self.optionalData, withMessage: self.message, optionalDataCompletion: {optionalData
                                 in
@@ -639,6 +645,9 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                     }
                 }else{
                     if let room = QiscusRoom.getRoomById(self.roomId){
+                        if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                            roomDelegate.didFinishLoadRoom(onRoom: room)
+                        }
                         self.comments = QiscusComment.groupAllCommentByDateInRoom(self.roomId, limit: 20, firstLoad: true)
                         if self.comments.count > 0 {
                             self.topicId = room.roomLastCommentTopicId
