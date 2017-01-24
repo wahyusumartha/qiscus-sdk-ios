@@ -7,7 +7,6 @@
 //
 
 import UIKit
-//import ReachabilitySwift
 import RealmSwift
 import Foundation
 import SwiftMQTT
@@ -207,64 +206,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         }
     }
     
-    /**
-     Class function to configure view chat
-     - parameter topicId: **Int** ID of topic chat.
-     - parameter readOnly: **Bool** to set read only or not (Optional), Default value : false.
-     - parameter title: **String** text to show as chat title (Optional), Default value : "Chat".
-     - parameter subtitle: **String** text to show as chat subtitle (Optional), Default value : "" (empty string).
-     - returns: **QiscusChatVC**
-     */
-    open class func chatView(withTopicId topicId:Int, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
-        Qiscus.checkDatabaseMigration()
-        Qiscus.sharedInstance.isPushed = true
-        QiscusUIConfiguration.sharedInstance.chatUsers = [String]()
-        QiscusUIConfiguration.sharedInstance.topicId = topicId
-        QiscusUIConfiguration.sharedInstance.readOnly = readOnly
-        QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
-        QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
-        
-        if QiscusChatVC.sharedInstance.isPresence {
-            QiscusChatVC.sharedInstance.goBack()
-        }
-        QiscusChatVC.sharedInstance.newChat = false
-        QiscusChatVC.sharedInstance.message = withMessage
-        
-        return QiscusChatVC.sharedInstance
-    }
     
-    /**
-     Class function to configure chat with topic ID
-     - parameter topicId: **Int** ID of topic chat.
-     - parameter target: The **UIViewController** where chat will appear.
-     - parameter readOnly: **Bool** to set read only or not (Optional), Default value : false.
-     - parameter title: **String** text to show as chat title (Optional), Default value : "Chat".
-     - parameter subtitle: **String** text to show as chat subtitle (Optional), Default value : "" (empty string).
-     */
-    open class func chat(withTopicId topicId:Int, target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", withMessage:String? = nil){
-        Qiscus.checkDatabaseMigration()
-        if !Qiscus.sharedInstance.connected {
-            Qiscus.setupReachability()
-        }
-        Qiscus.sharedInstance.isPushed = false
-        QiscusUIConfiguration.sharedInstance.chatUsers = [String]()
-        QiscusUIConfiguration.sharedInstance.topicId = topicId
-        QiscusUIConfiguration.sharedInstance.readOnly = readOnly
-        QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
-        QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
-
-        let chatVC = QiscusChatVC.sharedInstance
-        chatVC.message = withMessage
-        chatVC.newChat = false
-        let navController = UINavigationController()
-        navController.viewControllers = [chatVC]
-        
-        if QiscusChatVC.sharedInstance.isPresence {
-            QiscusChatVC.sharedInstance.goBack()
-        }
-        
-        target.navigationController?.present(navController, animated: true, completion: nil)
-    }
     /**
      Class function to configure chat with user
      - parameter users: **String** users.
@@ -273,7 +215,6 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
      - parameter title: **String** text to show as chat title (Optional), Default value : "Chat".
      - parameter subtitle: **String** text to show as chat subtitle (Optional), Default value : "" (empty string).
      */
-
     open class func chatVC(withUsers users:[String], readOnly:Bool = false, title:String = "Chat", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
@@ -343,7 +284,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         
         target.navigationController?.present(navController, animated: true, completion: nil)
     }
-    open class func chat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil,optionalDataCompletion: @escaping (String) -> Void){
+    open class func chat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -364,7 +305,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
             chatVC.distincId = ""
         }
         chatVC.optionalData = optionalData
-        chatVC.optionalDataCompletion = optionalDataCompletion
+        chatVC.optionalDataCompletion = {_ in}
         chatVC.message = withMessage
         chatVC.newChat = false
         let navController = UINavigationController()
@@ -560,7 +501,6 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
                 
                 let roomId = json["room_id"].intValue
                 let isPushed = Qiscus.sharedInstance.isPushed
-                let savedRoom = QiscusRoom.getRoom(withLastTopicId: notifTopicId)
                 
                 let channel = "r/\(roomId)/\(notifTopicId)/\(QiscusMe.sharedInstance.email)/d"
                 let message: String = "\(commentId):\(json["unique_temp_id"].stringValue)";
@@ -568,6 +508,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
                 Qiscus.realtimeThread.async {
                     Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: true, completion: {(succeeded, error) -> Void in
                             if succeeded {
+                                Qiscus.printLog(text: "send delivered for message with comment_id:\(commentId)")
                                 DispatchQueue.main.async {
                                     if let thisComment = QiscusComment.getCommentById(commentId) {
                                         if !thisComment.isOwnMessage{
@@ -582,8 +523,6 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
                     )
                 }
                 
-                
-                    
                 if isSaved{
                     let newMessage = QiscusComment.getCommentById(commentId)
                     if !QiscusComment.isValidCommentIdExist(commentBeforeId) {
@@ -607,22 +546,6 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
                                 showToast = true
                             }
                         }
-                        /*
-                        let channel = "r/\(roomId)/\(notifTopicId)/\(QiscusMe.sharedInstance.email)/r"
-                        let message: String = "\(commentId):\(json["unique_temp_id"].stringValue)";
-                        let data: Data = message.data(using: .utf8)!
-                        Qiscus.realtimeThread.async {
-                            Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: true, completion: {(succeeded, error) -> Void in
-                                if succeeded {
-                                    DispatchQueue.main.async {
-                                        if let thisComment = QiscusComment.getCommentById(commentId) {
-                                            thisComment.updateCommentStatus(.read)
-                                        }
-                                    }
-                                }
-                            })
-                        }
-                        */
                     }
                     
                     if showToast && Qiscus.sharedInstance.config.showToasterMessage{
@@ -633,19 +556,10 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
                                 QToasterSwift.toast(target: viewController, text: newMessage!.commentText, title:senderName, iconURL:senderAvatarURL, iconPlaceHolder:Qiscus.image(named:"avatar"), onTouch: {
                                     if Qiscus.sharedInstance.toastMessageAct == nil{
                                         if isPushed{
-                                            if savedRoom != nil {
-                                                let chatVC = Qiscus.chatView(withTopicId: notifTopicId)
-                                                currenRootView.pushViewController(chatVC, animated: true)
-                                            }else{
-                                                let chatVC = Qiscus.chatView(withRoomId: roomId, title: senderName)
-                                                currenRootView.pushViewController(chatVC, animated: true)
-                                            }
+                                            let chatVC = Qiscus.chatView(withRoomId: roomId, title: senderName)
+                                            currenRootView.pushViewController(chatVC, animated: true)
                                         }else{
-                                            if savedRoom != nil {
-                                                Qiscus.chat(withTopicId: notifTopicId, target: viewController)
-                                            }else{
-                                                Qiscus.chat(withRoomId: roomId, target: viewController, optionalDataCompletion: { _ in})
-                                            }
+                                            Qiscus.chat(withRoomId: roomId, target: viewController, optionalDataCompletion: { _ in})
                                         }
                                     }else{
                                         Qiscus.sharedInstance.toastMessageAct!(roomId, newMessage!)
