@@ -885,6 +885,9 @@ open class QiscusCommentClient: NSObject {
                     let room = QiscusRoom.getRoom(roomData)
                     let topicId = room.roomLastCommentTopicId
                     
+                    if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                        roomDelegate.didFinishLoadRoom(onRoom: room)
+                    }
                     
                     QiscusUIConfiguration.sharedInstance.topicId = topicId
                     QiscusChatVC.sharedInstance.topicId = topicId
@@ -929,10 +932,16 @@ open class QiscusCommentClient: NSObject {
                 }else if error != nil{
                     Qiscus.printLog(text: "error getRoom: \(error)")
                     self.commentDelegate?.didFailedLoadDataFromAPI("failed to load message with error \(error)", data: error)
+                    if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                        roomDelegate.didFailLoadRoom(withError: "fail to get chat room")
+                    }
                 }
                 
             }else{
                 self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message, connection error", data:nil)
+                if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                    roomDelegate.didFailLoadRoom(withError: "fail to get chat room")
+                }
             }
         })
     }
@@ -967,6 +976,11 @@ open class QiscusCommentClient: NSObject {
                     let room = QiscusRoom.getRoom(roomData)
                     let topicId = room.roomLastCommentTopicId
                     let users = parameters["emails"] as! [String]
+                    
+                    if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                        roomDelegate.didFinishLoadRoom(onRoom: room)
+                    }
+                    
                     if users.count == 1 {
                         room.updateUser(users.first!)
                     }
@@ -1016,10 +1030,16 @@ open class QiscusCommentClient: NSObject {
                 }else if error != nil{
                     Qiscus.printLog(text: "error getListComment: \(error)")
                     self.commentDelegate?.didFailedLoadDataFromAPI("\(error)", data:error)
+                    if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                        roomDelegate.didFailLoadRoom(withError: "fail to create or get chat room")
+                    }
                 }
                 
             }else{
                 self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message, connection error", data:nil)
+                if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                    roomDelegate.didFailLoadRoom(withError: "fail to create or get chat room")
+                }
             }
         })
     }
@@ -1051,7 +1071,11 @@ open class QiscusCommentClient: NSObject {
                     let roomData = json["results"]["room"]
                     let room = QiscusRoom.getRoom(roomData)
                     let topicId = room.roomLastCommentTopicId
-
+                    
+                    if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                        roomDelegate.didFinishLoadRoom(onRoom: room)
+                    }
+                    
                     QiscusUIConfiguration.sharedInstance.topicId = topicId
                     QiscusChatVC.sharedInstance.topicId = topicId
                     var newMessageCount: Int = 0
@@ -1088,10 +1112,16 @@ open class QiscusCommentClient: NSObject {
                 }else if error != nil{
                     Qiscus.printLog(text: "error getListComment: \(error)")
                     self.commentDelegate?.didFailedLoadDataFromAPI("\(error)", data:error)
+                    if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                        roomDelegate.didFailLoadRoom(withError: "fail to create chat room")
+                    }
                 }
                 
             }else{
                 self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message, connection error", data:nil)
+                if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                    roomDelegate.didFailLoadRoom(withError: "fail to create chat room")
+                }
             }
         })
     }
