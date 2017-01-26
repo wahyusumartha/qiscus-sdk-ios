@@ -12,7 +12,7 @@ import RealmSwift
 open class QiscusParticipant: Object {
     open dynamic var localId:Int = 0
     open dynamic var participantRoomId:Int = 0
-    open dynamic var participantUserId:Int = 0
+    open dynamic var participantEmail:String = ""
     open dynamic var participantIsDeleted:Bool = false
     
     open class var LastId:Int{
@@ -47,20 +47,33 @@ open class QiscusParticipant: Object {
             }
         }
     }
-    open class func addParticipant(_ userId:Int, roomId:Int){ // USED
+    open class func addParticipant(_ userEmail:String, roomId:Int){ // USED
         let realm = try! Realm()
         var searchQuery = NSPredicate()
         
-        searchQuery = NSPredicate(format: "participantRoomId == %d AND participantUserId == %d", roomId, userId)
+        searchQuery = NSPredicate(format: "participantRoomId == %d AND participantEmail == %@", roomId, userEmail)
         let participantData = realm.objects(QiscusParticipant.self).filter(searchQuery)
         
         if(participantData.count == 0){
             let participant = QiscusParticipant()
             participant.localId = QiscusParticipant.LastId + 1
             participant.participantRoomId = roomId
-            participant.participantUserId = userId
+            participant.participantEmail = userEmail
             try! realm.write {
                 realm.add(participant)
+            }
+        }
+    }
+    open class func removeAllParticipant(inRoom roomId:Int){
+        let realm = try! Realm()
+        var searchQuery = NSPredicate()
+        
+        searchQuery = NSPredicate(format: "participantRoomId == %d", roomId)
+        let participantData = realm.objects(QiscusParticipant.self).filter(searchQuery)
+        
+        if participantData.count > 0 {
+            try! realm.write {
+                realm.delete(participantData)
             }
         }
     }

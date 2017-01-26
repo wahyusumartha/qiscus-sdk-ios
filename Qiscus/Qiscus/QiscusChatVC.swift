@@ -97,6 +97,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     var message:String?
     var newChat:Bool = false
     var roomName:String?
+    var roomAvatar = UIImageView()
     
     var showLink:Bool = false{
         didSet{
@@ -312,6 +313,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         titleLabel.textColor = UIColor.white
         titleLabel.font = UIFont.boldSystemFont(ofSize: 16)
         titleLabel.text = QiscusTextConfiguration.sharedInstance.chatTitle
+        titleLabel.textAlignment = .left
         titleLabel.sizeToFit()
         
         let subTitleLabel = UILabel(frame:CGRect(x: 0, y: 18, width: 0, height: 0))
@@ -319,19 +321,20 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         subTitleLabel.textColor = UIColor.white
         subTitleLabel.font = UIFont.systemFont(ofSize: 11)
         subTitleLabel.text = QiscusTextConfiguration.sharedInstance.chatSubtitle
+        subTitleLabel.textAlignment = .left
         subTitleLabel.sizeToFit()
         
         let titleView = UIButton(frame: CGRect(x: 0, y: 0, width: max(subTitleLabel.frame.size.width,titleLabel.frame.size.width), height: 30))
         
-        if titleLabel.frame.width >= subTitleLabel.frame.width {
-            var adjustment = subTitleLabel.frame
-            adjustment.origin.x = titleView.frame.origin.x + (titleView.frame.width/2) - (subTitleLabel.frame.width/2)
-            subTitleLabel.frame = adjustment
-        } else {
-            var adjustment = titleLabel.frame
-            adjustment.origin.x = titleView.frame.origin.x + (titleView.frame.width/2) - (titleLabel.frame.width/2)
-            titleLabel.frame = adjustment
-        }
+//        if titleLabel.frame.width >= subTitleLabel.frame.width {
+//            var adjustment = subTitleLabel.frame
+//            adjustment.origin.x = titleView.frame.origin.x + (titleView.frame.width/2) - (subTitleLabel.frame.width/2)
+//            subTitleLabel.frame = adjustment
+//        } else {
+//            var adjustment = titleLabel.frame
+//            adjustment.origin.x = titleView.frame.origin.x + (titleView.frame.width/2) - (titleLabel.frame.width/2)
+//            titleLabel.frame = adjustment
+//        }
         
         titleView.addSubview(titleLabel)
         titleView.addSubview(subTitleLabel)
@@ -345,7 +348,10 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         
         let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
         self.navigationItem.setHidesBackButton(true, animated: false)
-        self.navigationItem.leftBarButtonItem = backButton
+        self.navigationItem.leftBarButtonItems = [
+            backButton,
+            self.roomAvatarButton()
+        ]
         
         // loadMoreControl
         self.loadMoreControl.addTarget(self, action: #selector(QiscusChatVC.loadMore), for: UIControlEvents.valueChanged)
@@ -572,6 +578,17 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                 if self.optionalDataCompletion != nil && room != nil{
                     self.optionalDataCompletion!(room!.optionalData)
                 }
+                if room != nil {
+                    if QiscusUIConfiguration.sharedInstance.copyright.chatTitle == ""{
+                        self.setTitle(title: room!.roomName)
+                    }
+                    if let avatar = room!.avatarImage {
+                        self.roomAvatar.image = avatar
+                    }else{
+                        self.roomAvatar.loadAsync(room!.roomAvatarURL)
+                        room!.downloadThumbAvatar()
+                    }
+                }
                 self.subscribeRealtime(onRoom: room)
                 if self.comments.count > 0 {
                     self.collectionView.reloadData()
@@ -596,6 +613,15 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                         if let room = QiscusRoom.getRoom(self.distincId, andUserEmail: self.users.first!){
                             if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
                                 roomDelegate.didFinishLoadRoom(onRoom: room)
+                            }
+                            if QiscusUIConfiguration.sharedInstance.copyright.chatTitle == ""{
+                                self.setTitle(title: room.roomName)
+                            }
+                            if let avatar = room.avatarImage {
+                                self.roomAvatar.image = avatar
+                            }else{
+                                self.roomAvatar.loadAsync(room.roomAvatarURL)
+                                room.downloadThumbAvatar()
                             }
                             self.topicId = room.roomLastCommentTopicId
                             self.comments = QiscusComment.grouppedComment(inTopicId: self.topicId, firstLoad: true)
@@ -645,6 +671,15 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                     }
                 }else{
                     if let room = QiscusRoom.getRoomById(self.roomId){
+                        if QiscusUIConfiguration.sharedInstance.copyright.chatTitle == ""{
+                            self.setTitle(title: room.roomName)
+                        }
+                        if let avatar = room.avatarImage {
+                            self.roomAvatar.image = avatar
+                        }else{
+                            self.roomAvatar.loadAsync(room.roomAvatarURL)
+                            room.downloadThumbAvatar()
+                        }
                         if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
                             roomDelegate.didFinishLoadRoom(onRoom: room)
                         }
@@ -674,7 +709,8 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                                 }
                             })
                         }
-                    }else{
+                    }
+                    else{
                         self.welcomeView.isHidden = false
                         self.showLoading("Load Data ...")
                         commentClient.getRoom(withID: self.roomId, triggerDelegate: true, withMessage: self.message, optionalDataCompletion: {optionalData in
@@ -1411,31 +1447,43 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         let backIcon = UIImageView()
         backIcon.contentMode = .scaleAspectFit
         
-        let backLabel = UILabel()
-        
-        backLabel.text = QiscusTextConfiguration.sharedInstance.backText
-        backLabel.textColor = UIColor.white
-        backLabel.font = UIFont.systemFont(ofSize: 12)
-        
-        let image = UIImage(named: "ic_back", in: Qiscus.bundle, compatibleWith: nil)?.localizedImage()
+        let image = Qiscus.image(named: "ic_back")
         backIcon.image = image
         
         
         if UIApplication.shared.userInterfaceLayoutDirection == .leftToRight {
             backIcon.frame = CGRect(x: 0,y: 0,width: 10,height: 15)
-            backLabel.frame = CGRect(x: 15,y: 0,width: 45,height: 15)
         }else{
             backIcon.frame = CGRect(x: 50,y: 0,width: 10,height: 15)
-            backLabel.frame = CGRect(x: 0,y: 0,width: 45,height: 15)
         }
         
         
-        let backButton = UIButton(frame:CGRect(x: 0,y: 0,width: 60,height: 20))
+        let backButton = UIButton(frame:CGRect(x: 0,y: 0,width: 10,height: 20))
         backButton.addSubview(backIcon)
-        backButton.addSubview(backLabel)
         backButton.addTarget(target, action: action, for: UIControlEvents.touchUpInside)
         
         return UIBarButtonItem(customView: backButton)
+    }
+    func roomAvatarButton() -> UIBarButtonItem{
+        self.roomAvatar = UIImageView()
+        self.roomAvatar.contentMode = .scaleAspectFit
+        self.roomAvatar.backgroundColor = UIColor.white
+        
+        let image = Qiscus.image(named: "room_avatar")
+        self.roomAvatar.image = image
+        
+        if UIApplication.shared.userInterfaceLayoutDirection == .leftToRight {
+            self.roomAvatar.frame = CGRect(x: 0,y: 0,width: 32,height: 32)
+        }else{
+            self.roomAvatar.frame = CGRect(x: 50,y: 0,width: 32,height: 32)
+        }
+        self.roomAvatar.layer.cornerRadius = 16
+        self.roomAvatar.clipsToBounds = true
+        
+        let button = UIButton(frame:CGRect(x: 0,y: 0,width: 32,height: 32))
+        button.addSubview(self.roomAvatar)
+        
+        return UIBarButtonItem(customView: button)
     }
     
     func showAlert(alert:UIAlertController){
@@ -1517,7 +1565,15 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         if withSubtitle != nil {
             QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = withSubtitle!
         }
-        self.navigationItem.setTitleWithSubtitle(title: QiscusTextConfiguration.sharedInstance.chatTitle, subtitle:QiscusTextConfiguration.sharedInstance.chatSubtitle)
+        var navTitle = ""
+        if title != ""{
+            navTitle = title
+        }else{
+            if let room = QiscusRoom.getRoom(withLastTopicId: self.topicId){
+               navTitle = room.roomName
+            }
+        }
+        self.navigationItem.setTitleWithSubtitle(title: navTitle, subtitle:QiscusTextConfiguration.sharedInstance.chatSubtitle)
     }
     func startTypingIndicator(withUser user:String){
         self.typingIndicatorUser = user

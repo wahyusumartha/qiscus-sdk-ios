@@ -18,10 +18,10 @@ open class QiscusTextConfiguration: NSObject {
     open var emptyTitle = "Welcome"
     
     /// Your text to show as title chat, Default value : "Title"
-    open var chatTitle = "Title"
+    open var chatTitle = ""
     
     /// Your text to show as subtitle chat, Default value : "Sub Title"
-    open var chatSubtitle = "Sub Title"
+    open var chatSubtitle = ""
     
     /// Your text if you set chat read only, Default value : "Archieved message: This message was locked. Click the key to open the conversation."
     open var readOnlyText = "Archieved message: This message was locked. Click the key to open the conversation."
@@ -46,8 +46,8 @@ open class QiscusTextConfiguration: NSObject {
     /// Your text to show as content confirmation when you want to upload file, Default value : "Are you sure to send"
     open var confirmationFileUploadText = "Are you sure to send"
     
-    /// Your text in back action, Default value : "Back"
-    open var backText = "Back"
+    /// Your text in back action, Default value : ""
+    open var backText = ""
     
     /// Your question mark, Default value : "?"
     open var questionMark = "?"

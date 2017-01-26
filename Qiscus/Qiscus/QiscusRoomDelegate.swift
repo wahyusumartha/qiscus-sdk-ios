@@ -7,9 +7,12 @@
 //
 
 import UIKit
+import SwiftyJSON
 
 public protocol QiscusRoomDelegate {
     func gotNewComment(_ comments:QiscusComment)
     func didFinishLoadRoom(onRoom room: QiscusRoom)
     func didFailLoadRoom(withError error:String)
+    func didFinishUpdateRoom(onRoom room:QiscusRoom)
+    func didFailUpdateRoom(withError error:String, errorData:JSON?)
 }

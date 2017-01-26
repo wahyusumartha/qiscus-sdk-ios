@@ -9,11 +9,14 @@
 import UIKit
 import RealmSwift
 import SwiftyJSON
+import Alamofire
 
 open class QiscusRoom: Object {
     open dynamic var localId:Int = 0
     open dynamic var roomId:Int = 0
     open dynamic var roomName:String = ""
+    open dynamic var roomAvatarURL:String = ""
+    open dynamic var roomAvatarLocalPath:String = ""
     open dynamic var roomChannel:String = ""
     open dynamic var roomLastCommentId:Int = 0
     open dynamic var roomLastCommentMessage:String = ""
@@ -29,6 +32,29 @@ open class QiscusRoom: Object {
     open dynamic var optionalData:String = ""
     open dynamic var distinctId:String = ""
     open dynamic var user:String = ""
+    
+    open var isAvatarExist:Bool{
+        get{
+            var check:Bool = false
+            if QiscusHelper.isFileExist(inLocalPath: self.roomAvatarLocalPath){
+                check = true
+            }
+            return check
+        }
+    }
+    open var avatarImage:UIImage?{
+        get{
+            if isAvatarExist{
+                if let image = UIImage.init(contentsOfFile: self.roomAvatarLocalPath){
+                    return image
+                }else{
+                    return nil
+                }
+            }else{
+                return nil
+            }
+        }
+    }
     
     // MARK: - Primary Key
     override open class func primaryKey() -> String {
@@ -99,6 +125,8 @@ open class QiscusRoom: Object {
             }
         }
         if let distinctId = fromJSON["distinct_id"].string { room.distinctId = distinctId}
+        if let roomName = fromJSON["room_name"].string { room.roomName = roomName}
+        if let roomAvatar = fromJSON["avatar_url"].string {room.roomAvatarURL = roomAvatar}
         
         room.saveRoom()
         return room
@@ -156,8 +184,15 @@ open class QiscusRoom: Object {
             try! realm.write {
                 realm.add(self)
             }
+            if self.roomAvatarLocalPath == "" {
+                self.downloadThumbAvatar()
+            }
         }else{
             let room = roomData.first!
+            var needDownloadAvatar = false
+            if room.roomAvatarLocalPath == "" {
+                needDownloadAvatar = true
+            }
             try! realm.write {
                 room.roomId = self.roomId
                 if room.roomName != "" { room.roomName = self.roomName }
@@ -166,7 +201,10 @@ open class QiscusRoom: Object {
                 if room.roomLastCommentMessage != "" {
                     room.roomLastCommentMessage = self.roomLastCommentMessage
                 }
-                
+                if roomAvatarURL != self.roomAvatarURL{
+                    needDownloadAvatar = true
+                }
+                room.roomAvatarURL = self.roomAvatarURL
                 room.roomLastCommentSender = self.roomLastCommentSender
                 room.roomLastCommentTopicId = self.roomLastCommentTopicId
                 room.roomLastCommentTopicTitle = self.roomLastCommentTopicTitle
@@ -178,6 +216,84 @@ open class QiscusRoom: Object {
                 if room.optionalData != "" { room.optionalData = self.optionalData }
                 if room.distinctId != "" {room.distinctId = self.distinctId}
             }
+            if needDownloadAvatar {
+                room.downloadThumbAvatar()
+            }
+        }
+    }
+    
+    // MARK: - Download Room Avatar
+    open func downloadThumbAvatar(){
+        if self.roomAvatarURL != ""{
+            let manager = Alamofire.SessionManager.default
+            Qiscus.printLog(text: "Downloading avatar for roomName: \(self.roomName)")
+            manager.request(self.roomAvatarURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
+                .responseData(completionHandler: { response in
+                    Qiscus.printLog(text: "download linkImage result: \(response)")
+                    if let data = response.data {
+                        if let image = UIImage(data: data) {
+                            var thumbImage = UIImage()
+                            let time = Double(Date().timeIntervalSince1970)
+                            let timeToken = UInt64(time * 10000)
+                            
+                            let fileExt = QiscusFile.getExtension(fromURL: self.roomAvatarURL)
+                            let fileName = "ios-roomAvatar-\(timeToken).\(fileExt)"
+                            
+                            if fileExt == "jpg" || fileExt == "jpg_" || fileExt == "png" || fileExt == "png_" {
+                                thumbImage = self.createThumbLink(image)
+                                
+                                let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
+                                let directoryPath = "\(documentsPath)/Qiscus"
+                                if !FileManager.default.fileExists(atPath: directoryPath){
+                                    do {
+                                        try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
+                                    } catch let error as NSError {
+                                        Qiscus.printLog(text: error.localizedDescription);
+                                    }
+                                }
+                                let thumbPath = "\(directoryPath)/\(fileName)"
+                                
+                                if fileExt == "png" || fileExt == "png_" {
+                                    try? UIImagePNGRepresentation(thumbImage)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+                                } else if fileExt == "jpg" || fileExt == "jpg_"{
+                                    try? UIImageJPEGRepresentation(thumbImage, 1.0)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+                                }
+                                DispatchQueue.main.async(execute: {
+                                    self.updateThumbURL(url: thumbPath)
+                                })
+                            }else{
+                                Qiscus.printLog(text: "failed to save room avatar on room: \(self.roomName) with id: \(self.roomId)")
+                            }
+                        }
+                    }
+                }).downloadProgress(closure: { progressData in
+                    let progress = CGFloat(progressData.fractionCompleted)
+                    DispatchQueue.main.async(execute: {
+                        Qiscus.printLog(text: "Download room (\(self.roomId)) avatar image progress: \(progress)")
+                    })
+                })
+        }
+    }
+    fileprivate func createThumbLink(_ image:UIImage)->UIImage{
+        var smallPart:CGFloat = image.size.height
+        
+        if(image.size.width > image.size.height){
+            smallPart = image.size.width
+        }
+        let ratio:CGFloat = CGFloat(100.0/smallPart)
+        let newSize = CGSize(width: (image.size.width * ratio),height: (image.size.height * ratio))
+        
+        UIGraphicsBeginImageContext(newSize)
+        image.draw(in: CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return newImage!
+    }
+    open func updateThumbURL(url:String){
+        let realm = try! Realm()
+        try! realm.write {
+            self.roomAvatarLocalPath = url
         }
     }
 }
