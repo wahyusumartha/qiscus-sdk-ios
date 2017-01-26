@@ -12,6 +12,8 @@ extension UINavigationItem {
 
     public func setTitleWithSubtitle(title:String, subtitle : String){
         
+        let titleWidth = QiscusHelper.screenWidth() - 160
+        
         let titleLabel = UILabel(frame:CGRect(x: 0, y: 0, width: 0, height: 0))
         titleLabel.backgroundColor = UIColor.clear
         titleLabel.textColor = UIColor.white
@@ -27,19 +29,19 @@ extension UINavigationItem {
         subTitleLabel.text = subtitle
         subTitleLabel.textAlignment = .left
         subTitleLabel.sizeToFit()
+
+        let titleView = UIView(frame: CGRect(x: 0, y: 0, width: titleWidth, height: 30))
         
-        let titleView = UIView(frame: CGRect(x: 0, y: 0, width: max(subTitleLabel.frame.size.width,titleLabel.frame.size.width), height: 30))
-        
-        
-//        if titleLabel.frame.width >= subTitleLabel.frame.width {
-//            var adjustment = subTitleLabel.frame
-//            adjustment.origin.x = titleView.frame.origin.x + (titleView.frame.width/2) - (subTitleLabel.frame.width/2)
-//            subTitleLabel.frame = adjustment
-//        } else {
-//            var adjustment = titleLabel.frame
-//            adjustment.origin.x = titleView.frame.origin.x + (titleView.frame.width/2) - (titleLabel.frame.width/2)
-//            titleLabel.frame = adjustment
-//        }
+        if titleLabel.frame.width > titleWidth {
+            var adjustment = titleLabel.frame
+            adjustment.size.width = titleWidth
+            titleLabel.frame = adjustment
+        }
+        if subTitleLabel.frame.width > titleWidth {
+            var adjustment = subTitleLabel.frame
+            adjustment.size.width = titleWidth
+            subTitleLabel.frame = adjustment
+        }
         
         titleView.addSubview(titleLabel)
         titleView.addSubview(subTitleLabel)
