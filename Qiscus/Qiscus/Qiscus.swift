@@ -212,10 +212,10 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
      - parameter users: **String** users.
      - parameter target: The **UIViewController** where chat will appear.
      - parameter readOnly: **Bool** to set read only or not (Optional), Default value : false.
-     - parameter title: **String** text to show as chat title (Optional), Default value : "Chat".
+     - parameter title: **String** text to show as chat title (Optional), Default value : "".
      - parameter subtitle: **String** text to show as chat subtitle (Optional), Default value : "" (empty string).
      */
-    open class func chatVC(withUsers users:[String], readOnly:Bool = false, title:String = "Chat", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
+    open class func chatVC(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -250,7 +250,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
      No Documentation
     */
     
-    open class func chat(withRoomId roomId:Int, target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil,optionalDataCompletion: @escaping (String) -> Void){
+    open class func chat(withRoomId roomId:Int, target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil,optionalDataCompletion: @escaping (String) -> Void){
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -284,7 +284,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         
         target.navigationController?.present(navController, animated: true, completion: nil)
     }
-    open class func chat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
+    open class func chat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -320,7 +320,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
     /** 
      No Documentation
     */
-    open class func chatView(withUsers users:[String], readOnly:Bool = false, title:String = "Chat", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
+    open class func chatView(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -345,7 +345,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
     /**
      No Documentation
      */
-    open class func chatView(withRoomId roomId:Int, readOnly:Bool = false, title:String = "Chat", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
+    open class func chatView(withRoomId roomId:Int, readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -369,7 +369,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
         return QiscusChatVC.sharedInstance
     }
     open class func image(named name:String)->UIImage?{
-        return UIImage(named: name, in: Qiscus.bundle, compatibleWith: nil)
+        return UIImage(named: name, in: Qiscus.bundle, compatibleWith: nil)?.localizedImage()
     }
     /**
      Class function to unlock action chat
@@ -685,7 +685,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
     }
     
     class func checkDatabaseMigration(){
-        let currentSchema:UInt64 = 2
+        let currentSchema:UInt64 = 4
         var configuration = Realm.Configuration()
         
         configuration.schemaVersion = currentSchema
@@ -693,7 +693,6 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
             Qiscus.printLog(text: "Need migration to QiscusDB schema: \(currentSchema) \nfrom schema: \(oldSchemaVersion)")
             
             if (oldSchemaVersion < currentSchema){
-                print("schema lama \(oldSchemaVersion)")
                 //Deleting Realm Files
                 let realmURL = Realm.Configuration.defaultConfiguration.fileURL!
                 let realmManagement = realmURL.appendingPathExtension("management")
@@ -781,5 +780,10 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
             QiscusChatVC.sharedInstance.goBack()
         }
         target.navigationController?.present(navController, animated: true, completion: nil)
+    }
+    
+    // MARK: - Update Room Methode
+    open class func updateRoom(withRoomId roomId:Int, roomName:String? = nil, roomAvatarURL:String? = nil, roomOptions:String? = nil){
+        Qiscus.commentService.updateRoom(withRoomId: roomId, roomName: roomName, roomAvatarURL: roomAvatarURL, roomOptions: roomOptions)
     }
 }
