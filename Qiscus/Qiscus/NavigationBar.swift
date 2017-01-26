@@ -17,6 +17,7 @@ extension UINavigationItem {
         titleLabel.textColor = UIColor.white
         titleLabel.font = UIFont.boldSystemFont(ofSize: 16)
         titleLabel.text = title
+        titleLabel.textAlignment = .left
         titleLabel.sizeToFit()
         
         let subTitleLabel = UILabel(frame:CGRect(x: 0, y: 18, width: 0, height: 0))
@@ -24,20 +25,21 @@ extension UINavigationItem {
         subTitleLabel.textColor = UIColor.white
         subTitleLabel.font = UIFont.systemFont(ofSize: 11)
         subTitleLabel.text = subtitle
+        subTitleLabel.textAlignment = .left
         subTitleLabel.sizeToFit()
         
         let titleView = UIView(frame: CGRect(x: 0, y: 0, width: max(subTitleLabel.frame.size.width,titleLabel.frame.size.width), height: 30))
         
         
-        if titleLabel.frame.width >= subTitleLabel.frame.width {
-            var adjustment = subTitleLabel.frame
-            adjustment.origin.x = titleView.frame.origin.x + (titleView.frame.width/2) - (subTitleLabel.frame.width/2)
-            subTitleLabel.frame = adjustment
-        } else {
-            var adjustment = titleLabel.frame
-            adjustment.origin.x = titleView.frame.origin.x + (titleView.frame.width/2) - (titleLabel.frame.width/2)
-            titleLabel.frame = adjustment
-        }
+//        if titleLabel.frame.width >= subTitleLabel.frame.width {
+//            var adjustment = subTitleLabel.frame
+//            adjustment.origin.x = titleView.frame.origin.x + (titleView.frame.width/2) - (subTitleLabel.frame.width/2)
+//            subTitleLabel.frame = adjustment
+//        } else {
+//            var adjustment = titleLabel.frame
+//            adjustment.origin.x = titleView.frame.origin.x + (titleView.frame.width/2) - (titleLabel.frame.width/2)
+//            titleLabel.frame = adjustment
+//        }
         
         titleView.addSubview(titleLabel)
         titleView.addSubview(subTitleLabel)

@@ -139,11 +139,11 @@ open class ChatPreviewDocVC: UIViewController, UIWebViewDelegate, WKNavigationDe
         
         let backLabel = UILabel()
         
-        backLabel.text = NSLocalizedString("BACK", comment: "Back")
+        backLabel.text = ""
         backLabel.textColor = UIColor.white
         backLabel.font = UIFont.systemFont(ofSize: 12)
         
-        let image = UIImage(named: "ic_back", in: Qiscus.bundle, compatibleWith: nil)?.localizedImage()
+        let image = Qiscus.image(named: "ic_back")
         backIcon.image = image
         
         
