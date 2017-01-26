@@ -39,7 +39,8 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
             return [
                 NSForegroundColorAttributeName: QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor,
                 NSUnderlineColorAttributeName: QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor,
-                NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue
+                NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue,
+                NSFontAttributeName: UIFont.systemFont(ofSize: 13)
             ]
         }
     }
@@ -60,7 +61,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
     
     open override func setupCell(){
         let user = self.comment.sender
-        
+        textView.font = UIFont.systemFont(ofSize: 13)
         switch cellPos {
         case .first:
             let balloonEdgeInset = UIEdgeInsetsMake(13, 13, 13, 13)
@@ -114,6 +115,8 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
                         let titleRange = (text as NSString).range(of: linkData.linkTitle)
                         attributedText = NSMutableAttributedString(string: text)
                         attributedText?.addAttributes(linkTextAttributes, range: titleRange)
+                        let allRange = (text as NSString).range(of: text)
+                        attributedText?.addAttribute(NSFontAttributeName, value: UIFont.systemFont(ofSize: 13), range: allRange)
                         let url = NSURL(string: linkData.linkURL)!
                         attributedText?.addAttribute(NSLinkAttributeName, value: url, range: titleRange)
                     }
@@ -133,6 +136,8 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
                             attributedText?.addAttributes(self.linkTextAttributes, range: titleRange)
                             let url = NSURL(string: linkData.linkURL)!
                             attributedText?.addAttribute(NSLinkAttributeName, value: url, range: titleRange)
+                            let allRange = (text as NSString).range(of: text)
+                            attributedText?.addAttribute(NSFontAttributeName, value: UIFont.systemFont(ofSize: 13), range: allRange)
                             self.comment.updateCommentCellWithLinkSize(linkURL: linkData.linkURL, linkTitle: linkData.linkTitle)
                             self.chatCellDelegate?.didChangeSize(onCell: self)
                         }
@@ -219,6 +224,16 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         textViewHeight.constant = 0
         textView.layoutIfNeeded()
         LinkContainer.isHidden = true
+        let emptyString = " "
+        let range = (emptyString as NSString).range(of: " ")
+        let attributedString = NSMutableAttributedString(string: emptyString)
+        attributedString.removeAttribute(NSLinkAttributeName, range: range)
+        for (stringAttribute,_) in linkTextAttributes {
+            attributedString.removeAttribute(stringAttribute, range: range)
+        }
+        textView.attributedText = attributedString
+        textView.text = ""
+        textView.font = UIFont.systemFont(ofSize: 13)
     }
     func openLink(){
         if comment.showLink{

@@ -1117,12 +1117,13 @@ open class QiscusComment: Object {
     open func calculateTextSizeForComment() -> CGSize {
         var size = CGSize()
         let textView = UITextView()
-        textView.font = UIFont.systemFont(ofSize: 14)
+        textView.font = UIFont.systemFont(ofSize: 13)
         textView.dataDetectorTypes = .all
         textView.linkTextAttributes = [
             NSForegroundColorAttributeName: QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor,
             NSUnderlineColorAttributeName: QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor,
-            NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue
+            NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue,
+            NSFontAttributeName: UIFont.systemFont(ofSize: 13)
         ]
         
         let maxWidth:CGFloat = 190
@@ -1138,12 +1139,13 @@ open class QiscusComment: Object {
     open func calculateTextSizeForCommentLink(linkURL:String, linkTitle:String) -> CGSize {
         var size = CGSize()
         let textView = UITextView()
-        textView.font = UIFont.systemFont(ofSize: 14)
+        textView.font = UIFont.systemFont(ofSize: 13)
         textView.dataDetectorTypes = .all
         textView.linkTextAttributes = [
             NSForegroundColorAttributeName: QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor,
             NSUnderlineColorAttributeName: QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor,
-            NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue
+            NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue,
+            NSFontAttributeName: UIFont.systemFont(ofSize: 13)
         ]
         
         let maxWidth:CGFloat = 190
@@ -1151,7 +1153,8 @@ open class QiscusComment: Object {
         let titleRange = (text as NSString).range(of: linkTitle)
         let attributedText = NSMutableAttributedString(string: text)
         attributedText.addAttributes(textView.linkTextAttributes, range: titleRange)
-        
+        let allRange = (text as NSString).range(of: text)
+        attributedText.addAttribute(NSFontAttributeName, value: UIFont.systemFont(ofSize: 13), range: allRange)
         textView.attributedText = attributedText
         let textSize = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
         
