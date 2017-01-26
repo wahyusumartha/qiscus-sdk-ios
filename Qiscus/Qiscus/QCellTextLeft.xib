@@ -148,6 +148,7 @@
                 <outlet property="ballonHeight" destination="oS9-sh-3WD" id="Hsi-Px-3eU"/>
                 <outlet property="balloonTopMargin" destination="Afh-rP-y3Q" id="1tE-Dg-dTs"/>
                 <outlet property="balloonView" destination="fMF-Uw-jWN" id="TD5-H9-osX"/>
+                <outlet property="balloonWidth" destination="XgA-oA-0j1" id="YiY-dW-1dN"/>
                 <outlet property="cellHeight" destination="cCu-kY-Szo" id="FQe-oS-dN5"/>
                 <outlet property="dateLabel" destination="3DM-pr-Bgi" id="zDU-z7-ZPU"/>
                 <outlet property="leftMargin" destination="T2q-hK-ErK" id="dl6-cI-Cjg"/>

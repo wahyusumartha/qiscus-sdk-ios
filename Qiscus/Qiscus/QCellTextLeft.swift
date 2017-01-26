@@ -23,6 +23,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
     @IBOutlet weak var textLeading: NSLayoutConstraint!
     @IBOutlet weak var textViewWidth: NSLayoutConstraint!
     @IBOutlet weak var textViewHeight: NSLayoutConstraint!
+    @IBOutlet weak var balloonWidth: NSLayoutConstraint!
     
     @IBOutlet weak var LinkContainer: UIView!
     @IBOutlet weak var linkDescription: UITextView!
@@ -221,9 +222,11 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         if cellPos == .last || cellPos == .single{
             leftMargin.constant = 42
             textLeading.constant = 23
+            balloonWidth.constant = 31
         }else{
             textLeading.constant = 8
             leftMargin.constant = 57
+            balloonWidth.constant = 16
         }
         
         
@@ -231,9 +234,6 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         
     }
     override func clearContext() {
-        textView.text = ""
-        textViewWidth.constant = 0
-        textViewHeight.constant = 0
         textView.layoutIfNeeded()
         LinkContainer.isHidden = true
     }

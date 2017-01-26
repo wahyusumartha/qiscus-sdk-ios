@@ -1786,7 +1786,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
 
         if let targetCell = cell as? QChatCell{
-            targetCell.setupCell()
+//            targetCell.setupCell()
             if !targetCell.comment.isOwnMessage && targetCell.comment.commentStatus != QiscusCommentStatus.read{
                 publishRead(comment: targetCell.comment)
                 var i = 0
@@ -1807,9 +1807,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         }
     }
     public func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        if let targetCell = cell as? QChatCell{
-            targetCell.clearContext()
-        }
         if indexPath.section == (comments.count - 1){
             
             if indexPath.row == comments[indexPath.section].count - 1{
@@ -1902,6 +1899,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         }
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! QChatCell
         cell.prepareCell(withComment: comment, cellPos: cellTypePosition, indexPath: indexPath, cellDelegate: self)
+        cell.setupCell()
         if let audioCell = cell as? QCellAudio{
             audioCell.delegate = self
             return audioCell

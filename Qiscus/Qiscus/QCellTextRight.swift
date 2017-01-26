@@ -264,9 +264,7 @@ class QCellTextRight: QChatCell {
         }
     }
     override func clearContext() {
-        textViewWidth.constant = 0
-        textViewHeight.constant = 0
-        textView.layoutIfNeeded()
+
         LinkContainer.isHidden = true
         textView.text = ""
         textView.font = UIFont.systemFont(ofSize: 13)
