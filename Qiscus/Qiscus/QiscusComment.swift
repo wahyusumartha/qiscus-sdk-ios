@@ -465,7 +465,7 @@ open class QiscusComment: Object {
         let newSize = calculateTextSizeForCommentLink(linkURL: linkURL, linkTitle: linkTitle)
         let realm = try! Realm()
         try! realm.write {
-            self.commentCellHeight = newSize.height + 68
+            self.commentCellHeight = newSize.height
             self.commentTextWidth = newSize.width
         }
     }
@@ -1158,7 +1158,7 @@ open class QiscusComment: Object {
         textView.attributedText = attributedText
         let textSize = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
         
-        size.height = textSize.height + 18
+        size.height = textSize.height + 86
         size.width = textSize.width
         
         return size

@@ -63,6 +63,14 @@ class QCellTextRight: QChatCell {
     
     open override func setupCell(){
         textView.font = UIFont.systemFont(ofSize: 13)
+        let emptyString = " "
+        let range = (emptyString as NSString).range(of: " ")
+        let attributedString = NSMutableAttributedString(string: emptyString)
+        attributedString.removeAttribute(NSLinkAttributeName, range: range)
+        for (stringAttribute,_) in linkTextAttributes {
+            attributedString.removeAttribute(stringAttribute, range: range)
+        }
+        textView.attributedText = attributedString
         switch self.cellPos {
         case .first:
             let balloonEdgeInset = UIEdgeInsetsMake(13, 13, 13, 13)
@@ -118,6 +126,10 @@ class QCellTextRight: QChatCell {
                         attributedText?.addAttribute(NSFontAttributeName, value: UIFont.systemFont(ofSize: 13), range: allRange)
                         let url = NSURL(string: linkData.linkURL)!
                         attributedText?.addAttribute(NSLinkAttributeName, value: url, range: titleRange)
+                        if comment.commentCellHeight != comment.calculateTextSizeForCommentLink(linkURL: linkData.linkURL, linkTitle: linkData.linkTitle).height {
+                            self.comment.updateCommentCellWithLinkSize(linkURL: linkData.linkURL, linkTitle: linkData.linkTitle)
+                            self.chatCellDelegate?.didChangeSize(onCell: self)
+                        }
                     }
                 }else{
                     // call from API
@@ -256,14 +268,6 @@ class QCellTextRight: QChatCell {
         textViewHeight.constant = 0
         textView.layoutIfNeeded()
         LinkContainer.isHidden = true
-        let emptyString = " "
-        let range = (emptyString as NSString).range(of: " ")
-        let attributedString = NSMutableAttributedString(string: emptyString)
-        attributedString.removeAttribute(NSLinkAttributeName, range: range)
-        for (stringAttribute,_) in linkTextAttributes {
-            attributedString.removeAttribute(stringAttribute, range: range)
-        }
-        textView.attributedText = attributedString
         textView.text = ""
         textView.font = UIFont.systemFont(ofSize: 13)
     }

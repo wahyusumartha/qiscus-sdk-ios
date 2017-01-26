@@ -61,6 +61,14 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
     
     open override func setupCell(){
         let user = self.comment.sender
+        let emptyString = " "
+        let range = (emptyString as NSString).range(of: " ")
+        let attributedString = NSMutableAttributedString(string: emptyString)
+        attributedString.removeAttribute(NSLinkAttributeName, range: range)
+        for (stringAttribute,_) in linkTextAttributes {
+            attributedString.removeAttribute(stringAttribute, range: range)
+        }
+        textView.attributedText = attributedString
         textView.font = UIFont.systemFont(ofSize: 13)
         switch cellPos {
         case .first:
@@ -119,6 +127,10 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
                         attributedText?.addAttribute(NSFontAttributeName, value: UIFont.systemFont(ofSize: 13), range: allRange)
                         let url = NSURL(string: linkData.linkURL)!
                         attributedText?.addAttribute(NSLinkAttributeName, value: url, range: titleRange)
+                        if comment.commentCellHeight != comment.calculateTextSizeForCommentLink(linkURL: linkData.linkURL, linkTitle: linkData.linkTitle).height {
+                            self.comment.updateCommentCellWithLinkSize(linkURL: linkData.linkURL, linkTitle: linkData.linkTitle)
+                            self.chatCellDelegate?.didChangeSize(onCell: self)
+                        }
                     }
                 }else{
                     // call from API
@@ -224,16 +236,6 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         textViewHeight.constant = 0
         textView.layoutIfNeeded()
         LinkContainer.isHidden = true
-        let emptyString = " "
-        let range = (emptyString as NSString).range(of: " ")
-        let attributedString = NSMutableAttributedString(string: emptyString)
-        attributedString.removeAttribute(NSLinkAttributeName, range: range)
-        for (stringAttribute,_) in linkTextAttributes {
-            attributedString.removeAttribute(stringAttribute, range: range)
-        }
-        textView.attributedText = attributedString
-        textView.text = ""
-        textView.font = UIFont.systemFont(ofSize: 13)
     }
     func openLink(){
         if comment.showLink{
