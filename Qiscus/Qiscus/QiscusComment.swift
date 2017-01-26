@@ -42,10 +42,14 @@ open class QiscusComment: Object {
     open dynamic var commentRow:Int = 0
     open dynamic var commentSection:Int = 0
     open dynamic var showLink:Bool = false
+    open dynamic var commentLinkPreviewed:String = ""
     
     open var commentLink:String? {
         get{
-            if let url = QiscusHelper.getFirstLinkInString(text: commentText){
+            if commentLinkPreviewed != "" {
+                return commentLinkPreviewed
+            }
+            else if let url = QiscusHelper.getFirstLinkInString(text: commentText){
                 return url
             }else{
                 return nil
@@ -456,6 +460,14 @@ open class QiscusComment: Object {
             self.showLink = show
         }
         self.updateCommentCellSize()
+    }
+    open func updateCommentCellWithLinkSize(linkURL:String, linkTitle: String){
+        let newSize = calculateTextSizeForCommentLink(linkURL: linkURL, linkTitle: linkTitle)
+        let realm = try! Realm()
+        try! realm.write {
+            self.commentCellHeight = newSize.height + 68
+            self.commentTextWidth = newSize.width
+        }
     }
     open func updateCommentCellSize(){
         var newSize = CGSize()
@@ -1116,6 +1128,31 @@ open class QiscusComment: Object {
         let maxWidth:CGFloat = 190
         
         textView.text = self.commentText
+        let textSize = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
+        
+        size.height = textSize.height + 18
+        size.width = textSize.width
+        
+        return size
+    }
+    open func calculateTextSizeForCommentLink(linkURL:String, linkTitle:String) -> CGSize {
+        var size = CGSize()
+        let textView = UITextView()
+        textView.font = UIFont.systemFont(ofSize: 14)
+        textView.dataDetectorTypes = .all
+        textView.linkTextAttributes = [
+            NSForegroundColorAttributeName: QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor,
+            NSUnderlineColorAttributeName: QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor,
+            NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue
+        ]
+        
+        let maxWidth:CGFloat = 190
+        let text = self.commentText.replacingOccurrences(of: linkURL, with: linkTitle)
+        let titleRange = (text as NSString).range(of: linkTitle)
+        let attributedText = NSMutableAttributedString(string: text)
+        attributedText.addAttributes(textView.linkTextAttributes, range: titleRange)
+        
+        textView.attributedText = attributedText
         let textSize = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
         
         size.height = textSize.height + 18

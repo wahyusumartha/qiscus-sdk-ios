@@ -8,7 +8,7 @@
 
 import UIKit
 
-class QCellTextLeft: QChatCell {
+class QCellTextLeft: QChatCell, UITextViewDelegate {
     let maxWidth:CGFloat = 190
     let minWidth:CGFloat = 80
     
@@ -46,12 +46,16 @@ class QCellTextLeft: QChatCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         textView.contentInset = UIEdgeInsets.zero
+        textView.delegate = self
+        textView.isUserInteractionEnabled = true
+        
         LinkContainer.isHidden = true
         LinkContainer.layer.cornerRadius = 4
         LinkContainer.clipsToBounds = true
         
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QCellTextLeft.openLink))
         LinkContainer.addGestureRecognizer(tapRecognizer)
+        
     }
     
     open override func setupCell(){
@@ -75,9 +79,90 @@ class QCellTextLeft: QChatCell {
             balloonView.image = Qiscus.image(named:"text_balloon_left")?.resizableImage(withCapInsets: balloonEdgeInset, resizingMode: .stretch).withRenderingMode(.alwaysTemplate)
             break
         }
+        var attributedText:NSMutableAttributedString?
         
-        textView.isUserInteractionEnabled = false
-        textView.text = comment.commentText as String
+        if comment.showLink{
+            if let url = comment.commentLink{
+                self.linkTitle.text = "Load data ..."
+                self.linkDescription.text = "Load url description"
+                self.linkImage.image = Qiscus.image(named: "link")
+                self.LinkContainer.isHidden = false
+                self.ballonHeight.constant = 83
+                self.textTopMargin.constant = 73
+                self.linkHeight.constant = 65
+                textViewWidth.constant = maxWidth
+                
+                var urlToCheck = url.lowercased()
+                if !urlToCheck.contains("http"){
+                    urlToCheck = "http://\(url.lowercased())"
+                }
+                
+                if let linkData = QiscusLinkData.getLinkData(fromURL: urlToCheck){
+                    // data already stored on local db
+                    self.linkTitle.text = linkData.linkTitle
+                    self.linkDescription.text = linkData.linkDescription
+                    if let image = linkData.thumbImage{
+                        self.linkImage.image = image
+                    }else if linkData.linkImageURL != ""{
+                        self.linkImage.loadAsync(linkData.linkImageURL, placeholderImage: Qiscus.image(named: "link"))
+                        linkData.downloadThumbImage()
+                    }else{
+                        self.linkImage.image = Qiscus.image(named: "link")
+                    }
+                    if linkData.linkTitle != "" {
+                        let text = comment.commentText.replacingOccurrences(of: linkData.linkURL, with: linkData.linkTitle)
+                        let titleRange = (text as NSString).range(of: linkData.linkTitle)
+                        attributedText = NSMutableAttributedString(string: text)
+                        attributedText?.addAttributes(linkTextAttributes, range: titleRange)
+                        let url = NSURL(string: linkData.linkURL)!
+                        attributedText?.addAttribute(NSLinkAttributeName, value: url, range: titleRange)
+                    }
+                }else{
+                    // call from API
+                    
+                    QiscusCommentClient.sharedInstance.getLinkMetadata(url: urlToCheck, synchronous: false, withCompletion: { linkData in
+                        self.linkTitle.text = linkData.linkTitle
+                        self.linkDescription.text = linkData.linkDescription
+                        self.linkImage.loadAsync(linkData.linkImageURL, placeholderImage: Qiscus.image(named: "link"))
+                        linkData.saveLink()
+                        if linkData.linkTitle != "" {
+                            let text = self.comment.commentText.replacingOccurrences(of: linkData.linkURL, with: linkData.linkTitle)
+                            let titleRange = (text as NSString).range(of: linkData.linkTitle)
+                            attributedText = NSMutableAttributedString(string: text)
+                            //NSLinkAttributeName: NSURL(string: "https://www.apple.com")!
+                            attributedText?.addAttributes(self.linkTextAttributes, range: titleRange)
+                            let url = NSURL(string: linkData.linkURL)!
+                            attributedText?.addAttribute(NSLinkAttributeName, value: url, range: titleRange)
+                            self.comment.updateCommentCellWithLinkSize(linkURL: linkData.linkURL, linkTitle: linkData.linkTitle)
+                            self.chatCellDelegate?.didChangeSize(onCell: self)
+                        }
+                    }, withFailCompletion: {
+                        self.linkTitle.text = "Not Found"
+                        self.linkDescription.text = "No description found"
+                        self.linkImage.image = Qiscus.image(named: "link")
+                        self.comment.updateCommmentShowLink(show: false)
+                        self.chatCellDelegate?.didChangeSize(onCell: self)
+                    })
+                }
+            }
+        }else{
+            self.linkTitle.text = ""
+            self.linkDescription.text = ""
+            self.linkImage.image = Qiscus.image(named: "link")
+            self.LinkContainer.isHidden = true
+            self.ballonHeight.constant = 10
+            self.textTopMargin.constant = 0
+            self.linkHeight.constant = 0
+        }
+        
+        //textView.isUserInteractionEnabled = false
+        textView.text = ""
+        
+        if attributedText == nil {
+            textView.text = comment.commentText
+        }else{
+            textView.attributedText = attributedText
+        }
         textView.textColor = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
         textView.linkTextAttributes = linkTextAttributes
         
@@ -91,6 +176,9 @@ class QCellTextLeft: QChatCell {
         }
         
         textViewWidth.constant = textWidth
+        if comment.showLink {
+            textViewWidth.constant = maxWidth
+        }
         textViewHeight.constant = textSize.height
         userNameLabel.textAlignment = .left
         
@@ -121,60 +209,7 @@ class QCellTextLeft: QChatCell {
             leftMargin.constant = 57
         }
         
-        if comment.showLink{
-            if let url = comment.commentLink{
-                self.linkTitle.text = "Load data ..."
-                self.linkDescription.text = "Load url description"
-                self.linkImage.image = Qiscus.image(named: "link")
-                self.LinkContainer.isHidden = false
-                self.ballonHeight.constant = 83
-                self.textTopMargin.constant = 73
-                self.linkHeight.constant = 65
-                textViewWidth.constant = maxWidth
-                
-                var urlToCheck = url.lowercased()
-                if !urlToCheck.contains("http"){
-                    urlToCheck = "http://\(url.lowercased())"
-                }
-                
-                if let linkData = QiscusLinkData.getLinkData(fromURL: urlToCheck){
-                    // data already stored on local db
-                    self.linkTitle.text = linkData.linkTitle
-                    self.linkDescription.text = linkData.linkDescription
-                    if let image = linkData.thumbImage{
-                        self.linkImage.image = image
-                    }else if linkData.linkImageURL != ""{
-                        self.linkImage.loadAsync(linkData.linkImageURL, placeholderImage: Qiscus.image(named: "link"))
-                        linkData.downloadThumbImage()
-                    }else{
-                        self.linkImage.image = Qiscus.image(named: "link")
-                    }
-                }else{
-                    // call from API
-                    
-                    QiscusCommentClient.sharedInstance.getLinkMetadata(url: urlToCheck, synchronous: false, withCompletion: { linkData in
-                        self.linkTitle.text = linkData.linkTitle
-                        self.linkDescription.text = linkData.linkDescription
-                        self.linkImage.loadAsync(linkData.linkImageURL, placeholderImage: Qiscus.image(named: "link"))
-                        linkData.saveLink()
-                    }, withFailCompletion: {
-                        self.linkTitle.text = "Not Found"
-                        self.linkDescription.text = "No description found"
-                        self.linkImage.image = Qiscus.image(named: "link")
-                        self.comment.updateCommmentShowLink(show: false)
-                        self.chatCellDelegate?.didChangeSize(onCell: self)
-                    })
-                }
-            }
-        }else{
-            self.linkTitle.text = ""
-            self.linkDescription.text = ""
-            self.linkImage.image = Qiscus.image(named: "link")
-            self.LinkContainer.isHidden = true
-            self.ballonHeight.constant = 10
-            self.textTopMargin.constant = 0
-            self.linkHeight.constant = 0
-        }
+        
         textView.layoutIfNeeded()
         
     }
@@ -197,5 +232,9 @@ class QCellTextLeft: QChatCell {
                 }
             }
         }
+    }
+    
+    func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange) -> Bool {
+        return true
     }
 }
