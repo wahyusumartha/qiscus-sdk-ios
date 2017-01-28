@@ -487,7 +487,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
     public func mqttDidReceive(message data: Data, in topic: String, from session: MQTTSession){
         let channelArr = topic.characters.split(separator: "/")
         let lastChannelPart = String(channelArr.last!)
-        
+        Qiscus.printLog(text: "Realtime socket receive message in topic: \(topic)\nwith message: \(JSON(data: data))")
         switch lastChannelPart {
             case "c":
                 let json = JSON(data: data)
@@ -505,7 +505,10 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
                 QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: commentId, roomId: roomId, status: .delivered, withCompletion: {
                     if let thisComment = QiscusComment.getCommentById(commentId) {
                         if !thisComment.isOwnMessage{
-                            thisComment.updateCommentStatus(.delivered)
+                            if let participant = QiscusParticipant.getParticipant(withEmail: thisComment.commentSenderEmail, roomId: roomId){
+                                participant.updateLastDeliveredCommentId(commentId: thisComment.commentId)
+                                participant.updateLastReadCommentId(commentId: thisComment.commentId)
+                            }
                         }
                     }
                 })
@@ -596,28 +599,18 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
             case "d":
                 let message = String(data: data, encoding: .utf8)!
                 let messageArr = message.characters.split(separator: ":")
-                let commentId = Int(String(messageArr[0]))!
+                let commentId = Int64(String(messageArr[0]))!
                 let commentUniqueId:String = String(messageArr[1])
-                let topicId:Int = Int(String(channelArr[2]))!
-                if let comments = QiscusComment.updateCommentStatus(withId: commentId, orUniqueId: commentUniqueId, toStatus: .delivered){
-                    if QiscusChatVC.sharedInstance.isPresence && (QiscusChatVC.sharedInstance.topicId == topicId){
-                        QiscusCommentClient.sharedInstance.commentDelegate?.commentDidChangeStatus(Comments: comments, toStatus: .delivered)
-                        Qiscus.printLog(text: "Change comment status to delivered")
-                    }
-                }
+                let userEmail = String(channelArr[3])
+                let _ = QiscusComment.updateCommentStatus(withId: commentId, orUniqueId: commentUniqueId, toStatus: .delivered, userEmail: userEmail)
                 break
             case "r":
                 let message = String(data: data, encoding: .utf8)!
                 let messageArr = message.characters.split(separator: ":")
-                let commentId = Int(String(messageArr[0]))!
+                let commentId = Int64(String(messageArr[0]))!
                 let commentUniqueId:String = String(messageArr[1])
-                let topicId:Int = Int(String(channelArr[2]))!
-                if let comments = QiscusComment.updateCommentStatus(withId: commentId, orUniqueId: commentUniqueId, toStatus: .read){
-                    if QiscusChatVC.sharedInstance.isPresence && (QiscusChatVC.sharedInstance.topicId == topicId){
-                        QiscusCommentClient.sharedInstance.commentDelegate?.commentDidChangeStatus(Comments: comments, toStatus: .read)
-                        Qiscus.printLog(text: "change comment status to read")
-                    }
-                }
+                let userEmail = String(channelArr[3])
+                let _ = QiscusComment.updateCommentStatus(withId: commentId, orUniqueId: commentUniqueId, toStatus: .read, userEmail:userEmail)
                 break
             default:
                 Qiscus.printLog(text: "Realtime socket receive message in unknown topic: \(topic)")
@@ -685,7 +678,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
     }
     
     class func checkDatabaseMigration(){
-        let currentSchema:UInt64 = 5
+        let currentSchema:UInt64 = 6
         var configuration = Realm.Configuration()
         
         configuration.schemaVersion = currentSchema

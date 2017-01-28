@@ -36,6 +36,10 @@ class goToChatVC: UIViewController {
                     emails.append(String(email).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines))
                 }
                 Qiscus.createChat(withUsers:emails, target:self, title:"New Group Chat", subtitle: "Always new chat")
+            }else if let roomId = Int(targetField.text!){
+                Qiscus.chat(withRoomId: roomId, target: self, optionalDataCompletion: {_ in 
+                
+                })
             }else{
                 Qiscus.chat(withUsers: [targetField.text!] , target: self, title: "SampleChat")
             }

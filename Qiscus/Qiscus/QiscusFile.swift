@@ -27,7 +27,7 @@ open class QiscusFile: Object {
     open dynamic var fileLocalPath:String = ""
     open dynamic var fileThumbPath:String = ""
     open dynamic var fileTopicId:Int = 0
-    open dynamic var fileCommentId:Int = 0
+    open dynamic var fileCommentId:Int64 = 0
     open dynamic var isDownloading:Bool = false
     open dynamic var isUploading:Bool = false
     open dynamic var downloadProgress:CGFloat = 0
@@ -139,7 +139,7 @@ open class QiscusFile: Object {
     open class func getCommentFileWithURL(_ url: String)->QiscusFile?{
         let realm = try! Realm()
         
-        let searchQuery:NSPredicate = NSPredicate(format: "fileURL == %@", url)
+        let searchQuery:NSPredicate = NSPredicate(format: "fileURL == '\(url)'")
         let fileData = realm.objects(QiscusFile.self).filter(searchQuery)
         
         if(fileData.count == 0){
@@ -217,7 +217,7 @@ open class QiscusFile: Object {
             }
         }
     }
-    open func updateCommentId(_ commentId: Int){
+    open func updateCommentId(_ commentId: Int64){
         let realm = try! Realm()
         
         let searchQuery:NSPredicate = NSPredicate(format: "fileId == %d", self.fileId)

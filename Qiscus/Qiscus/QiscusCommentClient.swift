@@ -265,7 +265,7 @@ open class QiscusCommentClient: NSObject {
                                 
                                 if success == true {
                                     let commentJSON = json["results"]["comment"]
-                                    comment.updateCommentId(commentJSON["id"].intValue)
+                                    comment.updateCommentId(commentJSON["id"].int64Value)
                                     comment.updateCommentStatus(QiscusCommentStatus.sent)
                                     let commentBeforeid = QiscusComment.getCommentBeforeIdFromJSON(commentJSON)
                                     if(QiscusComment.isValidCommentIdExist(commentBeforeid)){
@@ -771,7 +771,6 @@ open class QiscusCommentClient: NSObject {
                                         let isSaved = QiscusComment.getCommentFromJSON(comment, topicId: topicId, saved: true)
                                         
                                         if let thisComment = QiscusComment.getCommentById(QiscusComment.getCommentIdFromJSON(comment)){
-                                            thisComment.updateCommentStatus(QiscusCommentStatus.delivered)
                                             if isSaved {
                                                 newMessageCount += 1
                                                 newComments.insert(thisComment, at: 0)
@@ -801,7 +800,7 @@ open class QiscusCommentClient: NSObject {
         }
     }
     
-    open func getListComment(topicId: Int, commentId: Int, triggerDelegate:Bool = false, loadMore:Bool = false, message:String? = nil){ //USED
+    open func getListComment(topicId: Int, commentId: Int64, triggerDelegate:Bool = false, loadMore:Bool = false, message:String? = nil){ //USED
         let manager = Alamofire.SessionManager.default
         var parameters:[String: AnyObject]? = nil
         var loadURL = ""
@@ -828,11 +827,7 @@ open class QiscusCommentClient: NSObject {
                         for comment in comments {
                             let isSaved = QiscusComment.getCommentFromJSON(comment, topicId: topicId, saved: true)
                             if let thisComment = QiscusComment.getCommentById(QiscusComment.getCommentIdFromJSON(comment)){
-                                if loadMore{
-                                    thisComment.updateCommentStatus(.read)
-                                }else{
-                                    thisComment.updateCommentStatus(QiscusCommentStatus.delivered)
-                                }
+                                
                                 if isSaved {
                                     newMessageCount += 1
                                     if loadMore {
@@ -1005,7 +1000,7 @@ open class QiscusCommentClient: NSObject {
                         for comment in comments {
                             let isSaved = QiscusComment.getCommentFromJSON(comment, topicId: topicId, saved: true)
                             if let thisComment = QiscusComment.getCommentById(QiscusComment.getCommentIdFromJSON(comment)){
-                                thisComment.updateCommentStatus(QiscusCommentStatus.delivered)
+                                thisComment.updateCommentStatus(QiscusCommentStatus.sent)
                                 if isSaved {
                                     newMessageCount += 1
                                     newComments.insert(thisComment, at: 0)
@@ -1103,7 +1098,7 @@ open class QiscusCommentClient: NSObject {
                         for comment in comments {
                             let isSaved = QiscusComment.getCommentFromJSON(comment, topicId: topicId, saved: true)
                             if let thisComment = QiscusComment.getCommentById(QiscusComment.getCommentIdFromJSON(comment)){
-                                thisComment.updateCommentStatus(QiscusCommentStatus.delivered)
+                                thisComment.updateCommentStatus(QiscusCommentStatus.sent)
                                 if isSaved {
                                     newMessageCount += 1
                                     newComments.insert(thisComment, at: 0)
@@ -1151,7 +1146,7 @@ open class QiscusCommentClient: NSObject {
     }
     
     // MARK: - Load More
-    open func loadMoreComment(fromCommentId commentId:Int, topicId:Int, limit:Int = 10){
+    open func loadMoreComment(fromCommentId commentId:Int64, topicId:Int, limit:Int = 10){
         let comments = QiscusComment.loadMoreComment(fromCommentId: commentId, topicId: topicId, limit: limit)
         Qiscus.printLog(text: "got \(comments.count) new comments")
         
@@ -1259,7 +1254,7 @@ open class QiscusCommentClient: NSObject {
         }
     }
     // MARK: - Message Status
-    open func publishMessageStatus(onComment commentId:Int, roomId:Int, status:QiscusCommentStatus, withCompletion: @escaping ()->Void){
+    open func publishMessageStatus(onComment commentId:Int64, roomId:Int, status:QiscusCommentStatus, withCompletion: @escaping ()->Void){
         if status == QiscusCommentStatus.delivered || status == QiscusCommentStatus.read{
             let manager = Alamofire.SessionManager.default
             let loadURL = QiscusConfig.UPDATE_COMMENT_STATUS_URL

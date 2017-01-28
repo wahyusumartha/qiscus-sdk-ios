@@ -208,7 +208,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
 
         self.emptyChatImage.image = Qiscus.image(named: "empty_messages")?.withRenderingMode(.alwaysTemplate)
         self.emptyChatImage.tintColor = self.bottomColor
-        commentClient.commentDelegate = self
+        
         let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout
         layout?.sectionHeadersPinToVisibleBounds = true
         layout?.sectionFootersPinToVisibleBounds = true
@@ -219,6 +219,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     }
     override open func viewWillDisappear(_ animated: Bool) {
         self.isPresence = false
+        commentClient.commentDelegate = nil
         super.viewWillDisappear(animated)
         self.view.endEditing(true)
         //self.syncTimer?.invalidate()
@@ -231,11 +232,14 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         if audioPlayer != nil{
             audioPlayer?.stop()
         }
+        self.comments = [[QiscusComment]]()
+        self.collectionView.reloadData()
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         unreadIndexPath = [IndexPath]()
         bottomButton.isHidden = true
+        commentClient.commentDelegate = self
         self.isPresence = true
         self.comments = [[QiscusComment]]()
         self.collectionView.reloadData()
@@ -648,7 +652,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                         if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
                             roomDelegate.didFinishLoadRoom(onRoom: room)
                         }
-                        self.comments = QiscusComment.groupAllCommentByDateInRoom(self.roomId, limit: 20, firstLoad: true)
+                        self.comments = QiscusComment.grouppedComment(inTopicId: room.roomLastCommentTopicId, firstLoad: true)
                         if self.comments.count > 0 {
                             self.topicId = room.roomLastCommentTopicId
                             self.collectionView.reloadData()
@@ -1787,7 +1791,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
 
         if let targetCell = cell as? QChatCell{
 //            targetCell.setupCell()
-            if !targetCell.comment.isOwnMessage && targetCell.comment.commentStatus != QiscusCommentStatus.read{
+            if !targetCell.comment.isOwnMessage && targetCell.comment.commentStatusRaw != QiscusCommentStatus.read.rawValue{
                 publishRead(comment: targetCell.comment)
                 var i = 0
                 for index in unreadIndexPath{
@@ -1908,7 +1912,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         }
     }
     public func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        let comment = self.comments[indexPath.section].last!
+        let comment = self.comments[indexPath.section].first!
         
         if kind == UICollectionElementKindSectionFooter{
             if comment.isOwnMessage{

@@ -22,6 +22,7 @@ open class QiscusUser: Object {
     open dynamic var userEmail:String = ""
     open dynamic var userFullName:String = ""
     open dynamic var userAvailability:Bool = true
+    open dynamic var userLastSeen:String = ""
     open dynamic var role:String = ""
     open dynamic var desc: String = ""
 
@@ -76,7 +77,7 @@ open class QiscusUser: Object {
     open func usernameAs(_ nameAs: String){
         let realm = try! Realm()
         
-        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == %@ AND role == %@", self.userEmail, self.role)
+        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)' AND role == '\(self.role)'")
         let userData = realm.objects(QiscusUser.self).filter(searchQuery)
         
         if(userData.count == 0){
@@ -91,7 +92,7 @@ open class QiscusUser: Object {
     open func updateDescription(_ desc: String){
         let realm = try! Realm()
         
-        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == %@ AND role == %@", self.userEmail, self.role)
+        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)' AND role == '\(self.role)'", self.userEmail, self.role)
         let userData = realm.objects(QiscusUser.self).filter(searchQuery)
         
         if(userData.count == 0){
@@ -132,7 +133,7 @@ open class QiscusUser: Object {
     open class func getUserWithEmail(_ email:String)->QiscusUser?{ // USED
         let realm = try! Realm()
         
-        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == %@", email)
+        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(email)'")
         let userData = realm.objects(QiscusUser.self).filter(searchQuery)
         
         if(userData.count == 0){
@@ -145,7 +146,7 @@ open class QiscusUser: Object {
     open func updateUserFullName(_ fullName: String){
         let realm = try! Realm()
         
-        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == %@ AND role == %@", self.userEmail,self.role)
+        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)' AND role == '\(self.role)'")
         let userData = realm.objects(QiscusUser.self).filter(searchQuery)
         
         if(userData.count == 0){
@@ -174,7 +175,7 @@ open class QiscusUser: Object {
     open func saveUser()->QiscusUser{ //USED
         let realm = try! Realm()
         
-        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == %@", self.userEmail)
+        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)'")
         let userData = realm.objects(QiscusUser.self).filter(searchQuery)
 
         if(self.localId == 0){

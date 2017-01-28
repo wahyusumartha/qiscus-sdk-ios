@@ -61,7 +61,7 @@ open class QiscusLinkData: Object {
     }
     open class func getLinkData(fromURL url: String)->QiscusLinkData?{
         let realm = try! Realm()
-        let searchQuery:NSPredicate = NSPredicate(format: "linkURL == %@", url)
+        let searchQuery:NSPredicate = NSPredicate(format: "linkURL == '\(url)'")
         let RetNext = realm.objects(QiscusLinkData.self).filter(searchQuery)
         
         if RetNext.count > 0 {
@@ -73,7 +73,7 @@ open class QiscusLinkData: Object {
     }
     open func saveLink(){ // USED
         let realm = try! Realm()
-        let searchQuery = NSPredicate(format: "linkURL == %@", self.linkURL)
+        let searchQuery = NSPredicate(format: "linkURL == '\(self.linkURL)'")
         
         let linkData = realm.objects(QiscusLinkData.self).filter(searchQuery)
         

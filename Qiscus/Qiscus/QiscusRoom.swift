@@ -18,7 +18,7 @@ open class QiscusRoom: Object {
     open dynamic var roomAvatarURL:String = ""
     open dynamic var roomAvatarLocalPath:String = ""
     open dynamic var roomChannel:String = ""
-    open dynamic var roomLastCommentId:Int = 0
+    open dynamic var roomLastCommentId:Int64 = 0
     open dynamic var roomLastCommentMessage:String = ""
     open dynamic var roomLastCommentSender:String = ""
     open dynamic var roomLastCommentTopicId:Int = 0
@@ -40,6 +40,22 @@ open class QiscusRoom: Object {
                 check = true
             }
             return check
+        }
+    }
+    open var participants:[QiscusParticipant]{
+        get{
+            return QiscusParticipant.getParticipant(onRoomId: roomId)
+        }
+    }
+    open var lastCommentIdInRoom:Int64{
+        get{
+            if let lastComment = QiscusComment.lastCommentInTopic(self.roomLastCommentTopicId){
+                if lastComment.commentId > roomLastCommentId {
+                    updateRoomLastComment(lastComment)
+                    return lastComment.commentId
+                }
+            }
+            return roomLastCommentId
         }
     }
     open var avatarImage:UIImage?{
@@ -78,7 +94,7 @@ open class QiscusRoom: Object {
     open class func getRoom(_ withDistinctId:String, andUserEmail:String)->QiscusRoom?{ //USED
         let realm = try! Realm()
         
-        let searchQuery:NSPredicate = NSPredicate(format: "distinctId == %@ AND user == %@",withDistinctId, andUserEmail)
+        let searchQuery:NSPredicate = NSPredicate(format: "distinctId == '\(withDistinctId)' AND user == '\(andUserEmail)'")
         let roomData = realm.objects(QiscusRoom.self).filter(searchQuery)
         
         if(roomData.count > 0){
@@ -114,7 +130,7 @@ open class QiscusRoom: Object {
     open class func getRoom(_ fromJSON:JSON)->QiscusRoom{
         let room = QiscusRoom()
         if let id = fromJSON["id"].int {  room.roomId = id  }
-        if let commentId = fromJSON["last_comment_id"].int {room.roomLastCommentId = commentId}
+        if let commentId = fromJSON["last_comment_id"].int64 {room.roomLastCommentId = commentId}
         if let lastMessage = fromJSON["last_comment_message"].string {
             room.roomLastCommentMessage = lastMessage
         }
@@ -141,6 +157,14 @@ open class QiscusRoom: Object {
         let realm = try! Realm()
         try! realm.write {
             self.distinctId = distinctId
+        }
+    }
+    open func updateRoomLastComment(_ comment:QiscusComment){
+        let realm = try! Realm()
+        try! realm.write {
+            self.roomLastCommentId = comment.commentId
+            self.roomLastCommentMessage = comment.commentText
+            self.roomLastCommentSender = comment.commentSenderEmail
         }
     }
     open func updateDesc(_ desc:String){
