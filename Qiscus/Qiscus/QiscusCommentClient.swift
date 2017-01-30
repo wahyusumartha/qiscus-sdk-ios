@@ -227,6 +227,9 @@ open class QiscusCommentClient: NSObject {
         let comment = QiscusComment.newCommentWithMessage(message: message, inTopicId: topicId, showLink: showLink)
         self.postComment(comment, roomId: roomId, linkData:linkData)
         self.commentDelegate?.gotNewComment([comment])
+        if QiscusCommentClient.sharedInstance.roomDelegate != nil{
+            QiscusCommentClient.sharedInstance.roomDelegate?.gotNewComment(comment)
+        }
     }
     open func postComment(_ comment:QiscusComment, file:QiscusFile? = nil, roomId:Int? = nil, linkData:QiscusLinkData? = nil){ //USED
         
