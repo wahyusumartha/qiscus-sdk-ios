@@ -11,11 +11,11 @@ import RealmSwift
 import Alamofire
 import SwiftyJSON
 
-public enum QiscusCommentType:Int {
+@objc public enum QiscusCommentType:Int {
     case text
     case attachment
 }
-public enum QiscusCommentStatus:Int{
+@objc public enum QiscusCommentStatus:Int{
     case sending
     case sent
     case delivered
@@ -23,7 +23,7 @@ public enum QiscusCommentStatus:Int{
     case failed
 }
 
-open class QiscusComment: Object {
+@objc open class QiscusComment: Object {
     // MARK: - Dynamic Variable
     open dynamic var localId:Int64 = 0
     open dynamic var commentId:Int64 = 0

@@ -8,7 +8,7 @@
 
 import UIKit
 
-public protocol QiscusConfigDelegate {
+@objc public protocol QiscusConfigDelegate {
     func qiscusFailToConnect(_ withMessage:String)
     func qiscusConnected()
 }

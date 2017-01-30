@@ -14,7 +14,7 @@ import ImageViewer
 import IQAudioRecorderController
 import SwiftyJSON
 
-open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate, GalleryItemsDatasource, IQAudioRecorderViewControllerDelegate, AVAudioPlayerDelegate, ChatCellDelegate,ChatCellAudioDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
+@objc open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate, GalleryItemsDatasource, IQAudioRecorderViewControllerDelegate, AVAudioPlayerDelegate, ChatCellDelegate,ChatCellAudioDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
     
     static let sharedInstance = QiscusChatVC()
     
@@ -980,20 +980,23 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             }
         })
     }
-    open func didFailedLoadDataFromAPI(_ error: String, data:JSON?){
+    open func didFailedLoadDataFromAPI(_ error: String){
         self.dismissLoading()
-        var errorMessage = "Failed to load room data"
-        print("error data: \(data)")
-        if data != nil{
-            if let error = data!["detailed_messages"].array {
-                if let message = error[0].string {
-                    errorMessage = message
-                }
-            }else if let error = data!["message"].string {
-                errorMessage = error
-            }
-        }
-        QToasterSwift.toast(target: self, text: errorMessage, backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+//        if data != nil{
+//            var errorMessage = "Failed to load room data"
+//            var json = JSON(data!)
+//            print("error data: \(json)")
+//            if json != nil{
+//                if let error = json["detailed_messages"].array {
+//                    if let message = error[0].string {
+//                        errorMessage = message
+//                    }
+//                }else if let error = json["message"].string {
+//                    errorMessage = error
+//                }
+//            }
+//            QToasterSwift.toast(target: self, text: errorMessage, backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+//        }
     }
     open func gotNewComment(_ comments:[QiscusComment]){
         var refresh = false

@@ -9,7 +9,7 @@
 import UIKit
 import SwiftyJSON
 
-public protocol QCommentDelegate {
+@objc public protocol QCommentDelegate {
     func didSuccesPostComment(_ comment:QiscusComment)
     func didFailedPostComment(_ comment:QiscusComment)
     func downloadingMedia(_ comment:QiscusComment)
@@ -21,7 +21,7 @@ public protocol QCommentDelegate {
     func didFailedPostFile(_ comment:QiscusComment)
     func finishedLoadFromAPI(_ topicId: Int)
     func gotNewComment(_ comments:[QiscusComment])
-    func didFailedLoadDataFromAPI(_ error: String, data:JSON?)
+    func didFailedLoadDataFromAPI(_ error: String)
     func didFinishLoadMore()
     func commentDidChangeStatus(Comments comments:[QiscusComment], toStatus: QiscusCommentStatus)
     func performResendMessage(onIndexPath: IndexPath)

@@ -12,7 +12,7 @@ import Foundation
 import SwiftMQTT
 import SwiftyJSON
 
-open class Qiscus: NSObject, MQTTSessionDelegate {
+@objc open class Qiscus: NSObject, MQTTSessionDelegate {
 
     open static let sharedInstance = Qiscus()
     
