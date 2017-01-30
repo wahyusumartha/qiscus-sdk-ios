@@ -77,7 +77,7 @@ class QCellMediaRight: QChatCell {
             balloonView.image = Qiscus.image(named:"text_balloon_right")?.resizableImage(withCapInsets: balloonEdgeInset, resizingMode: .stretch).withRenderingMode(.alwaysTemplate)
             break
         }
-        balloonView.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor
+        balloonView.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonColor
         
         // cleartap recognizer
         if self.tapRecognizer != nil{
