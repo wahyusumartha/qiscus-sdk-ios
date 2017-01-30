@@ -8,7 +8,7 @@
 
 import UIKit
 
-open class QiscusColorConfiguration: NSObject {
+@objc open class QiscusColorConfiguration: NSObject {
     static var sharedInstance = QiscusColorConfiguration()
     
     /// Your cancel button color, using UIColor class, Default value : UIColor(red: 223/255.0, green: 223/255.0, blue: 223/255.0, alpha:1.0)

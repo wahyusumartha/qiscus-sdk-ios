@@ -18,7 +18,7 @@ import SwiftyJSON
     
     open var config = QiscusConfig.sharedInstance
     open var commentService = QiscusCommentClient.sharedInstance
-    open var styleConfiguration = QiscusUIConfiguration.sharedInstance
+    @objc open var styleConfiguration = QiscusUIConfiguration.sharedInstance
     
     open var isPushed:Bool = false
     open var iCloudUpload:Bool = false

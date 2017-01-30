@@ -8,7 +8,7 @@
 
 import UIKit
 
-open class QiscusUIConfiguration: NSObject {
+@objc open class QiscusUIConfiguration: NSObject {
     static var sharedInstance = QiscusUIConfiguration()
     
     open var color = QiscusColorConfiguration.sharedInstance
