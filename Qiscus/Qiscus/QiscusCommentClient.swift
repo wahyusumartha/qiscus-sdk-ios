@@ -938,9 +938,9 @@ open class QiscusCommentClient: NSObject {
                             user.userAvatarURL = participant["avatar_url"].stringValue
                             
                             let _ = user.saveUser()
+                            QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
                             if user.userEmail != QiscusMe.sharedInstance.email {
                                 room.updateUser(user.userEmail)
-                                QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
                             }
                         }
                     }
@@ -1052,9 +1052,9 @@ open class QiscusCommentClient: NSObject {
                             user.userAvatarURL = participant["avatar_url"].stringValue
                             
                             let _ = user.saveUser()
+                            QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
                             if user.userEmail != QiscusMe.sharedInstance.email {
                                 room.updateUser(user.userEmail)
-                                QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
                             }
                         }
                     }
@@ -1152,9 +1152,9 @@ open class QiscusCommentClient: NSObject {
                             user.userAvatarURL = participant["avatar_url"].stringValue
                             
                             let _ = user.saveUser()
+                            QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
                             if user.userEmail != QiscusMe.sharedInstance.email {
                                 room.updateUser(user.userEmail)
-                                QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
                             }
                         }
                     }
@@ -1251,7 +1251,6 @@ open class QiscusCommentClient: NSObject {
                                 for comment in comments {
                                     let isSaved = QiscusComment.getCommentFromJSON(comment, topicId: topicId, saved: true)
                                     if let thisComment = QiscusComment.getCommentById(QiscusComment.getCommentIdFromJSON(comment)){
-                                        thisComment.updateCommentStatus(QiscusCommentStatus.delivered)
                                         if isSaved {
                                             newMessageCount += 1
                                             newComments.insert(thisComment, at: 0)
@@ -1269,9 +1268,9 @@ open class QiscusCommentClient: NSObject {
                                     user.userAvatarURL = participant["avatar_url"].stringValue
                                     
                                     let _ = user.saveUser()
+                                    QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
                                     if user.userEmail != QiscusMe.sharedInstance.email {
                                         room.updateUser(user.userEmail)
-                                        QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
                                     }
                                 }
                             }
@@ -1329,7 +1328,7 @@ open class QiscusCommentClient: NSObject {
                     let error = json["error"]
                     
                     if results != nil{
-                        Qiscus.printLog(text: "success change comment status on \(commentId) to \(status)")
+                        Qiscus.printLog(text: "success change comment status on \(commentId) to \(status.rawValue)")
                         withCompletion()
                     }else if error != nil{
                         Qiscus.printLog(text: "error update message status: \(error)")

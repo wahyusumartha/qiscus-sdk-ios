@@ -33,6 +33,32 @@ open class QiscusParticipant: Object {
     override open class func primaryKey() -> String {
         return "localId"
     }
+    open class func getMinReadCommentId(onRoom roomId:Int)->Int64{
+        var minRead = Int64(0)
+        let participants = QiscusParticipant.getParticipant(onRoomId: roomId)
+        if participants.count > 0{
+            minRead = participants.first!.lastReadCommentId
+            for participant in participants{
+                if participant.lastReadCommentId < minRead{
+                    minRead = participant.lastReadCommentId
+                }
+            }
+        }
+        return minRead
+    }
+    open class func getMinDeliveredCommentId(onRoom roomId:Int)->Int64{
+        var minDelivered = Int64(0)
+        let participants = QiscusParticipant.getParticipant(onRoomId: roomId)
+        if participants.count > 0{
+            minDelivered = participants.first!.lastDeliveredCommentId
+            for participant in participants{
+                if participant.lastDeliveredCommentId < minDelivered{
+                    minDelivered = participant.lastDeliveredCommentId
+                }
+            }
+        }
+        return minDelivered
+    }
     open class func getParticipant(withEmail email:String, roomId:Int) -> QiscusParticipant?{
         let realm = try! Realm()
         let searchQuery = NSPredicate(format: "participantRoomId == %d AND participantEmail == '\(email)'", roomId)

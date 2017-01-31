@@ -103,11 +103,15 @@ import SwiftyJSON
                     }
                 }
             }
-            if commentId < minReadId {
+            print("message:\(commentText) | commentId:\(commentId) | read:\(minReadId) | delivered:\(minDeliveredId))")
+            if commentId <= minReadId {
+                print("status: read")
                 return QiscusCommentStatus.read
-            }else if commentId < minDeliveredId{
+            }else if commentId <= minDeliveredId{
+                print("status: delivered")
                 return QiscusCommentStatus.delivered
             }else{
+                print("status: \(commentStatusRaw)")
                 return QiscusCommentStatus(rawValue: commentStatusRaw)!
             }
         }
@@ -608,7 +612,7 @@ import SwiftyJSON
         
         comment.commentTopicId = topicId
         comment.commentSenderEmail = data["email"].stringValue
-        comment.commentStatusRaw = QiscusCommentStatus.delivered.rawValue
+        comment.commentStatusRaw = QiscusCommentStatus.sent.rawValue
         comment.commentBeforeId = data["comment_before_id"].int64Value
         comment.commentText = data["message"].stringValue
         comment.commentId = data["id"].int64Value
@@ -662,7 +666,7 @@ import SwiftyJSON
         let comment = QiscusComment()
         comment.commentTopicId = data["topic_id"].intValue
         comment.commentSenderEmail = data["username_real"].stringValue
-        comment.commentStatusRaw = QiscusCommentStatus.delivered.rawValue
+        comment.commentStatusRaw = QiscusCommentStatus.sent.rawValue
         comment.commentBeforeId = data["comment_before_id"].int64Value
         var created_at:String = ""
         var usernameAs:String = ""
@@ -696,7 +700,7 @@ import SwiftyJSON
             let timetoken = Double(chatDate!.timeIntervalSince1970)
             comment.commentCreatedAt = timetoken
         }
-        comment.commentStatusRaw = QiscusCommentStatus.delivered.rawValue
+        comment.commentStatusRaw = QiscusCommentStatus.sent.rawValue
         let saved = comment.saveComment(true)
         return saved
     }
@@ -707,7 +711,7 @@ import SwiftyJSON
         Qiscus.printLog(text: "getCommentFromJSON: \(data)")
         comment.commentTopicId = topicId
         comment.commentSenderEmail = data["email"].stringValue
-        comment.commentStatusRaw = QiscusCommentStatus.delivered.rawValue
+        comment.commentStatusRaw = QiscusCommentStatus.sent.rawValue
         comment.commentBeforeId = data["comment_before_id"].int64Value
         
         var created_at:String = ""
@@ -801,79 +805,56 @@ import SwiftyJSON
             }
         }
     }
-    open class func updateCommentStatus(withId commentId:Int64, orUniqueId:String, toStatus: QiscusCommentStatus, userEmail:String)->[QiscusComment]?{
-        var comments = [QiscusComment]()
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "commentId == %d OR commentUniqueId == '\(orUniqueId)'", commentId)
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery)
-        
-        if commentData.count > 0 {
-            let commentObject = commentData.last!
-            let searchAll = NSPredicate(format: "commentId <= %d AND commentStatusRaw < %d AND commentTopicId == %d", commentObject.commentId, toStatus.rawValue, commentObject.commentTopicId)
-            let commentsData = realm.objects(QiscusComment.self).filter(searchAll)
+    open class func getLastSentComent(inRoom roomId:Int)->QiscusComment?{
+        if let room = QiscusRoom.getRoomById(roomId){
+            let topicId = room.roomLastCommentTopicId
             
-            if commentsData.count > 0 {
-                for eachComment in commentsData{
-                    if eachComment.commentUniqueId == orUniqueId && eachComment.commentId != commentId{
-                        eachComment.updateCommentId(commentId)
-                    }
-                    if eachComment.commentStatus.rawValue < toStatus.rawValue || eachComment.commentStatus == .failed{
-                        
-                        if toStatus == QiscusCommentStatus.delivered || toStatus == QiscusCommentStatus.read{
-                            if let participant = QiscusParticipant.getParticipant(withEmail: userEmail, roomId: eachComment.roomId){
-                            
-                                if toStatus == QiscusCommentStatus.read {
-                                    let oldStatus:Int = eachComment.commentStatus.rawValue
-                                    participant.updateLastReadCommentId(commentId: eachComment.commentId)
-                                    if oldStatus != eachComment.commentStatus.rawValue{
-                                        if QiscusChatVC.sharedInstance.isPresence && (QiscusChatVC.sharedInstance.topicId == eachComment.commentTopicId){
-                                            QiscusCommentClient.sharedInstance.commentDelegate?.commentDidChangeStatus(Comments: [eachComment], toStatus: .read)
-                                            Qiscus.printLog(text: "Change comment status to read")
-                                        }
-                                    }
-                                }
-                                else if toStatus == QiscusCommentStatus.delivered {
-                                    let oldStatus:Int = eachComment.commentStatus.rawValue
-                                    participant.updateLastDeliveredCommentId(commentId: eachComment.commentId)
-                                    if oldStatus != eachComment.commentStatus.rawValue{
-                                        if QiscusChatVC.sharedInstance.isPresence && (QiscusChatVC.sharedInstance.topicId == eachComment.commentTopicId){
-                                            QiscusCommentClient.sharedInstance.commentDelegate?.commentDidChangeStatus(Comments: [eachComment], toStatus: .read)
-                                            Qiscus.printLog(text: "Change comment status to read")
-                                        }
-                                    }
-                                }
-                            }
-                        }else{
-                            eachComment.updateCommentStatus(toStatus)
-                        }
-                        
-                        comments.append(eachComment)
-                    }
+            let realm = try! Realm()
+            let searchQuery:NSPredicate = NSPredicate(format: "commentTopicId == %d", topicId)
+            let commentData = realm.objects(QiscusComment.self).filter(searchQuery).sorted(byProperty: "commentId", ascending: false)
+            
+            for comment in commentData {
+                if comment.commentStatus != QiscusCommentStatus.failed && comment.commentStatus != QiscusCommentStatus.sending{
+                    return comment
                 }
-                return comments
-            }else{
-                return nil
             }
+            return nil
         }else{
             return nil
         }
     }
 
-    open func updateCommentStatus(_ status: QiscusCommentStatus){
-        if(self.commentStatusRaw < status.rawValue) || self.commentStatus == .failed{
-            let realm = try! Realm()
-            
-            let searchQuery:NSPredicate = NSPredicate(format: "commentId == %d OR commentUniqueId == '\(self.commentUniqueId)'", self.commentId)
-            let commentData = realm.objects(QiscusComment.self).filter(searchQuery)
-            
-            if(commentData.count == 0){
-                self.commentStatusRaw = status.rawValue
+    open func updateCommentStatus(_ status: QiscusCommentStatus, email:String? = nil){
+        if(self.commentStatus.rawValue < status.rawValue) || self.commentStatus == .failed{
+            var changeStatus = false
+            if status != QiscusCommentStatus.read && status != QiscusCommentStatus.delivered{
+                let realm = try! Realm()
+                try! realm.write {
+                    self.commentStatusRaw = status.rawValue
+                }
+                changeStatus = true
             }else{
-                for comment in commentData{
-                    try! realm.write {
-                        comment.commentStatusRaw = status.rawValue
+                if email != nil{
+                    if let participant = QiscusParticipant.getParticipant(withEmail: email!, roomId: self.roomId){
+                        if status == QiscusCommentStatus.read{
+                            let oldMinReadId = QiscusParticipant.getMinReadCommentId(onRoom: self.roomId)
+                            participant.updateLastReadCommentId(commentId: self.commentId)
+                            if  QiscusParticipant.getMinReadCommentId(onRoom: self.roomId) != oldMinReadId{
+                                changeStatus = true
+                            }
+                        }else{
+                            let oldMinDeliveredId = QiscusParticipant.getMinDeliveredCommentId(onRoom: self.roomId)
+                            participant.updateLastDeliveredCommentId(commentId: self.commentId)
+                            if  QiscusParticipant.getMinDeliveredCommentId(onRoom: self.roomId) != oldMinDeliveredId{
+                                changeStatus = true
+                            }
+                        }
                     }
+                }
+            }
+            if changeStatus {
+                if let commentDelegate = QiscusCommentClient.sharedInstance.commentDelegate{
+                    commentDelegate.commentDidChangeStatus(fromComment: self, toStatus: status)
                 }
             }
         }

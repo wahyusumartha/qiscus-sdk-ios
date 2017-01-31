@@ -561,6 +561,7 @@ import SwiftyJSON
                 self.subscribeRealtime(onRoom: room)
                 if self.comments.count > 0 {
                     self.collectionView.reloadData()
+                    publishRead()
                     scrollToBotomFromNoData()
                     self.welcomeView.isHidden = true
                     commentClient.syncMessage(self.topicId)
@@ -598,6 +599,7 @@ import SwiftyJSON
                             self.subscribeRealtime(onRoom: room)
                             
                             if self.comments.count > 0 {
+                                publishRead()
                                 self.collectionView.isHidden = true
                                 self.collectionView.reloadData()
                                 scrollToBotomFromNoData()
@@ -654,6 +656,7 @@ import SwiftyJSON
                         }
                         self.comments = QiscusComment.grouppedComment(inTopicId: room.roomLastCommentTopicId, firstLoad: true)
                         if self.comments.count > 0 {
+                            publishRead()
                             self.topicId = room.roomLastCommentTopicId
                             self.collectionView.reloadData()
                             scrollToBotomFromNoData()
@@ -761,20 +764,32 @@ import SwiftyJSON
             }
         }
     }
-    open func commentDidChangeStatus(Comments comments: [QiscusComment], toStatus: QiscusCommentStatus) {
-        for comment in comments{
-            if comment.commentTopicId == self.topicId{
+    open func commentDidChangeStatus(fromComment comment: QiscusComment, toStatus: QiscusCommentStatus) {
+        if comment.commentTopicId == self.topicId{
+            if toStatus != QiscusCommentStatus.failed{
+                for commentGroup in self.comments {
+                    for singleComment in commentGroup{
+                        if singleComment.commentId <= comment.commentId{
+                            let indexPath = singleComment.commentIndexPath
+                            if self.comments.count > indexPath.section{
+                                if self.comments[indexPath.section].count > indexPath.row{
+                                    DispatchQueue.main.async {
+                                        self.comments[indexPath.section][indexPath.row] = singleComment
+                                        self.collectionView.reloadItems(at: [indexPath])
+                                    }
+                                }
+                            }
+                            
+                        }
+                    }
+                }
+            }else{
                 let indexPath = comment.commentIndexPath
-                if indexPath.section < self.comments.count{
-                    if indexPath.row < self.comments[indexPath.section].count{
-                        self.comments[indexPath.section][indexPath.row] = comment
-                        if comment.isOwnMessage {
-                            if let cell = collectionView.cellForItem(at: indexPath) as? QChatCell{
-                                cell.updateStatus(toStatus: toStatus)
-                            }
-                            if indexPath.section == self.comments.count - 1 && indexPath.row == self.comments[self.comments.count - 1].count{
-                                isLastRowVisible = true
-                            }
+                if self.comments.count > indexPath.section{
+                    if self.comments[indexPath.section].count > indexPath.row{
+                        DispatchQueue.main.async {
+                            self.comments[indexPath.section][indexPath.row] = comment
+                            self.collectionView.reloadItems(at: [indexPath])
                         }
                     }
                 }
@@ -962,6 +977,7 @@ import SwiftyJSON
         self.subscribeRealtime(onRoom: room)
         self.topicId = topicId
         self.comments = QiscusComment.grouppedComment(inTopicId: topicId, firstLoad: true)
+        
         collectionView.isHidden = true
         collectionView.reloadData()
         if self.comments.count > 0{
@@ -969,6 +985,7 @@ import SwiftyJSON
         }
         scrollToBotomFromNoData()
         self.dismissLoading()
+        publishRead()
     }
     open func scrollToBotomFromNoData(){
         let delay = 0.1 * Double(NSEC_PER_SEC)
@@ -1012,10 +1029,13 @@ import SwiftyJSON
             if isLastRowVisible{
                 needScroolToBottom = true
             }
-            if comments.count == 1 && !needScroolToBottom{
+            if comments.count == 1{
                 let firstComment = comments[0]
-                if firstComment.commentSenderEmail == QiscusConfig.sharedInstance.USER_EMAIL{
-                    needScroolToBottom = true
+                print("got newComment: \(firstComment.commentId) || \(firstComment.commentText)")
+                if !needScroolToBottom{
+                    if firstComment.commentSenderEmail == QiscusConfig.sharedInstance.USER_EMAIL{
+                        needScroolToBottom = true
+                    }
                 }
             }
             self.welcomeView.isHidden = true
@@ -1102,6 +1122,7 @@ import SwiftyJSON
                 self.collectionView.isHidden = false
             })
         }
+        publishRead()
     }
     
     // MARK: - Button Action
@@ -1795,7 +1816,7 @@ import SwiftyJSON
         if let targetCell = cell as? QChatCell{
 //            targetCell.setupCell()
             if !targetCell.comment.isOwnMessage && targetCell.comment.commentStatusRaw != QiscusCommentStatus.read.rawValue{
-                publishRead(comment: targetCell.comment)
+                publishRead()
                 var i = 0
                 for index in unreadIndexPath{
                     if index.row == indexPath.row && index.section == indexPath.section{
@@ -1990,10 +2011,23 @@ import SwiftyJSON
     @IBAction func goToBottomTapped(_ sender: UIButton) {
         scrollToBottom(true)
     }
-    func publishRead(comment:QiscusComment){
-        commentClient.publishMessageStatus(onComment: comment.commentId, roomId: comment.roomId, status: .read, withCompletion: {
-            comment.updateCommentStatus(.read)
-        })
+    func publishRead(){
+        if isPresence{
+            if self.comments.count > 0 {
+                let lastComment = self.comments.last!.last!
+                if let lastComentInTopic = QiscusComment.getLastSentComent(inRoom: lastComment.roomId){
+                    if let participant = QiscusParticipant.getParticipant(withEmail: QiscusConfig.sharedInstance.USER_EMAIL, roomId: lastComentInTopic.roomId){
+                        Qiscus.printLog(text: "check id: \(participant.lastReadCommentId) | \(lastComentInTopic.commentId)")
+                        if participant.lastReadCommentId < lastComentInTopic.commentId{
+                            Qiscus.printLog(text: "publishRead onCommentId: \(lastComentInTopic.commentId)")
+                            commentClient.publishMessageStatus(onComment: lastComentInTopic.commentId, roomId: lastComentInTopic.roomId, status: .read, withCompletion: {
+                                lastComentInTopic.updateCommentStatus(.read, email: QiscusConfig.sharedInstance.USER_EMAIL)
+                            })
+                        }
+                    }
+                }
+            }
+        }
     }
     func updateComment(onIndexPath indexPath:IndexPath){
         let comment = self.comments[indexPath.section][indexPath.row]

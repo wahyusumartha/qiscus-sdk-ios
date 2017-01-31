@@ -487,7 +487,7 @@ import SwiftyJSON
     public func mqttDidReceive(message data: Data, in topic: String, from session: MQTTSession){
         let channelArr = topic.characters.split(separator: "/")
         let lastChannelPart = String(channelArr.last!)
-        Qiscus.printLog(text: "Realtime socket receive message in topic: \(topic)\nwith message: \(JSON(data: data))")
+        Qiscus.printLog(text: "Realtime socket receive message in topic: \(topic)\nwith message: \(JSON(data: data)) and rawData: \(String(data: data, encoding: .utf8)!)")
         switch lastChannelPart {
             case "c":
                 let json = JSON(data: data)
@@ -504,12 +504,8 @@ import SwiftyJSON
                 
                 QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: commentId, roomId: roomId, status: .delivered, withCompletion: {
                     if let thisComment = QiscusComment.getCommentById(commentId) {
-                        if !thisComment.isOwnMessage{
-                            if let participant = QiscusParticipant.getParticipant(withEmail: thisComment.commentSenderEmail, roomId: roomId){
-                                participant.updateLastDeliveredCommentId(commentId: thisComment.commentId)
-                                participant.updateLastReadCommentId(commentId: thisComment.commentId)
-                            }
-                        }
+                        thisComment.updateCommentStatus(.sent)
+                        thisComment.updateCommentStatus(.read, email: thisComment.commentSenderEmail)
                     }
                 })
                 
@@ -602,7 +598,11 @@ import SwiftyJSON
                 let commentId = Int64(String(messageArr[0]))!
                 let commentUniqueId:String = String(messageArr[1])
                 let userEmail = String(channelArr[3])
-                let _ = QiscusComment.updateCommentStatus(withId: commentId, orUniqueId: commentUniqueId, toStatus: .delivered, userEmail: userEmail)
+                if let comment = QiscusComment.getCommentById(commentId){
+                    comment.updateCommentStatus(.delivered, email: userEmail)
+                }else if let comment = QiscusComment.getCommentByUniqueId(commentUniqueId){
+                    comment.updateCommentStatus(.delivered, email: userEmail)
+                }
                 break
             case "r":
                 let message = String(data: data, encoding: .utf8)!
@@ -610,7 +610,11 @@ import SwiftyJSON
                 let commentId = Int64(String(messageArr[0]))!
                 let commentUniqueId:String = String(messageArr[1])
                 let userEmail = String(channelArr[3])
-                let _ = QiscusComment.updateCommentStatus(withId: commentId, orUniqueId: commentUniqueId, toStatus: .read, userEmail:userEmail)
+                if let comment = QiscusComment.getCommentById(commentId){
+                    comment.updateCommentStatus(.read, email: userEmail)
+                }else if let comment = QiscusComment.getCommentByUniqueId(commentUniqueId){
+                    comment.updateCommentStatus(.read, email: userEmail)
+                }
                 break
             default:
                 Qiscus.printLog(text: "Realtime socket receive message in unknown topic: \(topic)")
