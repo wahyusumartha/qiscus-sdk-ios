@@ -12,13 +12,13 @@ import Foundation
 import SwiftMQTT
 import SwiftyJSON
 
-@objc open class Qiscus: NSObject, MQTTSessionDelegate {
+open class Qiscus: NSObject, MQTTSessionDelegate {
 
     open static let sharedInstance = Qiscus()
     
     open var config = QiscusConfig.sharedInstance
     open var commentService = QiscusCommentClient.sharedInstance
-    @objc open var styleConfiguration = QiscusUIConfiguration.sharedInstance
+    open var styleConfiguration = QiscusUIConfiguration.sharedInstance
     
     open var isPushed:Bool = false
     open var iCloudUpload:Bool = false

@@ -14,7 +14,7 @@ import ImageViewer
 import IQAudioRecorderController
 import SwiftyJSON
 
-@objc open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate, GalleryItemsDatasource, IQAudioRecorderViewControllerDelegate, AVAudioPlayerDelegate, ChatCellDelegate,ChatCellAudioDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
+open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate, GalleryItemsDatasource, IQAudioRecorderViewControllerDelegate, AVAudioPlayerDelegate, ChatCellDelegate,ChatCellAudioDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
     
     static let sharedInstance = QiscusChatVC()
     

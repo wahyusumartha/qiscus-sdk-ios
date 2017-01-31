@@ -9,7 +9,7 @@
 import UIKit
 import SwiftyJSON
 
-@objc public protocol QiscusRoomDelegate {
+public protocol QiscusRoomDelegate {
     func gotNewComment(_ comments:QiscusComment)
     func didFinishLoadRoom(onRoom room: QiscusRoom)
     func didFailLoadRoom(withError error:String)

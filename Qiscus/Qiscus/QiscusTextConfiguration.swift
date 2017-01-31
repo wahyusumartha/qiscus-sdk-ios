@@ -8,7 +8,7 @@
 
 import UIKit
 
-@objc open class QiscusTextConfiguration: NSObject {
+open class QiscusTextConfiguration: NSObject {
     static var sharedInstance = QiscusTextConfiguration()
     
     /// Your text to show as subtitle if there isn't any message, Default value : "Let's write message to start conversation"

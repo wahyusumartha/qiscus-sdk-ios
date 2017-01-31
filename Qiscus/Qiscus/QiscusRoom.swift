@@ -11,7 +11,7 @@ import RealmSwift
 import SwiftyJSON
 import Alamofire
 
-@objc open class QiscusRoom: Object {
+open class QiscusRoom: Object {
     open dynamic var localId:Int = 0
     open dynamic var roomId:Int = 0
     open dynamic var roomName:String = ""
