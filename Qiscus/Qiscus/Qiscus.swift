@@ -210,7 +210,6 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
     /**
      Class function to configure chat with user
      - parameter users: **String** users.
-     - parameter target: The **UIViewController** where chat will appear.
      - parameter readOnly: **Bool** to set read only or not (Optional), Default value : false.
      - parameter title: **String** text to show as chat title (Optional), Default value : "".
      - parameter subtitle: **String** text to show as chat subtitle (Optional), Default value : "" (empty string).
@@ -487,7 +486,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate {
     public func mqttDidReceive(message data: Data, in topic: String, from session: MQTTSession){
         let channelArr = topic.characters.split(separator: "/")
         let lastChannelPart = String(channelArr.last!)
-        Qiscus.printLog(text: "Realtime socket receive message in topic: \(topic)\nwith message: \(JSON(data: data)) and rawData: \(String(data: data, encoding: .utf8)!)")
+        Qiscus.printLog(text: "Realtime socket receive message in topic: \(topic)")
         switch lastChannelPart {
             case "c":
                 let json = JSON(data: data)

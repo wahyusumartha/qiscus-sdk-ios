@@ -116,7 +116,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                 showLink = false
                 permanentlyDisableLink = false
             }else{
-                print("url: \(linkToPreview)")
                 if !permanentlyDisableLink{
                     showLink = true
                 }
@@ -1031,7 +1030,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             }
             if comments.count == 1{
                 let firstComment = comments[0]
-                print("got newComment: \(firstComment.commentId) || \(firstComment.commentText)")
                 if !needScroolToBottom{
                     if firstComment.commentSenderEmail == QiscusConfig.sharedInstance.USER_EMAIL{
                         needScroolToBottom = true
@@ -2045,7 +2043,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             urlToCheck = "http://\(url.lowercased())"
         }
         commentClient.getLinkMetadata(url: urlToCheck, withCompletion: {linkData in
-            print("LinkData: \(linkData)")
             self.linkImage.loadAsync(linkData.linkImageURL)
             self.linkDescription.text = linkData.linkDescription
             self.linkTitle.text = linkData.linkTitle

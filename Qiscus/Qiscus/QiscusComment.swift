@@ -103,15 +103,11 @@ open class QiscusComment: Object {
                     }
                 }
             }
-            print("message:\(commentText) | commentId:\(commentId) | read:\(minReadId) | delivered:\(minDeliveredId))")
             if commentId <= minReadId {
-                print("status: read")
                 return QiscusCommentStatus.read
             }else if commentId <= minDeliveredId{
-                print("status: delivered")
                 return QiscusCommentStatus.delivered
             }else{
-                print("status: \(commentStatusRaw)")
                 return QiscusCommentStatus(rawValue: commentStatusRaw)!
             }
         }
@@ -964,10 +960,7 @@ open class QiscusComment: Object {
     open func saveComment(_ saved:Bool)->Bool{ // USED
         let realm = try! Realm()
         let searchQuery:NSPredicate?
-        print("commentId: \(self.commentId)")
-        print("commentUniqueId: \(self.commentUniqueId)")
         searchQuery = NSPredicate(format: "commentId == %d OR commentUniqueId == '\(self.commentUniqueId)'", self.commentId)
-        print("searchQuery: \(searchQuery)")
         let commentData = realm.objects(QiscusComment.self).filter(searchQuery!)
         
         if(self.localId == 0){
