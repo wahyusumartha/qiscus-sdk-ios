@@ -9,7 +9,7 @@
 import UIKit
 
 public extension UIViewController{
-    public func showQiscusLoading(withText text:String? = nil, andProgress progress:Float? = nil, isBlocking:Bool = false){
+    @objc public func showQiscusLoading(withText text:String? = nil, andProgress progress:Float = 0, isBlocking:Bool = false){
         let loadingView = QLoadingViewController.sharedInstance
         if loadingView.isPresence{
             self.dismissQiscusLoading()
@@ -26,11 +26,11 @@ public extension UIViewController{
             loadingView.loadingLabel.text = text
         }
         loadingView.isBlocking = isBlocking
-        if progress == nil{
+        if progress == 0{
             loadingView.percentageLabel.text = ""
             loadingView.percentageLabel.isHidden = true
         }else{
-            let percentage:Int = Int(progress! * 100)
+            let percentage:Int = Int(progress * 100)
             loadingView.percentageLabel.text = "\(percentage)%"
             loadingView.percentageLabel.isHidden = false
         }
