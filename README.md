@@ -9,9 +9,9 @@ Qiscus SDK is a lightweight and powerful chat library. Qiscus SDK will allow you
 
 - [x] Text Message and Emoji :+1:
 - [x] Upload Image and File
-- [x] Galery
-- [x] Camera
-- [x] iCloud
+  - [x] Galery
+  - [x] Camera
+  - [x] iCloud
 - [x] Custom Baloon Color
 - [x] Local Storage
 - [ ] Push Notification
@@ -37,21 +37,21 @@ Podfile file :
 ```
 target 'Sample' do
 
-.....
-use_frameworks!
+  .....
+  use_frameworks!
 
-.....
-pod 'Qiscus'
-.....
+  .....
+  pod 'Qiscus'
+  .....
 
-post_install do |installer|
-installer.pods_project.targets.each do |target|
-target.build_configurations.each do |config|
-config.build_settings['ENABLE_BITCODE'] = 'YES'
-config.build_settings['SWIFT_VERSION'] = '3.0'
-end
-end
-end
+  post_install do |installer|
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['ENABLE_BITCODE'] = 'YES'
+        config.build_settings['SWIFT_VERSION'] = '3.0'
+      end
+    end
+  end
 end
 ```
 ## Usage
@@ -63,24 +63,24 @@ To initiate Qiscus SDK, you need to import Qiscus and then add this in your code
 ##### Swift 3.0:
 
 ```
-Qiscus.setup(withAppId: YOUR_APP_ID, 
-userEmail: CURRENT_USER_EMAIL, 
-userKey: CURRENT_USER_PASSWORD, 
-username: CURRENT_USER_USERNAME, 
-avatarURL: CURRENT_USER_AVATAR_URL, 
-delegate: self
+Qiscus.setup( withAppId: YOUR_APP_ID, 
+              userEmail: CURRENT_USER_EMAIL, 
+              userKey: CURRENT_USER_PASSWORD, 
+              username: CURRENT_USER_USERNAME, 
+              avatarURL: CURRENT_USER_AVATAR_URL, 
+              delegate: self
 )
 ```
 ##### Objective C
 
 ```
 [Qiscus setupWithAppId:<YOUR_APP_ID> 
-userEmail:<USER_EMAIL> 
-userKey:<USER_KEY> 
-username:<USER_NAME> 
-avatarURL:<USER_AVATAR_URL> 
-delegate:self 
-secureURl:<true|false>];
+        userEmail:<USER_EMAIL> 
+        userKey:<USER_KEY> 
+        username:<USER_NAME> 
+        avatarURL:<USER_AVATAR_URL> 
+        delegate:self 
+        secureURl:<true|false>];
 ```
 
 [**Request access**](http://sdk.qiscus.com/start.html) to get new Qiscus APP_ID
