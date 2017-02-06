@@ -52,6 +52,9 @@ open class QiscusConfig: NSObject {
     }
     
     // MARK: -URL
+    open class var SET_DEVICE_TOKEN_URL:String{
+        return "\(QiscusConfig.sharedInstance.BASE_URL)/set_user_device_token"
+    }
     open class var UPLOAD_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/upload"
     }

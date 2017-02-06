@@ -132,6 +132,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		390E9F8F1E482D2B004B5940 /* Example.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Example.entitlements; sourceTree = "<group>"; };
 		39128C8F1D6C352900C3BEA2 /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UIImage.swift; path = Qiscus/UIImage.swift; sourceTree = "<group>"; };
 		39128C901D6C352900C3BEA2 /* Background.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Background.swift; path = Qiscus/Background.swift; sourceTree = "<group>"; };
 		39128C911D6C352900C3BEA2 /* UIView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UIView.swift; path = Qiscus/UIView.swift; sourceTree = "<group>"; };
@@ -357,6 +358,7 @@
 		39F1F6AB1D3B90E200FF1C8C /* Example */ = {
 			isa = PBXGroup;
 			children = (
+				390E9F8F1E482D2B004B5940 /* Example.entitlements */,
 				395291211E28559B004BD6B4 /* goToChatVC.swift */,
 				395291221E28559B004BD6B4 /* goToChatVC.xib */,
 				395291231E28559B004BD6B4 /* MainView.swift */,
@@ -543,6 +545,14 @@
 						CreatedOnToolsVersion = 7.3.1;
 						DevelopmentTeam = QG8KA4P8TE;
 						LastSwiftMigration = 0800;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+							com.apple.Push = {
+								enabled = 1;
+							};
+						};
 					};
 					39F1F70E1D3B91E200FF1C8C = {
 						CreatedOnToolsVersion = 7.3.1;
@@ -886,6 +896,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Example/Example.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = Example/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -908,7 +919,7 @@
 					"-framework",
 					"\"SwiftyJSON\"",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.qiscusdev.qiscusSDK2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.qiscus.qisme;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 			};
@@ -920,6 +931,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Example/Example.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = Example/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -942,7 +954,7 @@
 					"-framework",
 					"\"SwiftyJSON\"",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.qiscusdev.qiscusSDK2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.qiscus.qisme;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 			};

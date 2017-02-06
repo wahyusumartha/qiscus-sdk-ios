@@ -83,7 +83,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     //MARK: - external action
     open var unlockAction:(()->Void) = {}
     open var cellDelegate:QiscusChatCellDelegate?
-    open var optionalDataCompletion:((String)->Void)?
     open var titleAction:(()->Void) = {}
     
     var audioPlayer: AVAudioPlayer?
@@ -543,9 +542,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                 if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
                     roomDelegate.didFinishLoadRoom(onRoom: room!)
                 }
-                if self.optionalDataCompletion != nil && room != nil{
-                    self.optionalDataCompletion!(room!.optionalData)
-                }
                 if room != nil {
                     if QiscusUIConfiguration.sharedInstance.copyright.chatTitle == ""{
                         self.setTitle(title: room!.roomName)
@@ -603,15 +599,9 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                                 self.collectionView.reloadData()
                                 scrollToBotomFromNoData()
                                 self.welcomeView.isHidden = true
-                                if self.optionalDataCompletion != nil{
-                                    self.optionalDataCompletion!(room.optionalData)
-                                }
                                 commentClient.syncMessage(self.topicId)
                             }else{
                                 self.welcomeView.isHidden = false
-                                if self.optionalDataCompletion != nil{
-                                    self.optionalDataCompletion!(room.optionalData)
-                                }
                                 self.showLoading("Load Data ...")
                                 commentClient.getListComment(topicId: self.topicId, commentId: 0, triggerDelegate: true)
                             }
@@ -622,22 +612,11 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                         }
                         else{
                             self.showLoading("Load Data ...")
-                            commentClient.getListComment(withUsers: users, triggerDelegate: true, distincId: self.distincId, optionalData:self.optionalData, withMessage: self.message, optionalDataCompletion: {optionalData
-                                in
-                                if self.optionalDataCompletion != nil{
-                                    self.optionalDataCompletion!(optionalData)
-                                }
-                                Qiscus.printLog(text: "optional data from getListComment: \(optionalData)")
-                            })
+                            commentClient.getListComment(withUsers: users, triggerDelegate: true, distincId: self.distincId, optionalData:self.optionalData, withMessage: self.message)
                         }
                     }else{
                         self.showLoading("Load Data ...")
-                        commentClient.getListComment(withUsers: users, triggerDelegate: true, distincId: self.distincId, optionalData:self.optionalData, withMessage: self.message, optionalDataCompletion: {optionalData
-                            in
-                            if self.optionalDataCompletion != nil{
-                                self.optionalDataCompletion!(optionalData)
-                            }
-                        })
+                        commentClient.getListComment(withUsers: users, triggerDelegate: true, distincId: self.distincId, optionalData:self.optionalData, withMessage: self.message)
                     }
                 }else{
                     if let room = QiscusRoom.getRoomById(self.roomId){
@@ -660,9 +639,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                             self.collectionView.reloadData()
                             scrollToBotomFromNoData()
                             self.welcomeView.isHidden = true
-                            if self.optionalDataCompletion != nil{
-                                self.optionalDataCompletion!(room.optionalData)
-                            }
                             if message != nil {
                                 commentClient.postMessage(message: self.message!, topicId: self.topicId)
                                 self.message = nil
@@ -670,25 +646,14 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                             commentClient.syncMessage(self.topicId)
                         }else{
                             self.welcomeView.isHidden = false
-                            if self.optionalDataCompletion != nil{
-                                self.optionalDataCompletion!(room.optionalData)
-                            }
                             self.showLoading("Load Data ...")
-                            commentClient.getRoom(withID: self.roomId, triggerDelegate: true, withMessage: self.message, optionalDataCompletion: {optionalData in
-                                if self.optionalDataCompletion != nil{
-                                    self.optionalDataCompletion!(optionalData)
-                                }
-                            })
+                            commentClient.getRoom(withID: self.roomId, triggerDelegate: true, withMessage: self.message)
                         }
                     }
                     else{
                         self.welcomeView.isHidden = false
                         self.showLoading("Load Data ...")
-                        commentClient.getRoom(withID: self.roomId, triggerDelegate: true, withMessage: self.message, optionalDataCompletion: {optionalData in
-                            if self.optionalDataCompletion != nil{
-                                self.optionalDataCompletion!(optionalData)
-                            }
-                        })
+                        commentClient.getRoom(withID: self.roomId, triggerDelegate: true, withMessage: self.message)
                     }
                 }
             }

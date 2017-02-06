@@ -1,6 +1,5 @@
 //
 //  QiscusComment.swift
-//  LinkDokter
 //
 //  Created by Qiscus on 2/24/16.
 //  Copyright © 2016 qiscus. All rights reserved.
@@ -586,23 +585,7 @@ open class QiscusComment: Object {
         return commentId
     }
     open class func getComment(fromRealtimeJSON data:JSON)->Bool{
-        /*
-        {
-            "user_avatar" : "https:\/\/qiscuss3.s3.amazonaws.com\/uploads\/2843d09883c80473ff84a5cc4922f561\/qiscus-dp.png",
-            "unique_temp_id" : "ios-14805592733157",
-            "topic_id" : 407,
-            "created_at" : "2016-12-01T02:27:54.930Z",
-            "room_name" : "ee",
-            "username" : "ee",
-            "message" : "dddd",
-            "email" : "e3@qiscus.com",
-            "comment_before_id" : 13764,
-            "room_id" : 427,
-            "timestamp" : "2016-12-01T02:27:54Z",
-            "id" : 13765,
-            "chat_type" : "single"
-        }
-        */
+        
         let topicId = data["topic_id"].intValue
         let comment = QiscusComment()
         
@@ -613,6 +596,7 @@ open class QiscusComment: Object {
         comment.commentText = data["message"].stringValue
         comment.commentId = data["id"].int64Value
         comment.commentUniqueId = data["unique_temp_id"].stringValue
+        
         let createdAt = data["timestamp"].stringValue
         let dateTimeArr = createdAt.characters.split(separator: "T")
         let dateString = String(dateTimeArr.first!)
@@ -700,7 +684,6 @@ open class QiscusComment: Object {
         let saved = comment.saveComment(true)
         return saved
     }
-    
     
     open class func getCommentFromJSON(_ data: JSON, topicId:Int, saved:Bool) -> Bool{ // USED
         let comment = QiscusComment()

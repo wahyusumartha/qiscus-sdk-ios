@@ -194,6 +194,7 @@ open class QiscusCommentClient: NSObject {
                                     if self.configDelegate != nil {
                                         Qiscus.setupReachability()
                                         self.configDelegate!.qiscusConnected()
+                                        Qiscus.registerNotification()
                                     }
                                 }else{
                                     self.configDelegate!.qiscusFailToConnect("\(json["message"].stringValue)")
@@ -217,7 +218,60 @@ open class QiscusCommentClient: NSObject {
             request.resume()
         })
     }
-    
+    // MARK: - Register deviceToken
+    open func registerDevice(withToken deviceToken: String){
+        let manager = Alamofire.SessionManager.default
+        
+        let parameters:[String: AnyObject] = [
+            "token"  : qiscus.config.USER_TOKEN as AnyObject,
+            "device_token" : deviceToken as AnyObject,
+            "device_platform" : "ios" as AnyObject
+        ]
+        
+        DispatchQueue.global().async(execute: {
+            Qiscus.printLog(text: "registerDevice url: \(QiscusConfig.SET_DEVICE_TOKEN_URL)")
+            Qiscus.printLog(text: "post parameters: \(parameters)")
+            
+            let request = manager.request(QiscusConfig.SET_DEVICE_TOKEN_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+                Qiscus.printLog(text: "registerDevice result: \(response)")
+                Qiscus.printLog(text: "registerDevice url: \(QiscusConfig.LOGIN_REGISTER)")
+                Qiscus.printLog(text: "registerDevice parameters: \(parameters)")
+                Qiscus.printLog(text: "registerDevice headers: \(QiscusConfig.sharedInstance.requestHeader)")
+                switch response.result {
+                case .success:
+                    DispatchQueue.main.async(execute: {
+                        if let result = response.result.value{
+                            let json = JSON(result)
+                            let success:Bool = (json["status"].intValue == 200)
+                            
+                            if success {
+                                let pnData = json["results"]
+                                let configured = pnData["pn_ios_configured"].boolValue
+                                if configured {
+                                    Qiscus.printLog(text: "succesfully register device for push notification")
+                                }
+                            }else{
+                                //self.configDelegate!.qiscusFailToConnect("\(json["message"].stringValue)")
+                            }
+                        }else{
+                            if self.configDelegate != nil {
+                                //self.configDelegate!.qiscusFailToConnect("Cant get data from qiscus server")
+                            }
+                        }
+                    })
+                    break
+                case .failure(let error):
+                    DispatchQueue.main.async(execute: {
+                        if self.configDelegate != nil {
+                            self.configDelegate!.qiscusFailToConnect("\(error)")
+                        }
+                    })
+                    break
+                }
+            })
+            request.resume()
+        })
+    }
     // MARK: - Comment Methode
     open func postMessage(message: String, topicId: Int, roomId:Int? = nil, linkData:QiscusLinkData? = nil){ //USED
         var showLink = false
@@ -876,7 +930,7 @@ open class QiscusCommentClient: NSObject {
             }
         })
     }
-    open func getRoom(withID roomId:Int, triggerDelegate:Bool = false, withMessage:String? = nil, optionalDataCompletion: @escaping (String) -> Void){
+    open func getRoom(withID roomId:Int, triggerDelegate:Bool = false, withMessage:String? = nil){
         let manager = Alamofire.SessionManager.default
         let loadURL = QiscusConfig.ROOM_REQUEST_ID_URL
         
@@ -949,7 +1003,6 @@ open class QiscusCommentClient: NSObject {
                         self.postMessage(message: message, topicId: topicId)
                         QiscusChatVC.sharedInstance.message = nil
                     }
-                    optionalDataCompletion(room.optionalData)
                 }else if error != nil{
                     Qiscus.printLog(text: "error getRoom: \(error)")
                     var errorMessage = "Failed to load room data"
@@ -975,7 +1028,7 @@ open class QiscusCommentClient: NSObject {
         })
     }
     
-    open func getListComment(withUsers users:[String], triggerDelegate:Bool = true, loadMore:Bool = false, distincId:String? = nil, optionalData:String? = nil, withMessage:String? = nil,optionalDataCompletion: @escaping (String) -> Void){ //USED
+    open func getListComment(withUsers users:[String], triggerDelegate:Bool = true, loadMore:Bool = false, distincId:String? = nil, optionalData:String? = nil, withMessage:String? = nil){ //USED
         let manager = Alamofire.SessionManager.default
         let loadURL = QiscusConfig.ROOM_REQUEST_URL
 
@@ -1063,7 +1116,6 @@ open class QiscusCommentClient: NSObject {
                         self.postMessage(message: withMessage!, topicId: topicId)
                         QiscusChatVC.sharedInstance.message = nil
                     }
-                    optionalDataCompletion(room.optionalData)
                 }else if error != nil{
                     Qiscus.printLog(text: "error getListComment: \(error)")
                     var errorMessage = "Failed to load room data"

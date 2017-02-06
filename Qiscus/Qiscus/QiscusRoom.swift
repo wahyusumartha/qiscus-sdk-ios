@@ -10,7 +10,9 @@ import UIKit
 import RealmSwift
 import SwiftyJSON
 import Alamofire
-
+public enum QiscusRoomType {
+    case single,group
+}
 open class QiscusRoom: Object {
     open dynamic var localId:Int = 0
     open dynamic var roomId:Int = 0
@@ -32,7 +34,17 @@ open class QiscusRoom: Object {
     open dynamic var optionalData:String = ""
     open dynamic var distinctId:String = ""
     open dynamic var user:String = ""
+    open dynamic var isGroup = false
     
+    open var roomType:QiscusRoomType{
+        get{
+            if isGroup{
+                return QiscusRoomType.single
+            }else{
+                return QiscusRoomType.group
+            }
+        }
+    }
     open var isAvatarExist:Bool{
         get{
             var check:Bool = false
@@ -76,7 +88,6 @@ open class QiscusRoom: Object {
     override open class func primaryKey() -> String {
         return "localId"
     }
-    
     
     // MARK: - Getter Methode
     open class func getRoomById(_ roomId:Int)->QiscusRoom?{ //USED
@@ -126,7 +137,6 @@ open class QiscusRoom: Object {
             return 0
         }
     }
-    
     open class func getRoom(_ fromJSON:JSON)->QiscusRoom{
         let room = QiscusRoom()
         if let id = fromJSON["id"].int {  room.roomId = id  }
@@ -138,6 +148,13 @@ open class QiscusRoom: Object {
         if let option = fromJSON["options"].string {
             if option != "" && option != "<null>" {
                 room.optionalData = option
+            }
+        }
+        if let chatType = fromJSON["chat_type"].string{
+            if chatType == "single"{
+                room.isGroup = false
+            }else{
+                room.isGroup = true
             }
         }
         if let distinctId = fromJSON["distinct_id"].string { room.distinctId = distinctId}
