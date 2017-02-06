@@ -614,7 +614,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate {
                                                     if QiscusChatVC.sharedInstance.isPresence{
                                                         QiscusChatVC.sharedInstance.goBack()
                                                     }
-                                                    let viewController = navigation.viewControllers[currenRootView.viewControllers.count - 1]
+                                                    let viewController = navigation.viewControllers[navigation.viewControllers.count - 1]
                                                     if Qiscus.sharedInstance.isPushed{
                                                         let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
                                                         navigation.pushViewController(chatVC, animated: true)
