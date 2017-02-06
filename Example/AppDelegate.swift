@@ -28,6 +28,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             goToChatNavigationView()
         }
         
+        Qiscus.registerNotification()
+        
         //Chat view styling
         Qiscus.style.color.leftBaloonColor = UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1)
         Qiscus.style.color.welcomeIconColor = UIColor(red: 0.6, green: 0.6, blue: 0.6, alpha: 1)
@@ -64,7 +66,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
-    
+    func application(_ application: UIApplication, didRegister notificationSettings: UIUserNotificationSettings) {
+        Qiscus.didRegisterUserNotification()
+    }
     func goToChatNavigationView(){
         let chatView = goToChatVC()
         let navigationController = UINavigationController(rootViewController: chatView)

@@ -20,6 +20,7 @@ class goToChatVC: UIViewController {
         self.navigationController?.isNavigationBarHidden = true
         let dismissRecognizer = UITapGestureRecognizer(target: self, action: #selector(goToChatVC.hideKeyboard))
         self.view.addGestureRecognizer(dismissRecognizer)
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -37,9 +38,7 @@ class goToChatVC: UIViewController {
                 }
                 Qiscus.createChat(withUsers:emails, target:self, title:"New Group Chat", subtitle: "Always new chat")
             }else if let roomId = Int(targetField.text!){
-                Qiscus.chat(withRoomId: roomId, target: self, optionalDataCompletion: {_ in 
-                
-                })
+                Qiscus.chat(withRoomId: roomId, target: self)
             }else{
                 Qiscus.chat(withUsers: [targetField.text!] , target: self, title: "SampleChat")
             }
