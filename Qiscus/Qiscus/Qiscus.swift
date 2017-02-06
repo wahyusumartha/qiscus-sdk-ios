@@ -14,7 +14,7 @@ import SwiftyJSON
 import PushKit
 import UserNotifications
 
-open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate {
+open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUserNotificationCenterDelegate {
 
     open static let sharedInstance = Qiscus()
     
@@ -592,38 +592,13 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate {
                                 content.title = roomName
                                 content.body = "\(senderName): \(notificationMessage)"
                                 content.sound = UNNotificationSound.default()
+                                content.userInfo = ["qiscus-room-id": roomId]
                                 
                                 let request = UNNotificationRequest.init(identifier: "QiscusComment-\(newMessage?.commentId)", content: content, trigger: nil)
                                 let center = UNUserNotificationCenter.current()
                                 center.add(request, withCompletionHandler: { (error) in
                                     if error == nil {
-                                        if let window = UIApplication.shared.keyWindow{
-                                            if let currenRootView = window.rootViewController as? UINavigationController{
-                                                if QiscusChatVC.sharedInstance.isPresence{
-                                                    QiscusChatVC.sharedInstance.goBack()
-                                                }
-                                                let viewController = currenRootView.viewControllers[currenRootView.viewControllers.count - 1]
-                                                if Qiscus.sharedInstance.isPushed{
-                                                    let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
-                                                    currenRootView.pushViewController(chatVC, animated: true)
-                                                }else{
-                                                    Qiscus.chat(withRoomId: roomId, target: viewController)
-                                                }
-                                            }else if let currentRootView = window.rootViewController as? UITabBarController{
-                                                if let navigation = currentRootView.selectedViewController as? UINavigationController{
-                                                    if QiscusChatVC.sharedInstance.isPresence{
-                                                        QiscusChatVC.sharedInstance.goBack()
-                                                    }
-                                                    let viewController = navigation.viewControllers[navigation.viewControllers.count - 1]
-                                                    if Qiscus.sharedInstance.isPushed{
-                                                        let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
-                                                        navigation.pushViewController(chatVC, animated: true)
-                                                    }else{
-                                                        Qiscus.chat(withRoomId: roomId, target: viewController)
-                                                    }
-                                                }
-                                            }
-                                        }
+                                        Qiscus.printLog(text: "Notification added")
                                     }else{
                                         Qiscus.printLog(text: "Notificationerror: \(error)")
                                     }
@@ -898,4 +873,48 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate {
             voipRegistry.delegate = Qiscus.sharedInstance
         }
     }
+    open class func didReceive(LocalNotification notification:UILocalNotification){
+        if let userInfo = notification.userInfo {
+            if let roomData = userInfo["qiscus-room-id"]{
+                let roomId = roomData as! Int
+                if let window = UIApplication.shared.keyWindow{
+                    if let currenRootView = window.rootViewController as? UINavigationController{
+                        if QiscusChatVC.sharedInstance.isPresence{
+                            QiscusChatVC.sharedInstance.goBack()
+                        }
+                        let viewController = currenRootView.viewControllers[currenRootView.viewControllers.count - 1]
+                        if Qiscus.sharedInstance.isPushed{
+                            let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
+                            currenRootView.pushViewController(chatVC, animated: true)
+                        }else{
+                            Qiscus.chat(withRoomId: roomId, target: viewController)
+                        }
+                    }else if let currentRootView = window.rootViewController as? UITabBarController{
+                        if let navigation = currentRootView.selectedViewController as? UINavigationController{
+                            if QiscusChatVC.sharedInstance.isPresence{
+                                QiscusChatVC.sharedInstance.goBack()
+                            }
+                            let viewController = navigation.viewControllers[navigation.viewControllers.count - 1]
+                            if Qiscus.sharedInstance.isPushed{
+                                let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
+                                navigation.pushViewController(chatVC, animated: true)
+                            }else{
+                                Qiscus.chat(withRoomId: roomId, target: viewController)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+//    @available(iOS 10.0, *)
+//    public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+//        let data = response.notification.request.content.userInfo
+//
+//        print("hello notification pressed: \(data["roomId"] as! Int)")
+//    }
+//    @available(iOS 10.0, *)
+//    public func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+//        
+//    }
 }

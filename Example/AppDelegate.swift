@@ -69,6 +69,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didRegister notificationSettings: UIUserNotificationSettings) {
         Qiscus.didRegisterUserNotification()
     }
+    func application(_ application: UIApplication, didReceive notification: UILocalNotification) {
+        Qiscus.didReceive(LocalNotification:notification)
+    }
     func goToChatNavigationView(){
         let chatView = goToChatVC()
         let navigationController = UINavigationController(rootViewController: chatView)
