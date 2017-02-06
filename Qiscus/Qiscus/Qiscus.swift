@@ -564,14 +564,17 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate {
                             if let window = UIApplication.shared.keyWindow{
                                 if let currenRootView = window.rootViewController as? UINavigationController{
                                     let viewController = currenRootView.viewControllers[currenRootView.viewControllers.count - 1]
-                                    
                                     QToasterSwift.toast(target: viewController, text: notificationMessage, title:senderName, iconURL:senderAvatarURL, iconPlaceHolder:Qiscus.image(named:"avatar"), onTouch: {
                                         if Qiscus.sharedInstance.toastMessageAct == nil{
                                             if isPushed{
                                                 let chatVC = Qiscus.chatView(withRoomId: roomId, title: senderName)
                                                 currenRootView.pushViewController(chatVC, animated: true)
                                             }else{
-                                                Qiscus.chat(withRoomId: roomId, target: viewController)
+                                                if QiscusChatVC.sharedInstance.isPresence{
+                                                    QiscusChatVC.sharedInstance.goBack()
+                                                }
+                                                let activeViewController = currenRootView.viewControllers[currenRootView.viewControllers.count - 1]
+                                                Qiscus.chat(withRoomId: roomId, target: activeViewController)
                                             }
                                         }else{
                                             Qiscus.sharedInstance.toastMessageAct!(roomId, newMessage!)
@@ -596,12 +599,28 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate {
                                     if error == nil {
                                         if let window = UIApplication.shared.keyWindow{
                                             if let currenRootView = window.rootViewController as? UINavigationController{
+                                                if QiscusChatVC.sharedInstance.isPresence{
+                                                    QiscusChatVC.sharedInstance.goBack()
+                                                }
                                                 let viewController = currenRootView.viewControllers[currenRootView.viewControllers.count - 1]
                                                 if Qiscus.sharedInstance.isPushed{
                                                     let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
                                                     currenRootView.pushViewController(chatVC, animated: true)
                                                 }else{
                                                     Qiscus.chat(withRoomId: roomId, target: viewController)
+                                                }
+                                            }else if let currentRootView = window.rootViewController as? UITabBarController{
+                                                if let navigation = currentRootView.selectedViewController as? UINavigationController{
+                                                    if QiscusChatVC.sharedInstance.isPresence{
+                                                        QiscusChatVC.sharedInstance.goBack()
+                                                    }
+                                                    let viewController = navigation.viewControllers[currenRootView.viewControllers.count - 1]
+                                                    if Qiscus.sharedInstance.isPushed{
+                                                        let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
+                                                        navigation.pushViewController(chatVC, animated: true)
+                                                    }else{
+                                                        Qiscus.chat(withRoomId: roomId, target: viewController)
+                                                    }
                                                 }
                                             }
                                         }
