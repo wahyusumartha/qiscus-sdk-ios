@@ -308,8 +308,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         self.collectionView.register(UINib(nibName: "QCellAudioRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellAudioRight")
         self.collectionView.register(UINib(nibName: "QCellFileLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellFileLeft")
         self.collectionView.register(UINib(nibName: "QCellFileRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellFileRight")
-
-        self.navigationItem.setTitleWithSubtitle(title: QiscusTextConfiguration.sharedInstance.chatTitle, subtitle:QiscusTextConfiguration.sharedInstance.chatSubtitle)
+        
         self.navigationController?.navigationBar.verticalGradientColor(topColor, bottomColor: bottomColor)
         self.navigationController?.navigationBar.tintColor = tintColor
         
@@ -542,18 +541,18 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                 if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
                     roomDelegate.didFinishLoadRoom(onRoom: room!)
                 }
+                
                 if room != nil {
-                    if QiscusUIConfiguration.sharedInstance.copyright.chatTitle == ""{
-                        self.setTitle(title: room!.roomName)
-                    }
                     if let avatar = room!.avatarImage {
                         self.roomAvatar.image = avatar
                     }else{
                         self.roomAvatar.loadAsync(room!.roomAvatarURL)
                         room!.downloadThumbAvatar()
                     }
+                    self.loadTitle()
+                    self.subscribeRealtime(onRoom: room)
                 }
-                self.subscribeRealtime(onRoom: room)
+                
                 if self.comments.count > 0 {
                     self.collectionView.reloadData()
                     publishRead()
@@ -579,9 +578,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                             if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
                                 roomDelegate.didFinishLoadRoom(onRoom: room)
                             }
-                            if QiscusUIConfiguration.sharedInstance.copyright.chatTitle == ""{
-                                self.setTitle(title: room.roomName)
-                            }
+                            
                             if let avatar = room.avatarImage {
                                 self.roomAvatar.image = avatar
                             }else{
@@ -589,6 +586,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                                 room.downloadThumbAvatar()
                             }
                             self.topicId = room.roomLastCommentTopicId
+                            self.loadTitle()
                             self.comments = QiscusComment.grouppedComment(inTopicId: self.topicId, firstLoad: true)
                             Qiscus.printLog(text: "self comments: \n\(self.comments)")
                             self.subscribeRealtime(onRoom: room)
@@ -620,9 +618,9 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                     }
                 }else{
                     if let room = QiscusRoom.getRoomById(self.roomId){
-                        if QiscusUIConfiguration.sharedInstance.copyright.chatTitle == ""{
-                            self.setTitle(title: room.roomName)
-                        }
+                        self.topicId = room.roomLastCommentTopicId
+                        self.loadTitle()
+                        
                         if let avatar = room.avatarImage {
                             self.roomAvatar.image = avatar
                         }else{
@@ -633,6 +631,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                             roomDelegate.didFinishLoadRoom(onRoom: room)
                         }
                         self.comments = QiscusComment.grouppedComment(inTopicId: room.roomLastCommentTopicId, firstLoad: true)
+                        self.subscribeRealtime(onRoom: room)
                         if self.comments.count > 0 {
                             publishRead()
                             self.topicId = room.roomLastCommentTopicId
@@ -1516,32 +1515,75 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     func succesSaveImage(){
          QToasterSwift.toast(target: self.imagePreview!, text: "Successfully save image to your galery", backgroundColor: UIColor(red: 0, green: 0.8,blue: 0,alpha: 0.8), textColor: UIColor.white)
     }
-    func setTitle(title:String = "", withSubtitle:String? = nil){
-        QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
-        if withSubtitle != nil {
-            QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = withSubtitle!
+    func loadTitle(){
+        let title = QiscusUIConfiguration.sharedInstance.copyright.chatTitle
+        let subtitle = QiscusTextConfiguration.sharedInstance.chatSubtitle
+        print("topicId: \(self.topicId)    |||    roomId: \(self.roomId)")
+        if topicId == 0 && roomId > 0{
+            if let room = QiscusRoom.getRoomById(self.roomId){
+                self.topicId = room.roomLastCommentTopicId
+            }
         }
         var navTitle = ""
         if title != ""{
             navTitle = title
         }else{
             if let room = QiscusRoom.getRoom(withLastTopicId: self.topicId){
-               navTitle = room.roomName
-               QiscusTextConfiguration.sharedInstance.chatTitle = navTitle
+                navTitle = room.roomName
             }
         }
-        self.navigationItem.setTitleWithSubtitle(title: navTitle, subtitle:QiscusTextConfiguration.sharedInstance.chatSubtitle)
+        
+        var navSubtitle = ""
+        if subtitle == "" {
+            if let room = QiscusRoom.getRoom(withLastTopicId: self.topicId){
+                print("room type: \(room.roomType)")
+                if room.roomType == QiscusRoomType.group {
+                    print("participant count: \(room.participants.count)\nparticipants:\(room.participants)")
+                    if room.participants.count > 0 {
+                        for participant in room.participants {
+                            if participant.participantEmail != QiscusConfig.sharedInstance.USER_EMAIL{
+                                if let user = QiscusUser.getUserWithEmail(participant.participantEmail){
+                                    if navSubtitle == "" {
+                                        navSubtitle = user.userFullName
+                                    }else{
+                                        navSubtitle += ", \(user.userFullName)"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        self.navigationItem.setTitleWithSubtitle(title: navTitle, subtitle:navSubtitle)
+    }
+    func setTitle(title:String = "", withSubtitle:String? = nil){
+        print("title: \(title) ||| subtitle: \(withSubtitle)")
+        QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
+        if withSubtitle != nil {
+            QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = withSubtitle!
+        }
+        self.loadTitle()
     }
     func startTypingIndicator(withUser user:String){
+        let title = QiscusUIConfiguration.sharedInstance.copyright.chatTitle
+        var navTitle = ""
+        if title != ""{
+            navTitle = title
+        }else{
+            if let room = QiscusRoom.getRoom(withLastTopicId: self.topicId){
+                navTitle = room.roomName
+            }
+        }
         self.typingIndicatorUser = user
         self.isTypingOn = true
         let typingText = "\(user) is typing ..."
-        self.navigationItem.setTitleWithSubtitle(title: QiscusTextConfiguration.sharedInstance.chatTitle, subtitle:typingText)
+        self.navigationItem.setTitleWithSubtitle(title: navTitle, subtitle:typingText)
     }
     func stopTypingIndicator(){
         self.typingIndicatorUser = ""
         self.isTypingOn = false
-        self.navigationItem.setTitleWithSubtitle(title: QiscusTextConfiguration.sharedInstance.chatTitle, subtitle:QiscusTextConfiguration.sharedInstance.chatSubtitle)
+        self.loadTitle()
     }
     
     func subscribeRealtime(onRoom room:QiscusRoom?){

@@ -276,6 +276,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         chatVC.optionalData = optionalData
         chatVC.message = withMessage
         chatVC.newChat = false
+        
         let navController = UINavigationController()
         navController.viewControllers = [chatVC]
         
@@ -308,6 +309,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         chatVC.optionalData = optionalData
         chatVC.message = withMessage
         chatVC.newChat = false
+        
         let navController = UINavigationController()
         navController.viewControllers = [chatVC]
         
@@ -361,7 +363,8 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         chatVC.roomId = roomId
         chatVC.message = withMessage
         chatVC.newChat = false
-       
+        chatVC.loadTitle()
+        
         if QiscusChatVC.sharedInstance.isPresence {
             QiscusChatVC.sharedInstance.goBack()
         }

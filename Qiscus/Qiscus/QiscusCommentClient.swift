@@ -957,9 +957,7 @@ open class QiscusCommentClient: NSObject {
                     if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
                         roomDelegate.didFinishLoadRoom(onRoom: room)
                     }
-                    if QiscusUIConfiguration.sharedInstance.copyright.chatTitle == ""{
-                        QiscusChatVC.sharedInstance.setTitle(title: room.roomName)
-                    }
+                    
                     QiscusChatVC.sharedInstance.roomAvatar.loadAsync(room.roomAvatarURL)
                     
                     QiscusUIConfiguration.sharedInstance.topicId = topicId
@@ -998,6 +996,7 @@ open class QiscusCommentClient: NSObject {
                             }
                         }
                     }
+                    QiscusChatVC.sharedInstance.loadTitle()
                     self.commentDelegate?.finishedLoadFromAPI(topicId)
                     if let message = withMessage {
                         self.postMessage(message: message, topicId: topicId)
@@ -1062,9 +1061,7 @@ open class QiscusCommentClient: NSObject {
                     if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
                         roomDelegate.didFinishLoadRoom(onRoom: room)
                     }
-                    if QiscusUIConfiguration.sharedInstance.copyright.chatTitle == ""{
-                        QiscusChatVC.sharedInstance.setTitle(title: room.roomName)
-                    }
+                    
                     QiscusChatVC.sharedInstance.roomAvatar.loadAsync(room.roomAvatarURL)
                     if users.count == 1 {
                         room.updateUser(users.first!)
@@ -1111,6 +1108,7 @@ open class QiscusCommentClient: NSObject {
                             }
                         }
                     }
+                    QiscusChatVC.sharedInstance.loadTitle()
                     self.commentDelegate?.finishedLoadFromAPI(topicId)
                     if withMessage != nil {
                         self.postMessage(message: withMessage!, topicId: topicId)
@@ -1172,9 +1170,6 @@ open class QiscusCommentClient: NSObject {
                     if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
                         roomDelegate.didFinishLoadRoom(onRoom: room)
                     }
-                    if QiscusUIConfiguration.sharedInstance.copyright.chatTitle == ""{
-                        QiscusChatVC.sharedInstance.setTitle(title: room.roomName)
-                    }
                     QiscusChatVC.sharedInstance.roomAvatar.loadAsync(room.roomAvatarURL)
                     
                     QiscusUIConfiguration.sharedInstance.topicId = topicId
@@ -1210,7 +1205,7 @@ open class QiscusCommentClient: NSObject {
                             }
                         }
                     }
-                    
+                    QiscusChatVC.sharedInstance.loadTitle()
                     self.commentDelegate?.finishedLoadFromAPI(topicId)
                     if withMessage != nil {
                         self.postMessage(message: withMessage!, topicId: topicId)
@@ -1326,6 +1321,7 @@ open class QiscusCommentClient: NSObject {
                                     }
                                 }
                             }
+                            QiscusChatVC.sharedInstance.loadTitle()
                         }
                     }else if error != nil{
                         Qiscus.printLog(text: "error update chat room: \(error)")

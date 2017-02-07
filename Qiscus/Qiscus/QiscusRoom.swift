@@ -38,7 +38,7 @@ open class QiscusRoom: Object {
     
     open var roomType:QiscusRoomType{
         get{
-            if isGroup{
+            if !isGroup{
                 return QiscusRoomType.single
             }else{
                 return QiscusRoomType.group
