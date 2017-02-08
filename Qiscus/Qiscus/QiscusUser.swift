@@ -22,7 +22,8 @@ open class QiscusUser: Object {
     open dynamic var userEmail:String = ""
     open dynamic var userFullName:String = ""
     open dynamic var userAvailability:Bool = true
-    open dynamic var userLastSeen:String = ""
+    open dynamic var userLastSeen:Double = 0
+    open dynamic var isOffline:Bool = true
     open dynamic var role:String = ""
     open dynamic var desc: String = ""
 
@@ -30,7 +31,44 @@ open class QiscusUser: Object {
     override open class func primaryKey() -> String {
         return "localId"
     }
+    var isSelf:Bool{
+        get{
+            if self.userEmail == QiscusConfig.sharedInstance.USER_EMAIL{
+                return true
+            }
+            return false
+        }
+    }
+    var isOnline:Bool{
+        get{
+            return !isOffline
+        }
+    }
     
+    var lastSeenString:String{
+        get{
+            var result = ""
+            
+            let date = Date(timeIntervalSince1970: userLastSeen)
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "d MMMM yyyy"
+            let dateString = dateFormatter.string(from: date)
+            
+            let timeFormatter = DateFormatter()
+            timeFormatter.dateFormat = "h:mm a"
+            let timeString = timeFormatter.string(from: date)
+            
+            if date.isToday{
+                result = "today at \(timeString)"
+            }else if date.isYesterday{
+                result = "yesterday at \(timeString)"
+            }else{
+                result = "\(dateString) at \(timeString)"
+            }
+            
+            return result
+        }
+    }
     // MARK: - UpdaterMethode
     open func userId(_ value:Int){
         let realm = try! Realm()
@@ -104,6 +142,54 @@ open class QiscusUser: Object {
             }
         }
     }
+    open func updateLastSeen(_ timeToken:Double = 0){
+        let realm = try! Realm()
+        
+        if timeToken == 0 {
+            try! realm.write {
+                self.userLastSeen = Double(Date().timeIntervalSince1970)
+            }
+            self.updateStatus(isOnline: true)
+        }else{
+            if timeToken > userLastSeen{
+                try! realm.write {
+                    self.userLastSeen = timeToken
+                }
+            }
+        }
+    }
+    func checkStatus(){
+        let date = Date(timeIntervalSince1970: userLastSeen)
+        let now = Date()
+        
+        let secondDiff = now.offsetFromInSecond(date: date)
+        if secondDiff > 59 && isOnline {
+            self.updateStatus(isOnline: false)
+        }
+    }
+    open func updateStatus(isOnline online:Bool){
+        let realm = try! Realm()
+        let changed = (isOnline != online)
+        
+        if changed{
+            try! realm.write {
+                self.isOffline = !online
+            }
+            if let commentDelegate = QiscusCommentClient.sharedInstance.commentDelegate{
+                if QiscusMe.sharedInstance.email != self.userEmail{
+                    commentDelegate.didChangeUserStatus(withUser: self)
+                }
+            }
+        }
+        if online{
+            let when = DispatchTime.now() + 59
+            DispatchQueue.main.asyncAfter(deadline: when) {
+                if self.isOnline{
+                    self.checkStatus()
+                }
+            }
+        }
+    }
     // MARK: - Getter Methode
     open func getLastId() -> Int{
         let realm = try! Realm()
@@ -117,7 +203,7 @@ open class QiscusUser: Object {
         }
     }
     
-    open func getAllUser()->[QiscusUser]?{
+    open class func getAllUser()->[QiscusUser]?{
         let realm = try! Realm()
         let userData = realm.objects(QiscusUser.self)
         var users = [QiscusUser]()
@@ -188,6 +274,9 @@ open class QiscusUser: Object {
             }
             DispatchQueue.main.async {
                 self.downloadAvatar()
+            }
+            Qiscus.realtimeThread.sync {
+                Qiscus.addMqttChannel(channel: "u/\(self.userEmail)/s")
             }
             return self
         }else{

@@ -1352,6 +1352,37 @@ open class QiscusCommentClient: NSObject {
             }
         }
     }
+    // MARK: - SYNC ALL
+    open func sync(){
+        if Qiscus.isLoggedIn {
+            if let lastComment = QiscusComment.getLastComment() {
+                let manager = Alamofire.SessionManager.default
+                let requestURL = QiscusConfig.SYNC_URL
+                
+                let parameters:[String : AnyObject] = [
+                    "token" : qiscus.config.USER_TOKEN as AnyObject,
+                    "last_received_comment_id": lastComment.commentId as AnyObject
+                ]
+                manager.request(requestURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                    if let response = responseData.result.value {
+                        Qiscus.printLog(text: "create New room api response:\n\(response)")
+                        let json = JSON(response)
+                        let results = json["results"]
+                        let error = json["error"]
+                        
+                        if results != nil {
+                        
+                        }
+                        else if error != nil{
+                        }
+                        
+                    }else{
+                        
+                    }
+                })
+            }
+        }
+    }
     // MARK: - Message Status
     open func publishMessageStatus(onComment commentId:Int64, roomId:Int, status:QiscusCommentStatus, withCompletion: @escaping ()->Void){
         if status == QiscusCommentStatus.delivered || status == QiscusCommentStatus.read{

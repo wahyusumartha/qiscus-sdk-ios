@@ -1086,6 +1086,18 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         }
         publishRead()
     }
+    public func didChangeUserStatus(withUser user:QiscusUser){
+        if let room = QiscusRoom.getRoom(withLastTopicId: self.topicId){
+            if room.roomType == QiscusRoomType.single {
+                for participant in room.participants {
+                   if participant.participantEmail == user.userEmail{
+                        self.loadTitle()
+                        break
+                   }
+                }
+            }
+        }
+    }
     
     // MARK: - Button Action
     open func showLoading(_ text:String = "Loading"){
@@ -1549,6 +1561,23 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                                         navSubtitle += ", \(user.userFullName)"
                                     }
                                 }
+                            }
+                        }
+                    }
+                }else{
+                    if room.participants.count > 0 {
+                        for participant in room.participants {
+                            if participant.participantEmail != QiscusConfig.sharedInstance.USER_EMAIL{
+                                if let user = QiscusUser.getUserWithEmail(participant.participantEmail){
+                                    if user.isOnline {
+                                        navSubtitle = "is online"
+                                    }else if user.userLastSeen == Double(0){
+                                        navSubtitle = "is offline"
+                                    }else{
+                                        navSubtitle = "last seen: \(user.lastSeenString)"
+                                    }
+                                }
+                                break
                             }
                         }
                     }

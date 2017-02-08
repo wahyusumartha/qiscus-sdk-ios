@@ -27,7 +27,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
     
     open var isPushed:Bool = false
     open var iCloudUpload:Bool = false
-    
+    open static var versionNumber:String = "2.2.8"
     open var httpRealTime:Bool = false
     
     open var reachability:QReachability?
@@ -90,7 +90,12 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
     @objc open class func enableInAppNotif(){
         Qiscus.sharedInstance.config.showToasterMessage = true
     }
-    
+    @objc open class func disconnectRealtime(){
+        Qiscus.sharedInstance.mqtt?.unSubscribe(from: Qiscus.sharedInstance.mqttChannel, completion: { (success, error) in
+            Qiscus.sharedInstance.mqttChannel = [String]()
+        })
+        Qiscus.sharedInstance.mqtt?.disconnect()
+    }
     @objc open class func clear(){
         QiscusMe.clear()
         let realm = try! Realm()
@@ -98,14 +103,16 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
             realm.deleteAll()
         }
         Qiscus.deleteAllFiles()
-        Qiscus.sharedInstance.mqtt?.disconnect()
+        Qiscus.publishUserStatus(offline: true)
     }
     
     // need Documentation
     open func RealtimeConnect(){
         NotificationCenter.default.removeObserver(self, name: .UIApplicationDidBecomeActive, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .UIApplicationDidEnterBackground, object: nil)
         let center = NotificationCenter.default
         center.addObserver(self, selector: #selector(Qiscus.applicationDidBecomeActife), name: .UIApplicationDidBecomeActive, object: nil)
+        center.addObserver(self, selector: #selector(Qiscus.goToBackgroundMode), name: .UIApplicationDidEnterBackground, object: nil)
         Qiscus.realtimeThread.sync {
             let appName = Bundle.main.infoDictionary![kCFBundleNameKey as String] as! String
             var deviceID = "000"
@@ -115,6 +122,14 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
             let clientID = "iosMQTT-\(appName)-\(deviceID)-\(QiscusMe.sharedInstance.id)"
             Qiscus.printLog(text: "Realtime client id: \(clientID)")
             Qiscus.sharedInstance.mqtt = MQTTSession(host: "mqtt.qiscus.com", port: 1885, clientID: clientID, cleanSession: false, keepAlive: 60, useSSL: true)
+            
+            let message: String = "0:1";
+            let data: Data = message.data(using: .utf8)!
+            let channel = "u/\(QiscusMe.sharedInstance.email)/s"
+            
+            let lastWillMessage = MQTTPubMsg(topic: channel, payload: data, retain: false, QoS: .atLeastOnce)
+            
+            Qiscus.sharedInstance.mqtt?.lastWillMessage = lastWillMessage
             Qiscus.sharedInstance.mqtt?.delegate = Qiscus.sharedInstance
             Qiscus.sharedInstance.mqtt?.connect(completion: { (succeeded, error) -> Void in
                 if succeeded {
@@ -126,6 +141,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
             if !Qiscus.sharedInstance.mqttChannel.contains("\(QiscusMe.sharedInstance.token)/c"){
                 Qiscus.sharedInstance.mqttChannel.append("\(QiscusMe.sharedInstance.token)/c")
             }
+            
             var channels = [String: MQTTQoS]()
             for channel in Qiscus.sharedInstance.mqttChannel{
                 channels[channel] = MQTTQoS.atLeastOnce
@@ -135,6 +151,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
                     Qiscus.printLog(text: "Realtime chat comment subscribed")
                 }
             })
+            Qiscus.publishUserStatus()
         }
         
         DispatchQueue.main.async {
@@ -145,6 +162,13 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
                 Qiscus.realtimeThread.sync {
                     Qiscus.addMqttChannel(channel: deliveryChannel)
                     Qiscus.addMqttChannel(channel: readChannel)
+                }
+            }
+            if let allUser = QiscusUser.getAllUser() {
+                for user in allUser{
+                    if !user.isSelf{
+                        Qiscus.addMqttChannel(channel: "u/\(user.userEmail)/s")
+                    }
                 }
             }
         }
@@ -623,6 +647,8 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
                         switch message {
                         case "1":
                             if let user = QiscusUser.getUserWithEmail(userEmail) {
+                                user.updateLastSeen()
+                                user.updateStatus(isOnline: true)
                                 let userFullName = user.userFullName
                                 if !QiscusChatVC.sharedInstance.isTypingOn || (QiscusChatVC.sharedInstance.typingIndicatorUser != userFullName){
                                     QiscusChatVC.sharedInstance.startTypingIndicator(withUser: user.userFullName)
@@ -672,6 +698,39 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
                     comment.updateCommentStatus(.read, email: userEmail)
                 }
                 break
+            case "s":
+                let message = String(data: data, encoding: .utf8)!
+                let messageArr = message.characters.split(separator: ":")
+                let online = Int(String(messageArr[0]))
+                let userEmail = String(channelArr[1])
+                if online == 1 {
+                    if userEmail != QiscusMe.sharedInstance.email{
+                        if let user = QiscusUser.getUserWithEmail(userEmail){
+                            if let timeToken = Double(String(messageArr[1])){
+                                if timeToken == Double(0){
+                                    user.updateLastSeen()
+                                    user.updateStatus(isOnline: true)
+                                }else{
+                                    user.updateLastSeen(timeToken)
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    if userEmail != QiscusMe.sharedInstance.email{
+                        if let user = QiscusUser.getUserWithEmail(userEmail){
+                            if let timeToken = Double(String(messageArr[1])){
+                                if timeToken == Double(0) {
+                                    user.updateStatus(isOnline: false)
+                                    user.updateLastSeen()
+                                }else if timeToken == Double(1){
+                                    user.updateStatus(isOnline: false)
+                                }
+                            }
+                        }
+                    }
+                }
+                break
             default:
                 Qiscus.printLog(text: "Realtime socket receive message in unknown topic: \(topic)")
                 break
@@ -716,7 +775,10 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         
     }
     func applicationDidBecomeActife(){
-        Qiscus.sharedInstance.RealtimeConnect()
+        if Qiscus.isLoggedIn{
+            Qiscus.printLog(text: "go active")
+            Qiscus.sharedInstance.RealtimeConnect()
+        }
     }
     class func printLog(text:String){
         Qiscus.logThread.async{
@@ -739,7 +801,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
     }
     
     class func checkDatabaseMigration(){
-        let currentSchema:UInt64 = 7
+        let currentSchema:UInt64 = 8
         var configuration = Realm.Configuration()
         
         configuration.schemaVersion = currentSchema
@@ -910,14 +972,42 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
             }
         }
     }
-//    @available(iOS 10.0, *)
-//    public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-//        let data = response.notification.request.content.userInfo
-//
-//        print("hello notification pressed: \(data["roomId"] as! Int)")
-//    }
-//    @available(iOS 10.0, *)
-//    public func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-//        
-//    }
+    open class func publishUserStatus(offline:Bool = false){
+        if Qiscus.isLoggedIn{
+            DispatchQueue.main.async {
+                var message: String = "1:0";
+                
+                let channel = "u/\(QiscusMe.sharedInstance.email)/s"
+                if offline {
+                    message = "0:0"
+                    DispatchQueue.main.async {
+                        let data: Data = message.data(using: .utf8)!
+                        Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: false, completion: { (success, error) in
+                            if success {
+                                Qiscus.disconnectRealtime()
+                            }
+                        })
+                        Qiscus.printLog(text: "publish offline status")
+                    }
+                }else{
+                    if Qiscus.sharedInstance.application.applicationState == UIApplicationState.active {
+                        DispatchQueue.main.async {
+                            Qiscus.printLog(text: "publish online status")
+                            let data: Data = message.data(using: .utf8)!
+                            Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: false, completion: nil)
+                            let when = DispatchTime.now() + 30
+                            DispatchQueue.main.asyncAfter(deadline: when) {
+                                Qiscus.publishUserStatus()
+                            }
+                        }
+                        
+                    }
+                }
+            }
+        }
+    }
+    func goToBackgroundMode(){
+        Qiscus.printLog(text: "go to background")
+        Qiscus.publishUserStatus(offline: true)
+    }
 }

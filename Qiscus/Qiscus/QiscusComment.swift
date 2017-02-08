@@ -14,7 +14,7 @@ public enum QiscusCommentType:Int {
     case text
     case attachment
 }
-public enum QiscusCommentStatus:Int{
+@objc public enum QiscusCommentStatus:Int{
     case sending
     case sent
     case delivered
@@ -878,6 +878,16 @@ open class QiscusComment: Object {
         }
     }
     // Create New Comment
+    open class func getLastComment()->QiscusComment?{
+        let realm = try! Realm()
+        let searchQuery = NSPredicate(format: "commentStatusRaw != %d && commentStatusRaw != %d",QiscusCommentStatus.sending.rawValue,QiscusCommentStatus.failed.rawValue)
+        let commentData = realm.objects(QiscusComment.self).filter(searchQuery).sorted(byProperty: "commentId")
+        
+        if commentData.count > 0 {
+            return commentData.last!
+        }
+        return nil
+    }
     open class func newCommentWithMessage(message:String, inTopicId:Int, showLink:Bool = false)->QiscusComment{
         let realm = try! Realm()
         let searchQuery = NSPredicate(format: "commentTopicId == %d", inTopicId)
@@ -967,6 +977,9 @@ open class QiscusComment: Object {
             try! realm.write {
                 realm.add(self)
             }
+            if let user = QiscusUser.getUserWithEmail(self.commentSenderEmail){
+                user.updateLastSeen(self.commentCreatedAt)
+            }
             self.updateCommentCellSize()
             return true
         }else{
@@ -990,6 +1003,9 @@ open class QiscusComment: Object {
                     comment.commentIsSynced = true
                 }
                 comment.commentIsDeleted = self.commentIsDeleted
+            }
+            if let user = QiscusUser.getUserWithEmail(comment.commentSenderEmail){
+                user.updateLastSeen(comment.commentCreatedAt)
             }
             return false
         }
@@ -1027,6 +1043,9 @@ open class QiscusComment: Object {
                 realm.add(self)
             }
             self.updateCommentCellSize()
+            if let user = QiscusUser.getUserWithEmail(self.commentSenderEmail){
+                user.updateLastSeen(self.commentCreatedAt)
+            }
             return self
         }else{
             let comment = commentData.first!
@@ -1051,6 +1070,9 @@ open class QiscusComment: Object {
                 comment.commentIsDeleted = self.commentIsDeleted
             }
             comment.updateCommentCellSize()
+            if let user = QiscusUser.getUserWithEmail(comment.commentSenderEmail){
+                user.updateLastSeen(comment.commentCreatedAt)
+            }
             return comment
         }
     }

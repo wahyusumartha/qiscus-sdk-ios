@@ -40,7 +40,7 @@ class goToChatVC: UIViewController {
             }else if let roomId = Int(targetField.text!){
                 Qiscus.chat(withRoomId: roomId, target: self)
             }else{
-                Qiscus.chat(withUsers: [targetField.text!] , target: self, title: "SampleChat")
+                Qiscus.chat(withUsers: [targetField.text!] , target: self)
             }
         }
     }

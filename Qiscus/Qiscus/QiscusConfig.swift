@@ -40,7 +40,9 @@ open class QiscusConfig: NSObject {
         }
     }
     
-    open var requestHeader:[String:String]? = nil
+    open var requestHeader:[String:String]? = [
+        "User-Agent" : "QiscusSDKIos/v\(Qiscus.versionNumber)"
+    ]
     
     fileprivate override init() {}
     
@@ -52,6 +54,9 @@ open class QiscusConfig: NSObject {
     }
     
     // MARK: -URL
+    open class var SYNC_URL:String{
+        return "\(QiscusConfig.sharedInstance.BASE_URL)/sync"
+    }
     open class var SET_DEVICE_TOKEN_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/set_user_device_token"
     }
