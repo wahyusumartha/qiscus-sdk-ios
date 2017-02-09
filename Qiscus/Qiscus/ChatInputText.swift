@@ -33,7 +33,6 @@ open class ChatInputText: UITextView, UITextViewDelegate {
     
     
     override open func draw(_ rect: CGRect) {
-        Qiscus.printLog(text: "from coder")
         super.draw(rect)
         //self.commonInit()
     }
@@ -43,7 +42,6 @@ open class ChatInputText: UITextView, UITextViewDelegate {
     }
     
     fileprivate func commonInit(){
-        Qiscus.printLog(text: "override init textView executed")
         self.delegate = self
         self.placeholder = ""
         if self.value == "" {
@@ -56,7 +54,6 @@ open class ChatInputText: UITextView, UITextViewDelegate {
 
     // MARK: - UITextViewDelegate
     open func textViewDidChange(_ textView: UITextView) {
-        Qiscus.printLog(text: "executed textViewDidChange")
         let maxHeight:CGFloat = 85
         let minHeight:CGFloat = 25
         let fixedWidth = textView.frame.width

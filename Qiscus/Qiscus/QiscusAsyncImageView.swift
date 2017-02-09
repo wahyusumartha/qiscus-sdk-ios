@@ -31,7 +31,6 @@ public extension UIImageView {
         imageForUrl(url: url, header: header, useCache: useCache, completionHandler:{(image: UIImage?, url: String) in
             if image != nil {
                 if maskImage != nil{
-                    Qiscus.printLog(text: "here")
                     returnImage = UIImageView.maskImage(image!, mask: maskImage!)
                 }else{
                     returnImage = image!

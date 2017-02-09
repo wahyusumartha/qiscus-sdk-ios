@@ -26,6 +26,6 @@ import SwiftyJSON
     func commentDidChangeStatus(fromComment comment:QiscusComment, toStatus: QiscusCommentStatus)
     func performResendMessage(onIndexPath: IndexPath)
     func performDeleteMessage(onIndexPath:IndexPath)
-    func didChangeUserStatus(withUser user:QiscusUser)
+    @objc optional func didChangeUserStatus(withUser user:QiscusUser)
 }
 

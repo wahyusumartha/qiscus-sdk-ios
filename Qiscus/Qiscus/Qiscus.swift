@@ -17,6 +17,7 @@ import UserNotifications
 open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUserNotificationCenterDelegate {
 
     open static let sharedInstance = Qiscus()
+    static let showDebugPrint = true
     
     open var config = QiscusConfig.sharedInstance
     open var commentService = QiscusCommentClient.sharedInstance
@@ -39,6 +40,8 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
     
     static var realtimeThread = DispatchQueue(label: "qiscusRealtime")
     static var logThread = DispatchQueue(label: "qiscusLog", attributes: .concurrent)
+    
+    var notificationAction:((QiscusChatVC)->Void)? = nil
     
     @objc open class var isLoggedIn:Bool{
         get{
@@ -120,14 +123,13 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
                  deviceID = vendorIdentifier.uuidString
             }
             let clientID = "iosMQTT-\(appName)-\(deviceID)-\(QiscusMe.sharedInstance.id)"
-            Qiscus.printLog(text: "Realtime client id: \(clientID)")
             Qiscus.sharedInstance.mqtt = MQTTSession(host: "mqtt.qiscus.com", port: 1885, clientID: clientID, cleanSession: false, keepAlive: 60, useSSL: true)
             
-            let message: String = "0:1";
+            let message: String = "0";
             let data: Data = message.data(using: .utf8)!
             let channel = "u/\(QiscusMe.sharedInstance.email)/s"
             
-            let lastWillMessage = MQTTPubMsg(topic: channel, payload: data, retain: false, QoS: .atLeastOnce)
+            let lastWillMessage = MQTTPubMsg(topic: channel, payload: data, retain: true, QoS: .atLeastOnce)
             
             Qiscus.sharedInstance.mqtt?.lastWillMessage = lastWillMessage
             Qiscus.sharedInstance.mqtt?.delegate = Qiscus.sharedInstance
@@ -146,11 +148,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
             for channel in Qiscus.sharedInstance.mqttChannel{
                 channels[channel] = MQTTQoS.atLeastOnce
             }
-            Qiscus.sharedInstance.mqtt?.subscribe(to: channels, completion: {(succeeded, error) -> Void in
-                if succeeded {
-                    Qiscus.printLog(text: "Realtime chat comment subscribed")
-                }
-            })
+            Qiscus.sharedInstance.mqtt?.subscribe(to: channels, completion: nil)
             Qiscus.publishUserStatus()
         }
         
@@ -265,9 +263,11 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         chatVC.message = withMessage
         chatVC.newChat = false
         
-        if QiscusChatVC.sharedInstance.isPresence {
-            QiscusChatVC.sharedInstance.goBack()
+        
+        if chatVC.isPresence {
+            chatVC.goBack()
         }
+        chatVC.backAction = nil
         
         return chatVC
     }
@@ -301,12 +301,16 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         chatVC.message = withMessage
         chatVC.newChat = false
         
+        if chatVC.isPresence {
+            chatVC.goBack()
+        }
+        
+        chatVC.backAction = nil
+        
         let navController = UINavigationController()
         navController.viewControllers = [chatVC]
         
-        if QiscusChatVC.sharedInstance.isPresence {
-            QiscusChatVC.sharedInstance.goBack()
-        }
+        
         
         target.navigationController?.present(navController, animated: true, completion: nil)
     }
@@ -333,13 +337,13 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         chatVC.optionalData = optionalData
         chatVC.message = withMessage
         chatVC.newChat = false
+        if chatVC.isPresence {
+            chatVC.goBack()
+        }
+        chatVC.backAction = nil
         
         let navController = UINavigationController()
         navController.viewControllers = [chatVC]
-        
-        if QiscusChatVC.sharedInstance.isPresence {
-            QiscusChatVC.sharedInstance.goBack()
-        }
         
         target.navigationController?.present(navController, animated: true, completion: nil)
     }
@@ -362,11 +366,12 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         chatVC.message = withMessage
         chatVC.newChat = false
         
-        if QiscusChatVC.sharedInstance.isPresence {
-            QiscusChatVC.sharedInstance.goBack()
+        if chatVC.isPresence {
+            chatVC.goBack()
         }
+        chatVC.backAction = nil
         
-        return QiscusChatVC.sharedInstance
+        return chatVC
     }
     /**
      No Documentation
@@ -389,11 +394,12 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         chatVC.newChat = false
         chatVC.loadTitle()
         
-        if QiscusChatVC.sharedInstance.isPresence {
-            QiscusChatVC.sharedInstance.goBack()
+        if chatVC.isPresence {
+            chatVC.goBack()
         }
+        chatVC.backAction = nil
         
-        return QiscusChatVC.sharedInstance
+        return chatVC
     }
     @objc open class func image(named name:String)->UIImage?{
         return UIImage(named: name, in: Qiscus.bundle, compatibleWith: nil)?.localizedImage()
@@ -513,7 +519,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         if Qiscus.isLoggedIn{
             let channelArr = topic.characters.split(separator: "/")
             let lastChannelPart = String(channelArr.last!)
-            Qiscus.printLog(text: "Realtime socket receive message in topic: \(topic)")
+//            Qiscus.printLog(text: "Realtime socket receive message in topic: \(topic)")
             switch lastChannelPart {
             case "c":
                 let json = JSON(data: data)
@@ -707,12 +713,8 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
                     if userEmail != QiscusMe.sharedInstance.email{
                         if let user = QiscusUser.getUserWithEmail(userEmail){
                             if let timeToken = Double(String(messageArr[1])){
-                                if timeToken == Double(0){
-                                    user.updateLastSeen()
-                                    user.updateStatus(isOnline: true)
-                                }else{
-                                    user.updateLastSeen(timeToken)
-                                }
+                                user.updateStatus(isOnline: true)
+                                user.updateLastSeen(Double(timeToken)/1000)
                             }
                         }
                     }
@@ -720,12 +722,8 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
                     if userEmail != QiscusMe.sharedInstance.email{
                         if let user = QiscusUser.getUserWithEmail(userEmail){
                             if let timeToken = Double(String(messageArr[1])){
-                                if timeToken == Double(0) {
-                                    user.updateStatus(isOnline: false)
-                                    user.updateLastSeen()
-                                }else if timeToken == Double(1){
-                                    user.updateStatus(isOnline: false)
-                                }
+                                user.updateLastSeen(Double(timeToken)/1000)
+                                user.updateStatus(isOnline: false)
                             }
                         }
                     }
@@ -749,40 +747,36 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
                 Qiscus.sharedInstance.mqtt?.unSubscribe(from: channel, completion: {(succeeded, error) -> Void in
                     if succeeded {
                         Qiscus.sharedInstance.mqttChannel = Qiscus.sharedInstance.mqttChannel.filter() { $0 != channel }
-                        Qiscus.printLog(text: "Realtime channel \(channel) unsubscribed")
                     }
                 })
             }
         }
     }
     public class func addMqttChannel(channel: String){
-        //Qiscus.realtimeThread.sync {
-            var isExist = false
-            for channelName in Qiscus.sharedInstance.mqttChannel {
-                if channelName == channel {
-                    isExist = true
+        var isExist = false
+        for channelName in Qiscus.sharedInstance.mqttChannel {
+            if channelName == channel {
+                isExist = true
+            }
+        }
+        if !isExist{
+            Qiscus.sharedInstance.mqtt?.subscribe(to: channel, delivering: .atLeastOnce, completion: {(succeeded, error) -> Void in
+                if succeeded {
+                    Qiscus.sharedInstance.mqttChannel.append(channel)
                 }
-            }
-            if !isExist{
-                Qiscus.sharedInstance.mqtt?.subscribe(to: channel, delivering: .atLeastOnce, completion: {(succeeded, error) -> Void in
-                    if succeeded {
-                        Qiscus.sharedInstance.mqttChannel.append(channel)
-                        Qiscus.printLog(text: "Realtime channel \(channel) subscribed")
-                    }
-                })
-            }
-        //}
-        
+            })
+        }
     }
     func applicationDidBecomeActife(){
         if Qiscus.isLoggedIn{
-            Qiscus.printLog(text: "go active")
             Qiscus.sharedInstance.RealtimeConnect()
         }
     }
     class func printLog(text:String){
-        Qiscus.logThread.async{
-            print("[Qiscus]: \(text)")
+        if Qiscus.showDebugPrint{
+            Qiscus.logThread.async{
+                print("[Qiscus]: \(text)")
+            }
         }
     }
     class func deleteAllFiles(){
@@ -826,7 +820,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
                         try FileManager.default.removeItem(at: URL)
                     } catch {
                         // handle error
-                        print("no realm files")
+                        Qiscus.printLog(text: "no Database files")
                     }
                 }
                 
@@ -913,7 +907,6 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         }
     }
     public func pushRegistry(_ registry: PKPushRegistry, didReceiveIncomingPushWith payload: PKPushPayload, forType type: PKPushType) {
-        print("got pushNotification with payload: \(JSON(payload.dictionaryPayload)) ")
         if Qiscus.isLoggedIn{
             let payloadData = JSON(payload.dictionaryPayload)
             if let pnData = payloadData["qiscus_sdk"].string {
@@ -943,28 +936,35 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
             if let roomData = userInfo["qiscus-room-id"]{
                 let roomId = roomData as! Int
                 if let window = UIApplication.shared.keyWindow{
-                    if let currenRootView = window.rootViewController as? UINavigationController{
-                        if QiscusChatVC.sharedInstance.isPresence{
-                            QiscusChatVC.sharedInstance.goBack()
-                        }
-                        let viewController = currenRootView.viewControllers[currenRootView.viewControllers.count - 1]
-                        if Qiscus.sharedInstance.isPushed{
-                            let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
-                            currenRootView.pushViewController(chatVC, animated: true)
-                        }else{
-                            Qiscus.chat(withRoomId: roomId, target: viewController)
-                        }
-                    }else if let currentRootView = window.rootViewController as? UITabBarController{
-                        if let navigation = currentRootView.selectedViewController as? UINavigationController{
+                    if Qiscus.sharedInstance.notificationAction != nil{
+                        let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
+                        Qiscus.sharedInstance.notificationAction!(chatVC)
+                    }else{
+                        if let currenRootView = window.rootViewController as? UINavigationController{
                             if QiscusChatVC.sharedInstance.isPresence{
                                 QiscusChatVC.sharedInstance.goBack()
                             }
-                            let viewController = navigation.viewControllers[navigation.viewControllers.count - 1]
+                            
+                            let viewController = currenRootView.viewControllers[currenRootView.viewControllers.count - 1]
                             if Qiscus.sharedInstance.isPushed{
                                 let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
-                                navigation.pushViewController(chatVC, animated: true)
+                                currenRootView.pushViewController(chatVC, animated: true)
                             }else{
                                 Qiscus.chat(withRoomId: roomId, target: viewController)
+                            }
+                        }
+                        else if let currentRootView = window.rootViewController as? UITabBarController{
+                            if let navigation = currentRootView.selectedViewController as? UINavigationController{
+                                if QiscusChatVC.sharedInstance.isPresence{
+                                    QiscusChatVC.sharedInstance.goBack()
+                                }
+                                let viewController = navigation.viewControllers[navigation.viewControllers.count - 1]
+                                if Qiscus.sharedInstance.isPushed{
+                                    let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
+                                    navigation.pushViewController(chatVC, animated: true)
+                                }else{
+                                    Qiscus.chat(withRoomId: roomId, target: viewController)
+                                }
                             }
                         }
                     }
@@ -975,26 +975,24 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
     open class func publishUserStatus(offline:Bool = false){
         if Qiscus.isLoggedIn{
             DispatchQueue.main.async {
-                var message: String = "1:0";
+                var message: String = "1";
                 
                 let channel = "u/\(QiscusMe.sharedInstance.email)/s"
                 if offline {
-                    message = "0:0"
+                    message = "0"
                     DispatchQueue.main.async {
                         let data: Data = message.data(using: .utf8)!
-                        Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: false, completion: { (success, error) in
+                        Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: true, completion: { (success, error) in
                             if success {
                                 Qiscus.disconnectRealtime()
                             }
                         })
-                        Qiscus.printLog(text: "publish offline status")
                     }
                 }else{
                     if Qiscus.sharedInstance.application.applicationState == UIApplicationState.active {
                         DispatchQueue.main.async {
-                            Qiscus.printLog(text: "publish online status")
                             let data: Data = message.data(using: .utf8)!
-                            Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: false, completion: nil)
+                            Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: true, completion: nil)
                             let when = DispatchTime.now() + 30
                             DispatchQueue.main.asyncAfter(deadline: when) {
                                 Qiscus.publishUserStatus()
@@ -1007,7 +1005,9 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         }
     }
     func goToBackgroundMode(){
-        Qiscus.printLog(text: "go to background")
         Qiscus.publishUserStatus(offline: true)
+    }
+    public class func setNotificationAction(onClick action:@escaping ((QiscusChatVC)->Void)){
+        Qiscus.sharedInstance.notificationAction = action
     }
 }

@@ -58,11 +58,29 @@ open class QiscusUser: Object {
             timeFormatter.dateFormat = "h:mm a"
             let timeString = timeFormatter.string(from: date)
             
-            if date.isToday{
+            let now = Date()
+            
+            let secondDiff = now.offsetFromInSecond(date: date)
+            let minuteDiff = Int(secondDiff/60)
+            let hourDiff = Int(minuteDiff/60)
+            
+            if minuteDiff < 2 {
+                result = "a minute ago"
+            }
+            else if minuteDiff < 60 {
+                result = "\(Int(secondDiff/60)) minute ago"
+            }else if hourDiff == 1{
+                result = "an hour ago"
+            }else if hourDiff < 6 {
+                result = "\(hourDiff) hours ago"
+            }
+            else if date.isToday{
                 result = "today at \(timeString)"
-            }else if date.isYesterday{
+            }
+            else if date.isYesterday{
                 result = "yesterday at \(timeString)"
-            }else{
+            }
+            else{
                 result = "\(dateString) at \(timeString)"
             }
             
@@ -158,15 +176,7 @@ open class QiscusUser: Object {
             }
         }
     }
-    func checkStatus(){
-        let date = Date(timeIntervalSince1970: userLastSeen)
-        let now = Date()
-        
-        let secondDiff = now.offsetFromInSecond(date: date)
-        if secondDiff > 59 && isOnline {
-            self.updateStatus(isOnline: false)
-        }
-    }
+
     open func updateStatus(isOnline online:Bool){
         let realm = try! Realm()
         let changed = (isOnline != online)
@@ -177,15 +187,7 @@ open class QiscusUser: Object {
             }
             if let commentDelegate = QiscusCommentClient.sharedInstance.commentDelegate{
                 if QiscusMe.sharedInstance.email != self.userEmail{
-                    commentDelegate.didChangeUserStatus(withUser: self)
-                }
-            }
-        }
-        if online{
-            let when = DispatchTime.now() + 59
-            DispatchQueue.main.asyncAfter(deadline: when) {
-                if self.isOnline{
-                    self.checkStatus()
+                    commentDelegate.didChangeUserStatus?(withUser: self)
                 }
             }
         }

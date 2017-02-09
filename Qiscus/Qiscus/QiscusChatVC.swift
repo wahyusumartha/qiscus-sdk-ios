@@ -84,6 +84,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     open var unlockAction:(()->Void) = {}
     open var cellDelegate:QiscusChatCellDelegate?
     open var titleAction:(()->Void) = {}
+    var backAction:(()->Void)? = nil
     
     var audioPlayer: AVAudioPlayer?
     var audioTimer: Timer?
@@ -231,6 +232,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
             audioPlayer?.stop()
         }
         self.comments = [[QiscusComment]]()
+        self.backAction = nil
         self.collectionView.reloadData()
     }
     override open func viewWillAppear(_ animated: Bool) {
@@ -455,7 +457,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                 let message: String = "1";
                 let data: Data = message.data(using: .utf8)!
                 let channel = "r/\(room.roomId)/\(self.topicId)/\(QiscusMe.sharedInstance.email)/t"
-                Qiscus.printLog(text: "Realtime publish to channel: \(channel)")
                 Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: false, completion: nil)
             }
             
@@ -481,7 +482,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                 let message: String = "0";
                 let data: Data = message.data(using: .utf8)!
                 let channel = "r/\(room.roomId)/\(self.topicId)/\(QiscusMe.sharedInstance.email)/t"
-                Qiscus.printLog(text: "Realtime publish to channel: \(channel)")
                 Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: false, completion: nil)
             }
         }
@@ -520,10 +520,14 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     }
     func goBack() {
         self.isPresence = false
-        if Qiscus.sharedInstance.isPushed {
-            let _ = self.navigationController?.popViewController(animated: true)
+        if self.backAction != nil{
+            self.backAction!()
         }else{
-            self.navigationController?.dismiss(animated: true, completion: nil)
+            if Qiscus.sharedInstance.isPushed {
+                let _ = self.navigationController?.popViewController(animated: true)
+            }else{
+                self.navigationController?.dismiss(animated: true, completion: nil)
+            }
         }
     }
     
@@ -535,7 +539,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         }else{
             if(self.topicId > 0){
                 self.comments = QiscusComment.grouppedComment(inTopicId: self.topicId, firstLoad: true)
-                Qiscus.printLog(text: "self comments: \n\(self.comments)")
                 
                 let room = QiscusRoom.getRoom(withLastTopicId: self.topicId)
                 if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
@@ -588,7 +591,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                             self.topicId = room.roomLastCommentTopicId
                             self.loadTitle()
                             self.comments = QiscusComment.grouppedComment(inTopicId: self.topicId, firstLoad: true)
-                            Qiscus.printLog(text: "self comments: \n\(self.comments)")
                             self.subscribeRealtime(onRoom: room)
                             
                             if self.comments.count > 0 {
@@ -1307,7 +1309,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     // MARK: - Upload Action
     func continueImageUpload(_ image:UIImage? = nil,imageName:String,imagePath:URL? = nil, imageNSData:Data? = nil, videoFile:Bool = false, audioFile:Bool = false){
         if Qiscus.sharedInstance.connected{
-            Qiscus.printLog(text: "come here")
             commentClient.uploadImage(self.topicId, image: image, imageName: imageName, imagePath: imagePath, imageNSData: imageNSData, videoFile: videoFile, audioFile:audioFile)
         }else{
             self.showNoConnectionToast()
@@ -1530,7 +1531,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     func loadTitle(){
         let title = QiscusUIConfiguration.sharedInstance.copyright.chatTitle
         let subtitle = QiscusTextConfiguration.sharedInstance.chatSubtitle
-        print("topicId: \(self.topicId)    |||    roomId: \(self.roomId)")
         if topicId == 0 && roomId > 0{
             if let room = QiscusRoom.getRoomById(self.roomId){
                 self.topicId = room.roomLastCommentTopicId
@@ -1548,9 +1548,7 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         var navSubtitle = ""
         if subtitle == "" {
             if let room = QiscusRoom.getRoom(withLastTopicId: self.topicId){
-                print("room type: \(room.roomType)")
                 if room.roomType == QiscusRoomType.group {
-                    print("participant count: \(room.participants.count)\nparticipants:\(room.participants)")
                     if room.participants.count > 0 {
                         for participant in room.participants {
                             if participant.participantEmail != QiscusConfig.sharedInstance.USER_EMAIL{
@@ -1574,7 +1572,25 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                                     }else if user.userLastSeen == Double(0){
                                         navSubtitle = "is offline"
                                     }else{
+                                        let date = Date(timeIntervalSince1970: user.userLastSeen)
+                                        let secondDiff = Date().offsetFromInSecond(date: date)
+                                        let minuteDiff = Int(secondDiff/60)
+                                        let hourDiff = Int(minuteDiff/60)
+                                        
                                         navSubtitle = "last seen: \(user.lastSeenString)"
+                                        
+                                        if hourDiff < 6 {
+                                            var when = DispatchTime.now() + 60
+                                            
+                                            if hourDiff > 0 {
+                                                when = DispatchTime.now() + 3600
+                                            }
+                                            DispatchQueue.main.asyncAfter(deadline: when) {
+                                                if Qiscus.isLoggedIn && self.isPresence{
+                                                    self.loadTitle()
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                                 break
@@ -1587,7 +1603,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
         self.navigationItem.setTitleWithSubtitle(title: navTitle, subtitle:navSubtitle)
     }
     func setTitle(title:String = "", withSubtitle:String? = nil){
-        print("title: \(title) ||| subtitle: \(withSubtitle)")
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         if withSubtitle != nil {
             QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = withSubtitle!
@@ -2107,5 +2122,10 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
                 }
             }
         }
+    }
+    
+    // MARK: - Overriding back action
+    public func setBackButton(withAction action:@escaping (()->Void)){
+        self.backAction = action
     }
 }
