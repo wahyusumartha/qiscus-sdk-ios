@@ -59,6 +59,7 @@ class QCellTextRight: QChatCell {
         
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QCellTextRight.openLink))
         LinkContainer.addGestureRecognizer(tapRecognizer)
+        linkImage.clipsToBounds = true
     }
     
     open override func setupCell(){
