@@ -296,9 +296,8 @@ open class QiscusCommentClient: NSObject {
             "unique_temp_id" : comment.commentUniqueId as AnyObject
         ]
         
-        if QiscusConfig.sharedInstance.requestHeader == nil{
-            parameters["token"] = qiscus.config.USER_TOKEN as AnyObject?
-        }
+        parameters["token"] = qiscus.config.USER_TOKEN as AnyObject?
+        
         if linkData == nil{
             parameters["disable_link_preview"] = true as AnyObject
         }

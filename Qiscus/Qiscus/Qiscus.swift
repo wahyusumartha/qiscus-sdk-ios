@@ -17,7 +17,7 @@ import UserNotifications
 open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUserNotificationCenterDelegate {
 
     open static let sharedInstance = Qiscus()
-    static let showDebugPrint = false
+    static let showDebugPrint = true
     
     open var config = QiscusConfig.sharedInstance
     open var commentService = QiscusCommentClient.sharedInstance
