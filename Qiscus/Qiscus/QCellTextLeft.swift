@@ -170,7 +170,6 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
             self.LinkContainer.isHidden = true
             self.ballonHeight.constant = 10
             self.textTopMargin.constant = 0
-            self.linkHeight.constant = 0
         }
         
         //textView.isUserInteractionEnabled = false

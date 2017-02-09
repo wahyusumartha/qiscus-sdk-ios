@@ -167,7 +167,6 @@ class QCellTextRight: QChatCell {
             self.LinkContainer.isHidden = true
             self.balloonHeight.constant = 10
             self.textTopMargin.constant = 0
-            self.linkHeight.constant = 0
         }
         
         //textView.isUserInteractionEnabled = false
