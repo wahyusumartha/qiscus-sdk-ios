@@ -38,10 +38,15 @@ class goToChatVC: UIViewController {
                 }
                 Qiscus.createChat(withUsers:emails, target:self, title:"New Group Chat", subtitle: "Always new chat")
             }else if let roomId = Int(targetField.text!){
-                Qiscus.chat(withRoomId: roomId, target: self)
+                let view = Qiscus.chatView(withRoomId: roomId)
+                self.navigationController?.pushViewController(view, animated: true)
+                view.titleAction = {
+                    print("title clicked")
+                }
             }else{
                 Qiscus.chat(withUsers: [targetField.text!] , target: self)
             }
+            
         }
     }
     

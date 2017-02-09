@@ -46,7 +46,11 @@ extension UINavigationItem {
         titleView.addSubview(titleLabel)
         titleView.addSubview(subTitleLabel)
         
+        let tapRecognizer = UITapGestureRecognizer(target: QiscusChatVC.sharedInstance, action: #selector(QiscusChatVC.goToTitleAction))
+        titleView.addGestureRecognizer(tapRecognizer)
+        
         self.titleView = titleView
+        
     }
 
 }
