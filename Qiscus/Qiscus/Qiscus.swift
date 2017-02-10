@@ -14,36 +14,44 @@ import SwiftyJSON
 import PushKit
 import UserNotifications
 
-open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUserNotificationCenterDelegate {
+@objc public class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUserNotificationCenterDelegate {
 
-    open static let sharedInstance = Qiscus()
+    static let sharedInstance = Qiscus()
+    static let qiscusVersionNumber:String = "2.2.8"
     static let showDebugPrint = true
+    static let realtimeThread = DispatchQueue(label: "qiscusRealtime")
+    static let logThread = DispatchQueue(label: "qiscusLog", attributes: .concurrent)
     
-    open var config = QiscusConfig.sharedInstance
-    open var commentService = QiscusCommentClient.sharedInstance
-    open var styleConfiguration = QiscusUIConfiguration.sharedInstance
+    static var qiscusDeviceToken: String = ""
+    
+    var config = QiscusConfig.sharedInstance
+    var commentService = QiscusCommentClient.sharedInstance
+    var iCloudUpload:Bool = false
+    var isPushed:Bool = false
+    var reachability:QReachability?
+    var mqtt:MQTTSession?
+    var mqttChannel = [String]()
+    var notificationAction:((QiscusChatVC)->Void)? = nil
+    
+    @objc public var styleConfiguration = QiscusUIConfiguration.sharedInstance
+    @objc public var connected:Bool = false
+    @objc public var httpRealTime:Bool = false
+    @objc public var toastMessageAct:((_ roomId:Int, _ comment:QiscusComment)->Void)?
     
     let application = UIApplication.shared
     let appDelegate = UIApplication.shared.delegate
     
-    open var isPushed:Bool = false
-    open var iCloudUpload:Bool = false
-    open static var versionNumber:String = "2.2.8"
-    open var httpRealTime:Bool = false
-    
-    open var reachability:QReachability?
-    open var connected:Bool = false
-    open var mqtt:MQTTSession?
-    open var mqttChannel = [String]()
-    
-    open var toastMessageAct:((_ roomId:Int, _ comment:QiscusComment)->Void)?
-    
-    static var realtimeThread = DispatchQueue(label: "qiscusRealtime")
-    static var logThread = DispatchQueue(label: "qiscusLog", attributes: .concurrent)
-    
-    var notificationAction:((QiscusChatVC)->Void)? = nil
-    
-    @objc open class var isLoggedIn:Bool{
+    @objc public class var versionNumber:String{
+        get{
+            return Qiscus.qiscusVersionNumber
+        }
+    }
+    @objc public class var shared:Qiscus{
+        get{
+            return Qiscus.sharedInstance
+        }
+    }
+    @objc public class var isLoggedIn:Bool{
         get{
             Qiscus.checkDatabaseMigration()
             if !Qiscus.sharedInstance.connected {
@@ -52,14 +60,18 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
             return QiscusMe.isLoggedIn
         }
     }
-    
-    @objc open class var style:QiscusUIConfiguration{
+    @objc public class var deviceToken:String{
+        get{
+            return Qiscus.qiscusDeviceToken
+        }
+    }
+    @objc public class var style:QiscusUIConfiguration{
         get{
             return Qiscus.sharedInstance.styleConfiguration
         }
     }
     
-    @objc open class var commentService:QiscusCommentClient{
+    class var commentService:QiscusCommentClient{
         get{
             return QiscusCommentClient.sharedInstance
         }
@@ -69,7 +81,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         
     }
     
-    @objc open class var bundle:Bundle{
+    class var bundle:Bundle{
         get{
             let podBundle = Bundle(for: Qiscus.self)
             
@@ -84,22 +96,24 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
     /**
      Class function to disable notification when **In App**
      */
-    @objc open class func disableInAppNotif(){
+    @objc public class func disableInAppNotif(){
         Qiscus.sharedInstance.config.showToasterMessage = false
     }
     /**
      Class function to enable notification when **In App**
      */
-    @objc open class func enableInAppNotif(){
+    @objc public class func enableInAppNotif(){
         Qiscus.sharedInstance.config.showToasterMessage = true
     }
-    @objc open class func disconnectRealtime(){
+    
+    class func disconnectRealtime(){
         Qiscus.sharedInstance.mqtt?.unSubscribe(from: Qiscus.sharedInstance.mqttChannel, completion: { (success, error) in
             Qiscus.sharedInstance.mqttChannel = [String]()
         })
         Qiscus.sharedInstance.mqtt?.disconnect()
     }
-    @objc open class func clear(){
+    
+    @objc public class func clear(){
         QiscusMe.clear()
         let realm = try! Realm()
         try! realm.write {
@@ -110,7 +124,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
     }
     
     // need Documentation
-    open func RealtimeConnect(){
+    func RealtimeConnect(){
         NotificationCenter.default.removeObserver(self, name: .UIApplicationDidBecomeActive, object: nil)
         NotificationCenter.default.removeObserver(self, name: .UIApplicationDidEnterBackground, object: nil)
         let center = NotificationCenter.default
@@ -171,7 +185,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
             }
         }
     }
-    @objc open class func setup(withAppId appId:String, userEmail:String, userKey:String, username:String, avatarURL:String? = nil, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true){
+    @objc public class func setup(withAppId appId:String, userEmail:String, userKey:String, username:String, avatarURL:String? = nil, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true){
         Qiscus.checkDatabaseMigration()
         var requestProtocol = "https"
         if !secureURl {
@@ -205,7 +219,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
             }
         }
     }
-    @objc open class func setup(withURL baseUrl:String, userEmail:String, id:Int, username:String, userKey:String, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true, realTimeKey:String){
+    @objc public class func setup(withURL baseUrl:String, userEmail:String, id:Int, username:String, userKey:String, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true, realTimeKey:String){
         Qiscus.checkDatabaseMigration()
         let email = userEmail.lowercased()
         
@@ -240,7 +254,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
      - parameter title: **String** text to show as chat title (Optional), Default value : "".
      - parameter subtitle: **String** text to show as chat subtitle (Optional), Default value : "" (empty string).
      */
-    open class func chatVC(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
+    @objc public class func chatVC(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -276,7 +290,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
      No Documentation
     */
     
-    @objc open class func chat(withRoomId roomId:Int, target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
+    @objc public class func chat(withRoomId roomId:Int, target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -314,7 +328,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         
         target.navigationController?.present(navController, animated: true, completion: nil)
     }
-    @objc open class func chat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
+    @objc public class func chat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -350,7 +364,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
     /** 
      No Documentation
     */
-    @objc open class func chatView(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
+    @objc public class func chatView(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -376,7 +390,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
     /**
      No Documentation
      */
-    @objc open class func chatView(withRoomId roomId:Int, readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
+    @objc public class func chatView(withRoomId roomId:Int, readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -401,55 +415,43 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         
         return chatVC
     }
-    @objc open class func image(named name:String)->UIImage?{
+    @objc public class func image(named name:String)->UIImage?{
         return UIImage(named: name, in: Qiscus.bundle, compatibleWith: nil)?.localizedImage()
     }
     /**
      Class function to unlock action chat
      - parameter action: **()->Void** as unlock action for your chat
      */
-    @objc open class func unlockAction(_ action:@escaping (()->Void)){
+    @objc public class func unlockAction(_ action:@escaping (()->Void)){
         QiscusChatVC.sharedInstance.unlockAction = action
     }
     /**
      Class function to show alert in chat with UIAlertController
      - parameter alert: The **UIAlertController** to show alert message in chat
      */
-    @objc open class func showChatAlert(alertController alert:UIAlertController){
+    @objc public class func showChatAlert(alertController alert:UIAlertController){
         QiscusChatVC.sharedInstance.showAlert(alert: alert)
     }
     /**
      Class function to unlock chat
      */
-    @objc open class func unlockChat(){
+    @objc public class func unlockChat(){
         QiscusChatVC.sharedInstance.unlockChat()
     }
     /**
      Class function to lock chat
      */
-    @objc open class func lockChat(){
+    @objc public class func lockChat(){
         QiscusChatVC.sharedInstance.lockChat()
     }
-    /**
-     Class function to show loading message
-     - parameter text: **String** text to show as loading text (Optional), Default value : "Loading ...".
-     */
-    @objc open class func showLoading(_ text: String = "Loading ..."){
-        QiscusChatVC.sharedInstance.showLoading(text)
-    }
-    /**
-     Class function to hide loading 
-     */
-    @objc open class func dismissLoading(){
-        QiscusChatVC.sharedInstance.dismissLoading()
-    }
+    
     /**
      Class function to set color chat navigation with gradient
      - parameter topColor: The **UIColor** as your top gradient navigation color.
      - parameter bottomColor: The **UIColor** as your bottom gradient navigation color.
      - parameter tintColor: The **UIColor** as your tint gradient navigation color.
      */
-    @objc open class func setGradientChatNavigation(_ topColor:UIColor, bottomColor:UIColor, tintColor:UIColor){
+    @objc public class func setGradientChatNavigation(_ topColor:UIColor, bottomColor:UIColor, tintColor:UIColor){
         QiscusChatVC.sharedInstance.setGradientChatNavigation(withTopColor: topColor, bottomColor: bottomColor, tintColor: tintColor)
         QPopUpView.sharedInstance.topColor = topColor
         QPopUpView.sharedInstance.bottomColor = bottomColor
@@ -459,22 +461,19 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
      - parameter color: The **UIColor** as your navigation color.
      - parameter tintColor: The **UIColor** as your tint navigation color.
      */
-    @objc open class func setNavigationColor(_ color:UIColor, tintColor: UIColor){
+    @objc public class func setNavigationColor(_ color:UIColor, tintColor: UIColor){
         QiscusChatVC.sharedInstance.setNavigationColor(color, tintColor: tintColor)
     }
     /**
      Class function to set upload from iCloud active or not
      - parameter active: **Bool** to set active or not.
      */
-    @objc open class func iCloudUploadActive(_ active:Bool){
+    @objc public class func iCloudUploadActive(_ active:Bool){
         Qiscus.sharedInstance.iCloudUpload = active
         //QiscusChatVC.sharedInstance.documentButton.hidden = !active
     }
-    @objc open class func setHttpRealTime(_ rt:Bool = true){
-        Qiscus.sharedInstance.httpRealTime = rt
-    }
     
-    @objc open class func setupReachability(){
+    class func setupReachability(){
         Qiscus.sharedInstance.reachability = QReachability()
         
         if let reachable = Qiscus.sharedInstance.reachability {
@@ -514,12 +513,11 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         }
     }
     
-// MARK: - MQTT delegate
+    // MARK: - MQTT delegate
     public func mqttDidReceive(message data: Data, in topic: String, from session: MQTTSession){
         if Qiscus.isLoggedIn{
             let channelArr = topic.characters.split(separator: "/")
             let lastChannelPart = String(channelArr.last!)
-//            Qiscus.printLog(text: "Realtime socket receive message in topic: \(topic)")
             switch lastChannelPart {
             case "c":
                 let json = JSON(data: data)
@@ -830,7 +828,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
     }
     
     // MARK: - Create NEW Chat
-    @objc open class func createChatView(withUsers users:[String], readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
+    @objc public class func createChatView(withUsers users:[String], readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -859,7 +857,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         
         return chatVC
     }
-    @objc open class func createChat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil){
+    @objc public class func createChat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil){
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -891,7 +889,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
     }
     
     // MARK: - Update Room Methode
-    @objc open class func updateRoom(withRoomId roomId:Int, roomName:String? = nil, roomAvatarURL:String? = nil, roomOptions:String? = nil){
+    @objc public class func updateRoom(withRoomId roomId:Int, roomName:String? = nil, roomAvatarURL:String? = nil, roomOptions:String? = nil){
         Qiscus.commentService.updateRoom(withRoomId: roomId, roomName: roomName, roomAvatarURL: roomAvatarURL, roomOptions: roomOptions)
     }
     
@@ -903,6 +901,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
             for i in 0..<credentials.token.count {
                 token += String(format: "%02.2hhx", deviceToken[i] as CVarArg)
             }
+            Qiscus.qiscusDeviceToken = token
             QiscusCommentClient.sharedInstance.registerDevice(withToken: token)
         }
     }
@@ -919,19 +918,19 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
         print("token invalidated")
         Qiscus.registerNotification()
     }
-    open class func registerNotification(){
+    @objc public class func registerNotification(){
         let notificationSettings = UIUserNotificationSettings(types: [.badge, .sound, .alert], categories: nil)
         Qiscus.sharedInstance.application.registerUserNotificationSettings(notificationSettings)
         Qiscus.sharedInstance.application.registerForRemoteNotifications()
     }
-    open class func didRegisterUserNotification(){
+    @objc public class func didRegisterUserNotification(){
         if Qiscus.isLoggedIn{
             let voipRegistry = PKPushRegistry(queue: DispatchQueue.main)
             voipRegistry.desiredPushTypes = Set([PKPushType.voIP])
             voipRegistry.delegate = Qiscus.sharedInstance
         }
     }
-    open class func didReceive(LocalNotification notification:UILocalNotification){
+    @objc public class func didReceive(LocalNotification notification:UILocalNotification){
         if let userInfo = notification.userInfo {
             if let roomData = userInfo["qiscus-room-id"]{
                 let roomId = roomData as! Int
@@ -972,7 +971,7 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
             }
         }
     }
-    open class func publishUserStatus(offline:Bool = false){
+    class func publishUserStatus(offline:Bool = false){
         if Qiscus.isLoggedIn{
             DispatchQueue.main.async {
                 var message: String = "1";
@@ -1007,7 +1006,12 @@ open class Qiscus: NSObject, MQTTSessionDelegate, PKPushRegistryDelegate, UNUser
     func goToBackgroundMode(){
         Qiscus.publishUserStatus(offline: true)
     }
-    public class func setNotificationAction(onClick action:@escaping ((QiscusChatVC)->Void)){
+    @objc public class func setNotificationAction(onClick action:@escaping ((QiscusChatVC)->Void)){
         Qiscus.sharedInstance.notificationAction = action
+    }
+    
+    // MARK: - register PushNotification
+    @objc public class func registerDevice(withToken deviceToken: String){
+        QiscusCommentClient.sharedInstance.registerDevice(withToken: deviceToken)
     }
 }

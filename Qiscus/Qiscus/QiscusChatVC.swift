@@ -14,7 +14,7 @@ import ImageViewer
 import IQAudioRecorderController
 import SwiftyJSON
 
-open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate, GalleryItemsDatasource, IQAudioRecorderViewControllerDelegate, AVAudioPlayerDelegate, ChatCellDelegate,ChatCellAudioDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
+public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate, GalleryItemsDatasource, IQAudioRecorderViewControllerDelegate, AVAudioPlayerDelegate, ChatCellDelegate,ChatCellAudioDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
     
     static let sharedInstance = QiscusChatVC()
     
@@ -49,7 +49,6 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     @IBOutlet weak var collectionViewBottomConstrain: NSLayoutConstraint!
     @IBOutlet weak var linkPreviewTopMargin: NSLayoutConstraint!
     
-    
     // MARK: - View Attributes
     var defaultViewHeight:CGFloat = 0
     var isPresence:Bool = false
@@ -81,10 +80,10 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     var roomId:Int = 0
     
     //MARK: - external action
-    open var unlockAction:(()->Void) = {}
-    open var cellDelegate:QiscusChatCellDelegate?
-    open var titleAction:(()->Void) = {}
-    var backAction:(()->Void)? = nil
+    var unlockAction:(()->Void) = {}
+    var cellDelegate:QiscusChatCellDelegate?
+    @objc public var titleAction:(()->Void) = {}
+    @objc public var backAction:(()->Void)? = nil
     
     var audioPlayer: AVAudioPlayer?
     var audioTimer: Timer?
@@ -1102,10 +1101,10 @@ open class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelega
     }
     
     // MARK: - Button Action
-    open func showLoading(_ text:String = "Loading"){
+    @objc public func showLoading(_ text:String = "Loading"){
         self.showQiscusLoading(withText: text, isBlocking: true)
     }
-    open func dismissLoading(){
+    @objc public func dismissLoading(){
         self.dismissQiscusLoading()
     }
     func unlockChat(){

@@ -219,7 +219,7 @@ open class QiscusCommentClient: NSObject {
         })
     }
     // MARK: - Register deviceToken
-    open func registerDevice(withToken deviceToken: String){
+    func registerDevice(withToken deviceToken: String){
         let manager = Alamofire.SessionManager.default
         
         let parameters:[String: AnyObject] = [
@@ -248,22 +248,30 @@ open class QiscusCommentClient: NSObject {
                                 let pnData = json["results"]
                                 let configured = pnData["pn_ios_configured"].boolValue
                                 if configured {
-                                    Qiscus.printLog(text: "succesfully register device for push notification")
+                                    if let delegate = self.configDelegate {
+                                        delegate.didRegisterQiscusPushNotification?(withDeviceToken: Qiscus.deviceToken)
+                                    }
+                                }else{
+                                    if let delegate = self.configDelegate {
+                                        delegate.failToRegisterQiscusPushNotification?(withError: "unsuccessful register deviceToken : pushNotification not configured", andDeviceToken: Qiscus.deviceToken)
+                                    }
                                 }
                             }else{
-                                //self.configDelegate!.qiscusFailToConnect("\(json["message"].stringValue)")
+                                if let delegate = self.configDelegate {
+                                    delegate.failToRegisterQiscusPushNotification?(withError: "unsuccessful register deviceToken", andDeviceToken: Qiscus.deviceToken)
+                                }
                             }
                         }else{
-                            if self.configDelegate != nil {
-                                //self.configDelegate!.qiscusFailToConnect("Cant get data from qiscus server")
+                            if let delegate = self.configDelegate {
+                                delegate.failToRegisterQiscusPushNotification?(withError: "unsuccessful register deviceToken", andDeviceToken: Qiscus.deviceToken)
                             }
                         }
                     })
                     break
                 case .failure(let error):
                     DispatchQueue.main.async(execute: {
-                        if self.configDelegate != nil {
-                            self.configDelegate!.qiscusFailToConnect("\(error)")
+                        if let delegate = self.configDelegate {
+                            delegate.failToRegisterQiscusPushNotification?(withError: "unsuccessful register deviceToken: \(error)", andDeviceToken: Qiscus.deviceToken)
                         }
                     })
                     break
