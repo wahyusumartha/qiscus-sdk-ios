@@ -100,7 +100,7 @@ open class QiscusParticipant: Object {
         }
         return participants
     }
-    open class func addParticipant(_ userEmail:String, roomId:Int){ // USED
+    open class func addParticipant(_ userEmail:String, roomId:Int){ //  
         let realm = try! Realm()
         var searchQuery = NSPredicate()
         
@@ -113,8 +113,10 @@ open class QiscusParticipant: Object {
             participant.participantRoomId = roomId
             participant.participantEmail = userEmail
             if let room = QiscusRoom.getRoomById(roomId){
-                participant.lastReadCommentId = room.lastCommentIdInRoom
-                participant.lastDeliveredCommentId = room.lastCommentIdInRoom
+                if let lastComment = room.roomLastComment{
+                    participant.lastReadCommentId = lastComment.commentId
+                    participant.lastDeliveredCommentId = lastComment.commentId
+                }
             }
             
             try! realm.write {

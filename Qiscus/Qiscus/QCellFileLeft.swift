@@ -1,6 +1,6 @@
 //
 //  QCellFileLeft.swift
-//  Example
+//  QiscusSDK
 //
 //  Created by Ahmad Athaullah on 1/6/17.
 //  Copyright © 2017 Ahmad Athaullah. All rights reserved.
@@ -30,7 +30,7 @@ class QCellFileLeft: QChatCell {
         fileIcon.contentMode = .scaleAspectFit
     }
     open override func setupCell(){
-        userNameLabel.text = ""
+        userNameLabel.text = data.userFullName
         userNameLabel.isHidden = true
         topMargin.constant = 0
         cellHeight.constant = 0
@@ -38,26 +38,24 @@ class QCellFileLeft: QChatCell {
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QChatCell.showFile))
         fileContainer.addGestureRecognizer(tapRecognizer)
         
-        if cellPos == .first || cellPos == .single{
-            userNameLabel.text = user?.userFullName
+        if data.cellPos == .first || data.cellPos == .single{
             userNameLabel.isHidden = false
             topMargin.constant = 20
             cellHeight.constant = 20
         }
         
-        balloonView.image = QChatCellHelper.balloonImage(withPosition: CellPosition.left, cellVPos: cellPos)
-        if cellPos == .last || cellPos == .single{
+        balloonView.image = data.balloonImage
+        if data.cellPos == .last || data.cellPos == .single{
             balloonWidth.constant = 215
         }else{
-            balloonView.image = QChatCellHelper.balloonImage(cellVPos: cellPos)
             balloonWidth.constant = 200
         }
         
-        fileNameLabel.text = file?.fileName
-        fileTypeLabel.text = "\(file!.fileExtension.uppercased()) File"
-        dateLabel.text = comment.commentTime.lowercased()
+        fileNameLabel.text = data.fileName
+        fileTypeLabel.text = "\(data.fileType.uppercased()) File"
+        dateLabel.text = data.commentTime.lowercased()
 
-        if cellPos == .last || cellPos == .single {
+        if data.cellPos == .last || data.cellPos == .single {
             leftMargin.constant = 42
         }else{
             leftMargin.constant = 57
@@ -66,8 +64,8 @@ class QCellFileLeft: QChatCell {
         dateLabel.textColor = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
         fileIcon.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor
         
-        if file!.isUploading {
-            let uploadProgres = Int(file!.uploadProgress * 100)
+        if data.isUploading {
+            let uploadProgres = Int(data.uploadProgress * 100)
             let uploading = QiscusTextConfiguration.sharedInstance.uploadingText
             
             dateLabel.text = "\(uploading) \(QChatCellHelper.getFormattedStringFromInt(uploadProgres)) %"

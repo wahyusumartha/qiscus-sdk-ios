@@ -33,8 +33,8 @@ open class QiscusFile: Object {
     open dynamic var downloadProgress:CGFloat = 0
     open dynamic var uploadProgress:CGFloat = 0
     open dynamic var uploaded = true
-    open dynamic var unusedVar:Bool = false
     open dynamic var fileMiniThumbPath:String = ""
+    open dynamic var fileMimeType:String = ""
     
     var isUploaded:Bool{
         get{
@@ -46,6 +46,30 @@ open class QiscusFile: Object {
                 if result != "" {
                     check = true
                 }
+            }
+            return check
+        }
+    }
+    var thumbExist:Bool{
+        get{
+            var check:Bool = false
+            let checkValidation = FileManager.default
+            if (self.fileThumbPath != "" && checkValidation.fileExists(atPath: self.fileThumbPath as String))
+            {
+                check = true
+            }else if (self.fileMiniThumbPath != "" && checkValidation.fileExists(atPath: self.fileMiniThumbPath as String)){
+                check = true
+            }
+            return check
+        }
+    }
+    var localFileExist:Bool{
+        get{
+            var check:Bool = false
+            let checkValidation = FileManager.default
+            if (self.fileLocalPath != "" && checkValidation.fileExists(atPath: self.fileLocalPath as String))
+            {
+                check = true
             }
             return check
         }
@@ -102,10 +126,50 @@ open class QiscusFile: Object {
             return Qiscus.sharedInstance
         }
     }
+    public func thumbImage()->UIImage?{
+        if thumbExist{
+            let checkValidation = FileManager.default
+            if (self.fileThumbPath != "" && checkValidation.fileExists(atPath: self.fileThumbPath as String))
+            {
+                if let image = UIImage(contentsOfFile: fileThumbPath){
+                    return image
+                }
+            }else if (self.fileMiniThumbPath != "" && checkValidation.fileExists(atPath: self.fileMiniThumbPath as String)){
+                if let image = UIImage(contentsOfFile: fileMiniThumbPath){
+                    return image
+                }
+            }
+        }
+        return nil
+    }
+    public func thumbPath()->String{
+        if self.fileThumbPath != ""{
+            return fileThumbPath
+        }else if self.fileMiniThumbPath != ""{
+            return self.fileMiniThumbPath
+        }
+        
+        return ""
+    }
     override open class func primaryKey() -> String {
         return "fileId"
     }
-    
+    class func copyFile(file: QiscusFile)->QiscusFile{
+        let newFile = QiscusFile()
+        newFile.fileId = file.fileId
+        newFile.fileURL = file.fileURL
+        newFile.fileLocalPath = file.fileLocalPath
+        newFile.fileThumbPath = file.fileThumbPath
+        newFile.fileTopicId = file.fileTopicId
+        newFile.fileCommentId = file.fileCommentId
+        newFile.isDownloading = file.isDownloading
+        newFile.isUploading = file.isUploading
+        newFile.downloadProgress = file.downloadProgress
+        newFile.uploadProgress = file.uploadProgress
+        newFile.uploaded = file.uploaded
+        newFile.fileMiniThumbPath = file.fileMiniThumbPath
+        return newFile
+    }
     open class func getLastId() -> Int{
         let realm = try! Realm()
         let RetNext = realm.objects(QiscusFile.self).sorted(byProperty: "fileId")
@@ -129,10 +193,10 @@ open class QiscusFile: Object {
             searchQuery = NSPredicate(format: "fileCommentId == %d", comment.commentId)
             let data = realm.objects(QiscusFile.self).filter(searchQuery)
             if(data.count > 0){
-                file = data.first!
+                file = QiscusFile.copyFile(file: data.first!)
             }
         }else{
-            file = fileData.first!
+            file = QiscusFile.copyFile(file: fileData.first!)
         }
         return file
     }
@@ -145,7 +209,7 @@ open class QiscusFile: Object {
         if(fileData.count == 0){
             return nil
         }else{
-            return fileData.first!
+            return QiscusFile.copyFile(file: fileData.first!)
         }
     }
     open class func getCommentFile(_ fileId: Int)->QiscusFile?{
@@ -157,7 +221,7 @@ open class QiscusFile: Object {
         if(fileData.count == 0){
             return nil
         }else{
-            return fileData.first!
+            return QiscusFile.copyFile(file: fileData.first!)
         }
     }
     open func saveCommentFile(){
@@ -171,7 +235,7 @@ open class QiscusFile: Object {
         }
         if(fileData.count == 0){
             try! realm.write {
-                realm.add(self)
+                realm.add(QiscusFile.copyFile(file: self))
             }
             if self.isUploaded && (self.fileType == .video || self.fileType == .media){
                 DispatchQueue.main.async {
@@ -381,11 +445,9 @@ open class QiscusFile: Object {
             return UIImage()
         }
     }
-    open class func createThumbImage(_ image:UIImage, withMaskImage:UIImage? = nil, fillImageSize:UIImage? = nil)->UIImage{
-        var inputImage = image
-        if withMaskImage != nil {
-            inputImage = QiscusAsyncImageView.maskImage(image, mask: withMaskImage!)
-        }
+    open class func createThumbImage(_ image:UIImage, fillImageSize:UIImage? = nil)->UIImage{
+        let inputImage = image
+
         if fillImageSize == nil{
             var smallPart:CGFloat = inputImage.size.height
             

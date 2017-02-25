@@ -1,6 +1,6 @@
 //
 //  QiscusFileHelper.swift
-//  Example
+//  QiscusSDK
 //
 //  Created by Ahmad Athaullah on 7/18/16.
 //  Copyright © 2016 Ahmad Athaullah. All rights reserved.

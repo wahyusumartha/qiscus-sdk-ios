@@ -1,6 +1,6 @@
 //
 //  QCellAudio.swift
-//  Example
+//  QiscusSDK
 //
 //  Created by Ahmad Athaullah on 1/6/17.
 //  Copyright © 2017 Ahmad Athaullah. All rights reserved.
@@ -10,8 +10,9 @@ import UIKit
 
 class QCellAudio: QChatCell {
 
-    var delegate: ChatCellAudioDelegate?
+    var audioCellDelegate: ChatCellAudioDelegate?
     var _timeFormatter: DateComponentsFormatter?
+    var currentTime = TimeInterval()
     var timeFormatter: DateComponentsFormatter? {
         get {
             if _timeFormatter == nil {
@@ -27,5 +28,12 @@ class QCellAudio: QChatCell {
         set {
             _timeFormatter = newValue
         }
+    }
+    
+    open func displayAudioDownloading(){
+    
+    }
+    open func updateAudioDisplay(withTimeInterval timeInterval:TimeInterval){
+    
     }
 }

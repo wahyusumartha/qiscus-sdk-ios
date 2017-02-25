@@ -1,6 +1,6 @@
 //
 //  QLoadingViewController.swift
-//  Example
+//  QiscusSDK
 //
 //  Created by Ahmad Athaullah on 12/16/16.
 //  Copyright © 2016 Ahmad Athaullah. All rights reserved.

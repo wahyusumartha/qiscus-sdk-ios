@@ -1,6 +1,6 @@
 //
 //  QPopUpView.swift
-//  Example
+//  QiscusSDK
 //
 //  Created by Ahmad Athaullah on 10/31/16.
 //  Copyright © 2016 Ahmad Athaullah. All rights reserved.

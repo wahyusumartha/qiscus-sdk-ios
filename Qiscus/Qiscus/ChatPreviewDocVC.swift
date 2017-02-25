@@ -96,28 +96,7 @@ open class ChatPreviewDocVC: UIViewController, UIWebViewDelegate, WKNavigationDe
         }
     }
     open func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        
-        let headerFields = navigationAction.request.allHTTPHeaderFields
-        let headerIsPresent:Bool = (headerFields?.keys.map({$0}).contains("Authorization"))!
-        
-        if headerIsPresent {
-            decisionHandler(WKNavigationActionPolicy.allow)
-        } else {
-            if let headers = QiscusConfig.sharedInstance.requestHeader {
-                let req = NSMutableURLRequest(url: navigationAction.request.url!)
-                
-                
-                for (key, header) in headers{
-                    req.addValue(header, forHTTPHeaderField: key)
-                }
-                
-                webView.load(req as URLRequest)
-                
-            }else{
-                decisionHandler(WKNavigationActionPolicy.allow)
-            }
-            
-        }
+         decisionHandler(WKNavigationActionPolicy.allow)
     }
     
     open func webViewDidFinishLoad(_ webView: UIWebView) {

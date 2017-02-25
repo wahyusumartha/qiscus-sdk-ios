@@ -20,6 +20,7 @@ extension UINavigationItem {
         titleLabel.font = UIFont.boldSystemFont(ofSize: 16)
         titleLabel.text = title
         titleLabel.textAlignment = .left
+        titleLabel.tag = 502
         titleLabel.sizeToFit()
         
         let subTitleLabel = UILabel(frame:CGRect(x: 0, y: 18, width: 0, height: 0))
@@ -27,6 +28,7 @@ extension UINavigationItem {
         subTitleLabel.textColor = UIColor.white
         subTitleLabel.font = UIFont.systemFont(ofSize: 11)
         subTitleLabel.text = subtitle
+        subTitleLabel.tag = 402
         subTitleLabel.textAlignment = .left
         subTitleLabel.sizeToFit()
 

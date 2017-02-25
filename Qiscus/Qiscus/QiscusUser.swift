@@ -24,12 +24,19 @@ open class QiscusUser: Object {
     open dynamic var userAvailability:Bool = true
     open dynamic var userLastSeen:Double = 0
     open dynamic var isOffline:Bool = true
-    open dynamic var role:String = ""
-    open dynamic var desc: String = ""
 
     // MARK: - Primary Key
     override open class func primaryKey() -> String {
         return "localId"
+    }
+    var avatar:UIImage?{
+        get{
+            if QiscusHelper.isFileExist(inLocalPath: self.userAvatarLocalPath){
+                return UIImage(contentsOfFile: self.userAvatarLocalPath)
+            }else{
+                return nil
+            }
+        }
     }
     var isSelf:Bool{
         get{
@@ -102,14 +109,33 @@ open class QiscusUser: Object {
     }
     open func userAvatarLocalPath(_ value:String){
         let realm = try! Realm()
-        try! realm.write {
-            self.userAvatarLocalPath = value
+        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)'")
+        let userData = realm.objects(QiscusUser.self).filter(searchQuery)
+        
+        if let user = userData.first{
+            if user.userAvatarLocalPath != value{
+                try! realm.write {
+                    user.userAvatarLocalPath = value
+                }
+                
+                if let presenterDelegate = QiscusDataPresenter.shared.delegate {
+                    let copyUser = QiscusUser.copyUser(user: user)
+                    presenterDelegate.dataPresenter(didChangeUser: copyUser, onUserWithEmail: copyUser.userEmail)
+                }
+            }
         }
     }
-    open func userNameAs(_ value:String){
-        let realm = try! Realm()
-        try! realm.write {
-            self.userNameAs = value
+    public func updateUserNameAs(_ value:String){
+        if userNameAs != value {
+            let realm = try! Realm()
+            let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)'")
+            let userData = realm.objects(QiscusUser.self).filter(searchQuery)
+            
+            if let user = userData.first{
+                try! realm.write {
+                    user.userNameAs = value
+                }
+            }
         }
     }
     open func userEmail(_ value:String){
@@ -124,70 +150,60 @@ open class QiscusUser: Object {
             self.userFullName = value
         }
     }
-    open func userRole(_ value:String){
-        let realm = try! Realm()
-        try! realm.write {
-            self.role = value
-        }
-    }
-    open func usernameAs(_ nameAs: String){
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)' AND role == '\(self.role)'")
-        let userData = realm.objects(QiscusUser.self).filter(searchQuery)
-        
-        if(userData.count == 0){
-            self.userNameAs = nameAs
-        }else{
-            let user = userData.first!
-            try! realm.write {
-                user.userNameAs = nameAs
-            }
-        }
-    }
-    open func updateDescription(_ desc: String){
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)' AND role == '\(self.role)'", self.userEmail, self.role)
-        let userData = realm.objects(QiscusUser.self).filter(searchQuery)
-        
-        if(userData.count == 0){
-            self.desc = desc
-        }else{
-            let user = userData.first!
-            try! realm.write {
-                user.desc = desc
-            }
-        }
-    }
+
     open func updateLastSeen(_ timeToken:Double = 0){
         let realm = try! Realm()
         
-        if timeToken == 0 {
-            try! realm.write {
-                self.userLastSeen = Double(Date().timeIntervalSince1970)
-            }
-            self.updateStatus(isOnline: true)
-        }else{
-            if timeToken > userLastSeen{
+        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)'")
+        let userData = realm.objects(QiscusUser.self).filter(searchQuery)
+        
+        if let user = userData.first{
+            if timeToken == 0 {
                 try! realm.write {
-                    self.userLastSeen = timeToken
+                    user.userLastSeen = Double(Date().timeIntervalSince1970)
+                }
+                user.updateStatus(isOnline: true)
+            }else{
+                if timeToken > userLastSeen{
+                    try! realm.write {
+                        user.userLastSeen = timeToken
+                    }
                 }
             }
         }
     }
-
+    class func copyUser(user: QiscusUser)->QiscusUser{
+        let newUser = QiscusUser()
+        newUser.localId = user.localId
+        newUser.userId = user.userId
+        newUser.userAvatarURL = user.userAvatarURL
+        newUser.userAvatarLocalPath = user.userAvatarLocalPath
+        newUser.userNameAs = user.userNameAs
+        newUser.userEmail = user.userEmail
+        newUser.userFullName = user.userFullName
+        newUser.userAvailability = user.userAvailability
+        newUser.userLastSeen = user.userLastSeen
+        newUser.isOffline = user.isOffline
+        return newUser
+    }
     open func updateStatus(isOnline online:Bool){
-        let realm = try! Realm()
         let changed = (isOnline != online)
-        
         if changed{
-            try! realm.write {
-                self.isOffline = !online
-            }
-            if let commentDelegate = QiscusCommentClient.sharedInstance.commentDelegate{
-                if QiscusMe.sharedInstance.email != self.userEmail{
-                    commentDelegate.didChangeUserStatus?(withUser: self)
+            let realm = try! Realm()
+            let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)'")
+            let userData = realm.objects(QiscusUser.self).filter(searchQuery)
+            
+            if let user = userData.first {
+                try! realm.write {
+                    user.isOffline = !online
+                }
+                if let commentDelegate = QiscusCommentClient.sharedInstance.commentDelegate{
+                    if QiscusMe.sharedInstance.email != user.userEmail{
+                        let copyUser = QiscusUser.copyUser(user: user)
+                        DispatchQueue.main.async {
+                            commentDelegate.didChangeUserStatus?(withUser: copyUser)
+                        }
+                    }
                 }
             }
         }
@@ -218,7 +234,7 @@ open class QiscusUser: Object {
             return users
         }
     }
-    open class func getUserWithEmail(_ email:String)->QiscusUser?{ // USED
+    open class func getUserWithEmail(_ email:String)->QiscusUser?{ //  
         let realm = try! Realm()
         
         let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(email)'")
@@ -227,14 +243,14 @@ open class QiscusUser: Object {
         if(userData.count == 0){
             return nil
         }else{
-            return userData.first!
+            return QiscusUser.copyUser(user: userData.first!)
         }
     }
 
     open func updateUserFullName(_ fullName: String){
         let realm = try! Realm()
         
-        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)' AND role == '\(self.role)'")
+        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)'")
         let userData = realm.objects(QiscusUser.self).filter(searchQuery)
         
         if(userData.count == 0){
@@ -246,21 +262,36 @@ open class QiscusUser: Object {
             }
         }
     }
-    
-    open func getUserFromRoomJSON(_ json:JSON, role:String = "")->QiscusUser{
+    open func updateUserAvatarURL(_ avatarURL: String){
+        let realm = try! Realm()
+        
+        let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)'")
+        let userData = realm.objects(QiscusUser.self).filter(searchQuery)
+        
+        if(userData.count > 0){
+            let user = userData.first!
+            if user.userAvatarURL != avatarURL{
+                try! realm.write {
+                    user.userAvatarURL = avatarURL
+                    user.userAvatarLocalPath = ""
+                }
+                user.downloadAvatar()
+            }
+        }
+    }
+    open func getUserFromRoomJSON(_ json:JSON)->QiscusUser{
         var user = QiscusUser()
         user.userId = json["id"].intValue
         user.userAvatarURL = json["image"].stringValue
         user.userAvatarLocalPath = ""
         user.userEmail = json["email"].stringValue
         user.userFullName = json["fullname"].stringValue
-        user.role = role
         
         user = user.saveUser()
 
         return user
     }
-    open func saveUser()->QiscusUser{ //USED
+    open func saveUser()->QiscusUser{ // 
         let realm = try! Realm()
         
         let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)'")
@@ -277,8 +308,9 @@ open class QiscusUser: Object {
             DispatchQueue.main.async {
                 self.downloadAvatar()
             }
-            Qiscus.realtimeThread.sync {
-                Qiscus.addMqttChannel(channel: "u/\(self.userEmail)/s")
+            let userEmail = self.userEmail
+            Qiscus.realtimeThread.async {
+                Qiscus.addMqttChannel(channel: "u/\(userEmail)/s")
             }
             return self
         }else{
@@ -293,9 +325,7 @@ open class QiscusUser: Object {
             }
             try! realm.write {
                 user.userId = self.userId
-                user.role = self.role
                 user.userFullName = self.userFullName
-                
             }
             return user
         }
@@ -319,56 +349,100 @@ open class QiscusUser: Object {
         }
     }
     fileprivate func downloadAvatar(){
-        let manager = Alamofire.SessionManager.default
-        Qiscus.printLog(text: "Downloading avatar for user \(self.userEmail)")
-        
-        manager.request(self.userAvatarURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
-            .responseData(completionHandler: { response in
-                Qiscus.printLog(text: "download avatar result: \(response)")
-                if let data = response.data {
-                    if let image = UIImage(data: data) {
-                        var thumbImage = UIImage()
-                        let time = Double(Date().timeIntervalSince1970)
-                        let timeToken = UInt64(time * 10000)
-                        
-                        let fileExt = QiscusFile.getExtension(fromURL: self.userAvatarURL)
-                        let fileName = "ios-avatar-\(timeToken).\(fileExt)"
-                        
-                        if fileExt == "gif" || fileExt == "gif_"{
-                            thumbImage = image
-                        }else if fileExt == "jpg" || fileExt == "jpg_" || fileExt == "png" || fileExt == "png_" {
-                            thumbImage = self.createThumbAvatar(image)
-                        }
-                        
-                        let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
-                        let directoryPath = "\(documentsPath)/Qiscus"
-                        if !FileManager.default.fileExists(atPath: directoryPath){
-                            do {
-                                try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
-                            } catch let error as NSError {
-                                Qiscus.printLog(text: error.localizedDescription);
+        let user = QiscusUser.copyUser(user: self)
+        if user.userAvatarURL != ""{
+            if !Qiscus.qiscusDownload.contains("\(user.userAvatarURL):user:\(user.userId)"){
+                let checkURL = "\(user.userAvatarURL):user:\(user.userId)"
+                Qiscus.qiscusDownload.append(checkURL)
+                let manager = Alamofire.SessionManager.default
+                Qiscus.printLog(text: "Downloading avatar for user \(user.userEmail)")
+                
+                manager.request(user.userAvatarURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
+                    .responseData(completionHandler: { response in
+                        Qiscus.printLog(text: "download avatar result: \(response)")
+                        if let data = response.data {
+                            if let image = UIImage(data: data) {
+                                var thumbImage = UIImage()
+                                let time = Double(Date().timeIntervalSince1970)
+                                let timeToken = UInt64(time * 10000)
+                                
+                                let fileExt = QiscusFile.getExtension(fromURL: user.userAvatarURL)
+                                let fileName = "ios-avatar-\(timeToken).\(fileExt)"
+                                
+                                if fileExt == "gif" || fileExt == "gif_"{
+                                    thumbImage = image
+                                }else if fileExt == "jpg" || fileExt == "jpg_" || fileExt == "png" || fileExt == "png_" {
+                                    thumbImage = user.createThumbAvatar(image)
+                                }
+                                
+                                let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
+                                let directoryPath = "\(documentsPath)/Qiscus"
+                                if !FileManager.default.fileExists(atPath: directoryPath){
+                                    do {
+                                        try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
+                                    } catch let error as NSError {
+                                        Qiscus.printLog(text: error.localizedDescription);
+                                    }
+                                }
+                                let thumbPath = "\(directoryPath)/\(fileName)"
+                                
+                                if fileExt == "png" || fileExt == "png_" {
+                                    try? UIImagePNGRepresentation(thumbImage)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+                                } else if fileExt == "jpg" || fileExt == "jpg_"{
+                                    try? UIImageJPEGRepresentation(thumbImage, 1.0)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+                                } else if fileExt == "gif" || fileExt == "gif_"{
+                                    try? data.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+                                }
+                                DispatchQueue.main.async(execute: {
+                                    user.userAvatarLocalPath(thumbPath)
+                                })
+                                var i = 0
+                                var index:Int?
+                                for downloadURL in Qiscus.qiscusDownload{
+                                    if downloadURL == checkURL{
+                                        index = i
+                                        break
+                                    }
+                                    i += 1
+                                }
+                                if index != nil{
+                                    Qiscus.qiscusDownload.remove(at: index!)
+                                }
+                            }else{
+                                var i = 0
+                                var index:Int?
+                                for downloadURL in Qiscus.qiscusDownload{
+                                    if downloadURL == checkURL{
+                                        index = i
+                                        break
+                                    }
+                                    i += 1
+                                }
+                                if index != nil{
+                                    Qiscus.qiscusDownload.remove(at: index!)
+                                }
+                            }
+                        }else{
+                            var i = 0
+                            var index:Int?
+                            for downloadURL in Qiscus.qiscusDownload{
+                                if downloadURL == checkURL{
+                                    index = i
+                                    break
+                                }
+                                i += 1
+                            }
+                            if index != nil{
+                                Qiscus.qiscusDownload.remove(at: index!)
                             }
                         }
-                        let thumbPath = "\(directoryPath)/\(fileName)"
-                        
-                        if fileExt == "png" || fileExt == "png_" {
-                            try? UIImagePNGRepresentation(thumbImage)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
-                        } else if fileExt == "jpg" || fileExt == "jpg_"{
-                            try? UIImageJPEGRepresentation(thumbImage, 1.0)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
-                        } else if fileExt == "gif" || fileExt == "gif_"{
-                            try? data.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
-                        }
-                        DispatchQueue.main.async(execute: {
-                            self.userAvatarLocalPath(thumbPath)
-                        })
-                    }
-                }
-            }).downloadProgress(closure: { progressData in
-                let progress = CGFloat(progressData.fractionCompleted)
-                DispatchQueue.main.async(execute: {
-                    Qiscus.printLog(text: "Download avatar progress: \(progress)")
-                })
-            })
+                    }).downloadProgress(closure: { progressData in
+                        let progress = CGFloat(progressData.fractionCompleted)
+                        Qiscus.printLog(text: "Download avatar progress: \(progress)")
+                    })
+                
+            }
+        }
     }
     fileprivate func createThumbAvatar(_ image:UIImage)->UIImage{
         var smallPart:CGFloat = image.size.height

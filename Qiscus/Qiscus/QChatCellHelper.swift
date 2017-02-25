@@ -1,6 +1,6 @@
 //
 //  QChatCellHelper.swift
-//  Example
+//  QiscusSDK
 //
 //  Created by Ahmad Athaullah on 12/30/16.
 //  Copyright © 2016 Ahmad Athaullah. All rights reserved.
@@ -15,11 +15,12 @@ public enum CellPosition {
     case left, right
 }
 protocol ChatCellAudioDelegate {
-    func didTapPlayButton(_ button: UIButton, onCell cell: UICollectionViewCell)
-    func didTapPauseButton(_ button: UIButton, onCell cell: UICollectionViewCell)
-    func didTapDownloadButton(_ button: UIButton, onCell cell: UICollectionViewCell)
-    func didStartSeekTimeSlider(_ slider: UISlider, onCell cell: UICollectionViewCell)
-    func didEndSeekTimeSlider(_ slider: UISlider, onCell cell: UICollectionViewCell)
+    func didTapPlayButton(_ button: UIButton, onCell cell: QCellAudio)
+    func didTapPauseButton(_ button: UIButton, onCell cell: QCellAudio)
+    func didTapDownloadButton(_ button: UIButton, onCell cell: QCellAudio)
+    func didStartSeekTimeSlider(_ slider: UISlider, onCell cell: QCellAudio)
+    func didEndSeekTimeSlider(_ slider: UISlider, onCell cell: QCellAudio)
+    func didChangeData(onCell cell:QCellAudio , withData data:QiscusCommentPresenter)
 }
 open class QChatCellHelper: NSObject {
     open class func getCellPosition(ofIndexPath indexPath:IndexPath, inGroupOfComment comments:[[QiscusComment]])->CellTypePosition{

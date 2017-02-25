@@ -1,6 +1,6 @@
 //
 //  QCommentDelegate.swift
-//  Example
+//  QiscusSDK
 //
 //  Created by Ahmad Athaullah on 7/18/16.
 //  Copyright © 2016 Ahmad Athaullah. All rights reserved.
@@ -27,5 +27,7 @@ import SwiftyJSON
     func performResendMessage(onIndexPath: IndexPath)
     func performDeleteMessage(onIndexPath:IndexPath)
     @objc optional func didChangeUserStatus(withUser user:QiscusUser)
+    @objc optional func didChangeUserName(withUser user:QiscusUser)
+    @objc optional func didChangeSize(comment: QiscusComment)
 }
 

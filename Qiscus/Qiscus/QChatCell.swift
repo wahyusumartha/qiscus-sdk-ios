@@ -1,59 +1,45 @@
 //
 //  QChatCell.swift
-//  Example
+//  QiscusSDK
 //
 //  Created by Ahmad Athaullah on 1/6/17.
 //  Copyright © 2017 Ahmad Athaullah. All rights reserved.
 //
 
 import UIKit
-protocol ChatCellDelegate {
+
+@objc protocol ChatCellDelegate {
     func didChangeSize(onCell cell:QChatCell)
+    @objc optional func didTapCell(withData data:QiscusCommentPresenter)
 }
 class QChatCell: UICollectionViewCell {
-    var indexPath:IndexPath?
-    var cellPos = CellTypePosition.single
-    var comment = QiscusComment()
     var chatCellDelegate:ChatCellDelegate?
-    
-    var file:QiscusFile?{
-        get{
-            return QiscusFile.getCommentFileWithComment(comment)
-        }
-    }
-    var user:QiscusUser?{
-        get{
-            return comment.sender
-        }
-    }
+    var delegate: ChatCellDelegate?
+    var data = QiscusCommentPresenter()
     
     func setupCell(){
         // implementation will be overrided on child class
     }
-    func prepareCell(withComment comment:QiscusComment, cellPos:CellTypePosition, indexPath: IndexPath, cellDelegate:ChatCellDelegate? = nil){
-        self.cellPos = cellPos
-        self.comment = comment
-        self.indexPath = indexPath
-        self.chatCellDelegate = cellDelegate
+    func prepare(withData data:QiscusCommentPresenter, andDelegate delegate:ChatCellDelegate){
+        self.data = data
+        self.delegate = delegate
     }
+
     func updateStatus(toStatus status:QiscusCommentStatus){
         // implementation will be overrided on child class
     }
     open func resend(){
-        if QiscusCommentClient.sharedInstance.commentDelegate != nil{
-            QiscusCommentClient.sharedInstance.commentDelegate?.performResendMessage(onIndexPath: self.indexPath!)
-        }
+        QiscusDataPresenter.shared.resend(DataPresenter: self.data)
     }
     open func deleteComment(){
-        if QiscusCommentClient.sharedInstance.commentDelegate != nil{
-            QiscusCommentClient.sharedInstance.commentDelegate?.performDeleteMessage(onIndexPath: self.indexPath!)
+        if let presenterDelegate = QiscusDataPresenter.shared.delegate{
+            presenterDelegate.dataPresenter(dataDeleted: self.data)
         }
     }
     open func showFile(){
-        let file = QiscusFile.getCommentFileWithComment(comment)!
-        if !(file.isUploading){
-            let url = file.fileURL
-            let fileName = file.fileName
+        if data.isUploaded{
+            let url = data.remoteURL!
+            let fileName = data.fileName
             
             let preview = ChatPreviewDocVC()
             preview.fileName = fileName

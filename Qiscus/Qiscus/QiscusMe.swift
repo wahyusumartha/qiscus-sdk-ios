@@ -1,6 +1,6 @@
 //
 //  QiscusMe.swift
-//  Example
+//  QiscusSDK
 //
 //  Created by Ahmad Athaullah on 9/8/16.
 //  Copyright © 2016 Ahmad Athaullah. All rights reserved.

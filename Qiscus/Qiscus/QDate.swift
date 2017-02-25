@@ -1,6 +1,6 @@
 //
 //  QDate.swift
-//  Example
+//  QiscusSDK
 //
 //  Created by Ahmad Athaullah on 2/7/17.
 //  Copyright © 2017 Ahmad Athaullah. All rights reserved.

@@ -11,5 +11,5 @@ import UIKit
 open class ChatFileButton: UIButton {
 
     var comment:QiscusComment?
-
+    var data:QiscusCommentPresenter?
 }

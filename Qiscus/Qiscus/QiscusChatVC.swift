@@ -1,6 +1,6 @@
 //
 //  QiscusChatVC.swift
-//  Example
+//  QiscusSDK
 //
 //  Created by Ahmad Athaullah on 8/18/16.
 //  Copyright © 2016 Ahmad Athaullah. All rights reserved.
@@ -14,7 +14,7 @@ import ImageViewer
 import IQAudioRecorderController
 import SwiftyJSON
 
-public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate, GalleryItemsDatasource, IQAudioRecorderViewControllerDelegate, AVAudioPlayerDelegate, ChatCellDelegate,ChatCellAudioDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
+public class QiscusChatVC: UIViewController{
     
     static let sharedInstance = QiscusChatVC()
     
@@ -49,39 +49,89 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
     @IBOutlet weak var collectionViewBottomConstrain: NSLayoutConstraint!
     @IBOutlet weak var linkPreviewTopMargin: NSLayoutConstraint!
     
-    // MARK: - View Attributes
-    var defaultViewHeight:CGFloat = 0
     var isPresence:Bool = false
+    var titleLabel = UILabel()
+    var subtitleLabel = UILabel()
+    
+    // MARK: - shared Properties
+    var commentClient = QiscusCommentClient.sharedInstance
+    let dataPresenter = QiscusDataPresenter.shared
+    var archived:Bool = QiscusUIConfiguration.sharedInstance.readOnly
     
     // MARK: - Data Properties
+    var room:QiscusRoom?{
+        didSet{
+            if room != nil{
+                let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
+                self.navigationItem.setHidesBackButton(true, animated: false)
+                self.navigationItem.leftBarButtonItems = [
+                    backButton,
+                    self.roomAvatarButton()
+                ]
+                self.loadMoreControl.removeFromSuperview()
+                if room!.hasLoadMore{
+                    self.loadMoreControl = UIRefreshControl()
+                    self.loadMoreControl.addTarget(self, action: #selector(QiscusChatVC.loadMore), for: UIControlEvents.valueChanged)
+                    self.collectionView.addSubview(self.loadMoreControl)
+                }
+                self.loadTitle()
+                self.subscribeRealtime(onRoom: room)
+            }
+        }
+    }
     var hasMoreComment = true
+    var comments = [[QiscusCommentPresenter]]()
+    
     var loadMoreControl = UIRefreshControl()
-    var commentClient = QiscusCommentClient.sharedInstance
-    var topicId = QiscusUIConfiguration.sharedInstance.topicId
-    var users:[String] = QiscusUIConfiguration.sharedInstance.chatUsers
-    var consultantId: Int = 0
-    var consultantRate:Int = 0
-    //var comment = [[QiscusComment]]()
-    var comments = [[QiscusComment]]()
-    var archived:Bool = QiscusUIConfiguration.sharedInstance.readOnly
-    var rowHeight:[IndexPath: CGFloat] = [IndexPath: CGFloat]()
-    var firstLoad = true
+    
+    // MARK: - External data configuration
+    var topicId:Int?{
+        didSet{
+            if topicId != nil{
+                room = QiscusRoom.getRoom(withLastTopicId: topicId!)
+            }else{
+                room = nil
+            }
+        }
+    }
+    
+    var users:[String]?{
+        didSet{
+            if users != nil && !newRoom{
+                loadWithUser = true
+                if users!.count == 1 {
+                    let user = users![0]
+                    room = QiscusRoom.getRoom(distincId, andUserEmail: user)
+                }
+            }
+        }
+    }
+    var roomId:Int?{
+        didSet{
+            if roomId != nil {
+                room = QiscusRoom.getRoomById(roomId!)
+            }else{
+                room = nil
+            }
+        }
+    }
+    var distincId:String = ""
+    var optionalData:String?
+    var message:String?
+    var newRoom = false
     
     var topColor = UIColor(red: 8/255.0, green: 153/255.0, blue: 140/255.0, alpha: 1.0)
     var bottomColor = UIColor(red: 23/255.0, green: 177/255.0, blue: 149/255.0, alpha: 1)
     var tintColor = UIColor.white
-    var syncTimer:Timer?
-    var selectedImage:UIImage = UIImage()
+    
+    // MARK: Galery variable
+    var galleryItems:[QiscusGalleryItem] = [QiscusGalleryItem]()
+    
     var imagePreview:GalleryViewController?
     var loadWithUser:Bool = false
-    var distincId:String = ""
-    var optionalData:String?
-    var galleryItems:[QiscusGalleryItem] = [QiscusGalleryItem]()
-    var roomId:Int = 0
     
     //MARK: - external action
-    var unlockAction:(()->Void) = {}
-    var cellDelegate:QiscusChatCellDelegate?
+    @objc public var unlockAction:(()->Void) = {}
     @objc public var titleAction:(()->Void) = {}
     @objc public var backAction:(()->Void)? = nil
     
@@ -89,14 +139,15 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
     var audioTimer: Timer?
     var activeAudioCell: QCellAudio?
     
+    var cellDelegate:QiscusChatCellDelegate?
     var loadingView = QLoadingViewController.sharedInstance
     var typingIndicatorUser:String = ""
     var isTypingOn:Bool = false
     var linkData:QiscusLinkData?
-    var message:String?
-    var newChat:Bool = false
     var roomName:String?
     var roomAvatar = UIImageView()
+    var isSelfTyping = false
+    var firstLoad = true
     
     var showLink:Bool = false{
         didSet{
@@ -152,12 +203,7 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
             return UIImage(named: "ic_send_off", in: self.bundle, compatibleWith: nil)?.localizedImage()
         }
     }
-    var nextIndexPath:IndexPath{
-        get{
-            let indexPath = QiscusHelper.getNextIndexPathIn(groupComment:self.comments)
-            return IndexPath(row: indexPath.row, section: indexPath.section)
-        }
-    }
+
     var isLastRowVisible: Bool = false {
         didSet{
             bottomButton.isHidden = isLastRowVisible
@@ -203,7 +249,7 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
         linkPreviewContainer.layer.shadowColor = UIColor.black.cgColor
         linkPreviewContainer.layer.shadowOpacity = 0.6
         linkPreviewContainer.layer.shadowOffset = CGSize(width: -5, height: 0)
-
+        roomAvatar.contentMode = .scaleAspectFill
         self.emptyChatImage.image = Qiscus.image(named: "empty_messages")?.withRenderingMode(.alwaysTemplate)
         self.emptyChatImage.tintColor = self.bottomColor
         
@@ -214,40 +260,34 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
         let deleteMenuItem: UIMenuItem = UIMenuItem(title: "Delete", action: #selector(QChatCell.deleteComment))
         let menuItems:[UIMenuItem] = [resendMenuItem,deleteMenuItem]
         UIMenuController.shared.menuItems = menuItems
+        setupNavigationTitle()
+        //self.navigationItem.setTitleWithSubtitle(title: "Chat Room", subtitle: "chat subtitle")
     }
     override open func viewWillDisappear(_ animated: Bool) {
         self.isPresence = false
-        commentClient.commentDelegate = nil
+        dataPresenter.delegate = nil
+        //commentClient.commentDelegate = nil
         super.viewWillDisappear(animated)
-        self.view.endEditing(true)
         //self.syncTimer?.invalidate()
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
         self.view.endEditing(true)
-        if let room = QiscusRoom.getRoom(withLastTopicId: self.topicId){
-            self.unsubscribeTypingRealtime(onRoom: room)
+        if self.room != nil{
+            self.unsubscribeTypingRealtime(onRoom: room!)
         }
-        if audioPlayer != nil{
-            audioPlayer?.stop()
-        }
-        self.comments = [[QiscusComment]]()
-        self.backAction = nil
-        self.collectionView.reloadData()
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         unreadIndexPath = [IndexPath]()
         bottomButton.isHidden = true
-        commentClient.commentDelegate = self
+        dataPresenter.delegate = self
+        if self.loadMoreControl.isRefreshing {
+            self.loadMoreControl.endRefreshing()
+        }
+        //commentClient.commentDelegate = self
         self.isPresence = true
-        self.comments = [[QiscusComment]]()
-        self.collectionView.reloadData()
         self.navigationController?.setNavigationBarHidden(false , animated: false)
         self.isPresence = true
-        firstLoad = true
-        self.topicId = QiscusUIConfiguration.sharedInstance.topicId
-        self.archived = QiscusUIConfiguration.sharedInstance.readOnly
-        self.users = QiscusUIConfiguration.sharedInstance.chatUsers
         self.emptyChatImage.image = Qiscus.image(named: "empty_messages")?.withRenderingMode(.alwaysTemplate)
         self.emptyChatImage.tintColor = self.bottomColor
         let sendImage = Qiscus.image(named: "ic_send_on")?.withRenderingMode(.alwaysTemplate)
@@ -261,14 +301,12 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
         self.cameraButton.setImage(cameraImage, for: .normal)
         self.audioButton.setImage(audioImage, for: .normal)
         setupPage()
-        loadData()
     }
-    override open func viewDidAppear(_ animated: Bool) {
+    override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-    }
-    override open func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        self.comments = [[QiscusComment]]()
+        if firstLoad{
+            loadData()
+        }
     }
     // MARK: - Memory Warning
     override open func didReceiveMemoryWarning() {
@@ -276,6 +314,32 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
     }
     
     // MARK: - Setup UI
+    func setupNavigationTitle(){
+        let titleWidth = QiscusHelper.screenWidth() - 160
+        
+        titleLabel = UILabel(frame:CGRect(x: 0, y: 0, width: titleWidth, height: 17))
+        titleLabel.backgroundColor = UIColor.clear
+        titleLabel.textColor = UIColor.white
+        titleLabel.font = UIFont.boldSystemFont(ofSize: 16)
+        titleLabel.text = ""
+        titleLabel.textAlignment = .left
+        
+        subtitleLabel = UILabel(frame:CGRect(x: 0, y: 18, width: titleWidth, height: 12))
+        subtitleLabel.backgroundColor = UIColor.clear
+        subtitleLabel.textColor = UIColor.white
+        subtitleLabel.font = UIFont.systemFont(ofSize: 11)
+        subtitleLabel.text = ""
+        subtitleLabel.textAlignment = .left
+        
+        let titleView = UIView(frame: CGRect(x: 0, y: 0, width: titleWidth, height: 30))
+        titleView.addSubview(self.titleLabel)
+        titleView.addSubview(self.subtitleLabel)
+        
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QiscusChatVC.goToTitleAction))
+        titleView.addGestureRecognizer(tapRecognizer)
+        
+        self.navigationItem.titleView = titleView
+    }
     func setupPage(){
         archievedNotifView.isHidden = !archived
         self.archievedNotifTop.constant = 0
@@ -310,6 +374,9 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
         self.collectionView.register(UINib(nibName: "QCellFileLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellFileLeft")
         self.collectionView.register(UINib(nibName: "QCellFileRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellFileRight")
         
+        self.loadMoreControl.addTarget(self, action: #selector(QiscusChatVC.loadMore), for: UIControlEvents.valueChanged)
+        self.collectionView.addSubview(self.loadMoreControl)
+        
         self.navigationController?.navigationBar.verticalGradientColor(topColor, bottomColor: bottomColor)
         self.navigationController?.navigationBar.tintColor = tintColor
         
@@ -319,11 +386,6 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
             backButton,
             self.roomAvatarButton()
         ]
-        
-        // loadMoreControl
-        self.loadMoreControl.addTarget(self, action: #selector(QiscusChatVC.loadMore), for: UIControlEvents.valueChanged)
-        
-        self.collectionView.addSubview(self.loadMoreControl)
         
         if inputText.value == "" {
             sendButton.isEnabled = false
@@ -342,7 +404,7 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
         self.inputText.textContainerInset = UIEdgeInsets.zero
         self.inputText.placeholder = QiscusTextConfiguration.sharedInstance.textPlaceholder
         self.inputText.chatInputDelegate = self
-        self.defaultViewHeight = self.view.frame.height - (self.navigationController?.navigationBar.frame.height)! - QiscusHelper.statusBarSize().height
+        //self.defaultViewHeight = self.view.frame.height - (self.navigationController?.navigationBar.frame.height)! - QiscusHelper.statusBarSize().height
         
         // upload button setup
         self.galeryButton.addTarget(self, action: #selector(self.uploadImage), for: .touchUpInside)
@@ -363,10 +425,10 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
             let cancelTxt = QiscusTextConfiguration.sharedInstance.alertCancelText
             let settingTxt = QiscusTextConfiguration.sharedInstance.alertSettingText
             QPopUpView.showAlert(withTarget: self, message: text, firstActionTitle: settingTxt, secondActionTitle: cancelTxt,
-                doneAction: {
-                    self.goToIPhoneSetting()
-                },
-                cancelAction: {}
+                                 doneAction: {
+                                    self.goToIPhoneSetting()
+            },
+                                 cancelAction: {}
             )
         })
     }
@@ -376,10 +438,10 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
             let cancelTxt = QiscusTextConfiguration.sharedInstance.alertCancelText
             let settingTxt = QiscusTextConfiguration.sharedInstance.alertSettingText
             QPopUpView.showAlert(withTarget: self, message: text, firstActionTitle: settingTxt, secondActionTitle: cancelTxt,
-                doneAction: {
-                    self.goToIPhoneSetting()
-                },
-                cancelAction: {}
+                                 doneAction: {
+                                    self.goToIPhoneSetting()
+            },
+                                 cancelAction: {}
             )
         })
     }
@@ -442,59 +504,17 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
                 })
             }
         }, completion: nil)
-        
     }
     
-    // MARK: - ChatInputTextDelegate Delegate
-    open func chatInputTextDidChange(chatInput input: ChatInputText, height: CGFloat) {
-        if self.minInputHeight.constant != height {
-            input.layoutIfNeeded()
-            self.minInputHeight.constant = height
-        }
-        if let room = QiscusRoom.getRoom(withLastTopicId: self.topicId){
-            DispatchQueue.main.async {
-                let message: String = "1";
-                let data: Data = message.data(using: .utf8)!
-                let channel = "r/\(room.roomId)/\(self.topicId)/\(QiscusMe.sharedInstance.email)/t"
-                Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: false, completion: nil)
-            }
-            
-        }
-    }
-    open func valueChanged(value:String){
-        if value == "" {
-            linkToPreview = ""
-        }else{
-            sendButton.isEnabled = true
-            if let link = QiscusHelper.getFirstLinkInString(text: value){
-                if link != linkToPreview{
-                    linkToPreview = link
-                }
-            }else{
-                linkToPreview = ""
-            }
-        }
-    }
-    open func chatInputDidEndEditing(chatInput input: ChatInputText) {
-        if let room = QiscusRoom.getRoom(withLastTopicId: self.topicId){
-            DispatchQueue.main.async {
-                let message: String = "0";
-                let data: Data = message.data(using: .utf8)!
-                let channel = "r/\(room.roomId)/\(self.topicId)/\(QiscusMe.sharedInstance.email)/t"
-                Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: false, completion: nil)
-            }
-        }
-    }
+    
     
     func scrollToBottom(_ animated:Bool = false){
-        let bottomPoint = CGPoint(x: 0, y: collectionView.contentSize.height - collectionView.bounds.size.height)
-        
-        if collectionView.contentSize.height > collectionView.bounds.size.height{
-            collectionView.setContentOffset(bottomPoint, animated: animated)
-        }
-        let delay = 0.1 * Double(NSEC_PER_SEC)
-        let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
-        DispatchQueue.main.asyncAfter(deadline: time, execute: {
+        self.collectionView.performBatchUpdates({}, completion: { _ in
+            let bottomPoint = CGPoint(x: 0, y: self.collectionView.contentSize.height - self.collectionView.bounds.size.height)
+            
+            if self.collectionView.contentSize.height > self.collectionView.bounds.size.height{
+                self.collectionView.setContentOffset(bottomPoint, animated: animated)
+            }
             self.isLastRowVisible = true
         })
     }
@@ -530,427 +550,27 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
         }
     }
     
-    // MARK: - Load DataSource
+    // MARK: - Load DataSource on firstTime
     func loadData(){
-        if newChat {
-            self.showLoading("Load Data ...")
-            commentClient.createNewRoom(withUsers: users, optionalData: self.optionalData, withMessage: self.message)
+        self.showLoading("Load Data ...")
+        if newRoom && (self.users != nil){
+            dataPresenter.loadComments(inNewGroupChat: users!, optionalData: self.optionalData, withMessage: self.message)
+        }else if room != nil{
+            dataPresenter.loadComments(inRoom: room!.roomId, withMessage: message)
         }else{
-            if(self.topicId > 0){
-                self.comments = QiscusComment.grouppedComment(inTopicId: self.topicId, firstLoad: true)
-                
-                let room = QiscusRoom.getRoom(withLastTopicId: self.topicId)
-                if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
-                    roomDelegate.didFinishLoadRoom(onRoom: room!)
-                }
-                
-                if room != nil {
-                    if let avatar = room!.avatarImage {
-                        self.roomAvatar.image = avatar
-                    }else{
-                        self.roomAvatar.loadAsync(room!.roomAvatarURL)
-                        room!.downloadThumbAvatar()
-                    }
-                    self.loadTitle()
-                    self.subscribeRealtime(onRoom: room)
-                }
-                
-                if self.comments.count > 0 {
-                    self.collectionView.reloadData()
-                    publishRead()
-                    scrollToBotomFromNoData()
-                    self.welcomeView.isHidden = true
-                    commentClient.syncMessage(self.topicId)
-                    if message != nil {
-                        commentClient.postMessage(message: self.message!, topicId: self.topicId)
-                        self.message = nil
-                    }
+            if loadWithUser && users != nil{
+                if users!.count == 1 {
+                    dataPresenter.loadComments(inRoomWithUsers: users![0], optionalData: optionalData, withMessage: message, distinctId: distincId)
                 }else{
-                    self.welcomeView.isHidden = false
-                    self.showLoading("Load Data ...")
-                    commentClient.getListComment(topicId: self.topicId, commentId: 0, triggerDelegate: true, message:self.message)
-                    self.message = nil
+                    // here error toast
+                    self.dismissLoading()
                 }
-            }
-            else{
-                if self.users.count > 0 {
-                    loadWithUser = true
-                    if self.users.count == 1 {
-                        if let room = QiscusRoom.getRoom(self.distincId, andUserEmail: self.users.first!){
-                            if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
-                                roomDelegate.didFinishLoadRoom(onRoom: room)
-                            }
-                            
-                            if let avatar = room.avatarImage {
-                                self.roomAvatar.image = avatar
-                            }else{
-                                self.roomAvatar.loadAsync(room.roomAvatarURL)
-                                room.downloadThumbAvatar()
-                            }
-                            self.topicId = room.roomLastCommentTopicId
-                            self.loadTitle()
-                            self.comments = QiscusComment.grouppedComment(inTopicId: self.topicId, firstLoad: true)
-                            self.subscribeRealtime(onRoom: room)
-                            
-                            if self.comments.count > 0 {
-                                publishRead()
-                                self.collectionView.isHidden = true
-                                self.collectionView.reloadData()
-                                scrollToBotomFromNoData()
-                                self.welcomeView.isHidden = true
-                                commentClient.syncMessage(self.topicId)
-                            }else{
-                                self.welcomeView.isHidden = false
-                                self.showLoading("Load Data ...")
-                                commentClient.getListComment(topicId: self.topicId, commentId: 0, triggerDelegate: true)
-                            }
-                            if message != nil {
-                                commentClient.postMessage(message: self.message!, topicId: self.topicId)
-                                self.message = nil
-                            }
-                        }
-                        else{
-                            self.showLoading("Load Data ...")
-                            commentClient.getListComment(withUsers: users, triggerDelegate: true, distincId: self.distincId, optionalData:self.optionalData, withMessage: self.message)
-                        }
-                    }else{
-                        self.showLoading("Load Data ...")
-                        commentClient.getListComment(withUsers: users, triggerDelegate: true, distincId: self.distincId, optionalData:self.optionalData, withMessage: self.message)
-                    }
-                }else{
-                    if let room = QiscusRoom.getRoomById(self.roomId){
-                        self.topicId = room.roomLastCommentTopicId
-                        self.loadTitle()
-                        
-                        if let avatar = room.avatarImage {
-                            self.roomAvatar.image = avatar
-                        }else{
-                            self.roomAvatar.loadAsync(room.roomAvatarURL)
-                            room.downloadThumbAvatar()
-                        }
-                        if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
-                            roomDelegate.didFinishLoadRoom(onRoom: room)
-                        }
-                        self.comments = QiscusComment.grouppedComment(inTopicId: room.roomLastCommentTopicId, firstLoad: true)
-                        self.subscribeRealtime(onRoom: room)
-                        if self.comments.count > 0 {
-                            publishRead()
-                            self.topicId = room.roomLastCommentTopicId
-                            self.collectionView.reloadData()
-                            scrollToBotomFromNoData()
-                            self.welcomeView.isHidden = true
-                            if message != nil {
-                                commentClient.postMessage(message: self.message!, topicId: self.topicId)
-                                self.message = nil
-                            }
-                            commentClient.syncMessage(self.topicId)
-                        }else{
-                            self.welcomeView.isHidden = false
-                            self.showLoading("Load Data ...")
-                            commentClient.getRoom(withID: self.roomId, triggerDelegate: true, withMessage: self.message)
-                        }
-                    }
-                    else{
-                        self.welcomeView.isHidden = false
-                        self.showLoading("Load Data ...")
-                        commentClient.getRoom(withID: self.roomId, triggerDelegate: true, withMessage: self.message)
-                    }
-                }
+            }else if roomId != nil{
+                dataPresenter.loadComments(inRoom: roomId!, withMessage: message)
             }
         }
-    }
-    func syncData(){
-        if Qiscus.sharedInstance.connected{
-        if self.topicId > 0 {
-            if self.comments.count > 0 {
-                commentClient.syncMessage(self.topicId)
-            }else{
-                if self.users.count > 0 {
-                    //commentClient.getListComment(withUsers:users, triggerDelegate: true)
-                }else{
-                    commentClient.getListComment(topicId: self.topicId, commentId: 0, triggerDelegate: true)
-                }
-            }
-        }
-        }else{
-            self.showNoConnectionToast()
-        }
-    }
-    // MARK: - Qiscus Comment Delegate
-    open func performDeleteMessage(onIndexPath: IndexPath) {
-        let deletedComment = self.comments[onIndexPath.section][onIndexPath.row]
-        if comments[onIndexPath.section].count == 1{
-            let indexSet = IndexSet(integer: onIndexPath.section)
-            comments.remove(at: onIndexPath.section)
-            collectionView.performBatchUpdates({
-                self.collectionView.deleteSections(indexSet)
-            }, completion: nil)
-            if onIndexPath.section > 0 {
-                let row = self.comments[onIndexPath.section - 1].count - 1
-                let reloadIndexPath = IndexPath(row: row, section: onIndexPath.section - 1)
-                collectionView.reloadItems(at: [reloadIndexPath])
-            }
-        }else{
-            var last = false
-            if onIndexPath.row == (self.comments[onIndexPath.section].count - 1){
-                last = true
-            }else{
-                let commentAfter = self.comments[onIndexPath.section][onIndexPath.row + 1]
-                if (commentAfter.commentSenderEmail as String) != (deletedComment.commentSenderEmail as String){
-                    last = true
-                }
-            }
-            self.comments[onIndexPath.section].remove(at: onIndexPath.row)
-            collectionView.performBatchUpdates({
-                self.collectionView.deleteItems(at: [onIndexPath])
-            }, completion: nil)
-            if last {
-                let reloadIndexPath = IndexPath(row: onIndexPath.row - 1, section: onIndexPath.section)
-                collectionView.reloadItems(at: [reloadIndexPath])
-            }
-        }
-        deletedComment.deleteComment()
-    }
-    open func performResendMessage(onIndexPath: IndexPath) {
-        let resendComment = self.comments[onIndexPath.section][onIndexPath.row]
-        resendComment.updateCommentStatus(.sending)
-        self.comments[onIndexPath.section][onIndexPath.row] = resendComment
-        collectionView.reloadItems(at: [onIndexPath])
-        if resendComment.commentType == .text{
-            self.commentClient.postComment(resendComment)
-        }else{
-            if let file = QiscusFile.getCommentFileWithComment(resendComment){
-                if file.isUploaded {
-                    self.commentClient.postComment(resendComment)
-                }else if file.isOnlyLocalFileExist{
-                    self.commentClient.reUploadFile(onComment: resendComment)
-                }
-            }
-        }
-    }
-    open func commentDidChangeStatus(fromComment comment: QiscusComment, toStatus: QiscusCommentStatus) {
-        if comment.commentTopicId == self.topicId{
-            if toStatus != QiscusCommentStatus.failed{
-                for commentGroup in self.comments {
-                    for singleComment in commentGroup{
-                        if singleComment.commentId <= comment.commentId{
-                            let indexPath = singleComment.commentIndexPath
-                            if self.comments.count > indexPath.section{
-                                if self.comments[indexPath.section].count > indexPath.row{
-                                    DispatchQueue.main.async {
-                                        self.comments[indexPath.section][indexPath.row] = singleComment
-                                        self.collectionView.reloadItems(at: [indexPath])
-                                    }
-                                }
-                            }
-                            
-                        }
-                    }
-                }
-            }else{
-                let indexPath = comment.commentIndexPath
-                if self.comments.count > indexPath.section{
-                    if self.comments[indexPath.section].count > indexPath.row{
-                        DispatchQueue.main.async {
-                            self.comments[indexPath.section][indexPath.row] = comment
-                            self.collectionView.reloadItems(at: [indexPath])
-                        }
-                    }
-                }
-            }
-        }
-    }
-    open func didSuccesPostComment(_ comment:QiscusComment){
-        if comment.commentTopicId == self.topicId {
-            let indexPath = comment.commentIndexPath
-            DispatchQueue.main.async {
-                self.comments[indexPath.section][indexPath.row] = comment
-                self.collectionView.reloadItems(at: [indexPath])
-                if indexPath.section == self.comments.count - 1 && indexPath.row == self.comments[self.comments.count - 1].count - 1{
-                    self.isLastRowVisible = true
-                }
-            }
-        }
-    }
-    open func didFailedPostComment(_ comment:QiscusComment){
-        if comment.commentTopicId == self.topicId {
-            let indexPath = comment.commentIndexPath
-            DispatchQueue.main.async {
-                self.comments[indexPath.section][indexPath.row] = comment
-                self.collectionView.reloadItems(at: [indexPath])
-            }
-        }
-        
-    }
-    open func downloadingMedia(_ comment:QiscusComment){
-        let file = QiscusFile.getCommentFileWithComment(comment)!
-        let indexPath = comment.commentIndexPath
-        
-        if self.comments.count > indexPath.section{
-            if self.comments[indexPath.section].count > indexPath.row {
-                let targetCell = collectionView.cellForItem(at: indexPath)
-                let downloadProgress:Int = Int(file.downloadProgress * 100)
-                if let cell = targetCell as? QChatCell {
-                    cell.downloadingMedia(withPercentage: downloadProgress)
-                }
-            }
-        }
-    }
-    open func didDownloadMedia(_ comment: QiscusComment){
-        if Qiscus.sharedInstance.connected{
-            let file = QiscusFile.getCommentFileWithComment(comment)!
-            let indexPath = comment.commentIndexPath
-            if self.comments.count > indexPath.section{
-                if self.comments[indexPath.section].count > indexPath.row {
-                    let targetCell = collectionView.cellForItem(at: indexPath)
-                    if let cell = targetCell as? QCellMediaLeft {
-                        cell.comment = comment
-                        cell.setupImageView()
-                    }else if let cell = targetCell as? QCellMediaRight {
-                        cell.comment = comment
-                        cell.setupImageView()
-                    }else if let cell = targetCell as? QCellAudioLeft {
-                        cell.progressContainer.isHidden = true
-                        cell.filePath = file.fileLocalPath
-                        collectionView.reloadItems(at: [indexPath])
-                    }else if let cell = targetCell as? QCellAudioRight {
-                        cell.progressContainer.isHidden = true
-                        cell.filePath = file.fileLocalPath
-                        collectionView.reloadItems(at: [indexPath])
-                    }
-                }
-            }
-        }else{
-            self.showNoConnectionToast()
-        }
-    }
-    open func didUploadFile(_ comment:QiscusComment){
-        let file = QiscusFile.getCommentFileWithComment(comment)!
-        let indexPath = comment.commentIndexPath
-        
-        if self.comments.count > indexPath.section{
-            if self.comments[indexPath.section].count > indexPath.row {
-                if let cell = collectionView.cellForItem(at: indexPath) as? QCellMediaRight{
-                    cell.comment = comment
-                    cell.setupImageView()
-                }else if let cell = collectionView.cellForItem(at: indexPath) as? QCellAudioRight{
-                    cell.filePath = file.fileLocalPath
-                    cell.progressContainer.isHidden = true
-                    collectionView.reloadItems(at: [indexPath])
-                }else{
-                    collectionView.reloadItems(at: [indexPath])
-                }
-            }
-        }
-    }
-    open func uploadingFile(_ comment:QiscusComment){
-        let file = QiscusFile.getCommentFileWithComment(comment)!
-        let indexPath = comment.commentIndexPath
-        
-        if self.comments.count > indexPath.section{
-            if self.comments[indexPath.section].count > indexPath.row {
-                let uploadProgres:Int = Int(file.uploadProgress * 100)
-                let uploading = QiscusTextConfiguration.sharedInstance.uploadingText
-                if let cell = collectionView.cellForItem(at: indexPath) as? QCellMediaRight{
-                    if file.uploadProgress > 0 {
-                        cell.downloadButton.isHidden = true
-                        cell.progressLabel.text = "\(uploadProgres) %"
-                        cell.progressLabel.isHidden = false
-                        cell.progressContainer.isHidden = false
-                        cell.progressView.isHidden = false
-                        
-                        let newHeight = file.uploadProgress * cell.maxProgressHeight
-                        cell.progressHeight.constant = newHeight
-                        cell.progressView.layoutIfNeeded()
-                    }
-                }else if let cell = collectionView.cellForItem(at: indexPath) as? QCellAudioRight{
-                    if file.uploadProgress > 0 {
-                        cell.progressContainer.isHidden = false
-                        cell.progressHeight.constant = file.uploadProgress * 30
-                        cell.dateLabel.text = "\(uploading) \(QChatCellHelper.getFormattedStringFromInt(uploadProgres)) %"
-                        cell.progressContainer.layoutIfNeeded()
-                    }
-                }else if let cell = collectionView.cellForItem(at: indexPath) as? QCellFileRight{
-                    if file.uploadProgress > 0 {
-                        cell.dateLabel.text = "\(uploading) \(QChatCellHelper.getFormattedStringFromInt(uploadProgres)) %"
-                    }
-                }
-            }
-        }
-
     }
     
-    open func didFailedUploadFile(_ comment:QiscusComment){
-        let indexPath = comment.commentIndexPath
-        if indexPath.section < self.comments.count && indexPath.row < self.comments[indexPath.section].count{
-            collectionView.reloadItems(at: [indexPath])
-        }
-    }
-    open func didSuccessPostFile(_ comment:QiscusComment){
-        
-    }
-    open func didFailedPostFile(_ comment:QiscusComment){
-        
-    }
-    open func didFinishLoadMore(){
-        if comments.count > 0{
-            let first = comments[0][0]
-            let newComments = QiscusComment.grouppedComment(inTopicId: topicId, fromComment: first)
-            var mergeLastGroup = false
-            if newComments.count > 0{
-                let lastGroupComment = newComments.last!
-                let lastComment = lastGroupComment.last!
-                if lastComment.commentDate == first.commentDate && lastComment.commentSenderEmail == first.commentSenderEmail{
-                    mergeLastGroup = true
-                }
-                collectionView.performBatchUpdates({
-                    var i = 0
-                    for newGroupComment in newComments{
-                        if i == (newComments.count - 1) && mergeLastGroup {
-                            var indexPaths = [IndexPath]()
-                            var j = 0
-                            for newComment in newGroupComment{
-                                self.comments[i].insert(newComment, at: j)
-                                indexPaths.append(IndexPath(row: j, section: i))
-                                j += 1
-                            }
-                            self.collectionView.insertItems(at: indexPaths)
-                        }else{
-                            self.comments.insert(newGroupComment, at: i)
-                            var indexPaths = [IndexPath]()
-                            for j in 0..<newGroupComment.count{
-                                indexPaths.append(IndexPath(row: j, section: i))
-                            }
-                            self.collectionView.insertSections(IndexSet(integer: i))
-                            self.collectionView.insertItems(at: indexPaths)
-                        }
-                        i += 1
-                    }
-                }, completion: nil)
-            }
-        }else{
-            loadData()
-        }
-        self.loadMoreControl.endRefreshing()
-    }
-    open func finishedLoadFromAPI(_ topicId: Int){
-        let room = QiscusRoom.getRoom(withLastTopicId: self.topicId)
-        if newChat {
-            newChat = false
-        }
-        self.subscribeRealtime(onRoom: room)
-        self.topicId = topicId
-        self.comments = QiscusComment.grouppedComment(inTopicId: topicId, firstLoad: true)
-        
-        collectionView.isHidden = true
-        collectionView.reloadData()
-        if self.comments.count > 0{
-            welcomeView.isHidden = true
-        }
-        scrollToBotomFromNoData()
-        self.dismissLoading()
-        publishRead()
-    }
     open func scrollToBotomFromNoData(){
         let delay = 0.1 * Double(NSEC_PER_SEC)
         let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
@@ -960,144 +580,6 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
                 self.collectionView.isHidden = false
             }
         })
-    }
-    open func didFailedLoadDataFromAPI(_ error: String){
-        self.dismissLoading()
-//        if data != nil{
-//            var errorMessage = "Failed to load room data"
-//            var json = JSON(data!)
-//            print("error data: \(json)")
-//            if json != nil{
-//                if let error = json["detailed_messages"].array {
-//                    if let message = error[0].string {
-//                        errorMessage = message
-//                    }
-//                }else if let error = json["message"].string {
-//                    errorMessage = error
-//                }
-//            }
-//            QToasterSwift.toast(target: self, text: errorMessage, backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
-//        }
-    }
-    open func gotNewComment(_ comments:[QiscusComment]){
-        var refresh = false
-        
-        if self.comments.count > 0 {
-            var needScroolToBottom = false
-            
-            if firstLoad{
-                needScroolToBottom = true
-                firstLoad = false
-                refresh = true
-            }
-            if isLastRowVisible{
-                needScroolToBottom = true
-            }
-            if comments.count == 1{
-                let firstComment = comments[0]
-                if !needScroolToBottom{
-                    if firstComment.commentSenderEmail == QiscusConfig.sharedInstance.USER_EMAIL{
-                        needScroolToBottom = true
-                    }
-                }
-            }
-            self.welcomeView.isHidden = true
-            if self.comments.count == 0 {
-                refresh = true
-                needScroolToBottom = false
-            }
-            for singleComment in comments{
-                if singleComment.commentTopicId == self.topicId {
-                    let indexPathData = QiscusHelper.properIndexPathOf(comment: singleComment, inGroupedComment: self.comments)
-                    
-                    let indexPath = IndexPath(row: indexPathData.row, section: indexPathData.section)
-                    let indexSet = IndexSet(integer: indexPathData.section)
-                    singleComment.updateCommmentIndexPath(indexPath: indexPath)
-                    
-                    if indexPathData.newGroup {
-                        var newCommentGroup = [QiscusComment]()
-                        newCommentGroup.append(singleComment)
-                        self.comments.insert(newCommentGroup, at: indexPathData.section)
-                        if !singleComment.isOwnMessage{
-                            unreadIndexPath.append(indexPath)
-                        }
-                        self.collectionView.performBatchUpdates({
-                            self.collectionView.insertSections(indexSet)
-                            self.collectionView.insertItems(at: [indexPath])
-                        }, completion: nil)
-                    }else{
-                        self.comments[indexPathData.section].insert(singleComment, at: indexPathData.row)
-                        if !singleComment.isOwnMessage{
-                            unreadIndexPath.append(indexPath)
-                        }
-                        self.collectionView.performBatchUpdates({
-                            self.collectionView.insertItems(at: [indexPath])
-                        }, completion: nil)
-                    }
-                    
-                    var indexPathToReload = [IndexPath]()
-                    
-                    if indexPath.row > 0 {
-                        let indexPathBefore = IndexPath(row: indexPath.row - 1, section: indexPath.section)
-                        indexPathToReload.append(indexPathBefore)
-                    }else if indexPath.section > 0 {
-                        let rowBefore = self.comments[indexPath.section - 1].count - 1
-                        let indexPathBefore = IndexPath(row: rowBefore, section: indexPath.section)
-                        indexPathToReload.append(indexPathBefore)
-                    }
-                    if indexPath.row < (self.comments[indexPath.section].count - 1){
-                        let indexPathAfter = IndexPath(row: indexPath.row + 1, section: indexPath.section)
-                        indexPathToReload.append(indexPathAfter)
-                    }else if indexPath.section < (self.comments.count - 1){
-                        let indexPathAfter = IndexPath(row: 0, section: indexPath.section + 1)
-                        indexPathToReload.append(indexPathAfter)
-                    }
-                    if indexPathToReload.count > 0 {
-                        for reloadIndexPath in indexPathToReload{
-                            if self.comments.count > reloadIndexPath.section{
-                                if self.comments[reloadIndexPath.section].count > reloadIndexPath.row{
-                                    self.collectionView.reloadItems(at: [reloadIndexPath])
-                                    
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if refresh {
-                self.collectionView.reloadData()
-            }
-            if needScroolToBottom{
-                let delay = 0.1 * Double(NSEC_PER_SEC)
-                let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
-                DispatchQueue.main.asyncAfter(deadline: time, execute: {
-                    self.scrollToBottom()
-                })
-            }
-        }else{
-            self.comments = QiscusComment.grouppedComment(inTopicId: self.topicId, firstLoad: true)
-            collectionView.reloadData()
-            welcomeView.isHidden = true
-            let delay = 0.1 * Double(NSEC_PER_SEC)
-            let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
-            DispatchQueue.main.asyncAfter(deadline: time, execute: {
-                self.scrollToBottom()
-                self.collectionView.isHidden = false
-            })
-        }
-        publishRead()
-    }
-    public func didChangeUserStatus(withUser user:QiscusUser){
-        if let room = QiscusRoom.getRoom(withLastTopicId: self.topicId){
-            if room.roomType == QiscusRoomType.single {
-                for participant in room.participants {
-                   if participant.participantEmail == user.userEmail{
-                        self.loadTitle()
-                        break
-                   }
-                }
-            }
-        }
     }
     
     // MARK: - Button Action
@@ -1111,8 +593,8 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
         self.archievedNotifTop.constant = 65
         UIView.animate(withDuration: 0.6, animations: {
             self.view.layoutIfNeeded()
-            }, completion: { _ in
-                self.archievedNotifView.isHidden = true
+        }, completion: { _ in
+            self.archievedNotifView.isHidden = true
         })
     }
     func lockChat(){
@@ -1120,27 +602,45 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
         self.archievedNotifTop.constant = 0
         UIView.animate(withDuration: 0.6, animations: {
             self.view.layoutIfNeeded()
-            }
+        }
         )
     }
     func confirmUnlockChat(){
         self.unlockAction()
     }
     func sendMessage(){
-        if Qiscus.sharedInstance.connected{
-            let value = inputText.value.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            
-            commentClient.postMessage(message: value, topicId: self.topicId, linkData: self.linkData)
-            inputText.clearValue()
-            inputText.text = ""
-            sendButton.isEnabled = false
-            showLink = false
-            
-            self.scrollToBottom()
-            self.minInputHeight.constant = 25
-            self.inputText.layoutIfNeeded()
-        }else{
-            self.showNoConnectionToast()
+        Qiscus.logicThread.async {
+            if Qiscus.sharedInstance.connected{
+                let value = self.inputText.value.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+                var indexPath = IndexPath(row: 0, section: 0)
+                
+                if self.comments.count > 0 {
+                    let lastComment = self.comments.last!.last!
+                    if lastComment.userEmail == QiscusMe.sharedInstance.email && lastComment.isToday {
+                        indexPath.section = lastComment.commentIndexPath!.section
+                        indexPath.row = lastComment.commentIndexPath!.row + 1
+                    }else{
+                        indexPath.section = lastComment.commentIndexPath!.section + 1
+                        indexPath.row = 0
+                    }
+                }
+                if let chatRoom = self.room {
+                    self.commentClient.postMessage(message: value, topicId: chatRoom.roomLastCommentTopicId, linkData: self.linkData, indexPath: indexPath)
+                }
+                self.inputText.clearValue()
+                self.showLink = false
+                Qiscus.uiThread.async {
+                    self.inputText.text = ""
+                    self.minInputHeight.constant = 25
+                    self.sendButton.isEnabled = false
+                    self.inputText.layoutIfNeeded()
+                }
+                
+            }else{
+                Qiscus.uiThread.async {
+                    self.showNoConnectionToast()
+                }
+            }
         }
     }
     func uploadImage(){
@@ -1246,60 +746,7 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
             self.showNoConnectionToast()
         }
     }
-    open func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentAt url: URL) {
-        self.showLoading("Processing File")
-        let coordinator = NSFileCoordinator()
-        coordinator.coordinate(readingItemAt: url, options: NSFileCoordinator.ReadingOptions.forUploading, error: nil) { (dataURL) in
-            do{
-                let data:Data = try Data(contentsOf: dataURL, options: NSData.ReadingOptions.mappedIfSafe)
-                var fileName = dataURL.lastPathComponent.replacingOccurrences(of: "%20", with: "_")
-                fileName = fileName.replacingOccurrences(of: " ", with: "_")
-                
-                let fileNameArr = (fileName as String).characters.split(separator: ".")
-                let ext = String(fileNameArr.last!).lowercased()
-                
-                // get file extension
-                let isGifImage:Bool = (ext == "gif" || ext == "gif_")
-                let isJPEGImage:Bool = (ext == "jpg" || ext == "jpg_")
-                let isPNGImage:Bool = (ext == "png" || ext == "png_")
-                
-                if isGifImage || isPNGImage || isJPEGImage{
-                    var imagePath:URL?
-                    let image = UIImage(data: data)
-                    if isGifImage{
-                        imagePath = dataURL
-                    }
-                    self.dismissLoading()
-                    let text = QiscusTextConfiguration.sharedInstance.confirmationImageUploadText
-                    let okText = QiscusTextConfiguration.sharedInstance.alertOkText
-                    let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
-                    QPopUpView.showAlert(withTarget: self, image: image, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
-                        doneAction: {
-                            self.continueImageUpload(image, imageName: fileName, imagePath: imagePath)
-                        },
-                        cancelAction: {}
-                    )
-                }else{
-                    self.dismissLoading()
-                    let textFirst = QiscusTextConfiguration.sharedInstance.confirmationFileUploadText
-                    let textMiddle = "\(fileName as String)"
-                    let textLast = QiscusTextConfiguration.sharedInstance.questionMark
-                    let text = "\(textFirst) \(textMiddle) \(textLast)"
-                    let okText = QiscusTextConfiguration.sharedInstance.alertOkText
-                    let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
-                    QPopUpView.showAlert(withTarget: self, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
-                        doneAction: {
-                            self.continueImageUpload(imageName: fileName, imagePath: dataURL, imageNSData: data)
-                        },
-                        cancelAction: {
-                        }
-                    )
-                }
-            }catch _{
-                self.dismissLoading()
-            }
-        }
-    }
+    
     func goToIPhoneSetting(){
         UIApplication.shared.openURL(URL(string: UIApplicationOpenSettingsURLString)!)
         let _ = self.navigationController?.popViewController(animated: true)
@@ -1307,105 +754,28 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
     
     // MARK: - Upload Action
     func continueImageUpload(_ image:UIImage? = nil,imageName:String,imagePath:URL? = nil, imageNSData:Data? = nil, videoFile:Bool = false, audioFile:Bool = false){
-        if Qiscus.sharedInstance.connected{
-            commentClient.uploadImage(self.topicId, image: image, imageName: imageName, imagePath: imagePath, imageNSData: imageNSData, videoFile: videoFile, audioFile:audioFile)
-        }else{
-            self.showNoConnectionToast()
-        }
-    }
-    
-    // MARK: UIImagePicker Delegate
-    open func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]){
-        let time = Double(Date().timeIntervalSince1970)
-        let timeToken = UInt64(time * 10000)
-        let fileType:String = info[UIImagePickerControllerMediaType] as! String
-        picker.dismiss(animated: true, completion: nil)
-        
-        if fileType == "public.image"{
-            var imageName:String = ""
-            let image = info[UIImagePickerControllerOriginalImage] as! UIImage
-            var imagePath:URL?
-            if let imageURL = info[UIImagePickerControllerReferenceURL] as? URL{
-                imageName = imageURL.lastPathComponent
-                
-                let imageNameArr = imageName.characters.split(separator: ".")
-                let imageExt:String = String(imageNameArr.last!).lowercased()
-                
-                if imageExt.isEqual("gif") || imageExt.isEqual("gif_"){
-                    imagePath = imageURL
-                }
+        if let chatRoom = self.room{
+            if Qiscus.sharedInstance.connected{
+                self.dataPresenter.newMediaMessage(chatRoom.roomLastCommentTopicId, image: image, imageName: imageName, imagePath: imagePath, imageNSData: imageNSData, videoFile: videoFile, audioFile:audioFile)
             }else{
-                imageName = "\(timeToken).jpg"
-            }
-            let text = QiscusTextConfiguration.sharedInstance.confirmationImageUploadText
-            let okText = QiscusTextConfiguration.sharedInstance.alertOkText
-            let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
-            
-            QPopUpView.showAlert(withTarget: self, image: image, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
-                doneAction: {
-                    self.continueImageUpload(image, imageName: imageName, imagePath: imagePath)
-                },
-                cancelAction: {}
-            )
-        }else if fileType == "public.movie" {
-            let mediaURL = info[UIImagePickerControllerMediaURL] as! URL
-            let fileName = mediaURL.lastPathComponent
-            let fileNameArr = fileName.characters.split(separator: ".")
-            let fileExt:NSString = String(fileNameArr.last!).lowercased() as NSString
-            
-            let mediaData = try? Data(contentsOf: mediaURL)
-            
-            Qiscus.printLog(text: "mediaURL: \(mediaURL)\nfileName: \(fileName)\nfileExt: \(fileExt)")
-            
-            //create thumb image
-            let assetMedia = AVURLAsset(url: mediaURL)
-            let thumbGenerator = AVAssetImageGenerator(asset: assetMedia)
-            thumbGenerator.appliesPreferredTrackTransform = true
-            
-            let thumbTime = CMTimeMakeWithSeconds(0, 30)
-            let maxSize = CGSize(width: QiscusHelper.screenWidth(), height: QiscusHelper.screenWidth())
-            thumbGenerator.maximumSize = maxSize
-            
-            do{
-                let thumbRef = try thumbGenerator.copyCGImage(at: thumbTime, actualTime: nil)
-                let thumbImage = UIImage(cgImage: thumbRef)
-                
-                QPopUpView.showAlert(withTarget: self, image: thumbImage, message:"Are you sure to send this video?", isVideoImage: true,
-                                    doneAction: {
-                                        Qiscus.printLog(text: "continue video upload")
-                                        self.continueImageUpload(thumbImage, imageName: fileName, imageNSData: mediaData, videoFile: true)
-                    },
-                                    cancelAction: {
-                                        Qiscus.printLog(text: "cancel upload")
-                    }
-                )
-            }catch{
-                Qiscus.printLog(text: "error creating thumb image")
+                self.showNoConnectionToast()
             }
         }
-    }
-    open func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        picker.dismiss(animated: true, completion: nil)
     }
     
     // MARK: - Load More Control
     func loadMore(){
-        if self.comments.count > 0 {
-            if Qiscus.sharedInstance.connected{
-                let firstComment = self.comments[0][0]
-                
-                if firstComment.commentBeforeId > 0 {
-                    commentClient.getListComment(topicId: topicId, commentId: firstComment.commentId, loadMore: true)
-                }else{
-                    self.loadMoreControl.endRefreshing()
-                    self.loadMoreControl.isEnabled = false
+        if self.room != nil {
+            if Qiscus.shared.connected{
+                var firstCommentId = Int64(0)
+                if self.comments.count > 0 {
+                    firstCommentId = self.comments.first!.first!.commentId
                 }
+                dataPresenter.loadMore(inRoom: self.room!, fromComment: firstCommentId)
             }else{
                 self.showNoConnectionToast()
                 self.loadMoreControl.endRefreshing()
             }
-        }else{
-            self.loadData()
         }
     }
     
@@ -1433,12 +803,18 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
     }
     func roomAvatarButton() -> UIBarButtonItem{
         self.roomAvatar = UIImageView()
-        self.roomAvatar.contentMode = .scaleAspectFit
+        self.roomAvatar.contentMode = .scaleAspectFill
         self.roomAvatar.backgroundColor = UIColor.white
         
         let image = Qiscus.image(named: "room_avatar")
         self.roomAvatar.image = image
-        
+        if self.room != nil{
+            if let avatar = room!.avatarImage {
+                self.roomAvatar.image = avatar
+            }else{
+                room!.downloadThumbAvatar()
+            }
+        }
         if UIApplication.shared.userInterfaceLayoutDirection == .leftToRight {
             self.roomAvatar.frame = CGRect(x: 0,y: 0,width: 32,height: 32)
         }else{
@@ -1509,97 +885,70 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
             GalleryConfigurationItem.thumbnailsButtonMode(.custom(seeAllButton))
         ]
     }
-    public func itemCount() -> Int {
-        return self.galleryItems.count
-    }
-    public func provideGalleryItem(_ index: Int) -> GalleryItem {
-        let item = self.galleryItems[index]
-        if item.isVideo{
-            return GalleryItem.video(fetchPreviewImageBlock: { $0(item.image)}, videoURL: URL(string: item.url)! )
-        }else{
-            return GalleryItem.image { $0(item.image) }
-        }
-    }
-    func saveImageToGalery(){
-        Qiscus.printLog(text: "saving image")
-        UIImageWriteToSavedPhotosAlbum(self.selectedImage, self, #selector(QiscusChatVC.succesSaveImage), nil)
-    }
-    func succesSaveImage(){
-         QToasterSwift.toast(target: self.imagePreview!, text: "Successfully save image to your galery", backgroundColor: UIColor(red: 0, green: 0.8,blue: 0,alpha: 0.8), textColor: UIColor.white)
-    }
+   
+    
     func loadTitle(){
-        let title = QiscusUIConfiguration.sharedInstance.copyright.chatTitle
-        let subtitle = QiscusTextConfiguration.sharedInstance.chatSubtitle
-        if topicId == 0 && roomId > 0{
-            if let room = QiscusRoom.getRoomById(self.roomId){
-                self.topicId = room.roomLastCommentTopicId
+        Qiscus.logicThread.async {
+            let title = QiscusUIConfiguration.sharedInstance.copyright.chatTitle
+            var navTitle = ""
+            if title != ""{
+                navTitle = title
+            }else{
+                if self.room != nil{
+                    navTitle = self.room!.roomName
+                }
             }
-        }
-        var navTitle = ""
-        if title != ""{
-            navTitle = title
-        }else{
-            if let room = QiscusRoom.getRoom(withLastTopicId: self.topicId){
-                navTitle = room.roomName
+            Qiscus.uiThread.async {
+                self.titleLabel.text = navTitle
             }
+            self.loadSubtitle()
         }
-        
-        var navSubtitle = ""
-        if subtitle == "" {
-            if let room = QiscusRoom.getRoom(withLastTopicId: self.topicId){
-                if room.roomType == QiscusRoomType.group {
-                    if room.participants.count > 0 {
-                        for participant in room.participants {
-                            if participant.participantEmail != QiscusConfig.sharedInstance.USER_EMAIL{
-                                if let user = QiscusUser.getUserWithEmail(participant.participantEmail){
-                                    if navSubtitle == "" {
-                                        navSubtitle = user.userFullName
-                                    }else{
-                                        navSubtitle += ", \(user.userFullName)"
+    }
+    func loadSubtitle(){
+        Qiscus.logicThread.async {
+            let subtitle = QiscusTextConfiguration.sharedInstance.chatSubtitle
+            
+            var navSubtitle = ""
+            if subtitle == "" {
+                if self.room != nil {
+                    if self.room!.roomType == .group {
+                        if self.room!.participants.count > 0{
+                            for participant in self.room!.participants {
+                                if participant.participantEmail != QiscusConfig.sharedInstance.USER_EMAIL{
+                                    if let user = QiscusUser.getUserWithEmail(participant.participantEmail){
+                                        if navSubtitle == "" {
+                                            navSubtitle = user.userFullName
+                                        }else{
+                                            navSubtitle += ", \(user.userFullName)"
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                }else{
-                    if room.participants.count > 0 {
-                        for participant in room.participants {
-                            if participant.participantEmail != QiscusConfig.sharedInstance.USER_EMAIL{
-                                if let user = QiscusUser.getUserWithEmail(participant.participantEmail){
-                                    if user.isOnline {
-                                        navSubtitle = "is online"
-                                    }else if user.userLastSeen == Double(0){
-                                        navSubtitle = "is offline"
-                                    }else{
-                                        let date = Date(timeIntervalSince1970: user.userLastSeen)
-                                        let secondDiff = Date().offsetFromInSecond(date: date)
-                                        let minuteDiff = Int(secondDiff/60)
-                                        let hourDiff = Int(minuteDiff/60)
-                                        
-                                        navSubtitle = "last seen: \(user.lastSeenString)"
-                                        
-                                        if hourDiff < 6 {
-                                            var when = DispatchTime.now() + 60
-                                            
-                                            if hourDiff > 0 {
-                                                when = DispatchTime.now() + 3600
-                                            }
-                                            DispatchQueue.main.asyncAfter(deadline: when) {
-                                                if Qiscus.isLoggedIn && self.isPresence{
-                                                    self.loadTitle()
-                                                }
-                                            }
+                    }else{
+                        if self.room!.participants.count > 0 {
+                            for participant in self.room!.participants {
+                                if participant.participantEmail != QiscusConfig.sharedInstance.USER_EMAIL{
+                                    if let user = QiscusUser.getUserWithEmail(participant.participantEmail){
+                                        if user.isOnline {
+                                            navSubtitle = "is online"
+                                        }else if user.userLastSeen == Double(0){
+                                            navSubtitle = "is offline"
+                                        }else{
+                                            navSubtitle = "last seen: \(user.lastSeenString)"
                                         }
                                     }
+                                    break
                                 }
-                                break
                             }
                         }
                     }
                 }
             }
+            Qiscus.uiThread.async {
+                self.subtitleLabel.text = navSubtitle
+            }
         }
-        self.navigationItem.setTitleWithSubtitle(title: navTitle, subtitle:navSubtitle)
     }
     func setTitle(title:String = "", withSubtitle:String? = nil){
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
@@ -1609,24 +958,21 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
         self.loadTitle()
     }
     func startTypingIndicator(withUser user:String){
-        let title = QiscusUIConfiguration.sharedInstance.copyright.chatTitle
-        var navTitle = ""
-        if title != ""{
-            navTitle = title
-        }else{
-            if let room = QiscusRoom.getRoom(withLastTopicId: self.topicId){
-                navTitle = room.roomName
+        Qiscus.logicThread.async {
+            self.typingIndicatorUser = user
+            self.isTypingOn = true
+            let typingText = "\(user) is typing ..."
+            Qiscus.uiThread.async {
+                self.subtitleLabel.text = typingText
             }
         }
-        self.typingIndicatorUser = user
-        self.isTypingOn = true
-        let typingText = "\(user) is typing ..."
-        self.navigationItem.setTitleWithSubtitle(title: navTitle, subtitle:typingText)
     }
     func stopTypingIndicator(){
-        self.typingIndicatorUser = ""
-        self.isTypingOn = false
-        self.loadTitle()
+        Qiscus.logicThread.async {
+            self.typingIndicatorUser = ""
+            self.isTypingOn = false
+            self.loadSubtitle()
+        }
     }
     
     func subscribeRealtime(onRoom room:QiscusRoom?){
@@ -1649,227 +995,572 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
         self.view.endEditing(true)
     }
     open func resendMessage(){
-    
+        
     }
-
+    
     
     // MARK: AVAudioPlayerDelegate
     
-    public func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        do {
-            try AVAudioSession.sharedInstance().setActive(false)
-            if let activeCell = activeAudioCell as? QCellAudioLeft{
-                activeCell.isPlaying = false
-            }
-            stopTimer()
-            updateAudioDisplay()
-        } catch _ as NSError {}
-    }
     
-    public func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
-        if let activeCell = activeAudioCell as? QCellAudioLeft{
-            activeCell.isPlaying = false
-        }
-        stopTimer()
-        updateAudioDisplay()
-    }
-    
-    
-    // MARK: IQAudioRecorderViewControllerDelegate
-    
-    public func audioRecorderController(_ controller: IQAudioRecorderViewController, didFinishWithAudioAtPath filePath: String) {
-        let fileURL = URL(fileURLWithPath: filePath)
-        Qiscus.printLog(text: "filePath \(filePath)")
-        Qiscus.printLog(text: "fileURL \(fileURL)")
-        var fileContent: Data?
-        fileContent = try! Data(contentsOf: fileURL)
-        
-        let fileName = fileURL.lastPathComponent
-        
-        self.continueImageUpload(imageName: fileName, imageNSData: fileContent, audioFile: true)
-        //commentClient.uploadAudio(self.room.roomLastCommentTopicId, fileName: fileName, filePath: fileURL, roomId: self.room.roomId)
-        
-        controller.dismiss(animated: true, completion: nil)
-    }
-    
-    public func audioRecorderControllerDidCancel(_ controller: IQAudioRecorderViewController) {
-        controller.dismiss(animated: true, completion: nil)
-    }
-    
-    // MARK: - Audio Methods
-    
-    func audioTimerFired(_ timer: Timer) {
-        self.updateAudioDisplay()
-    }
-    
-    func stopTimer() {
-        audioTimer?.invalidate()
-        audioTimer = nil
-    }
-    
-    func updateAudioDisplay() {
-        if let cell = activeAudioCell as? QCellAudioLeft{
-            if let currentTime = audioPlayer?.currentTime {
-                cell.currentTimeSlider.setValue(Float(currentTime), animated: true)
-                cell.seekTimeLabel.text = cell.timeFormatter?.string(from: currentTime)
-            }
-        }else if let cell = activeAudioCell as? QCellAudioRight{
-            if let currentTime = audioPlayer?.currentTime {
-                cell.currentTimeSlider.setValue(Float(currentTime), animated: true)
-                cell.seekTimeLabel.text = cell.timeFormatter?.string(from: currentTime)
-            }
-        }
-    }
-    
-    // MARK: - ChatCellAudioDelegate
-    func didTapDownloadButton(_ button: UIButton, onCell cell: UICollectionViewCell) {
-        if let targetCell = cell as? QCellAudioLeft{
-            targetCell.isDownloading = true
-            targetCell.playButton.removeTarget(nil, action: nil, for: .allEvents)
-            let selectedComment = self.comments[(targetCell.indexPath?.section)!][(targetCell.indexPath?.row)!]
-            self.commentClient.downloadMedia(selectedComment, isAudioFile: true)
-        }else if let targetCell = cell as? QCellAudioRight{
-            targetCell.isDownloading = true
-            targetCell.playButton.removeTarget(nil, action: nil, for: .allEvents)
-            let selectedComment = self.comments[(targetCell.indexPath?.section)!][(targetCell.indexPath?.row)!]
-            self.commentClient.downloadMedia(selectedComment, isAudioFile: true)
-        }
-        Qiscus.printLog(text: "downloading")
-    }
-        
-    func didTapPlayButton(_ button: UIButton, onCell cell: UICollectionViewCell) {
-        if let targetCell = cell as? QCellAudioLeft{
-            let path = targetCell.filePath
-            if let url = URL(string: path) {
-                if audioPlayer != nil {
-                    if audioPlayer!.isPlaying {
-                        if let activeCell = activeAudioCell as? QCellAudioLeft{
-                            activeCell.isPlaying = false
-                        }else if let activeCell = activeAudioCell as? QCellAudioRight{
-                            activeCell.isPlaying = false
-                        }
-                        audioPlayer?.stop()
-                        stopTimer()
-                        updateAudioDisplay()
-                    }
-                }
-                
-                activeAudioCell = targetCell
-                
-                do {
-                    audioPlayer = try AVAudioPlayer(contentsOf: url)
-                }
-                catch let error as NSError {
-                    Qiscus.printLog(text: error.localizedDescription)
-                }
-                
-                audioPlayer?.delegate = self
-                audioPlayer?.currentTime = Double(targetCell.currentTimeSlider.value)
-                
-                do {
-                    try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
-                    //Qiscus.printLog(text: "AVAudioSession Category Playback OK")
-                    do {
-                        try AVAudioSession.sharedInstance().setActive(true)
-                        //Qiscus.printLog(text: "AVAudioSession is Active")
-                        audioPlayer?.prepareToPlay()
-                        audioPlayer?.play()
-                        
-                        audioTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(audioTimerFired(_:)), userInfo: nil, repeats: true)
-                        
-                    } catch _ as NSError {
-                        //Qiscus.printLog(text: error.localizedDescription)
-                    }
-                } catch _ as NSError {
-                    //Qiscus.printLog(text: error.localizedDescription)
-                }
-            }
-        }else if let targetCell = cell as? QCellAudioRight{
-            let path = targetCell.filePath
-            if let url = URL(string: path) {
-                if audioPlayer != nil {
-                    if audioPlayer!.isPlaying {
-                        if let activeCell = activeAudioCell as? QCellAudioRight{
-                            activeCell.isPlaying = false
-                        }else if let activeCell = activeAudioCell as? QCellAudioLeft{
-                            activeCell.isPlaying = false
-                        }
-                        audioPlayer?.stop()
-                        stopTimer()
-                        updateAudioDisplay()
-                    }
-                }
-                
-                activeAudioCell = targetCell
-                
-                do {
-                    audioPlayer = try AVAudioPlayer(contentsOf: url)
-                }
-                catch let error as NSError {
-                    Qiscus.printLog(text: error.localizedDescription)
-                }
-                
-                audioPlayer?.delegate = self
-                audioPlayer?.currentTime = Double(targetCell.currentTimeSlider.value)
-                
-                do {
-                    try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
-                    //Qiscus.printLog(text: "AVAudioSession Category Playback OK")
-                    do {
-                        try AVAudioSession.sharedInstance().setActive(true)
-                        //Qiscus.printLog(text: "AVAudioSession is Active")
-                        audioPlayer?.prepareToPlay()
-                        audioPlayer?.play()
-                        
-                        audioTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(audioTimerFired(_:)), userInfo: nil, repeats: true)
-                        
-                    } catch _ as NSError {
-                        //Qiscus.printLog(text: error.localizedDescription)
-                    }
-                } catch _ as NSError {
-                    //Qiscus.printLog(text: error.localizedDescription)
-                }
-            }
-        }
-        
-    }
-    
-    func didTapPauseButton(_ button: UIButton, onCell cell: UICollectionViewCell) {
-        audioPlayer?.pause()
-        stopTimer()
-        updateAudioDisplay()
-    }
-    
-    func didStartSeekTimeSlider(_ slider: UISlider, onCell cell: UICollectionViewCell) {
-        if audioTimer != nil {
-            stopTimer()
-        }
-    }
-    
-    func didEndSeekTimeSlider(_ slider: UISlider, onCell cell: UICollectionViewCell) {
-        audioPlayer?.stop()
-        if let targetCell = cell as? QCellAudioLeft{
-            let currentTime = targetCell.currentTimeSlider.value
-            audioPlayer?.currentTime = Double(currentTime)
-        }
-        audioPlayer?.prepareToPlay()
-        audioPlayer?.play()
-        
-        audioTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(audioTimerFired(_:)), userInfo: nil, repeats: true)
-    }
     
     // MARK: - UICollectionViewDelegate
-    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+    
+    @IBAction func goToBottomTapped(_ sender: UIButton) {
+        scrollToBottom(true)
+    }
+    func publishRead(){
+        Qiscus.logicThread.async {
+            if self.isPresence{
+                if self.comments.count > 0 {
+                    let lastComment = QiscusComment.copyComment(comment: self.comments.last!.last!.comment!)
+                    if let lastComentInTopic = QiscusComment.getLastSentComent(inRoom: lastComment.roomId){
+                        if let participant = QiscusParticipant.getParticipant(withEmail: QiscusConfig.sharedInstance.USER_EMAIL, roomId: lastComentInTopic.roomId){
+                            if participant.lastReadCommentId < lastComentInTopic.commentId{
+                                Qiscus.printLog(text: "publishRead onCommentId: \(lastComentInTopic.commentId)")
+                                self.commentClient.publishMessageStatus(onComment: lastComentInTopic.commentId, roomId: lastComentInTopic.roomId, status: .read, withCompletion: {
+                                    lastComentInTopic.updateCommentStatus(.read, email: QiscusConfig.sharedInstance.USER_EMAIL)
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    @IBAction func hideLinkPreview(_ sender: UIButton) {
+        permanentlyDisableLink = true
+        showLink = false
+    }
+    func getLinkPreview(url:String){
+        var urlToCheck = url.lowercased()
+        if !urlToCheck.contains("http"){
+            urlToCheck = "http://\(url.lowercased())"
+        }
+        commentClient.getLinkMetadata(url: urlToCheck, withCompletion: {linkData in
+            
+            self.linkImage.loadAsync(linkData.linkImageURL, placeholderImage: Qiscus.image(named: "link"))
+            self.linkDescription.text = linkData.linkDescription
+            self.linkTitle.text = linkData.linkTitle
+            self.linkData = linkData
+            self.linkPreviewTopMargin.constant = -65
+            UIView.animate(withDuration: 0.65, animations: {
+                self.view.layoutIfNeeded()
+            }, completion: nil)
+        }, withFailCompletion: {
+            self.showLink = false
+        })
+    }
+    func hideLinkContainer(){
+        Qiscus.uiThread.async {
+            self.linkPreviewTopMargin.constant = 0
+            UIView.animate(withDuration: 0.65, animations: {
+                self.view.layoutIfNeeded()
+            }, completion: nil)
+        }
+    }
+    
+    // MARK: - Overriding back action
+    public func setBackButton(withAction action:@escaping (()->Void)){
+        self.backAction = action
+    }
+    
+    //MARK: -reset chat view
+    func reset(){
+        self.room = nil
+        self.firstLoad = true
+        self.topicId = nil
+        self.users = nil
+        self.roomId = nil
+        self.distincId = ""
+        self.optionalData = nil
+        self.message = nil
+        self.newRoom = false
+        self.comments = [[QiscusCommentPresenter]]()
+        if audioPlayer != nil{
+            audioPlayer?.stop()
+        }
+        self.comments = [[QiscusCommentPresenter]]()
+        self.backAction = nil
+        self.titleAction = {}
+        self.unlockAction = {}
+        self.collectionView.reloadData()
+    }
+    
+}
 
+// MARK: - QiscusDataPresenterDelegate
+extension QiscusChatVC: QiscusDataPresenterDelegate{
+    public func dataPresenter(didFinishLoad comments: [[QiscusCommentPresenter]], inRoom: QiscusRoom) {
+        self.dismissLoading()
+        self.firstLoad = false
+        if comments.count > 0 {
+            self.comments = comments
+            self.welcomeView.isHidden = true
+            
+            self.collectionView.reloadData()
+            self.scrollToBottom()
+        }
+    }
+    public func dataPresenter(didFinishLoadMore comments: [[QiscusCommentPresenter]], inRoom: QiscusRoom) {
+        Qiscus.logicThread.async {
+            if self.room != nil{
+                if inRoom.hasLoadMore != self.room!.hasLoadMore{
+                    self.room!.hasLoadMore = inRoom.hasLoadMore
+                }
+                if self.comments.count > 0 {
+                    if comments.count > 0 {
+                        let lastGroup = comments.last!
+                        let lastData = lastGroup.last!
+                        var mergeLastGroup = false
+                        let firstCurrentComment = self.comments.first!.first!
+                        
+                        if lastData.commentDate == firstCurrentComment.commentDate && lastData.userEmail == firstCurrentComment.userEmail{
+                            mergeLastGroup = true
+                            if self.comments[0].count == 1 {
+                                firstCurrentComment.cellPos = .last
+                            }else{
+                                firstCurrentComment.cellPos = .middle
+                            }
+                        }
+                        var section = 0
+                        var reloadIndexPath = [IndexPath]()
+                        for currentDataGroup in self.comments{
+                            var row = 0
+                            var sectionAdd = comments.count
+                            if mergeLastGroup{
+                                sectionAdd -= 1
+                            }
+                            let rowAdd = comments.last!.count
+                            for currentData in currentDataGroup{
+                                if section == 0 && mergeLastGroup{
+                                    currentData.commentIndexPath = IndexPath(row: row + rowAdd, section: section + sectionAdd)
+                                    if row == 0{
+                                        if currentDataGroup.count == 1 {
+                                            currentData.cellPos = .last
+                                        }else{
+                                            currentData.cellPos = .middle
+                                        }
+                                        currentData.balloonImage = currentData.getBalloonImage()
+                                        reloadIndexPath.append(currentData.commentIndexPath!)
+                                    }
+                                }else{
+                                    currentData.commentIndexPath = IndexPath(row: row, section: (section + sectionAdd))
+                                }
+                                self.comments[section][row] = currentData
+                                row += 1
+                            }
+                            section += 1
+                        }
+                        Qiscus.uiThread.async {
+                            self.collectionView.performBatchUpdates({
+                                var i = 0
+                                for newGroupComment in comments{
+                                    if i == (comments.count - 1) && mergeLastGroup {
+                                        var indexPaths = [IndexPath]()
+                                        var j = 0
+                                        for newComment in newGroupComment{
+                                            self.comments[i].insert(newComment, at: j)
+                                            indexPaths.append(IndexPath(row: j, section: i))
+                                            j += 1
+                                        }
+                                        self.collectionView.insertItems(at: indexPaths)
+                                    }else{
+                                        self.comments.insert(newGroupComment, at: i)
+                                        var indexPaths = [IndexPath]()
+                                        for j in 0..<newGroupComment.count{
+                                            indexPaths.append(IndexPath(row: j, section: i))
+                                        }
+                                        self.collectionView.insertSections(IndexSet(integer: i))
+                                        self.collectionView.insertItems(at: indexPaths)
+                                    }
+                                    i += 1
+                                }
+                            }, completion: { _ in
+                                self.loadMoreControl.endRefreshing()
+                                if reloadIndexPath.count > 0 {
+                                    self.collectionView.reloadItems(at: reloadIndexPath)
+                                }
+                                if !inRoom.hasLoadMore{
+                                    Qiscus.uiThread.async {
+                                        self.loadMoreControl.removeFromSuperview()
+                                    }
+                                }
+                            })
+                        }
+                    }
+                    else{
+                        Qiscus.uiThread.async {
+                            self.loadMoreControl.endRefreshing()
+                            self.loadMoreControl.removeFromSuperview()
+                        }
+                    }
+                }else{
+                    self.comments = comments
+                    Qiscus.uiThread.async {
+                        self.welcomeView.isHidden = true
+                        self.collectionView.reloadData()
+                        self.scrollToBottom()
+                        self.loadMoreControl.endRefreshing()
+                        if !inRoom.hasLoadMore{
+                            self.loadMoreControl.removeFromSuperview()
+                        }
+                    }
+                }
+            }
+        }
+        
+    }
+    public func dataPresenter(didFailLoadMore inRoom: QiscusRoom) {
+        Qiscus.uiThread.async {
+            if self.loadMoreControl.isRefreshing{
+                self.loadMoreControl.endRefreshing()
+            }
+            QToasterSwift.toast(target: self, text: "Fail to load more coometn, try again later", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+        }
+    }
+    public func dataPresenter(willResendData data: QiscusCommentPresenter) {
+        Qiscus.logicThread.async {
+            if let indexPath = data.commentIndexPath{
+                if indexPath.section < self.comments.count{
+                    if indexPath.row < self.comments[indexPath.section].count{
+                        self.comments[indexPath.section][indexPath.row] = data
+                        Qiscus.uiThread.async {
+                            if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
+                                cell.updateStatus(toStatus: data.commentStatus)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public func dataPresenter(dataDeleted data: QiscusCommentPresenter) {
+        Qiscus.logicThread.async {
+            if let indexPath = data.commentIndexPath{
+                if indexPath.section < self.comments.count{
+                    if indexPath.row < self.comments[indexPath.section].count{
+                        let deletedComment = self.comments[indexPath.section][indexPath.row].comment
+                        if self.comments[indexPath.section].count == 1{
+                            let indexSet = IndexSet(integer: indexPath.section)
+                            Qiscus.uiThread.async {
+                                self.collectionView.performBatchUpdates({
+                                    self.comments.remove(at: indexPath.section)
+                                    self.collectionView.deleteSections(indexSet)
+                                }, completion: { _ in
+                                    Qiscus.logicThread.async {
+                                        deletedComment?.deleteComment()
+                                        var section = 0
+                                        for dataGroup in self.comments{
+                                            var row = 0
+                                            for data in dataGroup{
+                                                let newIndexPath = IndexPath(row: row, section: section)
+                                                data.commentIndexPath = newIndexPath
+                                                self.comments[section][row] = data
+                                                row += 1
+                                            }
+                                            section += 1
+                                        }
+                                    }
+                                })
+                            }
+                        }else{
+                            Qiscus.uiThread.async {
+                                self.collectionView.performBatchUpdates({
+                                    self.comments[indexPath.section].remove(at: indexPath.row)
+                                    self.collectionView.deleteItems(at: [indexPath])
+                                }, completion: { _ in
+                                    deletedComment?.deleteComment()
+                                    Qiscus.logicThread.async {
+                                        var i = 0
+                                        for data in self.comments[indexPath.section]{
+                                            data.commentIndexPath = IndexPath(row: i, section: indexPath.section)
+                                            if i == 0 && i == (self.comments[indexPath.section].count - 1){
+                                                data.cellPos = .single
+                                            }else if i == 0 {
+                                                data.cellPos = .first
+                                            }else if i == (self.comments[indexPath.section].count - 1){
+                                                data.cellPos = .last
+                                            }else{
+                                                data.cellPos = .middle
+                                            }
+                                            data.balloonImage = data.getBalloonImage()
+                                            self.comments[indexPath.section][i] = data
+                                            i += 1
+                                        }
+                                        let indexSet = IndexSet(integer: indexPath.section)
+                                        Qiscus.uiThread.async {
+                                            self.collectionView.reloadSections(indexSet)
+                                        }
+                                    }
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+    public func dataPresenter(didChangeContent data: QiscusCommentPresenter, inRoom: QiscusRoom) {
+        Qiscus.logicThread.async {
+            if let indexPath = data.commentIndexPath{
+                if indexPath.section < self.comments.count{
+                    if indexPath.row < self.comments[indexPath.section].count {
+                        self.comments[indexPath.section][indexPath.row] = data
+                        
+                        if data.isDownloading {
+                            let percentage = Int(data.downloadProgress * 100)
+                            
+                            if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
+                                Qiscus.uiThread.async {
+                                    cell.downloadingMedia(withPercentage: percentage)
+                                }
+                            }
+                        }else{
+                            Qiscus.uiThread.async {
+                                self.collectionView.reloadItems(at: [indexPath])
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public func dataPresenter(didChangeStatusFrom commentId: Int64, toStatus: QiscusCommentStatus, topicId: Int){
+        Qiscus.logicThread.async {
+            if let chatRoom = self.room{
+                if topicId == chatRoom.roomLastCommentTopicId{
+                    var indexToReload = [IndexPath]()
+                    
+                    for dataGroup in self.comments {
+                        for data in dataGroup {
+                            if data.commentId <= commentId && data.commentStatus.rawValue < toStatus.rawValue {
+                                if let indexPath = data.commentIndexPath {
+                                    data.commentStatus = toStatus
+                                    self.comments[indexPath.section][indexPath.row] = data
+                                    indexToReload.append(indexPath)
+                                }
+                            }
+                        }
+                    }
+                    if indexToReload.count > 0 {
+                        Qiscus.uiThread.async {
+                            self.collectionView.reloadItems(at: indexToReload)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public func dataPresenter(gotNewData presenter: QiscusCommentPresenter, inRoom:QiscusRoom) {
+        Qiscus.logicThread.async {
+            var indexPath = IndexPath()
+            if self.comments.count == 0 {
+                indexPath = IndexPath(row: 0, section: 0)
+                var newGroup = [QiscusCommentPresenter]()
+                presenter.cellPos = .single
+                presenter.balloonImage = presenter.getBalloonImage()
+                presenter.commentIndexPath = IndexPath(row: 0, section: 0)
+                newGroup.append(presenter)
+                self.comments.append(newGroup)
+                Qiscus.uiThread.async {
+                    self.collectionView.performBatchUpdates({
+                        self.collectionView.insertSections(IndexSet(integer: indexPath.section))
+                        self.collectionView.insertItems(at: [indexPath])
+                    }, completion: {_ in
+                        if presenter.userIsOwn || self.isLastRowVisible{
+                            self.scrollToBottom()
+                        }
+                    })
+                }
+                if presenter.toUpload {
+                    self.dataPresenter.uploadData(fromPresenter: presenter)
+                }
+            }else{
+                let lastComment = self.comments.last!.last!
+                if lastComment.createdAt < presenter.createdAt {
+                    if lastComment.userEmail == presenter.userEmail && lastComment.commentDate == presenter.commentDate{
+                        indexPath = IndexPath(row: self.comments[self.comments.count - 1].count , section: self.comments.count - 1)
+                        presenter.cellPos = .last
+                        presenter.balloonImage = presenter.getBalloonImage()
+                        presenter.commentIndexPath = indexPath
+                        if lastComment.commentIndexPath?.row == 0 {
+                            lastComment.cellPos = .first
+                        }else{
+                            lastComment.cellPos = .middle
+                        }
+                        lastComment.balloonImage = lastComment.getBalloonImage()
+                        self.comments[lastComment.commentIndexPath!.section][lastComment.commentIndexPath!.row] = lastComment
+                        self.comments[indexPath.section].insert(presenter, at: indexPath.row)
+                        Qiscus.uiThread.async {
+                            self.collectionView.performBatchUpdates({
+                                self.collectionView.insertItems(at: [indexPath])
+                            }, completion: {_ in
+                                self.collectionView.reloadItems(at: [lastComment.commentIndexPath!])
+                                self.scrollToBottom(true)
+                            })
+                        }
+                    }else{
+                        indexPath = IndexPath(row: 0, section: self.comments.count)
+                        var newGroup = [QiscusCommentPresenter]()
+                        presenter.cellPos = .single
+                        presenter.balloonImage = presenter.getBalloonImage()
+                        presenter.commentIndexPath = indexPath
+                        newGroup.append(presenter)
+                        self.comments.insert(newGroup, at: indexPath.section)
+                        Qiscus.uiThread.async {
+                            self.collectionView.performBatchUpdates({
+                                self.collectionView.insertSections(IndexSet(integer: indexPath.section))
+                                self.collectionView.insertItems(at: [indexPath])
+                            }, completion: {_ in
+                                self.scrollToBottom(true)
+                            })
+                        }
+                    }
+                    if presenter.toUpload {
+                        self.dataPresenter.uploadData(fromPresenter: presenter)
+                    }
+                }else{
+                
+                }
+            }
+        }
+    }
+    public func dataPresenter(didChangeCellSize presenter:QiscusCommentPresenter, inRoom: QiscusRoom){
+        Qiscus.logicThread.async {
+            if let indexPath = presenter.commentIndexPath{
+                if self.comments.count > indexPath.section{
+                    if self.comments[indexPath.section].count > indexPath.row{
+                        self.comments[indexPath.section][indexPath.row] = presenter
+                        Qiscus.uiThread.async {
+                            self.collectionView.reloadItems(at: [indexPath])
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public func dataPresenter(didChangeUser user: QiscusUser, onUserWithEmail email: String) {
+        Qiscus.logicThread.async {
+            var indexPathToReload = [IndexPath]()
+            var imageIndexPath = [IndexPath]()
+            var section = 0
+            for dataGroup in self.comments{
+                var row = 0
+                for data in dataGroup{
+                    if data.userEmail == email{
+                        if data.userFullName != user.userFullName{
+                            data.userFullName = user.userFullName
+                            self.comments[section][row] = data
+                            if row == 0 {
+                                indexPathToReload.append(IndexPath(row: row, section: section))
+                            }
+                        }
+                        if !data.userIsOwn{
+                            if row == 0 {
+                                imageIndexPath.append(IndexPath(row: row, section: section))
+                            }
+                        }
+                    }
+                    row += 1
+                }
+                section += 1
+            }
+            if indexPathToReload.count > 0 {
+                Qiscus.uiThread.async {
+                    self.collectionView.reloadItems(at: indexPathToReload)
+                }
+            }
+            for indexPath in imageIndexPath.reversed(){
+                if let footerCell = self.collectionView.supplementaryView(forElementKind: UICollectionElementKindSectionFooter, at: indexPath) as? QChatFooterLeft{
+                    if let image = user.avatar{
+                        footerCell.setup(withImage: image)
+                    }
+                }
+            }
+        }
+    }
+    public func dataPresenter(didChangeRoom room: QiscusRoom, onRoomWithId roomId: Int) {
+        if let newRoom = QiscusRoom.getRoomById(roomId){
+            if newRoom.roomName != room.roomName{
+                newRoom.roomName = room.roomName
+            }
+            self.room = newRoom
+        }
+    }
+    public func dataPresenter(didFailLoad error: String) {
+        self.dismissLoading()
+        QToasterSwift.toast(target: self, text: error, backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+    }
+}
+
+// MARK: - CollectionView dataSource, delegate, and delegateFlowLayout
+extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
+    // MARK: CollectionView Data source
+    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return self.comments[section].count
+    }
+    public func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return self.comments.count
+    }
+    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let data = self.comments[indexPath.section][indexPath.row]
+        Qiscus.logicThread.async {
+            data.commentIndexPath = indexPath
+            data.balloonImage = data.getBalloonImage()
+            self.comments[indexPath.section][indexPath.row] = data
+        }
+        
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: data.cellIdentifier, for: indexPath) as! QChatCell
+        cell.prepare(withData: data, andDelegate: self)
+        cell.setupCell()
+        
+        if let audioCell = cell as? QCellAudio{
+            audioCell.audioCellDelegate = self
+            return audioCell
+        }else{
+            return cell
+        }
+    }
+    public func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let comment = self.comments[indexPath.section].first!
+        
+        if kind == UICollectionElementKindSectionFooter{
+            if comment.userIsOwn{
+                let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterRight", for: indexPath) as! QChatFooterRight
+                return footerCell
+            }else{
+                let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterLeft", for: indexPath) as! QChatFooterLeft
+                footerCell.setup(withComent: comment.comment!)
+                return footerCell
+            }
+        }else{
+            let headerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellHeader", for: indexPath) as! QChatHeaderCell
+            
+            let comment = self.comments[indexPath.section][0]
+            var date:String = ""
+            
+            if comment.commentDate == QiscusHelper.thisDateString {
+                date = QiscusTextConfiguration.sharedInstance.todayText
+            }else{
+                date = comment.commentDate
+            }
+            headerCell.setupHeader(withText: date)
+            headerCell.clipsToBounds = true
+            return headerCell
+        }
+    }
+    
+    // MARK: CollectionView delegate
+    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        
         if let targetCell = cell as? QChatCell{
-//            targetCell.setupCell()
-            if !targetCell.comment.isOwnMessage && targetCell.comment.commentStatusRaw != QiscusCommentStatus.read.rawValue{
+            if !targetCell.data.userIsOwn && targetCell.data.commentStatus != .read{
                 publishRead()
                 var i = 0
                 for index in unreadIndexPath{
                     if index.row == indexPath.row && index.section == indexPath.section{
                         unreadIndexPath.remove(at: i)
-                        updateComment(onIndexPath: indexPath)
                         break
                     }
                     i += 1
@@ -1914,9 +1605,11 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
             if comment.commentType == .text{
                 show = true
             }else{
-                if let file = QiscusFile.getCommentFileWithComment(comment){
-                    if file.isUploaded || file.isOnlyLocalFileExist{
-                        show = true
+                if let commentData = comment.comment{
+                    if let file = QiscusFile.getCommentFileWithComment(commentData){
+                        if file.isUploaded || file.isOnlyLocalFileExist{
+                            show = true
+                        }
                     }
                 }
             }
@@ -1932,86 +1625,7 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
             UIPasteboard.general.string = textComment.commentText
         }
     }
-        
-    // MARK: - UICollectionViewDataSource
-    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return self.comments[section].count
-    }
-    public func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return self.comments.count
-    }
-    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let comment = self.comments[indexPath.section][indexPath.row]
-        comment.updateCommmentIndexPath(indexPath: indexPath)
-        
-        let cellTypePosition = QChatCellHelper.getCellPosition(ofIndexPath: indexPath, inGroupOfComment: self.comments)
-        var cellIdentifier = ""
-        var position:String = "Left"
-        if comment.isOwnMessage{
-            position = "Right"
-        }
-        switch comment.commentType {
-        case .text:
-            cellIdentifier = "cellText\(position)"
-            break
-        default:
-            if let file = QiscusFile.getCommentFile(comment.commentFileId) {
-                switch file.fileType {
-                case .media:
-                    cellIdentifier = "cellMedia\(position)"
-                    break
-                case .video:
-                    cellIdentifier = "cellMedia\(position)"
-                    break
-                case .audio:
-                    cellIdentifier = "cellAudio\(position)"
-                    break
-                default:
-                    cellIdentifier = "cellFile\(position)"
-                    break
-                }
-            }
-            break
-        }
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as! QChatCell
-        cell.prepareCell(withComment: comment, cellPos: cellTypePosition, indexPath: indexPath, cellDelegate: self)
-        cell.setupCell()
-        if let audioCell = cell as? QCellAudio{
-            audioCell.delegate = self
-            return audioCell
-        }else{
-            return cell
-        }
-    }
-    public func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        let comment = self.comments[indexPath.section].first!
-        
-        if kind == UICollectionElementKindSectionFooter{
-            if comment.isOwnMessage{
-                let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterRight", for: indexPath) as! QChatFooterRight
-                footerCell.setup(withComent: comment)
-                return footerCell
-            }else{
-                let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterLeft", for: indexPath) as! QChatFooterLeft
-                footerCell.setup(withComent: comment)
-                return footerCell
-            }
-        }else{
-            let headerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellHeader", for: indexPath) as! QChatHeaderCell
-            
-            let comment = self.comments[indexPath.section][0]
-            var date:String = ""
-            
-            if comment.commentDate == QiscusHelper.thisDateString {
-                date = QiscusTextConfiguration.sharedInstance.todayText
-            }else{
-                date = comment.commentDate
-            }
-            headerCell.setupHeader(withText: date)
-            headerCell.clipsToBounds = true
-            return headerCell
-        }
-    }
+    // MARK: CollectionView delegateFlowLayout
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         var height = CGFloat(0)
         if section > 0 {
@@ -2029,7 +1643,7 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
         var height = CGFloat(0)
         var width = CGFloat(0)
         let firstComment = self.comments[section][0]
-        if !firstComment.isOwnMessage{
+        if !firstComment.userIsOwn{
             height = 44
             width = 44
         }
@@ -2037,84 +1651,33 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
     }
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         let firstComment = self.comments[section][0]
-        if firstComment.isOwnMessage{
+        if firstComment.userIsOwn{
             return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         }else{
             return UIEdgeInsets(top: 0, left: 0, bottom: -44, right: 0)
         }
     }
-    // MARK: - UICollectionViewDelegateFlowLayout
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        var height = CGFloat(50)
-        if self.comments.count > 0 {
-            let comment = self.comments[indexPath.section][indexPath.row]
-            let cellTypePosition = QChatCellHelper.getCellPosition(ofIndexPath: indexPath, inGroupOfComment: self.comments)
-            height = comment.commentCellHeight
-            if cellTypePosition == .first || cellTypePosition == .single{
-                height += 20
-            }
-        }
-        return CGSize(width: collectionView.bounds.size.width, height: height)
-    }
-    @IBAction func goToBottomTapped(_ sender: UIButton) {
-        scrollToBottom(true)
-    }
-    func publishRead(){
-        if isPresence{
-            if self.comments.count > 0 {
-                let lastComment = self.comments.last!.last!
-                if let lastComentInTopic = QiscusComment.getLastSentComent(inRoom: lastComment.roomId){
-                    if let participant = QiscusParticipant.getParticipant(withEmail: QiscusConfig.sharedInstance.USER_EMAIL, roomId: lastComentInTopic.roomId){
-                        Qiscus.printLog(text: "check id: \(participant.lastReadCommentId) | \(lastComentInTopic.commentId)")
-                        if participant.lastReadCommentId < lastComentInTopic.commentId{
-                            Qiscus.printLog(text: "publishRead onCommentId: \(lastComentInTopic.commentId)")
-                            commentClient.publishMessageStatus(onComment: lastComentInTopic.commentId, roomId: lastComentInTopic.roomId, status: .read, withCompletion: {
-                                lastComentInTopic.updateCommentStatus(.read, email: QiscusConfig.sharedInstance.USER_EMAIL)
-                            })
-                        }
-                    }
-                }
-            }
-        }
-    }
-    func updateComment(onIndexPath indexPath:IndexPath){
         let comment = self.comments[indexPath.section][indexPath.row]
-        if let updatedComment = QiscusComment.getCommentById(comment.commentId){
-            self.comments[indexPath.section][indexPath.row] = updatedComment
+        var size = comment.cellSize
+        if comment.commentType == .text{
+            size.height += 15
+            if comment.showLink {
+                size.height += 75
+            }
         }
-    }
-    @IBAction func hideLinkPreview(_ sender: UIButton) {
-        permanentlyDisableLink = true
-        showLink = false
-    }
-    func getLinkPreview(url:String){
-        var urlToCheck = url.lowercased()
-        if !urlToCheck.contains("http"){
-            urlToCheck = "http://\(url.lowercased())"
+        if comment.cellPos == .single || comment.cellPos == .first{
+            size.height += 20
         }
-        commentClient.getLinkMetadata(url: urlToCheck, withCompletion: {linkData in
-            self.linkImage.loadAsync(linkData.linkImageURL)
-            self.linkDescription.text = linkData.linkDescription
-            self.linkTitle.text = linkData.linkTitle
-            self.linkData = linkData
-            self.linkPreviewTopMargin.constant = -65
-            UIView.animate(withDuration: 0.65, animations: {
-                self.view.layoutIfNeeded()
-            }, completion: nil)
-        }, withFailCompletion: {
-            self.showLink = false
-        })
+        size.width = collectionView.bounds.size.width
+        return size
     }
-    func hideLinkContainer(){
-        self.linkPreviewTopMargin.constant = 0
-        UIView.animate(withDuration: 0.65, animations: {
-            self.view.layoutIfNeeded()
-        }, completion: nil)
-    }
-    
-    // MARK: - ChatCellDelegate
+}
+// MARK: - ChatCell Delegate
+extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
+    // MARK: ChatCellDelegate
     func didChangeSize(onCell cell:QChatCell){
-        if let indexPath = cell.indexPath {
+        if let indexPath = cell.data.commentIndexPath {
             if indexPath.section < self.comments.count{
                 if indexPath.row < self.comments[indexPath.section].count{
                     collectionView.reloadItems(at: [indexPath])
@@ -2122,9 +1685,353 @@ public class QiscusChatVC: UIViewController, ChatInputTextDelegate, QCommentDele
             }
         }
     }
+    func didTapCell(withData data:QiscusCommentPresenter){
+        if data.commentType == .image || data.commentType == .video{
+            self.galleryItems = [QiscusGalleryItem]()
+            var totalIndex = 0
+            var currentIndex = 0
+            for dataGroup in self.comments {
+                for targetData in dataGroup{
+                    if targetData.commentType == .image || targetData.commentType == .video {
+                        if targetData.localFileExist{
+                            if data.localURL == targetData.localURL{
+                                currentIndex = totalIndex
+                            }
+                            if targetData.commentType == .image{
+                                let urlString = "file://\(targetData.localURL!)"
+                                print("Local url : \(urlString)")
+                                if let url = URL(string: urlString) {
+                                    if let data = try? Data(contentsOf: url) {
+                                        let image = UIImage(data: data)!
+                                        let item = QiscusGalleryItem()
+                                        item.image = image
+                                        item.isVideo = false
+                                        self.galleryItems.append(item)
+                                    }
+                                }
+                            }else if targetData.commentType == .video{
+                                let urlString = "file://\(targetData.localURL!)"
+                                let urlThumb = "file://\(targetData.localThumbURL!)"
+                                if let url = URL(string: urlThumb) {
+                                    if let data = try? Data(contentsOf: url) {
+                                        let image = UIImage(data: data)!
+                                        let item = QiscusGalleryItem()
+                                        item.image = image
+                                        item.isVideo = true
+                                        item.url = urlString
+                                        self.galleryItems.append(item)
+                                    }
+                                }
+                            }
+                            
+                            totalIndex += 1
+                        }
+                    }
+                }
+            }
+            let closeButton = UIButton(frame: CGRect(origin: CGPoint.zero, size: CGSize(width: 20, height: 20)))
+            closeButton.setImage(Qiscus.image(named: "close")?.withRenderingMode(.alwaysTemplate), for: UIControlState())
+            closeButton.tintColor = UIColor.white
+            closeButton.imageView?.contentMode = .scaleAspectFit
+            
+            let seeAllButton = UIButton(frame: CGRect(origin: CGPoint.zero, size: CGSize(width: 20, height: 20)))
+            seeAllButton.setTitle("", for: UIControlState())
+            seeAllButton.setImage(Qiscus.image(named: "viewmode")?.withRenderingMode(.alwaysTemplate), for: UIControlState())
+            seeAllButton.tintColor = UIColor.white
+            seeAllButton.imageView?.contentMode = .scaleAspectFit
+            
+            let gallery = GalleryViewController(startIndex: currentIndex, itemsDatasource: self, displacedViewsDatasource: nil, configuration: self.galleryConfiguration())
+            QiscusChatVC.sharedInstance.presentImageGallery(gallery)
+        }
+    }
     
-    // MARK: - Overriding back action
-    public func setBackButton(withAction action:@escaping (()->Void)){
-        self.backAction = action
+    // MARK: ChatCellAudioDelegate
+    func didTapPlayButton(_ button: UIButton, onCell cell: QCellAudio) {
+        let path = cell.data.localURL!
+        if let url = URL(string: path) {
+            if audioPlayer != nil {
+                if audioPlayer!.isPlaying {
+                    if let activeCell = activeAudioCell{
+                        activeCell.data.audioIsPlaying = false
+                        self.didChangeData(onCell: activeCell, withData: activeCell.data)
+                    }
+                    audioPlayer?.stop()
+                    stopTimer()
+                    updateAudioDisplay()
+                }
+            }
+            
+            activeAudioCell = cell
+            
+            do {
+                audioPlayer = try AVAudioPlayer(contentsOf: url)
+            }
+            catch let error as NSError {
+                Qiscus.printLog(text: error.localizedDescription)
+            }
+            
+            audioPlayer?.delegate = self
+            audioPlayer?.currentTime = Double(cell.data.currentTimeSlider)
+            
+            do {
+                try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
+                //Qiscus.printLog(text: "AVAudioSession Category Playback OK")
+                do {
+                    try AVAudioSession.sharedInstance().setActive(true)
+                    //Qiscus.printLog(text: "AVAudioSession is Active")
+                    audioPlayer?.prepareToPlay()
+                    audioPlayer?.play()
+                    
+                    audioTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(audioTimerFired(_:)), userInfo: nil, repeats: true)
+                    
+                } catch _ as NSError {
+                    Qiscus.printLog(text: "Audio player error")
+                }
+            } catch _ as NSError {
+                Qiscus.printLog(text: "Audio player error")
+            }
+        }
+    }
+    func didTapPauseButton(_ button: UIButton, onCell cell: QCellAudio){
+        audioPlayer?.pause()
+        stopTimer()
+        updateAudioDisplay()
+    }
+    func didTapDownloadButton(_ button: UIButton, onCell cell: QCellAudio){
+        cell.displayAudioDownloading()
+        self.commentClient.downloadMedia(data: cell.data, isAudioFile: true)
+    }
+    func didStartSeekTimeSlider(_ slider: UISlider, onCell cell: QCellAudio){
+        if audioTimer != nil {
+            stopTimer()
+        }
+    }
+    func didEndSeekTimeSlider(_ slider: UISlider, onCell cell: QCellAudio){
+        audioPlayer?.stop()
+        let currentTime = cell.data.currentTimeSlider
+        audioPlayer?.currentTime = Double(currentTime)
+        audioPlayer?.prepareToPlay()
+        audioPlayer?.play()
+        audioTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(audioTimerFired(_:)), userInfo: nil, repeats: true)
+    }
+    func didChangeData(onCell cell: QCellAudio, withData data: QiscusCommentPresenter) {
+        Qiscus.logicThread.async {
+            if let indexPath = data.commentIndexPath{
+                if indexPath.section < self.comments.count {
+                    if indexPath.row < self.comments[indexPath.section].count{
+                        self.comments[indexPath.section][indexPath.row] = data
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - GaleryItemDataSource
+extension QiscusChatVC:GalleryItemsDatasource{
+    public func itemCount() -> Int{
+        return self.galleryItems.count
+    }
+    public func provideGalleryItem(_ index: Int) -> GalleryItem{
+        let item = self.galleryItems[index]
+        if item.isVideo{
+            return GalleryItem.video(fetchPreviewImageBlock: { $0(item.image)}, videoURL: URL(string: item.url)! )
+        }else{
+            return GalleryItem.image { $0(item.image) }
+        }
+    }
+}
+// MARK: - UIImagePickerDelegate
+extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDelegate{
+    open func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]){
+        let time = Double(Date().timeIntervalSince1970)
+        let timeToken = UInt64(time * 10000)
+        let fileType:String = info[UIImagePickerControllerMediaType] as! String
+        picker.dismiss(animated: true, completion: nil)
+        
+        if fileType == "public.image"{
+            var imageName:String = ""
+            let image = info[UIImagePickerControllerOriginalImage] as! UIImage
+            var imagePath:URL?
+            if let imageURL = info[UIImagePickerControllerReferenceURL] as? URL{
+                imageName = imageURL.lastPathComponent
+                
+                let imageNameArr = imageName.characters.split(separator: ".")
+                let imageExt:String = String(imageNameArr.last!).lowercased()
+                
+                if imageExt.isEqual("gif") || imageExt.isEqual("gif_"){
+                    imagePath = imageURL
+                }
+            }else{
+                imageName = "\(timeToken).jpg"
+            }
+            let text = QiscusTextConfiguration.sharedInstance.confirmationImageUploadText
+            let okText = QiscusTextConfiguration.sharedInstance.alertOkText
+            let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
+            
+            QPopUpView.showAlert(withTarget: self, image: image, message: text, firstActionTitle: okText, secondActionTitle: cancelText,doneAction: {
+                 self.continueImageUpload(image, imageName: imageName, imagePath: imagePath)
+            },
+                 cancelAction: {}
+            )
+        }else if fileType == "public.movie" {
+            let mediaURL = info[UIImagePickerControllerMediaURL] as! URL
+            let fileName = mediaURL.lastPathComponent
+            let fileNameArr = fileName.characters.split(separator: ".")
+            let fileExt:NSString = String(fileNameArr.last!).lowercased() as NSString
+            
+            let mediaData = try? Data(contentsOf: mediaURL)
+            
+            Qiscus.printLog(text: "mediaURL: \(mediaURL)\nfileName: \(fileName)\nfileExt: \(fileExt)")
+            
+            //create thumb image
+            let assetMedia = AVURLAsset(url: mediaURL)
+            let thumbGenerator = AVAssetImageGenerator(asset: assetMedia)
+            thumbGenerator.appliesPreferredTrackTransform = true
+            
+            let thumbTime = CMTimeMakeWithSeconds(0, 30)
+            let maxSize = CGSize(width: QiscusHelper.screenWidth(), height: QiscusHelper.screenWidth())
+            thumbGenerator.maximumSize = maxSize
+            
+            do{
+                let thumbRef = try thumbGenerator.copyCGImage(at: thumbTime, actualTime: nil)
+                let thumbImage = UIImage(cgImage: thumbRef)
+                
+                QPopUpView.showAlert(withTarget: self, image: thumbImage, message:"Are you sure to send this video?", isVideoImage: true,
+                                     doneAction: {
+                                        Qiscus.printLog(text: "continue video upload")
+                                        self.continueImageUpload(thumbImage, imageName: fileName, imageNSData: mediaData, videoFile: true)
+                },
+                                     cancelAction: {
+                                        Qiscus.printLog(text: "cancel upload")
+                }
+                )
+            }catch{
+                Qiscus.printLog(text: "error creating thumb image")
+            }
+        }
+    }
+    open func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: nil)
+    }
+}
+// MARK: - IQAudioRecorderViewControllerDelegate
+extension QiscusChatVC:IQAudioRecorderViewControllerDelegate{
+    public func audioRecorderController(_ controller: IQAudioRecorderViewController, didFinishWithAudioAtPath filePath: String) {
+        let fileURL = URL(fileURLWithPath: filePath)
+        Qiscus.printLog(text: "filePath \(filePath)")
+        Qiscus.printLog(text: "fileURL \(fileURL)")
+        var fileContent: Data?
+        fileContent = try! Data(contentsOf: fileURL)
+        
+        let fileName = fileURL.lastPathComponent
+        
+        self.continueImageUpload(imageName: fileName, imageNSData: fileContent, audioFile: true)
+        //commentClient.uploadAudio(self.room.roomLastCommentTopicId, fileName: fileName, filePath: fileURL, roomId: self.room.roomId)
+        
+        controller.dismiss(animated: true, completion: nil)
+    }
+    
+    public func audioRecorderControllerDidCancel(_ controller: IQAudioRecorderViewController) {
+        controller.dismiss(animated: true, completion: nil)
+    }
+}
+
+// MARK: - UIDocumentPickerDelegate
+extension QiscusChatVC: UIDocumentPickerDelegate{
+    open func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentAt url: URL) {
+        self.showLoading("Processing File")
+        let coordinator = NSFileCoordinator()
+        coordinator.coordinate(readingItemAt: url, options: NSFileCoordinator.ReadingOptions.forUploading, error: nil) { (dataURL) in
+            do{
+                let data:Data = try Data(contentsOf: dataURL, options: NSData.ReadingOptions.mappedIfSafe)
+                var fileName = dataURL.lastPathComponent.replacingOccurrences(of: "%20", with: "_")
+                fileName = fileName.replacingOccurrences(of: " ", with: "_")
+                
+                let fileNameArr = (fileName as String).characters.split(separator: ".")
+                let ext = String(fileNameArr.last!).lowercased()
+                
+                // get file extension
+                let isGifImage:Bool = (ext == "gif" || ext == "gif_")
+                let isJPEGImage:Bool = (ext == "jpg" || ext == "jpg_")
+                let isPNGImage:Bool = (ext == "png" || ext == "png_")
+                
+                if isGifImage || isPNGImage || isJPEGImage{
+                    var imagePath:URL?
+                    let image = UIImage(data: data)
+                    if isGifImage{
+                        imagePath = dataURL
+                    }
+                    self.dismissLoading()
+                    let text = QiscusTextConfiguration.sharedInstance.confirmationImageUploadText
+                    let okText = QiscusTextConfiguration.sharedInstance.alertOkText
+                    let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
+                    QPopUpView.showAlert(withTarget: self, image: image, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
+                                         doneAction: {
+                                            self.continueImageUpload(image, imageName: fileName, imagePath: imagePath)
+                    },
+                                         cancelAction: {}
+                    )
+                }else{
+                    self.dismissLoading()
+                    let textFirst = QiscusTextConfiguration.sharedInstance.confirmationFileUploadText
+                    let textMiddle = "\(fileName as String)"
+                    let textLast = QiscusTextConfiguration.sharedInstance.questionMark
+                    let text = "\(textFirst) \(textMiddle) \(textLast)"
+                    let okText = QiscusTextConfiguration.sharedInstance.alertOkText
+                    let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
+                    QPopUpView.showAlert(withTarget: self, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
+                                         doneAction: {
+                                            self.continueImageUpload(imageName: fileName, imagePath: dataURL, imageNSData: data)
+                    },
+                                         cancelAction: {
+                    }
+                    )
+                }
+            }catch _{
+                self.dismissLoading()
+            }
+        }
+    }
+}
+// MARK: - AudioPlayer
+extension QiscusChatVC:AVAudioPlayerDelegate{
+    public func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        do {
+            try AVAudioSession.sharedInstance().setActive(false)
+            if let activeCell = activeAudioCell {
+                activeCell.data.audioIsPlaying = false
+                self.didChangeData(onCell: activeCell, withData: activeCell.data)
+            }
+            stopTimer()
+            updateAudioDisplay()
+        } catch _ as NSError {}
+    }
+    
+    public func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        if let activeCell = activeAudioCell as? QCellAudioLeft{
+            activeCell.data.audioIsPlaying = false
+            self.didChangeData(onCell: activeCell, withData: activeCell.data)
+        }
+        stopTimer()
+        updateAudioDisplay()
+    }
+    
+    // MARK: - Audio Methods
+    func audioTimerFired(_ timer: Timer) {
+        self.updateAudioDisplay()
+    }
+    
+    func stopTimer() {
+        audioTimer?.invalidate()
+        audioTimer = nil
+    }
+    
+    func updateAudioDisplay() {
+        if let cell = activeAudioCell{
+            if let currentTime = audioPlayer?.currentTime {
+                cell.updateAudioDisplay(withTimeInterval: currentTime)
+            }
+        }
     }
 }

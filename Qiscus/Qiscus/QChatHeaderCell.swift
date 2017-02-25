@@ -1,6 +1,6 @@
 //
 //  QChatHeaderCell.swift
-//  Example
+//  QiscusSDK
 //
 //  Created by Ahmad Athaullah on 1/3/17.
 //  Copyright © 2017 Ahmad Athaullah. All rights reserved.

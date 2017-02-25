@@ -1,6 +1,6 @@
 //
 //  QChatFooterLeft.swift
-//  Example
+//  QiscusSDK
 //
 //  Created by Ahmad Athaullah on 1/9/17.
 //  Copyright © 2017 Ahmad Athaullah. All rights reserved.
@@ -18,19 +18,21 @@ class QChatFooterLeft: UICollectionReusableView {
         super.awakeFromNib()
         avatarImage.layer.cornerRadius = 19
         avatarImage.clipsToBounds = true
+        avatarImage.contentMode = .scaleAspectFill
         self.isUserInteractionEnabled = false
     }
     
     func setup(withComent comment:QiscusComment){
-        let avatar = Qiscus.image(named: "in_chat_avatar")
+        avatarImage.image = Qiscus.image(named: "in_chat_avatar")
         self.comment = comment
+        
         if let user = comment.sender{
-            if QiscusHelper.isFileExist(inLocalPath: user.userAvatarLocalPath){
-                avatarImage.image = UIImage.init(contentsOfFile: user.userAvatarLocalPath)
-            }else{
-                avatarImage.loadAsync(user.userAvatarURL, placeholderImage: avatar)
+            if let image = user.avatar{
+                avatarImage.image = image
             }
         }
     }
-    
+    func setup(withImage image:UIImage){
+        avatarImage.image = image
+    }
 }

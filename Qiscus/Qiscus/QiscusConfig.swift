@@ -40,7 +40,7 @@ open class QiscusConfig: NSObject {
         }
     }
     
-    open var requestHeader:[String:String]? = [
+    open var requestHeader:[String:String] = [
         "User-Agent" : "QiscusSDKIos/v\(Qiscus.versionNumber)"
     ]
     

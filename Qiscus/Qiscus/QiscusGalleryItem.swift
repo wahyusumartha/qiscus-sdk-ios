@@ -1,6 +1,6 @@
 //
 //  QiscusGalleryItem.swift
-//  Example
+//  QiscusSDK
 //
 //  Created by Ahmad Athaullah on 12/9/16.
 //  Copyright © 2016 Ahmad Athaullah. All rights reserved.

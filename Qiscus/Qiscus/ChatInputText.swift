@@ -8,7 +8,7 @@
 
 import UIKit
 
-public protocol ChatInputTextDelegate {
+@objc public protocol ChatInputTextDelegate {
     func chatInputTextDidChange(chatInput input:ChatInputText, height: CGFloat)
     func chatInputDidEndEditing(chatInput input:ChatInputText)
     func valueChanged(value:String)
@@ -75,18 +75,22 @@ open class ChatInputText: UITextView, UITextViewDelegate {
     open func textViewDidBeginEditing(_ textView: UITextView) {
         textView.text = self.value
         textView.textColor = self.activeTextColor
+        textView.becomeFirstResponder()
     }
     open func textViewDidEndEditing(_ textView: UITextView) {
         if value == "" {
             textView.text = self.placeholder
             textView.textColor = self.placeHolderColor
         }
+        textView.resignFirstResponder()
         self.chatInputDelegate?.chatInputDidEndEditing(chatInput: self)
     }
     open func clearValue(){
         self.value = ""
-        self.text = placeholder
-        self.textColor = placeHolderColor
+        Qiscus.uiThread.async {
+            self.text = self.placeholder
+            self.textColor = self.placeHolderColor
+        }
     }
     
 }
