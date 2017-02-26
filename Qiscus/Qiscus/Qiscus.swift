@@ -541,7 +541,6 @@ import UserNotifications
                 case "c":
                     let json = JSON(data: data)
                     let notifTopicId = QiscusComment.getCommentTopicIdFromJSON(json)
-                    let commentBeforeId = QiscusComment.getCommentBeforeIdFromJSON(json)
                     let commentId = QiscusComment.getCommentIdFromJSON(json)
                     let qiscusService = QiscusCommentClient.sharedInstance
                     let senderAvatarURL = json["user_avatar"].stringValue
@@ -601,10 +600,10 @@ import UserNotifications
                                 qiscusService.delegate?.qiscusService(didChangeRoom: newRoom, onRoomWithId: roomId)
                             }
                         }
-                        
                     }else{
                         Qiscus.printLog(text: "New user detected")
                     }
+                    
                     if let room = QiscusRoom.getRoomById(roomId){
                         if room.roomType == .group{
                             var changed = false
@@ -630,11 +629,7 @@ import UserNotifications
                     }
                     if isSaved{
                         let newMessage = QiscusComment.getComment(withId: commentId)
-                        if !QiscusComment.isValidCommentIdExist(commentBeforeId) {
-                            qiscusService.syncMessage(notifTopicId)
-                        }else{
-                            newMessage?.updateCommentIsSync(true)
-                        }
+                        
                         if qiscusService.commentDelegate != nil{
                             let copyComment = QiscusComment.copyComment(comment: newMessage!)
                             let presenter = QiscusCommentPresenter.getPresenter(forComment: copyComment)

@@ -49,6 +49,12 @@ let qiscus = Qiscus.sharedInstance
 open class QiscusCommentClient: NSObject {
     open static let sharedInstance = QiscusCommentClient()
     
+    class var shared:QiscusCommentClient{
+        get{
+            return QiscusCommentClient.sharedInstance
+        }
+    }
+    
     open var commentDelegate: QCommentDelegate?
     open var roomDelegate: QiscusRoomDelegate?
     open var configDelegate: QiscusConfigDelegate?
@@ -373,14 +379,7 @@ open class QiscusCommentClient: NSObject {
                                     data.commentStatus = .sent
                                 }
                                 let commentBeforeid = QiscusComment.getCommentBeforeIdFromJSON(commentJSON)
-                                if(QiscusComment.isValidCommentIdExist(commentBeforeid)){
-                                    comment.commentIsSynced = true
-                                    comment.commentBeforeId = commentBeforeid
-                                }else{
-                                    self.syncMessage(comment.commentTopicId)
-                                }
-                                
-                                self.commentDelegate?.didSuccesPostComment(comment)
+                                comment.commentBeforeId = commentBeforeid
                                 
                                 if file != nil {
                                     let thisComment = QiscusComment.getComment(withLocalId: comment.localId)
@@ -967,19 +966,20 @@ open class QiscusCommentClient: NSObject {
     }
     
     // MARK: - Communicate with Server
-    open func syncMessage(_ topicId: Int, triggerDelegate:Bool = false) {
-        DispatchQueue.main.async {
+    open func syncMessage(inTopic topicId: Int, fromComment commentId: Int64 ) {
+        Qiscus.logicThread.async {
             let manager = Alamofire.SessionManager.default
-            if let commentId = QiscusComment.getLastSyncCommentId(topicId) {
-                let loadURL = QiscusConfig.LOAD_URL
-                let parameters:[String: AnyObject] =  [
-                        "comment_id"  : commentId as AnyObject,
-                        "topic_id" : topicId as AnyObject,
-                        "token" : qiscus.config.USER_TOKEN as AnyObject,
-                        "after":"true" as AnyObject
-                    ]
+            let loadURL = QiscusConfig.LOAD_URL
+            let parameters:[String: AnyObject] =  [
+                "comment_id"  : commentId as AnyObject,
+                "topic_id" : topicId as AnyObject,
+                "token" : qiscus.config.USER_TOKEN as AnyObject,
+                "after":"true" as AnyObject
+            ]
+            Qiscus.printLog(text: "sync comment parameters: \n\(parameters)")
+            Qiscus.printLog(text: "sync comment url: \n\(loadURL)")
+            Qiscus.apiThread.async {
                 manager.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
-                    Qiscus.printLog(text: "sync comment parameters: \n\(parameters)")
                     Qiscus.printLog(text: "sync comment response: \n\(responseData)")
                     if let response = responseData.result.value {
                         let json = JSON(response)
@@ -988,47 +988,25 @@ open class QiscusCommentClient: NSObject {
                         if results != nil{
                             let comments = json["results"]["comments"].arrayValue
                             if comments.count > 0 {
-                                DispatchQueue.main.async(execute: {
-                                    var newMessageCount: Int = 0
-                                    var newComments = [QiscusComment]()
-                                    for comment in comments {
-                                        
-                                        let isSaved = QiscusComment.getCommentFromJSON(comment, topicId: topicId, saved: true)
-                                        
-                                        if let thisComment = QiscusComment.getComment(withId: QiscusComment.getCommentIdFromJSON(comment)){
-                                            if isSaved {
-                                                newMessageCount += 1
-                                                newComments.insert(thisComment, at: 0)
-                                            }
+                                for newComment in comments {
+                                    let newCommentId = QiscusComment.getCommentIdFromJSON(newComment)
+                                    let isSaved = QiscusComment.getCommentFromJSON(newComment, topicId: topicId, saved: true)
+                                    
+                                    if let thisComment = QiscusComment.getComment(withId: newCommentId){
+                                        if isSaved {
+                                            let presenter = QiscusCommentPresenter.getPresenter(forComment: thisComment)
+                                            self.delegate?.qiscusService(gotNewMessage: presenter)
                                         }
                                     }
-                                    if newComments.count > 0 {
-                                        self.commentDelegate?.gotNewComment(newComments)
-                                    }
-                                })
-                            }
-                        }else if error != nil{
-                            if triggerDelegate{
-                                var errorMessage = "Failed to load room data"
-                                if let errorData = json["detailed_messages"].array {
-                                    if let message = errorData[0].string {
-                                        errorMessage = message
-                                    }
-                                }else if let errorData = json["message"].string {
-                                    errorMessage = errorData
                                 }
 
-                                self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message with error \(errorMessage)")
                             }
+                        }else if error != nil{
                             Qiscus.printLog(text: "error sync message: \(error)")
                         }
                     }else{
-                        if triggerDelegate{
-                            self.commentDelegate?.didFailedLoadDataFromAPI("failed to sync message, connection error")
-                        }
                         Qiscus.printLog(text: "error sync message")
                     }
-                    
                 })
             }
         }
