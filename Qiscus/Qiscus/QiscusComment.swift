@@ -351,8 +351,8 @@ public class QiscusComment: Object {
     }
     open var commentStatus:QiscusCommentStatus {
         get {
-            if commentStatusRaw == QiscusCommentStatus.failed.rawValue{
-                return QiscusCommentStatus.failed
+            if commentStatusRaw == QiscusCommentStatus.failed.rawValue || commentStatusRaw == QiscusCommentStatus.sending.rawValue{
+                return QiscusCommentStatus(rawValue: commentStatusRaw)
             }else{
                 var minReadId = Int64(0)
                 var minDeliveredId = Int64(0)
