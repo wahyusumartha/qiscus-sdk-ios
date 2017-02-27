@@ -18,7 +18,7 @@ class QChatFooterRight: UICollectionReusableView {
     }
     
     func setup(withComent comment:QiscusComment){
-        let avatar = Qiscus.image(named: "in_chat_avatar")
+        
     }
     
     
