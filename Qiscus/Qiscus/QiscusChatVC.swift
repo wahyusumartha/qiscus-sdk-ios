@@ -917,7 +917,7 @@ public class QiscusChatVC: UIViewController{
                                 if participant.participantEmail != QiscusConfig.sharedInstance.USER_EMAIL{
                                     if let user = QiscusUser.getUserWithEmail(participant.participantEmail){
                                         if navSubtitle == "" {
-                                            navSubtitle = user.userFullName
+                                            navSubtitle = "You, \(user.userFullName)"
                                         }else{
                                             navSubtitle += ", \(user.userFullName)"
                                         }
@@ -1369,6 +1369,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                         self.collectionView.insertItems(at: [indexPath])
                     }, completion: {_ in
                         if presenter.userIsOwn || self.isLastRowVisible{
+                            self.welcomeView.isHidden = true
                             self.scrollToBottom()
                         }
                     })
