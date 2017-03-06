@@ -124,13 +124,13 @@ class QPopUpView: UIViewController {
     @IBAction func firstButtonAction(_ sender: AnyObject) {
         self.dismiss(animated: true, completion: {})
         self.isPresent = false
-        self.firstAction()
+        self.secondAction()
     }
 
     @IBAction func secondButtonAction(_ sender: AnyObject) {
         self.dismiss(animated: true, completion: {})
         self.isPresent = false
-        self.secondAction()
+        self.firstAction()
     }
     @IBAction func singleButtonAction(_ sender: AnyObject) {
         self.dismiss(animated: true, completion: {})
@@ -147,6 +147,7 @@ class QPopUpView: UIViewController {
         }else{
             alert.isPresent = true
         }
+
         alert.secondAction = cancelAction
         alert.firstAction = doneAction
         alert.image = image
