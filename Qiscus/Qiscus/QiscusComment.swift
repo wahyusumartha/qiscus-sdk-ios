@@ -951,6 +951,17 @@ public class QiscusComment: Object {
             }else{
                 comment.showLink = true
             }
+        }else if comment.commentType == .attachment {
+            var file = QiscusFile.getCommentFileWithComment(comment)
+            if file == nil {
+                file = QiscusFile()
+            }
+            file?.updateURL(comment.getMediaURL())
+            file?.updateCommentId(comment.commentId)
+            file?.saveCommentFile()
+            
+            file = QiscusFile.getCommentFileWithComment(comment)
+            comment.commentFileId = file!.fileId
         }
         
         return saved

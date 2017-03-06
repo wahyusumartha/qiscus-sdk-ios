@@ -186,7 +186,7 @@ open class QiscusFile: Object {
         var searchQuery = NSPredicate()
         var file:QiscusFile?
         
-        searchQuery = NSPredicate(format: "fileId == %d", comment.commentFileId)
+        searchQuery = NSPredicate(format: "fileId == \(comment.commentFileId) OR fileCommentId == \(comment.commentId)")
         let fileData = realm.objects(QiscusFile.self).filter(searchQuery)
         
         if(fileData.count == 0){

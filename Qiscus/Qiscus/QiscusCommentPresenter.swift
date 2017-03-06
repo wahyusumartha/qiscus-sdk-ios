@@ -205,90 +205,101 @@ public enum QiscusCommentPresenterType:Int {
             }
             break
         default:
-            if let file = QiscusFile.getCommentFile(comment.commentFileId) {
-                commentPresenter.localFileExist = file.isLocalFileExist()
-                commentPresenter.isUploaded = file.isUploaded
-                commentPresenter.remoteURL = file.fileURL
-                commentPresenter.uploadMimeType = file.fileMimeType
-                commentPresenter.fileType = file.fileExtension
+            var commentFile = QiscusFile.getCommentFileWithComment(comment)
+            var file = QiscusFile()
+            if commentFile == nil {
+                commentFile = QiscusFile()
+                commentFile!.updateURL(comment.getMediaURL())
+                commentFile!.updateCommentId(comment.commentId)
+                commentFile!.saveCommentFile()
                 
-                switch file.fileType {
-                case .media:
-                    commentPresenter.commentType = .image
-                    commentPresenter.cellIdentifier = "cellMedia\(position)"
-                    commentPresenter.displayImage = Qiscus.image(named: "media_balloon")
-                    commentPresenter.cellSize.height = 135
+                commentFile = QiscusFile.getCommentFileWithComment(comment)!
+                comment.commentFileId = commentFile!.fileId
+            }
+            file = QiscusFile.copyFile(file: commentFile!)
+            
+            commentPresenter.localFileExist = file.isLocalFileExist()
+            commentPresenter.isUploaded = file.isUploaded
+            commentPresenter.remoteURL = file.fileURL
+            commentPresenter.uploadMimeType = file.fileMimeType
+            commentPresenter.fileType = file.fileExtension
+            
+            switch file.fileType {
+            case .media:
+                commentPresenter.commentType = .image
+                commentPresenter.cellIdentifier = "cellMedia\(position)"
+                commentPresenter.displayImage = Qiscus.image(named: "media_balloon")
+                commentPresenter.cellSize.height = 135
+                
+                if let image = file.thumbImage(){
+                    commentPresenter.displayImage = image
+                    commentPresenter.localURL = file.fileLocalPath
+                    commentPresenter.localThumbURL = file.fileMiniThumbPath
+                }else{
+                    commentPresenter.remoteURL = file.fileURL
+                    let thumbURL = commentPresenter.remoteURL!.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
                     
-                    if let image = file.thumbImage(){
-                        commentPresenter.displayImage = image
-                        commentPresenter.localURL = file.fileLocalPath
-                        commentPresenter.localThumbURL = file.fileMiniThumbPath
-                    }else{
-                        commentPresenter.remoteURL = file.fileURL
-                        let thumbURL = commentPresenter.remoteURL!.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
-                        
-                        if let imageURL = URL(string: thumbURL){
-                            if let imageData = NSData(contentsOf: imageURL){
-                                if let image = UIImage(data: imageData as Data){
-                                    commentPresenter.displayImage = image
-                                }
-                            }
-                        }
-                        
-                    }
-                    break
-                case .video:
-                    commentPresenter.commentType = .video
-                    commentPresenter.cellIdentifier = "cellMedia\(position)"
-                    commentPresenter.displayImage = Qiscus.image(named: "media_balloon")
-                    commentPresenter.cellSize.height = 135
-                    if let image = file.thumbImage(){
-                        commentPresenter.displayImage = image
-                        commentPresenter.localURL = file.fileLocalPath
-                        commentPresenter.localThumbURL = file.fileMiniThumbPath
-                    }else{
-                        var thumbURL = commentPresenter.remoteURL!.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
-                        let thumbUrlArr = thumbURL.characters.split(separator: ".")
-                        
-                        var newThumbURL = ""
-                        var i = 0
-                        for thumbComponent in thumbUrlArr{
-                            if i == 0{
-                                newThumbURL += String(thumbComponent)
-                            }else if i < (thumbUrlArr.count - 1){
-                                newThumbURL += ".\(String(thumbComponent))"
-                            }else{
-                                newThumbURL += ".png"
-                            }
-                            i += 1
-                        }
-                        thumbURL = newThumbURL
-                        if let imageURL = URL(string: thumbURL){
-                            if let imageData = NSData(contentsOf: imageURL){
-                                if let image = UIImage(data: imageData as Data){
-                                    commentPresenter.displayImage = image
-                                }
+                    if let imageURL = URL(string: thumbURL){
+                        if let imageData = NSData(contentsOf: imageURL){
+                            if let image = UIImage(data: imageData as Data){
+                                commentPresenter.displayImage = image
                             }
                         }
                     }
-                    break
-                case .audio:
-                    commentPresenter.commentType = .audio
-                    commentPresenter.cellIdentifier = "cellAudio\(position)"
-                    commentPresenter.localFileExist = file.localFileExist
-                    commentPresenter.cellSize.height = 83
-                    commentPresenter.audioFileExist = file.isOnlyLocalFileExist
-                    if file.isOnlyLocalFileExist {
-                        commentPresenter.localURL = file.fileLocalPath
-                    }
-                    break
-                default:
-                    commentPresenter.commentType = .file
-                    commentPresenter.cellIdentifier = "cellFile\(position)"
-                    commentPresenter.cellSize.height = 65
-                    commentPresenter.fileName = file.fileName
-                    break
+                    
                 }
+                break
+            case .video:
+                commentPresenter.commentType = .video
+                commentPresenter.cellIdentifier = "cellMedia\(position)"
+                commentPresenter.displayImage = Qiscus.image(named: "media_balloon")
+                commentPresenter.cellSize.height = 135
+                if let image = file.thumbImage(){
+                    commentPresenter.displayImage = image
+                    commentPresenter.localURL = file.fileLocalPath
+                    commentPresenter.localThumbURL = file.fileMiniThumbPath
+                }else{
+                    var thumbURL = commentPresenter.remoteURL!.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
+                    let thumbUrlArr = thumbURL.characters.split(separator: ".")
+                    
+                    var newThumbURL = ""
+                    var i = 0
+                    for thumbComponent in thumbUrlArr{
+                        if i == 0{
+                            newThumbURL += String(thumbComponent)
+                        }else if i < (thumbUrlArr.count - 1){
+                            newThumbURL += ".\(String(thumbComponent))"
+                        }else{
+                            newThumbURL += ".png"
+                        }
+                        i += 1
+                    }
+                    thumbURL = newThumbURL
+                    if let imageURL = URL(string: thumbURL){
+                        if let imageData = NSData(contentsOf: imageURL){
+                            if let image = UIImage(data: imageData as Data){
+                                commentPresenter.displayImage = image
+                            }
+                        }
+                    }
+                }
+                break
+            case .audio:
+                commentPresenter.commentType = .audio
+                commentPresenter.cellIdentifier = "cellAudio\(position)"
+                commentPresenter.localFileExist = file.localFileExist
+                commentPresenter.cellSize.height = 83
+                commentPresenter.audioFileExist = file.isOnlyLocalFileExist
+                if file.isOnlyLocalFileExist {
+                    commentPresenter.localURL = file.fileLocalPath
+                }
+                break
+            default:
+                commentPresenter.commentType = .file
+                commentPresenter.cellIdentifier = "cellFile\(position)"
+                commentPresenter.cellSize.height = 65
+                commentPresenter.fileName = file.fileName
+                break
             }
             break
         }
