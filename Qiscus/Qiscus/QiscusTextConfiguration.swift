@@ -65,13 +65,13 @@ open class QiscusTextConfiguration: NSObject {
     open var todayText = "Today"
     
     /// Your text if it is the process of uploading file, Default value : "Uploading"
-    open var uploadingText = "Uploading"
+    open var uploadingText = "uploading"
     
     /// Your text if it is the process of uploading image, Default value : "Sending"
-    open var sendingText = "Sending"
+    open var sendingText = "sending"
     
     /// Your text if the process of uploading fail, Default value : "Sending Failed"
-    open var failedText = "Sending Failed"
+    open var failedText = "failed"
     
     /// Your text if there isn't connection internet, Default value :  "can't connect to internet, please check your connection"
     open var noConnectionText = "can't connect to internet, please check your connection"
