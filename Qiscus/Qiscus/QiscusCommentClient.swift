@@ -439,7 +439,7 @@ open class QiscusCommentClient: NSObject {
         Qiscus.apiThread.async {
             let comment = data.comment!
             
-            let file = QiscusFile.getCommentFile(comment.commentFileId)!
+            let file = QiscusFile.getCommentFileWithComment(data.comment!)!
             let manager = Alamofire.SessionManager.default
             
             file.updateIsDownloading(true)
@@ -448,8 +448,8 @@ open class QiscusCommentClient: NSObject {
             Qiscus.uiThread.async {
                 self.delegate?.qiscusService(didChangeContent: data)
             }
-            
-            manager.request(file.fileURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
+            let fileURL = file.fileURL.replacingOccurrences(of: " ", with: "%20")
+            manager.request(fileURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
                 .responseData(completionHandler: { response in
                     Qiscus.printLog(text: "download result: \(response)")
                     if let imageData = response.data {
