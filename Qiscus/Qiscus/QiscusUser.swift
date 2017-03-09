@@ -32,8 +32,14 @@ open class QiscusUser: Object {
     var avatar:UIImage?{
         get{
             if QiscusHelper.isFileExist(inLocalPath: self.userAvatarLocalPath){
-                return UIImage(contentsOfFile: self.userAvatarLocalPath)
+                if let image =  UIImage(contentsOfFile: self.userAvatarLocalPath){
+                    return image
+                }else{
+                    self.downloadAvatar()
+                    return nil
+                }
             }else{
+                self.downloadAvatar()
                 return nil
             }
         }
