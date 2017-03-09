@@ -1485,7 +1485,7 @@ open class QiscusCommentClient: NSObject {
                             let roomData = json["results"]["room"]
                             var room = QiscusRoom()
                             var roomExist = false
-                            if let chatRoom = QiscusRoom.getRoomById(roomData["id"]){
+                            if let chatRoom = QiscusRoom.getRoomById(roomData["id"].intValue){
                                 roomExist = true
                                 room = QiscusRoom.copyRoom(room: chatRoom)
                             }else{
@@ -1540,9 +1540,6 @@ open class QiscusCommentClient: NSObject {
                                 }
                             }
                             QiscusChatVC.sharedInstance.loadTitle()
-                            if roomAvatarURL != nil && roomAvatar != nil{
-                                room.updateAvatar(image: roomAvatar)
-                            }
                         }
                     }else if error != nil{
                         Qiscus.printLog(text: "error update chat room: \(error)")
