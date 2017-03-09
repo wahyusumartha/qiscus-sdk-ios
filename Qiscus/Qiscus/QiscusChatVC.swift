@@ -1708,18 +1708,20 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                                 print("Local url : \(urlString)")
                                 if let url = URL(string: urlString) {
                                     if let imageData = try? Data(contentsOf: url) {
-                                        if data.fileType == "gif"{
-                                            let image = UIImage.gif(data: imageData)
-                                            let item = QiscusGalleryItem()
-                                            item.image = image
-                                            item.isVideo = false
-                                            self.galleryItems.append(item)
+                                        if targetData.fileType == "gif"{
+                                            if let image = UIImage.gif(data: imageData){
+                                                let item = QiscusGalleryItem()
+                                                item.image = image
+                                                item.isVideo = false
+                                                self.galleryItems.append(item)
+                                            }
                                         }else{
-                                            let image = UIImage(data: imageData)!
-                                            let item = QiscusGalleryItem()
-                                            item.image = image
-                                            item.isVideo = false
-                                            self.galleryItems.append(item)
+                                            if let image = UIImage(data: imageData) {
+                                                let item = QiscusGalleryItem()
+                                                item.image = image
+                                                item.isVideo = false
+                                                self.galleryItems.append(item)
+                                            }
                                         }
                                     }
                                 }
