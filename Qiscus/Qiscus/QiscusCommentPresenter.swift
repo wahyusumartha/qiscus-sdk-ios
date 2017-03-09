@@ -237,7 +237,24 @@ public enum QiscusCommentPresenterType:Int {
                     commentPresenter.localThumbURL = file.fileMiniThumbPath
                 }else{
                     commentPresenter.remoteURL = file.fileURL
-                    let thumbURL = commentPresenter.remoteURL!.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
+                    var thumbURL = commentPresenter.remoteURL!.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/").replacingOccurrences(of: " ", with: "%20")
+                    if commentPresenter.fileType == "gif"{
+                        let thumbUrlArr = thumbURL.characters.split(separator: ".")
+                        
+                        var newThumbURL = ""
+                        var i = 0
+                        for thumbComponent in thumbUrlArr{
+                            if i == 0{
+                                newThumbURL += String(thumbComponent)
+                            }else if i < (thumbUrlArr.count - 1){
+                                newThumbURL += ".\(String(thumbComponent))"
+                            }else{
+                                newThumbURL += ".png"
+                            }
+                            i += 1
+                        }
+                        thumbURL = newThumbURL
+                    }
                     
                     if let imageURL = URL(string: thumbURL){
                         if let imageData = NSData(contentsOf: imageURL){
