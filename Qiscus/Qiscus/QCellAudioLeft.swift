@@ -132,6 +132,8 @@ class QCellAudioLeft: QCellAudio {
                     break
                 }
             })
+        }else{
+            self.filePath = ""
         }
         if data.isUploading{
             let uploadProgres = Int(data.uploadProgress * 100)
