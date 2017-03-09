@@ -894,7 +894,7 @@ import UserNotifications
     // MARK: - local DB
     class func checkDatabaseMigration(){
         Qiscus.dbThread.async {
-            let currentSchema:UInt64 = 13
+            let currentSchema:UInt64 = 14
             var configuration = Realm.Configuration()
             
             configuration.schemaVersion = currentSchema
