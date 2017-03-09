@@ -186,7 +186,7 @@ open class QiscusFile: Object {
         var searchQuery = NSPredicate()
         var file:QiscusFile?
         
-        searchQuery = NSPredicate(format: "fileId == \(comment.commentFileId) OR fileCommentId == \(comment.commentId)")
+        searchQuery = NSPredicate(format: "fileId == \(comment.commentFileId)")
         let fileData = realm.objects(QiscusFile.self).filter(searchQuery)
         
         if(fileData.count == 0){
@@ -379,7 +379,8 @@ open class QiscusFile: Object {
         var mediaURL:URL?
         var fileName:String? = ""
         if(self.fileLocalPath == ""){
-            mediaURL = URL(string: self.fileURL as String)!
+            let remoteURL = self.fileURL.replacingOccurrences(of: " ", with: "%20")
+            mediaURL = URL(string: remoteURL)!
             fileName = mediaURL!.lastPathComponent.replacingOccurrences(of: "%20", with: "_")
         }else if(self.fileLocalPath as String).range(of: "/") == nil{
             fileName = self.fileLocalPath as String
