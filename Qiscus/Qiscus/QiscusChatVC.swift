@@ -1702,12 +1702,20 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                                 let urlString = "file://\(targetData.localURL!)"
                                 print("Local url : \(urlString)")
                                 if let url = URL(string: urlString) {
-                                    if let data = try? Data(contentsOf: url) {
-                                        let image = UIImage(data: data)!
-                                        let item = QiscusGalleryItem()
-                                        item.image = image
-                                        item.isVideo = false
-                                        self.galleryItems.append(item)
+                                    if let imageData = try? Data(contentsOf: url) {
+                                        if data.fileType == "gif"{
+                                            let image = UIImage.gif(data: imageData)
+                                            let item = QiscusGalleryItem()
+                                            item.image = image
+                                            item.isVideo = false
+                                            self.galleryItems.append(item)
+                                        }else{
+                                            let image = UIImage(data: imageData)!
+                                            let item = QiscusGalleryItem()
+                                            item.image = image
+                                            item.isVideo = false
+                                            self.galleryItems.append(item)
+                                        }
                                     }
                                 }
                             }else if targetData.commentType == .video{
