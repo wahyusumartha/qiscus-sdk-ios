@@ -101,7 +101,7 @@ public enum QiscusCommentPresenterType:Int {
                 NSForegroundColorAttributeName: foregroundColorAttributeName,
                 NSUnderlineColorAttributeName: underlineColorAttributeName,
                 NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue,
-                NSFontAttributeName: UIFont.systemFont(ofSize: 14)
+                NSFontAttributeName: Qiscus.style.chatFont
             ]
         }
     }
@@ -113,7 +113,7 @@ public enum QiscusCommentPresenterType:Int {
             }
             return [
                 NSForegroundColorAttributeName: foregroundColorAttributeName,
-                NSFontAttributeName: UIFont.systemFont(ofSize: 14)
+                NSFontAttributeName: Qiscus.style.chatFont
             ]
         }
     }
@@ -328,7 +328,7 @@ public enum QiscusCommentPresenterType:Int {
     class func calculateTextSize(attributedText : NSMutableAttributedString) -> CGSize {
         var size = CGSize()
         let textView = UITextView()
-        textView.font = UIFont.systemFont(ofSize: 14)
+        textView.font = Qiscus.style.chatFont
         textView.dataDetectorTypes = .all
         textView.linkTextAttributes = QiscusCommentPresenter().linkTextAttributes
         
