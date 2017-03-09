@@ -1452,7 +1452,7 @@ open class QiscusCommentClient: NSObject {
         }
     }
     // MARK: - Update Room
-    open func updateRoom(withRoomId roomId:Int, roomName:String? = nil, roomAvatarURL:String? = nil, roomOptions:String? = nil){
+    open func updateRoom(withRoomId roomId:Int, roomName:String? = nil, roomAvatarURL:String? = nil, roomAvatar:UIImage? = nil, roomOptions:String? = nil){
         if roomName != nil || roomAvatarURL != nil || roomOptions != nil {
             let manager = Alamofire.SessionManager.default
             let requestURL = QiscusConfig.UPDATE_ROOM_URL
@@ -1470,10 +1470,10 @@ open class QiscusCommentClient: NSObject {
             if roomOptions != nil {
                 parameters["options"] = roomOptions as AnyObject
             }
-            Qiscus.printLog(text: "create new room parameters: \(parameters)")
+            Qiscus.printLog(text: "update room parameters: \(parameters)")
             manager.request(requestURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                 if let response = responseData.result.value {
-                    Qiscus.printLog(text: "create New room api response:\n\(response)")
+                    Qiscus.printLog(text: "update room api response:\n\(response)")
                     let json = JSON(response)
                     let results = json["results"]
                     let error = json["error"]
@@ -1483,7 +1483,27 @@ open class QiscusCommentClient: NSObject {
                         let changed = json["results"]["changed"].boolValue
                         if changed {
                             let roomData = json["results"]["room"]
-                            let room = QiscusRoom.getRoom(roomData)
+                            var room = QiscusRoom()
+                            var roomExist = false
+                            if let chatRoom = QiscusRoom.getRoomById(roomData["id"]){
+                                roomExist = true
+                                room = QiscusRoom.copyRoom(room: chatRoom)
+                            }else{
+                                room = QiscusRoom.getRoom(roomData)
+                            }
+                            
+                            if roomExist {
+                                if roomName != nil {
+                                    room.updateRoomName(roomName!)
+                                }
+                                if roomOptions != nil {
+                                    room.updateRoomOptions(roomOptions!)
+                                }
+                                if roomAvatarURL != nil {
+                                    room.updateRoomAvatar(roomAvatarURL!, avatarImage: roomAvatar)
+                                }
+                            }
+                            
                             let topicId = room.roomLastCommentTopicId
                             
                             if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
@@ -1520,6 +1540,9 @@ open class QiscusCommentClient: NSObject {
                                 }
                             }
                             QiscusChatVC.sharedInstance.loadTitle()
+                            if roomAvatarURL != nil && roomAvatar != nil{
+                                room.updateAvatar(image: roomAvatar)
+                            }
                         }
                     }else if error != nil{
                         Qiscus.printLog(text: "error update chat room: \(error)")

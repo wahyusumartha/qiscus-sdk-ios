@@ -210,7 +210,7 @@ open class QiscusRoom: Object {
             self.distinctId = distinctId
         }
     }
-    open func updateRoomAvatar(_ avatarURL:String){
+    open func updateRoomAvatar(_ avatarURL:String, avatarImage:UIImage? = nil){
         let realm = try! Realm()
         let searchQuery:NSPredicate = NSPredicate(format: "roomId == %d", self.roomId)
         let roomData = realm.objects(QiscusRoom.self).filter(searchQuery)
@@ -222,7 +222,11 @@ open class QiscusRoom: Object {
                     room.roomAvatarURL = avatarURL
                     room.roomAvatarLocalPath = ""
                 }
-                room.downloadThumbAvatar()
+                if avatarImage == nil {
+                    room.downloadThumbAvatar()
+                }else{
+                    room.updateAvatar(image: avatarImage)
+                }
             }
         }
     }
@@ -236,6 +240,20 @@ open class QiscusRoom: Object {
             if room.roomName != name{
                 try! realm.write {
                     room.roomName = name
+                }
+            }
+        }
+    }
+    open func updateRoomOptions(_ options:String){
+        let realm = try! Realm()
+        let searchQuery:NSPredicate = NSPredicate(format: "roomId == %d", self.roomId)
+        let roomData = realm.objects(QiscusRoom.self).filter(searchQuery)
+        
+        if roomData.count > 0 {
+            let room = roomData.first!
+            if room.optionalData != options{
+                try! realm.write {
+                    room.optionalData = options
                 }
             }
         }
@@ -296,6 +314,40 @@ open class QiscusRoom: Object {
     }
     
     // MARK: - Download Room Avatar
+    open func updateAvatar(image:UIImage){
+        var thumbImage = UIImage()
+        let time = Double(Date().timeIntervalSince1970)
+        let timeToken = UInt64(time * 10000)
+        
+        let fileExt = QiscusFile.getExtension(fromURL: chatRoom.roomAvatarURL)
+        let fileName = "ios-roomAvatar-\(timeToken).\(fileExt)"
+        
+        if fileExt == "jpg" || fileExt == "jpg_" || fileExt == "png" || fileExt == "png_" {
+            thumbImage = chatRoom.createThumbLink(image)
+            
+            let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
+            let directoryPath = "\(documentsPath)/Qiscus"
+            if !FileManager.default.fileExists(atPath: directoryPath){
+                do {
+                    try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
+                } catch let error as NSError {
+                    Qiscus.printLog(text: error.localizedDescription);
+                }
+            }
+            
+            
+            let thumbPath = "\(directoryPath)/\(fileName)"
+            
+            if fileExt == "png" || fileExt == "png_" {
+                try? UIImagePNGRepresentation(thumbImage)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+            } else if fileExt == "jpg" || fileExt == "jpg_"{
+                try? UIImageJPEGRepresentation(thumbImage, 1.0)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+            }
+            DispatchQueue.main.async(execute: {
+                chatRoom.updateThumbURL(url: thumbPath)
+            })
+        }
+    }
     open func downloadThumbAvatar(){
         let chatRoom = QiscusRoom.copyRoom(room: self)
         if chatRoom.roomAvatarURL != ""{
