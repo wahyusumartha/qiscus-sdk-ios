@@ -300,6 +300,11 @@ public class QiscusChatVC: UIViewController{
         self.galeryButton.setImage(galeryImage, for: .normal)
         self.cameraButton.setImage(cameraImage, for: .normal)
         self.audioButton.setImage(audioImage, for: .normal)
+        if self.room != nil {
+            if let newRoom = QiscusRoom.getRoomById(room!.roomId){
+                self.room = newRoom
+            }
+        }
         setupPage()
     }
     override public func viewDidAppear(_ animated: Bool) {
