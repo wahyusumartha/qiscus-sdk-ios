@@ -1714,6 +1714,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                                                 item.image = image
                                                 item.isVideo = false
                                                 self.galleryItems.append(item)
+                                                totalIndex += 1
                                             }
                                         }else{
                                             if let image = UIImage(data: imageData) {
@@ -1721,6 +1722,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                                                 item.image = image
                                                 item.isVideo = false
                                                 self.galleryItems.append(item)
+                                                totalIndex += 1
                                             }
                                         }
                                     }
@@ -1730,17 +1732,17 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                                 let urlThumb = "file://\(targetData.localThumbURL!)"
                                 if let url = URL(string: urlThumb) {
                                     if let data = try? Data(contentsOf: url) {
-                                        let image = UIImage(data: data)!
-                                        let item = QiscusGalleryItem()
-                                        item.image = image
-                                        item.isVideo = true
-                                        item.url = urlString
-                                        self.galleryItems.append(item)
+                                        if let image = UIImage(data: data){
+                                            let item = QiscusGalleryItem()
+                                            item.image = image
+                                            item.isVideo = true
+                                            item.url = urlString
+                                            self.galleryItems.append(item)
+                                            totalIndex += 1
+                                        }
                                     }
                                 }
                             }
-                            
-                            totalIndex += 1
                         }
                     }
                 }

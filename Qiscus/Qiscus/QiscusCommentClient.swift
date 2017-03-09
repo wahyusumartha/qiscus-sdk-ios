@@ -476,7 +476,7 @@ open class QiscusCommentClient: NSObject {
                                     }
                                 }
                                 
-                                let fileName = "\(comment.commentId)-Q-\(file.fileName as String)"
+                                let fileName = "\(comment.commentId)-Q-\(file.fileName.replacingOccurrences(of: " ", with: "%20") as String)"
                                 let path = "\(documentsPath)/Qiscus/\(fileName)"
                                 let thumbPath = "\(documentsPath)/Qiscus/thumb_\(fileName)"
                                 
