@@ -76,6 +76,9 @@ public class QiscusChatVC: UIViewController{
                 }
                 self.loadTitle()
                 self.subscribeRealtime(onRoom: room)
+            }else{
+                self.titleLabel.text = ""
+                self.subtitleLabel.text = ""
             }
         }
     }
@@ -300,7 +303,7 @@ public class QiscusChatVC: UIViewController{
         self.galeryButton.setImage(galeryImage, for: .normal)
         self.cameraButton.setImage(cameraImage, for: .normal)
         self.audioButton.setImage(audioImage, for: .normal)
-        if self.room != nil {
+        if self.room != nil && !firstLoad {
             if let newRoom = QiscusRoom.getRoomById(room!.roomId){
                 self.room = newRoom
             }
@@ -310,6 +313,7 @@ public class QiscusChatVC: UIViewController{
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if firstLoad{
+            self.room = nil
             loadData()
         }
     }
@@ -560,14 +564,11 @@ public class QiscusChatVC: UIViewController{
         self.showLoading("Load Data ...")
         if newRoom && (self.users != nil){
             dataPresenter.loadComments(inNewGroupChat: users!, optionalData: self.optionalData, withMessage: self.message)
-        }else if room != nil{
-            dataPresenter.loadComments(inRoom: room!.roomId, withMessage: message)
         }else{
             if loadWithUser && users != nil{
                 if users!.count == 1 {
                     dataPresenter.loadComments(inRoomWithUsers: users![0], optionalData: optionalData, withMessage: message, distinctId: distincId)
                 }else{
-                    // here error toast
                     self.dismissLoading()
                 }
             }else if roomId != nil{
@@ -1071,7 +1072,6 @@ public class QiscusChatVC: UIViewController{
     
     //MARK: -reset chat view
     func reset(){
-        self.room = nil
         self.firstLoad = true
         self.topicId = nil
         self.users = nil
@@ -1088,6 +1088,7 @@ public class QiscusChatVC: UIViewController{
         self.backAction = nil
         self.titleAction = {}
         self.unlockAction = {}
+        self.room = nil
         self.collectionView.reloadData()
     }
     
@@ -1098,6 +1099,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
     public func dataPresenter(didFinishLoad comments: [[QiscusCommentPresenter]], inRoom: QiscusRoom) {
         self.dismissLoading()
         self.firstLoad = false
+        self.room = inRoom
         if comments.count > 0 {
             self.comments = comments
             self.welcomeView.isHidden = true
