@@ -142,7 +142,7 @@ open class QiscusRoom: Object {
     open class func getRoom(_ withDistinctId:String, andUserEmail:String)->QiscusRoom?{ // 
         let realm = try! Realm()
         
-        let searchQuery:NSPredicate = NSPredicate(format: "distinctId == '\(withDistinctId)' AND user == '\(andUserEmail)'")
+        let searchQuery:NSPredicate = NSPredicate(format: "distinctId == '\(withDistinctId)' AND user == '\(andUserEmail)' AND isGroup == false")
         let roomData = realm.objects(QiscusRoom.self).filter(searchQuery)
         
         if(roomData.count > 0){
