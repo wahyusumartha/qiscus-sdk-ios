@@ -1707,7 +1707,6 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                             }
                             if targetData.commentType == .image{
                                 let urlString = "file://\(targetData.localURL!)"
-                                print("Local url : \(urlString)")
                                 if let url = URL(string: urlString) {
                                     if let imageData = try? Data(contentsOf: url) {
                                         if targetData.fileType == "gif"{

@@ -604,7 +604,6 @@ open class QiscusCommentClient: NSObject {
             }
         }
         urlUpload.httpMethod = "POST"
-        print("file: \(presenterData.fileName)  || mimeType: \(presenterData.uploadMimeType)")
         Qiscus.apiThread.async {
             Alamofire.upload(multipartFormData: {formData in
                 formData.append(presenterData.uploadData!, withName: "file", fileName: presenterData.fileName, mimeType: presenterData.uploadMimeType!)

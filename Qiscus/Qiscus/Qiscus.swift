@@ -18,7 +18,7 @@ import UserNotifications
 
     static let sharedInstance = Qiscus()
     static let qiscusVersionNumber:String = "2.2.8"
-    static let showDebugPrint = true
+    static let showDebugPrint = false
     
     // MARK: - Thread
     static let realtimeThread = DispatchQueue(label: "com.qiscus.realtime")
@@ -1010,14 +1010,12 @@ import UserNotifications
     public func pushRegistry(_ registry: PKPushRegistry, didReceiveIncomingPushWith payload: PKPushPayload, forType type: PKPushType) {
         if Qiscus.isLoggedIn{
             let payloadData = JSON(payload.dictionaryPayload)
-            if let pnData = payloadData["qiscus_sdk"].string {
-                print("pn data: \(pnData)")
+            if let _ = payloadData["qiscus_sdk"].string {
                 Qiscus.sharedInstance.RealtimeConnect()
             }
         }
     }
     public func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenForType type: PKPushType) {
-        print("token invalidated")
         Qiscus.registerNotification()
     }
     @objc public class func registerNotification(){
