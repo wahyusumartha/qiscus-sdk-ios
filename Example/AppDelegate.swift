@@ -66,11 +66,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Qiscus.didRegisterUserNotification(withToken:deviceToken)
+        print("deviceToken: \(deviceToken)")
+    }
     func application(_ application: UIApplication, didRegister notificationSettings: UIUserNotificationSettings) {
-        Qiscus.didRegisterUserNotification()
+        //Qiscus.didRegisterUserNotification()
     }
     func application(_ application: UIApplication, didReceive notification: UILocalNotification) {
         Qiscus.didReceive(LocalNotification:notification)
+    }
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
+       Qiscus.didReceive(RemoteNotification:userInfo)
     }
     func goToChatNavigationView(){
         let chatView = goToChatVC()

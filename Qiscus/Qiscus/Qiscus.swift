@@ -18,7 +18,7 @@ import UserNotifications
 
     static let sharedInstance = Qiscus()
     static let qiscusVersionNumber:String = "2.2.8"
-    static let showDebugPrint = false
+    static let showDebugPrint = true
     
     // MARK: - Thread
     static let realtimeThread = DispatchQueue(label: "com.qiscus.realtime")
@@ -1004,6 +1004,7 @@ import UserNotifications
                 token += String(format: "%02.2hhx", deviceToken[i] as CVarArg)
             }
             Qiscus.qiscusDeviceToken = token
+            Qiscus.printLog(text: "Device token: \(token)")
             QiscusCommentClient.sharedInstance.registerDevice(withToken: token)
         }
     }
@@ -1023,11 +1024,29 @@ import UserNotifications
         Qiscus.sharedInstance.application.registerUserNotificationSettings(notificationSettings)
         Qiscus.sharedInstance.application.registerForRemoteNotifications()
     }
+    @objc public class func didRegisterUserNotification(withToken token: Data){
+        if Qiscus.isLoggedIn{
+            var tokenString: String = ""
+            for i in 0..<token.count {
+                tokenString += String(format: "%02.2hhx", token[i] as CVarArg)
+            }
+            Qiscus.qiscusDeviceToken = tokenString
+            Qiscus.printLog(text: "Device token: \(tokenString)")
+            QiscusCommentClient.sharedInstance.registerDevice(withToken: tokenString)
+        }
+    }
     @objc public class func didRegisterUserNotification(){
         if Qiscus.isLoggedIn{
             let voipRegistry = PKPushRegistry(queue: DispatchQueue.main)
             voipRegistry.desiredPushTypes = Set([PKPushType.voIP])
             voipRegistry.delegate = Qiscus.sharedInstance
+        }
+    }
+    @objc public class func didReceive(RemoteNotification userInfo:[AnyHashable : Any]){
+        if Qiscus.isLoggedIn{
+            if userInfo["qiscus_sdk"] != nil{
+                Qiscus.sharedInstance.RealtimeConnect()
+            }
         }
     }
     @objc public class func didReceive(LocalNotification notification:UILocalNotification){
