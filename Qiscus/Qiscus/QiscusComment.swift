@@ -192,9 +192,12 @@ public class QiscusComment: Object {
                             savedComment.commentBeforeId = value
                         }
                         if topicId > 0 && thiscommentId > 0 {
-                            if !QiscusComment.isCommentExist(thiscommentId){
+                            if !QiscusComment.isCommentExist(value){
                                 if let syncId = QiscusComment.getLastSyncCommentId(topicId, unsyncCommentId: thiscommentId){
-                                    QiscusCommentClient.shared.syncMessage(inTopic: topicId, fromComment: syncId)
+                                    if let room = QiscusRoom.getRoom(withLastTopicId: topicId){
+                                        QiscusCommentClient.shared.syncMessage(inRoom: room, fromComment: syncId)
+                                    }
+                                    
                                 }
                             }else{
                                 if savedComment.commentIsSynced == false{
@@ -637,6 +640,25 @@ public class QiscusComment: Object {
         }
         return comments
     }
+    public class func checkSync(inTopicId topicId: Int)->Int64?{
+        let realm = try! Realm()
+        
+        let sortProperties = [SortDescriptor(property: "commentCreatedAt", ascending: false)]
+        let searchQuery:NSPredicate = NSPredicate(format: "commentTopicId == \(topicId)")
+        
+        let commentData = realm.objects(QiscusComment.self).filter(searchQuery).sorted(by: sortProperties)
+        
+        
+        if(commentData.count > 0){
+            let lastCommentId = commentData.last!.commentId
+            for comment in commentData{
+                if !QiscusComment.isCommentExist(comment.commentBeforeId) && comment.localId != lastCommentId{
+                    return comment.commentId
+                }
+            }
+        }
+        return nil
+    }
     public class func getComments(inTopicId topicId: Int, limit:Int = 0, fromCommentId:Int64? = nil)->[QiscusComment]{ //
 
         var allComment = [QiscusComment]()
@@ -837,7 +859,7 @@ public class QiscusComment: Object {
         var lastSyncCommentId:Int64?
         
         let realm = try! Realm()
-        let searchQuery = NSPredicate(format: "commentIsSynced == true AND commentTopicId == \(topicId) AND (commentStatusRaw != \(QiscusCommentStatus.sending.rawValue) OR commentStatusRaw == \(QiscusCommentStatus.failed.rawValue)) AND commentId < \(unsyncCommentId)")
+        let searchQuery = NSPredicate(format: "commentTopicId == \(topicId) AND (commentStatusRaw != \(QiscusCommentStatus.sending.rawValue) OR commentStatusRaw == \(QiscusCommentStatus.failed.rawValue)) AND commentId < \(unsyncCommentId)")
         let commentData = realm.objects(QiscusComment.self).filter(searchQuery).sorted(byProperty: "commentCreatedAt")
         
         if commentData.count > 0{

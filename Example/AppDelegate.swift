@@ -68,7 +68,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Qiscus.didRegisterUserNotification(withToken:deviceToken)
-        print("deviceToken: \(deviceToken)")
     }
     func application(_ application: UIApplication, didRegister notificationSettings: UIUserNotificationSettings) {
         //Qiscus.didRegisterUserNotification()

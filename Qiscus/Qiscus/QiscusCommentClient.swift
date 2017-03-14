@@ -965,12 +965,13 @@ open class QiscusCommentClient: NSObject {
     }
     
     // MARK: - Communicate with Server
-    open func syncMessage(inTopic topicId: Int, fromComment commentId: Int64 ) {
+    open func syncMessage(inRoom room: QiscusRoom, fromComment commentId: Int64, silent:Bool = false) {
         Qiscus.logicThread.async {
+            let topicId = room.roomLastCommentTopicId
             let manager = Alamofire.SessionManager.default
             let loadURL = QiscusConfig.LOAD_URL
             let parameters:[String: AnyObject] =  [
-                "comment_id"  : commentId as AnyObject,
+                "last_comment_id"  : commentId as AnyObject,
                 "topic_id" : topicId as AnyObject,
                 "token" : qiscus.config.USER_TOKEN as AnyObject,
                 "after":"true" as AnyObject
@@ -988,23 +989,23 @@ open class QiscusCommentClient: NSObject {
                             let comments = json["results"]["comments"].arrayValue
                             if comments.count > 0 {
                                 for newComment in comments {
-                                    let newCommentId = QiscusComment.getCommentIdFromJSON(newComment)
-                                    let isSaved = QiscusComment.getCommentFromJSON(newComment, topicId: topicId, saved: true)
-                                    
-                                    if let thisComment = QiscusComment.getComment(withId: newCommentId){
-                                        if isSaved {
-                                            let presenter = QiscusCommentPresenter.getPresenter(forComment: thisComment)
-                                            self.delegate?.qiscusService(gotNewMessage: presenter)
-                                        }
-                                    }
+                                    let _ = QiscusComment.getCommentFromJSON(newComment, topicId: topicId, saved: true)
                                 }
-
+                            }
+                            if !silent {
+                                QiscusDataPresenter.shared.loadComments(inRoom: room.roomId, checkSync: false)
                             }
                         }else if error != nil{
                             Qiscus.printLog(text: "error sync message: \(error)")
+                            if !silent {
+                                QiscusDataPresenter.shared.loadComments(inRoom: room.roomId, checkSync: false)
+                            }
                         }
                     }else{
                         Qiscus.printLog(text: "error sync message")
+                        if !silent {
+                            QiscusDataPresenter.shared.loadComments(inRoom: room.roomId, checkSync: false)
+                        }
                     }
                 })
             }
