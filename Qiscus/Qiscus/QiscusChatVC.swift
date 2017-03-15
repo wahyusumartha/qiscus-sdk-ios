@@ -226,7 +226,7 @@ public class QiscusChatVC: UIViewController{
     }
     var UTIs:[String]{
         get{
-            return ["public.jpeg", "public.png"/*,"com.compuserve.gif"*/,"public.text", "public.archive", "com.microsoft.word.doc", "com.microsoft.excel.xls", "com.microsoft.powerpoint.​ppt", "com.adobe.pdf","public.mpeg-4"]
+            return ["public.jpeg", "public.png","com.compuserve.gif","public.text", "public.archive", "com.microsoft.word.doc", "com.microsoft.excel.xls", "com.microsoft.powerpoint.​ppt", "com.adobe.pdf","public.mpeg-4"]
         }
     }
     
@@ -1991,7 +1991,8 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                     let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
                     QPopUpView.showAlert(withTarget: self, image: image, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
                                          doneAction: {
-                                            self.continueImageUpload(image, imageName: fileName, imagePath: imagePath)
+                                            self.continueImageUpload(image, imageName: fileName, imagePath: imagePath, imageNSData: data)
+                                            
                     },
                                          cancelAction: {}
                     )

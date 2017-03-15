@@ -359,6 +359,7 @@ import Photos
             presenter.uploadMimeType = imageMimeType
             presenter.localURL = commentFile.fileLocalPath
             presenter.localThumbURL = commentFile.fileThumbPath
+            presenter.displayImage = UIImage(data: thumbData)
             
             Qiscus.uiThread.async {
                 self.delegate?.dataPresenter(gotNewData: presenter, inRoom: self.room)
