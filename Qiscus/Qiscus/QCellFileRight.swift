@@ -52,7 +52,11 @@ class QCellFileRight: QChatCell {
         }
         
         fileNameLabel.text = data.fileName
-        fileTypeLabel.text = "\(data.fileType.uppercased()) File"
+        if data.commentType == .document{
+            fileTypeLabel.text = "\(data.fileType.uppercased()) File"
+        }else{
+            fileTypeLabel.text = "Unknown File"
+        }
         dateLabel.text = data.commentTime.lowercased()
         
         if data.cellPos == .last || data.cellPos == .single {
