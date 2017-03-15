@@ -395,7 +395,7 @@ open class QiscusFile: Object {
         var check:Bool = false
         let ext = self.getExtension()
         
-        if(ext == "pdf" || ext == "pdf_" || ext == "doc" || ext == "docx" || ext == "ppt" || ext == "pptx" || ext == "xls" || ext == "xlsx"){
+        if(ext == "pdf" || ext == "pdf_" || ext == "doc" || ext == "docx" || ext == "ppt" || ext == "pptx" || ext == "xls" || ext == "xlsx" || ext == "txt"){
             check = true
         }
         
