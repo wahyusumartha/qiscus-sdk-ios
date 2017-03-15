@@ -287,7 +287,9 @@ public class QiscusChatVC: UIViewController{
         if self.loadMoreControl.isRefreshing {
             self.loadMoreControl.endRefreshing()
         }
-        //commentClient.commentDelegate = self
+        self.inputBarBottomMargin.constant = 0
+        self.view.layoutIfNeeded()
+        self.view.endEditing(true)
         self.isPresence = true
         self.navigationController?.setNavigationBarHidden(false , animated: false)
         self.isPresence = true
@@ -478,6 +480,8 @@ public class QiscusChatVC: UIViewController{
         })
     }
     func goToTitleAction(){
+        self.inputBarBottomMargin.constant = 0
+        self.view.layoutIfNeeded()
         self.titleAction()
     }
     // MARK: - Keyboard Methode
