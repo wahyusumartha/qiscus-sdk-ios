@@ -12,6 +12,7 @@ public enum QiscusCommentPresenterType:Int {
     case image
     case video
     case audio
+    case document
     case file
 }
 @objc public class QiscusCommentPresenter: NSObject {
@@ -311,11 +312,18 @@ public enum QiscusCommentPresenterType:Int {
                     commentPresenter.localURL = file.fileLocalPath
                 }
                 break
+            case .document:
+                commentPresenter.commentType = .document
+                commentPresenter.cellIdentifier = "cellFile\(position)"
+                commentPresenter.cellSize.height = 65
+                commentPresenter.fileName = file.fileName
+                break
             default:
                 commentPresenter.commentType = .file
                 commentPresenter.cellIdentifier = "cellFile\(position)"
                 commentPresenter.cellSize.height = 65
                 commentPresenter.fileName = file.fileName
+                commentPresenter.fileType = "unknown file"
                 break
             }
             break

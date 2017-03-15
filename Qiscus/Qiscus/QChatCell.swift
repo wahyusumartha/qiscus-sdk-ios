@@ -37,7 +37,7 @@ class QChatCell: UICollectionViewCell {
         }
     }
     open func showFile(){
-        if data.isUploaded{
+        if data.isUploaded && (data.commentType == .document){
             let url = data.remoteURL!
             let fileName = data.fileName
             

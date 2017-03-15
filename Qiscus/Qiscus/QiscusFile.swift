@@ -111,7 +111,7 @@ open class QiscusFile: Object {
             var type:QFileType = QFileType.others
             if(isMediaFile()){
                 type = QFileType.media
-            }else if(isPdfFile()){
+            }else if(isDocFile()){
                 type = QFileType.document
             }else if(isVideoFile()){
                 type = QFileType.video
@@ -357,6 +357,7 @@ open class QiscusFile: Object {
     // MARK: Additional Methode
     fileprivate func getExtension() -> String{
         var ext = ""
+        
         if (self.fileName as String).range(of: ".") != nil{
             let fileNameArr = (self.fileName as String).characters.split(separator: ".")
             ext = String(fileNameArr.last!).lowercased()
@@ -389,6 +390,16 @@ open class QiscusFile: Object {
             fileName = fileLastPath.replacingOccurrences(of: " ", with: "_")
         }
         return fileName!
+    }
+    fileprivate func isDocFile() -> Bool{
+        var check:Bool = false
+        let ext = self.getExtension()
+        
+        if(ext == "pdf" || ext == "pdf_" || ext == "doc" || ext == "docx" || ext == "ppt" || ext == "pptx" || ext == "xls" || ext == "xlsx"){
+            check = true
+        }
+        
+        return check
     }
     fileprivate func isPdfFile() -> Bool{
         var check:Bool = false
