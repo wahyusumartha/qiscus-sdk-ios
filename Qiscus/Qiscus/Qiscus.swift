@@ -1216,6 +1216,7 @@ import UserNotifications
         if let userInfo = notification.userInfo {
             if let roomData = userInfo["qiscus-room-id"]{
                 let roomId = roomData as! Int
+                UIApplication.shared.cancelAllLocalNotifications()
                 if let window = UIApplication.shared.keyWindow{
                     if Qiscus.sharedInstance.notificationAction != nil{
                         let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
