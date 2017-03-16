@@ -135,30 +135,36 @@ import UserNotifications
     
     // need Documentation
     func checkChat(){
-        let appName = Bundle.main.infoDictionary![kCFBundleNameKey as String] as! String
-        var deviceID = "000"
-        if let vendorIdentifier = UIDevice.current.identifierForVendor {
-            deviceID = vendorIdentifier.uuidString
+        if let lastMessage = QiscusComment.getLastAllComment() {
+            QiscusCommentClient.shared.syncChat(fromComment: lastMessage.commentId)
         }
-        let clientID = "iosMQTT-\(appName)-\(deviceID)-\(QiscusMe.sharedInstance.id)"
-        Qiscus.sharedInstance.mqtt = MQTTSession(host: "mqtt.qiscus.com", port: 1885, clientID: clientID, cleanSession: false, keepAlive: 60, useSSL: true)
-        let mqtt = Qiscus.sharedInstance.mqtt
-        mqtt?.delegate = Qiscus.sharedInstance
-        
-        mqtt?.connect(completion: { (succeeded, error) -> Void in
-            if succeeded {
-                Qiscus.printLog(text: "Realtime socket connected to check chat")
-                let channel = "\(QiscusMe.sharedInstance.token)/c"
-                Qiscus.shared.mqtt?.subscribe(to: channel, delivering: .atLeastOnce, completion: {(succeeded, error) -> Void in
-                    if succeeded {
-                        Qiscus.printLog(text: "successfully subscribe to channel: \(channel)")
-                    }
-                })
-            }else{
-                Qiscus.printLog(text: "Realtime socket connect error: \(error)")
-                self.checkChat()
+        else{
+            let appName = Bundle.main.infoDictionary![kCFBundleNameKey as String] as! String
+            var deviceID = "000"
+            if let vendorIdentifier = UIDevice.current.identifierForVendor {
+                deviceID = vendorIdentifier.uuidString
             }
-        })
+            let clientID = "iosMQTT-\(appName)-\(deviceID)-\(QiscusMe.sharedInstance.id)"
+            Qiscus.sharedInstance.mqtt = MQTTSession(host: "mqtt.qiscus.com", port: 1885, clientID: clientID, cleanSession: false, keepAlive: 60, useSSL: true)
+            let mqtt = Qiscus.sharedInstance.mqtt
+            mqtt?.delegate = Qiscus.sharedInstance
+            
+            mqtt?.connect(completion: { (succeeded, error) -> Void in
+                if succeeded {
+                    Qiscus.printLog(text: "Realtime socket connected to check chat")
+                    let channel = "\(QiscusMe.sharedInstance.token)/c"
+                    Qiscus.shared.mqtt?.subscribe(to: channel, delivering: .atLeastOnce, completion: {(succeeded, error) -> Void in
+                        if succeeded {
+                            Qiscus.printLog(text: "successfully subscribe to channel: \(channel)")
+                        }
+                    })
+                }else{
+                    Qiscus.printLog(text: "Realtime socket connect error: \(error)")
+                    self.checkChat()
+                }
+            })
+        }
+        
     }
     func RealtimeConnect(){
         NotificationCenter.default.removeObserver(self, name: .UIApplicationDidBecomeActive, object: nil)
@@ -1206,11 +1212,9 @@ import UserNotifications
         }
     }
     @objc public class func didReceive(RemoteNotification userInfo:[AnyHashable : Any]){
-        DispatchQueue.global(qos: .background).async {
-            if Qiscus.isLoggedIn{
-                if userInfo["qiscus_sdk"] != nil{
-                    Qiscus.sharedInstance.checkChat()
-                }
+        if Qiscus.isLoggedIn{
+            if userInfo["qiscus_sdk"] != nil{
+                Qiscus.sharedInstance.checkChat()
             }
         }
     }

@@ -514,6 +514,18 @@ public class QiscusComment: Object {
             return nil
         }
     }
+    public class func getLastAllComment()->QiscusComment?{
+        let realm = try! Realm()
+        let searchQuery:NSPredicate = NSPredicate(format: "(commentStatusRaw != \(QiscusCommentStatus.sending.rawValue) OR commentStatusRaw == \(QiscusCommentStatus.failed.rawValue))")
+        let RetNext = realm.objects(QiscusComment.self).filter(searchQuery).sorted(byProperty: "commentCreatedAt")
+        
+        if RetNext.count > 0 {
+            let last = QiscusComment.copyComment(comment: RetNext.last!)
+            return last
+        } else {
+            return nil
+        }
+    }
     public class func getLastComment(inTopicId topicId:Int)->QiscusComment?{
         let realm = try! Realm()
         let searchQuery:NSPredicate = NSPredicate(format: "commentTopicId == %d", topicId)
