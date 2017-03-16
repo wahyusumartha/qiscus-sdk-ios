@@ -52,7 +52,7 @@ public class QiscusChatVC: UIViewController{
     var isPresence:Bool = false
     var titleLabel = UILabel()
     var subtitleLabel = UILabel()
-    
+    var isBeforeTranslucent = false
     // MARK: - shared Properties
     var commentClient = QiscusCommentClient.sharedInstance
     let dataPresenter = QiscusDataPresenter.shared
@@ -269,9 +269,11 @@ public class QiscusChatVC: UIViewController{
     override open func viewWillDisappear(_ animated: Bool) {
         self.isPresence = false
         dataPresenter.delegate = nil
-        //commentClient.commentDelegate = nil
+        if self.navigationController != nil {
+            self.navigationController?.navigationBar.isTranslucent = self.isBeforeTranslucent
+        }
         super.viewWillDisappear(animated)
-        //self.syncTimer?.invalidate()
+        
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
         self.view.endEditing(true)
@@ -281,6 +283,11 @@ public class QiscusChatVC: UIViewController{
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        if let navController = self.navigationController {
+            self.isBeforeTranslucent = navController.navigationBar.isTranslucent
+            self.navigationController?.navigationBar.isTranslucent = false
+        }
+        
         unreadIndexPath = [IndexPath]()
         bottomButton.isHidden = true
         dataPresenter.delegate = self

@@ -46,6 +46,20 @@ class QChatCell: UICollectionViewCell {
             preview.url = url
             preview.roomName = QiscusTextConfiguration.sharedInstance.chatTitle
             QiscusChatVC.sharedInstance.navigationController?.pushViewController(preview, animated: true)
+        }else{
+            if let url = URL(string: data.remoteURL!){
+                if #available(iOS 10.0, *) {
+                    UIApplication.shared.open(url, completionHandler: { success in
+                        if !success {
+                            Qiscus.printLog(text: "fail to open file")
+                        }
+                    })
+                } else {
+                    UIApplication.shared.openURL(url)
+                }
+            }else{
+                Qiscus.printLog(text: "cant open file url")
+            }
         }
     }
     open func downloadingMedia(withPercentage percentage:Int){

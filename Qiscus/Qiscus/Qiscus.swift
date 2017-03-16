@@ -522,25 +522,29 @@ import UserNotifications
         if let reachable = Qiscus.sharedInstance.reachability {
             if reachable.isReachable {
                 Qiscus.sharedInstance.connected = true
-                Qiscus.sharedInstance.RealtimeConnect()
+                if Qiscus.isLoggedIn {
+                    Qiscus.sharedInstance.RealtimeConnect()
+                }
             }
         }
         
         Qiscus.sharedInstance.reachability?.whenReachable = { reachability in
             
             DispatchQueue.main.async {
+                
                 if reachability.isReachableViaWiFi {
                     Qiscus.printLog(text: "connected via wifi")
                 } else {
                     Qiscus.printLog(text: "connected via cellular data")
                 }
                 Qiscus.sharedInstance.connected = true
-                
-                Qiscus.sharedInstance.RealtimeConnect()
+                if Qiscus.isLoggedIn {
+                    Qiscus.sharedInstance.RealtimeConnect()
+                }
                 if QiscusChatVC.sharedInstance.isPresence {
                     Qiscus.printLog(text: "try to sync after connected")
-                    //QiscusChatVC.sharedInstance.syncData()
                 }
+                
             }
         }
         Qiscus.sharedInstance.reachability?.whenUnreachable = { reachability in

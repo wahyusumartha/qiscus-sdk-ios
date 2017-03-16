@@ -181,8 +181,6 @@ public class QiscusComment: Object {
         didSet{
             let id : Int64 = self.localId
             let value = self.commentBeforeId
-            let topicId = self.commentTopicId
-            let thiscommentId = self.commentId
             
             Qiscus.dbThread.async {
                 if let savedComment = QiscusComment.getSavedComment(localId: id){
