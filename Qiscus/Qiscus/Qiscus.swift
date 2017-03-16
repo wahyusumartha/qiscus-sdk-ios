@@ -1206,9 +1206,11 @@ import UserNotifications
         }
     }
     @objc public class func didReceive(RemoteNotification userInfo:[AnyHashable : Any]){
-        if Qiscus.isLoggedIn{
-            if userInfo["qiscus_sdk"] != nil{
-                Qiscus.sharedInstance.checkChat()
+        DispatchQueue.global(qos: .background).async {
+            if Qiscus.isLoggedIn{
+                if userInfo["qiscus_sdk"] != nil{
+                    Qiscus.sharedInstance.checkChat()
+                }
             }
         }
     }
