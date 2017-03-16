@@ -1034,20 +1034,23 @@ open class QiscusCommentClient: NSObject {
                             if comments.count > 0 {
                                 for newComment in comments {
                                     let topicId = newComment["topic_id"].intValue
-                                    
+                                    let email = newComment["email"].stringValue
                                     let isSaved = QiscusComment.getCommentFromJSON(newComment, topicId: topicId, saved: true)
                                     
-                                    if isSaved {
+                                    if isSaved && (email != QiscusMe.sharedInstance.email){
                                         let roomId = newComment["room_id"].intValue
                                         let commentId = newComment["room_id"].int64Value
-                                        var userName = newComment["user_name"].stringValue
+                                        let userName = newComment["user_name"].stringValue
+                                    
                                         var message = newComment["message"].stringValue
                                         
                                         var roomTitle = userName
                                         if let roomName = newComment["room_name"].string{
                                             roomTitle = roomName
                                         }
-                                        
+                                        if(message.hasPrefix("[file]")){
+                                            message = "send you file"
+                                        }
                                         if #available(iOS 10.0, *) {
                                             let content = UNMutableNotificationContent()
                                             content.title = roomTitle
