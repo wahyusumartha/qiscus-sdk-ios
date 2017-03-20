@@ -1197,7 +1197,7 @@ import UserNotifications
                     let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
                     
                     var channels = [String: MQTTQoS]()
-                    channels[commentChannel] = MQTTQoS.exactlyOnce
+                    channels[commentChannel] = MQTTQoS.atLeastOnce
                     if !chatOnly {
                         let rooms = QiscusRoom.getAllRoom()
                         for room in rooms{
