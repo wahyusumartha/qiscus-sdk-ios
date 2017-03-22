@@ -10,7 +10,6 @@ target 'Example' do
     pod 'RealmSwift'
     pod 'SwiftyJSON'
     pod 'ImageViewer'
-    pod 'SwiftMQTT'
     pod 'CocoaMQTT'
     pod 'IQAudioRecorderController'
 end
@@ -25,7 +24,6 @@ target 'Qiscus' do
     pod 'SwiftyJSON'
     pod 'ImageViewer'
     pod 'CocoaMQTT'
-    pod 'SwiftMQTT'
     pod 'IQAudioRecorderController'
 end
 
