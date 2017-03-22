@@ -679,6 +679,9 @@ import CocoaMQTT
         }
     }
     @objc public class func notificationAction(roomId: Int){
+        if QiscusChatVC.sharedInstance.isPresence {
+            QiscusChatVC.sharedInstance.goBack()
+        }
         if let window = UIApplication.shared.keyWindow{
             if Qiscus.sharedInstance.notificationAction != nil{
                 let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
