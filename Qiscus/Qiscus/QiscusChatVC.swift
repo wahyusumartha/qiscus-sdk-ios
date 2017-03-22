@@ -13,6 +13,7 @@ import Photos
 import ImageViewer
 import IQAudioRecorderController
 import SwiftyJSON
+import UserNotifications
 
 public class QiscusChatVC: UIViewController{
     
@@ -282,6 +283,13 @@ public class QiscusChatVC: UIViewController{
         }
     }
     override open func viewWillAppear(_ animated: Bool) {
+        if #available(iOS 10.0, *) {
+            let center = UNUserNotificationCenter.current()
+            center.removeAllDeliveredNotifications() // To remove all delivered notifications
+            center.removeAllPendingNotificationRequests()
+        }else{
+            UIApplication.shared.cancelAllLocalNotifications()
+        }
         super.viewWillAppear(animated)
         if let navController = self.navigationController {
             self.isBeforeTranslucent = navController.navigationBar.isTranslucent
@@ -997,15 +1005,15 @@ public class QiscusChatVC: UIViewController{
             let typingChannel:String = "r/\(room!.roomId)/\(room!.roomLastCommentTopicId)/+/t"
             let readChannel:String = "r/\(room!.roomId)/\(room!.roomLastCommentTopicId)/+/r"
             let deliveryChannel:String = "r/\(room!.roomId)/\(room!.roomLastCommentTopicId)/+/r"
-            Qiscus.addMqttChannel(channel: typingChannel)
-            Qiscus.addMqttChannel(channel: readChannel)
-            Qiscus.addMqttChannel(channel: deliveryChannel)
+            Qiscus.shared.mqtt?.subscribe(typingChannel, qos: .qos1)
+            Qiscus.shared.mqtt?.subscribe(readChannel, qos: .qos1)
+            Qiscus.shared.mqtt?.subscribe(deliveryChannel, qos: .qos1)
         }
     }
     func unsubscribeTypingRealtime(onRoom room:QiscusRoom?){
         if room != nil {
             let channel = "r/\(room!.roomId)/\(room!.roomLastCommentTopicId)/+/t"
-            Qiscus.deleteMqttChannel(channel: channel)
+            Qiscus.shared.mqtt?.unsubscribe(channel)
         }
     }
     func appDidEnterBackground(){
@@ -1371,7 +1379,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         }
     }
     public func dataPresenter(gotNewData presenter: QiscusCommentPresenter, inRoom:QiscusRoom) {
-        Qiscus.logicThread.async {
+        Qiscus.uiThread.async {
             var indexPath = IndexPath()
             if self.comments.count == 0 {
                 indexPath = IndexPath(row: 0, section: 0)
@@ -1381,17 +1389,17 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                 presenter.commentIndexPath = IndexPath(row: 0, section: 0)
                 newGroup.append(presenter)
                 self.comments.append(newGroup)
-                Qiscus.uiThread.async {
-                    self.collectionView.performBatchUpdates({
-                        self.collectionView.insertSections(IndexSet(integer: indexPath.section))
-                        self.collectionView.insertItems(at: [indexPath])
-                    }, completion: {_ in
-                        if presenter.userIsOwn || self.isLastRowVisible{
-                            self.welcomeView.isHidden = true
-                            self.scrollToBottom()
+                self.collectionView.performBatchUpdates({
+                    self.collectionView.insertSections(IndexSet(integer: indexPath.section))
+                    self.collectionView.insertItems(at: [indexPath])
+                }, completion: {_ in
+                    if presenter.userIsOwn || self.isLastRowVisible{
+                        self.welcomeView.isHidden = true
+                        if self.isLastRowVisible || presenter.userEmail == QiscusMe.sharedInstance.email {
+                            self.scrollToBottom(true)
                         }
-                    })
-                }
+                    }
+                })
                 if presenter.toUpload {
                     self.dataPresenter.uploadData(fromPresenter: presenter)
                 }
@@ -1409,16 +1417,17 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                             lastComment.cellPos = .middle
                         }
                         lastComment.balloonImage = lastComment.getBalloonImage()
+                    
                         self.comments[lastComment.commentIndexPath!.section][lastComment.commentIndexPath!.row] = lastComment
                         self.comments[indexPath.section].insert(presenter, at: indexPath.row)
-                        Qiscus.uiThread.async {
-                            self.collectionView.performBatchUpdates({
-                                self.collectionView.insertItems(at: [indexPath])
-                            }, completion: {_ in
-                                self.collectionView.reloadItems(at: [lastComment.commentIndexPath!])
+                        self.collectionView.performBatchUpdates({
+                            self.collectionView.insertItems(at: [indexPath])
+                        }, completion: {_ in
+                            self.collectionView.reloadItems(at: [lastComment.commentIndexPath!])
+                            if self.isLastRowVisible || presenter.userEmail == QiscusMe.sharedInstance.email {
                                 self.scrollToBottom(true)
-                            })
-                        }
+                            }
+                        })
                     }else{
                         indexPath = IndexPath(row: 0, section: self.comments.count)
                         var newGroup = [QiscusCommentPresenter]()
@@ -1426,15 +1435,16 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                         presenter.balloonImage = presenter.getBalloonImage()
                         presenter.commentIndexPath = indexPath
                         newGroup.append(presenter)
+                    
                         self.comments.insert(newGroup, at: indexPath.section)
-                        Qiscus.uiThread.async {
-                            self.collectionView.performBatchUpdates({
-                                self.collectionView.insertSections(IndexSet(integer: indexPath.section))
-                                self.collectionView.insertItems(at: [indexPath])
-                            }, completion: {_ in
+                        self.collectionView.performBatchUpdates({
+                            self.collectionView.insertSections(IndexSet(integer: indexPath.section))
+                            self.collectionView.insertItems(at: [indexPath])
+                        }, completion: {_ in
+                            if self.isLastRowVisible || presenter.userEmail == QiscusMe.sharedInstance.email {
                                 self.scrollToBottom(true)
-                            })
-                        }
+                            }
+                        })
                     }
                     if presenter.toUpload {
                         self.dataPresenter.uploadData(fromPresenter: presenter)

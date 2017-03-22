@@ -22,18 +22,8 @@ extension QiscusChatVC: ChatInputTextDelegate {
             if !self.isSelfTyping{
                 if self.room != nil {
                     let message: String = "1";
-                    let data: Data = message.data(using: .utf8)!
                     let channel = "r/\(self.room!.roomId)/\(self.room!.roomLastCommentTopicId)/\(QiscusMe.sharedInstance.email)/t"
-                    Qiscus.uiThread.async {
-                        Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: false, completion: { (succeeded, error) -> Void in
-                            if succeeded {
-                                self.isSelfTyping = true
-                                Qiscus.printLog(text: "publish typing message in topic: \(channel)")
-                            }else{
-                                Qiscus.printLog(text: "publish typing error: \(error)")
-                            }
-                        })
-                    }
+                    Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
                 }
             }
         }
@@ -64,20 +54,9 @@ extension QiscusChatVC: ChatInputTextDelegate {
             if self.isSelfTyping{
                 if self.room != nil {
                     let message: String = "0";
-                    let data: Data = message.data(using: .utf8)!
                     let channel = "r/\(self.room!.roomId)/\(self.room!.roomLastCommentTopicId)/\(QiscusMe.sharedInstance.email)/t"
-                    Qiscus.uiThread.async {
-                        Qiscus.sharedInstance.mqtt?.publish(data, in: channel, delivering: .atLeastOnce, retain: false, completion: {  (succeeded, error) -> Void in
-                            if succeeded {
-                                self.isSelfTyping = false
-                                Qiscus.printLog(text: "publish typing message in topic: \(channel)")
-                            }else{
-                                Qiscus.printLog(text: "publish typing error: \(error)")
-                            }
-                        })
-                    }
+                    Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
                 }
-                
             }
         }
     }

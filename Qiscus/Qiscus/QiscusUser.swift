@@ -315,9 +315,9 @@ open class QiscusUser: Object {
                 self.downloadAvatar()
             }
             let userEmail = self.userEmail
-            Qiscus.realtimeThread.async {
-                Qiscus.addMqttChannel(channel: "u/\(userEmail)/s")
-            }
+            
+            Qiscus.shared.mqtt?.subscribe("u/\(userEmail)/s", qos: .qos1)
+
             return self
         }else{
             let user = userData.first!

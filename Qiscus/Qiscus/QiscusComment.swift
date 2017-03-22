@@ -1363,10 +1363,12 @@ public class QiscusComment: Object {
                 file = QiscusFile.getCommentFileWithComment(self)
                 self.commentFileId = file!.fileId
             }
-            self.localId = QiscusComment.LastId + 1
-            try! realm.write {
+            
+            try? realm.write {
+                self.localId = QiscusComment.LastId + 1
                 realm.add(self)
             }
+
             if let user = QiscusUser.getUserWithEmail(self.commentSenderEmail){
                 user.updateLastSeen(self.commentCreatedAt)
             }
@@ -1473,7 +1475,7 @@ public class QiscusComment: Object {
         }
         return check
     }
-    open class func isCommentIdExist(_ commentId:Int)->Bool{
+    open class func isCommentIdExist(_ commentId:Int64)->Bool{
         let realm = try! Realm()
         let searchQuery = NSPredicate(format: "commentId == %d", commentId)
         let commentData = realm.objects(QiscusComment.self).filter(searchQuery)

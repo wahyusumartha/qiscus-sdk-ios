@@ -40,24 +40,12 @@ import Photos
     
     func loadComments(inRoom roomId:Int, withMessage:String? = nil, checkSync:Bool = true){
         Qiscus.logicThread.async {
-            if let room = QiscusRoom.getRoomById(roomId){
-                let topicId = room.roomLastCommentTopicId
-                if let unsyncCommentId = QiscusComment.checkSync(inTopicId: topicId){
-                    if checkSync {
-                        if let syncId = QiscusComment.getLastSyncCommentId(topicId, unsyncCommentId: unsyncCommentId){
-                            QiscusCommentClient.shared.syncMessage(inRoom: room, fromComment: syncId)
-                        }
-                    }else{
-                        let comments = QiscusComment.grouppedComment(inTopicId: topicId)
-                        let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
-                        Qiscus.uiThread.async {
-                            self.delegate?.dataPresenter(didFinishLoad: presenters, inRoom: room)
-                        }
-                        if let message = withMessage {
-                            self.commentClient.postMessage(message: message, topicId: room.roomLastCommentTopicId)
-                        }
-                        self.room = room
-                        self.data = presenters
+        if let room = QiscusRoom.getRoomById(roomId){
+            let topicId = room.roomLastCommentTopicId
+            if let unsyncCommentId = QiscusComment.checkSync(inTopicId: topicId){
+                if checkSync {
+                    if let syncId = QiscusComment.getLastSyncCommentId(topicId, unsyncCommentId: unsyncCommentId){
+                        QiscusCommentClient.shared.syncMessage(inRoom: room, fromComment: syncId)
                     }
                 }else{
                     let comments = QiscusComment.grouppedComment(inTopicId: topicId)
@@ -72,8 +60,20 @@ import Photos
                     self.data = presenters
                 }
             }else{
-                self.commentClient.getRoom(withID: roomId, withMessage: withMessage)
+                let comments = QiscusComment.grouppedComment(inTopicId: topicId)
+                let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
+                Qiscus.uiThread.async {
+                    self.delegate?.dataPresenter(didFinishLoad: presenters, inRoom: room)
+                }
+                if let message = withMessage {
+                    self.commentClient.postMessage(message: message, topicId: room.roomLastCommentTopicId)
+                }
+                self.room = room
+                self.data = presenters
             }
+        }else{
+            self.commentClient.getRoom(withID: roomId, withMessage: withMessage)
+        }
         }
     }
     func loadComments(inRoomWithUsers user:String, optionalData:String? = nil, withMessage:String? = nil, distinctId:String = ""){

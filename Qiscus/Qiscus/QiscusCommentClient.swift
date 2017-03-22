@@ -14,6 +14,7 @@ import SwiftyJSON
 import AVFoundation
 import Photos
 import UserNotifications
+import CocoaMQTT
 
 fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
   switch (lhs, rhs) {
@@ -975,7 +976,7 @@ open class QiscusCommentClient: NSObject {
                 "last_comment_id"  : commentId as AnyObject,
                 "topic_id" : topicId as AnyObject,
                 "token" : qiscus.config.USER_TOKEN as AnyObject,
-                "after":"true" as AnyObject
+                "after" : "true" as AnyObject
             ]
             Qiscus.printLog(text: "sync comment parameters: \n\(parameters)")
             Qiscus.printLog(text: "sync comment url: \n\(loadURL)")
@@ -1012,19 +1013,22 @@ open class QiscusCommentClient: NSObject {
             }
         }
     }
-    // MARK: - Communicate with Server
-    open func syncChat(fromComment commentId:Int64) {
+    open func syncRoom(inRoom room: QiscusRoom, fromComment commentId: Int64, silent:Bool = false) {
+        Qiscus.logicThread.async {
+            let topicId = room.roomLastCommentTopicId
             let manager = Alamofire.SessionManager.default
-            let loadURL = QiscusConfig.SYNC_URL
+            let loadURL = QiscusConfig.LOAD_URL
             let parameters:[String: AnyObject] =  [
                 "last_comment_id"  : commentId as AnyObject,
+                "topic_id" : topicId as AnyObject,
                 "token" : qiscus.config.USER_TOKEN as AnyObject,
+                "after":"true" as AnyObject
             ]
-            Qiscus.printLog(text: "sync chat parameters: \n\(parameters)")
-            Qiscus.printLog(text: "sync chat url: \n\(loadURL)")
+            Qiscus.printLog(text: "sync comment parameters: \n\(parameters)")
+            Qiscus.printLog(text: "sync comment url: \n\(loadURL)")
             Qiscus.apiThread.async {
                 manager.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
-                    Qiscus.printLog(text: "sync chat response: \n\(responseData)")
+                    Qiscus.printLog(text: "sync comment response: \n\(responseData)")
                     if let response = responseData.result.value {
                         let json = JSON(response)
                         let results = json["results"]
@@ -1032,59 +1036,263 @@ open class QiscusCommentClient: NSObject {
                         if results != nil{
                             let comments = json["results"]["comments"].arrayValue
                             if comments.count > 0 {
-                                for newComment in comments {
-                                    let topicId = newComment["topic_id"].intValue
-                                    let email = newComment["email"].stringValue
-                                    let isSaved = QiscusComment.getCommentFromJSON(newComment, topicId: topicId, saved: true)
+                                for newComment in comments.reversed() {
+                                    let notifTopicId = newComment["topic_id"].intValue
+                                    let id = newComment["id"].int64Value
+                                    let roomId = newComment["room_id"].intValue
+                                    let senderName = newComment["username"].stringValue
+                                    let isSaved = QiscusComment.getCommentFromJSON(newComment, topicId: notifTopicId, saved: true)
+                                    let qiscusService = QiscusCommentClient.sharedInstance
                                     
-                                    if isSaved && (email != QiscusMe.sharedInstance.email){
-                                        let roomId = newComment["room_id"].intValue
-                                        let commentId = newComment["room_id"].int64Value
-                                        let userName = newComment["user_name"].stringValue
-                                    
-                                        var message = newComment["message"].stringValue
+                                    if isSaved{
+                                        QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: commentId, roomId: roomId, status: .delivered, withCompletion: {
+                                            if let thisComment = QiscusComment.getComment(withId: commentId) {
+                                                thisComment.updateCommentStatus(.read, email: thisComment.commentSenderEmail)
+                                            }
+                                        })
+                                        let newMessage = QiscusComment.getComment(withId: id)
                                         
-                                        var roomTitle = userName
-                                        if let roomName = newComment["room_name"].string{
-                                            roomTitle = roomName
+                                        if qiscusService.commentDelegate != nil{
+                                            let copyComment = QiscusComment.copyComment(comment: newMessage!)
+                                            let presenter = QiscusCommentPresenter.getPresenter(forComment: copyComment)
+                                            presenter.userFullName = senderName
+                                            Qiscus.uiThread.async {
+                                                qiscusService.delegate?.qiscusService(gotNewMessage: presenter)
+                                            }
                                         }
-                                        if(message.hasPrefix("[file]")){
-                                            message = "send you file"
-                                        }
-                                        if #available(iOS 10.0, *) {
-                                            let content = UNMutableNotificationContent()
-                                            content.title = roomTitle
-                                            content.body = "\(userName): \(message)"
-                                            content.sound = UNNotificationSound.default()
-                                            content.userInfo = ["qiscus-room-id": roomId]
-                                            
-                                            let request = UNNotificationRequest.init(identifier: "QiscusComment-\(commentId)", content: content, trigger: nil)
-                                            let center = UNUserNotificationCenter.current()
-                                            center.add(request, withCompletionHandler: { (error) in
-                                                if error == nil {
-                                                    Qiscus.printLog(text: "Notification added")
-                                                }else{
-                                                    Qiscus.printLog(text: "Notificationerror: \(error)")
+                                        Qiscus.logicThread.async {
+                                            if qiscusService.roomDelegate != nil{
+                                                let copyComment = QiscusComment.copyComment(comment: newMessage!)
+                                                Qiscus.uiThread.async {
+                                                    qiscusService.roomDelegate?.gotNewComment(copyComment)
+                                                    
                                                 }
-                                            })
-                                        } else {
-                                            // Fallback on earlier versions
+                                            }
                                         }
                                     }
                                 }
                             }
-                            
+                            if !silent {
+                                QiscusDataPresenter.shared.loadComments(inRoom: room.roomId, checkSync: false)
+                            }
                         }else if error != nil{
                             Qiscus.printLog(text: "error sync message: \(error)")
-                            
+                            if !silent {
+                                QiscusDataPresenter.shared.loadComments(inRoom: room.roomId, checkSync: false)
+                            }
+                        }
+                    }else{
+                        Qiscus.printLog(text: "error sync message")
+                        if !silent {
+                            QiscusDataPresenter.shared.loadComments(inRoom: room.roomId, checkSync: false)
+                        }
+                    }
+                })
+            }
+        }
+    }
+    // MARK: - Communicate with Server
+    open func syncChat(fromComment commentId:Int64, backgroundFetch:Bool = false) {
+            let manager = Alamofire.SessionManager.default
+            let loadURL = QiscusConfig.SYNC_URL
+            let parameters:[String: AnyObject] =  [
+                "last_received_comment_id"  : commentId as AnyObject,
+                "token" : qiscus.config.USER_TOKEN as AnyObject,
+            ]
+            Qiscus.printLog(text: "sync chat parameters: \n\(parameters)")
+            Qiscus.printLog(text: "sync chat url: \n\(loadURL)")
+            //Qiscus.apiThread.async {
+                manager.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                    Qiscus.printLog(text: "sync chat response: \n\(responseData)")
+                    let state = UIApplication.shared.applicationState
+                    if let response = responseData.result.value {
+                        let json = JSON(response)
+                        let results = json["results"]
+                        let error = json["error"]
+                        let qiscusService = QiscusCommentClient.sharedInstance
+                        if results != nil{
+                            let comments = json["results"]["comments"].arrayValue
+                            if comments.count > 0 {
+                                if state != .active{
+                                    for newComment in comments.reversed() {
+                                        let notifTopicId = newComment["topic_id"].intValue
+                                        let roomId = newComment["room_id"].intValue
+                                        let id = newComment["id"].int64Value
+                                        let senderName = newComment["username"].stringValue
+                                        let roomName = newComment["room_name"].stringValue
+                                        let isSaved = QiscusComment.getCommentFromJSON(newComment, topicId: notifTopicId, saved: true)
+                                        
+                                        if isSaved{
+                                            let newMessage = QiscusComment.getComment(withId: id)
+                                            var notificationMessage = ""
+                                            if newMessage!.commentIsFile {
+                                                if let file = QiscusFile.getCommentFileWithComment(newMessage!){
+                                                    switch file.fileType {
+                                                    case .media:
+                                                        notificationMessage = "Send you picture"
+                                                        break
+                                                    case .document:
+                                                        notificationMessage = "Send you document"
+                                                        break
+                                                    case .video:
+                                                        notificationMessage = "Send you video"
+                                                        break
+                                                    case .audio:
+                                                        notificationMessage = "Send you audio"
+                                                        break
+                                                    default:
+                                                        notificationMessage = "Send you file"
+                                                        break
+                                                    }
+                                                }else{
+                                                    notificationMessage = "Send you file"
+                                                }
+                                            }else{
+                                                notificationMessage = newMessage!.commentText
+                                            }
+                                            if #available(iOS 10.0, *) {
+                                                let content = UNMutableNotificationContent()
+                                                content.title = roomName
+                                                content.body = "\(senderName): \(notificationMessage)"
+                                                content.sound = UNNotificationSound.default()
+                                                content.userInfo = ["qiscus-room-id": roomId]
+                                                
+                                                let request = UNNotificationRequest.init(identifier: "QiscusComment-\(newMessage?.commentId)", content: content, trigger: nil)
+                                                let center = UNUserNotificationCenter.current()
+                                                center.add(request, withCompletionHandler: { (error) in
+                                                    if error == nil {
+                                                        Qiscus.printLog(text: "Notification added")
+                                                    }else{
+                                                        Qiscus.printLog(text: "Notificationerror: \(error)")
+                                                    }
+                                                })
+                                            } else {
+                                                // Fallback on earlier versions
+                                            }
+                                        }
+                                    }
+                                }else{
+                                    Qiscus.logicThread.async {
+                                        for newComment in comments.reversed() {
+                                            let notifTopicId = newComment["topic_id"].intValue
+                                            let roomId = newComment["room_id"].intValue
+                                            let id = newComment["id"].int64Value
+                                            let senderName = newComment["username"].stringValue
+                                            let senderAvatar = newComment["user_avatar_url"].stringValue
+                                            let isSaved = QiscusComment.getCommentFromJSON(newComment, topicId: notifTopicId, saved: true)
+                                            
+                                            if isSaved{
+                                                let newMessage = QiscusComment.getComment(withId: id)
+                                                var notificationMessage = ""
+                                                if newMessage!.commentIsFile {
+                                                    if let file = QiscusFile.getCommentFileWithComment(newMessage!){
+                                                        switch file.fileType {
+                                                        case .media:
+                                                            notificationMessage = "Send you picture"
+                                                            break
+                                                        case .document:
+                                                            notificationMessage = "Send you document"
+                                                            break
+                                                        case .video:
+                                                            notificationMessage = "Send you video"
+                                                            break
+                                                        case .audio:
+                                                            notificationMessage = "Send you audio"
+                                                            break
+                                                        default:
+                                                            notificationMessage = "Send you file"
+                                                            break
+                                                        }
+                                                    }else{
+                                                        notificationMessage = "Send you file"
+                                                    }
+                                                }else{
+                                                    notificationMessage = newMessage!.commentText
+                                                }
+                                                if qiscusService.commentDelegate != nil{
+                                                    let copyComment = QiscusComment.copyComment(comment: newMessage!)
+                                                    let presenter = QiscusCommentPresenter.getPresenter(forComment: copyComment)
+                                                    presenter.userFullName = senderName
+                                                    Qiscus.uiThread.async {
+                                                        qiscusService.delegate?.qiscusService(gotNewMessage: presenter)
+                                                    }
+                                                }
+                                                Qiscus.logicThread.async {
+                                                    if qiscusService.roomDelegate != nil{
+                                                        let copyComment = QiscusComment.copyComment(comment: newMessage!)
+                                                        Qiscus.uiThread.async {
+                                                            qiscusService.roomDelegate?.gotNewComment(copyComment)
+                                                            
+                                                        }
+                                                    }
+                                                }
+                                                var showToast = true
+                                                if QiscusChatVC.sharedInstance.isPresence && QiscusChatVC.sharedInstance.room?.roomLastCommentTopicId == notifTopicId{
+                                                    showToast = false
+                                                    if QiscusChatVC.sharedInstance.room?.roomLastCommentTopicId != notifTopicId{
+                                                        if Qiscus.sharedInstance.config.showToasterMessageInsideChat{
+                                                            showToast = true
+                                                        }
+                                                    }
+                                                }
+                                                if showToast && Qiscus.sharedInstance.config.showToasterMessage{
+                                                    if let window = UIApplication.shared.keyWindow{
+                                                        if let currenRootView = window.rootViewController as? UINavigationController{
+                                                            let viewController = currenRootView.viewControllers[currenRootView.viewControllers.count - 1]
+                                                            Qiscus.uiThread.async {
+                                                                QToasterSwift.toast(target: viewController, text: notificationMessage, title:senderName, iconURL:senderAvatar, iconPlaceHolder:Qiscus.image(named:"avatar"), onTouch: {
+                                                                    if Qiscus.sharedInstance.toastMessageAct == nil{
+                                                                        if Qiscus.sharedInstance.isPushed{
+                                                                            let chatVC = Qiscus.chatView(withRoomId: roomId, title: senderName)
+                                                                            currenRootView.pushViewController(chatVC, animated: true)
+                                                                        }else{
+                                                                            if QiscusChatVC.sharedInstance.isPresence{
+                                                                                QiscusChatVC.sharedInstance.goBack()
+                                                                            }
+                                                                            let activeViewController = currenRootView.viewControllers[currenRootView.viewControllers.count - 1]
+                                                                            Qiscus.chat(withRoomId: roomId, target: activeViewController)
+                                                                        }
+                                                                    }else{
+                                                                        
+                                                                        Qiscus.sharedInstance.toastMessageAct!(roomId, newMessage!)
+                                                                    }
+                                                                    
+                                                                }
+                                                                )
+                                                            }
+                                                        }
+                                                }
+                                            }
+                                            }
+                                        }
+                                    }
+                                    let appName = Bundle.main.infoDictionary![kCFBundleNameKey as String] as! String
+                                    var deviceID = "000"
+                                    if let vendorIdentifier = UIDevice.current.identifierForVendor {
+                                        deviceID = vendorIdentifier.uuidString
+                                    }
+                                    let clientID = "iosMQTT-\(appName)-\(deviceID)-\(QiscusMe.sharedInstance.id)"
+                                    let mqtt = CocoaMQTT(clientID: clientID, host: "mqtt.qiscus.com", port: 1883)
+                                    mqtt.username = ""
+                                    mqtt.password = ""
+                                    mqtt.cleanSession = false
+                                    mqtt.willMessage = CocoaMQTTWill(topic: "u/\(QiscusMe.sharedInstance.email)/s", message: "0")
+                                    mqtt.keepAlive = 60
+                                    mqtt.delegate = Qiscus.shared
+                                    mqtt.connect()
+                                }
+                            }
+                        }else if error != nil{
+                            Qiscus.printLog(text: "error sync message: \(error)")
                         }
                     }else{
                         Qiscus.printLog(text: "error sync message")
                         
                     }
                 })
-            }
+            //}
     }
+    
     open func getListComment(topicId: Int, commentId: Int64, triggerDelegate:Bool = false, loadMore:Bool = false, message:String? = nil){ //
         let manager = Alamofire.SessionManager.default
         var parameters:[String: AnyObject]? = nil

@@ -21,6 +21,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         UINavigationBar.appearance().barTintColor = UIColor.white
         UINavigationBar.appearance().tintColor = UIColor.black
+        UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalMinimum)
         
         if !Qiscus.isLoggedIn{
             goToLoginView()
@@ -72,10 +73,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didRegister notificationSettings: UIUserNotificationSettings) {
         //Qiscus.didRegisterUserNotification()
     }
-    func application(_ application: UIApplication, didReceive notification: UILocalNotification) {
-        Qiscus.didReceive(LocalNotification:notification)
-    }
+
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
+        print("hellooo ...")
        Qiscus.didReceive(RemoteNotification:userInfo)
     }
     func goToChatNavigationView(){
