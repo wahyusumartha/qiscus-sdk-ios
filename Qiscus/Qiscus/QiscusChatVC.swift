@@ -567,6 +567,7 @@ public class QiscusChatVC: UIViewController{
     }
     func goBack() {
         self.isPresence = false
+        self.reset()
         if self.backAction != nil{
             self.backAction!()
         }else{

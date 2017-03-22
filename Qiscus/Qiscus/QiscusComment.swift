@@ -576,16 +576,15 @@ public class QiscusComment: Object {
     }
     public class func newComment(withMessage message:String, inTopicId:Int, showLink:Bool = false)->QiscusComment{
         let comment = QiscusComment()
-        comment.localId = QiscusComment.LastId + 1
-        
         let realm = try! Realm()
         
         let newComment = QiscusComment()
-        newComment.localId = comment.localId
+        
         try! realm.write {
+            newComment.localId = comment.localId
             realm.add(newComment)
         }
-        
+        comment.localId = newComment.localId
         
         let time = Double(Date().timeIntervalSince1970)
         let timeToken = UInt64(time * 10000)
@@ -928,7 +927,6 @@ public class QiscusComment: Object {
         
         if(commentData.count == 0){
             saved = true
-            newComment.localId = QiscusComment.LastId + 1
             newComment.commentId = commentId
             newComment.commentUniqueId = commentUniqueId
             newComment.commentTopicId = topicId
@@ -938,6 +936,7 @@ public class QiscusComment: Object {
             newComment.commentText = data["message"].stringValue
             newComment.showLink = link
             try! realm.write {
+                newComment.localId = QiscusComment.LastId + 1
                 realm.add(newComment)
             }
         }else{
@@ -1032,7 +1031,6 @@ public class QiscusComment: Object {
         
         if(commentData.count == 0){
             saved = true
-            newComment.localId = QiscusComment.LastId + 1
             newComment.commentId = commentId
             newComment.commentUniqueId = commentUniqueId
             newComment.commentTopicId = topicId
@@ -1042,6 +1040,7 @@ public class QiscusComment: Object {
             newComment.commentSenderEmail = data["username_real"].stringValue
             newComment.commentStatusRaw = QiscusCommentStatus.sent.rawValue
             try! realm.write {
+                newComment.localId = QiscusComment.LastId + 1
                 realm.add(newComment)
             }
         }else{
@@ -1412,9 +1411,6 @@ public class QiscusComment: Object {
         }
         let commentData = realm.objects(QiscusComment.self).filter(searchQuery!)
         
-        if(self.localId == 0){
-            self.localId = QiscusComment.LastId + 1
-        }
         if(commentData.count == 0){
             if self.commentIsFile{
                 let fileURL = self.getMediaURL()
@@ -1431,6 +1427,7 @@ public class QiscusComment: Object {
                 self.commentFileId = file!.fileId
             }
             try! realm.write {
+                self.localId = QiscusComment.LastId + 1
                 realm.add(self)
             }
             self.updateCommentCellSize()
