@@ -519,7 +519,7 @@ import CocoaMQTT
     // MARK: - local DB
     class func checkDatabaseMigration(){
         Qiscus.dbThread.async {
-            let currentSchema:UInt64 = 14
+            let currentSchema:UInt64 = 15
             var configuration = Realm.Configuration()
             
             configuration.schemaVersion = currentSchema
