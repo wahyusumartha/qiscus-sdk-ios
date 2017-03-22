@@ -59,6 +59,10 @@ import Photos
                     self.room = room
                     self.data = presenters
                 }
+            }else if checkSync {
+                if let lastComment = QiscusComment.getLastAllComment(){
+                    QiscusCommentClient.shared.syncChatFirst(fromComment: lastComment.commentId, roomId: roomId)
+                }
             }else{
                 let comments = QiscusComment.grouppedComment(inTopicId: topicId)
                 let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)

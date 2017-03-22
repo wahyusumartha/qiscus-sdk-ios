@@ -490,6 +490,11 @@ import CocoaMQTT
     
 
     func applicationDidBecomeActife(){
+        if QiscusChatVC.sharedInstance.isPresence {
+            QiscusChatVC.sharedInstance.goBack()
+            QiscusChatVC.sharedInstance.room = nil
+            QiscusChatVC.sharedInstance.comments = [[QiscusCommentPresenter]]()
+        }
         if Qiscus.isLoggedIn{
             Qiscus.sharedInstance.RealtimeConnect()
         }
@@ -669,8 +674,6 @@ import CocoaMQTT
     }
     
     @objc public class func didReceive(RemoteNotification userInfo:[AnyHashable : Any]){
-        let state = UIApplication.shared.applicationState
-        
         if Qiscus.isLoggedIn{
             if userInfo["qiscus_room_id"] != nil{
                 let roomId = userInfo["qiscus_room_id"] as! Int
@@ -679,9 +682,6 @@ import CocoaMQTT
         }
     }
     @objc public class func notificationAction(roomId: Int){
-        if QiscusChatVC.sharedInstance.isPresence {
-            QiscusChatVC.sharedInstance.goBack()
-        }
         if let window = UIApplication.shared.keyWindow{
             if Qiscus.sharedInstance.notificationAction != nil{
                 let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
@@ -809,6 +809,11 @@ import CocoaMQTT
         }
     }
     func goToBackgroundMode(){
+        if QiscusChatVC.sharedInstance.isPresence {
+            QiscusChatVC.sharedInstance.goBack()
+            QiscusChatVC.sharedInstance.room = nil
+            QiscusChatVC.sharedInstance.comments = [[QiscusCommentPresenter]]()
+        }
         Qiscus.publishUserStatus(offline: true)
     }
     @objc public class func setNotificationAction(onClick action:@escaping ((QiscusChatVC)->Void)){

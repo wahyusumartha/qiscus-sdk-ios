@@ -1092,6 +1092,65 @@ open class QiscusCommentClient: NSObject {
         }
     }
     // MARK: - Communicate with Server
+    open func syncChatFirst(fromComment commentId:Int64, roomId:Int) {
+        let manager = Alamofire.SessionManager.default
+        let loadURL = QiscusConfig.SYNC_URL
+        let parameters:[String: AnyObject] =  [
+            "last_received_comment_id"  : commentId as AnyObject,
+            "token" : qiscus.config.USER_TOKEN as AnyObject,
+            ]
+        Qiscus.printLog(text: "sync chat parameters: \n\(parameters)")
+        Qiscus.printLog(text: "sync chat url: \n\(loadURL)")
+        //Qiscus.apiThread.async {
+        manager.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+            Qiscus.printLog(text: "sync chat response: \n\(responseData)")
+            if let response = responseData.result.value {
+                let json = JSON(response)
+                let results = json["results"]
+                let error = json["error"]
+                let qiscusService = QiscusCommentClient.sharedInstance
+                if results != nil{
+                    let comments = json["results"]["comments"].arrayValue
+                    if comments.count > 0 {
+                        Qiscus.logicThread.async {
+                            for newComment in comments.reversed() {
+                                let notifTopicId = newComment["topic_id"].intValue
+                                let id = newComment["id"].int64Value
+                                let isSaved = QiscusComment.getCommentFromJSON(newComment, topicId: notifTopicId, saved: true)
+                                
+                                if isSaved{
+                                    let newMessage = QiscusComment.getComment(withId: id)
+                                    
+                                    Qiscus.logicThread.async {
+                                        if qiscusService.roomDelegate != nil{
+                                            let copyComment = QiscusComment.copyComment(comment: newMessage!)
+                                            Qiscus.uiThread.async {
+                                                qiscusService.roomDelegate?.gotNewComment(copyComment)
+                                                
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            
+                        }
+                    }
+                    if let serviceDelegate = QiscusCommentClient.shared.delegate {
+                        if let room = QiscusRoom.getRoomById(roomId){
+                            serviceDelegate.qiscusService(didFinishLoadRoom: room)
+                        }
+                    }
+                }else if error != nil{
+                    Qiscus.printLog(text: "error sync message: \(error)")
+                }
+            }else{
+                Qiscus.printLog(text: "error sync message")
+                
+            }
+        })
+        //}
+    }
+
     open func syncChat(fromComment commentId:Int64, backgroundFetch:Bool = false) {
             let manager = Alamofire.SessionManager.default
             let loadURL = QiscusConfig.SYNC_URL
