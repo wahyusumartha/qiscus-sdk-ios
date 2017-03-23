@@ -265,6 +265,7 @@ public class QiscusChatVC: UIViewController{
         let menuItems:[UIMenuItem] = [resendMenuItem,deleteMenuItem]
         UIMenuController.shared.menuItems = menuItems
         setupNavigationTitle()
+        
         //self.navigationItem.setTitleWithSubtitle(title: "Chat Room", subtitle: "chat subtitle")
     }
     override open func viewWillDisappear(_ animated: Bool) {

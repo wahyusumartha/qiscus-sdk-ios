@@ -230,11 +230,9 @@ open class QiscusFile: Object {
         let searchQuery:NSPredicate = NSPredicate(format: "fileId == %d", self.fileId)
         let fileData = realm.objects(QiscusFile.self).filter(searchQuery)
         
-        if(self.fileId == 0){
-            self.fileId = QiscusFile.getLastId() + 1
-        }
         if(fileData.count == 0){
             try! realm.write {
+                self.fileId = QiscusFile.getLastId() + 1
                 realm.add(QiscusFile.copyFile(file: self))
             }
             if self.isUploaded && (self.fileType == .video || self.fileType == .media){

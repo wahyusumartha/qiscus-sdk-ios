@@ -669,7 +669,8 @@ import CocoaMQTT
         }
     }
     
-    @objc public class func didReceive(RemoteNotification userInfo:[AnyHashable : Any]){
+    @objc public class func didReceive(RemoteNotification userInfo:[AnyHashable : Any], completionHandler: @escaping (UIBackgroundFetchResult) -> Void = {_ in}){
+        completionHandler(.newData)
         let state = UIApplication.shared.applicationState
         if Qiscus.isLoggedIn && state != .active{
             if userInfo["qiscus_room_id"] != nil{

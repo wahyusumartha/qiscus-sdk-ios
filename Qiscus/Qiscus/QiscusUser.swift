@@ -303,12 +303,9 @@ open class QiscusUser: Object {
         let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)'")
         let userData = realm.objects(QiscusUser.self).filter(searchQuery)
 
-        if(self.localId == 0){
-            self.localId = getLastId() + 1
-        }
-        
         if(userData.count == 0){
             try! realm.write {
+                self.localId = getLastId() + 1
                 realm.add(self)
             }
             DispatchQueue.main.async {

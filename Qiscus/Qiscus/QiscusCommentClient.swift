@@ -1176,59 +1176,14 @@ open class QiscusCommentClient: NSObject {
                                     for newComment in comments.reversed() {
                                         let notifTopicId = newComment["topic_id"].intValue
                                         let roomId = newComment["room_id"].intValue
-                                        let id = newComment["id"].int64Value
-                                        let senderName = newComment["username"].stringValue
-                                        let roomName = newComment["room_name"].stringValue
-                                        let isSaved = QiscusComment.getCommentFromJSON(newComment, topicId: notifTopicId, saved: true)
+                                        let _ = QiscusComment.getCommentFromJSON(newComment, topicId: notifTopicId, saved: true)
                                         
-                                        if isSaved{
-                                            let newMessage = QiscusComment.getComment(withId: id)
-                                            var notificationMessage = ""
-                                            if newMessage!.commentIsFile {
-                                                if let file = QiscusFile.getCommentFileWithComment(newMessage!){
-                                                    switch file.fileType {
-                                                    case .media:
-                                                        notificationMessage = "Send you picture"
-                                                        break
-                                                    case .document:
-                                                        notificationMessage = "Send you document"
-                                                        break
-                                                    case .video:
-                                                        notificationMessage = "Send you video"
-                                                        break
-                                                    case .audio:
-                                                        notificationMessage = "Send you audio"
-                                                        break
-                                                    default:
-                                                        notificationMessage = "Send you file"
-                                                        break
-                                                    }
-                                                }else{
-                                                    notificationMessage = "Send you file"
-                                                }
-                                            }else{
-                                                notificationMessage = newMessage!.commentText
+                                        QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: commentId, roomId: roomId, status: .delivered, withCompletion: {
+                                            if let thisComment = QiscusComment.getComment(withId: commentId) {
+                                                thisComment.updateCommentStatus(.read, email: thisComment.commentSenderEmail)
                                             }
-                                            if #available(iOS 10.0, *) {
-                                                let content = UNMutableNotificationContent()
-                                                content.title = roomName
-                                                content.body = "\(senderName): \(notificationMessage)"
-                                                content.sound = UNNotificationSound.default()
-                                                content.userInfo = ["qiscus-room-id": roomId]
-                                                
-                                                let request = UNNotificationRequest.init(identifier: "QiscusComment-\(newMessage?.commentId)", content: content, trigger: nil)
-                                                let center = UNUserNotificationCenter.current()
-                                                center.add(request, withCompletionHandler: { (error) in
-                                                    if error == nil {
-                                                        Qiscus.printLog(text: "Notification added")
-                                                    }else{
-                                                        Qiscus.printLog(text: "Notificationerror: \(error)")
-                                                    }
-                                                })
-                                            } else {
-                                                // Fallback on earlier versions
-                                            }
-                                        }
+                                        })
+                                        
                                     }
                                 }else{
                                     Qiscus.logicThread.async {
@@ -1272,8 +1227,10 @@ open class QiscusCommentClient: NSObject {
                                                     let copyComment = QiscusComment.copyComment(comment: newMessage!)
                                                     let presenter = QiscusCommentPresenter.getPresenter(forComment: copyComment)
                                                     presenter.userFullName = senderName
-                                                    Qiscus.uiThread.async {
-                                                        qiscusService.delegate?.qiscusService(gotNewMessage: presenter)
+                                                    if QiscusChatVC.sharedInstance.isPresence && QiscusChatVC.sharedInstance.room?.roomLastCommentTopicId == notifTopicId{
+                                                        Qiscus.uiThread.async {
+                                                            qiscusService.delegate?.qiscusService(gotNewMessage: presenter)
+                                                        }
                                                     }
                                                 }
                                                 Qiscus.logicThread.async {
@@ -1281,7 +1238,6 @@ open class QiscusCommentClient: NSObject {
                                                         let copyComment = QiscusComment.copyComment(comment: newMessage!)
                                                         Qiscus.uiThread.async {
                                                             qiscusService.roomDelegate?.gotNewComment(copyComment)
-                                                            
                                                         }
                                                     }
                                                 }
@@ -1320,25 +1276,11 @@ open class QiscusCommentClient: NSObject {
                                                                 )
                                                             }
                                                         }
+                                                    }
                                                 }
-                                            }
                                             }
                                         }
                                     }
-                                    let appName = Bundle.main.infoDictionary![kCFBundleNameKey as String] as! String
-                                    var deviceID = "000"
-                                    if let vendorIdentifier = UIDevice.current.identifierForVendor {
-                                        deviceID = vendorIdentifier.uuidString
-                                    }
-                                    let clientID = "iosMQTT-\(appName)-\(deviceID)-\(QiscusMe.sharedInstance.id)"
-                                    let mqtt = CocoaMQTT(clientID: clientID, host: "mqtt.qiscus.com", port: 1883)
-                                    mqtt.username = ""
-                                    mqtt.password = ""
-                                    mqtt.cleanSession = false
-                                    mqtt.willMessage = CocoaMQTTWill(topic: "u/\(QiscusMe.sharedInstance.email)/s", message: "0")
-                                    mqtt.keepAlive = 60
-                                    mqtt.delegate = Qiscus.shared
-                                    mqtt.connect()
                                 }
                             }
                         }else if error != nil{

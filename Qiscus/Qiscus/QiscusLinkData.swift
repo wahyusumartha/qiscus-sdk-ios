@@ -211,11 +211,9 @@ open class QiscusLinkData: Object {
             
             let linkData = realm.objects(QiscusLinkData.self).filter(searchQuery)
             
-            if(self.localId == 0){
-                self.localId = QiscusLinkData.LastId + 1
-            }
             if linkData.count == 0{
                 try! realm.write {
+                    self.localId = QiscusLinkData.LastId + 1
                     realm.add(self)
                 }
                 if self.linkImageThumbURL == "" {

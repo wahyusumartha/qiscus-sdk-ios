@@ -146,12 +146,10 @@ open class QiscusTopic: Object {
         
         let searchQuery:NSPredicate = NSPredicate(format: "topicId == %d", self.topicId)
         let topicData = realm.objects(QiscusTopic.self).filter(searchQuery)
-        
-        if(self.localId == 0){
-            self.localId = QiscusTopic.getLastId() + 1
-        }
+
         if(topicData.count == 0){
             try! realm.write {
+                self.localId = QiscusTopic.getLastId() + 1
                 realm.add(self)
             }
         }else{

@@ -109,7 +109,6 @@ open class QiscusParticipant: Object {
         
         if(participantData.count == 0){
             let participant = QiscusParticipant()
-            participant.localId = QiscusParticipant.LastId + 1
             participant.participantRoomId = roomId
             participant.participantEmail = userEmail
             if let room = QiscusRoom.getRoomById(roomId){
@@ -120,6 +119,7 @@ open class QiscusParticipant: Object {
             }
             
             try! realm.write {
+                participant.localId = QiscusParticipant.LastId + 1
                 realm.add(participant)
             }
         }

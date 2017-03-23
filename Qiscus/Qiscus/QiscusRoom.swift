@@ -279,11 +279,9 @@ open class QiscusRoom: Object {
         let searchQuery:NSPredicate = NSPredicate(format: "roomId == %d", self.roomId)
         let roomData = realm.objects(QiscusRoom.self).filter(searchQuery)
         
-        if(self.localId == 0){
-            self.localId = QiscusRoom.getLastId() + 1
-        }
         if(roomData.count == 0){
             try! realm.write {
+                self.localId = QiscusRoom.getLastId() + 1
                 realm.add(self)
             }
             if self.roomAvatarLocalPath == "" {
