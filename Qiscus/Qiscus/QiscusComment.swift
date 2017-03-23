@@ -1067,40 +1067,78 @@ public class QiscusComment: Object {
     
     open class func getCommentFromJSON(_ data: JSON, topicId:Int, saved:Bool) -> Bool{ //
         let comment = QiscusComment()
+        /*
+         {
+         "id": 985,
+         "comment_before_id": 984,
+         "message": "Hello Post 2",
+         "type": "text"
+         "payload": {},
+         "disable_link_preview": false,
+         "email": "f1@gmail.com",
+         "username": "f1",
+         "user_avatar": {
+         "avatar": {
+         "url": "http://imagebucket.com/image.jpg"
+         }
+         },
+         "user_avatar_url": "http://imagebucket.com/image.jpg",
+         "timestamp": "2016-09-06T16:18:50+00:00",
+         "unique_temp_id": "CanBeAnything1234321"
+         }
+         */
         Qiscus.printLog(text: "getCommentFromJSON: \(data)")
-        comment.commentTopicId = topicId
-        comment.commentSenderEmail = data["email"].stringValue
-        comment.commentStatusRaw = QiscusCommentStatus.sent.rawValue
-        comment.commentBeforeId = data["comment_before_id"].int64Value
+        comment.commentId = data["id"].int64Value
+        comment.commentUniqueId = data["unique_temp_id"].stringValue
         
-        var created_at:String = ""
-        var usernameAs:String = ""
-        if(data["message"] != nil){
-            comment.commentText = data["message"].stringValue
-            comment.commentId = data["id"].int64Value
-            usernameAs = data["username"].stringValue
-            created_at = data["timestamp"].stringValue
-            if let uniqueId = data["unique_temp_id"].string {
-                comment.commentUniqueId = uniqueId
-            }else if let randomme = data["randomme"].string {
-                comment.commentUniqueId = randomme
+        var isSaved = false
+        var newComment = QiscusComment()
+        
+        let realm = try! Realm()
+        let searchQuery:NSPredicate?
+        searchQuery = NSPredicate(format: "commentId == \(comment.commentId) OR commentUniqueId == '\(comment.commentUniqueId)'")
+        let commentData = realm.objects(QiscusComment.self).filter(searchQuery!)
+        
+        if commentData.count == 0 {
+            try? realm.write {
+                comment.localId = QiscusComment.LastId + 1
+                realm.add(comment)
             }
+            isSaved = true
+            newComment = QiscusComment.copyComment(comment: comment)
         }else{
-            comment.commentText = data["comment"].stringValue
-            comment.commentId = data["id"].int64Value
-            usernameAs = data["username"].stringValue
-            if let uniqueId = data["unique_temp_id"].string {
-                comment.commentUniqueId = uniqueId
-            }else if let randomme = data["randomme"].string {
-                comment.commentUniqueId = randomme
-            }
-            created_at = data["timestamp"].stringValue
+            newComment = QiscusComment.copyComment(comment: commentData.first!)
         }
-        if let sender = QiscusUser.getUserWithEmail(comment.commentSenderEmail as String){
-            if usernameAs != ""{
-                if sender.userNameAs != usernameAs {
-                    sender.updateUserNameAs(usernameAs)
+        newComment.commentTopicId = topicId
+        newComment.commentSenderEmail = data["email"].stringValue
+        newComment.commentStatusRaw = QiscusCommentStatus.sent.rawValue
+        newComment.commentBeforeId = data["comment_before_id"].int64Value
+        newComment.commentText = data["message"].stringValue
+        
+        let created_at = data["timestamp"].stringValue
+        let sender = data["username"].stringValue
+        
+        if isSaved {
+            if newComment.commentIsFile {
+                let fileURL = newComment.getMediaURL()
+                var file = QiscusFile.getCommentFileWithURL(fileURL)
+                
+                if(file == nil){
+                    file = QiscusFile()
                 }
+                file?.updateURL(fileURL)
+                file?.updateCommentId(newComment.commentId)
+                file?.saveCommentFile()
+                
+                file = QiscusFile.getCommentFileWithComment(newComment)
+                newComment.commentFileId = file!.fileId
+            }
+        }
+
+        if let user = QiscusUser.getUserWithEmail(newComment.commentSenderEmail){
+            user.updateLastSeen(newComment.commentCreatedAt)
+            if user.userNameAs != sender {
+                user.updateUserNameAs(sender)
             }
         }
         let dateTimeArr = created_at.characters.split(separator: "T")
@@ -1108,8 +1146,6 @@ public class QiscusComment: Object {
         let timeArr = String(dateTimeArr.last!).characters.split(separator: "Z")
         let timeString = String(timeArr.first!)
         let dateTimeString = "\(dateString) \(timeString) +0000"
-        Qiscus.printLog(text: "dateTimeString: \(dateTimeString)")
-        Qiscus.printLog(text: "commentid: \(comment.commentId)")
         
         let rawDateFormatter = DateFormatter()
         rawDateFormatter.locale = Locale(identifier: "en_US_POSIX")
@@ -1119,22 +1155,21 @@ public class QiscusComment: Object {
         
         if chatDate != nil{
             let timetoken = Double(chatDate!.timeIntervalSince1970)
-            comment.commentCreatedAt = timetoken
+            newComment.commentCreatedAt = timetoken
         }
         
-        if comment.commentType == QiscusCommentType.text && comment.commentLink != nil{
+        if newComment.commentType == QiscusCommentType.text && newComment.commentLink != nil{
             if let disableLink = data["disable_link_preview"].bool{
-                comment.showLink = !disableLink
+                newComment.showLink = !disableLink
             }else{
-                comment.showLink = true
+                newComment.showLink = true
             }
         }
         
-        if let participant = QiscusParticipant.getParticipant(withEmail: comment.commentSenderEmail, roomId: comment.roomId){
-            participant.updateLastReadCommentId(commentId: comment.commentId)
+        if let participant = QiscusParticipant.getParticipant(withEmail: newComment.commentSenderEmail, roomId: newComment.roomId){
+            participant.updateLastReadCommentId(commentId: newComment.commentId)
         }
         
-        let isSaved = comment.saveComment(true)
         return isSaved
     }
     
