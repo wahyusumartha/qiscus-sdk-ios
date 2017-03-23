@@ -581,7 +581,7 @@ public class QiscusComment: Object {
         let newComment = QiscusComment()
         
         try! realm.write {
-            newComment.localId = comment.localId
+            newComment.localId = QiscusComment.LastId + 1
             realm.add(newComment)
         }
         comment.localId = newComment.localId

@@ -490,11 +490,7 @@ import CocoaMQTT
     
 
     func applicationDidBecomeActife(){
-        if QiscusChatVC.sharedInstance.isPresence {
-            QiscusChatVC.sharedInstance.goBack()
-            QiscusChatVC.sharedInstance.room = nil
-            QiscusChatVC.sharedInstance.comments = [[QiscusCommentPresenter]]()
-        }
+
         if Qiscus.isLoggedIn{
             Qiscus.sharedInstance.RealtimeConnect()
         }
@@ -674,7 +670,8 @@ import CocoaMQTT
     }
     
     @objc public class func didReceive(RemoteNotification userInfo:[AnyHashable : Any]){
-        if Qiscus.isLoggedIn{
+        let state = UIApplication.shared.applicationState
+        if Qiscus.isLoggedIn && state != .active{
             if userInfo["qiscus_room_id"] != nil{
                 let roomId = userInfo["qiscus_room_id"] as! Int
                 Qiscus.notificationAction(roomId: roomId)
