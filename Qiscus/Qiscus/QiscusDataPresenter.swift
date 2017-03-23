@@ -391,7 +391,7 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
     }
     func qiscusService(didFinishLoadMore inRoom: QiscusRoom, dataCount: Int, from commentId:Int64) {
         let chatRoom = QiscusRoom.copyRoom(room: inRoom)
-        if chatRoom.roomId == room.roomId{
+        if QiscusChatVC.sharedInstance.isPresence && (data.topicId == QiscusChatVC.sharedInstance.room.roomLastCommentTopicId) {
             Qiscus.logicThread.async {
                 var newData = [[QiscusCommentPresenter]]()
                 if dataCount > 0 {
@@ -420,7 +420,7 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
     }
     func qiscusService(didChangeContent data:QiscusCommentPresenter){
         Qiscus.logicThread.async {
-            if data.topicId == self.room.roomLastCommentTopicId {
+            if QiscusChatVC.sharedInstance.isPresence && (data.topicId == QiscusChatVC.sharedInstance.room.roomLastCommentTopicId) {
                 Qiscus.uiThread.async {
                     self.delegate?.dataPresenter(didChangeContent: data, inRoom: self.room)
                 }
@@ -430,7 +430,7 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
     func qiscusService(didFailLoadMore inRoom: QiscusRoom) {
         let chatRoom = QiscusRoom.copyRoom(room: inRoom)
         Qiscus.logicThread.async {
-            if chatRoom.roomLastCommentTopicId == self.room.roomLastCommentTopicId {
+            if QiscusChatVC.sharedInstance.isPresence && (data.topicId == QiscusChatVC.sharedInstance.room.roomLastCommentTopicId) {
                 Qiscus.uiThread.async {
                     self.delegate?.dataPresenter(didFailLoadMore: chatRoom)
                 }
@@ -441,7 +441,7 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
         self.delegate?.dataPresenter(didChangeUser: user, onUserWithEmail: email)
     }
     func qiscusService(didChangeRoom room: QiscusRoom, onRoomWithId roomId: Int) {
-        if roomId == self.room.roomId{
+        if QiscusChatVC.sharedInstance.isPresence && (data.topicId == QiscusChatVC.sharedInstance.room.roomLastCommentTopicId) {
             self.delegate?.dataPresenter(didChangeRoom: room, onRoomWithId: roomId)
         }
     }

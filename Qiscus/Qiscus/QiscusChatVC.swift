@@ -1105,7 +1105,6 @@ public class QiscusChatVC: UIViewController{
         if audioPlayer != nil{
             audioPlayer?.stop()
         }
-        self.comments = [[QiscusCommentPresenter]]()
         self.backAction = nil
         self.titleAction = {}
         self.unlockAction = {}
@@ -1331,22 +1330,25 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
     }
     public func dataPresenter(didChangeContent data: QiscusCommentPresenter, inRoom: QiscusRoom) {
         Qiscus.logicThread.async {
-            if let indexPath = data.commentIndexPath{
-                if indexPath.section < self.comments.count{
-                    if indexPath.row < self.comments[indexPath.section].count {
-                        self.comments[indexPath.section][indexPath.row] = data
-                        
-                        if data.isDownloading {
-                            let percentage = Int(data.downloadProgress * 100)
+            if self.room?.roomId == inRoom.roomId{
+                if let indexPath = data.commentIndexPath{
+                    if indexPath.section < self.comments.count{
+                        if indexPath.row < self.comments[indexPath.section].count {
+                            self.comments[indexPath.section][indexPath.row] = data
                             
-                            if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
-                                Qiscus.uiThread.async {
-                                    cell.downloadingMedia(withPercentage: percentage)
+                            if data.isDownloading {
+                                let percentage = Int(data.downloadProgress * 100)
+                                
+                                if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
+                                    Qiscus.uiThread.async {
+                                        cell.downloadingMedia(withPercentage: percentage)
+                                    }
                                 }
-                            }
-                        }else{
-                            Qiscus.uiThread.async {
-                                self.collectionView.reloadItems(at: [indexPath])
+                            }else{
+                                Qiscus.uiThread.async {
+                                    self.comments[indexPath.section][indexPath.row] = data
+                                    self.collectionView.reloadItems(at: [indexPath])
+                                }
                             }
                         }
                     }
