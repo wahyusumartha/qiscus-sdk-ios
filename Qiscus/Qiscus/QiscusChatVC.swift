@@ -1332,20 +1332,18 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         Qiscus.logicThread.async {
             if self.room?.roomId == inRoom.roomId{
                 if let indexPath = data.commentIndexPath{
-                    if indexPath.section < self.comments.count{
-                        if indexPath.row < self.comments[indexPath.section].count {
-                            self.comments[indexPath.section][indexPath.row] = data
-                            
-                            if data.isDownloading {
-                                let percentage = Int(data.downloadProgress * 100)
+                    Qiscus.uiThread.async {
+                        if indexPath.section < self.comments.count{
+                            if indexPath.row < self.comments[indexPath.section].count {
+                                self.comments[indexPath.section][indexPath.row] = data
                                 
-                                if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
-                                    Qiscus.uiThread.async {
+                                if data.isDownloading {
+                                    let percentage = Int(data.downloadProgress * 100)
+                                    
+                                    if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
                                         cell.downloadingMedia(withPercentage: percentage)
                                     }
-                                }
-                            }else{
-                                Qiscus.uiThread.async {
+                                }else{
                                     self.comments[indexPath.section][indexPath.row] = data
                                     self.collectionView.reloadItems(at: [indexPath])
                                 }
