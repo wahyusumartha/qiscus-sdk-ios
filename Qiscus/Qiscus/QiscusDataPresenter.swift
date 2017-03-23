@@ -430,7 +430,7 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
     func qiscusService(didFailLoadMore inRoom: QiscusRoom) {
         let chatRoom = QiscusRoom.copyRoom(room: inRoom)
         Qiscus.logicThread.async {
-            if QiscusChatVC.sharedInstance.isPresence && (data.topicId == QiscusChatVC.sharedInstance.room.roomLastCommentTopicId) {
+            if QiscusChatVC.sharedInstance.isPresence && (data.topicId == QiscusChatVC.sharedInstance.room?.roomLastCommentTopicId) {
                 Qiscus.uiThread.async {
                     self.delegate?.dataPresenter(didFailLoadMore: chatRoom)
                 }
@@ -441,7 +441,7 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
         self.delegate?.dataPresenter(didChangeUser: user, onUserWithEmail: email)
     }
     func qiscusService(didChangeRoom room: QiscusRoom, onRoomWithId roomId: Int) {
-        if QiscusChatVC.sharedInstance.isPresence && (data.topicId == QiscusChatVC.sharedInstance.room.roomLastCommentTopicId) {
+        if QiscusChatVC.sharedInstance.isPresence && (data.topicId == QiscusChatVC.sharedInstance.room?.roomLastCommentTopicId) {
             self.delegate?.dataPresenter(didChangeRoom: room, onRoomWithId: roomId)
         }
     }
