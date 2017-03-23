@@ -121,13 +121,14 @@ import CocoaMQTT
     }
     
     @objc public class func clear(){
+        Qiscus.publishUserStatus(offline: true)
+        Qiscus.shared.mqtt?.disconnect()
         QiscusMe.clear()
         let realm = try! Realm()
         try! realm.write {
             realm.deleteAll()
         }
         Qiscus.deleteAllFiles()
-        Qiscus.publishUserStatus(offline: true)
     }
     
     // need Documentation
