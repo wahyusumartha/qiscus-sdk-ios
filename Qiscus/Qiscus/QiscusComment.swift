@@ -917,28 +917,29 @@ public class QiscusComment: Object {
             link = !disableLink
         }
         
+        var saved = false
+        var newComment = QiscusComment()
+        newComment.commentId = commentId
+        newComment.commentUniqueId = commentUniqueId
+        
         let realm = try! Realm()
         let searchQuery:NSPredicate?
         searchQuery = NSPredicate(format: "commentId == \(commentId) OR commentUniqueId == '\(commentUniqueId)'")
         let commentData = realm.objects(QiscusComment.self).filter(searchQuery!)
         
-        var saved = false
-        var newComment = QiscusComment()
-        
         if(commentData.count == 0){
-            saved = true
             try! realm.write {
                 newComment.localId = QiscusComment.LastId + 1
                 realm.add(newComment)
             }
-            newComment.commentId = commentId
-            newComment.commentUniqueId = commentUniqueId
+            newComment = QiscusComment.copyComment(comment: newComment)
             newComment.commentTopicId = topicId
             newComment.commentCreatedAt = commentCreatedAt
             newComment.commentSenderEmail = data["email"].stringValue
             newComment.commentStatusRaw = QiscusCommentStatus.sent.rawValue
             newComment.commentText = data["message"].stringValue
             newComment.showLink = link
+            saved = true
         }else{
             newComment = QiscusComment.copyComment(comment: commentData.first!)
         }
@@ -1067,26 +1068,7 @@ public class QiscusComment: Object {
     
     open class func getCommentFromJSON(_ data: JSON, topicId:Int, saved:Bool) -> Bool{ //
         let comment = QiscusComment()
-        /*
-         {
-         "id": 985,
-         "comment_before_id": 984,
-         "message": "Hello Post 2",
-         "type": "text"
-         "payload": {},
-         "disable_link_preview": false,
-         "email": "f1@gmail.com",
-         "username": "f1",
-         "user_avatar": {
-         "avatar": {
-         "url": "http://imagebucket.com/image.jpg"
-         }
-         },
-         "user_avatar_url": "http://imagebucket.com/image.jpg",
-         "timestamp": "2016-09-06T16:18:50+00:00",
-         "unique_temp_id": "CanBeAnything1234321"
-         }
-         */
+
         Qiscus.printLog(text: "getCommentFromJSON: \(data)")
         comment.commentId = data["id"].int64Value
         comment.commentUniqueId = data["unique_temp_id"].stringValue
