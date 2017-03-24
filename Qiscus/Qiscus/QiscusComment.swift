@@ -642,8 +642,8 @@ public class QiscusComment: Object {
     public class func checkSync(inTopicId topicId: Int)->Int64?{
         let realm = try! Realm()
         
-        let sortProperties = [SortDescriptor(property: "commentCreatedAt", ascending: true)]
-        let searchQuery:NSPredicate = NSPredicate(format: "commentTopicId == \(topicId)")
+        let sortProperties = [SortDescriptor(property: "commentId", ascending: true)]
+        let searchQuery:NSPredicate = NSPredicate(format: "commentTopicId == \(topicId) AND commentId != 0")
         
         let commentData = realm.objects(QiscusComment.self).filter(searchQuery).sorted(by: sortProperties)
         
