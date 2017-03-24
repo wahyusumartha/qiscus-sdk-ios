@@ -1009,7 +1009,11 @@ open class QiscusCommentClient: NSObject {
                                     comment.commentSenderEmail = email
                                     comment.commentTopicId = topicId
                                     comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue / 1000)
-                                    comment.updateCommentStatus(.delivered, email: email)
+                                    comment.updateCommentStatus(.sent)
+                                    
+                                    if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
+                                        participant.updateLastReadCommentId(commentId: comment.commentId)
+                                    }
                                     
                                     if let user = QiscusUser.getUserWithEmail(email) {
                                         user.updateUserAvatarURL(newComment["user_avatar_url"].stringValue)
@@ -1231,7 +1235,10 @@ open class QiscusCommentClient: NSObject {
                                         comment.commentSenderEmail = email
                                         comment.commentTopicId = topicId
                                         comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue / 1000)
-                                        comment.updateCommentStatus(.delivered, email: email)
+                                        comment.updateCommentStatus(.sent)
+                                        if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
+                                            participant.updateLastReadCommentId(commentId: comment.commentId)
+                                        }
                                         
                                         if let user = QiscusUser.getUserWithEmail(email) {
                                             var userChanged = false
@@ -1428,7 +1435,10 @@ open class QiscusCommentClient: NSObject {
                         comment.commentSenderEmail = email
                         comment.commentTopicId = topicId
                         comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue / 1000)
-                        comment.updateCommentStatus(.delivered, email: email)
+                        
+                        if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
+                            participant.updateLastReadCommentId(commentId: comment.commentId)
+                        }
                     }
                     
                     if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
@@ -1651,7 +1661,11 @@ open class QiscusCommentClient: NSObject {
                         comment.commentTopicId = topicId
                         comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue / 1000)
                         
-                        comment.updateCommentStatus(.delivered, email: email)
+                        comment.updateCommentStatus(.sent)
+                        if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
+                            participant.updateLastReadCommentId(commentId: comment.commentId)
+                        }
+                        
                     }
                     
                     if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
@@ -1777,6 +1791,10 @@ open class QiscusCommentClient: NSObject {
                             let isSaved = QiscusComment.getCommentFromJSON(comment, topicId: topicId, saved: true)
                             if let thisComment =  QiscusComment.getComment(withId: QiscusComment.getCommentIdFromJSON(comment)){
                                 thisComment.updateCommentStatus(QiscusCommentStatus.sent)
+                                thisComment.updateCommentStatus(.sent)
+                                if let participant = QiscusParticipant.getParticipant(withEmail: thisComment.commentSenderEmail, roomId: room.roomId){
+                                    participant.updateLastReadCommentId(commentId: thisComment.commentId)
+                                }
                                 if isSaved {
                                     newMessageCount += 1
                                     newComments.insert(thisComment, at: 0)
