@@ -43,25 +43,8 @@ import Photos
             if let room = QiscusRoom.getRoomById(roomId){
                 let topicId = room.roomLastCommentTopicId
                 if let unsyncCommentId = QiscusComment.checkSync(inTopicId: topicId){
-                    if checkSync {
-                        if let syncId = QiscusComment.getLastSyncCommentId(topicId, unsyncCommentId: unsyncCommentId){
-                            QiscusCommentClient.shared.syncMessage(inRoom: room, fromComment: syncId)
-                        }
-                    }else{
-                        let comments = QiscusComment.grouppedComment(inTopicId: topicId)
-                        let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
-                        Qiscus.uiThread.async {
-                            self.delegate?.dataPresenter(didFinishLoad: presenters, inRoom: room)
-                        }
-                        if let message = withMessage {
-                            self.commentClient.postMessage(message: message, topicId: room.roomLastCommentTopicId)
-                        }
-                        self.room = room
-                        self.data = presenters
-                    }
-                }else if checkSync {
-                    if let lastComment = QiscusComment.getLastAllComment(){
-                        QiscusCommentClient.shared.syncChatFirst(fromComment: lastComment.commentId, roomId: room.roomId)
+                    if let syncId = QiscusComment.getLastSyncCommentId(topicId, unsyncCommentId: unsyncCommentId){
+                        QiscusCommentClient.shared.syncMessage(inRoom: room, fromComment: syncId)
                     }
                 }else{
                     let comments = QiscusComment.grouppedComment(inTopicId: topicId)
@@ -72,8 +55,6 @@ import Photos
                     if let message = withMessage {
                         self.commentClient.postMessage(message: message, topicId: room.roomLastCommentTopicId)
                     }
-                    self.room = room
-                    self.data = presenters
                 }
             }else{
                 self.commentClient.getRoom(withID: roomId, withMessage: withMessage)
@@ -97,10 +78,7 @@ import Photos
                     if let message = withMessage {
                         self.commentClient.postMessage(message: message, topicId: room.roomLastCommentTopicId)
                     }
-                    self.room = room
-                    self.data = presenters
                 }
-                
             }else{
                 self.commentClient.getListComment(withUsers: [user], distincId: distinctId, optionalData:optionalData, withMessage: withMessage)
             }

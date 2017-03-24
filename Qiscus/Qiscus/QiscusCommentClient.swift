@@ -991,7 +991,40 @@ open class QiscusCommentClient: NSObject {
                             let comments = json["results"]["comments"].arrayValue
                             if comments.count > 0 {
                                 for newComment in comments {
-                                    let _ = QiscusComment.getCommentFromJSON(newComment, topicId: topicId, saved: true)
+                                    /*
+                                    {
+                                        "type": "text"
+                                        "payload": {},
+                                        "username": "f1",
+                                        "user_avatar": {
+                                            "avatar": {
+                                                "url": "http://imagebucket.com/image.jpg"
+                                            }
+                                        },
+                                        "user_avatar_url": "http://imagebucket.com/image.jpg",
+                                        "timestamp": "2016-09-06T16:18:50+00:00",
+                                        "unique_temp_id": "CanBeAnything1234321"
+                                    }
+                                    */
+                                    let id = newComment["id"].int64Value
+                                    let uniqueId = newComment["unique_temp_id"].stringValue
+                                    var comment = QiscusComment()
+                                    if let old = QiscusComment.comment(withId:id, andUniqueId: uniqueId){
+                                        comment = old
+                                    }else{
+                                        comment = QiscusComment.newComment(withId: id, andUniqueId: uniqueId)
+                                    }
+                                    let email = newComment["email"].stringValue
+                                    comment.commentText = newComment["message"].stringValue
+                                    comment.commentBeforeId = newComment["comment_before_id"].stringValue
+                                    comment.showLink = newComment["disable_link_preview"].boolValue
+                                    comment.commentSenderEmail = email
+                                    comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue / 1000)
+                                    
+                                    if let user = QiscusUser.getUserWithEmail(email) {
+                                        user.updateUserAvatarURL(newComment["user_avatar_url"].stringValue)
+                                        user.updateUserFullName(newComment["username"].stringValue)
+                                    }
                                 }
                             }
                             if !silent {

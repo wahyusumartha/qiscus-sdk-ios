@@ -483,6 +483,36 @@ public class QiscusComment: Object {
         newComment.commentLinkPreviewed = comment.commentLinkPreviewed
         return newComment
     }
+    class func newComment(withId commentId:Int64, andUniqueId uniqueId:String)->QiscusComment{
+        let comment = QiscusComment()
+        comment.commentId = commentId
+        comment.commentUniqueId = uniqueId
+        
+        let realm = try! Realm()
+        
+        try! realm.write {
+            comment.localId = QiscusComment.LastId + 1
+            realm.add(comment)
+        }
+        return QiscusComment.copyComment(comment: comment)
+    }
+    public class func comment(withId commentId:Int64, andUniqueId uniqueId:String? = nil)->QiscusComment?{
+        let realm = try! Realm()
+        let searchQuery:NSPredicate?
+        var query = "commentId == \(commentId)"
+        if uniqueId != nil {
+            query = "\(query) OR commentUniqueId == '\(uniqueId!)'"
+        }
+        searchQuery = NSPredicate(format: query)
+        let commentData = realm.objects(QiscusComment.self).filter(searchQuery!)
+        
+        if commentData.count == 0 {
+            return nil
+        }else{
+            return QiscusComment.copyComment(comment: commentData.first)
+        }
+    }
+    
     open class func getLastComment()->QiscusComment?{
         let realm = try! Realm()
         let searchQuery = NSPredicate(format: "commentStatusRaw != %d && commentStatusRaw != %d",QiscusCommentStatus.sending.rawValue,QiscusCommentStatus.failed.rawValue)
