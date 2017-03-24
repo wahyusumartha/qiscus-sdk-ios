@@ -1436,6 +1436,7 @@ open class QiscusCommentClient: NSObject {
                         comment.commentTopicId = topicId
                         comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue / 1000)
                         
+                        comment.updateCommentStatus(.sent)
                         if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
                             participant.updateLastReadCommentId(commentId: comment.commentId)
                         }
