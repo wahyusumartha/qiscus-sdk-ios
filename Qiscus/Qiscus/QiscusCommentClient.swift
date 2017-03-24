@@ -1008,7 +1008,7 @@ open class QiscusCommentClient: NSObject {
                                     comment.showLink = !(newComment["disable_link_preview"].boolValue)
                                     comment.commentSenderEmail = email
                                     comment.commentTopicId = topicId
-                                    comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue / 1000)
+                                    comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue)
                                     comment.updateCommentStatus(.sent)
                                     
                                     if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
@@ -1234,7 +1234,7 @@ open class QiscusCommentClient: NSObject {
                                         comment.showLink = !(newComment["disable_link_preview"].boolValue)
                                         comment.commentSenderEmail = email
                                         comment.commentTopicId = topicId
-                                        comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue / 1000)
+                                        comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue)
                                         comment.updateCommentStatus(.sent)
                                         if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: roomId){
                                             participant.updateLastReadCommentId(commentId: comment.commentId)
@@ -1434,7 +1434,8 @@ open class QiscusCommentClient: NSObject {
                         comment.showLink = !(payload["disable_link_preview"].boolValue)
                         comment.commentSenderEmail = email
                         comment.commentTopicId = topicId
-                        comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue / 1000)
+                        
+                        comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)
                         
                         comment.updateCommentStatus(.sent)
                         if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
@@ -1660,7 +1661,14 @@ open class QiscusCommentClient: NSObject {
                         comment.showLink = !(payload["disable_link_preview"].boolValue)
                         comment.commentSenderEmail = email
                         comment.commentTopicId = topicId
-                        comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue / 1000)
+                        let timetoken = Double(payload["unix_timestamp"].doubleValue)
+                        let date = Date(timeIntervalSince1970: timetoken)
+                        let dateFormatter = DateFormatter()
+                        dateFormatter.dateFormat = "d MMMM yyyy, h:mm a"
+                        let dateString = dateFormatter.string(from: date)
+                        
+                        print("comment dateTime: \(dateString)")
+                        comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)
                         
                         comment.updateCommentStatus(.sent)
                         if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){

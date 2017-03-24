@@ -897,7 +897,7 @@ extension Qiscus:CocoaMQTTDelegate{
                             comment.commentText = json["message"].stringValue
                             comment.commentSenderEmail = email
                             comment.showLink = !(json["disable_link_preview"].boolValue)
-                            comment.commentCreatedAt = Double(json["unix_timestamp"].doubleValue / 1000)
+                            comment.commentCreatedAt = Double(json["unix_timestamp"].doubleValue)
                             comment.commentBeforeId = commentBeforeId
                             comment.commentTopicId = notifTopicId
                             
