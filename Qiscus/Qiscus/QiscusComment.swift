@@ -509,7 +509,7 @@ public class QiscusComment: Object {
         if commentData.count == 0 {
             return nil
         }else{
-            return QiscusComment.copyComment(comment: commentData.first)
+            return QiscusComment.copyComment(comment: commentData.first!)
         }
     }
     

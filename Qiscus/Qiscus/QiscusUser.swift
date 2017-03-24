@@ -266,10 +266,6 @@ open class QiscusUser: Object {
             try! realm.write {
                 user.userFullName = fullName
             }
-            if let presenterDelegate = QiscusDataPresenter.shared.delegate {
-                let copyUser = QiscusUser.copyUser(user: user)
-                presenterDelegate.dataPresenter(didChangeUser: copyUser, onUserWithEmail: copyUser.userEmail)
-            }
         }
     }
     open func updateUserAvatarURL(_ avatarURL: String){
