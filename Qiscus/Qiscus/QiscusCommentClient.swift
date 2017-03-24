@@ -1009,6 +1009,7 @@ open class QiscusCommentClient: NSObject {
                                     comment.commentSenderEmail = email
                                     comment.commentTopicId = topicId
                                     comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue / 1000)
+                                    comment.updateCommentStatus(.delivered, email: email)
                                     
                                     if let user = QiscusUser.getUserWithEmail(email) {
                                         user.updateUserAvatarURL(newComment["user_avatar_url"].stringValue)
@@ -1230,6 +1231,7 @@ open class QiscusCommentClient: NSObject {
                                         comment.commentSenderEmail = email
                                         comment.commentTopicId = topicId
                                         comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue / 1000)
+                                        comment.updateCommentStatus(.delivered, email: email)
                                         
                                         if let user = QiscusUser.getUserWithEmail(email) {
                                             var userChanged = false
@@ -1426,6 +1428,7 @@ open class QiscusCommentClient: NSObject {
                         comment.commentSenderEmail = email
                         comment.commentTopicId = topicId
                         comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue / 1000)
+                        comment.updateCommentStatus(.delivered, email: email)
                     }
                     
                     if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
@@ -1647,6 +1650,8 @@ open class QiscusCommentClient: NSObject {
                         comment.commentSenderEmail = email
                         comment.commentTopicId = topicId
                         comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue / 1000)
+                        
+                        comment.updateCommentStatus(.delivered, email: email)
                     }
                     
                     if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
