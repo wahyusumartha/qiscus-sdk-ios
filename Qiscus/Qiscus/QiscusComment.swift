@@ -30,13 +30,11 @@ public class QiscusComment: Object {
         didSet{
             let id : Int64 = self.localId
             let value = self.commentId
-            Qiscus.dbThread.async {
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
-                    if savedComment.commentId != value{
-                        let realm = try! Realm()
-                        try! realm.write {
-                            savedComment.commentId = value
-                        }
+            if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if savedComment.commentId != value{
+                    let realm = try! Realm()
+                    try! realm.write {
+                        savedComment.commentId = value
                     }
                 }
             }
@@ -46,13 +44,11 @@ public class QiscusComment: Object {
         didSet{
             let id : Int64 = self.localId
             let value = self.commentText
-            Qiscus.dbThread.async {
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
-                    if savedComment.commentText != value{
-                        let realm = try! Realm()
-                        try! realm.write {
-                            savedComment.commentText = value
-                        }
+            if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if savedComment.commentText != value{
+                    let realm = try! Realm()
+                    try! realm.write {
+                        savedComment.commentText = value
                     }
                 }
             }
@@ -63,13 +59,11 @@ public class QiscusComment: Object {
         didSet{
             let id : Int64 = self.localId
             let value = self.commentCreatedAt
-            Qiscus.dbThread.async {
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
-                    if savedComment.commentCreatedAt != value{
-                        let realm = try! Realm()
-                        try! realm.write {
-                            savedComment.commentCreatedAt = value
-                        }
+            if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if savedComment.commentCreatedAt != value{
+                    let realm = try! Realm()
+                    try! realm.write {
+                        savedComment.commentCreatedAt = value
                     }
                 }
             }
@@ -79,13 +73,11 @@ public class QiscusComment: Object {
         didSet{
             let id : Int64 = self.localId
             let value = self.commentUniqueId
-            Qiscus.dbThread.async {
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
-                    if savedComment.commentUniqueId != value{
-                        let realm = try! Realm()
-                        try! realm.write {
-                            savedComment.commentUniqueId = value
-                        }
+            if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if savedComment.commentUniqueId != value{
+                    let realm = try! Realm()
+                    try! realm.write {
+                        savedComment.commentUniqueId = value
                     }
                 }
             }
@@ -95,13 +87,11 @@ public class QiscusComment: Object {
         didSet{
             let id : Int64 = self.localId
             let value = self.commentTopicId
-            Qiscus.dbThread.async {
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
-                    if savedComment.commentTopicId != value{
-                        let realm = try! Realm()
-                        try! realm.write {
-                            savedComment.commentTopicId = value
-                        }
+            if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if savedComment.commentTopicId != value{
+                    let realm = try! Realm()
+                    try! realm.write {
+                        savedComment.commentTopicId = value
                     }
                 }
             }
@@ -111,13 +101,11 @@ public class QiscusComment: Object {
         didSet{
             let id : Int64 = self.localId
             let value = self.commentSenderEmail
-            Qiscus.dbThread.async {
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
-                    if savedComment.commentSenderEmail != value{
-                        let realm = try! Realm()
-                        try! realm.write {
-                            savedComment.commentSenderEmail = value
-                        }
+            if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if savedComment.commentSenderEmail != value{
+                    let realm = try! Realm()
+                    try! realm.write {
+                        savedComment.commentSenderEmail = value
                     }
                 }
             }
@@ -127,17 +115,15 @@ public class QiscusComment: Object {
         didSet{
             let id : Int64 = self.localId
             let value = self.commentFileId
-            Qiscus.dbThread.async {
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
-                    if savedComment.commentFileId != value{
-                        let realm = try! Realm()
-                        try! realm.write {
-                            savedComment.commentFileId = value
-                        }
+            if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if savedComment.commentFileId != value{
+                    let realm = try! Realm()
+                    try! realm.write {
+                        savedComment.commentFileId = value
                     }
                 }
             }
-        }
+    }
     }
     open dynamic var commentStatusRaw:Int = QiscusCommentStatus.sending.rawValue {
         didSet{
@@ -165,13 +151,11 @@ public class QiscusComment: Object {
         didSet{
             let id : Int64 = self.localId
             let value = self.commentIsSynced
-            Qiscus.dbThread.async {
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
-                    if savedComment.commentIsSynced != value{
-                        let realm = try! Realm()
-                        try! realm.write {
-                            savedComment.commentIsSynced = value
-                        }
+            if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if savedComment.commentIsSynced != value{
+                    let realm = try! Realm()
+                    try! realm.write {
+                        savedComment.commentIsSynced = value
                     }
                 }
             }
@@ -182,13 +166,11 @@ public class QiscusComment: Object {
             let id : Int64 = self.localId
             let value = self.commentBeforeId
             
-            Qiscus.dbThread.async {
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
-                    if savedComment.commentBeforeId != value{
-                        let realm = try! Realm()
-                        try! realm.write {
-                            savedComment.commentBeforeId = value
-                        }
+            if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if savedComment.commentBeforeId != value{
+                    let realm = try! Realm()
+                    try! realm.write {
+                        savedComment.commentBeforeId = value
                     }
                 }
             }
@@ -198,13 +180,11 @@ public class QiscusComment: Object {
         didSet{
             let id : Int64 = self.localId
             let value = self.commentCellHeight
-            Qiscus.dbThread.async {
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
-                    if savedComment.commentCellHeight != value{
-                        let realm = try! Realm()
-                        try! realm.write {
-                            savedComment.commentCellHeight = value
-                        }
+            if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if savedComment.commentCellHeight != value{
+                    let realm = try! Realm()
+                    try! realm.write {
+                        savedComment.commentCellHeight = value
                     }
                 }
             }
@@ -263,13 +243,11 @@ public class QiscusComment: Object {
         didSet{
             let id : Int64 = self.localId
             let value = self.showLink
-            Qiscus.dbThread.async {
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
-                    if savedComment.showLink != value{
-                        let realm = try! Realm()
-                        try! realm.write {
-                            savedComment.showLink = value
-                        }
+            if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if savedComment.showLink != value{
+                    let realm = try! Realm()
+                    try! realm.write {
+                        savedComment.showLink = value
                     }
                 }
             }
@@ -279,13 +257,11 @@ public class QiscusComment: Object {
         didSet{
             let id : Int64 = self.localId
             let value = self.commentLinkPreviewed
-            Qiscus.dbThread.async {
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
-                    if savedComment.commentLinkPreviewed != value{
-                        let realm = try! Realm()
-                        try! realm.write {
-                            savedComment.commentLinkPreviewed = value
-                        }
+            if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if savedComment.commentLinkPreviewed != value{
+                    let realm = try! Realm()
+                    try! realm.write {
+                        savedComment.commentLinkPreviewed = value
                     }
                 }
             }

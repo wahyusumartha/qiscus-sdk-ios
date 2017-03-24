@@ -877,83 +877,84 @@ extension Qiscus:CocoaMQTTDelegate{
                 let commentId = json["id"].int64Value
                 let email = json["email"].stringValue
                 
-                if  QiscusComment.comment(withId: commentBeforeId) != nil {
-                    if let syncId = QiscusComment.getLastSyncCommentId(notifTopicId, unsyncCommentId: commentId){
-                        if let room = QiscusRoom.getRoom(withLastTopicId: notifTopicId){
+                if let room = QiscusRoom.getRoom(withLastTopicId: notifTopicId){
+                    let dataCount = QiscusComment.getComments(inTopicId: notifTopicId).count
+                    if  dataCount > 0 && QiscusComment.comment(withId: commentBeforeId) == nil {
+                        if let syncId = QiscusComment.getLastSyncCommentId(notifTopicId, unsyncCommentId: commentId){
                             QiscusCommentClient.shared.syncMessage(inRoom: room, fromComment: syncId, silent: true, triggerDelegate: true)
                         }
-                    }
-                }else{
-                    var comment = QiscusComment()
-                    var saved = false
-                    let uniqueId = json["unique_temp_id"].stringValue
-                    if let dbComment = QiscusComment.comment(withId: commentId, andUniqueId: uniqueId){
-                        comment = dbComment
                     }else{
-                        comment = QiscusComment.newComment(withId: commentId, andUniqueId: uniqueId)
-                        saved = true
-                    }
-                    comment.commentText = json["message"].stringValue
-                    comment.commentSenderEmail = email
-                    comment.showLink = !(json["disable_link_preview"].boolValue)
-                    comment.commentCreatedAt = Double(json["unix_timestamp"].doubleValue / 1000)
-                    comment.commentBeforeId = commentBeforeId
-                    comment.commentTopicId = notifTopicId
-                    
-                    if saved {
-                        let service = QiscusCommentClient.sharedInstance
-                        if QiscusChatVC.sharedInstance.isPresence && QiscusChatVC.sharedInstance.room?.roomId == roomId && !Qiscus.shared.syncing{
-                            if let delegate = service.delegate {
-                                Qiscus.logicThread.async {
-                                    let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                                    delegate.qiscusService(gotNewMessage: presenter)
-                                }
-                            }
+                        var comment = QiscusComment()
+                        var saved = false
+                        let uniqueId = json["unique_temp_id"].stringValue
+                        if let dbComment = QiscusComment.comment(withId: commentId, andUniqueId: uniqueId){
+                            comment = dbComment
+                        }else{
+                            comment = QiscusComment.newComment(withId: commentId, andUniqueId: uniqueId)
+                            saved = true
                         }
-                        if let roomDelegate = service.roomDelegate {
-                            roomDelegate.gotNewComment(comment)
-                        }
-                    }
-                    var roomChanged = false
-                    var userChanged = false
-                    if let user = QiscusUser.getUserWithEmail(email){
-                        if let room = QiscusRoom.getRoomById(roomId){
-                            if room.roomType == .group{
-                                if room.roomName != json["room_name"].stringValue{
-                                    roomChanged = true
-                                    room.updateRoomName(json["room_name"].stringValue)
-                                }
-                            }
-                            if user.userEmail != QiscusMe.sharedInstance.email{
-                                if user.userFullName != json["username"].stringValue{
-                                    if room.roomType == .single{
-                                        roomChanged = true
+                        comment.commentText = json["message"].stringValue
+                        comment.commentSenderEmail = email
+                        comment.showLink = !(json["disable_link_preview"].boolValue)
+                        comment.commentCreatedAt = Double(json["unix_timestamp"].doubleValue / 1000)
+                        comment.commentBeforeId = commentBeforeId
+                        comment.commentTopicId = notifTopicId
+                        
+                        if saved {
+                            let service = QiscusCommentClient.sharedInstance
+                            if QiscusChatVC.sharedInstance.isPresence && QiscusChatVC.sharedInstance.room?.roomId == roomId && !Qiscus.shared.syncing{
+                                if let delegate = service.delegate {
+                                    Qiscus.logicThread.async {
+                                        let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
+                                        delegate.qiscusService(gotNewMessage: presenter)
                                     }
-                                    userChanged = true
-                                    user.updateUserFullName(json["username"].stringValue)
-                                }
-                                
-                                if user.userAvatarURL != json["user_avatar"].stringValue{
-                                    if room.roomType == .single{
-                                        roomChanged = true
-                                    }
-                                    userChanged = true
-                                    user.updateUserAvatarURL(json["user_avatar"].stringValue)
                                 }
                             }
-                            if let presenterDelegate = QiscusDataPresenter.shared.delegate {
-                                if userChanged {
-                                    let copyUser = QiscusUser.copyUser(user: user)
-                                    presenterDelegate.dataPresenter(didChangeUser: copyUser, onUserWithEmail: copyUser.userEmail)
+                            if let roomDelegate = service.roomDelegate {
+                                roomDelegate.gotNewComment(comment)
+                            }
+                        }
+                        var roomChanged = false
+                        var userChanged = false
+                        if let user = QiscusUser.getUserWithEmail(email){
+                            if let room = QiscusRoom.getRoomById(roomId){
+                                if room.roomType == .group{
+                                    if room.roomName != json["room_name"].stringValue{
+                                        roomChanged = true
+                                        room.updateRoomName(json["room_name"].stringValue)
+                                    }
                                 }
-                                if roomChanged {
-                                    let copyRoom = QiscusRoom.copyRoom(room: room)
-                                    presenterDelegate.dataPresenter(didChangeRoom: copyRoom, onRoomWithId: roomId)
+                                if user.userEmail != QiscusMe.sharedInstance.email{
+                                    if user.userFullName != json["username"].stringValue{
+                                        if room.roomType == .single{
+                                            roomChanged = true
+                                        }
+                                        userChanged = true
+                                        user.updateUserFullName(json["username"].stringValue)
+                                    }
+                                    
+                                    if user.userAvatarURL != json["user_avatar"].stringValue{
+                                        if room.roomType == .single{
+                                            roomChanged = true
+                                        }
+                                        userChanged = true
+                                        user.updateUserAvatarURL(json["user_avatar"].stringValue)
+                                    }
+                                }
+                                if let presenterDelegate = QiscusDataPresenter.shared.delegate {
+                                    if userChanged {
+                                        let copyUser = QiscusUser.copyUser(user: user)
+                                        presenterDelegate.dataPresenter(didChangeUser: copyUser, onUserWithEmail: copyUser.userEmail)
+                                    }
+                                    if roomChanged {
+                                        let copyRoom = QiscusRoom.copyRoom(room: room)
+                                        presenterDelegate.dataPresenter(didChangeRoom: copyRoom, onRoomWithId: roomId)
+                                    }
                                 }
                             }
                         }
+                        
                     }
-                    
                 }
                 QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: commentId, roomId: roomId, status: .delivered, withCompletion: {
                     if let thisComment = QiscusComment.getComment(withId: commentId) {
