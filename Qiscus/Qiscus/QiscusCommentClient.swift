@@ -1682,7 +1682,8 @@ open class QiscusCommentClient: NSObject {
                                 for payload in comments {
                                     var comment = QiscusComment()
                                     var id = payload["id"].int64Value
-                                    var uid = payload["unique_temp_id"].int64Value
+                                    var uid = payload["unique_temp_id"].stringValue
+                                    var email = payload["email"].stringValue
                                     if let old = QiscusComment.comment(withId: id, andUniqueId: uid){
                                         comment = old
                                     }else{
@@ -1701,19 +1702,21 @@ open class QiscusCommentClient: NSObject {
                             if let participants = roomData["participants"].array {
                                 QiscusParticipant.removeAllParticipant(inRoom: room.roomId)
                                 for participant in participants{
-                                    let user = QiscusUser()
-                                    user.userEmail = participant["email"].stringValue
-                                    user.userFullName = participant["username"].stringValue
-                                    user.userAvatarURL = participant["avatar_url"].stringValue
-                                    
-                                    let _ = user.saveUser()
-                                    QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
-                                    if user.userEmail != QiscusMe.sharedInstance.email {
-                                        room.updateUser(user.userEmail)
+                                    let email = participant["email"].stringValue
+                                    if QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId) == nil{
+                                        let user = QiscusUser()
+                                        user.userEmail = participant["email"].stringValue
+                                        user.userFullName = participant["username"].stringValue
+                                        user.userAvatarURL = participant["avatar_url"].stringValue
+                                        let _ = user.saveUser()
+                                        QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
                                     }
                                 }
                             }
                             QiscusChatVC.sharedInstance.loadTitle()
+                            if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                                roomDelegate.didFinishUpdateRoom(onRoom: room)
+                            }
                         }
                     }else if error != nil{
                         Qiscus.printLog(text: "error update chat room: \(error)")
