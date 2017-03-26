@@ -47,6 +47,20 @@ public class QiscusComment: Object {
             if let savedComment = QiscusComment.getSavedComment(localId: id){
                 if savedComment.commentText != value{
                     let realm = try! Realm()
+                    if self.commentIsFile{
+                        let fileURL = self.getMediaURL()
+                        var file = QiscusFile.getCommentFileWithURL(fileURL)
+                        
+                        if(file == nil){
+                            file = QiscusFile()
+                        }
+                        file?.updateURL(fileURL)
+                        file?.updateCommentId(self.commentId)
+                        file?.saveCommentFile()
+                        
+                        file = QiscusFile.getCommentFileWithComment(self)
+                        self.commentFileId = file!.fileId
+                    }
                     try! realm.write {
                         savedComment.commentText = value
                     }
