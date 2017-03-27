@@ -1536,7 +1536,8 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     }
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let data = self.comments[indexPath.section][indexPath.row]
-        Qiscus.logicThread.async {
+        
+        if data.commentIndexPath != indexPath {
             data.commentIndexPath = indexPath
             data.balloonImage = data.getBalloonImage()
             self.comments[indexPath.section][indexPath.row] = data

@@ -192,17 +192,34 @@ public enum QiscusCommentPresenterType:Int {
                             
                             let url = NSURL(string: linkData.linkURL)!
                             attributedText.addAttribute(NSLinkAttributeName, value: url, range: titleRange)
+                        }else{
+                            commentPresenter.showLink = false
+                            comment.showLink = false
+                            attributedText = NSMutableAttributedString(string: commentPresenter.commentText)
+                            attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
                         }
                     }
-                }
-                else{
+                }else{
                     commentPresenter.showLink = false
+                    comment.showLink = false
+                    attributedText = NSMutableAttributedString(string: commentPresenter.commentText)
+                    attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
                 }
+            }else{
+                attributedText = NSMutableAttributedString(string: commentPresenter.commentText)
+                attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
             }
             commentPresenter.commentAttributedText = attributedText
-            Qiscus.uiThread.sync {
-                let cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText)
-                commentPresenter.cellSize = cellSize
+            
+            if let size = comment.cellSize {
+                commentPresenter.cellSize = size
+            }else{
+                Qiscus.uiThread.sync {
+                    let cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText)
+                    commentPresenter.cellSize = cellSize
+                    comment.commentCellHeight = cellSize.height
+                    comment.commentCellWidth = cellSize.width
+                }
             }
             break
         default:

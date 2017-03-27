@@ -47,7 +47,7 @@ import Photos
                         QiscusCommentClient.shared.syncMessage(inRoom: room, fromComment: syncId)
                     }
                 }else{
-                    let comments = QiscusComment.grouppedComment(inTopicId: topicId)
+                    let comments = QiscusComment.grouppedComment(inTopicId: topicId, limit: 20)
                     let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
                     Qiscus.uiThread.async {
                         self.delegate?.dataPresenter(didFinishLoad: presenters, inRoom: room)
@@ -70,7 +70,7 @@ import Photos
                         QiscusCommentClient.shared.syncMessage(inRoom: room, fromComment: syncId)
                     }
                 }else{
-                    let comments = QiscusComment.grouppedComment(inTopicId: room.roomLastCommentTopicId)
+                    let comments = QiscusComment.grouppedComment(inTopicId: room.roomLastCommentTopicId,limit:20)
                     let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
                     Qiscus.uiThread.async {
                         self.delegate?.dataPresenter(didFinishLoad: presenters, inRoom: room)
@@ -88,7 +88,15 @@ import Photos
         commentClient.createNewRoom(withUsers: users, optionalData: optionalData, withMessage: withMessage)
     }
     public func loadMore(inRoom room:QiscusRoom, fromComment commentId:Int64){
-        commentClient.loadMore(room: room, fromComment: commentId)
+        Qiscus.logicThread.async {
+            let comments = QiscusComment.grouppedComment(inTopicId: room.roomLastCommentTopicId, fromCommentId: commentId, limit: 20)
+            if comments.count > 0 {
+                let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
+                self.delegate?.dataPresenter(didFinishLoadMore: presenters, inRoom: room)
+            }else{
+                self.commentClient.loadMore(room: room, fromComment: commentId)
+            }
+        }
     }
     fileprivate class func getPresenters(fromComments comments:[[QiscusComment]])->[[QiscusCommentPresenter]]{
         var commentsPresenter = [[QiscusCommentPresenter]]()
@@ -99,7 +107,6 @@ import Photos
             var row = 0
             for comment in commentGroup{
                 let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                presenter.commentIndexPath = IndexPath(row: row, section: section)
                 var cellPos = CellTypePosition.single
                 if commentGroup.count > 1 {
                     if row == 0 {
@@ -111,9 +118,6 @@ import Photos
                     }
                 }
                 presenter.cellPos = cellPos
-                if let balloon = presenter.getBalloonImage() {
-                    presenter.balloonImage = balloon
-                }
                 presenterGroup.append(presenter)
                 row += 1
             }
@@ -354,7 +358,7 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
     func qiscusService(didFinishLoadRoom inRoom: QiscusRoom) {
         let chatRoom = QiscusRoom.copyRoom(room: inRoom)
         Qiscus.logicThread.async {
-            let comments = QiscusComment.grouppedComment(inTopicId: chatRoom.roomLastCommentTopicId)
+            let comments = QiscusComment.grouppedComment(inTopicId: chatRoom.roomLastCommentTopicId, limit:20)
             let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
             self.room = chatRoom
             self.data = presenters
@@ -374,9 +378,9 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
                 if dataCount > 0 {
                     var data = [[QiscusComment]]()
                     if commentId > 0 {
-                        data = QiscusComment.grouppedComment(inTopicId: chatRoom.roomLastCommentTopicId, fromCommentId: commentId)
+                        data = QiscusComment.grouppedComment(inTopicId: chatRoom.roomLastCommentTopicId, fromCommentId: commentId, limit:20)
                     }else{
-                        data = QiscusComment.grouppedComment(inTopicId: chatRoom.roomLastCommentTopicId)
+                        data = QiscusComment.grouppedComment(inTopicId: chatRoom.roomLastCommentTopicId, limit:20)
                     }
                     if data.count > 0 {
                         newData = QiscusDataPresenter.getPresenters(fromComments: data)

@@ -63,6 +63,13 @@ class QCellTextRight: QChatCell {
             textWidth = minWidth
         }
         
+        self.linkTitle.text = ""
+        self.linkDescription.text = ""
+        self.linkImage.image = data.linkImage
+        self.LinkContainer.isHidden = true
+        self.balloonHeight.constant = 10
+        self.textTopMargin.constant = 0
+        
         if data.showLink {
             self.linkTitle.text = data.linkTitle
             self.linkDescription.text = data.linkDescription
@@ -76,16 +83,7 @@ class QCellTextRight: QChatCell {
             if !data.linkSaved{
                 QiscusDataPresenter.getLinkData(withData: data)
             }
-        }else{
-            self.linkTitle.text = ""
-            self.linkDescription.text = ""
-            self.linkImage.image = data.linkImage
-            self.LinkContainer.isHidden = true
-            self.balloonHeight.constant = 10
-            self.textTopMargin.constant = 0
         }
-        
-        
         textViewHeight.constant = textSize.height
         textViewWidth.constant = textWidth
         userNameLabel.textAlignment = .right

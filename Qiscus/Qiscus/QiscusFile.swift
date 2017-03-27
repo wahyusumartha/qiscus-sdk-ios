@@ -532,7 +532,7 @@ open class QiscusFile: Object {
         let manager = Alamofire.SessionManager.default
         Qiscus.printLog(text: "Downloading miniImage for url \(self.fileURL)")
         
-        var thumbMiniPath = self.fileURL.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
+        var thumbMiniPath = self.fileURL.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/").replacingOccurrences(of: " ", with: "%20")
         if self.fileType == .video{
             let thumbUrlArr = thumbMiniPath.characters.split(separator: ".")
             var newThumbURL = ""

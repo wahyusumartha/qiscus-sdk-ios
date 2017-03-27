@@ -991,12 +991,12 @@ open class QiscusCommentClient: NSObject {
                                         comment = old
                                     }else{
                                         comment = QiscusComment.newComment(withId: id, andUniqueId: uniqueId)
+                                        comment.showLink = !(newComment["disable_link_preview"].boolValue)
                                         saved = true
                                     }
                                     let email = newComment["email"].stringValue
                                     comment.commentText = newComment["message"].stringValue
                                     comment.commentBeforeId = newComment["comment_before_id"].int64Value
-                                    comment.showLink = !(newComment["disable_link_preview"].boolValue)
                                     comment.commentSenderEmail = email
                                     comment.commentTopicId = topicId
                                     comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue)
@@ -1080,13 +1080,13 @@ open class QiscusCommentClient: NSObject {
                                             comment = dbComment
                                         }else{
                                             comment = QiscusComment.newComment(withId: id, andUniqueId: uId)
+                                            comment.showLink = !(newComment["disable_link_preview"].boolValue)
                                             saved = true
                                         }
                                         
                                         let email = newComment["email"].stringValue
                                         comment.commentText = newComment["message"].stringValue
                                         comment.commentBeforeId = newComment["comment_before_id"].int64Value
-                                        comment.showLink = !(newComment["disable_link_preview"].boolValue)
                                         comment.commentSenderEmail = email
                                         comment.commentTopicId = topicId
                                         comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue)
@@ -1174,13 +1174,13 @@ open class QiscusCommentClient: NSObject {
                                 comment = dbComment
                             }else{
                                 comment = QiscusComment.newComment(withId: id, andUniqueId: uId)
+                                comment.showLink = !(newComment["disable_link_preview"].boolValue)
                                 newMessageCount += 1
                             }
                             
                             let email = newComment["email"].stringValue
                             comment.commentText = newComment["message"].stringValue
                             comment.commentBeforeId = newComment["comment_before_id"].int64Value
-                            comment.showLink = !(newComment["disable_link_preview"].boolValue)
                             comment.commentSenderEmail = email
                             comment.commentTopicId = topicId
                             comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue)
@@ -1249,11 +1249,11 @@ open class QiscusCommentClient: NSObject {
                             comment = old
                         }else{
                             comment = QiscusComment.newComment(withId: id, andUniqueId: uId)
+                            comment.showLink = !(payload["disable_link_preview"].boolValue)
                         }
                         comment.commentId = id
                         comment.commentBeforeId = payload["comment_before_id"].int64Value
                         comment.commentText = payload["message"].stringValue
-                        comment.showLink = !(payload["disable_link_preview"].boolValue)
                         comment.commentSenderEmail = email
                         comment.commentTopicId = topicId
                         
@@ -1380,11 +1380,11 @@ open class QiscusCommentClient: NSObject {
                             comment = old
                         }else{
                             comment = QiscusComment.newComment(withId: id, andUniqueId: uId)
+                            comment.showLink = !(payload["disable_link_preview"].boolValue)
                         }
                         comment.commentId = id
                         comment.commentBeforeId = payload["comment_before_id"].int64Value
                         comment.commentText = payload["message"].stringValue
-                        comment.showLink = !(payload["disable_link_preview"].boolValue)
                         comment.commentSenderEmail = email
                         comment.commentTopicId = topicId
                         let timetoken = Double(payload["unix_timestamp"].doubleValue)
@@ -1524,11 +1524,11 @@ open class QiscusCommentClient: NSObject {
                             comment = old
                         }else{
                             comment = QiscusComment.newComment(withId: id, andUniqueId: uId)
+                            comment.showLink = !(payload["disable_link_preview"].boolValue)
                         }
                         comment.commentId = id
                         comment.commentBeforeId = payload["comment_before_id"].int64Value
                         comment.commentText = payload["message"].stringValue
-                        comment.showLink = !(payload["disable_link_preview"].boolValue)
                         comment.commentSenderEmail = email
                         comment.commentTopicId = topicId
                         comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)
@@ -1676,14 +1676,13 @@ open class QiscusCommentClient: NSObject {
                             if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
                                 roomDelegate.didFinishUpdateRoom(onRoom: room)
                             }
-                            var newMessageCount: Int = 0
                             let comments = json["results"]["comments"].arrayValue
                             if comments.count > 0 {
                                 for payload in comments {
                                     var comment = QiscusComment()
-                                    var id = payload["id"].int64Value
-                                    var uid = payload["unique_temp_id"].stringValue
-                                    var email = payload["email"].stringValue
+                                    let id = payload["id"].int64Value
+                                    let uid = payload["unique_temp_id"].stringValue
+                                    let email = payload["email"].stringValue
                                     if let old = QiscusComment.comment(withId: id, andUniqueId: uid){
                                         comment = old
                                     }else{

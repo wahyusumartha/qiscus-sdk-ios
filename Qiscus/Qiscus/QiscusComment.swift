@@ -53,12 +53,13 @@ public class QiscusComment: Object {
                         
                         if(file == nil){
                             file = QiscusFile()
+                            file?.updateURL(fileURL)
+                            file?.updateCommentId(self.commentId)
+                            file?.saveCommentFile()
+                            
+                            file = QiscusFile.getCommentFileWithComment(self)
                         }
-                        file?.updateURL(fileURL)
-                        file?.updateCommentId(self.commentId)
-                        file?.saveCommentFile()
                         
-                        file = QiscusFile.getCommentFileWithComment(self)
                         self.commentFileId = file!.fileId
                     }
                     try! realm.write {
@@ -204,16 +205,16 @@ public class QiscusComment: Object {
             }
         }
     }
-    open dynamic var commentTextWidth:CGFloat = 0 {
+    open dynamic var commentCellWidth:CGFloat = 0 {
         didSet{
             let id : Int64 = self.localId
-            let value = self.commentTextWidth
+            let value = self.commentCellWidth
             Qiscus.dbThread.async {
                 if let savedComment = QiscusComment.getSavedComment(localId: id){
-                    if savedComment.commentTextWidth != value{
+                    if savedComment.commentCellWidth != value{
                         let realm = try! Realm()
                         try! realm.write {
-                            savedComment.commentTextWidth = value
+                            savedComment.commentCellWidth = value
                         }
                     }
                 }
@@ -283,6 +284,15 @@ public class QiscusComment: Object {
     }
     
     // MARK: Getter Variable
+    open var cellSize:CGSize? {
+        get{
+            if commentCellHeight > 0 && commentCellWidth > 0 {
+                return CGSize(width: commentCellWidth, height: commentCellHeight)
+            }else{
+                return nil
+            }
+        }
+    }
     open var commentLink:String? {
         get{
             if commentLinkPreviewed != "" {
@@ -466,7 +476,7 @@ public class QiscusComment: Object {
         newComment.commentBeforeId = comment.commentBeforeId
         newComment.commentIsSynced = comment.commentIsSynced
         newComment.commentCellHeight = comment.commentCellHeight
-        newComment.commentTextWidth = comment.commentTextWidth
+        newComment.commentCellWidth = comment.commentCellWidth
         newComment.commentRow = comment.commentRow
         newComment.commentSection = comment.commentSection
         newComment.showLink = comment.showLink
@@ -689,8 +699,14 @@ public class QiscusComment: Object {
         
         
         if(commentData.count > 0){
+            var count = 0
             for comment in commentData{
-                allComment.insert(QiscusComment.copyComment(comment: comment), at: 0)
+                if count <= limit || limit == 0{
+                    allComment.insert(QiscusComment.copyComment(comment: comment), at: 0)
+                    count += 1
+                }else{
+                    break
+                }
             }
         }
         return allComment
@@ -709,10 +725,10 @@ public class QiscusComment: Object {
     }
     
     //MARK: [[QiscusComment]]
-    open class func grouppedComment(inTopicId topicId:Int, fromCommentId:Int64? = nil)->[[QiscusComment]]{
+    open class func grouppedComment(inTopicId topicId:Int, fromCommentId:Int64? = nil, limit:Int = 0)->[[QiscusComment]]{
         var allComment = [[QiscusComment]]()
         
-        let commentData = QiscusComment.getComments(inTopicId: topicId, fromCommentId: fromCommentId)
+        let commentData = QiscusComment.getComments(inTopicId: topicId, limit: limit,fromCommentId: fromCommentId)
         
         if(commentData.count > 0){
             var first = commentData.first!
@@ -807,7 +823,7 @@ public class QiscusComment: Object {
         let realm = try! Realm()
         try! realm.write {
             self.commentCellHeight = newSize.height
-            self.commentTextWidth = newSize.width
+            self.commentCellWidth = newSize.width
         }
     }
     open func updateCommentCellSize(size:CGSize? = nil){
@@ -852,10 +868,10 @@ public class QiscusComment: Object {
                     }
                     comment.updateCommentCellSize(size: newSize)
                 }else{
-                    if size!.height != comment.commentCellHeight || size!.width != comment.commentTextWidth{
+                    if size!.height != comment.commentCellHeight || size!.width != comment.commentCellWidth{
                         try! realm.write {
                             comment.commentCellHeight = size!.height - 5
-                            comment.commentTextWidth = size!.width
+                            comment.commentCellWidth = size!.width
                         }
                         let copyComment = QiscusComment.copyComment(comment: comment)
                         if let commentDelegate = QiscusCommentClient.sharedInstance.commentDelegate {
