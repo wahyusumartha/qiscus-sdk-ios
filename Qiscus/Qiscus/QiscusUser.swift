@@ -351,7 +351,7 @@ open class QiscusUser: Object {
             }
         }
     }
-    fileprivate func downloadAvatar(){
+    public func downloadAvatar(){
         let user = QiscusUser.copyUser(user: self)
         if user.userAvatarURL != ""{
             if !Qiscus.qiscusDownload.contains("\(user.userAvatarURL):user:\(user.userId)"){
@@ -366,11 +366,9 @@ open class QiscusUser: Object {
                         if let data = response.data {
                             if let image = UIImage(data: data) {
                                 var thumbImage = UIImage()
-                                let time = Double(Date().timeIntervalSince1970)
-                                let timeToken = UInt64(time * 10000)
                                 
                                 let fileExt = QiscusFile.getExtension(fromURL: user.userAvatarURL)
-                                let fileName = "ios-avatar-\(timeToken).\(fileExt)"
+                                let fileName = "ios-avatar-\(user.localId).\(fileExt)"
                                 
                                 if fileExt == "gif" || fileExt == "gif_"{
                                     thumbImage = image

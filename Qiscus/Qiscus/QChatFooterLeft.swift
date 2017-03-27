@@ -12,7 +12,6 @@ class QChatFooterLeft: UICollectionReusableView {
 
     @IBOutlet weak var avatarImage: UIImageView!
     
-    var comment = QiscusComment()
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -22,13 +21,14 @@ class QChatFooterLeft: UICollectionReusableView {
         self.isUserInteractionEnabled = false
     }
     
-    func setup(withComent comment:QiscusComment){
+    func setup(withComent comment:QiscusCommentPresenter){
         avatarImage.image = Qiscus.image(named: "in_chat_avatar")
-        self.comment = comment
-        
-        if let user = comment.sender{
-            if let image = user.avatar{
-                avatarImage.image = image
+        if QiscusHelper.isFileExist(inLocalPath: comment.userAvatarLocalPath){
+            avatarImage.loadAsync(fromLocalPath: comment.userAvatarLocalPath)
+        }else{
+            avatarImage.loadAsync(comment.userAvatarURL)
+            Qiscus.logicThread.async {
+                comment.comment!.sender!.downloadAvatar()
             }
         }
     }

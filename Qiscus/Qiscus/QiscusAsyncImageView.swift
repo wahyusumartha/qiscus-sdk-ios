@@ -27,17 +27,32 @@ public extension UIImageView {
             }
         })
     }
-    
+    public func loadAsync(fromLocalPath localPath:String, placeholderImage:UIImage? = nil){
+        var returnImage = UIImage()
+        if placeholderImage != nil {
+            returnImage = placeholderImage!
+            self.image = returnImage
+        }
+        DispatchQueue.global().async {
+            if let image = UIImage(contentsOfFile: localPath){
+                DispatchQueue.main.async {
+                    self.image = image
+                }
+            }
+        }
+    }
     
     // func imageForUrl
     //  Modified from ImageLoader.swift Created by Nate Lyman on 7/5/14.
     //              git: https://github.com/natelyman/SwiftImageLoader
     //              Copyright (c) 2014 NateLyman.com. All rights reserved.
     //
-    func imageForUrl(url urlString: String, header: [String : String] = [String : String](), useCache:Bool = true, completionHandler:@escaping (_ image: UIImage?, _ url: String) -> ()) {
+    func imageForUrl(url urlString: String, header: [String : String] = [String : String](), useCache:Bool = false, completionHandler:@escaping (_ image: UIImage?, _ url: String) -> ()) {
         
         DispatchQueue.global().async(execute: {()in
+            
             let image = cache.object(forKey: urlString as NSString)
+            
             
             if useCache && (image != nil) {
                 DispatchQueue.main.async(execute: {() in
@@ -56,6 +71,7 @@ public extension UIImageView {
                     
                         if (error != nil) {
                             completionHandler(nil, urlString)
+                            print("[QiscusAsyncImageView] Error: \(error)")
                             Qiscus.printLog(text: "[QiscusAsyncImageView] : \(error)")
                             return
                         }

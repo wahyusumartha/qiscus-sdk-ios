@@ -1563,13 +1563,12 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                 return footerCell
             }else{
                 let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterLeft", for: indexPath) as! QChatFooterLeft
-                footerCell.setup(withComent: comment.comment!)
+                footerCell.setup(withComent: comment)
                 return footerCell
             }
         }else{
             let headerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellHeader", for: indexPath) as! QChatHeaderCell
             
-            let comment = self.comments[indexPath.section][0]
             var date:String = ""
             
             if comment.commentDate == QiscusHelper.thisDateString {

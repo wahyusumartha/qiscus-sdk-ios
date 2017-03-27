@@ -58,7 +58,13 @@ class QCellMediaLeft: QChatCell {
     open override func setupCell(){
         progressContainer.isHidden = true
         progressView.isHidden = true
-        imageDisplay.image = data.displayImage
+        if QiscusHelper.isFileExist(inLocalPath: data.localThumbURL!){
+            imageDisplay.loadAsync(fromLocalPath: data.localThumbURL!)
+        }else if QiscusHelper.isFileExist(inLocalPath: data.localMiniThumbURL!){
+            imageDisplay.loadAsync(fromLocalPath: data.localMiniThumbURL!)
+        }else{
+            imageDisplay.loadAsync(data.remoteThumbURL!)
+        }
         balloonView.image = data.balloonImage
         
         balloonView.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor

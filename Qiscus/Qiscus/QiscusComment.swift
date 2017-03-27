@@ -675,7 +675,6 @@ public class QiscusComment: Object {
         if(commentData.count > 0){
             let lastCommentId = commentData.first!.localId
             for comment in commentData{
-                print("comment check sync: \(comment.commentId) : \(comment.commentText)  || \(QiscusComment.isCommentExist(comment.commentBeforeId)) || \(lastCommentId) || \(comment.commentBeforeId)")
                 if !QiscusComment.isCommentExist(comment.commentBeforeId) && comment.localId != lastCommentId{
                     return comment.commentId
                 }

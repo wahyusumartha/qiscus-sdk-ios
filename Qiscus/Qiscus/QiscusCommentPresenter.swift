@@ -35,7 +35,8 @@ public enum QiscusCommentPresenterType:Int {
     // user attribute
     var userIsOwn = false
     var userFullName = ""
-    var userImage = UIImage()
+    var userAvatarLocalPath = ""
+    var userAvatarURL = ""
     var userEmail = ""
     
     // link attribute
@@ -64,9 +65,10 @@ public enum QiscusCommentPresenterType:Int {
     // url variable 
     var localFileExist = false
     var remoteURL: String?
+    var remoteThumbURL:String?
     var localURL :String?
     var localThumbURL :String?
-    
+    var localMiniThumbURL:String?
     
     // audio variable
     var durationLabel = ""
@@ -136,6 +138,8 @@ public enum QiscusCommentPresenterType:Int {
         
         if let user = comment.sender{
             commentPresenter.userFullName = user.userFullName
+            commentPresenter.userAvatarLocalPath = user.userAvatarLocalPath
+            commentPresenter.userAvatarURL = user.userAvatarURL
         }
         
         var position:String = "Left"
@@ -248,53 +252,12 @@ public enum QiscusCommentPresenterType:Int {
                 commentPresenter.cellIdentifier = "cellMedia\(position)"
                 commentPresenter.displayImage = Qiscus.image(named: "media_balloon")
                 commentPresenter.cellSize.height = 135
-                
-                if let image = file.thumbImage(){
-                    commentPresenter.displayImage = image
-                    commentPresenter.localURL = file.fileLocalPath
-                    commentPresenter.localThumbURL = file.fileMiniThumbPath
-                }else{
-                    commentPresenter.remoteURL = file.fileURL
-                    var thumbURL = commentPresenter.remoteURL!.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/").replacingOccurrences(of: " ", with: "%20")
-                    if commentPresenter.fileType == "gif"{
-                        let thumbUrlArr = thumbURL.characters.split(separator: ".")
-                        
-                        var newThumbURL = ""
-                        var i = 0
-                        for thumbComponent in thumbUrlArr{
-                            if i == 0{
-                                newThumbURL += String(thumbComponent)
-                            }else if i < (thumbUrlArr.count - 1){
-                                newThumbURL += ".\(String(thumbComponent))"
-                            }else{
-                                newThumbURL += ".png"
-                            }
-                            i += 1
-                        }
-                        thumbURL = newThumbURL
-                    }
-                    
-                    if let imageURL = URL(string: thumbURL){
-                        if let imageData = NSData(contentsOf: imageURL){
-                            if let image = UIImage(data: imageData as Data){
-                                commentPresenter.displayImage = image
-                            }
-                        }
-                    }
-                    
-                }
-                break
-            case .video:
-                commentPresenter.commentType = .video
-                commentPresenter.cellIdentifier = "cellMedia\(position)"
-                commentPresenter.displayImage = Qiscus.image(named: "media_balloon")
-                commentPresenter.cellSize.height = 135
-                if let image = file.thumbImage(){
-                    commentPresenter.displayImage = image
-                    commentPresenter.localURL = file.fileLocalPath
-                    commentPresenter.localThumbURL = file.fileMiniThumbPath
-                }else{
-                    var thumbURL = commentPresenter.remoteURL!.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
+                commentPresenter.remoteURL = file.fileURL.replacingOccurrences(of: " ", with: "%20")
+                commentPresenter.localURL = file.fileLocalPath
+                commentPresenter.localThumbURL = file.fileThumbPath
+                commentPresenter.localMiniThumbURL = file.fileMiniThumbPath
+                var thumbURL = commentPresenter.remoteURL!.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
+                if commentPresenter.fileType == "gif"{
                     let thumbUrlArr = thumbURL.characters.split(separator: ".")
                     
                     var newThumbURL = ""
@@ -310,14 +273,36 @@ public enum QiscusCommentPresenterType:Int {
                         i += 1
                     }
                     thumbURL = newThumbURL
-                    if let imageURL = URL(string: thumbURL){
-                        if let imageData = NSData(contentsOf: imageURL){
-                            if let image = UIImage(data: imageData as Data){
-                                commentPresenter.displayImage = image
-                            }
-                        }
-                    }
                 }
+                commentPresenter.remoteThumbURL = thumbURL
+                
+                break
+            case .video:
+                commentPresenter.commentType = .video
+                commentPresenter.cellIdentifier = "cellMedia\(position)"
+                commentPresenter.displayImage = Qiscus.image(named: "media_balloon")
+                commentPresenter.cellSize.height = 135
+                commentPresenter.remoteURL = file.fileURL.replacingOccurrences(of: " ", with: "%20")
+                commentPresenter.localURL = file.fileLocalPath
+                commentPresenter.localThumbURL = file.fileThumbPath
+                commentPresenter.localMiniThumbURL = file.fileMiniThumbPath
+                var thumbURL = commentPresenter.remoteURL!.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
+                let thumbUrlArr = thumbURL.characters.split(separator: ".")
+                
+                var newThumbURL = ""
+                var i = 0
+                for thumbComponent in thumbUrlArr{
+                    if i == 0{
+                        newThumbURL += String(thumbComponent)
+                    }else if i < (thumbUrlArr.count - 1){
+                        newThumbURL += ".\(String(thumbComponent))"
+                    }else{
+                        newThumbURL += ".png"
+                    }
+                    i += 1
+                }
+                thumbURL = newThumbURL
+                commentPresenter.remoteThumbURL = thumbURL
                 break
             case .audio:
                 commentPresenter.commentType = .audio
