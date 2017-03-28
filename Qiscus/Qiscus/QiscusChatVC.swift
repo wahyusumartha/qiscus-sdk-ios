@@ -282,6 +282,7 @@ public class QiscusChatVC: UIViewController{
         if self.room != nil{
             self.unsubscribeTypingRealtime(onRoom: room!)
         }
+        self.dismissLoading()
     }
     override open func viewWillAppear(_ animated: Bool) {
         if #available(iOS 10.0, *) {
@@ -1020,6 +1021,7 @@ public class QiscusChatVC: UIViewController{
     }
     func appDidEnterBackground(){
         self.view.endEditing(true)
+        self.dismissLoading()
     }
     open func resendMessage(){
         

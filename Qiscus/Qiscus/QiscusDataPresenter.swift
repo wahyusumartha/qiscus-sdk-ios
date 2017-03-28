@@ -157,6 +157,8 @@ import Photos
                 
                 data.commentAttributedText = attributedText
                 data.cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText)
+                data.comment?.commentCellWidth = data.cellSize.width
+                data.comment?.commentCellHeight = data.cellSize.height
                 data.showLink = true
                 data.linkSaved = true
                 if let image = linkData.thumbImage{
@@ -177,6 +179,7 @@ import Photos
                 data.linkImage = Qiscus.image(named: "link")
                 data.showLink = false
                 if let comment = data.comment{
+                    comment.showLink = false
                     if comment.commentRoom.roomId == QiscusDataPresenter.shared.room.roomId{
                         Qiscus.uiThread.async {
                             QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeContent: data, inRoom: QiscusDataPresenter.shared.room)
@@ -191,6 +194,7 @@ import Photos
             data.showLink = false
             
             if let comment = data.comment{
+                comment.showLink = false
                 if comment.commentRoom.roomId == QiscusDataPresenter.shared.room.roomId{
                     Qiscus.uiThread.async {
                         QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeContent: data, inRoom: QiscusDataPresenter.shared.room)

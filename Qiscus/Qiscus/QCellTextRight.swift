@@ -91,7 +91,7 @@ class QCellTextRight: QChatCell {
         balloonView.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonColor
         
         // first cell
-        if data.userFullName != "" && (data.cellPos == .first || data.cellPos == .single){
+        if data.cellPos == .first || data.cellPos == .single{
             userNameLabel.text = data.userFullName
             userNameLabel.isHidden = false
             balloonTopMargin.constant = 20

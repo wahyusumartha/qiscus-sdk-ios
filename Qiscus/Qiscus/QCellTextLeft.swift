@@ -95,7 +95,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         balloonView.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor
         dateLabel.textColor = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
         
-        if data.userFullName != "" && (data.cellPos == .first || data.cellPos == .single){
+        if data.cellPos == .first || data.cellPos == .single{
             userNameLabel.text = data.userFullName
             userNameLabel.isHidden = false
             balloonTopMargin.constant = 20

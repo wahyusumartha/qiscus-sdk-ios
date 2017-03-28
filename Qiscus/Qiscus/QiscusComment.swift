@@ -699,10 +699,18 @@ public class QiscusComment: Object {
         
         if(commentData.count > 0){
             var count = 0
+            var previousUid = commentData.first!.commentUniqueId
             for comment in commentData{
-                if count <= limit || limit == 0{
-                    allComment.insert(QiscusComment.copyComment(comment: comment), at: 0)
-                    count += 1
+                if (count <= limit || limit == 0){
+                    if comment.commentUniqueId != previousUid || count == 0{
+                        allComment.insert(QiscusComment.copyComment(comment: comment), at: 0)
+                        previousUid = comment.commentUniqueId
+                        count += 1
+                    }else{
+                        try! realm.write {
+                            realm.delete(comment)
+                        }
+                    }
                 }else{
                     break
                 }

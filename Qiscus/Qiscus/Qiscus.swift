@@ -901,18 +901,6 @@ extension Qiscus:CocoaMQTTDelegate{
                             comment.commentBeforeId = commentBeforeId
                             comment.commentTopicId = notifTopicId
                             
-                            if saved {
-                                let service = QiscusCommentClient.sharedInstance
-                                if QiscusChatVC.sharedInstance.isPresence && QiscusChatVC.sharedInstance.room?.roomId == roomId && !Qiscus.shared.syncing{
-                                    if let delegate = service.delegate {
-                                        let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                                        delegate.qiscusService(gotNewMessage: presenter)
-                                    }
-                                }
-                                if let roomDelegate = service.roomDelegate {
-                                    roomDelegate.gotNewComment(comment)
-                                }
-                            }
                             var roomChanged = false
                             var userChanged = false
                             if let user = QiscusUser.getUserWithEmail(email){
@@ -951,8 +939,34 @@ extension Qiscus:CocoaMQTTDelegate{
                                         }
                                     }
                                 }
+                            }else if let room = QiscusRoom.getRoomById(roomId){
+                                let user = QiscusUser()
+                                user.userEmail = email
+                                user.userFullName = json["username"].stringValue
+                                user.userAvatarURL = json["user_avatar"].stringValue
+                                let newUser = QiscusUser.copyUser(user: user.saveUser())
+                                QiscusParticipant.addParticipant(newUser.userEmail, roomId: room.roomId)
+                                if let presenterDelegate = QiscusDataPresenter.shared.delegate {
+                                    presenterDelegate.dataPresenter(didChangeUser: newUser, onUserWithEmail: newUser.userEmail)
+                                    let copyRoom = QiscusRoom.copyRoom(room: room)
+                                    presenterDelegate.dataPresenter(didChangeRoom: copyRoom, onRoomWithId: roomId)
+                                }
                             }
-                            
+                            if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
+                                participant.updateLastReadCommentId(commentId: comment.commentId)
+                            }
+                            if saved {
+                                let service = QiscusCommentClient.sharedInstance
+                                if QiscusChatVC.sharedInstance.isPresence && QiscusChatVC.sharedInstance.room?.roomId == roomId && !Qiscus.shared.syncing{
+                                    if let delegate = service.delegate {
+                                        let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
+                                        delegate.qiscusService(gotNewMessage: presenter)
+                                    }
+                                }
+                                if let roomDelegate = service.roomDelegate {
+                                    roomDelegate.gotNewComment(comment)
+                                }
+                            }
                         }
                     }
                     QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: commentId, roomId: roomId, status: .delivered, withCompletion: {
