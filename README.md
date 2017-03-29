@@ -5,6 +5,73 @@ Qiscus SDK [![CocoaPods Compatible](https://img.shields.io/cocoapods/v/Qiscus.sv
 
 Qiscus SDK is a lightweight and powerful chat library. Qiscus SDK will allow you to easily integrating Qiscus engine with your apps to make cool chatting application.
 
+# Quick Start
+### 1. Create a new SDK application in the Dashboard and get app_id 
+### 2. When integrating SDK with an existing app 
+### 3. Using the  SDK in Objective C 
+
+# Authentication 
+### Initializing with APP_ID
+### Login or register 
+### Disconnecting/logout
+### Updating a User Profile and Avatar
+
+# Channel Types 
+### Open Room
+### Group Room
+### 1 on 1 
+
+# 1-to-1 Chat 
+### Creating and starting 1-to-1 chat 
+
+# Group Room 
+### Creating a Group Room 
+### Getting a Group Room instance with room id 
+### Inviting users to an existing room 
+### Leaving a Group Room 
+### Advanced
+#### Getting a list of all channel members 
+#### Getting participants' online statuses
+#### Typing indicators 
+#### Read Receipts 
+#### Admin messages
+#### Room cover images 
+#### Custom room types 
+#### Custom message types 
+#### Message auto-translation 
+#### File Message thumbnails 
+
+# Messaging
+### Sending messages 
+### Receiving messages 
+### Loading previous messages
+### Loading messages by timestamp 
+### Deleting messages 
+    
+# Room Metadata 
+### MetaData 
+### MetaCounter 
+
+# Event Handler 
+### Channel Delegate 
+### Connection Delegate 
+    
+# UI Customization
+### Theme Customization 
+### UI Source code? 
+    
+# Push Notifications
+### 1. Create a Certificate Signing Request(CSR)
+### 2. Create a Push Notification SSL certificate 
+### 3. Export a p12 file and upload it to SendBird Dashboard.
+### 4. Register and unregister a device token in SendBird SDK
+### Push notification message templates 
+
+# Caching Data 
+# Miscellaneous
+# Change Log
+# API Reference
+
 ## Features
 
 - [x] Text Message and Emoji :+1:
