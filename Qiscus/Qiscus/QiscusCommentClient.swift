@@ -1514,8 +1514,6 @@ open class QiscusCommentClient: NSObject {
                     let room = QiscusRoom.getRoom(roomData)
                     let commentData = results["comments"].arrayValue
                     let topicId = roomData["last_topic_id"].intValue
-                    let users = parameters["emails"] as! [String]
-                    
                     
                     for payload in commentData{
                         let id = payload["id"].int64Value
