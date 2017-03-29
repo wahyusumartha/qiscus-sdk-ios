@@ -56,7 +56,6 @@ Qiscus SDK is a lightweight and powerful chat library. Qiscus SDK will allow you
 
 # Event Handler 
 ### Room Delegate 
-### Connection Delegate 
     
 # UI Customization
 ### Theme Customization 
