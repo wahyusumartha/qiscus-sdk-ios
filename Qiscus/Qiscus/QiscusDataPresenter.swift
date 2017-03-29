@@ -422,7 +422,7 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
         Qiscus.logicThread.async {
             if QiscusChatVC.sharedInstance.isPresence && (data.topicId == QiscusChatVC.sharedInstance.room?.roomLastCommentTopicId) {
                 Qiscus.uiThread.async {
-                    self.delegate?.dataPresenter(didChangeContent: data, inRoom: self.room)
+                    self.delegate?.dataPresenter(didChangeContent: data, inRoom: QiscusChatVC.sharedInstance.room!)
                 }
             }
         }
