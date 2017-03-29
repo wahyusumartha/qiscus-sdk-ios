@@ -17,7 +17,6 @@ Qiscus SDK is a lightweight and powerful chat library. Qiscus SDK will allow you
 ### Updating a User Profile and Avatar
 
 # Room Types 
-### Open Room
 ### Group Room
 ### 1 on 1 
 
@@ -46,8 +45,11 @@ Qiscus SDK is a lightweight and powerful chat library. Qiscus SDK will allow you
 ### Receiving messages 
 ### Loading previous messages
 ### Loading messages by timestamp 
-### Deleting messages 
-    
+### Getting a list of participants in a room 
+### Getting participants' online statuses
+### Getting a list of banned or muted users in a room 
+### Deleting messages  
+
 # Room Metadata 
 ### MetaData 
 ### MetaCounter 
