@@ -521,17 +521,19 @@ import CocoaMQTT
     
     // MARK: - local DB
     class func checkDatabaseMigration(){
+        let realmURL = Realm.Configuration.defaultConfiguration.fileURL!
+        Qiscus.printLog(text:"realmURL \(realmURL)")
         Qiscus.dbThread.async {
             let currentSchema:UInt64 = 16
             var configuration = Realm.Configuration()
             
             configuration.schemaVersion = currentSchema
             configuration.migrationBlock = { migration, oldSchemaVersion in
-                Qiscus.printLog(text: "Need migration to QiscusDB schema: \(currentSchema) \nfrom schema: \(oldSchemaVersion)")
-                
+            Qiscus.printLog(text: "Need migration to QiscusDB schema: \(currentSchema) \nfrom schema: \(oldSchemaVersion)")
+            
                 if (oldSchemaVersion < currentSchema){
                     //Deleting Realm Files
-                    let realmURL = Realm.Configuration.defaultConfiguration.fileURL!
+                    
                     let realmManagement = realmURL.appendingPathExtension("management")
                     
                     let realmURLs = [

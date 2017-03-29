@@ -138,11 +138,14 @@ import Photos
             data.linkImage = Qiscus.image(named: "link")
             
             QiscusLinkData.copyLink(link: linkData).saveLink()
+            var attributedText = NSMutableAttributedString(string: data.commentText)
+            let allRange = (data.commentText as NSString).range(of: data.commentText)
+            attributedText.addAttributes(data.textAttribute, range: allRange)
             
             if linkData.linkTitle != "" {
                 let text = data.commentText.replacingOccurrences(of: linkData.linkURL, with: linkData.linkTitle)
                 let titleRange = (text as NSString).range(of: linkData.linkTitle)
-                let attributedText = NSMutableAttributedString(string: text)
+                attributedText = NSMutableAttributedString(string: text)
                 
                 let allRange = (text as NSString).range(of: text)
                 attributedText.addAttributes(data.textAttribute, range: allRange)
@@ -166,7 +169,7 @@ import Photos
                 }
                 
                 if let comment = data.comment{
-                    if comment.commentRoom.roomId == QiscusDataPresenter.shared.room.roomId{
+                    if comment.commentRoom.roomId == QiscusChatVC.sharedInstance.room?.roomId{
                         Qiscus.uiThread.async {
                             QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeContent: data, inRoom: QiscusDataPresenter.shared.room)
                         }
@@ -178,11 +181,16 @@ import Photos
                 data.linkDescription = "No description found"
                 data.linkImage = Qiscus.image(named: "link")
                 data.showLink = false
-                if let comment = data.comment{
-                    comment.showLink = false
-                    if comment.commentRoom.roomId == QiscusDataPresenter.shared.room.roomId{
-                        Qiscus.uiThread.async {
-                            QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeContent: data, inRoom: QiscusDataPresenter.shared.room)
+                data.cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText)
+                Qiscus.logicThread.async {
+                    if let comment = QiscusComment.getComment(withUniqueId: data.commentUniqueid){
+                        comment.showLink = false
+                        comment.commentCellHeight = data.cellSize.height
+                        comment.commentCellWidth = data.cellSize.width
+                        if comment.commentRoom.roomId == QiscusChatVC.sharedInstance.room?.roomId{
+                            Qiscus.uiThread.async {
+                                QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeContent: data, inRoom: QiscusDataPresenter.shared.room)
+                            }
                         }
                     }
                 }
@@ -192,12 +200,19 @@ import Photos
             data.linkDescription = "No description found"
             data.linkImage = Qiscus.image(named: "link")
             data.showLink = false
-            
-            if let comment = data.comment{
-                comment.showLink = false
-                if comment.commentRoom.roomId == QiscusDataPresenter.shared.room.roomId{
-                    Qiscus.uiThread.async {
-                        QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeContent: data, inRoom: QiscusDataPresenter.shared.room)
+            let attributedText = NSMutableAttributedString(string: data.commentText)
+            let allRange = (data.commentText as NSString).range(of: data.commentText)
+            attributedText.addAttributes(data.textAttribute, range: allRange)
+            data.cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText)
+            Qiscus.logicThread.async {
+                if let comment = QiscusComment.getComment(withUniqueId: data.commentUniqueid){
+                    comment.showLink = false
+                    comment.commentCellHeight = data.cellSize.height
+                    comment.commentCellWidth = data.cellSize.width
+                    if comment.commentRoom.roomId == QiscusChatVC.sharedInstance.room?.roomId{
+                        Qiscus.uiThread.async {
+                            QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeContent: data, inRoom: QiscusDataPresenter.shared.room)
+                        }
                     }
                 }
             }

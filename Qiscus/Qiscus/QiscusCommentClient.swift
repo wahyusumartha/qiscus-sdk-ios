@@ -991,11 +991,12 @@ open class QiscusCommentClient: NSObject {
                                         comment = old
                                     }else{
                                         comment = QiscusComment.newComment(withId: id, andUniqueId: uniqueId)
+                                        comment.commentText = newComment["message"].stringValue
                                         comment.showLink = !(newComment["disable_link_preview"].boolValue)
                                         saved = true
                                     }
                                     let email = newComment["email"].stringValue
-                                    comment.commentText = newComment["message"].stringValue
+                                    
                                     comment.commentBeforeId = newComment["comment_before_id"].int64Value
                                     comment.commentSenderEmail = email
                                     comment.commentTopicId = topicId
@@ -1080,12 +1081,13 @@ open class QiscusCommentClient: NSObject {
                                             comment = dbComment
                                         }else{
                                             comment = QiscusComment.newComment(withId: id, andUniqueId: uId)
+                                            comment.commentText = newComment["message"].stringValue
                                             comment.showLink = !(newComment["disable_link_preview"].boolValue)
                                             saved = true
                                         }
                                         
                                         let email = newComment["email"].stringValue
-                                        comment.commentText = newComment["message"].stringValue
+                                        
                                         comment.commentBeforeId = newComment["comment_before_id"].int64Value
                                         comment.commentSenderEmail = email
                                         comment.commentTopicId = topicId
@@ -1174,12 +1176,13 @@ open class QiscusCommentClient: NSObject {
                                 comment = dbComment
                             }else{
                                 comment = QiscusComment.newComment(withId: id, andUniqueId: uId)
+                                comment.commentText = newComment["message"].stringValue
                                 comment.showLink = !(newComment["disable_link_preview"].boolValue)
                                 newMessageCount += 1
                             }
                             
                             let email = newComment["email"].stringValue
-                            comment.commentText = newComment["message"].stringValue
+                            
                             comment.commentBeforeId = newComment["comment_before_id"].int64Value
                             comment.commentSenderEmail = email
                             comment.commentTopicId = topicId
@@ -1249,11 +1252,11 @@ open class QiscusCommentClient: NSObject {
                             comment = old
                         }else{
                             comment = QiscusComment.newComment(withId: id, andUniqueId: uId)
+                            comment.commentText = payload["message"].stringValue
                             comment.showLink = !(payload["disable_link_preview"].boolValue)
                         }
                         comment.commentId = id
                         comment.commentBeforeId = payload["comment_before_id"].int64Value
-                        comment.commentText = payload["message"].stringValue
                         comment.commentSenderEmail = email
                         comment.commentTopicId = topicId
                         
@@ -1380,11 +1383,11 @@ open class QiscusCommentClient: NSObject {
                             comment = old
                         }else{
                             comment = QiscusComment.newComment(withId: id, andUniqueId: uId)
+                            comment.commentText = payload["message"].stringValue
                             comment.showLink = !(payload["disable_link_preview"].boolValue)
                         }
                         comment.commentId = id
                         comment.commentBeforeId = payload["comment_before_id"].int64Value
-                        comment.commentText = payload["message"].stringValue
                         comment.commentSenderEmail = email
                         comment.commentTopicId = topicId
                         let timetoken = Double(payload["unix_timestamp"].doubleValue)
@@ -1524,11 +1527,11 @@ open class QiscusCommentClient: NSObject {
                             comment = old
                         }else{
                             comment = QiscusComment.newComment(withId: id, andUniqueId: uId)
+                            comment.commentText = payload["message"].stringValue
                             comment.showLink = !(payload["disable_link_preview"].boolValue)
                         }
                         comment.commentId = id
                         comment.commentBeforeId = payload["comment_before_id"].int64Value
-                        comment.commentText = payload["message"].stringValue
                         comment.commentSenderEmail = email
                         comment.commentTopicId = topicId
                         comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)
@@ -1687,10 +1690,11 @@ open class QiscusCommentClient: NSObject {
                                         comment = old
                                     }else{
                                         comment = QiscusComment.newComment(withId: id, andUniqueId: uid)
-                                        comment.showLink = !(payload["disable_link_preview"].boolValue)
+                                        
                                         comment.commentId = id
                                         comment.commentBeforeId = payload["comment_before_id"].int64Value
                                         comment.commentText = payload["message"].stringValue
+                                        comment.showLink = !(payload["disable_link_preview"].boolValue)
                                         comment.commentSenderEmail = email
                                         comment.commentTopicId = topicId
                                         comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)

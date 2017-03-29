@@ -158,7 +158,7 @@ public enum QiscusCommentPresenterType:Int {
             let allRange = (commentPresenter.commentText as NSString).range(of: commentPresenter.commentText)
             attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
             
-            if commentPresenter.showLink {
+            if comment.showLink {
                 if let url = comment.commentLink{
                     commentPresenter.linkTitle = "Load data ..."
                     commentPresenter.linkDescription = "Load url description"
@@ -210,6 +210,8 @@ public enum QiscusCommentPresenterType:Int {
                     attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
                 }
             }else{
+                commentPresenter.showLink = false
+                comment.showLink = false
                 attributedText = NSMutableAttributedString(string: commentPresenter.commentText)
                 attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
             }
