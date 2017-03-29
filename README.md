@@ -16,7 +16,7 @@ Qiscus SDK is a lightweight and powerful chat library. Qiscus SDK will allow you
 ### Disconnecting/logout
 ### Updating a User Profile and Avatar
 
-# Channel Types 
+# Room Types 
 ### Open Room
 ### Group Room
 ### 1 on 1 
@@ -30,7 +30,7 @@ Qiscus SDK is a lightweight and powerful chat library. Qiscus SDK will allow you
 ### Inviting users to an existing room 
 ### Leaving a Group Room 
 ### Advanced
-#### Getting a list of all channel members 
+#### Getting a list of all room members 
 #### Getting participants' online statuses
 #### Typing indicators 
 #### Read Receipts 
@@ -53,7 +53,7 @@ Qiscus SDK is a lightweight and powerful chat library. Qiscus SDK will allow you
 ### MetaCounter 
 
 # Event Handler 
-### Channel Delegate 
+### Room Delegate 
 ### Connection Delegate 
     
 # UI Customization
