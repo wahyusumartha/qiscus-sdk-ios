@@ -1128,7 +1128,14 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
             
             self.collectionView.reloadData()
             self.scrollToBottom()
+            
+            let commentId = comments.last!.last!.commentId
+            let roomId = inRoom.roomId
+            Qiscus.logicThread.async {
+                QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: commentId, roomId: roomId, status: .read, withCompletion: {_ in })
+            }
         }
+        
     }
     public func dataPresenter(didFinishLoadMore comments: [[QiscusCommentPresenter]], inRoom: QiscusRoom) {
         Qiscus.logicThread.async {
@@ -1407,7 +1414,8 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                 if presenter.toUpload {
                     self.dataPresenter.uploadData(fromPresenter: presenter)
                 }
-            }else{
+            }
+            else{
                 let lastComment = self.comments.last!.last!
                 if lastComment.createdAt < presenter.createdAt {
                     if lastComment.userEmail == presenter.userEmail && lastComment.commentDate == presenter.commentDate{
@@ -1455,6 +1463,13 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                     }
                 }else{
                 
+                }
+            }
+            if presenter.commentId > 0 {
+                Qiscus.logicThread.async {
+                    Qiscus.logicThread.async {
+                        QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: presenter.commentId, roomId: inRoom.roomId, status: .read, withCompletion: {_ in })
+                    }
                 }
             }
         }
