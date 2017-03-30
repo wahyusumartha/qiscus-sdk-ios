@@ -524,7 +524,7 @@ import CocoaMQTT
         let realmURL = Realm.Configuration.defaultConfiguration.fileURL!
         Qiscus.printLog(text:"realmURL \(realmURL)")
         Qiscus.dbThread.async {
-            let currentSchema:UInt64 = 16
+            let currentSchema:UInt64 = 17
             var configuration = Realm.Configuration()
             
             configuration.schemaVersion = currentSchema
