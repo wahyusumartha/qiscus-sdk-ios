@@ -89,7 +89,11 @@ public enum QiscusCommentPresenterType:Int {
     // getter variable
     var comment:QiscusComment?{
         get{
-            return QiscusComment.getComment(withLocalId: localId)
+            if let saved = QiscusComment.comment(withLocalId: self.localId){
+                return QiscusComment.copyComment(comment: saved)
+            }else{
+                return nil
+            }
         }
     }
     var linkTextAttributes:[String: Any]{

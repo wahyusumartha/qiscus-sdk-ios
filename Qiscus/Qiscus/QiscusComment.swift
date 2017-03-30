@@ -31,7 +31,7 @@ public class QiscusComment: Object {
             if !self.copyProcess {
                 let id : Int64 = self.localId
                 let value = self.commentId
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if let savedComment = QiscusComment.comment(withLocalId: id){
                     if savedComment.commentId != value{
                         let realm = try! Realm()
                         try! realm.write {
@@ -47,7 +47,7 @@ public class QiscusComment: Object {
             if !self.copyProcess {
                 let id : Int64 = self.localId
                 let value = self.commentText
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if let savedComment = QiscusComment.comment(withLocalId: id){
                     if savedComment.commentText != value{
                         let realm = try! Realm()
                         if self.commentIsFile{
@@ -79,7 +79,7 @@ public class QiscusComment: Object {
             if !self.copyProcess{
                 let id : Int64 = self.localId
                 let value = self.commentCreatedAt
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if let savedComment = QiscusComment.comment(withLocalId: id){
                     if savedComment.commentCreatedAt != value{
                         let realm = try! Realm()
                         try! realm.write {
@@ -95,7 +95,7 @@ public class QiscusComment: Object {
             if !self.copyProcess {
                 let id : Int64 = self.localId
                 let value = self.commentUniqueId
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if let savedComment = QiscusComment.comment(withLocalId: id){
                     if savedComment.commentUniqueId != value{
                         let realm = try! Realm()
                         try! realm.write {
@@ -111,7 +111,7 @@ public class QiscusComment: Object {
             if !self.copyProcess {
                 let id : Int64 = self.localId
                 let value = self.commentTopicId
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if let savedComment = QiscusComment.comment(withLocalId: id){
                     if savedComment.commentTopicId != value{
                         let realm = try! Realm()
                         try! realm.write {
@@ -127,7 +127,7 @@ public class QiscusComment: Object {
             if !self.copyProcess {
                 let id : Int64 = self.localId
                 let value = self.commentSenderEmail
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if let savedComment = QiscusComment.comment(withLocalId: id){
                     if savedComment.commentSenderEmail != value{
                         let realm = try! Realm()
                         try! realm.write {
@@ -143,7 +143,7 @@ public class QiscusComment: Object {
             if !self.copyProcess {
                 let id : Int64 = self.localId
                 let value = self.commentFileId
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if let savedComment = QiscusComment.comment(withLocalId: id){
                     if savedComment.commentFileId != value{
                         let realm = try! Realm()
                         try! realm.write {
@@ -162,7 +162,7 @@ public class QiscusComment: Object {
                 Qiscus.dbThread.async {
                     if value != QiscusCommentStatus.delivered.rawValue &&
                         value != QiscusCommentStatus.read.rawValue{
-                        if let savedComment = QiscusComment.getSavedComment(localId: id){
+                        if let savedComment = QiscusComment.comment(withLocalId: id){
                             if savedComment.commentStatusRaw != value{
                                 if value > savedComment.commentStatusRaw || value == QiscusCommentStatus.failed.rawValue{
                                     let realm = try! Realm()
@@ -183,7 +183,7 @@ public class QiscusComment: Object {
             if !self.copyProcess {
                 let id : Int64 = self.localId
                 let value = self.commentIsSynced
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if let savedComment = QiscusComment.comment(withLocalId: id){
                     if savedComment.commentIsSynced != value{
                         let realm = try! Realm()
                         try! realm.write {
@@ -200,7 +200,7 @@ public class QiscusComment: Object {
                 let id : Int64 = self.localId
                 let value = self.commentBeforeId
                 
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if let savedComment = QiscusComment.comment(withLocalId: id){
                     if savedComment.commentBeforeId != value{
                         let realm = try! Realm()
                         try! realm.write {
@@ -216,7 +216,7 @@ public class QiscusComment: Object {
             if !self.copyProcess {
                 let id : Int64 = self.localId
                 let value = self.commentCellHeight
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if let savedComment = QiscusComment.comment(withLocalId: id){
                     if savedComment.commentCellHeight != value{
                         let realm = try! Realm()
                         try! realm.write {
@@ -233,7 +233,7 @@ public class QiscusComment: Object {
                 let id : Int64 = self.localId
                 let value = self.commentCellWidth
                 Qiscus.dbThread.async {
-                    if let savedComment = QiscusComment.getSavedComment(localId: id){
+                    if let savedComment = QiscusComment.comment(withLocalId: id){
                         if savedComment.commentCellWidth != value{
                             let realm = try! Realm()
                             try! realm.write {
@@ -252,7 +252,7 @@ public class QiscusComment: Object {
                 let id : Int64 = self.localId
                 let value = self.commentRow
                 Qiscus.dbThread.async {
-                    if let savedComment = QiscusComment.getSavedComment(localId: id){
+                    if let savedComment = QiscusComment.comment(withLocalId: id){
                         if savedComment.commentRow != value{
                             let realm = try! Realm()
                             try! realm.write {
@@ -270,7 +270,7 @@ public class QiscusComment: Object {
                 let id : Int64 = self.localId
                 let value = self.commentSection
                 Qiscus.dbThread.async {
-                    if let savedComment = QiscusComment.getSavedComment(localId: id){
+                    if let savedComment = QiscusComment.comment(withLocalId: id){
                         if savedComment.commentSection != value{
                             let realm = try! Realm()
                             try! realm.write {
@@ -287,7 +287,7 @@ public class QiscusComment: Object {
             if !self.copyProcess {
                 let id : Int64 = self.localId
                 var value = self.showLink
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if let savedComment = QiscusComment.comment(withLocalId: id){
                     if value {
                         if self.commentLink == nil {
                             value = false
@@ -307,7 +307,7 @@ public class QiscusComment: Object {
             if !self.copyProcess {
                 let id : Int64 = self.localId
                 let value = self.commentLinkPreviewed
-                if let savedComment = QiscusComment.getSavedComment(localId: id){
+                if let savedComment = QiscusComment.comment(withLocalId: id){
                     if savedComment.commentLinkPreviewed != value{
                         let realm = try! Realm()
                         try! realm.write {
@@ -523,7 +523,9 @@ public class QiscusComment: Object {
         newComment.copyProcess = false
         return newComment
     }
-    class func newComment(withId commentId:Int64, andUniqueId uniqueId:String)->QiscusComment{
+    
+    // MARK: - new comment
+    public class func newComment(withId commentId:Int64, andUniqueId uniqueId:String)->QiscusComment{
         let comment = QiscusComment()
         comment.commentId = commentId
         comment.commentUniqueId = uniqueId
@@ -535,114 +537,6 @@ public class QiscusComment: Object {
             realm.add(comment)
         }
         return QiscusComment.copyComment(comment: comment)
-    }
-    public class func comment(withId commentId:Int64, andUniqueId uniqueId:String? = nil)->QiscusComment?{
-        let realm = try! Realm()
-        let searchQuery:NSPredicate?
-        var query = "commentId == \(commentId)"
-        if uniqueId != nil {
-            query = "\(query) OR commentUniqueId == '\(uniqueId!)'"
-        }
-        searchQuery = NSPredicate(format: query)
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery!)
-        
-        if commentData.count == 0 {
-            return nil
-        }else{
-            return QiscusComment.copyComment(comment: commentData.first!)
-        }
-    }
-    
-    open class func getLastComment()->QiscusComment?{
-        let realm = try! Realm()
-        let searchQuery = NSPredicate(format: "commentStatusRaw != %d && commentStatusRaw != %d",QiscusCommentStatus.sending.rawValue,QiscusCommentStatus.failed.rawValue)
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery).sorted(byProperty: "commentId")
-        
-        if commentData.count > 0 {
-            return QiscusComment.copyComment(comment: commentData.last!)
-        }
-        return nil
-    }
-    open class func getFirstComment(inTopic topicId:Int)->QiscusComment?{
-        let realm = try! Realm()
-        let searchQuery = NSPredicate(format: "commentStatusRaw != \(QiscusCommentStatus.sending.rawValue) && commentStatusRaw != \(QiscusCommentStatus.failed.rawValue) && commentTopicId == \(topicId)")
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery).sorted(byProperty: "commentCreatedAt", ascending: true)
-        
-        if commentData.count > 0 {
-            return QiscusComment.copyComment(comment: commentData.first!)
-        }
-        return nil
-    }
-    class func getSavedComment(localId:Int64)->QiscusComment?{
-        let realm = try! Realm()
-        let searchQuery:NSPredicate = NSPredicate(format: "localId == \(localId)")
-        let RetNext = realm.objects(QiscusComment.self).filter(searchQuery)
-        
-        if RetNext.count > 0 {
-            return RetNext.last!
-        } else {
-            return nil
-        }
-    }
-    public class func getLastAllComment()->QiscusComment?{
-        let realm = try! Realm()
-        let searchQuery:NSPredicate = NSPredicate(format: "(commentStatusRaw != \(QiscusCommentStatus.sending.rawValue) OR commentStatusRaw == \(QiscusCommentStatus.failed.rawValue))")
-        let RetNext = realm.objects(QiscusComment.self).filter(searchQuery).sorted(byProperty: "commentCreatedAt")
-        
-        if RetNext.count > 0 {
-            let last = QiscusComment.copyComment(comment: RetNext.last!)
-            return last
-        } else {
-            return nil
-        }
-    }
-    public class func getLastComment(inTopicId topicId:Int)->QiscusComment?{
-        let realm = try! Realm()
-        let searchQuery:NSPredicate = NSPredicate(format: "commentTopicId == %d", topicId)
-        let RetNext = realm.objects(QiscusComment.self).filter(searchQuery).sorted(byProperty: "commentId")
-        
-        if RetNext.count > 0 {
-            let last = QiscusComment.copyComment(comment: RetNext.last!)
-            return last
-        } else {
-            return nil
-        }
-    }
-    public class func getComment(withLocalId localId: Int64)->QiscusComment?{
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "localId == %d", localId)
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery)
-        
-        if(commentData.count == 0){
-            return nil
-        }else{
-            return QiscusComment.copyComment(comment: commentData.first!)
-        }
-    }
-    public class func getComment(withUniqueId uniqueId: String)->QiscusComment?{
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "commentUniqueId == '\(uniqueId)'")
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery)
-        
-        if(commentData.count == 0){
-            return nil
-        }else{
-            return QiscusComment.copyComment(comment: commentData.first!)
-        }
-    }
-    public class func getComment(withId commentId: Int64)->QiscusComment?{
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "commentId == \(commentId)")
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery)
-        
-        if(commentData.count == 0){
-            return nil
-        }else{
-            return QiscusComment.copyComment(comment: commentData.first!)
-        }
     }
     public class func newComment(withMessage message:String, inTopicId:Int, showLink:Bool = false)->QiscusComment{
         let comment = QiscusComment()
@@ -673,14 +567,64 @@ public class QiscusComment: Object {
         
         return QiscusComment.copyComment(comment: comment)
     }
-    private class func comment(withId commentId:Int64, uniqueId:String)->QiscusComment?{
+    
+    // MARK : - get comment
+    public class func comment(withId commentId:Int64, andUniqueId uniqueId:String? = nil)->QiscusComment?{
         let realm = try! Realm()
         let searchQuery:NSPredicate?
-        searchQuery = NSPredicate(format: "commentId == \(commentId) OR commentUniqueId == '\(uniqueId)'")
+        var query = "commentId == \(commentId)"
+        if uniqueId != nil {
+            query = "\(query) OR commentUniqueId == '\(uniqueId!)'"
+        }
+        searchQuery = NSPredicate(format: query)
         let commentData = realm.objects(QiscusComment.self).filter(searchQuery!)
         
-        return commentData.first
+        if commentData.count == 0 {
+            return nil
+        }else{
+            return QiscusComment.copyComment(comment: commentData.first!)
+        }
     }
+    public class func comment(withLocalId localId:Int64)->QiscusComment?{
+        let realm = try! Realm()
+        let searchQuery:NSPredicate = NSPredicate(format: "localId == \(localId)")
+        let RetNext = realm.objects(QiscusComment.self).filter(searchQuery)
+        
+        if RetNext.count > 0 {
+            return RetNext.last!
+        } else {
+            return nil
+        }
+    }
+    public class func comment(withUniqueId uniqueId: String)->QiscusComment?{
+        let realm = try! Realm()
+        
+        let searchQuery:NSPredicate = NSPredicate(format: "commentUniqueId == '\(uniqueId)'")
+        let commentData = realm.objects(QiscusComment.self).filter(searchQuery)
+        
+        if(commentData.count == 0){
+            return nil
+        }else{
+            return QiscusComment.copyComment(comment: commentData.first!)
+        }
+    }
+    public class func getLastComment(inTopicId topicId:Int? = nil)->QiscusComment?{
+        let realm = try! Realm()
+        var searchQuery:NSPredicate = NSPredicate(format: "(commentStatusRaw != \(QiscusCommentStatus.sending.rawValue) OR commentStatusRaw == \(QiscusCommentStatus.failed.rawValue))")
+        if topicId != nil {
+            searchQuery = NSPredicate(format: "commentTopicId == \(topicId!)")
+        }
+        let RetNext = realm.objects(QiscusComment.self).filter(searchQuery).sorted(byProperty: "commentId")
+        
+        if RetNext.count > 0 {
+            let last = QiscusComment.copyComment(comment: RetNext.last!)
+            return last
+        } else {
+            return nil
+        }
+    }
+
+    
     
     //MARK: [QiscusComment]
     public class func getUnreadComments(inTopic topicId:Int)->[QiscusComment]{
@@ -715,7 +659,7 @@ public class QiscusComment: Object {
         if(commentData.count > 0){
             let lastCommentId = commentData.first!.localId
             for comment in commentData{
-                if !QiscusComment.isCommentExist(comment.commentBeforeId) && comment.localId != lastCommentId{
+                if !QiscusComment.isExist(commentId: comment.commentBeforeId) && comment.localId != lastCommentId{
                     return comment.commentId
                 }
             }
@@ -799,19 +743,6 @@ public class QiscusComment: Object {
         return allComment
     }
     
-    open class func firstUnsyncCommentId(_ topicId:Int)->Int64{
-        let realm = try! Realm()
-        let searchQuery = NSPredicate(format: "commentIsSynced == false AND commentTopicId == %d AND (commentStatusRaw == %d OR commentStatusRaw == %d)",topicId,QiscusCommentStatus.sent.rawValue,QiscusCommentStatus.delivered.rawValue)
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery).sorted(byProperty: "commentCreatedAt")
-        
-        if commentData.count > 0{
-            let firstData = commentData.first!
-            return firstData.commentId
-        }else{
-            return 0
-        }
-    }
-    
     // MARK: Object Getter Method
     public func getMediaURL() -> String{
         let component1 = (self.commentText as String).components(separatedBy: "[file]")
@@ -820,118 +751,8 @@ public class QiscusComment: Object {
         return mediaUrlString!
     }
     
-    // MARK: - Setter Method
-    // MARK: Class Setter Method
-    public class func deleteAllFailedMessage(){ //
-        let realm = try! Realm()
-        let searchQuery:NSPredicate = NSPredicate(format: "commentStatusRaw == %d", QiscusCommentStatus.failed.rawValue)
-        let RetNext = realm.objects(QiscusComment.self).filter(searchQuery)
-        
-        if RetNext.count > 0 {
-            for failedComment in RetNext{
-                try! realm.write {
-                    realm.delete(failedComment)
-                }
-            }
-        }
-    }
     // MARK: - Object Setter Method
-    open func updateCommmentIndexPath(indexPath:IndexPath){
-        self.commentRow = indexPath.row
-        self.commentSection = indexPath.section
-        Qiscus.dbThread.async {
-            if let dbComment = QiscusComment.comment(withId: self.commentId, uniqueId: self.commentUniqueId){
-                let realm = try! Realm()
-                try! realm.write {
-                    dbComment.commentRow = indexPath.row
-                    dbComment.commentSection = indexPath.section
-                }
-            }
-        }
-    }
-    open class func updateCommmentShowLink(show:Bool, commentId:Int64){
-        if let comment = QiscusComment.getComment(withId: commentId){
-            let realm = try! Realm()
-            try! realm.write {
-                comment.showLink = show
-            }
-            comment.updateCommentCellSize()
-        }
-    }
-    open func updateCommmentShowLink(show:Bool){
-        let realm = try! Realm()
-        try! realm.write {
-            self.showLink = show
-        }
-        self.updateCommentCellSize()
-    }
-    open func updateCommentCellWithLinkSize(linkURL:String, linkTitle: String){
-        let newSize = calculateTextSizeForCommentLink(linkURL: linkURL, linkTitle: linkTitle)
-        let realm = try! Realm()
-        try! realm.write {
-            self.commentCellHeight = newSize.height
-            self.commentCellWidth = newSize.width
-        }
-    }
-    open func updateCommentCellSize(size:CGSize? = nil){
-        let id = self.commentId
-        let uniqueId = self.commentUniqueId
-        
-        Qiscus.dbThread.async {
-            let realm = try! Realm()
-            let searchQuery:NSPredicate?
-            searchQuery = NSPredicate(format: "commentId == \(id) OR commentUniqueId == '\(uniqueId)'")
-            let commentData = realm.objects(QiscusComment.self).filter(searchQuery!)
-            
-            if let comment = commentData.first{
-                if size == nil {
-                    var newSize = CGSize()
-                    switch comment.commentType {
-                    case .text:
-                        comment.calculateTextSizeForComment()
-                        
-                        break
-                    case .attachment:
-                        if let file = QiscusFile.getCommentFileWithComment(comment){
-                            switch file.fileType {
-                            case .audio:
-                                newSize.height = 88
-                                break
-                            case .document:
-                                newSize.height = 70
-                                break
-                            case .media:
-                                newSize.height = 140
-                                break
-                            case .others:
-                                newSize.height = 70
-                                break
-                            case .video:
-                                newSize.height = 140
-                                break
-                            }
-                        }
-                        break
-                    }
-                    comment.updateCommentCellSize(size: newSize)
-                }else{
-                    if size!.height != comment.commentCellHeight || size!.width != comment.commentCellWidth{
-                        try! realm.write {
-                            comment.commentCellHeight = size!.height - 5
-                            comment.commentCellWidth = size!.width
-                        }
-                        let copyComment = QiscusComment.copyComment(comment: comment)
-                        if let commentDelegate = QiscusCommentClient.sharedInstance.commentDelegate {
-                            Qiscus.uiThread.async {
-                                commentDelegate.didChangeSize?(comment: copyComment)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-    }
+
     open class func getLastSyncCommentId(_ topicId:Int, unsyncCommentId:Int64)->Int64?{ //
         
         let realm = try! Realm()
@@ -942,57 +763,17 @@ public class QiscusComment: Object {
             let firstCommentId = commentData.first!.localId
             for comment in commentData.reversed(){
                 print("comment: \(comment.commentId)  :  \(comment.commentText)")
-                if QiscusComment.isCommentExist(comment.commentBeforeId) || comment.localId == firstCommentId{
+                if QiscusComment.isExist(commentId: comment.commentBeforeId) || comment.localId == firstCommentId{
                     return comment.commentId
                 }
             }
         }
         return nil
     }
-    open class func countCommentOntTopic(_ topicId:Int)->Int{ //
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "commentTopicId == %d", topicId)
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery)
-        
-        return commentData.count
-    }
 
     
     // MARK: - Updater Methode
-    open func updateCommentId(_ commentId:Int64){
-        self.commentId = commentId
-        Qiscus.dbThread.async {
-            let realm = try! Realm()
-            
-            let searchQuery:NSPredicate = NSPredicate(format: "commentUniqueId == '\(self.commentUniqueId)' && commentUniqueId != ''")
-            let commentData = realm.objects(QiscusComment.self).filter(searchQuery)
-            
-            if(commentData.count > 0){
-                try! realm.write {
-                    self.commentId = commentId
-                }
-            }
-        }
-        
-    }
-    open func updateCommentIsSync(_ sync: Bool){
-        self.commentIsSynced = sync
-        Qiscus.dbThread.async {
-            let realm = try! Realm()
-            
-            let searchQuery:NSPredicate = NSPredicate(format: "commentId == %d", self.commentId)
-            let commentData = realm.objects(QiscusComment.self).filter(searchQuery)
-            
-            if(commentData.count == 0){
-                self.commentIsSynced = sync
-            }else{
-                try! realm.write {
-                    self.commentIsSynced = sync
-                }
-            }
-        }
-    }
+    
     open class func getLastSentComent(inRoom roomId:Int)->QiscusComment?{
         if let room = QiscusRoom.getRoomById(roomId){
             let topicId = room.roomLastCommentTopicId
@@ -1063,51 +844,51 @@ public class QiscusComment: Object {
             }
         }
     }
-    open func updateCommentFileId(_ fileId:Int){
-        let realm = try! Realm()
-        let searchQuery:NSPredicate?
-        
-        if(self.commentUniqueId != ""){
-            searchQuery = NSPredicate(format: "commentUniqueId == '\(self.commentUniqueId)' && commentUniqueId != ''")
-        }else{
-            searchQuery = NSPredicate(format: "commentId == %d", self.commentId)
+    
+    // MARK: - Checking Methode
+    public func isFileMessage() -> Bool{
+        var check:Bool = false
+        if((self.commentText as String).hasPrefix("[file]")){
+            check = true
         }
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery!)
+        return check
+    }
+    public class func isExist(commentId:Int64)->Bool{
+        let realm = try! Realm()
+        let searchQuery = NSPredicate(format: "commentId == %d", commentId)
+        let commentData = realm.objects(QiscusComment.self).filter(searchQuery)
         
-        if commentData.count == 0 {
-            self.commentFileId = fileId
+        if commentData.count > 0{
+            return true
         }else{
-            try! realm.write {
-                self.commentFileId = fileId
-            }
+            return false
         }
     }
     
-    open func updateCommentText(_ text:String){
+    open class func isUnsyncMessageExist(_ topicId:Int)->Bool{ //
         let realm = try! Realm()
-        let searchQuery:NSPredicate?
+        let searchQuery = NSPredicate(format: "commentIsSynced == false AND commentTopicId == %d",topicId)
+        let commentData = realm.objects(QiscusComment.self).filter(searchQuery)
         
-        if(self.commentUniqueId != ""){
-            searchQuery = NSPredicate(format: "commentUniqueId == '\(self.commentUniqueId)' && commentUniqueId != ''")
+        if commentData.count > 0{
+            return true
         }else{
-            searchQuery = NSPredicate(format: "commentId == %d", self.commentId)
+            return false
         }
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery!)
+    }
+    
+    // MARK: - Delete
+    open class func deleteAll(){
+        let realm = try! Realm()
+        let comments = realm.objects(QiscusComment.self)
         
-        if commentData.count == 0 {
-            self.commentText = text
-        }else{
+        if comments.count > 0 {
             try! realm.write {
-                self.commentText = text
+                realm.delete(comments)
             }
         }
     }
-    // Create New Comment
-    
-    
-    
-    // MARK: - Save and Delete Comment
-    open func deleteComment(){
+    public func deleteComment(){
         let commentId = self.commentId
         let commentUniqueId = self.commentUniqueId
         Qiscus.dbThread.async {
@@ -1123,223 +904,5 @@ public class QiscusComment: Object {
                 }
             }
         }
-        
-    }
-    open class func deleteFailedComment(_ topicId:Int){
-        let realm = try! Realm()
-        let searchQuery = NSPredicate(format: "commentStatusRaw == %d AND commentTopicId == %d", QiscusCommentStatus.failed.rawValue,topicId)
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery)
-        
-        if commentData.count > 0 {
-            for comment in commentData{
-                try! realm.write {
-                    realm.delete(comment)
-                }
-            }
-        }
-    }
-    open class func deleteUnsendComment(_ topicId:Int){
-        let realm = try! Realm()
-        let searchQuery = NSPredicate(format: "(commentStatusRaw == %d || commentStatusRaw == %d) AND commentTopicId == %d", QiscusCommentStatus.sending.rawValue,QiscusCommentStatus.failed.rawValue,topicId)
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery)
-        
-        if commentData.count > 0 {
-            for comment in commentData{
-                try! realm.write {
-                    realm.delete(comment)
-                }
-            }
-        }
-    }
-    open func saveComment(_ saved:Bool)->Bool{ //
-        let realm = try! Realm()
-        let searchQuery:NSPredicate?
-        searchQuery = NSPredicate(format: "commentId == %d OR commentUniqueId == '\(self.commentUniqueId)'", self.commentId)
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery!)
-        
-        if(commentData.count == 0){
-            if self.commentIsFile{
-                let fileURL = self.getMediaURL()
-                var file = QiscusFile.getCommentFileWithURL(fileURL)
-                
-                if(file == nil){
-                    file = QiscusFile()
-                }
-                file?.updateURL(fileURL)
-                file?.updateCommentId(self.commentId)
-                file?.saveCommentFile()
-                
-                file = QiscusFile.getCommentFileWithComment(self)
-                self.commentFileId = file!.fileId
-            }
-            
-            try? realm.write {
-                self.localId = QiscusComment.LastId + 1
-                realm.add(self)
-            }
-
-            if let user = QiscusUser.getUserWithEmail(self.commentSenderEmail){
-                user.updateLastSeen(self.commentCreatedAt)
-            }
-            self.updateCommentCellSize()
-            return true
-        }else{
-            let comment = commentData.first!
-            try! realm.write {
-                comment.commentId = self.commentId
-                comment.commentText = self.commentText
-                if(self.commentCreatedAt > 0){
-                    comment.commentCreatedAt = self.commentCreatedAt
-                }
-                comment.commentBeforeId = self.commentBeforeId
-                comment.commentTopicId = self.commentTopicId
-                comment.commentSenderEmail = self.commentSenderEmail
-                if self.commentFileId > 0 {
-                    comment.commentFileId = self.commentFileId
-                }
-                if(comment.commentStatusRaw < self.commentStatusRaw){
-                    comment.commentStatusRaw = self.commentStatusRaw
-                }
-                if self.commentIsSynced{
-                    comment.commentIsSynced = true
-                }
-            }
-            if let user = QiscusUser.getUserWithEmail(comment.commentSenderEmail){
-                user.updateLastSeen(comment.commentCreatedAt)
-            }
-            return false
-        }
-    }
-    
-    // MARK: - Checking Methode
-    open func isFileMessage() -> Bool{
-        var check:Bool = false
-        if((self.commentText as String).hasPrefix("[file]")){
-            check = true
-        }
-        return check
-    }
-    open class func isCommentIdExist(_ commentId:Int64)->Bool{
-        let realm = try! Realm()
-        let searchQuery = NSPredicate(format: "commentId == %d", commentId)
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery)
-        
-        if commentData.count > 0{
-            return true
-        }else{
-            return false
-        }
-    }
-    open class func isCommentExist(_ commentId:Int64)->Bool{
-        let realm = try! Realm()
-        let searchQuery = NSPredicate(format: "commentId ==\(commentId)")
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery)
-        
-        if commentData.count > 0{
-            return true
-        }else{
-            return false
-        }
-    }
-    open class func isUnsyncMessageExist(_ topicId:Int)->Bool{ //
-        let realm = try! Realm()
-        let searchQuery = NSPredicate(format: "commentIsSynced == false AND commentTopicId == %d",topicId)
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery)
-        
-        if commentData.count > 0{
-            return true
-        }else{
-            return false
-        }
-    }
-    
-    // MARK: - Load More
-    open class func loadMoreComment(fromCommentId commentId:Int64, topicId:Int, limit:Int = 10)->[QiscusComment]{
-        var comments = [QiscusComment]()
-        let realm = try! Realm()
-        let searchQuery = NSPredicate(format: "commentId < %d AND commentTopicId == %d", commentId, topicId)
-        let commentData = realm.objects(QiscusComment.self).filter(searchQuery).sorted(byProperty: "commentId")
-        
-        if commentData.count > 0{
-            var i = 0
-            for comment in commentData {
-                if i < limit {
-                    comments.append(comment)
-                }else{
-                    break
-                }
-                i += 1
-            }
-        }
-        
-        return comments
-    }
-    
-    open class func deleteAll(){
-        let realm = try! Realm()
-        let comments = realm.objects(QiscusComment.self)
-        
-        if comments.count > 0 {
-            try! realm.write {
-                realm.delete(comments)
-            }
-        }
-    }
-    
-    open func calculateTextSizeForComment(){
-        var size = CGSize()
-        let textView = UITextView()
-        textView.font = UIFont.systemFont(ofSize: 14)
-        textView.dataDetectorTypes = .all
-        textView.linkTextAttributes = [
-            NSForegroundColorAttributeName: QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor,
-            NSUnderlineColorAttributeName: QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor,
-            NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue,
-            NSFontAttributeName: UIFont.systemFont(ofSize: 14)
-        ]
-        
-        let maxWidth:CGFloat = 190
-        let comment = QiscusComment.copyComment(comment: self)
-        Qiscus.uiThread.async {
-            textView.text = comment.commentText
-            let textSize = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
-            
-            size.height = textSize.height + 18
-            size.width = textSize.width
-            
-            if comment.showLink {
-                size.height += 73
-            }
-            Qiscus.dbThread.async {
-                comment.updateCommentCellSize(size: size)
-            }
-        }
-    }
-    open func calculateTextSizeForCommentLink(linkURL:String, linkTitle:String) -> CGSize {
-        var size = CGSize()
-        let textView = UITextView()
-        textView.font = Qiscus.style.chatFont
-        textView.dataDetectorTypes = .all
-        textView.linkTextAttributes = [
-            NSForegroundColorAttributeName: QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor,
-            NSUnderlineColorAttributeName: QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor,
-            NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue,
-            NSFontAttributeName: Qiscus.style.chatFont
-        ]
-        
-        let maxWidth:CGFloat = 190
-        let text = self.commentText.replacingOccurrences(of: linkURL, with: linkTitle)
-        let titleRange = (text as NSString).range(of: linkTitle)
-        let attributedText = NSMutableAttributedString(string: text)
-        attributedText.addAttributes(textView.linkTextAttributes, range: titleRange)
-        let allRange = (text as NSString).range(of: text)
-        attributedText.addAttribute(NSFontAttributeName, value: Qiscus.style.chatFont, range: allRange)
-        textView.attributedText = attributedText
-        let textSize = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
-        
-        size.height = textSize.height + 86
-        size.width = textSize.width
-        
-        return size
     }
 }

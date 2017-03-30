@@ -183,7 +183,7 @@ import Photos
                 data.showLink = false
                 data.cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText)
                 Qiscus.logicThread.async {
-                    if let comment = QiscusComment.getComment(withUniqueId: data.commentUniqueid){
+                    if let comment = QiscusComment.comment(withUniqueId: data.commentUniqueid){
                         comment.showLink = false
                         comment.commentCellHeight = data.cellSize.height
                         comment.commentCellWidth = data.cellSize.width
@@ -205,7 +205,7 @@ import Photos
             attributedText.addAttributes(data.textAttribute, range: allRange)
             data.cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText)
             Qiscus.logicThread.async {
-                if let comment = QiscusComment.getComment(withUniqueId: data.commentUniqueid){
+                if let comment = QiscusComment.comment(withUniqueId: data.commentUniqueid){
                     comment.showLink = false
                     comment.commentCellHeight = data.cellSize.height
                     comment.commentCellWidth = data.cellSize.width

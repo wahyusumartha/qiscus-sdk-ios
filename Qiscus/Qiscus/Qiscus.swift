@@ -135,7 +135,7 @@ import CocoaMQTT
     // need Documentation
     func backgroundCheck(){
         if Qiscus.isLoggedIn{
-            if let lastComment = QiscusComment.getLastAllComment(){
+            if let lastComment = QiscusComment.getLastComment(){
                 QiscusCommentClient.shared.syncChat(fromComment: lastComment.commentId, backgroundFetch: true)
             }else{
                 let lastId = QiscusMe.sharedInstance.lastCommentId
@@ -469,7 +469,7 @@ import CocoaMQTT
                 }
                 if QiscusChatVC.sharedInstance.isPresence {
                     Qiscus.printLog(text: "try to sync after connected")
-                    if let lastComment = QiscusComment.getLastAllComment() {
+                    if let lastComment = QiscusComment.getLastComment() {
                         QiscusCommentClient.shared.syncChat(fromComment: lastComment.commentId)
                     }
                 }
@@ -767,7 +767,7 @@ import CocoaMQTT
         if let vendorIdentifier = UIDevice.current.identifierForVendor {
             deviceID = vendorIdentifier.uuidString
         }
-        if let lastComment = QiscusComment.getLastAllComment(){
+        if let lastComment = QiscusComment.getLastComment(){
             QiscusCommentClient.shared.syncChat(fromComment: lastComment.commentId)
         }else{
             let lastId = QiscusMe.sharedInstance.lastCommentId
@@ -972,7 +972,7 @@ extension Qiscus:CocoaMQTTDelegate{
                         }
                     }
                     QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: commentId, roomId: roomId, status: .delivered, withCompletion: {
-                        if let thisComment = QiscusComment.getComment(withId: commentId) {
+                        if let thisComment = QiscusComment.comment(withId: commentId) {
                             thisComment.updateCommentStatus(.read, email: thisComment.commentSenderEmail)
                         }
                     })
@@ -1019,9 +1019,9 @@ extension Qiscus:CocoaMQTTDelegate{
                     let commentId = Int64(String(messageArr[0]))!
                     let commentUniqueId:String = String(messageArr[1])
                     let userEmail = String(channelArr[3])
-                    if let comment = QiscusComment.getComment(withId: commentId){
+                    if let comment = QiscusComment.comment(withId: commentId){
                         comment.updateCommentStatus(.delivered, email: userEmail)
-                    }else if let comment = QiscusComment.getComment(withUniqueId: commentUniqueId){
+                    }else if let comment = QiscusComment.comment(withUniqueId: commentUniqueId){
                         comment.updateCommentStatus(.delivered, email: userEmail)
                     }
                     break
@@ -1030,9 +1030,9 @@ extension Qiscus:CocoaMQTTDelegate{
                     let commentId = Int64(String(messageArr[0]))!
                     let commentUniqueId:String = String(messageArr[1])
                     let userEmail = String(channelArr[3])
-                    if let comment = QiscusComment.getComment(withId: commentId){
+                    if let comment = QiscusComment.comment(withId: commentId){
                         comment.updateCommentStatus(.read, email: userEmail)
-                    }else if let comment = QiscusComment.getComment(withUniqueId: commentUniqueId){
+                    }else if let comment = QiscusComment.comment(withUniqueId: commentUniqueId){
                         comment.updateCommentStatus(.read, email: userEmail)
                     }
                     break

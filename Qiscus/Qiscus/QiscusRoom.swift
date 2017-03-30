@@ -72,11 +72,7 @@ open class QiscusRoom: Object {
             return nil
         }
     }
-    public var firstComment:QiscusComment?{
-        get{
-            return QiscusComment.getFirstComment(inTopic: self.roomLastCommentTopicId)
-        }
-    }
+
     public var roomType:QiscusRoomType{
         get{
             if !isGroup{

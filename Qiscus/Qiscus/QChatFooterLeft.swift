@@ -28,7 +28,7 @@ class QChatFooterLeft: UICollectionReusableView {
         }else{
             avatarImage.loadAsync(comment.userAvatarURL)
             Qiscus.logicThread.async {
-                if let comment = QiscusComment.getComment(withId: comment.commentId){
+                if let comment = QiscusComment.comment(withId: comment.commentId){
                     if let user = comment.sender {
                         user.downloadAvatar()
                     }

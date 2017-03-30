@@ -878,7 +878,7 @@ open class QiscusCommentClient: NSObject {
                                         let file = data["file"]
                                         if let url = file["url"].string {
                                             comment.updateCommentStatus(QiscusCommentStatus.sending)
-                                            comment.updateCommentText("[file]\(url) [/file]")
+                                            comment.commentText = "[file]\(url) [/file]"
                                             Qiscus.printLog(text: "upload success")
                                             
                                             commentFile.updateURL(url)
@@ -923,7 +923,7 @@ open class QiscusCommentClient: NSObject {
                             Qiscus.printLog(text: "upload progress: \(progress)")
                             commentFile.updateIsUploading(true)
                             commentFile.updateUploadProgress(progress)
-                            if let currentComment = QiscusComment.getComment(withUniqueId: comment.commentUniqueId){
+                            if let currentComment = QiscusComment.comment(withUniqueId: comment.commentUniqueId){
                                 let presenter = QiscusCommentPresenter.getPresenter(forComment: currentComment)
                                 presenter.isUploading = true
                                 presenter.uploadProgress = progress
