@@ -15,7 +15,7 @@ public enum QiscusRoomType {
 }
 open class QiscusRoom: Object {
     open dynamic var localId:Int = 0
-    open dynamic var roomId:Int = 0
+    open dynamic var roomId:Int = 0 
     open dynamic var roomName:String = ""
     open dynamic var roomAvatarURL:String = ""
     open dynamic var roomAvatarLocalPath:String = ""
@@ -45,8 +45,11 @@ open class QiscusRoom: Object {
             }
         }
     }
+    private var copyProcess = false
+    
     class func copyRoom(room:QiscusRoom)->QiscusRoom{
         let roomCopy = QiscusRoom()
+        roomCopy.copyProcess = true
         roomCopy.localId = room.localId
         roomCopy.roomId = room.roomId
         roomCopy.roomName = room.roomName
@@ -57,6 +60,7 @@ open class QiscusRoom: Object {
         roomCopy.distinctId = room.distinctId
         roomCopy.user = room.user
         roomCopy.isGroup = room.isGroup
+        roomCopy.copyProcess = false
         return roomCopy
     }
     public var roomUnreadMessage:[QiscusComment]{

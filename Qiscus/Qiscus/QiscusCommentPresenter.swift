@@ -257,7 +257,7 @@ public enum QiscusCommentPresenterType:Int {
                 commentPresenter.commentType = .image
                 commentPresenter.cellIdentifier = "cellMedia\(position)"
                 commentPresenter.displayImage = Qiscus.image(named: "media_balloon")
-                commentPresenter.cellSize.height = 135
+                commentPresenter.cellSize.height = 188
                 commentPresenter.remoteURL = file.fileURL.replacingOccurrences(of: " ", with: "%20")
                 commentPresenter.localURL = file.fileLocalPath
                 commentPresenter.localThumbURL = file.fileThumbPath
@@ -287,7 +287,7 @@ public enum QiscusCommentPresenterType:Int {
                 commentPresenter.commentType = .video
                 commentPresenter.cellIdentifier = "cellMedia\(position)"
                 commentPresenter.displayImage = Qiscus.image(named: "media_balloon")
-                commentPresenter.cellSize.height = 135
+                commentPresenter.cellSize.height = 188
                 commentPresenter.remoteURL = file.fileURL.replacingOccurrences(of: " ", with: "%20")
                 commentPresenter.localURL = file.fileLocalPath
                 commentPresenter.localThumbURL = file.fileThumbPath

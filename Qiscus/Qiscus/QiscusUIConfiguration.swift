@@ -15,7 +15,6 @@ open class QiscusUIConfiguration: NSObject {
     open var copyright = QiscusTextConfiguration.sharedInstance
     open var chatFont = UIFont.systemFont(ofSize: 15)
     
-    
     /// To set read only or not, Default value : false
     open var readOnly = false
     

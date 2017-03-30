@@ -90,11 +90,11 @@ class QCellMediaLeft: QChatCell {
         
         // if this is last cell
         if data.cellPos == .last || data.cellPos == .single{
-            balloonWidth.constant = 147
+            balloonWidth.constant = 200
             leftMargin.constant = 42
         }else{
             leftMargin.constant = 57
-            balloonWidth.constant = 132
+            balloonWidth.constant = 185
         }
         
         if data.commentType == .video{
