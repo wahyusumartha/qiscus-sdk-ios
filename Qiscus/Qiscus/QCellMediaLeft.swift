@@ -161,7 +161,7 @@ class QCellMediaLeft: QChatCell {
             
             let newHeight = CGFloat(percentage / 100) * maxProgressHeight
             progressHeight.constant = newHeight
-            progressView.layoutIfNeeded()
+            progressContainer.layoutIfNeeded()
         }
     }
     

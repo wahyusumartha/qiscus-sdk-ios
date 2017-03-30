@@ -192,9 +192,9 @@ class QCellMediaRight: QChatCell {
             progressContainer.isHidden = false
             progressView.isHidden = false
             
-            let newHeight = (data.downloadProgress) * maxProgressHeight
+            let newHeight = CGFloat(percentage / 100) * maxProgressHeight
             progressHeight.constant = newHeight
-            progressView.layoutIfNeeded()
+            progressContainer.layoutIfNeeded()
         }
     }
     

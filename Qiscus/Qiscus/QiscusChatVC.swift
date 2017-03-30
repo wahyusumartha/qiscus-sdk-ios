@@ -823,7 +823,7 @@ public class QiscusChatVC: UIViewController{
         }
         
         
-        let backButton = UIButton(frame:CGRect(x: 0,y: 0,width: 10,height: 20))
+        let backButton = UIButton(frame:CGRect(x: 0,y: 0,width: 17,height: 20))
         backButton.addSubview(backIcon)
         backButton.addTarget(target, action: action, for: UIControlEvents.touchUpInside)
         
