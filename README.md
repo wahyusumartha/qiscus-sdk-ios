@@ -59,10 +59,10 @@ Qiscus SDK is a lightweight and powerful chat library. Qiscus SDK will allow you
     
 # UI Customization
 ### Theme Customization 
-### UI Source code? 
+### UI Source code
     
 # Push Notifications
-### 1. Create a Certificate Signing Request(CSR)
+### 1. Create a Certificate Signing Request (CSR)
 ### 2. Create a Push Notification SSL certificate 
 ### 3. Export a p12 file and upload it to SendBird Dashboard.
 ### 4. Register and unregister a device token in SendBird SDK
