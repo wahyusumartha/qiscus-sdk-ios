@@ -1348,7 +1348,6 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                                 
                                 if data.isDownloading {
                                     let percentage = Int(data.downloadProgress * 100)
-                                    
                                     if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
                                         cell.downloadingMedia(withPercentage: percentage)
                                     }

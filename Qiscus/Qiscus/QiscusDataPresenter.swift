@@ -419,12 +419,8 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
         }
     }
     func qiscusService(didChangeContent data:QiscusCommentPresenter){
-        Qiscus.logicThread.async {
-            if QiscusChatVC.sharedInstance.isPresence && (data.topicId == QiscusChatVC.sharedInstance.room?.roomLastCommentTopicId) {
-                Qiscus.uiThread.async {
-                    self.delegate?.dataPresenter(didChangeContent: data, inRoom: QiscusChatVC.sharedInstance.room!)
-                }
-            }
+        if let room  = QiscusRoom.getRoom(withLastTopicId: data.topicId){
+            self.delegate?.dataPresenter(didChangeContent: data, inRoom: room)
         }
     }
     func qiscusService(didFailLoadMore inRoom: QiscusRoom) {

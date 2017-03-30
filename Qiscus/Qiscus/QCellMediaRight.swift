@@ -59,9 +59,9 @@ class QCellMediaRight: QChatCell {
         progressView.isHidden = true
         
         if QiscusHelper.isFileExist(inLocalPath: data.localThumbURL!){
-            imageDisplay.loadAsync(data.localThumbURL!)
+            imageDisplay.loadAsync(fromLocalPath: data.localThumbURL!)
         }else if QiscusHelper.isFileExist(inLocalPath: data.localMiniThumbURL!){
-            imageDisplay.loadAsync(data.localMiniThumbURL!)
+            imageDisplay.loadAsync(fromLocalPath: data.localMiniThumbURL!)
         }else{
             imageDisplay.loadAsync(data.remoteThumbURL!)
         }

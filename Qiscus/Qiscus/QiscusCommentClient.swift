@@ -442,8 +442,7 @@ open class QiscusCommentClient: NSObject {
                 self.delegate?.qiscusService(didChangeContent: data)
             }
             let fileURL = file.fileURL.replacingOccurrences(of: " ", with: "%20")
-            manager.request(fileURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
-                .responseData(completionHandler: { response in
+            manager.request(fileURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil).responseData(completionHandler: { response in
                     Qiscus.printLog(text: "download result: \(response)")
                     if let imageData = response.data {
                         if !isAudioFile{
@@ -452,7 +451,6 @@ open class QiscusCommentClient: NSObject {
                                 if !(file.fileExtension == "gif" || file.fileExtension == "gif_"){
                                     thumbImage = QiscusFile.createThumbImage(image, fillImageSize: thumbImageRef)
                                 }
-                                
                                 
                                 DispatchQueue.main.async(execute: {
                                     file.updateDownloadProgress(1.0)
@@ -573,17 +571,18 @@ open class QiscusCommentClient: NSObject {
                             self.delegate?.qiscusService(didChangeContent: data)
                         }
                     }
-                }).downloadProgress(closure: { progressData in
+                }
+            ).downloadProgress(closure: { progressData in
+                Qiscus.logicThread.async {
                     let progress = CGFloat(progressData.fractionCompleted)
-                    let progressDiv = progress - data.downloadProgress
                     data.downloadProgress = progress
+                    data.isDownloading = true
                     file.updateDownloadProgress(progress)
                     
-                    if progressDiv > 0.1 {
-                        self.delegate?.qiscusService(didChangeContent: data)
-                        Qiscus.printLog(text: "Download progress: \(progress)")
-                    }
-                })
+                    self.delegate?.qiscusService(didChangeContent: data)
+                    Qiscus.printLog(text: "Download progress: \(progress)")
+                }
+            })
         }
     }
     
