@@ -48,7 +48,7 @@
                                 <rect key="frame" x="129" y="3" width="179" height="179"/>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ZEi-7i-IVN" customClass="ChatFileButton" customModule="Qiscus" customModuleProvider="target">
-                                <rect key="frame" x="198.5" y="72.5" width="40" height="40"/>
+                                <rect key="frame" x="199" y="73" width="40" height="40"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="40" id="Cfy-no-SWZ"/>
                                     <constraint firstAttribute="width" constant="40" id="KXe-GL-SS7"/>
@@ -56,16 +56,16 @@
                                 <state key="normal" image="ic_download_chat"/>
                             </button>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Fdl-wE-vVk">
-                                <rect key="frame" x="198.5" y="72.5" width="40" height="40"/>
+                                <rect key="frame" x="199" y="73" width="40" height="40"/>
                             </imageView>
                             <view clipsSubviews="YES" alpha="0.55000001192092896" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nAE-GU-M7b">
-                                <rect key="frame" x="198.5" y="72.5" width="40" height="40"/>
+                                <rect key="frame" x="199" y="73" width="40" height="40"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="a27-Is-ESA" userLabel="progressView">
-                                        <rect key="frame" x="0.0" y="-50" width="40" height="90"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="40" height="40"/>
                                         <color key="backgroundColor" red="0.14316189230000001" green="0.78178174079999996" blue="0.53946288170000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="90" id="pRr-VQ-DCe"/>
+                                            <constraint firstAttribute="height" constant="40" id="pRr-VQ-DCe"/>
                                         </constraints>
                                     </view>
                                 </subviews>
@@ -77,7 +77,7 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="100%" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4pl-iQ-IyF">
-                                <rect key="frame" x="198.5" y="72.5" width="40" height="40"/>
+                                <rect key="frame" x="199" y="73" width="40" height="40"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -166,7 +166,7 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <image name="ic_download_chat" width="49" height="49"/>
+        <image name="ic_download_chat" width="30" height="30"/>
         <image name="ic_info_time" width="24" height="24"/>
         <image name="movie_frame" width="147" height="132"/>
     </resources>

@@ -30,7 +30,7 @@ class QCellMediaLeft: QChatCell {
     
     let defaultDateLeftMargin:CGFloat = -10
     var tapRecognizer: UITapGestureRecognizer?
-    let maxProgressHeight:CGFloat = 36.0
+    let maxProgressHeight:CGFloat = 40
     var isVideo = false
     
     
@@ -41,8 +41,7 @@ class QCellMediaLeft: QChatCell {
         progressContainer.clipsToBounds = true
         progressContainer.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.65).cgColor
         progressContainer.layer.borderWidth = 2
-        downloadButton.setImage(Qiscus.image(named: "ic_download_chat")!.withRenderingMode(.alwaysTemplate), for: UIControlState())
-        downloadButton.tintColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.7)
+        downloadButton.setImage(Qiscus.image(named: "ic_download_chat")!.withRenderingMode(.alwaysOriginal), for: UIControlState())
         self.videoPlay.image = Qiscus.image(named: "play_button")
         self.videoFrame.image = Qiscus.image(named: "movie_frame")?.withRenderingMode(.alwaysTemplate)
         self.videoFrame.tintColor = UIColor.black
@@ -97,9 +96,13 @@ class QCellMediaLeft: QChatCell {
             balloonWidth.constant = 185
         }
         
-        if data.commentType == .video{
+        if data.commentType == .video || data.fileType == "gif"{
+            if data.fileType == "gif" {
+                self.videoPlay.image = Qiscus.image(named: "ic_gif")
+            }else{
+                self.videoFrame.isHidden = false
+            }
             self.videoPlay.isHidden = false
-            self.videoFrame.isHidden = false
         }else{
             self.videoPlay.isHidden = true
             self.videoFrame.isHidden = true
