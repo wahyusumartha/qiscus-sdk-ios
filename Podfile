@@ -6,7 +6,6 @@ target 'Example' do
 
     pod 'Alamofire', '~> 4.0'
     pod 'AlamofireImage'
-    pod 'PusherSwift'
     pod 'RealmSwift'
     pod 'SwiftyJSON'
     pod 'ImageViewer'
@@ -19,7 +18,6 @@ target 'Qiscus' do
     
     pod 'Alamofire', '~> 4.0'
     pod 'AlamofireImage'
-    pod 'PusherSwift'
     pod 'RealmSwift'
     pod 'SwiftyJSON'
     pod 'ImageViewer'
