@@ -18,7 +18,7 @@ open class QiscusLinkData: Object {
             if localId > 0 {
                 let id = self.localId
                 let value = linkURL
-                Qiscus.dbThread.async {
+                
                     let realm = try! Realm()
                     let searchQuery = NSPredicate(format: "localId == \(id)")
                     
@@ -32,7 +32,7 @@ open class QiscusLinkData: Object {
                             }
                         }
                     }
-                }
+                
             }
         }
     }
@@ -41,7 +41,7 @@ open class QiscusLinkData: Object {
             if localId > 0 {
                 let id = self.localId
                 let value = linkTitle
-                Qiscus.dbThread.async {
+                
                     let realm = try! Realm()
                     let searchQuery = NSPredicate(format: "localId == \(id)")
                     
@@ -55,7 +55,7 @@ open class QiscusLinkData: Object {
                             }
                         }
                     }
-                }
+                
             }
         }
     }
@@ -64,7 +64,7 @@ open class QiscusLinkData: Object {
             if localId > 0 {
                 let id = self.localId
                 let value = linkDescription
-                Qiscus.dbThread.async {
+                
                     let realm = try! Realm()
                     let searchQuery = NSPredicate(format: "localId == \(id)")
                     
@@ -78,7 +78,7 @@ open class QiscusLinkData: Object {
                             }
                         }
                     }
-                }
+                
             }
         }
     }
@@ -87,7 +87,7 @@ open class QiscusLinkData: Object {
             if localId > 0 {
                 let id = self.localId
                 let value = linkImageURL
-                Qiscus.dbThread.async {
+                
                     let realm = try! Realm()
                     let searchQuery = NSPredicate(format: "localId == \(id)")
                     
@@ -101,7 +101,7 @@ open class QiscusLinkData: Object {
                             }
                         }
                     }
-                }
+                
             }
         }
     }
@@ -110,7 +110,7 @@ open class QiscusLinkData: Object {
             if localId > 0 {
                 let id = self.localId
                 let value = linkImageThumbURL
-                Qiscus.dbThread.async {
+                
                     let realm = try! Realm()
                     let searchQuery = NSPredicate(format: "localId == \(id)")
                     
@@ -124,7 +124,7 @@ open class QiscusLinkData: Object {
                             }
                         }
                     }
-                }
+                
             }
         }
     }
@@ -182,7 +182,7 @@ open class QiscusLinkData: Object {
     open class var LastId:Int{
         get{
             let realm = try! Realm()
-            let RetNext = realm.objects(QiscusLinkData.self).sorted(byProperty: "localId")
+            let RetNext = realm.objects(QiscusLinkData.self).sorted(byKeyPath: "localId")
             
             if RetNext.count > 0 {
                 let last = RetNext.last!
@@ -205,7 +205,7 @@ open class QiscusLinkData: Object {
         }
     }
     open func saveLink(){ //  
-        Qiscus.dbThread.async {
+        
             let realm = try! Realm()
             let searchQuery = NSPredicate(format: "linkURL == '\(self.linkURL)'")
             
@@ -220,11 +220,11 @@ open class QiscusLinkData: Object {
                     self.downloadThumbImage()
                 }
             }
-        }
+        
     }
     open func updateThumbURL(url:String){
         let localId = self.localId
-        Qiscus.dbThread.async {
+        
             let realm = try! Realm()
             let searchQuery = NSPredicate(format: "localId == '\(localId)'")
             
@@ -236,11 +236,11 @@ open class QiscusLinkData: Object {
                     firstLink.linkImageThumbURL = url
                 }
             }
-        }
+        
     }
     open func updateLinkImageURL(url:String){
         let localId = self.localId
-        Qiscus.dbThread.async {
+        
             let realm = try! Realm()
             let searchQuery = NSPredicate(format: "localId == '\(localId)'")
             
@@ -252,7 +252,7 @@ open class QiscusLinkData: Object {
                     firstLink.linkImageURL = url
                 }
             }
-        }
+        
     }
     fileprivate func createThumbLink(_ image:UIImage)->UIImage{
         var smallPart:CGFloat = image.size.height
@@ -274,9 +274,8 @@ open class QiscusLinkData: Object {
         if self.linkImageURL != ""{
             let linkData = QiscusLinkData.copyLink(link: self)
             let imageURL = self.linkImageURL
-            let manager = Alamofire.SessionManager.default
             Qiscus.printLog(text: "Downloading image for link \(self.linkURL)")
-            manager.request(self.linkImageURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
+            Alamofire.request(self.linkImageURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
                 .responseData(completionHandler: { response in
                     Qiscus.printLog(text: "download linkImage result: \(response)")
                     if let data = response.data {

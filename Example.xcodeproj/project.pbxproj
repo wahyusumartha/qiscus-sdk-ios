@@ -51,6 +51,8 @@
 		39955B741D656F0A00927ADD /* QiscusChatVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39955B721D656F0A00927ADD /* QiscusChatVC.swift */; };
 		39955B751D656F0A00927ADD /* QiscusChatVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39955B731D656F0A00927ADD /* QiscusChatVC.xib */; };
 		39955B7F1D65992200927ADD /* QiscusUIConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39955B7E1D65992200927ADD /* QiscusUIConfiguration.swift */; };
+		3996D6B41E8F6BF400EFC462 /* QiscusFileDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3996D6B31E8F6BF400EFC462 /* QiscusFileDB.swift */; };
+		3996D6B61E8FD33D00EFC462 /* QiscusRoomDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3996D6B51E8FD33D00EFC462 /* QiscusRoomDB.swift */; };
 		399761401E2367D4004076C0 /* QChatFooterLeft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3997613E1E2367D4004076C0 /* QChatFooterLeft.swift */; };
 		399761411E2367D4004076C0 /* QChatFooterLeft.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3997613F1E2367D4004076C0 /* QChatFooterLeft.xib */; };
 		399761441E2368CF004076C0 /* QChatFooterRight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399761421E2368CF004076C0 /* QChatFooterRight.swift */; };
@@ -69,6 +71,7 @@
 		39D92CF21E1DD64200F36A1A /* QCellMediaRight.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39D92CF01E1DD64200F36A1A /* QCellMediaRight.xib */; };
 		39D92CF51E1DF5FF00F36A1A /* QCellAudioLeft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D92CF31E1DF5FF00F36A1A /* QCellAudioLeft.swift */; };
 		39D92CF61E1DF5FF00F36A1A /* QCellAudioLeft.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39D92CF41E1DF5FF00F36A1A /* QCellAudioLeft.xib */; };
+		39DC748D1E8F2894005487C1 /* QiscusCommentDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39DC748C1E8F2894005487C1 /* QiscusCommentDB.swift */; };
 		39DD2ED51E5E8119006AB580 /* QiscusCommentPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390F44721E540BEE00C6B64B /* QiscusCommentPresenter.swift */; };
 		39E195EA1DBDE3F4000DDF76 /* QReachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E195E91DBDE3F4000DDF76 /* QReachability.swift */; };
 		39E195EC1DBDE4A8000DDF76 /* QiscusAsyncImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E195EB1DBDE4A8000DDF76 /* QiscusAsyncImageView.swift */; };
@@ -185,6 +188,8 @@
 		39955B7E1D65992200927ADD /* QiscusUIConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusUIConfiguration.swift; path = Qiscus/QiscusUIConfiguration.swift; sourceTree = "<group>"; };
 		39955B801D65A2D900927ADD /* QAsyncImageView.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QAsyncImageView.framework; path = "../../../Library/Developer/Xcode/DerivedData/Example-gfoaldkgffrxjdelneboawwkwliw/Build/Products/Debug-iphonesimulator/QAsyncImageView/QAsyncImageView.framework"; sourceTree = "<group>"; };
 		39955B811D65A2D900927ADD /* QToasterSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QToasterSwift.framework; path = "../../../Library/Developer/Xcode/DerivedData/Example-gfoaldkgffrxjdelneboawwkwliw/Build/Products/Debug-iphonesimulator/QToasterSwift/QToasterSwift.framework"; sourceTree = "<group>"; };
+		3996D6B31E8F6BF400EFC462 /* QiscusFileDB.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusFileDB.swift; path = Qiscus/QiscusFileDB.swift; sourceTree = "<group>"; };
+		3996D6B51E8FD33D00EFC462 /* QiscusRoomDB.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusRoomDB.swift; path = Qiscus/QiscusRoomDB.swift; sourceTree = "<group>"; };
 		3997613E1E2367D4004076C0 /* QChatFooterLeft.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QChatFooterLeft.swift; path = Qiscus/QChatFooterLeft.swift; sourceTree = "<group>"; };
 		3997613F1E2367D4004076C0 /* QChatFooterLeft.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = QChatFooterLeft.xib; path = Qiscus/QChatFooterLeft.xib; sourceTree = "<group>"; };
 		399761421E2368CF004076C0 /* QChatFooterRight.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QChatFooterRight.swift; path = Qiscus/QChatFooterRight.swift; sourceTree = "<group>"; };
@@ -204,6 +209,7 @@
 		39D92CF01E1DD64200F36A1A /* QCellMediaRight.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = QCellMediaRight.xib; path = Qiscus/QCellMediaRight.xib; sourceTree = "<group>"; };
 		39D92CF31E1DF5FF00F36A1A /* QCellAudioLeft.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QCellAudioLeft.swift; path = Qiscus/QCellAudioLeft.swift; sourceTree = "<group>"; };
 		39D92CF41E1DF5FF00F36A1A /* QCellAudioLeft.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = QCellAudioLeft.xib; path = Qiscus/QCellAudioLeft.xib; sourceTree = "<group>"; };
+		39DC748C1E8F2894005487C1 /* QiscusCommentDB.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusCommentDB.swift; path = Qiscus/QiscusCommentDB.swift; sourceTree = "<group>"; };
 		39E195E91DBDE3F4000DDF76 /* QReachability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QReachability.swift; path = Qiscus/QReachability.swift; sourceTree = "<group>"; };
 		39E195EB1DBDE4A8000DDF76 /* QiscusAsyncImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusAsyncImageView.swift; path = Qiscus/QiscusAsyncImageView.swift; sourceTree = "<group>"; };
 		39E195ED1DBDE9CC000DDF76 /* QToasterConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QToasterConfig.swift; path = Qiscus/QToasterConfig.swift; sourceTree = "<group>"; };
@@ -277,6 +283,9 @@
 				39F1F7331D3B92E800FF1C8C /* QiscusParticipant.swift */,
 				39F1F7341D3B92E800FF1C8C /* QiscusTopic.swift */,
 				39F1F7351D3B92E800FF1C8C /* QiscusUser.swift */,
+				39DC748C1E8F2894005487C1 /* QiscusCommentDB.swift */,
+				3996D6B31E8F6BF400EFC462 /* QiscusFileDB.swift */,
+				3996D6B51E8FD33D00EFC462 /* QiscusRoomDB.swift */,
 			);
 			name = DataModel;
 			sourceTree = "<group>";
@@ -790,6 +799,7 @@
 				392C85BA1E1F73A20059D5BD /* QCellAudio.swift in Sources */,
 				39D92CE11E1B824E00F36A1A /* QChatHeaderCell.swift in Sources */,
 				399761441E2368CF004076C0 /* QChatFooterRight.swift in Sources */,
+				3996D6B61E8FD33D00EFC462 /* QiscusRoomDB.swift in Sources */,
 				39F1F7391D3B92E800FF1C8C /* QiscusParticipant.swift in Sources */,
 				395E08131D43B8850021370F /* QiscusRoomDelegate.swift in Sources */,
 				39E195EC1DBDE4A8000DDF76 /* QiscusAsyncImageView.swift in Sources */,
@@ -798,7 +808,9 @@
 				392C85B41E1F1B790059D5BD /* QChatCell.swift in Sources */,
 				39F1F7461D3B931E00FF1C8C /* QProgressData.swift in Sources */,
 				392C85B11E1F17BE0059D5BD /* QCellFileLeft.swift in Sources */,
+				39DC748D1E8F2894005487C1 /* QiscusCommentDB.swift in Sources */,
 				392A52621D80EF1D0007300D /* QiscusConfigDelegate.swift in Sources */,
+				3996D6B41E8F6BF400EFC462 /* QiscusFileDB.swift in Sources */,
 				39128CA51D6C357E00C3BEA2 /* ChatTapRecognizer.swift in Sources */,
 				39E195F11DBDE9CC000DDF76 /* QToasterSwift.swift in Sources */,
 				39128CA61D6C357E00C3BEA2 /* ChatInputText.swift in Sources */,
@@ -963,8 +975,6 @@
 					"-framework",
 					"\"ImageViewer\"",
 					"-framework",
-					"\"PusherSwift\"",
-					"-framework",
 					"\"Realm\"",
 					"-framework",
 					"\"RealmSwift\"",
@@ -997,8 +1007,6 @@
 					"\"AlamofireImage\"",
 					"-framework",
 					"\"ImageViewer\"",
-					"-framework",
-					"\"PusherSwift\"",
 					"-framework",
 					"\"Realm\"",
 					"-framework",
@@ -1037,8 +1045,6 @@
 					"\"AlamofireImage\"",
 					"-framework",
 					"\"ImageViewer\"",
-					"-framework",
-					"\"PusherSwift\"",
 					"-framework",
 					"\"Realm\"",
 					"-framework",
@@ -1081,8 +1087,6 @@
 					"\"AlamofireImage\"",
 					"-framework",
 					"\"ImageViewer\"",
-					"-framework",
-					"\"PusherSwift\"",
 					"-framework",
 					"\"Realm\"",
 					"-framework",

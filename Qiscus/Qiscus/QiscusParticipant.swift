@@ -13,13 +13,13 @@ open class QiscusParticipant: Object {
     open dynamic var localId:Int = 0
     open dynamic var participantRoomId:Int = 0
     open dynamic var participantEmail:String = ""
-    open dynamic var lastReadCommentId:Int64 = 0
-    open dynamic var lastDeliveredCommentId:Int64 = 0
+    open dynamic var lastReadCommentId:Int = 0
+    open dynamic var lastDeliveredCommentId:Int = 0
     
     open class var LastId:Int{
         get{
             let realm = try! Realm()
-            let RetNext = realm.objects(QiscusParticipant.self).sorted(byProperty: "localId")
+            let RetNext = realm.objects(QiscusParticipant.self).sorted(byKeyPath: "localId")
             
             if RetNext.count > 0 {
                 let last = RetNext.last!
@@ -33,8 +33,8 @@ open class QiscusParticipant: Object {
     override open class func primaryKey() -> String {
         return "localId"
     }
-    open class func getMinReadCommentId(onRoom roomId:Int)->Int64{
-        var minRead = Int64(0)
+    open class func getMinReadCommentId(onRoom roomId:Int)->Int{
+        var minRead = Int(0)
         let participants = QiscusParticipant.getParticipant(onRoomId: roomId)
         if participants.count > 0{
             minRead = participants.first!.lastReadCommentId
@@ -46,8 +46,8 @@ open class QiscusParticipant: Object {
         }
         return minRead
     }
-    open class func getMinDeliveredCommentId(onRoom roomId:Int)->Int64{
-        var minDelivered = Int64(0)
+    open class func getMinDeliveredCommentId(onRoom roomId:Int)->Int{
+        var minDelivered = Int(0)
         let participants = QiscusParticipant.getParticipant(onRoomId: roomId)
         if participants.count > 0{
             minDelivered = participants.first!.lastDeliveredCommentId
@@ -70,7 +70,7 @@ open class QiscusParticipant: Object {
             return nil
         }
     }
-    open func updateLastReadCommentId(commentId:Int64){
+    open func updateLastReadCommentId(commentId:Int){
         if self.lastReadCommentId < commentId {
             let realm = try! Realm()
             try! realm.write {
@@ -79,7 +79,7 @@ open class QiscusParticipant: Object {
         }
         updateLastDeliveredCommentId(commentId: commentId)
     }
-    open func updateLastDeliveredCommentId(commentId:Int64){
+    open func updateLastDeliveredCommentId(commentId:Int){
         if self.lastDeliveredCommentId < commentId{
         let realm = try! Realm()
             try! realm.write {
@@ -111,7 +111,7 @@ open class QiscusParticipant: Object {
             let participant = QiscusParticipant()
             participant.participantRoomId = roomId
             participant.participantEmail = userEmail
-            if let room = QiscusRoom.getRoomById(roomId){
+            if let room = QiscusRoom.room(withId: roomId){
                 if let lastComment = room.roomLastComment{
                     participant.lastReadCommentId = lastComment.commentId
                     participant.lastDeliveredCommentId = lastComment.commentId

@@ -21,10 +21,9 @@ import CocoaMQTT
     static let showDebugPrint = true
     
     // MARK: - Thread
-    static let realtimeThread = DispatchQueue(label: "com.qiscus.realtime")
-    static let logThread = DispatchQueue(label: "com.qiscus.log")
-    static let apiThread = DispatchQueue(label: "com.qiscus.httpRequest")
-    static let dbThread = DispatchQueue(label: "com.qiscus.db")
+    static let realtimeThread = DispatchQueue.global()
+    static let logThread = DispatchQueue.global()
+    static let apiThread = DispatchQueue.global()
     static let uiThread = DispatchQueue.main
     static let logicThread = DispatchQueue.global()
     
@@ -62,10 +61,6 @@ import CocoaMQTT
     }
     @objc public class var isLoggedIn:Bool{
         get{
-            Qiscus.checkDatabaseMigration()
-            if !Qiscus.sharedInstance.connected {
-                Qiscus.setupReachability()
-            }
             return QiscusMe.isLoggedIn
         }
     }
@@ -523,7 +518,7 @@ import CocoaMQTT
     class func checkDatabaseMigration(){
         let realmURL = Realm.Configuration.defaultConfiguration.fileURL!
         Qiscus.printLog(text:"realmURL \(realmURL)")
-        Qiscus.dbThread.async {
+        
             let currentSchema:UInt64 = 17
             var configuration = Realm.Configuration()
             
@@ -555,7 +550,7 @@ import CocoaMQTT
                 }
             }
             Realm.Configuration.defaultConfiguration = configuration
-        }
+        
     }
     
     // MARK: - Create NEW Chat
@@ -835,7 +830,7 @@ extension Qiscus:CocoaMQTTDelegate{
         let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
         mqtt.subscribe(commentChannel, qos: .qos2)
         if state == .active {
-            let rooms = QiscusRoom.getAllRoom()
+            let rooms = QiscusRoom.all()
             for room in rooms{
                 let deliveryChannel = "r/\(room.roomId)/\(room.roomLastCommentTopicId)/+/d"
                 let readChannel = "r/\(room.roomId)/\(room.roomLastCommentTopicId)/+/r"
@@ -864,7 +859,7 @@ extension Qiscus:CocoaMQTTDelegate{
     }
     public func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16 ){
         print("cocoaMQTT got message in topic: \(message.topic)")
-        print("cocaMQTT message: \(message.string)")
+        print("cocaMQTT message: \(String(describing: message.string))")
         // let state = UIApplication.shared.applicationState
         Qiscus.logicThread.async {
             if let messageData = message.string {
@@ -875,12 +870,12 @@ extension Qiscus:CocoaMQTTDelegate{
                     
                     let json = JSON.parse(messageData)
                     let notifTopicId = json["topic_id"].intValue
-                    let commentBeforeId = json["comment_before_id"].int64Value
+                    let commentBeforeId = json["comment_before_id"].intValue
                     let roomId = json["room_id"].intValue
-                    let commentId = json["id"].int64Value
+                    let commentId = json["id"].intValue
                     let email = json["email"].stringValue
                     
-                    if let room = QiscusRoom.getRoom(withLastTopicId: notifTopicId){
+                    if let room = QiscusRoom.room(withLastTopicId: notifTopicId){
                         let dataCount = QiscusComment.getComments(inTopicId: notifTopicId).count
                         if  dataCount > 0 && QiscusComment.comment(withId: commentBeforeId) == nil {
                             if let syncId = QiscusComment.getLastSyncCommentId(notifTopicId, unsyncCommentId: commentId){
@@ -906,11 +901,11 @@ extension Qiscus:CocoaMQTTDelegate{
                             var roomChanged = false
                             var userChanged = false
                             if let user = QiscusUser.getUserWithEmail(email){
-                                if let room = QiscusRoom.getRoomById(roomId){
+                                if let room = QiscusRoom.room(withId: roomId){
                                     if room.roomType == .group{
                                         if room.roomName != json["room_name"].stringValue{
                                             roomChanged = true
-                                            room.updateRoomName(json["room_name"].stringValue)
+                                            room.roomName = json["room_name"].stringValue
                                         }
                                     }
                                     if user.userEmail != QiscusMe.sharedInstance.email{
@@ -936,12 +931,11 @@ extension Qiscus:CocoaMQTTDelegate{
                                             presenterDelegate.dataPresenter(didChangeUser: copyUser, onUserWithEmail: copyUser.userEmail)
                                         }
                                         if roomChanged {
-                                            let copyRoom = QiscusRoom.copyRoom(room: room)
-                                            presenterDelegate.dataPresenter(didChangeRoom: copyRoom, onRoomWithId: roomId)
+                                            presenterDelegate.dataPresenter(didChangeRoom: room, onRoomWithId: roomId)
                                         }
                                     }
                                 }
-                            }else if let room = QiscusRoom.getRoomById(roomId){
+                            }else if let room = QiscusRoom.room(withId: roomId){
                                 let user = QiscusUser()
                                 user.userEmail = email
                                 user.userFullName = json["username"].stringValue
@@ -950,8 +944,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                 QiscusParticipant.addParticipant(newUser.userEmail, roomId: room.roomId)
                                 if let presenterDelegate = QiscusDataPresenter.shared.delegate {
                                     presenterDelegate.dataPresenter(didChangeUser: newUser, onUserWithEmail: newUser.userEmail)
-                                    let copyRoom = QiscusRoom.copyRoom(room: room)
-                                    presenterDelegate.dataPresenter(didChangeRoom: copyRoom, onRoomWithId: roomId)
+                                    presenterDelegate.dataPresenter(didChangeRoom: room, onRoomWithId: roomId)
                                 }
                             }
                             if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
@@ -1016,7 +1009,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     break
                 case "d":
                     let messageArr = messageData.characters.split(separator: ":")
-                    let commentId = Int64(String(messageArr[0]))!
+                    let commentId = Int(String(messageArr[0]))!
                     let commentUniqueId:String = String(messageArr[1])
                     let userEmail = String(channelArr[3])
                     if let comment = QiscusComment.comment(withId: commentId){
@@ -1027,7 +1020,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     break
                 case "r":
                     let messageArr = messageData.characters.split(separator: ":")
-                    let commentId = Int64(String(messageArr[0]))!
+                    let commentId = Int(String(messageArr[0]))!
                     let commentUniqueId:String = String(messageArr[1])
                     let userEmail = String(channelArr[3])
                     if let comment = QiscusComment.comment(withId: commentId){

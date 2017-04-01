@@ -32,7 +32,7 @@ open class QiscusMe: NSObject {
     open var token = ""
     open var userKey = ""
     open var baseUrl = ""
-    open var lastCommentId = Int64(0)
+    open var lastCommentId = Int(0)
     
     fileprivate override init(){
         let userData = UserDefaults.standard
@@ -60,7 +60,7 @@ open class QiscusMe: NSObject {
         if let url = userData.value(forKey: "qiscus_base_url") as? String{
             self.baseUrl = url
         }
-        if let lastComment = userData.value(forKey: "qiscus_lastComment_id") as? Int64{
+        if let lastComment = userData.value(forKey: "qiscus_lastComment_id") as? Int{
             self.lastCommentId = lastComment
         }
     }
@@ -74,7 +74,7 @@ open class QiscusMe: NSObject {
         QiscusMe.sharedInstance.avatarUrl = json["avatar"].stringValue
         QiscusMe.sharedInstance.rtKey = json["rtKey"].stringValue
         QiscusMe.sharedInstance.token = json["token"].stringValue
-        QiscusMe.sharedInstance.lastCommentId = json["last_comment_id"].int64Value
+        QiscusMe.sharedInstance.lastCommentId = json["last_comment_id"].intValue
                 
         QiscusMe.sharedInstance.userData.set(json["id"].intValue, forKey: "qiscus_id")
         QiscusMe.sharedInstance.userData.set(json["email"].stringValue, forKey: "qiscus_email")
@@ -82,7 +82,7 @@ open class QiscusMe: NSObject {
         QiscusMe.sharedInstance.userData.set(json["avatar"].stringValue, forKey: "qiscus_avatar_url")
         QiscusMe.sharedInstance.userData.set(json["rtKey"].stringValue, forKey: "qiscus_rt_key")
         QiscusMe.sharedInstance.userData.set(json["token"].stringValue, forKey: "qiscus_token")
-        QiscusMe.sharedInstance.userData.set(json["last_comment_id"].int64Value, forKey: "qiscus_lastComment_id")
+        QiscusMe.sharedInstance.userData.set(json["last_comment_id"].intValue, forKey: "qiscus_lastComment_id")
         return QiscusMe.sharedInstance
     }
     

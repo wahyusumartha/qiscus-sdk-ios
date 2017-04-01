@@ -21,20 +21,159 @@ public enum QFileType:Int {
     case others
 }
 
-open class QiscusFile: Object {
-    open dynamic var fileId:Int = 0
-    open dynamic var fileURL:String = ""
-    open dynamic var fileLocalPath:String = ""
-    open dynamic var fileThumbPath:String = ""
-    open dynamic var fileTopicId:Int = 0
-    open dynamic var fileCommentId:Int64 = 0
-    open dynamic var isDownloading:Bool = false
-    open dynamic var isUploading:Bool = false
-    open dynamic var downloadProgress:CGFloat = 0
-    open dynamic var uploadProgress:CGFloat = 0
-    open dynamic var uploaded = true
-    open dynamic var fileMiniThumbPath:String = ""
-    open dynamic var fileMimeType:String = ""
+public class QiscusFile: NSObject {
+    public var fileId:Int = 0
+    public var fileURL:String = ""{
+        didSet{
+            if !self.copyProcess {
+                if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        fileDB.fileURL = self.fileURL
+                    }
+                    if self.isUploaded && (self.fileType == .video || self.fileType == .media) && self.fileMiniThumbPath == ""{
+                        DispatchQueue.main.async {
+                            self.downloadMiniImage()
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public var fileLocalPath:String = ""{
+        didSet{
+            if !self.copyProcess {
+                if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        fileDB.fileLocalPath = self.fileLocalPath
+                    }
+                }
+            }
+        }
+    }
+    public var fileThumbPath:String = ""{
+        didSet{
+            if !self.copyProcess {
+                if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        fileDB.fileThumbPath = self.fileThumbPath
+                    }
+                }
+            }
+        }
+    }
+    public var fileTopicId:Int = 0{
+        didSet{
+            if !self.copyProcess {
+                if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        fileDB.fileTopicId = self.fileTopicId
+                    }
+                }
+            }
+        }
+    }
+    public var fileCommentId:Int = 0{
+        didSet{
+            if !self.copyProcess {
+                if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        fileDB.fileCommentId = self.fileCommentId
+                    }
+                }
+            }
+        }
+    }
+    public var isDownloading:Bool = false{
+        didSet{
+            if !self.copyProcess {
+                if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        fileDB.isDownloading = self.isDownloading
+                    }
+                }
+            }
+        }
+    }
+    public var isUploading:Bool = false {
+        didSet{
+            if !self.copyProcess {
+                if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        fileDB.isUploading = self.isUploading
+                    }
+                }
+            }
+        }
+    }
+    public var downloadProgress:CGFloat = 0{
+        didSet{
+            if !self.copyProcess {
+                if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        fileDB.downloadProgress = self.downloadProgress
+                    }
+                }
+            }
+        }
+    }
+    public var uploadProgress:CGFloat = 0{
+        didSet{
+            if !self.copyProcess {
+                if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        fileDB.uploadProgress = self.uploadProgress
+                    }
+                }
+            }
+        }
+    }
+    public var uploaded = true{
+        didSet{
+            if !self.copyProcess {
+                if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        fileDB.uploaded = self.uploaded
+                    }
+                }
+            }
+        }
+    }
+    public var fileMiniThumbPath:String = ""{
+        didSet{
+            if !self.copyProcess {
+                if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        fileDB.fileMiniThumbPath = self.fileMiniThumbPath
+                    }
+                }
+            }
+        }
+    }
+    public var fileMimeType:String = ""{
+        didSet{
+            if !self.copyProcess {
+                if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        fileDB.fileMimeType = self.fileMimeType
+                    }
+                }
+            }
+        }
+    }
+    
+    public var copyProcess = false
     
     var isUploaded:Bool{
         get{
@@ -96,17 +235,17 @@ open class QiscusFile: Object {
         }
     }
     
-    open var fileExtension:String{
+    public var fileExtension:String{
         get{
             return getExtension()
         }
     }
-    open var fileName:String{
+    public var fileName:String{
         get{
             return getFileName()
         }
     }
-    open var fileType:QFileType{
+    public var fileType:QFileType{
         get {
             var type:QFileType = QFileType.others
             if(isMediaFile()){
@@ -121,7 +260,7 @@ open class QiscusFile: Object {
             return type
         }
     }
-    open var qiscus:Qiscus{
+    public var qiscus:Qiscus{
         get{
             return Qiscus.sharedInstance
         }
@@ -151,207 +290,28 @@ open class QiscusFile: Object {
         
         return ""
     }
-    override open class func primaryKey() -> String {
-        return "fileId"
-    }
-    class func copyFile(file: QiscusFile)->QiscusFile{
-        let newFile = QiscusFile()
-        newFile.fileId = file.fileId
-        newFile.fileURL = file.fileURL
-        newFile.fileLocalPath = file.fileLocalPath
-        newFile.fileThumbPath = file.fileThumbPath
-        newFile.fileTopicId = file.fileTopicId
-        newFile.fileCommentId = file.fileCommentId
-        newFile.isDownloading = file.isDownloading
-        newFile.isUploading = file.isUploading
-        newFile.downloadProgress = file.downloadProgress
-        newFile.uploadProgress = file.uploadProgress
-        newFile.uploaded = file.uploaded
-        newFile.fileMiniThumbPath = file.fileMiniThumbPath
-        return newFile
-    }
-    open class func getLastId() -> Int{
-        let realm = try! Realm()
-        let RetNext = realm.objects(QiscusFile.self).sorted(byProperty: "fileId")
-        
-        if RetNext.count > 0 {
-            let last = RetNext.last!
-            return last.fileId
-        } else {
-            return 0
-        }
-    }
-    open class func getCommentFileWithComment(_ comment: QiscusComment)->QiscusFile?{
-        let realm = try! Realm()
-        var searchQuery = NSPredicate()
-        var file:QiscusFile?
-        
-        searchQuery = NSPredicate(format: "fileId == \(comment.commentFileId)")
-        let fileData = realm.objects(QiscusFile.self).filter(searchQuery)
-        
-        if(fileData.count == 0){
-            searchQuery = NSPredicate(format: "fileCommentId == %d", comment.commentId)
-            let data = realm.objects(QiscusFile.self).filter(searchQuery)
-            if(data.count > 0){
-                file = QiscusFile.copyFile(file: data.first!)
-            }
+    
+    public class func file(forComment comment: QiscusComment)->QiscusFile?{
+        if let fileDB = QiscusFileDB.fileDB(withId: comment.commentFileId){
+            return fileDB.file()
+        }else if let fileDB = QiscusFileDB.fileDB(withCommentId: comment.commentId){
+            return fileDB.file()
         }else{
-            file = QiscusFile.copyFile(file: fileData.first!)
-        }
-        return file
-    }
-    open class func getCommentFileWithURL(_ url: String)->QiscusFile?{
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "fileURL == '\(url)'")
-        let fileData = realm.objects(QiscusFile.self).filter(searchQuery)
-        
-        if(fileData.count == 0){
             return nil
-        }else{
-            return QiscusFile.copyFile(file: fileData.first!)
         }
     }
-    open class func getCommentFile(_ fileId: Int)->QiscusFile?{
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "fileId == %d", fileId)
-        let fileData = realm.objects(QiscusFile.self).filter(searchQuery)
-        
-        if(fileData.count == 0){
+    public class func file(withURL url: String)->QiscusFile?{
+        if let fileDB = QiscusFileDB.file(withURL: url){
+            return fileDB.file()
+        }else{
             return nil
-        }else{
-            return QiscusFile.copyFile(file: fileData.first!)
         }
     }
-    open func saveCommentFile(){
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "fileId == %d", self.fileId)
-        let fileData = realm.objects(QiscusFile.self).filter(searchQuery)
-        
-        if(fileData.count == 0){
-            try! realm.write {
-                self.fileId = QiscusFile.getLastId() + 1
-                realm.add(QiscusFile.copyFile(file: self))
-            }
-            if self.isUploaded && (self.fileType == .video || self.fileType == .media){
-                DispatchQueue.main.async {
-                    self.downloadMiniImage()
-                }
-            }
-        }else{
-            let file = fileData.first!
-            try! realm.write {
-                file.fileURL = self.fileURL
-                file.fileLocalPath = self.fileLocalPath
-                file.fileThumbPath = self.fileThumbPath
-                file.fileTopicId = self.fileTopicId
-                file.fileCommentId = self.fileCommentId
-            }
-            if self.isUploaded && (self.fileType == .video || self.fileType == .media) && self.fileMiniThumbPath == ""{
-                DispatchQueue.main.async {
-                    self.downloadMiniImage()
-                }
-            }
-        }
+    public class func newFile()->QiscusFile{
+        let newDBFile = QiscusFileDB.newFile()
+        return newDBFile.file()
     }
     
-    // MARK: - Setter Methode
-    open func updateMiniThumbPath(_ path:String){
-        let realm = try! Realm()
-        try! realm.write{
-            self.fileMiniThumbPath = path
-        }
-    }
-    open func updateURL(_ url: String){
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "fileId == %d", self.fileId)
-        let fileData = realm.objects(QiscusFile.self).filter(searchQuery)
-        
-        if(fileData.count == 0){
-            self.fileURL = url
-        }else{
-            let file = fileData.first!
-            try! realm.write{
-                file.fileURL = url
-            }
-        }
-    }
-    open func updateCommentId(_ commentId: Int64){
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "fileId == %d", self.fileId)
-        let fileData = realm.objects(QiscusFile.self).filter(searchQuery)
-        
-        if(fileData.count == 0){
-            self.fileCommentId = commentId
-        }else{
-            let file = fileData.first!
-            try! realm.write{
-                file.fileCommentId = commentId
-            }
-        }
-    }
-    open func updateLocalPath(_ url: String){
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "fileId == %d", self.fileId)
-        let fileData = realm.objects(QiscusFile.self).filter(searchQuery)
-        
-        if(fileData.count == 0){
-            self.fileLocalPath = url
-        }else{
-            let file = fileData.first!
-            try! realm.write{
-                file.fileLocalPath = url
-            }
-        }
-    }
-    open func updateThumbPath(_ url: String){
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "fileId == %d", self.fileId)
-        let fileData = realm.objects(QiscusFile.self).filter(searchQuery)
-        
-        if(fileData.count == 0){
-            self.fileThumbPath = url
-        }else{
-            let file = fileData.first!
-            try! realm.write{
-                file.fileThumbPath = url
-            }
-        }
-    }
-    open func updateIsUploading(_ uploading: Bool){
-        let realm = try! Realm()
-        
-        try! realm.write{
-            self.isUploading = uploading
-        }
-    }
-    open func updateIsDownloading(_ downloading: Bool){
-        let realm = try! Realm()
-
-        try! realm.write{
-            self.isDownloading = downloading
-        }
-    }
-    open func updateUploadProgress(_ progress: CGFloat){
-        let realm = try! Realm()
-        
-        try! realm.write{
-            self.uploadProgress = progress
-        }
-    }
-    open func updateDownloadProgress(_ progress: CGFloat){
-        let realm = try! Realm()
-        
-        try! realm.write{
-            self.downloadProgress = progress
-        }
-    }
     // MARK: Additional Methode
     fileprivate func getExtension() -> String{
         var ext = ""
@@ -362,7 +322,7 @@ open class QiscusFile: Object {
         }
         return ext
     }
-    open class func getExtension(fromURL url:String) -> String{
+    public class func getExtension(fromURL url:String) -> String{
         var ext = ""
         if url.range(of: ".") != nil{
             let fileNameArr = url.characters.split(separator: ".")
@@ -441,21 +401,21 @@ open class QiscusFile: Object {
     }
     
     // MARK: - image manipulation
-    open func getLocalThumbImage() -> UIImage{
+    public func getLocalThumbImage() -> UIImage{
         if let image = UIImage(contentsOfFile: (self.fileThumbPath as String)) {
             return image
         }else{
             return UIImage()
         }
     }
-    open func getLocalImage() -> UIImage{
+    public func getLocalImage() -> UIImage{
         if let image = UIImage(contentsOfFile: (self.fileLocalPath as String)) {
             return image
         }else{
             return UIImage()
         }
     }
-    open class func createThumbImage(_ image:UIImage, fillImageSize:UIImage? = nil)->UIImage{
+    public class func createThumbImage(_ image:UIImage, fillImageSize:UIImage? = nil)->UIImage{
         let inputImage = image
 
         if fillImageSize == nil{
@@ -479,7 +439,7 @@ open class QiscusFile: Object {
             return newImage
         }
     }
-    open class func resizeImage(_ image:UIImage, toFillSize:CGSize)->UIImage{
+    public class func resizeImage(_ image:UIImage, toFillSize:CGSize)->UIImage{
 
         var ratio:CGFloat = 1
         let widthRatio:CGFloat = CGFloat(toFillSize.width/image.size.width)
@@ -501,7 +461,7 @@ open class QiscusFile: Object {
         return newImage!
         
     }
-    open class func saveFile(_ fileData: Data, fileName: String) -> String {
+    public class func saveFile(_ fileData: Data, fileName: String) -> String {
         let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
         let directoryPath = "\(documentsPath)/Qiscus"
         if !FileManager.default.fileExists(atPath: directoryPath){
@@ -517,7 +477,7 @@ open class QiscusFile: Object {
         
         return path
     }
-    open func isLocalFileExist()->Bool{
+    public func isLocalFileExist()->Bool{
         var check:Bool = false
         
         let checkValidation = FileManager.default
@@ -529,7 +489,6 @@ open class QiscusFile: Object {
         return check
     }
     private func downloadMiniImage(){
-        let manager = Alamofire.SessionManager.default
         Qiscus.printLog(text: "Downloading miniImage for url \(self.fileURL)")
         
         var thumbMiniPath = self.fileURL.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/").replacingOccurrences(of: " ", with: "%20")
@@ -550,7 +509,7 @@ open class QiscusFile: Object {
             thumbMiniPath = newThumbURL
         }
         
-        manager.request(thumbMiniPath, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
+        Alamofire.request(thumbMiniPath, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
             .responseData(completionHandler: { response in
                 Qiscus.printLog(text: "download miniImage result: \(response)")
                 if let data = response.data {
@@ -576,9 +535,7 @@ open class QiscusFile: Object {
                         
                         try? UIImagePNGRepresentation(thumbImage)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
                         
-                        DispatchQueue.main.async(execute: {
-                            self.updateMiniThumbPath(thumbPath)
-                        })
+                        self.fileMiniThumbPath = thumbPath
                     }
                 }
             }).downloadProgress(closure: { progressData in

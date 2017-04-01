@@ -10,62 +10,146 @@ import UIKit
 import RealmSwift
 import SwiftyJSON
 import Alamofire
+
 public enum QiscusRoomType {
     case single,group
 }
-open class QiscusRoom: Object {
-    open dynamic var localId:Int = 0
-    open dynamic var roomId:Int = 0 
-    open dynamic var roomName:String = ""
-    open dynamic var roomAvatarURL:String = ""
-    open dynamic var roomAvatarLocalPath:String = ""
-    open dynamic var roomLastCommentTopicId:Int = 0
-
-    open dynamic var optionalData:String = ""
-    open dynamic var distinctId:String = ""
-    open dynamic var user:String = ""
-    open dynamic var isGroup:Bool = false
-    open dynamic var hasLoadMore:Bool = true{
+public class QiscusRoom: NSObject {
+    public var localId:Int = 0
+    public var roomId:Int = 0 {
         didSet{
-            let id = self.localId
-            let value = self.hasLoadMore
-            Qiscus.dbThread.async {
-                let realm = try! Realm()
-                let searchQuery:NSPredicate = NSPredicate(format: "localId == \(id)")
-                let roomData = realm.objects(QiscusRoom.self).filter(searchQuery)
-                
-                if roomData.count > 0{
-                    let room = roomData.first!
-                    if value != room.hasLoadMore{
+            if !self.copyProcess {
+                if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        roomDB.roomId = self.roomId
+                    }
+                }
+            }
+        }
+    }
+    public var roomName:String = ""{
+        didSet{
+            if !self.copyProcess {
+                if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        roomDB.roomName = self.roomName
+                    }
+                }
+            }
+        }
+    }
+    public var roomAvatarURL:String = ""{
+        didSet{
+            if !self.copyProcess {
+                if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
+                    let realm = try! Realm()
+                    
+                    if roomDB.roomAvatarURL != self.roomAvatarURL{
                         try! realm.write {
-                            room.hasLoadMore = value
+                            roomDB.roomAvatarURL = self.roomAvatarURL
+                            roomDB.roomAvatarLocalPath = ""
+                        }
+                        if self.needDownload {
+                            self.downloadThumbAvatar()
                         }
                     }
                 }
             }
         }
     }
-    private var copyProcess = false
-    
-    class func copyRoom(room:QiscusRoom)->QiscusRoom{
-        let roomCopy = QiscusRoom()
-        roomCopy.copyProcess = true
-        roomCopy.localId = room.localId
-        roomCopy.roomId = room.roomId
-        roomCopy.roomName = room.roomName
-        roomCopy.roomAvatarURL = room.roomAvatarURL
-        roomCopy.roomAvatarLocalPath = room.roomAvatarLocalPath
-        roomCopy.roomLastCommentTopicId = room.roomLastCommentTopicId
-        roomCopy.optionalData = room.optionalData
-        roomCopy.distinctId = room.distinctId
-        roomCopy.user = room.user
-        roomCopy.isGroup = room.isGroup
-        roomCopy.copyProcess = false
-        return roomCopy
+    public var roomAvatarLocalPath:String = ""{
+        didSet{
+            if !self.copyProcess {
+                if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        roomDB.roomAvatarLocalPath = self.roomAvatarLocalPath
+                    }
+                }
+            }
+        }
     }
+    public var roomLastCommentTopicId:Int = 0{
+        didSet{
+            if !self.copyProcess {
+                if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        roomDB.roomLastCommentTopicId = self.roomLastCommentTopicId
+                    }
+                }
+            }
+        }
+    }
+    public var optionalData:String = ""{
+        didSet{
+            if !self.copyProcess {
+                if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        roomDB.optionalData = self.optionalData
+                    }
+                }
+            }
+        }
+    }
+    public var distinctId:String = ""{
+        didSet{
+            if !self.copyProcess {
+                if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        roomDB.distinctId = self.distinctId
+                    }
+                }
+            }
+        }
+    }
+    public var user:String = ""{
+        didSet{
+            if !self.copyProcess {
+                if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        roomDB.user = self.user
+                    }
+                }
+            }
+        }
+    }
+    public var isGroup:Bool = false{
+        didSet{
+            if !self.copyProcess {
+                if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        roomDB.isGroup = self.isGroup
+                    }
+                }
+            }
+        }
+    }
+    public var hasLoadMore:Bool = true{
+        didSet{
+            if !self.copyProcess {
+                if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
+                    let realm = try! Realm()
+                    try! realm.write {
+                        roomDB.hasLoadMore = self.hasLoadMore
+                    }
+                }
+            }
+        }
+    }
+    // MARK: - process flag
+    public var copyProcess = false
+    public var needDownload = true
+    
     public var roomUnreadMessage:[QiscusComment]{
         get{
-            return QiscusComment.getUnreadComments(inTopic: roomLastCommentTopicId)
+            return QiscusCommentDB.unreadComments(inTopic: self.roomLastCommentTopicId)
         }
     }
     public var roomLastComment:QiscusComment?{
@@ -86,7 +170,7 @@ open class QiscusRoom: Object {
             }
         }
     }
-    open var isAvatarExist:Bool{
+    public var isAvatarExist:Bool{
         get{
             var check:Bool = false
             if QiscusHelper.isFileExist(inLocalPath: self.roomAvatarLocalPath){
@@ -95,369 +179,223 @@ open class QiscusRoom: Object {
             return check
         }
     }
-    open var participants:[QiscusParticipant]{
+    public var participants:[QiscusParticipant]{
         get{
             return QiscusParticipant.getParticipant(onRoomId: roomId)
         }
     }
     
-    open var avatarImage:UIImage?{
+    public var avatarImage:UIImage?{
         get{
             if isAvatarExist{
                 if let image = UIImage.init(contentsOfFile: self.roomAvatarLocalPath){
                     return image
                 }else{
+                    self.downloadThumbAvatar()
                     return nil
                 }
             }else{
+                self.downloadThumbAvatar()
                 return nil
             }
         }
     }
-    
-    // MARK: - Primary Key
-    override open class func primaryKey() -> String {
-        return "localId"
+    // MARK: - New Data
+    public class func newRoom()->QiscusRoom{
+        let roomDB = QiscusRoomDB.newRoomDB()
+        return roomDB.room()
     }
     
     // MARK: - Getter Methode
-    private class func roomWithId(_ roomId:Int)->QiscusRoom?{ //
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "roomId == %d",roomId)
-        let roomData = realm.objects(QiscusRoom.self).filter(searchQuery)
-        
-        if(roomData.count > 0){
-            return roomData.first
+    public class func room(withId roomId:Int)->QiscusRoom?{ //
+        if let roomDB = QiscusRoomDB.roomDB(withId: roomId){
+            return roomDB.room()
         }else{
             return nil
         }
     }
-    open class func getRoomById(_ roomId:Int)->QiscusRoom?{ // 
-        if let room = QiscusRoom.roomWithId(roomId){
-            return QiscusRoom.copyRoom(room: room)
-        }
-        return nil
-    }
-    open class func getRoom(_ withDistinctId:String, andUserEmail:String)->QiscusRoom?{ // 
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "distinctId == '\(withDistinctId)' AND user == '\(andUserEmail)' AND isGroup == false")
-        let roomData = realm.objects(QiscusRoom.self).filter(searchQuery)
-        
-        if(roomData.count > 0){
-            return QiscusRoom.copyRoom(room: roomData.first!)
+    public class func room(withDistinctId distinctId:String, andUserEmail email:String)->QiscusRoom?{ //
+        if let roomDB = QiscusRoomDB.roomDB(withDistinctId: distinctId, andUserEmail: email){
+            return roomDB.room()
         }else{
             return nil
         }
     }
-    open class func getRoom(withLastTopicId topicId:Int)->QiscusRoom?{ // 
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "roomLastCommentTopicId == %d",topicId)
-        let roomData = realm.objects(QiscusRoom.self).filter(searchQuery)
-        
-        if(roomData.count > 0){
-            return QiscusRoom.copyRoom(room: roomData.first!)
+    public class func room(withLastTopicId topicId:Int)->QiscusRoom?{ //
+        if let roomDB = QiscusRoomDB.roomDB(withLastTopicId: topicId) {
+            return roomDB.room()
         }else{
             return nil
         }
     }
-    open class func getLastId() -> Int{
-        let realm = try! Realm()
-        let RetNext = realm.objects(QiscusRoom.self).sorted(byProperty: "localId")
-        
-        if RetNext.count > 0 {
-            let last = RetNext.last!
-            return last.localId
-        } else {
-            return 0
-        }
-    }
-    open class func getRoom(_ fromJSON:JSON)->QiscusRoom{
-        let room = QiscusRoom()
-        if let id = fromJSON["id"].int {  room.roomId = id  }
-
-        if let topicId = fromJSON["last_topic_id"].int { room.roomLastCommentTopicId = topicId}
-        if let option = fromJSON["options"].string {
-            if option != "" && option != "<null>" {
-                room.optionalData = option
-            }
-        }
-        if let chatType = fromJSON["chat_type"].string{
-            if chatType == "single"{
-                room.isGroup = false
+    public class func room(fromJSON json:JSON)->QiscusRoom{
+        var room = QiscusRoom()
+        print("room json data: \(json)")
+        if let id = json["id"].int {
+            if let roomDB = QiscusRoomDB.roomDB(withId: id){
+                room = roomDB.room()
             }else{
-                room.isGroup = true
+                room = QiscusRoomDB.newRoomDB().room()
+                room.roomId = id
+            }
+            if let topicId = json["last_topic_id"].int {
+                room.roomLastCommentTopicId = topicId
+            }
+            if let option = json["options"].string {
+                if option != "" && option != "<null>" {
+                    room.optionalData = option
+                }
+            }
+            if let chatType = json["chat_type"].string{
+                if chatType == "single"{
+                    room.isGroup = false
+                }else{
+                    room.isGroup = true
+                }
+            }
+            if let distinctId = json["distinct_id"].string {
+                room.distinctId = distinctId
+            }
+            if let roomName = json["room_name"].string {
+                room.roomName = roomName
+            }
+            if let roomAvatar = json["avatar_url"].string {
+                room.roomAvatarURL = roomAvatar
             }
         }
-        if let distinctId = fromJSON["distinct_id"].string { room.distinctId = distinctId}
-        if let roomName = fromJSON["room_name"].string { room.roomName = roomName}
-        if let roomAvatar = fromJSON["avatar_url"].string {room.roomAvatarURL = roomAvatar}
-        
-        room.saveRoom()
         return room
     }
-    open func updateUser(_ user:String){
-        let realm = try! Realm()
-        try! realm.write {
-            self.user = user
-        }
-    }
-    open func updateDistinctId(_ distinctId:String){
-        let realm = try! Realm()
-        try! realm.write {
-            self.distinctId = distinctId
-        }
-    }
-    open func updateRoomAvatar(_ avatarURL:String, avatarImage:UIImage? = nil){
-        let realm = try! Realm()
-        let searchQuery:NSPredicate = NSPredicate(format: "roomId == %d", self.roomId)
-        let roomData = realm.objects(QiscusRoom.self).filter(searchQuery)
-        
-        if roomData.count > 0 {
-            let room = roomData.first!
-            if room.roomAvatarURL != avatarURL{
-                try! realm.write {
-                    room.roomAvatarURL = avatarURL
-                    room.roomAvatarLocalPath = ""
-                }
-                if avatarImage == nil {
-                    room.downloadThumbAvatar()
-                }else{
-                    room.updateAvatar(image: avatarImage!)
-                }
-            }
-        }
-    }
-    open func updateRoomName(_ name:String){
-        let realm = try! Realm()
-        let searchQuery:NSPredicate = NSPredicate(format: "roomId == %d", self.roomId)
-        let roomData = realm.objects(QiscusRoom.self).filter(searchQuery)
-        
-        if roomData.count > 0 {
-            let room = roomData.first!
-            if room.roomName != name{
-                try! realm.write {
-                    room.roomName = name
-                }
-            }
-        }
-    }
-    open func updateRoomOptions(_ options:String){
-        let realm = try! Realm()
-        let searchQuery:NSPredicate = NSPredicate(format: "roomId == %d", self.roomId)
-        let roomData = realm.objects(QiscusRoom.self).filter(searchQuery)
-        
-        if roomData.count > 0 {
-            let room = roomData.first!
-            if room.optionalData != options{
-                try! realm.write {
-                    room.optionalData = options
-                }
-            }
-        }
-    }
-    open class func getAllRoom() -> [QiscusRoom]{
-        var allRoom = [QiscusRoom]()
-        let realm = try! Realm()
-        
-        let roomData = realm.objects(QiscusRoom.self)
-        
-        if(roomData.count > 0){
-            for room in roomData{
-                allRoom.append(QiscusRoom.copyRoom(room: room))
-            }
-        }
-        return allRoom
-    }
-
-    // MARK: - Save Room
-    open func saveRoom(){
-        let realm = try! Realm()
-        
-        let searchQuery:NSPredicate = NSPredicate(format: "roomId == %d", self.roomId)
-        let roomData = realm.objects(QiscusRoom.self).filter(searchQuery)
-        
-        if(roomData.count == 0){
-            try! realm.write {
-                self.localId = QiscusRoom.getLastId() + 1
-                realm.add(self)
-            }
-            if self.roomAvatarLocalPath == "" {
-                self.downloadThumbAvatar()
-            }
+    
+    public func updateRoomAvatar(_ avatarURL:String, avatarImage:UIImage? = nil){
+        if let image = avatarImage {
+            self.needDownload = false
+            self.roomAvatarURL = avatarURL
+            self.needDownload = true
+            self.updateAvatar(image: image)
         }else{
-            let room = roomData.first!
-            var needDownloadAvatar = false
-            if room.roomAvatarLocalPath == "" {
-                needDownloadAvatar = true
-            }
-            try! realm.write {
-                room.roomId = self.roomId
-                if room.roomName != "" { room.roomName = self.roomName }
+            self.roomAvatarURL = avatarURL
+        }
+    }
+    
+    // MARK: - [QiscusRoom]
+    public class func all() -> [QiscusRoom]{
+        return QiscusRoomDB.all()
+    }
 
-                if roomAvatarURL != self.roomAvatarURL{
-                    needDownloadAvatar = true
+    // MARK: - Download Room Avatar
+    public func updateAvatar(image:UIImage){
+        Qiscus.logicThread.async {
+            let time = Double(Date().timeIntervalSince1970)
+            let timeToken = UInt64(time * 10000)
+            let fileExt = QiscusFile.getExtension(fromURL: self.roomAvatarURL)
+            let fileName = "ios-roomAvatar-\(timeToken).\(fileExt)"
+            
+            if fileExt == "jpg" || fileExt == "jpg_" || fileExt == "png" || fileExt == "png_" {
+                let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
+                let directoryPath = "\(documentsPath)/Qiscus"
+                
+                if !FileManager.default.fileExists(atPath: directoryPath){
+                    do {
+                        try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
+                    } catch let error as NSError {
+                        Qiscus.printLog(text: error.localizedDescription);
+                    }
                 }
-                room.roomAvatarURL = self.roomAvatarURL
-                room.roomLastCommentTopicId = self.roomLastCommentTopicId
-                if room.optionalData != "" { room.optionalData = self.optionalData }
-                if room.distinctId != "" {room.distinctId = self.distinctId}
-            }
-            if needDownloadAvatar {
-                room.downloadThumbAvatar()
+                
+                let path = "\(directoryPath)/\(fileName)"
+                if fileExt == "png" || fileExt == "png_" {
+                    try? UIImagePNGRepresentation(image)!.write(to: URL(fileURLWithPath: path), options: [.atomic])
+                }
+                else if fileExt == "jpg" || fileExt == "jpg_"{
+                    try? UIImageJPEGRepresentation(image, 1.0)!.write(to: URL(fileURLWithPath: path), options: [.atomic])
+                }
+                
+                self.roomAvatarLocalPath = path
+                
+                if let presenterDelegate = QiscusDataPresenter.shared.delegate{
+                    presenterDelegate.dataPresenter(didChangeRoom: self, onRoomWithId: self.roomId)
+                }
+                
             }
         }
     }
     
-    // MARK: - Download Room Avatar
-    open func updateAvatar(image:UIImage){
-        var thumbImage = UIImage()
-        let time = Double(Date().timeIntervalSince1970)
-        let timeToken = UInt64(time * 10000)
-        
-        let fileExt = QiscusFile.getExtension(fromURL: self.roomAvatarURL)
-        let fileName = "ios-roomAvatar-\(timeToken).\(fileExt)"
-        
-        if fileExt == "jpg" || fileExt == "jpg_" || fileExt == "png" || fileExt == "png_" {
-            thumbImage = self.createThumbLink(image)
-            
-            let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
-            let directoryPath = "\(documentsPath)/Qiscus"
-            if !FileManager.default.fileExists(atPath: directoryPath){
-                do {
-                    try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
-                } catch let error as NSError {
-                    Qiscus.printLog(text: error.localizedDescription);
-                }
-            }
-            
-            
-            let thumbPath = "\(directoryPath)/\(fileName)"
-            
-            if fileExt == "png" || fileExt == "png_" {
-                try? UIImagePNGRepresentation(thumbImage)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
-            } else if fileExt == "jpg" || fileExt == "jpg_"{
-                try? UIImageJPEGRepresentation(thumbImage, 1.0)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
-            }
-            let chatRoom = QiscusRoom.copyRoom(room: self)
-            DispatchQueue.main.async(execute: {
-                chatRoom.updateThumbURL(url: thumbPath)
-            })
-        }
-    }
-    open func downloadThumbAvatar(){
-        let chatRoom = QiscusRoom.copyRoom(room: self)
-        if chatRoom.roomAvatarURL != ""{
-            if !Qiscus.qiscusDownload.contains("\(chatRoom.roomAvatarURL):room:\(chatRoom.roomId)"){
-                let manager = Alamofire.SessionManager.default
-                Qiscus.printLog(text: "Downloading avatar for roomName: \(chatRoom.roomName)")
-                let checkURL = "\(chatRoom.roomAvatarURL):room:\(chatRoom.roomId)"
-                Qiscus.qiscusDownload.append(checkURL)
-                manager.request(chatRoom.roomAvatarURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
-                    .responseData(completionHandler: { response in
-                        Qiscus.printLog(text: "download linkImage result: \(response)")
-                        if let data = response.data {
-                            if let image = UIImage(data: data) {
-                                var thumbImage = UIImage()
-                                let time = Double(Date().timeIntervalSince1970)
-                                let timeToken = UInt64(time * 10000)
-                                
-                                let fileExt = QiscusFile.getExtension(fromURL: chatRoom.roomAvatarURL)
-                                let fileName = "ios-roomAvatar-\(timeToken).\(fileExt)"
-                                
-                                if fileExt == "jpg" || fileExt == "jpg_" || fileExt == "png" || fileExt == "png_" {
-                                    thumbImage = chatRoom.createThumbLink(image)
+    public func downloadThumbAvatar(){
+        Qiscus.logicThread.async {
+            if self.roomAvatarURL != ""{
+                let url = self.roomAvatarURL
+                let checkURL = "\(self.roomAvatarURL):room:\(self.roomId)"
+                if !Qiscus.qiscusDownload.contains(checkURL){
+                    Qiscus.printLog(text: "Downloading avatar for room: \(self.roomName)")
+                    Qiscus.qiscusDownload.append(checkURL)
+                    
+                    Alamofire.request(url, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
+                        .responseData(completionHandler: { response in
+                            Qiscus.printLog(text: "download avatar result: \(response)")
+                            if let data = response.data {
+                                if let image = UIImage(data: data) {
+                                    let fileExt = QiscusFile.getExtension(fromURL: url)
+                                    let fileName = "ios-roomAvatar-\(self.roomId).\(fileExt)"
                                     
-                                    let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
-                                    let directoryPath = "\(documentsPath)/Qiscus"
-                                    if !FileManager.default.fileExists(atPath: directoryPath){
-                                        do {
-                                            try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
-                                        } catch let error as NSError {
-                                            Qiscus.printLog(text: error.localizedDescription);
+                                    if fileExt == "jpg" || fileExt == "jpg_" || fileExt == "png" || fileExt == "png_" {
+                                        
+                                        let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
+                                        let directoryPath = "\(documentsPath)/Qiscus"
+                                        if !FileManager.default.fileExists(atPath: directoryPath){
+                                            do {
+                                                try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
+                                            } catch let error as NSError {
+                                                Qiscus.printLog(text: error.localizedDescription);
+                                            }
                                         }
-                                    }
-                                    
-                                    
-                                    let thumbPath = "\(directoryPath)/\(fileName)"
-                                    
-                                    if fileExt == "png" || fileExt == "png_" {
-                                        try? UIImagePNGRepresentation(thumbImage)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
-                                    } else if fileExt == "jpg" || fileExt == "jpg_"{
-                                        try? UIImageJPEGRepresentation(thumbImage, 1.0)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
-                                    }
-                                    DispatchQueue.main.async(execute: {
-                                        chatRoom.updateThumbURL(url: thumbPath)
-                                    })
-                                    var i = 0
-                                    var index:Int?
-                                    for downloadURL in Qiscus.qiscusDownload{
-                                        if downloadURL == checkURL{
-                                            index = i
-                                            break
+                                        
+                                        let path = "\(directoryPath)/\(fileName)"
+                                        
+                                        if fileExt == "png" || fileExt == "png_" {
+                                            try? UIImagePNGRepresentation(image)!.write(to: URL(fileURLWithPath: path), options: [.atomic])
+                                        } else if fileExt == "jpg" || fileExt == "jpg_"{
+                                            try? UIImageJPEGRepresentation(image, 1.0)!.write(to: URL(fileURLWithPath: path), options: [.atomic])
                                         }
-                                        i += 1
-                                    }
-                                    if index != nil{
-                                        Qiscus.qiscusDownload.remove(at: index!)
-                                    }
-                                }else{
-                                    Qiscus.printLog(text: "failed to save room avatar on room: \(chatRoom.roomName) with id: \(chatRoom.roomId)")
-                                    var i = 0
-                                    var index:Int?
-                                    for downloadURL in Qiscus.qiscusDownload{
-                                        if downloadURL == checkURL{
-                                            index = i
-                                            break
+                                        
+                                        self.roomAvatarLocalPath = path
+                                        
+                                        if let presenterDelegate = QiscusDataPresenter.shared.delegate{
+                                            presenterDelegate.dataPresenter(didChangeRoom: self, onRoomWithId: self.roomId)
                                         }
-                                        i += 1
-                                    }
-                                    if index != nil{
-                                        Qiscus.qiscusDownload.remove(at: index!)
+                                        var i = 0
+                                        var index:Int?
+                                        for downloadURL in Qiscus.qiscusDownload{
+                                            if downloadURL == checkURL{
+                                                index = i
+                                                break
+                                            }
+                                            i += 1
+                                        }
+                                        if index != nil{
+                                            Qiscus.qiscusDownload.remove(at: index!)
+                                        }
+                                    }else{
+                                        Qiscus.printLog(text: "failed to save room avatar on room: \(self.roomName) with id: \(self.roomId)")
+                                        var i = 0
+                                        var index:Int?
+                                        for downloadURL in Qiscus.qiscusDownload{
+                                            if downloadURL == checkURL{
+                                                index = i
+                                                break
+                                            }
+                                            i += 1
+                                        }
+                                        if index != nil{
+                                            Qiscus.qiscusDownload.remove(at: index!)
+                                        }
                                     }
                                 }
                             }
-                        }
-                    }).downloadProgress(closure: { progressData in
-                        let progress = CGFloat(progressData.fractionCompleted)
-                        
-                        Qiscus.printLog(text: "Download room (\(chatRoom.roomId)) avatar image progress: \(progress)")
-                    })
-            }
-        }
-    }
-    fileprivate func createThumbLink(_ image:UIImage)->UIImage{
-        var smallPart:CGFloat = image.size.height
-        
-        if(image.size.width > image.size.height){
-            smallPart = image.size.width
-        }
-        let ratio:CGFloat = CGFloat(100.0/smallPart)
-        let newSize = CGSize(width: (image.size.width * ratio),height: (image.size.height * ratio))
-        
-        UIGraphicsBeginImageContext(newSize)
-        image.draw(in: CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height))
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        return newImage!
-    }
-    open func updateThumbURL(url:String){
-        let realm = try! Realm()
-        let searchQuery:NSPredicate = NSPredicate(format: "roomId == %d", self.roomId)
-        let roomData = realm.objects(QiscusRoom.self).filter(searchQuery)
-        
-        if roomData.count > 0 {
-            let room = roomData.first!
-            if room.roomAvatarLocalPath != url{
-                try! realm.write {
-                    room.roomAvatarLocalPath = url
-                }
-                if let presenterDelegate = QiscusDataPresenter.shared.delegate{
-                    let copyRoom = QiscusRoom.copyRoom(room: room)
-                    presenterDelegate.dataPresenter(didChangeRoom: copyRoom, onRoomWithId: copyRoom.roomId)
+                        }).downloadProgress(closure: { progressData in
+                            let progress = CGFloat(progressData.fractionCompleted)
+                            
+                            Qiscus.printLog(text: "Download room (\(self.roomId)) avatar image progress: \(progress)")
+                        })
                 }
             }
         }

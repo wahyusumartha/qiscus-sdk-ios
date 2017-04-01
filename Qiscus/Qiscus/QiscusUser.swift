@@ -217,7 +217,7 @@ open class QiscusUser: Object {
     // MARK: - Getter Methode
     open func getLastId() -> Int{
         let realm = try! Realm()
-        let RetNext = realm.objects(QiscusUser.self).sorted(byProperty: "localId")
+        let RetNext = realm.objects(QiscusUser.self).sorted(byKeyPath: "localId")
         
         if RetNext.count > 0 {
             let last = RetNext.last!
@@ -357,10 +357,9 @@ open class QiscusUser: Object {
             if !Qiscus.qiscusDownload.contains("\(user.userAvatarURL):user:\(user.userId)"){
                 let checkURL = "\(user.userAvatarURL):user:\(user.userId)"
                 Qiscus.qiscusDownload.append(checkURL)
-                let manager = Alamofire.SessionManager.default
                 Qiscus.printLog(text: "Downloading avatar for user \(user.userEmail)")
                 
-                manager.request(user.userAvatarURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
+                Alamofire.request(user.userAvatarURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
                     .responseData(completionHandler: { response in
                         Qiscus.printLog(text: "download avatar result: \(response)")
                         if let data = response.data {

@@ -17,8 +17,8 @@ public enum QiscusCommentPresenterType:Int {
 }
 @objc public class QiscusCommentPresenter: NSObject {
     // commentAttribute
-    var localId:Int64 = 0
-    var commentId:Int64 = 0
+    var localId:Int = 0
+    var commentId:Int = 0
     var commentText = ""
     var commentAttributedText:NSMutableAttributedString?
     var commentDate = ""
@@ -89,11 +89,7 @@ public enum QiscusCommentPresenterType:Int {
     // getter variable
     var comment:QiscusComment?{
         get{
-            if let saved = QiscusComment.comment(withLocalId: self.localId){
-                return QiscusComment.copyComment(comment: saved)
-            }else{
-                return nil
-            }
+            return QiscusCommentDB.comment(withLocalId: self.localId)
         }
     }
     var linkTextAttributes:[String: Any]{
@@ -233,18 +229,16 @@ public enum QiscusCommentPresenterType:Int {
             }
             break
         default:
-            var commentFile = QiscusFile.getCommentFileWithComment(comment)
             var file = QiscusFile()
-            if commentFile == nil {
-                commentFile = QiscusFile()
-                commentFile!.updateURL(comment.getMediaURL())
-                commentFile!.updateCommentId(comment.commentId)
-                commentFile!.saveCommentFile()
-                
-                commentFile = QiscusFile.getCommentFileWithComment(comment)!
-                comment.commentFileId = commentFile!.fileId
+            
+            if let commentFile = QiscusFile.file(forComment: comment){
+                file = commentFile
+            }else{
+                file = QiscusFile.newFile()
+                file.fileURL = comment.getMediaURL()
+                file.fileCommentId = comment.commentId
+                comment.commentFileId = file.fileId
             }
-            file = QiscusFile.copyFile(file: commentFile!)
             
             commentPresenter.localFileExist = file.isLocalFileExist()
             commentPresenter.isUploaded = file.isUploaded

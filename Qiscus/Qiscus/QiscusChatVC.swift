@@ -92,7 +92,7 @@ public class QiscusChatVC: UIViewController{
     var topicId:Int?{
         didSet{
             if topicId != nil{
-                room = QiscusRoom.getRoom(withLastTopicId: topicId!)
+                room = QiscusRoom.room(withLastTopicId: topicId!)
             }else{
                 room = nil
             }
@@ -105,7 +105,7 @@ public class QiscusChatVC: UIViewController{
                 loadWithUser = true
                 if users!.count == 1 {
                     let user = users![0]
-                    room = QiscusRoom.getRoom(distincId, andUserEmail: user)
+                    room = QiscusRoom.room(withDistinctId: distincId, andUserEmail: user)
                 }
             }
         }
@@ -113,7 +113,7 @@ public class QiscusChatVC: UIViewController{
     var roomId:Int?{
         didSet{
             if roomId != nil {
-                room = QiscusRoom.getRoomById(roomId!)
+                room = QiscusRoom.room(withId: self.roomId!)
             }else{
                 room = nil
             }
@@ -324,7 +324,7 @@ public class QiscusChatVC: UIViewController{
         self.cameraButton.setImage(cameraImage, for: .normal)
         self.audioButton.setImage(audioImage, for: .normal)
         if self.room != nil && !firstLoad {
-            if let newRoom = QiscusRoom.getRoomById(room!.roomId){
+            if let newRoom = QiscusRoom.room(withId: self.room!.roomId){
                 self.room = newRoom
             }
         }
@@ -527,7 +527,7 @@ public class QiscusChatVC: UIViewController{
             self.view.layoutIfNeeded()
             if self.isLastRowVisible {
                 let delay = 0.1 * Double(NSEC_PER_SEC)
-                let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
+                let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
                 DispatchQueue.main.asyncAfter(deadline: time, execute: {
                     if self.comments.count > 0 {
                         self.scrollToBottom()
@@ -555,7 +555,7 @@ public class QiscusChatVC: UIViewController{
             self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
         }else{
             let delay = 0.1 * Double(NSEC_PER_SEC)
-            let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
+            let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
             DispatchQueue.main.asyncAfter(deadline: time, execute: {
                 if self.comments.count > 0 {
                     self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
@@ -602,7 +602,7 @@ public class QiscusChatVC: UIViewController{
     
     open func scrollToBotomFromNoData(){
         let delay = 0.1 * Double(NSEC_PER_SEC)
-        let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
+        let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
         DispatchQueue.main.asyncAfter(deadline: time, execute: {
             if self.comments.count > 0 {
                 self.scrollToBottom()
@@ -796,7 +796,7 @@ public class QiscusChatVC: UIViewController{
     func loadMore(){
         if self.room != nil {
             if Qiscus.shared.connected{
-                var firstCommentId = Int64(0)
+                var firstCommentId = Int(0)
                 if self.comments.count > 0 {
                     firstCommentId = self.comments.first!.first!.commentId
                 }
@@ -836,14 +836,16 @@ public class QiscusChatVC: UIViewController{
         self.roomAvatar.backgroundColor = UIColor.white
         
         let image = Qiscus.image(named: "room_avatar")
-        self.roomAvatar.image = image
-        if self.room != nil{
-            if let avatar = room!.avatarImage {
+        
+        
+        if let chatRoom = self.room{
+            if let avatar = chatRoom.avatarImage {
                 self.roomAvatar.image = avatar
             }else{
-                room!.downloadThumbAvatar()
+                self.roomAvatar.loadAsync(chatRoom.roomAvatarURL, placeholderImage: image)
             }
         }
+        
         if UIApplication.shared.userInterfaceLayoutDirection == .leftToRight {
             self.roomAvatar.frame = CGRect(x: 0,y: 0,width: 32,height: 32)
         }else{
@@ -1042,7 +1044,7 @@ public class QiscusChatVC: UIViewController{
         Qiscus.logicThread.async {
             if self.isPresence{
                 if self.comments.count > 0 {
-                    let lastComment = QiscusComment.copyComment(comment: self.comments.last!.last!.comment!)
+                    let lastComment = self.comments.last!.last!.comment!
                     if let lastComentInTopic = QiscusComment.getLastSentComent(inRoom: lastComment.roomId){
                         if let participant = QiscusParticipant.getParticipant(withEmail: QiscusConfig.sharedInstance.USER_EMAIL, roomId: lastComentInTopic.roomId){
                             if participant.lastReadCommentId < lastComentInTopic.commentId{
@@ -1363,7 +1365,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
             }
         }
     }
-    public func dataPresenter(didChangeStatusFrom commentId: Int64, toStatus: QiscusCommentStatus, topicId: Int){
+    public func dataPresenter(didChangeStatusFrom commentId: Int, toStatus: QiscusCommentStatus, topicId: Int){
         Qiscus.logicThread.async {
             if let chatRoom = self.room{
                 if topicId == chatRoom.roomLastCommentTopicId{
@@ -1529,11 +1531,8 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         }
     }
     public func dataPresenter(didChangeRoom room: QiscusRoom, onRoomWithId roomId: Int) {
-        if let newRoom = QiscusRoom.getRoomById(roomId){
-            if newRoom.roomName != room.roomName{
-                newRoom.roomName = room.roomName
-            }
-            self.room = newRoom
+        if self.room?.roomId == room.roomId{
+            self.room = room
         }
     }
     public func dataPresenter(didFailLoad error: String) {
@@ -1654,7 +1653,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                 show = true
             }else{
                 if let commentData = comment.comment{
-                    if let file = QiscusFile.getCommentFileWithComment(commentData){
+                    if let file = QiscusFile.file(forComment: commentData){
                         if file.isUploaded || file.isOnlyLocalFileExist{
                             show = true
                         }

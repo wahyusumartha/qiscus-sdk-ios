@@ -71,8 +71,8 @@ public extension UIImageView {
                     
                         if (error != nil) {
                             completionHandler(nil, urlString)
-                            print("[QiscusAsyncImageView] Error: \(error)")
-                            Qiscus.printLog(text: "[QiscusAsyncImageView] : \(error)")
+                            print("[QiscusAsyncImageView] Error: \(String(describing: error))")
+                            Qiscus.printLog(text: "[QiscusAsyncImageView] : \(String(describing: error))")
                             return
                         }
                         
