@@ -492,7 +492,9 @@ public class QiscusFile: NSObject {
         Qiscus.printLog(text: "Downloading miniImage for url \(self.fileURL)")
         
         var thumbMiniPath = self.fileURL.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/").replacingOccurrences(of: " ", with: "%20")
-        if self.fileType == .video{
+        let fileExtension = QiscusFile.getExtension(fromURL: thumbMiniPath)
+        
+        if self.fileType == .video || fileExtension == "gif"{
             let thumbUrlArr = thumbMiniPath.characters.split(separator: ".")
             var newThumbURL = ""
             var i = 0
@@ -509,16 +511,14 @@ public class QiscusFile: NSObject {
             thumbMiniPath = newThumbURL
         }
         
+        
         Alamofire.request(thumbMiniPath, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
             .responseData(completionHandler: { response in
                 Qiscus.printLog(text: "download miniImage result: \(response)")
                 if let data = response.data {
                     if let image = UIImage(data: data) {
                         var thumbImage = UIImage()
-                        let time = Double(Date().timeIntervalSince1970)
-                        let timeToken = UInt64(time * 10000)
-                        
-                        let fileName = "ios-miniThumb-\(timeToken).png"
+                        let fileName = "ios-miniThumb-\(self.fileId).\(fileExtension)"
                         
                         thumbImage = QiscusFile.resizeImage(image, toFillSize: CGSize(width: 441, height: 396))
                         
@@ -532,8 +532,12 @@ public class QiscusFile: NSObject {
                             }
                         }
                         let thumbPath = "\(documentsPath)/Qiscus/\(fileName)"
+                        if fileExtension == "jpg" {
+                            try? UIImageJPEGRepresentation(thumbImage, 1)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+                        }else{
+                            try? UIImagePNGRepresentation(thumbImage)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+                        }
                         
-                        try? UIImagePNGRepresentation(thumbImage)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
                         
                         self.fileMiniThumbPath = thumbPath
                     }
