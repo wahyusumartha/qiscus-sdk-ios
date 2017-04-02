@@ -27,7 +27,7 @@ public class QiscusFile: NSObject {
         didSet{
             if !self.copyProcess {
                 if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         fileDB.fileURL = self.fileURL
                     }
@@ -44,7 +44,7 @@ public class QiscusFile: NSObject {
         didSet{
             if !self.copyProcess {
                 if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         fileDB.fileLocalPath = self.fileLocalPath
                     }
@@ -56,7 +56,7 @@ public class QiscusFile: NSObject {
         didSet{
             if !self.copyProcess {
                 if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         fileDB.fileThumbPath = self.fileThumbPath
                     }
@@ -68,7 +68,7 @@ public class QiscusFile: NSObject {
         didSet{
             if !self.copyProcess {
                 if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         fileDB.fileTopicId = self.fileTopicId
                     }
@@ -80,7 +80,7 @@ public class QiscusFile: NSObject {
         didSet{
             if !self.copyProcess {
                 if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         fileDB.fileCommentId = self.fileCommentId
                     }
@@ -92,7 +92,7 @@ public class QiscusFile: NSObject {
         didSet{
             if !self.copyProcess {
                 if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         fileDB.isDownloading = self.isDownloading
                     }
@@ -104,7 +104,7 @@ public class QiscusFile: NSObject {
         didSet{
             if !self.copyProcess {
                 if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         fileDB.isUploading = self.isUploading
                     }
@@ -116,7 +116,7 @@ public class QiscusFile: NSObject {
         didSet{
             if !self.copyProcess {
                 if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         fileDB.downloadProgress = self.downloadProgress
                     }
@@ -128,7 +128,7 @@ public class QiscusFile: NSObject {
         didSet{
             if !self.copyProcess {
                 if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         fileDB.uploadProgress = self.uploadProgress
                     }
@@ -140,7 +140,7 @@ public class QiscusFile: NSObject {
         didSet{
             if !self.copyProcess {
                 if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         fileDB.uploaded = self.uploaded
                     }
@@ -152,7 +152,7 @@ public class QiscusFile: NSObject {
         didSet{
             if !self.copyProcess {
                 if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         fileDB.fileMiniThumbPath = self.fileMiniThumbPath
                     }
@@ -164,7 +164,7 @@ public class QiscusFile: NSObject {
         didSet{
             if !self.copyProcess {
                 if let fileDB = QiscusFileDB.fileDB(withId: self.fileId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         fileDB.fileMimeType = self.fileMimeType
                     }

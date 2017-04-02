@@ -26,7 +26,7 @@ open class QiscusTopic: Object {
     
     // MARK: - Setter Methode
     open class func setDeletedAll(_ roomId:Int){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "topicIsDeleted == false AND topicRoomId == %d",roomId)
         let topicData = realm.objects(QiscusTopic.self).filter(searchQuery)
@@ -40,7 +40,7 @@ open class QiscusTopic: Object {
         }
     }
     open class func setUndeleteAll(_ roomId:Int){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "topicIsDeleted == true AND topicRoomId == %d",roomId)
         let topicData = realm.objects(QiscusTopic.self).filter(searchQuery)
@@ -54,7 +54,7 @@ open class QiscusTopic: Object {
         }
     }
     open func setUndelete(){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "topicId == %d", self.topicId)
         let topicData = realm.objects(QiscusTopic.self).filter(searchQuery)
@@ -69,7 +69,7 @@ open class QiscusTopic: Object {
         }
     }
     open class func deleteUnusedTopic(_ roomId:Int){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "topicIsDeleted == true AND topicRoomId == %d",roomId)
         let topicData = realm.objects(QiscusTopic.self).filter(searchQuery)
@@ -83,7 +83,7 @@ open class QiscusTopic: Object {
         }
     }
     open func clearNotif(){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "topicId == %d", self.topicId)
         let topicData = realm.objects(QiscusTopic.self).filter(searchQuery)
@@ -100,7 +100,7 @@ open class QiscusTopic: Object {
     
     // MARK: - Getter Methode
     open class func getLastId() -> Int{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let RetNext = realm.objects(QiscusTopic.self).sorted(byKeyPath: "localId")
         
         if RetNext.count > 0 {
@@ -111,7 +111,7 @@ open class QiscusTopic: Object {
         }
     }
     open class func getTopicById(_ topicId:Int) -> QiscusTopic?{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "topicId == %d",topicId)
         let topicData = realm.objects(QiscusTopic.self).filter(searchQuery)
@@ -125,7 +125,7 @@ open class QiscusTopic: Object {
     }
     open class func getAllTopic(_ roomId: Int) -> [QiscusTopic]{
         var allTopic = [QiscusTopic]()
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "topicIsDeleted == false AND topicRoomId == %d",roomId)
         let topicData = realm.objects(QiscusTopic.self).filter(searchQuery).sorted(byKeyPath: "topicUnread", ascending: false)
@@ -142,7 +142,7 @@ open class QiscusTopic: Object {
     
     // MARK : - save topics
     open func saveTopics(){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "topicId == %d", self.topicId)
         let topicData = realm.objects(QiscusTopic.self).filter(searchQuery)
@@ -168,7 +168,7 @@ open class QiscusTopic: Object {
     
     // MARK: - delete all topic in Room
     open class func deleteAllTopicsInRoom(_ roomId: Int){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "topicRoomId == %d",roomId)
         let topicData = realm.objects(QiscusTopic.self).filter(searchQuery)

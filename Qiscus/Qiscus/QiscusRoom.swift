@@ -20,7 +20,7 @@ public class QiscusRoom: NSObject {
         didSet{
             if !self.copyProcess {
                 if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         roomDB.roomId = self.roomId
                     }
@@ -32,7 +32,7 @@ public class QiscusRoom: NSObject {
         didSet{
             if !self.copyProcess {
                 if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         roomDB.roomName = self.roomName
                     }
@@ -44,7 +44,7 @@ public class QiscusRoom: NSObject {
         didSet{
             if !self.copyProcess {
                 if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     
                     if roomDB.roomAvatarURL != self.roomAvatarURL{
                         try! realm.write {
@@ -63,7 +63,7 @@ public class QiscusRoom: NSObject {
         didSet{
             if !self.copyProcess {
                 if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         roomDB.roomAvatarLocalPath = self.roomAvatarLocalPath
                     }
@@ -75,7 +75,7 @@ public class QiscusRoom: NSObject {
         didSet{
             if !self.copyProcess {
                 if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         roomDB.roomLastCommentTopicId = self.roomLastCommentTopicId
                     }
@@ -87,7 +87,7 @@ public class QiscusRoom: NSObject {
         didSet{
             if !self.copyProcess {
                 if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         roomDB.optionalData = self.optionalData
                     }
@@ -99,7 +99,7 @@ public class QiscusRoom: NSObject {
         didSet{
             if !self.copyProcess {
                 if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         roomDB.distinctId = self.distinctId
                     }
@@ -111,7 +111,7 @@ public class QiscusRoom: NSObject {
         didSet{
             if !self.copyProcess {
                 if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         roomDB.user = self.user
                     }
@@ -123,7 +123,7 @@ public class QiscusRoom: NSObject {
         didSet{
             if !self.copyProcess {
                 if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         roomDB.isGroup = self.isGroup
                     }
@@ -135,7 +135,7 @@ public class QiscusRoom: NSObject {
         didSet{
             if !self.copyProcess {
                 if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         roomDB.hasLoadMore = self.hasLoadMore
                     }

@@ -29,7 +29,7 @@ public class QiscusComment: NSObject {
         didSet{
             if !self.copyProcess {
                 if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         savedComment.commentId = self.commentId
                     }
@@ -41,7 +41,7 @@ public class QiscusComment: NSObject {
         didSet{
             if !self.copyProcess {
                 if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     if self.commentIsFile{
                         let fileURL = self.getMediaURL()
                         var file = QiscusFile()
@@ -65,7 +65,7 @@ public class QiscusComment: NSObject {
         didSet{
             if !self.copyProcess{
                 if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         savedComment.commentCreatedAt = self.commentCreatedAt
                     }
@@ -77,7 +77,7 @@ public class QiscusComment: NSObject {
         didSet{
             if !self.copyProcess {
                 if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         savedComment.commentUniqueId = self.commentUniqueId
                     }
@@ -89,7 +89,7 @@ public class QiscusComment: NSObject {
         didSet{
             if !self.copyProcess {
                 if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         savedComment.commentTopicId = self.commentTopicId
                     }
@@ -101,7 +101,7 @@ public class QiscusComment: NSObject {
         didSet{
             if !self.copyProcess {
                 if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         savedComment.commentSenderEmail = self.commentSenderEmail
                     }
@@ -113,7 +113,7 @@ public class QiscusComment: NSObject {
         didSet{
             if !self.copyProcess {
                 if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         savedComment.commentFileId = self.commentFileId
                     }
@@ -129,7 +129,7 @@ public class QiscusComment: NSObject {
                     if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
                         if savedComment.commentStatusRaw != self.commentStatusRaw{
                             if self.commentStatusRaw > savedComment.commentStatusRaw || self.commentStatusRaw == QiscusCommentStatus.failed.rawValue{
-                                let realm = try! Realm()
+                                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                                 try! realm.write {
                                     savedComment.commentStatusRaw = self.commentStatusRaw
                                 }
@@ -145,7 +145,7 @@ public class QiscusComment: NSObject {
         didSet{
             if !self.copyProcess {
                 if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         savedComment.commentIsSynced = self.commentIsSynced
                     }
@@ -157,7 +157,7 @@ public class QiscusComment: NSObject {
         didSet{
             if !self.copyProcess {
                 if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         savedComment.commentBeforeId = self.commentBeforeId
                     }
@@ -169,7 +169,7 @@ public class QiscusComment: NSObject {
         didSet{
             if !self.copyProcess {
                 if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         savedComment.commentCellHeight = self.commentCellHeight
                     }
@@ -181,7 +181,7 @@ public class QiscusComment: NSObject {
         didSet{
             if !self.copyProcess {
                 if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         savedComment.commentCellWidth = self.commentCellWidth
                     }
@@ -198,7 +198,7 @@ public class QiscusComment: NSObject {
                             self.showLink = false
                         }
                     }
-                    let realm = try! Realm()
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         savedComment.showLink = self.showLink
                     }
@@ -211,7 +211,7 @@ public class QiscusComment: NSObject {
             if !self.copyProcess {
                 if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
                     if savedComment.commentLinkPreviewed != self.commentLinkPreviewed{
-                        let realm = try! Realm()
+                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                         try! realm.write {
                             savedComment.commentLinkPreviewed = self.commentLinkPreviewed
                         }

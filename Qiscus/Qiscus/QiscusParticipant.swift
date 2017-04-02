@@ -18,7 +18,7 @@ open class QiscusParticipant: Object {
     
     open class var LastId:Int{
         get{
-            let realm = try! Realm()
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             let RetNext = realm.objects(QiscusParticipant.self).sorted(byKeyPath: "localId")
             
             if RetNext.count > 0 {
@@ -60,7 +60,7 @@ open class QiscusParticipant: Object {
         return minDelivered
     }
     open class func getParticipant(withEmail email:String, roomId:Int) -> QiscusParticipant?{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let searchQuery = NSPredicate(format: "participantRoomId == %d AND participantEmail == '\(email)'", roomId)
         let participantData = realm.objects(QiscusParticipant.self).filter(searchQuery)
         
@@ -72,7 +72,7 @@ open class QiscusParticipant: Object {
     }
     open func updateLastReadCommentId(commentId:Int){
         if self.lastReadCommentId < commentId {
-            let realm = try! Realm()
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
                 self.lastReadCommentId = commentId
             }
@@ -81,7 +81,7 @@ open class QiscusParticipant: Object {
     }
     open func updateLastDeliveredCommentId(commentId:Int){
         if self.lastDeliveredCommentId < commentId{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
                 self.lastDeliveredCommentId = commentId
             }
@@ -89,7 +89,7 @@ open class QiscusParticipant: Object {
     }
     open class func getParticipant(onRoomId  roomId:Int)->[QiscusParticipant]{
         var participants = [QiscusParticipant]()
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let searchQuery = NSPredicate(format: "participantRoomId == %d", roomId)
         let participantData = realm.objects(QiscusParticipant.self).filter(searchQuery)
         
@@ -101,7 +101,7 @@ open class QiscusParticipant: Object {
         return participants
     }
     open class func addParticipant(_ userEmail:String, roomId:Int){ //  
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         var searchQuery = NSPredicate()
         
         searchQuery = NSPredicate(format: "participantRoomId == %d AND participantEmail == '\(userEmail)'", roomId)
@@ -125,7 +125,7 @@ open class QiscusParticipant: Object {
         }
     }
     open class func removeAllParticipant(inRoom roomId:Int){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         var searchQuery = NSPredicate()
         
         searchQuery = NSPredicate(format: "participantRoomId == %d", roomId)
@@ -138,7 +138,7 @@ open class QiscusParticipant: Object {
         }
     }
     open class func CommitParticipantChange(_ roomId:Int){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let searchQuery =  NSPredicate(format: "participantRoomId == %d AND participantIsDeleted == true", roomId)
         let participantData = realm.objects(QiscusParticipant.self).filter(searchQuery)
         

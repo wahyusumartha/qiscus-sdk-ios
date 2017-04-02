@@ -28,6 +28,8 @@ import CocoaMQTT
     static let logicThread = DispatchQueue.global()
     
     static var qiscusDeviceToken: String = ""
+    static var dbConfiguration = Realm.Configuration.defaultConfiguration
+    
     static var qiscusDownload:[String] = [String]()
     
     var config = QiscusConfig.sharedInstance
@@ -120,7 +122,7 @@ import CocoaMQTT
         Qiscus.publishUserStatus(offline: true)
         Qiscus.shared.mqtt?.disconnect()
         QiscusMe.clear()
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         try! realm.write {
             realm.deleteAll()
         }
@@ -516,41 +518,18 @@ import CocoaMQTT
     
     // MARK: - local DB
     class func checkDatabaseMigration(){
-        let realmURL = Realm.Configuration.defaultConfiguration.fileURL!
-        Qiscus.printLog(text:"realmURL \(realmURL)")
+        if Qiscus.dbConfiguration.fileURL?.lastPathComponent != "Qiscus.realm" {
+            Qiscus.dbConfiguration = Realm.Configuration.defaultConfiguration
+            var realmURL = Qiscus.dbConfiguration.fileURL!
+            realmURL.deleteLastPathComponent()
+            realmURL.appendPathComponent("Qiscus.realm")
+            Qiscus.dbConfiguration.fileURL = realmURL
+            Qiscus.dbConfiguration.deleteRealmIfMigrationNeeded = true
+        }
+        Qiscus.dbConfiguration.schemaVersion = 1
         
-            let currentSchema:UInt64 = 17
-            var configuration = Realm.Configuration()
-            
-            configuration.schemaVersion = currentSchema
-            configuration.migrationBlock = { migration, oldSchemaVersion in
-            Qiscus.printLog(text: "Need migration to QiscusDB schema: \(currentSchema) \nfrom schema: \(oldSchemaVersion)")
-            
-                if (oldSchemaVersion < currentSchema){
-                    //Deleting Realm Files
-                    
-                    let realmManagement = realmURL.appendingPathExtension("management")
-                    
-                    let realmURLs = [
-                        realmURL,
-                        realmURL.appendingPathExtension("lock"),
-                        realmManagement.appendingPathComponent("access_control.control.mx"),
-                        realmManagement.appendingPathComponent("access_control.write.mx")
-                    ]
-                    
-                    for URL in realmURLs {
-                        do {
-                            try FileManager.default.removeItem(at: URL)
-                        } catch {
-                            // handle error
-                            Qiscus.printLog(text: "no Database files")
-                        }
-                    }
-                    
-                }
-            }
-            Realm.Configuration.defaultConfiguration = configuration
-        
+        let _ = try! Realm(configuration: Qiscus.dbConfiguration)
+        Qiscus.printLog(text:"realmURL \(Qiscus.dbConfiguration.fileURL!)")
     }
     
     // MARK: - Create NEW Chat

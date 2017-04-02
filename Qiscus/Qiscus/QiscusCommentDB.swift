@@ -32,7 +32,7 @@ public class QiscusCommentDB: Object {
     }
     public class var lastId:Int{
         get{
-            let realm = try! Realm()
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             let RetNext = realm.objects(QiscusCommentDB.self).sorted(byKeyPath: "localId")
             
             if RetNext.count > 0 {
@@ -90,7 +90,7 @@ public class QiscusCommentDB: Object {
     
     // MARK: - QiscusCommentDB
     public class func commentDB(withId commentId:Int, andUniqueId uniqueId:String? = nil)->QiscusCommentDB?{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let searchQuery:NSPredicate?
         var query = "commentId == \(commentId)"
         if uniqueId != nil {
@@ -106,7 +106,7 @@ public class QiscusCommentDB: Object {
         }
     }
     public class func commentDB(withLocalId localId:Int)->QiscusCommentDB?{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let searchQuery:NSPredicate = NSPredicate(format: "localId == \(localId)")
         let RetNext = realm.objects(QiscusCommentDB.self).filter(searchQuery)
         
@@ -117,7 +117,7 @@ public class QiscusCommentDB: Object {
         }
     }
     public class func commentDB(withUniqueId uniqueId: String)->QiscusCommentDB?{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "commentUniqueId == '\(uniqueId)'")
         let commentData = realm.objects(QiscusCommentDB.self).filter(searchQuery)
@@ -132,7 +132,7 @@ public class QiscusCommentDB: Object {
     // MARK: - add newComment to DB
     public class func new(commentWithId commentId:Int, andUniqueId uniqueId:String)->QiscusCommentDB{
         let commentDB = QiscusCommentDB()
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         try! realm.write {
             commentDB.localId = QiscusCommentDB.lastId + 1
             realm.add(commentDB)
@@ -142,7 +142,7 @@ public class QiscusCommentDB: Object {
         return commentDB
     }
     public class func newComment()->QiscusCommentDB{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let commentDB = QiscusCommentDB()
         try! realm.write {
             commentDB.localId = QiscusCommentDB.lastId + 1
@@ -153,7 +153,7 @@ public class QiscusCommentDB: Object {
     }
     // MARK: - Checking Methode
     public class func isExist(commentId:Int)->Bool{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let searchQuery = NSPredicate(format: "commentId == %d", commentId)
         let commentData = realm.objects(QiscusCommentDB.self).filter(searchQuery)
         
@@ -164,7 +164,7 @@ public class QiscusCommentDB: Object {
         }
     }
     public class func unsyncExist(topicId:Int)->Bool{ //
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let searchQuery = NSPredicate(format: "commentIsSynced == false AND commentTopicId == \(topicId)")
         let commentData = realm.objects(QiscusCommentDB.self).filter(searchQuery)
         
@@ -177,7 +177,7 @@ public class QiscusCommentDB: Object {
     
     // MARK: - Comment in room / topic
     public class func lastComment(inTopicId topicId:Int? = nil)->QiscusComment?{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         var query = "(commentStatusRaw != \(QiscusCommentStatus.sending.rawValue) OR commentStatusRaw == \(QiscusCommentStatus.failed.rawValue))"
         if topicId != nil {
             query = "\(query) AND commentTopicId == \(topicId!)"
@@ -196,7 +196,7 @@ public class QiscusCommentDB: Object {
         if let room = QiscusRoom.room(withLastTopicId: topicId){
             if let participant = QiscusParticipant.getParticipant(withEmail: QiscusMe.sharedInstance.email, roomId: room.roomId){
                 let lastReadId = participant.lastReadCommentId
-                let realm = try! Realm()
+                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                 
                 let sortProperties = [SortDescriptor(keyPath: "commentCreatedAt"), SortDescriptor(keyPath: "commentId", ascending: true)]
                 let searchQuery:NSPredicate = NSPredicate(format: "commentTopicId == \(topicId) AND commentId > \(lastReadId)")
@@ -214,7 +214,7 @@ public class QiscusCommentDB: Object {
     
     // MARK : - Int
     public class func checkSync(inTopicId topicId: Int)->Int?{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let sortProperties = [SortDescriptor(keyPath: "commentId", ascending: true)]
         let searchQuery:NSPredicate = NSPredicate(format: "commentTopicId == \(topicId) AND commentId != 0")
         let commentData = realm.objects(QiscusCommentDB.self).filter(searchQuery).sorted(by: sortProperties)
@@ -231,7 +231,7 @@ public class QiscusCommentDB: Object {
         return nil
     }
     open class func lastSyncId(topicId:Int, unsyncCommentId:Int)->Int?{ //
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let searchQuery = NSPredicate(format: "commentTopicId == \(topicId) AND (commentStatusRaw != \(QiscusCommentStatus.sending.rawValue) OR commentStatusRaw == \(QiscusCommentStatus.failed.rawValue)) AND commentId < \(unsyncCommentId)")
         let commentData = realm.objects(QiscusCommentDB.self).filter(searchQuery).sorted(byKeyPath: "commentCreatedAt", ascending: true)
         
@@ -251,7 +251,7 @@ public class QiscusCommentDB: Object {
     public class func getComments(inTopicId topicId: Int, limit:Int = 0, fromCommentId:Int? = nil)->[QiscusComment]{ //
         
         var allComment = [QiscusComment]()
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let sortProperties = [SortDescriptor(keyPath: "commentCreatedAt", ascending: false)]
         var query = "commentTopicId == \(topicId)"
         if fromCommentId != nil{
@@ -283,7 +283,7 @@ public class QiscusCommentDB: Object {
         return allComment
     }
     open class func firstUnsyncComment(inTopicId topicId:Int)->QiscusComment?{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let searchQuery = NSPredicate(format: "commentIsSynced == false AND commentTopicId == %d AND (commentStatusRaw == %d OR commentStatusRaw == %d)",topicId,QiscusCommentStatus.sent.rawValue,QiscusCommentStatus.delivered.rawValue)
         
         let commentData = realm.objects(QiscusCommentDB.self).filter(searchQuery).sorted(byKeyPath: "commentCreatedAt")
@@ -300,7 +300,7 @@ public class QiscusCommentDB: Object {
         if let room = QiscusRoomDB.roomDB(withId: roomId){
             let topicId = room.roomLastCommentTopicId
             
-            let realm = try! Realm()
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             let searchQuery:NSPredicate = NSPredicate(format: "commentTopicId == %d", topicId)
             let commentData = realm.objects(QiscusCommentDB.self).filter(searchQuery).sorted(byKeyPath: "commentId", ascending: false)
             
@@ -318,7 +318,7 @@ public class QiscusCommentDB: Object {
     
     open func updateStatus(_ status: QiscusCommentStatus, email:String? = nil){
         
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         if(self.commentStatusRaw < status.rawValue) ||
            self.commentStatusRaw == QiscusCommentStatus.failed.rawValue{
@@ -359,7 +359,7 @@ public class QiscusCommentDB: Object {
     }
     // MARK: - Delete
     public class func deleteAll(){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let comments = realm.objects(QiscusCommentDB.self)
         
         if comments.count > 0 {
@@ -369,7 +369,7 @@ public class QiscusCommentDB: Object {
         }
     }
     public func deleteComment(){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         try! realm.write {
             realm.delete(self)
         }

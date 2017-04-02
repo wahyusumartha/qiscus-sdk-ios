@@ -28,7 +28,7 @@ class QiscusRoomDB: Object {
         return "localId"
     }
     public class func lastId() -> Int{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let data = realm.objects(QiscusRoomDB.self).sorted(byKeyPath: "localId")
         
         if data.count > 0 {
@@ -41,7 +41,7 @@ class QiscusRoomDB: Object {
     
     // MARK: - QiscusRoomDB
     public class func roomDB(withLocalId localId:Int)->QiscusRoomDB?{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let searchQuery:NSPredicate = NSPredicate(format: "localId == \(localId)")
         let data = realm.objects(QiscusRoomDB.self).filter(searchQuery)
         
@@ -52,7 +52,7 @@ class QiscusRoomDB: Object {
         }
     }
     public class func roomDB(withId roomId:Int)->QiscusRoomDB?{ //
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "roomId == %d",roomId)
         let data = realm.objects(QiscusRoomDB.self).filter(searchQuery)
@@ -64,7 +64,7 @@ class QiscusRoomDB: Object {
         }
     }
     public class func roomDB(withDistinctId distinctId:String, andUserEmail email:String)->QiscusRoomDB?{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let searchQuery:NSPredicate = NSPredicate(format: "distinctId == '\(distinctId)' AND user == '\(email)' AND isGroup == false")
         let data = realm.objects(QiscusRoomDB.self).filter(searchQuery)
         
@@ -75,7 +75,7 @@ class QiscusRoomDB: Object {
         }
     }
     public class func roomDB(withLastTopicId topicId:Int)->QiscusRoomDB?{ //
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "roomLastCommentTopicId == %d",topicId)
         let data = realm.objects(QiscusRoomDB.self).filter(searchQuery)
@@ -108,7 +108,7 @@ class QiscusRoomDB: Object {
     // MARK: - [QiscusRoom]
     public class func all() -> [QiscusRoom]{
         var allRoom = [QiscusRoom]()
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let data = realm.objects(QiscusRoomDB.self)
         
@@ -122,7 +122,7 @@ class QiscusRoomDB: Object {
     
     // MARK: - addNewData
     public class func newRoomDB()->QiscusRoomDB{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let newRoom = QiscusRoomDB()
         try! realm.write {
             newRoom.localId = QiscusRoomDB.lastId() + 1

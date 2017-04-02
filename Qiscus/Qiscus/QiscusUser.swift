@@ -102,19 +102,19 @@ open class QiscusUser: Object {
     }
     // MARK: - UpdaterMethode
     open func userId(_ value:Int){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         try! realm.write {
             self.userId = value
         }
     }
     open func userAvatarURL(_ value:String){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         try! realm.write {
             self.userAvatarURL = value
         }
     }
     open func userAvatarLocalPath(_ value:String){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)'")
         let userData = realm.objects(QiscusUser.self).filter(searchQuery)
         
@@ -133,7 +133,7 @@ open class QiscusUser: Object {
     }
     public func updateUserNameAs(_ value:String){
         if userNameAs != value {
-            let realm = try! Realm()
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)'")
             let userData = realm.objects(QiscusUser.self).filter(searchQuery)
             
@@ -145,20 +145,20 @@ open class QiscusUser: Object {
         }
     }
     open func userEmail(_ value:String){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         try! realm.write {
             self.userEmail = value
         }
     }
     open func userFullName(_ value:String){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         try! realm.write {
             self.userFullName = value
         }
     }
 
     open func updateLastSeen(_ timeToken:Double = 0){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)'")
         let userData = realm.objects(QiscusUser.self).filter(searchQuery)
@@ -195,7 +195,7 @@ open class QiscusUser: Object {
     open func updateStatus(isOnline online:Bool){
         let changed = (isOnline != online)
         if changed{
-            let realm = try! Realm()
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)'")
             let userData = realm.objects(QiscusUser.self).filter(searchQuery)
             
@@ -216,7 +216,7 @@ open class QiscusUser: Object {
     }
     // MARK: - Getter Methode
     open func getLastId() -> Int{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let RetNext = realm.objects(QiscusUser.self).sorted(byKeyPath: "localId")
         
         if RetNext.count > 0 {
@@ -228,7 +228,7 @@ open class QiscusUser: Object {
     }
     
     open class func getAllUser()->[QiscusUser]?{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let userData = realm.objects(QiscusUser.self)
         var users = [QiscusUser]()
         if(userData.count == 0){
@@ -241,7 +241,7 @@ open class QiscusUser: Object {
         }
     }
     open class func getUserWithEmail(_ email:String)->QiscusUser?{ //  
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(email)'")
         let userData = realm.objects(QiscusUser.self).filter(searchQuery)
@@ -254,7 +254,7 @@ open class QiscusUser: Object {
     }
 
     open func updateUserFullName(_ fullName: String){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)'")
         let userData = realm.objects(QiscusUser.self).filter(searchQuery)
@@ -269,7 +269,7 @@ open class QiscusUser: Object {
         }
     }
     open func updateUserAvatarURL(_ avatarURL: String){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)'")
         let userData = realm.objects(QiscusUser.self).filter(searchQuery)
@@ -298,7 +298,7 @@ open class QiscusUser: Object {
         return user
     }
     open func saveUser()->QiscusUser{ // 
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "userEmail == '\(self.userEmail)'")
         let userData = realm.objects(QiscusUser.self).filter(searchQuery)
@@ -340,7 +340,7 @@ open class QiscusUser: Object {
     }
     
     open class func setUnavailableAll(){
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "userAvailability == true")
         let userData = realm.objects(QiscusUser.self).filter(searchQuery)

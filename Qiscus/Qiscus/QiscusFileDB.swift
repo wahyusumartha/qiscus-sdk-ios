@@ -30,7 +30,7 @@ class QiscusFileDB: Object {
     }
     
     public class func getLastId() -> Int{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let RetNext = realm.objects(QiscusFileDB.self).sorted(byKeyPath: "fileId")
         
         if RetNext.count > 0 {
@@ -43,7 +43,7 @@ class QiscusFileDB: Object {
     
     // MARK: - QiscusFileDB
     public class func fileDB(withId fileId:Int)->QiscusFileDB?{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let searchQuery:NSPredicate = NSPredicate(format: "fileId == \(fileId)")
         let RetNext = realm.objects(QiscusFileDB.self).filter(searchQuery)
         
@@ -54,7 +54,7 @@ class QiscusFileDB: Object {
         }
     }
     public class func fileDB(withCommentId commentId:Int)->QiscusFileDB?{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let query = "fileCommentId == \(commentId)"
         let searchQuery = NSPredicate(format: query)
@@ -67,7 +67,7 @@ class QiscusFileDB: Object {
         }
     }
     public class func file(withURL url: String)->QiscusFileDB?{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "fileURL == '\(url)'")
         let fileData = realm.objects(QiscusFileDB.self).filter(searchQuery)
@@ -101,7 +101,7 @@ class QiscusFileDB: Object {
     
     // MARK: - addNewData
     public class func newFile()->QiscusFileDB{
-        let realm = try! Realm()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let newFile = QiscusFileDB()
         try! realm.write {
             newFile.fileId = QiscusFileDB.getLastId() + 1
