@@ -1344,18 +1344,20 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         Qiscus.logicThread.async {
             if self.room?.roomId == inRoom.roomId{
                 if let indexPath = data.commentIndexPath{
-                    Qiscus.uiThread.async {
-                        if indexPath.section < self.comments.count{
-                            if indexPath.row < self.comments[indexPath.section].count {
-                                self.comments[indexPath.section][indexPath.row] = data
-                                
-                                if data.isDownloading {
+                    if indexPath.section < self.comments.count{
+                        if indexPath.row < self.comments[indexPath.section].count {
+                            self.comments[indexPath.section][indexPath.row] = data
+                            
+                            if data.isDownloading {
+                                Qiscus.uiThread.async {
                                     let percentage = Int(data.downloadProgress * 100)
                                     if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
                                         cell.downloadingMedia(withPercentage: percentage)
                                     }
-                                }else{
-                                    self.comments[indexPath.section][indexPath.row] = data
+                                }
+                            }else{
+                                self.comments[indexPath.section][indexPath.row] = data
+                                Qiscus.uiThread.async {
                                     self.collectionView.reloadItems(at: [indexPath])
                                 }
                             }
@@ -1392,7 +1394,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         }
     }
     public func dataPresenter(gotNewData presenter: QiscusCommentPresenter, inRoom:QiscusRoom) {
-        Qiscus.uiThread.async {
+        Qiscus.logicThread.async {
             var indexPath = IndexPath()
             if self.comments.count == 0 {
                 indexPath = IndexPath(row: 0, section: 0)
@@ -1402,17 +1404,19 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                 presenter.commentIndexPath = IndexPath(row: 0, section: 0)
                 newGroup.append(presenter)
                 self.comments.append(newGroup)
-                self.collectionView.performBatchUpdates({
-                    self.collectionView.insertSections(IndexSet(integer: indexPath.section))
-                    self.collectionView.insertItems(at: [indexPath])
-                }, completion: {_ in
-                    if presenter.userIsOwn || self.isLastRowVisible{
-                        self.welcomeView.isHidden = true
-                        if self.isLastRowVisible || presenter.userEmail == QiscusMe.sharedInstance.email {
-                            self.scrollToBottom(true)
+                Qiscus.uiThread.async {
+                    self.collectionView.performBatchUpdates({
+                        self.collectionView.insertSections(IndexSet(integer: indexPath.section))
+                        self.collectionView.insertItems(at: [indexPath])
+                    }, completion: {_ in
+                        if presenter.userIsOwn || self.isLastRowVisible{
+                            self.welcomeView.isHidden = true
+                            if self.isLastRowVisible || presenter.userEmail == QiscusMe.sharedInstance.email {
+                                self.scrollToBottom(true)
+                            }
                         }
-                    }
-                })
+                    })
+                }
                 if presenter.toUpload {
                     self.dataPresenter.uploadData(fromPresenter: presenter)
                 }
@@ -1434,14 +1438,16 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                     
                         self.comments[lastComment.commentIndexPath!.section][lastComment.commentIndexPath!.row] = lastComment
                         self.comments[indexPath.section].insert(presenter, at: indexPath.row)
-                        self.collectionView.performBatchUpdates({
-                            self.collectionView.insertItems(at: [indexPath])
-                        }, completion: {_ in
-                            self.collectionView.reloadItems(at: [lastComment.commentIndexPath!])
-                            if self.isLastRowVisible || presenter.userEmail == QiscusMe.sharedInstance.email {
-                                self.scrollToBottom(true)
-                            }
-                        })
+                        Qiscus.uiThread.async {
+                            self.collectionView.performBatchUpdates({
+                                self.collectionView.insertItems(at: [indexPath])
+                            }, completion: {_ in
+                                self.collectionView.reloadItems(at: [lastComment.commentIndexPath!])
+                                if self.isLastRowVisible || presenter.userEmail == QiscusMe.sharedInstance.email {
+                                    self.scrollToBottom(true)
+                                }
+                            })
+                        }
                     }else{
                         indexPath = IndexPath(row: 0, section: self.comments.count)
                         var newGroup = [QiscusCommentPresenter]()
@@ -1451,14 +1457,16 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                         newGroup.append(presenter)
                     
                         self.comments.insert(newGroup, at: indexPath.section)
-                        self.collectionView.performBatchUpdates({
-                            self.collectionView.insertSections(IndexSet(integer: indexPath.section))
-                            self.collectionView.insertItems(at: [indexPath])
-                        }, completion: {_ in
-                            if self.isLastRowVisible || presenter.userEmail == QiscusMe.sharedInstance.email {
-                                self.scrollToBottom(true)
-                            }
-                        })
+                        Qiscus.uiThread.async {
+                            self.collectionView.performBatchUpdates({
+                                self.collectionView.insertSections(IndexSet(integer: indexPath.section))
+                                self.collectionView.insertItems(at: [indexPath])
+                            }, completion: {_ in
+                                if self.isLastRowVisible || presenter.userEmail == QiscusMe.sharedInstance.email {
+                                    self.scrollToBottom(true)
+                                }
+                            })
+                        }
                     }
                     if presenter.toUpload {
                         self.dataPresenter.uploadData(fromPresenter: presenter)
@@ -1469,9 +1477,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
             }
             if presenter.commentId > 0 {
                 Qiscus.logicThread.async {
-                    Qiscus.logicThread.async {
-                        QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: presenter.commentId, roomId: inRoom.roomId, status: .read, withCompletion: {_ in })
-                    }
+                    QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: presenter.commentId, roomId: inRoom.roomId, status: .read, withCompletion: {_ in })
                 }
             }
         }

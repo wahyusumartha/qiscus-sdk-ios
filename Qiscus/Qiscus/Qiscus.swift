@@ -803,7 +803,6 @@ import CocoaMQTT
 }
 extension Qiscus:CocoaMQTTDelegate{
     public func mqtt(_ mqtt: CocoaMQTT, didConnect host: String, port: Int){
-        print("mqtt connected")
         let state = UIApplication.shared.applicationState
         
         let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
@@ -837,9 +836,6 @@ extension Qiscus:CocoaMQTTDelegate{
     
     }
     public func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16 ){
-        print("cocoaMQTT got message in topic: \(message.topic)")
-        print("cocaMQTT message: \(String(describing: message.string))")
-        // let state = UIApplication.shared.applicationState
         Qiscus.logicThread.async {
             if let messageData = message.string {
                 let channelArr = message.topic.characters.split(separator: "/")

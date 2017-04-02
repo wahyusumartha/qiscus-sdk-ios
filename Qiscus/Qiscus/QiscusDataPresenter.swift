@@ -130,58 +130,83 @@ import Photos
     }
     
     class func getLinkData(withData data:QiscusCommentPresenter){
-        QiscusCommentClient.sharedInstance.getLinkMetadata(url: data.linkURL, synchronous: false, withCompletion: { linkData in
-            data.linkTitle = linkData.linkTitle
-            data.linkDescription = linkData.linkDescription
-            data.linkImageURL = linkData.linkImageURL
-            data.linkImage = Qiscus.image(named: "link")
-            
-            QiscusLinkData.copyLink(link: linkData).saveLink()
-            var attributedText = NSMutableAttributedString(string: data.commentText)
-            let allRange = (data.commentText as NSString).range(of: data.commentText)
-            attributedText.addAttributes(data.textAttribute, range: allRange)
-            
-            if linkData.linkTitle != "" {
-                let text = data.commentText.replacingOccurrences(of: linkData.linkURL, with: linkData.linkTitle)
-                let titleRange = (text as NSString).range(of: linkData.linkTitle)
-                attributedText = NSMutableAttributedString(string: text)
+        Qiscus.logicThread.async {
+            QiscusCommentClient.sharedInstance.getLinkMetadata(url: data.linkURL, synchronous: false, withCompletion: { linkData in
+                data.linkTitle = linkData.linkTitle
+                data.linkDescription = linkData.linkDescription
+                data.linkImageURL = linkData.linkImageURL
+                data.linkImage = Qiscus.image(named: "link")
                 
-                let allRange = (text as NSString).range(of: text)
+                QiscusLinkData.copyLink(link: linkData).saveLink()
+                var attributedText = NSMutableAttributedString(string: data.commentText)
+                let allRange = (data.commentText as NSString).range(of: data.commentText)
                 attributedText.addAttributes(data.textAttribute, range: allRange)
                 
-                for (attribute,_) in data.textAttribute {
-                    attributedText.removeAttribute(attribute, range: titleRange)
-                }
-                attributedText.addAttributes(data.linkTextAttributes, range: titleRange)
-                
-                let url = NSURL(string: linkData.linkURL)!
-                attributedText.addAttribute(NSLinkAttributeName, value: url, range: titleRange)
-                
-                data.commentAttributedText = attributedText
-                data.cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText)
-                data.comment?.commentCellWidth = data.cellSize.width
-                data.comment?.commentCellHeight = data.cellSize.height
-                data.showLink = true
-                data.linkSaved = true
-                if let image = linkData.thumbImage{
-                    data.linkImage = image
-                }
-                
-                if let comment = data.comment{
-                    if comment.commentRoom.roomId == QiscusChatVC.sharedInstance.room?.roomId{
-                        if let room = QiscusRoom.room(withId: comment.commentRoom.roomId){
-                            Qiscus.uiThread.async {
-                                QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeContent: data, inRoom: room)
+                if linkData.linkTitle != "" {
+                    let text = data.commentText.replacingOccurrences(of: linkData.linkURL, with: linkData.linkTitle)
+                    let titleRange = (text as NSString).range(of: linkData.linkTitle)
+                    attributedText = NSMutableAttributedString(string: text)
+                    
+                    let allRange = (text as NSString).range(of: text)
+                    attributedText.addAttributes(data.textAttribute, range: allRange)
+                    
+                    for (attribute,_) in data.textAttribute {
+                        attributedText.removeAttribute(attribute, range: titleRange)
+                    }
+                    attributedText.addAttributes(data.linkTextAttributes, range: titleRange)
+                    
+                    let url = NSURL(string: linkData.linkURL)!
+                    attributedText.addAttribute(NSLinkAttributeName, value: url, range: titleRange)
+                    
+                    data.commentAttributedText = attributedText
+                    data.cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText)
+                    data.comment?.commentCellWidth = data.cellSize.width
+                    data.comment?.commentCellHeight = data.cellSize.height
+                    data.showLink = true
+                    data.linkSaved = true
+                    if let image = linkData.thumbImage{
+                        data.linkImage = image
+                    }
+                    
+                    if let comment = data.comment{
+                        if comment.commentRoom.roomId == QiscusChatVC.sharedInstance.room?.roomId{
+                            if let room = QiscusRoom.room(withId: comment.commentRoom.roomId){
+                                Qiscus.uiThread.async {
+                                    QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeContent: data, inRoom: room)
+                                }
+                            }
+                        }
+                    }
+                    
+                }else{
+                    data.linkTitle = "Not Found"
+                    data.linkDescription = "No description found"
+                    data.linkImage = Qiscus.image(named: "link")
+                    data.showLink = false
+                    data.cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText)
+                    Qiscus.logicThread.async {
+                        if let comment = QiscusComment.comment(withUniqueId: data.commentUniqueid){
+                            comment.showLink = false
+                            comment.commentCellHeight = data.cellSize.height
+                            comment.commentCellWidth = data.cellSize.width
+                            if comment.commentRoom.roomId == QiscusChatVC.sharedInstance.room?.roomId{
+                                if let room = QiscusRoom.room(withId: comment.commentRoom.roomId){
+                                    Qiscus.uiThread.async {
+                                        QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeContent: data, inRoom: room)
+                                    }
+                                }
                             }
                         }
                     }
                 }
-                
-            }else{
+            }, withFailCompletion: {
                 data.linkTitle = "Not Found"
                 data.linkDescription = "No description found"
                 data.linkImage = Qiscus.image(named: "link")
                 data.showLink = false
+                let attributedText = NSMutableAttributedString(string: data.commentText)
+                let allRange = (data.commentText as NSString).range(of: data.commentText)
+                attributedText.addAttributes(data.textAttribute, range: allRange)
                 data.cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText)
                 Qiscus.logicThread.async {
                     if let comment = QiscusComment.comment(withUniqueId: data.commentUniqueid){
@@ -197,31 +222,8 @@ import Photos
                         }
                     }
                 }
-            }
-        }, withFailCompletion: {
-            data.linkTitle = "Not Found"
-            data.linkDescription = "No description found"
-            data.linkImage = Qiscus.image(named: "link")
-            data.showLink = false
-            let attributedText = NSMutableAttributedString(string: data.commentText)
-            let allRange = (data.commentText as NSString).range(of: data.commentText)
-            attributedText.addAttributes(data.textAttribute, range: allRange)
-            data.cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText)
-            Qiscus.logicThread.async {
-                if let comment = QiscusComment.comment(withUniqueId: data.commentUniqueid){
-                    comment.showLink = false
-                    comment.commentCellHeight = data.cellSize.height
-                    comment.commentCellWidth = data.cellSize.width
-                    if comment.commentRoom.roomId == QiscusChatVC.sharedInstance.room?.roomId{
-                        if let room = QiscusRoom.room(withId: comment.commentRoom.roomId){
-                            Qiscus.uiThread.async {
-                                QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeContent: data, inRoom: room)
-                            }
-                        }
-                    }
-                }
-            }
-        })
+            })
+        }
     }
     func send(Message message:String, topicId:Int, linkData:QiscusLinkData?, indexPath: IndexPath?){
         if linkData != nil{
@@ -254,7 +256,9 @@ import Photos
         }
     }
     public func uploadData(fromPresenter presenter:QiscusCommentPresenter){
-        self.commentClient.uploadMediaData(withData: presenter)
+        Qiscus.logicThread.async {
+            self.commentClient.uploadMediaData(withData: presenter)
+        }
     }
     public func newMediaMessage(_ topicId: Int,image:UIImage?,imageName:String,imagePath:URL? = nil, imageNSData:Data? = nil, roomId:Int? = nil, thumbImageRef:UIImage? = nil, videoFile:Bool = true, audioFile:Bool = false){
         Qiscus.logicThread.async {

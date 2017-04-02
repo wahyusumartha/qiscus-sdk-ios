@@ -547,7 +547,6 @@ open class QiscusCommentClient: NSObject {
                                 }
                             }
                             let path = "\(documentsPath)/Qiscus/\(file.fileName as String)"
-                            //print
                             try! imageData.write(to: URL(fileURLWithPath: path), options: [.atomic])
                             
                             file.downloadProgress = 1
@@ -1378,13 +1377,6 @@ open class QiscusCommentClient: NSObject {
                         comment.commentBeforeId = payload["comment_before_id"].intValue
                         comment.commentSenderEmail = email
                         comment.commentTopicId = topicId
-                        let timetoken = Double(payload["unix_timestamp"].doubleValue)
-                        let date = Date(timeIntervalSince1970: timetoken)
-                        let dateFormatter = DateFormatter()
-                        dateFormatter.dateFormat = "d MMMM yyyy, h:mm a"
-                        let dateString = dateFormatter.string(from: date)
-                        
-                        print("comment dateTime: \(dateString)")
                         comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)
                         
                         comment.updateCommentStatus(.sent)

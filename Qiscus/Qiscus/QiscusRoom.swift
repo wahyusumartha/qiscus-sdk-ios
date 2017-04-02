@@ -230,7 +230,6 @@ public class QiscusRoom: NSObject {
     }
     public class func room(fromJSON json:JSON)->QiscusRoom{
         var room = QiscusRoom()
-        print("room json data: \(json)")
         if let id = json["id"].int {
             if let roomDB = QiscusRoomDB.roomDB(withId: id){
                 room = roomDB.room()

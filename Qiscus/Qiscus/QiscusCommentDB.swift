@@ -238,7 +238,6 @@ public class QiscusCommentDB: Object {
         if commentData.count > 0{
             let firstCommentId = commentData.first!.localId
             for comment in commentData.reversed(){
-                print("comment: \(comment.commentId)  :  \(comment.commentText)")
                 if QiscusComment.isExist(commentId: comment.commentBeforeId) || comment.localId == firstCommentId{
                     return comment.commentId
                 }
