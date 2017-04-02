@@ -969,7 +969,7 @@ open class QiscusCommentClient: NSObject {
                         let json = JSON(response)
                         let results = json["results"]
                         let error = json["error"]
-                        if results != nil{
+                        if results != JSON.null{
                             let comments = json["results"]["comments"].arrayValue
                             if comments.count > 0 {
                                 let service = QiscusCommentClient.shared
@@ -1019,7 +1019,7 @@ open class QiscusCommentClient: NSObject {
                             if !silent {
                                 QiscusDataPresenter.shared.loadComments(inRoom: room.roomId, checkSync: false)
                             }
-                        }else if error != nil{
+                        }else if error != JSON.null{
                             Qiscus.printLog(text: "error sync message: \(error)")
                             if !silent {
                                 QiscusDataPresenter.shared.loadComments(inRoom: room.roomId, checkSync: false)
@@ -1054,7 +1054,7 @@ open class QiscusCommentClient: NSObject {
                     let json = JSON(response)
                     let results = json["results"]
                     let error = json["error"]
-                    if results != nil{
+                    if results != JSON.null{
                         let comments = json["results"]["comments"].arrayValue
                         if comments.count > 0 {
                             if state == .active{
@@ -1122,7 +1122,7 @@ open class QiscusCommentClient: NSObject {
                                 }
                             }
                         }
-                    }else if error != nil{
+                    }else if error != JSON.null{
                         Qiscus.printLog(text: "error sync message: \(error)")
                     }
                     Qiscus.shared.syncing = false
@@ -1153,7 +1153,7 @@ open class QiscusCommentClient: NSObject {
                 let json = JSON(response)
                 let results = json["results"]
                 let error = json["error"]
-                if results != nil{
+                if results != JSON.null{
                     let comments = json["results"]["comments"].arrayValue
                     var newMessageCount = 0
                     if comments.count > 0 {
@@ -1196,7 +1196,7 @@ open class QiscusCommentClient: NSObject {
                         }
                     }
                     self.delegate?.qiscusService(didFinishLoadMore: room, dataCount: newMessageCount, from: commentId)
-                }else if error != nil{
+                }else if error != JSON.null{
                     Qiscus.printLog(text: "error loadMore: \(error)")
                     self.delegate?.qiscusService(didFailLoadMore: room)
                 }
@@ -1223,7 +1223,7 @@ open class QiscusCommentClient: NSObject {
                 let results = json["results"]
                 let error = json["error"]
                 
-                if results != nil{
+                if results != JSON.null{
                     Qiscus.printLog(text: "getListComment with id response: \(responseData)")
                     let roomData = results["room"]
                     let room = QiscusRoom.room(fromJSON: roomData)
@@ -1296,7 +1296,7 @@ open class QiscusCommentClient: NSObject {
                         self.postMessage(message: withMessage!, topicId: topicId)
                         QiscusChatVC.sharedInstance.message = nil
                     }
-                }else if error != nil{
+                }else if error != JSON.null{
                     Qiscus.printLog(text: "error getRoom: \(error)")
                     var errorMessage = "Failed to load room data"
                     if let errorData = json["detailed_messages"].array {
@@ -1351,7 +1351,7 @@ open class QiscusCommentClient: NSObject {
                 let results = json["results"]
                 let error = json["error"]
                 
-                if results != nil{
+                if results != JSON.null{
                     Qiscus.printLog(text: "getListComment with user response: \(responseData)")
                     let roomData = results["room"]
                     let room = QiscusRoom.room(fromJSON: roomData)
@@ -1432,7 +1432,7 @@ open class QiscusCommentClient: NSObject {
                         self.postMessage(message: withMessage!, topicId: topicId)
                         QiscusChatVC.sharedInstance.message = nil
                     }
-                }else if error != nil{
+                }else if error != JSON.null{
                     Qiscus.printLog(text: "error getListComment: \(error)")
                     var errorMessage = "Failed to load room data"
                     if let errorData = json["detailed_messages"].array {
@@ -1487,7 +1487,7 @@ open class QiscusCommentClient: NSObject {
                 let results = json["results"]
                 let error = json["error"]
                 
-                if results != nil{
+                if results != JSON.null{
                     Qiscus.printLog(text: "getListComment with user response: \(responseData)")
                     let roomData = results["room"]
                     let room = QiscusRoom.room(fromJSON: roomData)
@@ -1564,7 +1564,7 @@ open class QiscusCommentClient: NSObject {
                         self.postMessage(message: withMessage!, topicId: topicId)
                         QiscusChatVC.sharedInstance.message = nil
                     }
-                }else if error != nil{
+                }else if error != JSON.null{
                     Qiscus.printLog(text: "error getListComment: \(error)")
                     var errorMessage = "Failed to load room data"
                     if let errorData = json["detailed_messages"].array {
@@ -1624,7 +1624,7 @@ open class QiscusCommentClient: NSObject {
                     let results = json["results"]
                     let error = json["error"]
                     
-                    if results != nil{
+                    if results != JSON.null{
                         Qiscus.printLog(text: "getListComment with user response: \(responseData)")
                         let changed = json["results"]["changed"].boolValue
                         if changed {
@@ -1697,7 +1697,7 @@ open class QiscusCommentClient: NSObject {
                                 roomDelegate.didFinishUpdateRoom(onRoom: room)
                             }
                         }
-                    }else if error != nil{
+                    }else if error != JSON.null{
                         Qiscus.printLog(text: "error update chat room: \(error)")
                         var errorMessage = "Failed to load room data"
                         if let errorData = json["detailed_messages"].array {
@@ -1742,10 +1742,10 @@ open class QiscusCommentClient: NSObject {
                         let results = json["results"]
                         let error = json["error"]
                         
-                        if results != nil {
+                        if results != JSON.null {
                         
                         }
-                        else if error != nil{
+                        else if error != JSON.null{
                         }
                         
                     }else{
@@ -1778,10 +1778,10 @@ open class QiscusCommentClient: NSObject {
                         let results = json["results"]
                         let error = json["error"]
                         
-                        if results != nil{
+                        if results != JSON.null{
                             Qiscus.printLog(text: "success change comment status on \(commentId) to \(status.rawValue)")
                             withCompletion()
-                        }else if error != nil{
+                        }else if error != JSON.null{
                             Qiscus.printLog(text: "error update message status: \(error)")
                         }
                     }else{
