@@ -6,92 +6,15 @@ Qiscus SDK [![CocoaPods Compatible](https://img.shields.io/cocoapods/v/Qiscus.sv
 Qiscus SDK is a lightweight and powerful chat library. Qiscus SDK will allow you to easily integrating Qiscus engine with your apps to make cool chatting application.
 
 # Quick Start
-### 1. Create a new SDK application in the Dashboard and get app_id 
-### 2. When integrating SDK with an existing app 
-### 3. Using the  SDK in Objective C 
-
-# Authentication 
-### Initializing with APP_ID
-### Login or register 
-### Disconnecting/logout
-### Updating a User Profile and Avatar
-
-# Room Types 
-### Group Room
-### 1 on 1 
-
-# 1-to-1 Chat 
-### Creating and starting 1-to-1 chat 
-
-# Group Room 
-### Creating a Group Room 
-### Getting a Group Room instance with room id 
-### Inviting users to an existing room 
-### Leaving a Group Room 
-### Advanced
-#### Getting a list of all room members 
-#### Getting participants' online statuses
-#### Typing indicators 
-#### Read Receipts 
-#### Admin messages
-#### Room cover images 
-#### Custom room types 
-#### Custom message types 
-#### Message auto-translation 
-#### File Message thumbnails 
-
-# Messaging
-### Sending messages 
-### Receiving messages 
-### Loading previous messages
-### Loading messages by timestamp 
-### Getting a list of participants in a room 
-### Getting participants' online statuses
-### Getting a list of banned or muted users in a room 
-### Deleting messages  
-
-# Room Metadata 
-### MetaData 
-### MetaCounter 
-
-# Event Handler 
-### Room Delegate 
-    
-# UI Customization
-### Theme Customization 
-### UI Source code
-    
-# Push Notifications
-### 1. Create a Certificate Signing Request (CSR)
-### 2. Create a Push Notification SSL certificate 
-### 3. Export a p12 file and upload it to SendBird Dashboard.
-### 4. Register and unregister a device token in SendBird SDK
-### Push notification message templates 
-
-# Caching Data 
-# Miscellaneous
-# Change Log
-# API Reference
-
-## Features
-
-- [x] Text Message and Emoji :+1:
-- [x] Upload Image and File
-  - [x] Galery
-  - [x] Camera
-  - [x] iCloud
-- [x] Custom Baloon Color
-- [x] Local Storage
-- [ ] Push Notification
-
 ## Requirements
 
 - iOS 9.0+ 
 - Xcode 8.0+
 - Swift 3.0+
-
-## Instalation
-### CocoaPods
+### Create a new SDK application in the Dashboard and get app_id 
+[**Request access**](http://sdk.qiscus.com/start.html) to get new Qiscus APP_ID
+### Integrating SDK with an existing app 
+##### CocoaPods
 
 [CocoaPods](http://cocoapods.org) is a dependency manager for Cocoa projects. You can install it with the following command:
 
@@ -122,10 +45,10 @@ target 'Sample' do
   end
 end
 ```
-## Usage
-### Initiate Qiscus SDK in your project 
 
 
+# Authentication 
+### Initializing with APP_ID
 To initiate Qiscus SDK, you need to import Qiscus and then add this in your code everywhere you want
 
 ##### Swift 3.0:
@@ -151,7 +74,7 @@ Qiscus.setup( withAppId: YOUR_APP_ID,
         secureURl:<true|false>];
 ```
 
-[**Request access**](http://sdk.qiscus.com/start.html) to get new Qiscus APP_ID
+
 
 For example : 
 ##### Swift 3.0:
@@ -210,9 +133,18 @@ secureURl:true
 ##### Note:
 Don't forget to add usage description for camera, photo library and microphone to your info.plist
 ![alt tag](https://res.cloudinary.com/qiscus/raw/upload/v1485738688/1485738687/Screen%20Shot%202017-01-30%20at%208.10.46%20AM.png)
+### Login or register 
+### Disconnecting/logout
+### Updating a User Profile and Avatar
 
-### Start Chat
-#### Chat with target email
+# Room Types 
+### Group Room
+A Group Room is a chat for several users. A user can join the chat only through an invitation.
+### 1 on 1 
+A 1 on 1 Room is a chat for two users. The chat initiator only need to add the target's messaging username
+
+# 1-to-1 Chat 
+### Creating and starting 1-to-1 chat by target
 Start chat with target is very easy, all you need is just call 
 ###### Swift 3.0 :
 `Qiscus.chat(withUsers: ["TARGET_EMAIL"], target: self)` 
@@ -268,7 +200,63 @@ optionalData:NULL];
 
 ```
 
-#### Chat with room id
+
+
+# Group Room 
+### Creating a Group Room 
+Qiscus also support group chat. To create new group chat, all you need is just call 
+###### Swift 3.0:
+`Qiscus.createChat(withUsers users:["TARGET_EMAIL_1, TARGET_EMAIL_2"], target:self)` 
+###### Objective C:
+`[Qiscus createChatViewWithUsers:<ARRAY_OF_TARGET_EMAIL> target:self readOnly:<false|true> title:<CHAT_TITLE> subtitle:<CHAT_SUBTITLE> distinctId:NULL optionalData:NULL withMessage:NULL]`
+
+For example in your ViewController : 
+
+##### Swift 3.0
+```
+import UIKit
+import Qiscus
+
+class ViewController: UIViewController {
+
+.....
+func goToChat(){
+let chatTargets = ["081111111111@qiscuswa.com, 081234567890@qiscuswa.com"]
+Qiscus.createChat(withUsers:chatTargets, target:self)
+}
+.....
+}
+```
+
+##### Objective C:
+```
+#import "MainVC.h"
+
+@import Qiscus;
+
+@interface MainVC ()
+...
+...
+@end
+
+@implementation MainVC
+...
+- (void)goToChat{
+[Qiscus createChatViewWithUsers:emails 
+target:self 
+readOnly:false 
+title:@"New Group Chat" 
+subtitle:@"always new chat" 
+distinctId:NULL 
+optionalData:NULL 
+withMessage:NULL];
+}
+
+...
+@end
+
+```
+### Getting a Group Room instance with room id 
 When you already know your chat room id, you can easily go to that room. Just call
 ###### Swift 3.0:
 `Qiscus.chat(withRoomId roomId:[ROOM_ID], target:self, optionalDataCompletion: {_ in})` 
@@ -329,59 +317,61 @@ optionalDataCompletion:^(NSString * _) {
 
 ```
 
+### Inviting users to an existing room 
+### Leaving a Group Room 
+### Advanced
+#### Getting a list of all room members 
+#### Getting participants' online statuses
+#### Typing indicators 
+#### Read Receipts 
+#### Admin messages
+#### Room cover images 
+#### Custom room types 
+#### Custom message types 
+#### Message auto-translation 
+#### File Message thumbnails 
+
+# Messaging
+### Sending messages 
+### Receiving messages 
+### Loading previous messages
+### Loading messages by timestamp 
+### Getting a list of participants in a room 
+### Getting participants' online statuses
+### Getting a list of banned or muted users in a room 
+### Deleting messages  
+
+# Room Metadata 
+### MetaData 
+### MetaCounter 
+
+# Event Handler 
+### Room Delegate 
+    
+# UI Customization
+### Theme Customization 
+### UI Source code
+    
+# Push Notifications
+### 1. Create a Certificate Signing Request (CSR)
+### 2. Create a Push Notification SSL certificate 
+### 3. Export a p12 file and upload it to SendBird Dashboard.
+### 4. Register and unregister a device token in SendBird SDK
+### Push notification message templates 
+
+# Caching Data 
+# Miscellaneous
+# Change Log
+# API Reference
+
+### Start Chat
+#### Chat with target email
+
+
+#### Chat with room id
+
 #### Create group chat
-Qiscus also support group chat. To create new group chat, all you need is just call 
-###### Swift 3.0:
-`Qiscus.createChat(withUsers users:["TARGET_EMAIL_1, TARGET_EMAIL_2"], target:self)` 
-###### Objective C:
-`[Qiscus createChatViewWithUsers:<ARRAY_OF_TARGET_EMAIL> target:self readOnly:<false|true> title:<CHAT_TITLE> subtitle:<CHAT_SUBTITLE> distinctId:NULL optionalData:NULL withMessage:NULL]`
 
-For example in your ViewController : 
-
-##### Swift 3.0
-```
-import UIKit
-import Qiscus
-
-class ViewController: UIViewController {
-
-.....
-func goToChat(){
-let chatTargets = ["081111111111@qiscuswa.com, 081234567890@qiscuswa.com"]
-Qiscus.createChat(withUsers:chatTargets, target:self)
-}
-.....
-}
-```
-
-##### Objective C:
-```
-#import "MainVC.h"
-
-@import Qiscus;
-
-@interface MainVC ()
-...
-...
-@end
-
-@implementation MainVC
-...
-- (void)goToChat{
-[Qiscus createChatViewWithUsers:emails 
-target:self 
-readOnly:false 
-title:@"New Group Chat" 
-subtitle:@"always new chat" 
-distinctId:NULL 
-optionalData:NULL 
-withMessage:NULL];
-}
-
-...
-@end
-
-```
 
 for accesing room that created by this call, you need to call it with its roomId. This methode is always creating new chat room.
 
