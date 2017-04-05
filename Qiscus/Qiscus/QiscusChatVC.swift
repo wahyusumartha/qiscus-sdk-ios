@@ -255,6 +255,8 @@ public class QiscusChatVC: UIViewController{
         linkPreviewContainer.layer.shadowOffset = CGSize(width: -5, height: 0)
         roomAvatar.contentMode = .scaleAspectFill
         inputText.font = Qiscus.style.chatFont
+        self.collectionView.delegate = self
+        self.collectionView.dataSource = self
         self.emptyChatImage.image = Qiscus.image(named: "empty_messages")?.withRenderingMode(.alwaysTemplate)
         self.emptyChatImage.tintColor = self.bottomColor
         
