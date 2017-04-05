@@ -350,33 +350,6 @@ optionalDataCompletion:^(NSString * _) {
     
 # UI Customization
 ### Theme Customization 
-### UI Source code
-    
-# Push Notifications
-### 1. Create a Certificate Signing Request (CSR)
-### 2. Create a Push Notification SSL certificate 
-### 3. Export a p12 file and upload it to SendBird Dashboard.
-### 4. Register and unregister a device token in SendBird SDK
-### Push notification message templates 
-
-# Caching Data 
-# Miscellaneous
-# Change Log
-# API Reference
-
-### Start Chat
-#### Chat with target email
-
-
-#### Chat with room id
-
-#### Create group chat
-
-
-for accesing room that created by this call, you need to call it with its roomId. This methode is always creating new chat room.
-
-### Custom Style of Chat Interface 
-
 you can explore customisation of chat interface by calling method style
 
 For Example : 
@@ -401,6 +374,20 @@ tintColor:[UIColor whiteColor]];
 
 
 Check sample apps -> [Swift](https://github.com/qiscus/qiscus-sdk-ios-sample) or [Objective C](https://github.com/qiscus/qiscus-sdk-ios-sample-obj-c)
+### UI Source code
+    
+# Push Notifications
+### 1. Create a Certificate Signing Request (CSR)
+### 2. Create a Push Notification SSL certificate 
+### 3. Export a p12 file and upload it to SendBird Dashboard.
+### 4. Register and unregister a device token in SendBird SDK
+### Push notification message templates 
+
+# Caching Data 
+# Miscellaneous
+# Change Log
+# API Reference
+
 
 ## License
 
