@@ -313,9 +313,6 @@ optionalDataCompletion:^(NSString * _) {
 @end
 
 ```
-
-# Event Handler 
-### Room Delegate 
     
 # UI Customization
 ### Theme Customization 
