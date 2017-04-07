@@ -133,9 +133,6 @@ secureURl:true
 ##### Note:
 Don't forget to add usage description for camera, photo library and microphone to your info.plist
 ![alt tag](https://res.cloudinary.com/qiscus/raw/upload/v1485738688/1485738687/Screen%20Shot%202017-01-30%20at%208.10.46%20AM.png)
-### Login or register 
-### Disconnecting/logout
-### Updating a User Profile and Avatar
 
 # Room Types 
 ### Group Room
@@ -317,34 +314,6 @@ optionalDataCompletion:^(NSString * _) {
 
 ```
 
-### Inviting users to an existing room 
-### Leaving a Group Room 
-### Advanced
-#### Getting a list of all room members 
-#### Getting participants' online statuses
-#### Typing indicators 
-#### Read Receipts 
-#### Admin messages
-#### Room cover images 
-#### Custom room types 
-#### Custom message types 
-#### Message auto-translation 
-#### File Message thumbnails 
-
-# Messaging
-### Sending messages 
-### Receiving messages 
-### Loading previous messages
-### Loading messages by timestamp 
-### Getting a list of participants in a room 
-### Getting participants' online statuses
-### Getting a list of banned or muted users in a room 
-### Deleting messages  
-
-# Room Metadata 
-### MetaData 
-### MetaCounter 
-
 # Event Handler 
 ### Room Delegate 
     
@@ -374,19 +343,7 @@ tintColor:[UIColor whiteColor]];
 
 
 Check sample apps -> [Swift](https://github.com/qiscus/qiscus-sdk-ios-sample) or [Objective C](https://github.com/qiscus/qiscus-sdk-ios-sample-obj-c)
-### UI Source code
-    
-# Push Notifications
-### 1. Create a Certificate Signing Request (CSR)
-### 2. Create a Push Notification SSL certificate 
-### 3. Export a p12 file and upload it to SendBird Dashboard.
-### 4. Register and unregister a device token in SendBird SDK
-### Push notification message templates 
 
-# Caching Data 
-# Miscellaneous
-# Change Log
-# API Reference
 
 
 ## License
