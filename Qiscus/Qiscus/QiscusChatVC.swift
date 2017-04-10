@@ -351,7 +351,7 @@ public class QiscusChatVC: UIViewController{
         titleLabel = UILabel(frame:CGRect(x: 0, y: 0, width: titleWidth, height: 17))
         titleLabel.backgroundColor = UIColor.clear
         titleLabel.textColor = UIColor.white
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 16)
+        titleLabel.font = UIFont.boldSystemFont(ofSize: UIFont.systemFontSize)
         titleLabel.text = ""
         titleLabel.textAlignment = .left
         
@@ -849,14 +849,14 @@ public class QiscusChatVC: UIViewController{
         }
         
         if UIApplication.shared.userInterfaceLayoutDirection == .leftToRight {
-            self.roomAvatar.frame = CGRect(x: 0,y: 0,width: 32,height: 32)
+            self.roomAvatar.frame = CGRect(x: 0,y: 0,width: 30,height: 30)
         }else{
-            self.roomAvatar.frame = CGRect(x: 50,y: 0,width: 32,height: 32)
+            self.roomAvatar.frame = CGRect(x: 50,y: 0,width: 30,height: 30)
         }
         self.roomAvatar.layer.cornerRadius = 16
         self.roomAvatar.clipsToBounds = true
         
-        let button = UIButton(frame:CGRect(x: 0,y: 0,width: 32,height: 32))
+        let button = UIButton(frame:CGRect(x: 0,y: 0,width: 30,height: 30))
         button.addSubview(self.roomAvatar)
         
         return UIBarButtonItem(customView: button)
@@ -974,6 +974,8 @@ public class QiscusChatVC: UIViewController{
                                     break
                                 }
                             }
+                        }else{
+                            navSubtitle = "not available"
                         }
                     }
                 }
