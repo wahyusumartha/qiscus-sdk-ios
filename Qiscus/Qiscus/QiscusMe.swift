@@ -65,7 +65,6 @@ open class QiscusMe: NSObject {
         }
     }
 
-
     open class func saveData(fromJson json:JSON)->QiscusMe{
         Qiscus.printLog(text: "jsonFron saveData: \(json)")
         QiscusMe.sharedInstance.id = json["id"].intValue

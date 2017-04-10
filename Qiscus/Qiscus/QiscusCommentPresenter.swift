@@ -217,8 +217,17 @@ public enum QiscusCommentPresenterType:Int {
             }
             commentPresenter.commentAttributedText = attributedText
             
-            if let size = comment.cellSize {
-                commentPresenter.cellSize = size
+            let fontSize = Qiscus.shared.styleConfiguration.chatFont.pointSize
+            let fontName = Qiscus.shared.styleConfiguration.chatFont.fontName
+            
+            
+            var needCalculate = false
+            if fontName != comment.commentFontName || fontSize != comment.commentFontSize{
+                needCalculate = true
+            }
+
+            if comment.cellSize != nil && !needCalculate{
+                commentPresenter.cellSize = comment.cellSize!
             }else{
                 Qiscus.uiThread.sync {
                     let cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText)
@@ -226,6 +235,8 @@ public enum QiscusCommentPresenterType:Int {
                     comment.commentCellHeight = cellSize.height
                     comment.commentCellWidth = cellSize.width
                 }
+                comment.commentFontName = fontName
+                comment.commentFontSize = fontSize
             }
             break
         default:
@@ -342,7 +353,7 @@ public enum QiscusCommentPresenterType:Int {
         textView.dataDetectorTypes = .all
         textView.linkTextAttributes = QiscusCommentPresenter().linkTextAttributes
         
-        let maxWidth:CGFloat = 190
+        let maxWidth:CGFloat = QiscusUIConfiguration.chatTextMaxWidth
         textView.attributedText = attributedText
         
         size = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))

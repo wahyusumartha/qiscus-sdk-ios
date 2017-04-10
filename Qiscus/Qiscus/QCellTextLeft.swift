@@ -9,7 +9,7 @@
 import UIKit
 
 class QCellTextLeft: QChatCell, UITextViewDelegate {
-    let maxWidth:CGFloat = 190
+    let maxWidth:CGFloat = QiscusUIConfiguration.chatTextMaxWidth
     let minWidth:CGFloat = 80
     
     @IBOutlet weak var userNameLabel: UILabel!
@@ -24,6 +24,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
     @IBOutlet weak var textViewWidth: NSLayoutConstraint!
     @IBOutlet weak var textViewHeight: NSLayoutConstraint!
     @IBOutlet weak var balloonWidth: NSLayoutConstraint!
+    @IBOutlet weak var linkContainerWidth: NSLayoutConstraint!
     
     @IBOutlet weak var LinkContainer: UIView!
     @IBOutlet weak var linkDescription: UITextView!
@@ -44,7 +45,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         LinkContainer.isHidden = true
         LinkContainer.layer.cornerRadius = 4
         LinkContainer.clipsToBounds = true
-        
+        linkContainerWidth.constant = self.maxWidth + 2
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QCellTextLeft.openLink))
         LinkContainer.addGestureRecognizer(tapRecognizer)
         linkImage.clipsToBounds = true
@@ -109,12 +110,12 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         
         // last cell
         if data.cellPos == .last || data.cellPos == .single{
-            leftMargin.constant = 42
+            leftMargin.constant = 35
             textLeading.constant = 23
             balloonWidth.constant = 31
         }else{
             textLeading.constant = 8
-            leftMargin.constant = 57
+            leftMargin.constant = 50
             balloonWidth.constant = 16
         }
         

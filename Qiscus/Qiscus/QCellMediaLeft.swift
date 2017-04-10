@@ -90,9 +90,9 @@ class QCellMediaLeft: QChatCell {
         // if this is last cell
         if data.cellPos == .last || data.cellPos == .single{
             balloonWidth.constant = 200
-            leftMargin.constant = 42
+            leftMargin.constant = 35
         }else{
-            leftMargin.constant = 57
+            leftMargin.constant = 50
             balloonWidth.constant = 185
         }
         

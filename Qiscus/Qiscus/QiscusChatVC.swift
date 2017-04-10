@@ -66,8 +66,7 @@ public class QiscusChatVC: UIViewController{
                 let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
                 self.navigationItem.setHidesBackButton(true, animated: false)
                 self.navigationItem.leftBarButtonItems = [
-                    backButton,
-                    self.roomAvatarButton()
+                    backButton
                 ]
                 self.loadMoreControl.removeFromSuperview()
                 if room!.hasLoadMore{
@@ -76,6 +75,12 @@ public class QiscusChatVC: UIViewController{
                     self.collectionView.addSubview(self.loadMoreControl)
                 }
                 self.loadTitle()
+                let image = Qiscus.image(named: "room_avatar")
+                if let avatar = self.room!.avatarImage {
+                    self.roomAvatar.image = avatar
+                }else{
+                    self.roomAvatar.loadAsync(self.room!.roomAvatarURL, placeholderImage: image)
+                }
                 self.subscribeRealtime(onRoom: room)
             }else{
                 self.titleLabel.text = ""
@@ -346,25 +351,53 @@ public class QiscusChatVC: UIViewController{
     
     // MARK: - Setup UI
     func setupNavigationTitle(){
-        let titleWidth = QiscusHelper.screenWidth() - 160
+        var totalButton = 1
+        if let leftButtons = self.navigationItem.leftBarButtonItems {
+            totalButton += leftButtons.count
+        }
+        if let rightButtons = self.navigationItem.rightBarButtonItems {
+            totalButton += rightButtons.count
+        }
         
-        titleLabel = UILabel(frame:CGRect(x: 0, y: 0, width: titleWidth, height: 17))
+        let titleWidth = QiscusHelper.screenWidth() - CGFloat(49 * totalButton) - 40
+        
+        titleLabel = UILabel(frame:CGRect(x: 40, y: 7, width: titleWidth, height: 17))
         titleLabel.backgroundColor = UIColor.clear
         titleLabel.textColor = UIColor.white
         titleLabel.font = UIFont.boldSystemFont(ofSize: UIFont.systemFontSize)
         titleLabel.text = ""
         titleLabel.textAlignment = .left
         
-        subtitleLabel = UILabel(frame:CGRect(x: 0, y: 18, width: titleWidth, height: 12))
+        subtitleLabel = UILabel(frame:CGRect(x: 40, y: 25, width: titleWidth, height: 13))
         subtitleLabel.backgroundColor = UIColor.clear
         subtitleLabel.textColor = UIColor.white
         subtitleLabel.font = UIFont.systemFont(ofSize: 11)
         subtitleLabel.text = ""
         subtitleLabel.textAlignment = .left
         
-        let titleView = UIView(frame: CGRect(x: 0, y: 0, width: titleWidth, height: 30))
+        self.roomAvatar = UIImageView()
+        self.roomAvatar.contentMode = .scaleAspectFill
+        self.roomAvatar.backgroundColor = UIColor.white
+        
+        let image = Qiscus.image(named: "room_avatar")
+        
+        
+        if let chatRoom = self.room{
+            if let avatar = chatRoom.avatarImage {
+                self.roomAvatar.image = avatar
+            }else{
+                self.roomAvatar.loadAsync(chatRoom.roomAvatarURL, placeholderImage: image)
+            }
+        }
+        
+        self.roomAvatar.frame = CGRect(x: 0,y: 6,width: 32,height: 32)
+        self.roomAvatar.layer.cornerRadius = 16
+        self.roomAvatar.clipsToBounds = true
+        
+        let titleView = UIView(frame: CGRect(x: 0, y: 0, width: titleWidth + 40, height: 44))
         titleView.addSubview(self.titleLabel)
         titleView.addSubview(self.subtitleLabel)
+        titleView.addSubview(self.roomAvatar)
         
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QiscusChatVC.goToTitleAction))
         titleView.addGestureRecognizer(tapRecognizer)
@@ -413,10 +446,7 @@ public class QiscusChatVC: UIViewController{
         
         let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
         self.navigationItem.setHidesBackButton(true, animated: false)
-        self.navigationItem.leftBarButtonItems = [
-            backButton,
-            self.roomAvatarButton()
-        ]
+        self.navigationItem.leftBarButtonItems = [backButton]
         
         if inputText.value == "" {
             sendButton.isEnabled = false
@@ -818,48 +848,18 @@ public class QiscusChatVC: UIViewController{
         let image = Qiscus.image(named: "ic_back")
         backIcon.image = image
         
-        
+        //let backButtons = UIBarButtonItem(barButtonSystemItem: , target: <#T##Any?#>, action: <#T##Selector?#>)
         if UIApplication.shared.userInterfaceLayoutDirection == .leftToRight {
-            backIcon.frame = CGRect(x: 0,y: 0,width: 10,height: 15)
+            backIcon.frame = CGRect(x: 0,y: 11,width: 13,height: 22)
         }else{
-            backIcon.frame = CGRect(x: 50,y: 0,width: 10,height: 15)
+            backIcon.frame = CGRect(x: 22,y: 11,width: 13,height: 22)
         }
         
         
-        let backButton = UIButton(frame:CGRect(x: 0,y: 0,width: 17,height: 20))
+        let backButton = UIButton(frame:CGRect(x: 0,y: 0,width: 23,height: 44))
         backButton.addSubview(backIcon)
         backButton.addTarget(target, action: action, for: UIControlEvents.touchUpInside)
-        
         return UIBarButtonItem(customView: backButton)
-    }
-    func roomAvatarButton() -> UIBarButtonItem{
-        self.roomAvatar = UIImageView()
-        self.roomAvatar.contentMode = .scaleAspectFill
-        self.roomAvatar.backgroundColor = UIColor.white
-        
-        let image = Qiscus.image(named: "room_avatar")
-        
-        
-        if let chatRoom = self.room{
-            if let avatar = chatRoom.avatarImage {
-                self.roomAvatar.image = avatar
-            }else{
-                self.roomAvatar.loadAsync(chatRoom.roomAvatarURL, placeholderImage: image)
-            }
-        }
-        
-        if UIApplication.shared.userInterfaceLayoutDirection == .leftToRight {
-            self.roomAvatar.frame = CGRect(x: 0,y: 0,width: 30,height: 30)
-        }else{
-            self.roomAvatar.frame = CGRect(x: 50,y: 0,width: 30,height: 30)
-        }
-        self.roomAvatar.layer.cornerRadius = 16
-        self.roomAvatar.clipsToBounds = true
-        
-        let button = UIButton(frame:CGRect(x: 0,y: 0,width: 30,height: 30))
-        button.addSubview(self.roomAvatar)
-        
-        return UIBarButtonItem(customView: button)
     }
     
     func showAlert(alert:UIAlertController){
@@ -1129,6 +1129,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         self.dismissLoading()
         self.firstLoad = false
         self.room = inRoom
+        
         if comments.count > 0 {
             self.comments = comments
             self.welcomeView.isHidden = true

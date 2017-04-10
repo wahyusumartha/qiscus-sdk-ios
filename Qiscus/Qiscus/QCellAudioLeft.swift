@@ -102,9 +102,9 @@ class QCellAudioLeft: QCellAudio {
         
         dateLabel.text = data.commentTime.lowercased()
         if data.cellPos == .single || data.cellPos == .last {
-            leftMargin.constant = 42
+            leftMargin.constant = 35
         }else{
-            leftMargin.constant = 57
+            leftMargin.constant = 50
         }
         
         balloonView.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor

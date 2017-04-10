@@ -122,6 +122,7 @@ import CocoaMQTT
         Qiscus.publishUserStatus(offline: true)
         Qiscus.shared.mqtt?.disconnect()
         QiscusMe.clear()
+        Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         try! realm.write {
             realm.deleteAll()
@@ -489,9 +490,11 @@ import CocoaMQTT
     
 
     func applicationDidBecomeActife(){
-
         if Qiscus.isLoggedIn{
             Qiscus.sharedInstance.RealtimeConnect()
+        }
+        if !Qiscus.sharedInstance.styleConfiguration.rewriteChatFont {
+            Qiscus.sharedInstance.styleConfiguration.chatFont = UIFont.preferredFont(forTextStyle: UIFontTextStyle.body)
         }
     }
     class func printLog(text:String){
@@ -526,7 +529,7 @@ import CocoaMQTT
             Qiscus.dbConfiguration.fileURL = realmURL
             Qiscus.dbConfiguration.deleteRealmIfMigrationNeeded = true
         }
-        Qiscus.dbConfiguration.schemaVersion = 1
+        Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
         
         let _ = try! Realm(configuration: Qiscus.dbConfiguration)
         Qiscus.printLog(text:"realmURL \(Qiscus.dbConfiguration.fileURL!)")

@@ -120,12 +120,12 @@ import Photos
                 presenterGroup.append(presenter)
                 row += 1
             }
+            
             if presenterGroup.count > 0{
                 commentsPresenter.append(presenterGroup)
             }
             section += 1
         }
-        
         return commentsPresenter
     }
     

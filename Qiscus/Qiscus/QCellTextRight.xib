@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12118" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12086"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -161,6 +161,7 @@
                 <outlet property="balloonWidth" destination="Mpc-6P-meC" id="9qO-S3-EeM"/>
                 <outlet property="cellHeight" destination="c9H-y8-YTd" id="KCI-6u-b3Y"/>
                 <outlet property="dateLabel" destination="LrG-8y-Xg3" id="f1L-g0-9tW"/>
+                <outlet property="linkContainerWidth" destination="joe-oD-PGj" id="HRT-Ma-PaZ"/>
                 <outlet property="linkDescription" destination="t4i-7J-fFf" id="s5Q-mz-SCm"/>
                 <outlet property="linkHeight" destination="5dK-9D-Q6t" id="9Xq-U9-J5X"/>
                 <outlet property="linkImage" destination="FL3-Hk-QI4" id="Ga8-HU-Tfa"/>

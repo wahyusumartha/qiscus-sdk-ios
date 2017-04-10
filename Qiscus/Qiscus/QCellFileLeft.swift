@@ -60,9 +60,9 @@ class QCellFileLeft: QChatCell {
         dateLabel.text = data.commentTime.lowercased()
 
         if data.cellPos == .last || data.cellPos == .single {
-            leftMargin.constant = 42
+            leftMargin.constant = 35
         }else{
-            leftMargin.constant = 57
+            leftMargin.constant = 50
         }
         balloonView.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor
         dateLabel.textColor = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor

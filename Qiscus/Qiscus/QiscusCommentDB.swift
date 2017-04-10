@@ -25,6 +25,8 @@ public class QiscusCommentDB: Object {
     public dynamic var commentCellWidth:CGFloat = 0
     public dynamic var showLink:Bool = false
     public dynamic var commentLinkPreviewed:String = ""
+    public dynamic var commentFontSize:CGFloat = 0
+    public dynamic var commentFontName:String = ""
     
     // MARK: - Primary Key
     override open class func primaryKey() -> String {

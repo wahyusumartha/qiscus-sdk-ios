@@ -13,12 +13,22 @@ open class QiscusUIConfiguration: NSObject {
     
     open var color = QiscusColorConfiguration.sharedInstance
     open var copyright = QiscusTextConfiguration.sharedInstance
-    open var chatFont = UIFont.systemFont(ofSize: 15)
+    open var chatFont = UIFont.preferredFont(forTextStyle: UIFontTextStyle.body){
+        didSet{
+            if chatFont.pointSize != UIFont.preferredFont(forTextStyle: UIFontTextStyle.body).pointSize{
+                if chatFont.fontName != UIFont.preferredFont(forTextStyle: UIFontTextStyle.body).fontName {
+                    rewriteChatFont = true
+                }
+            }
+        }
+    }
+    public var rewriteChatFont = false
+    
     
     /// To set read only or not, Default value : false
     open var readOnly = false
     
-    
+    static var chatTextMaxWidth:CGFloat = 0.6 * QiscusHelper.screenWidth()
     open var topicId:Int = 0
     open var chatUsers:[String] = [String]()
     open var baseColor:UIColor{

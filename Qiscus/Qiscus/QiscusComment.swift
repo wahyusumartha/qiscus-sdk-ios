@@ -220,6 +220,34 @@ public class QiscusComment: NSObject {
             }
         }
     }
+    public var commentFontSize:CGFloat = 0 {
+        didSet{
+            if !self.copyProcess {
+                if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
+                    if savedComment.commentFontSize != self.commentFontSize{
+                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        try! realm.write {
+                            savedComment.commentFontSize = self.commentFontSize
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public var commentFontName:String = "" {
+        didSet{
+            if !self.copyProcess {
+                if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
+                    if savedComment.commentFontName != self.commentFontName{
+                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        try! realm.write {
+                            savedComment.commentFontName = self.commentFontName
+                        }
+                    }
+                }
+            }
+        }
+    }
     
     // MARK: - Process Flag
     public var copyProcess:Bool = false

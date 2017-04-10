@@ -9,7 +9,7 @@
 import UIKit
 
 class QCellTextRight: QChatCell {
-    let maxWidth:CGFloat = 190
+    let maxWidth:CGFloat = QiscusUIConfiguration.chatTextMaxWidth
     let minWidth:CGFloat = 80
     
     @IBOutlet weak var userNameLabel: UILabel!
@@ -19,6 +19,7 @@ class QCellTextRight: QChatCell {
     @IBOutlet weak var statusImage: UIImageView!
     
     @IBOutlet weak var balloonWidth: NSLayoutConstraint!
+    @IBOutlet weak var linkContainerWidth: NSLayoutConstraint!
     @IBOutlet weak var cellHeight: NSLayoutConstraint!
     @IBOutlet weak var rightMargin: NSLayoutConstraint!
     @IBOutlet weak var balloonTopMargin: NSLayoutConstraint!
@@ -43,7 +44,7 @@ class QCellTextRight: QChatCell {
         LinkContainer.isHidden = true
         LinkContainer.layer.cornerRadius = 4
         LinkContainer.clipsToBounds = true
-        
+        linkContainerWidth.constant = self.maxWidth + 2
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QCellTextRight.openLink))
         LinkContainer.addGestureRecognizer(tapRecognizer)
         linkImage.clipsToBounds = true
