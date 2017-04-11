@@ -854,13 +854,12 @@ public class QiscusChatVC: UIViewController{
         self.navigationController?.navigationBar.tintColor = self.tintColor
         let _ = self.view
         self.sendButton.tintColor = self.topColor
+        if self.inputText.value == "" {
+            self.sendButton.isEnabled = false
+        }
         self.attachButton.tintColor = self.topColor
         self.bottomButton.tintColor = self.topColor
-        //self.documentButton.tintColor = self.bottomColor
-        //self.galeryButton.tintColor = self.bottomColor
-        //self.cameraButton.tintColor = self.bottomColor
         self.emptyChatImage.tintColor = self.bottomColor
-        //self.audioButton.tintColor = self.bottomColor
     }
     func setNavigationColor(_ color:UIColor, tintColor:UIColor){
         self.topColor = color
@@ -870,13 +869,12 @@ public class QiscusChatVC: UIViewController{
         self.navigationController?.navigationBar.tintColor = tintColor
         let _ = self.view
         self.sendButton.tintColor = self.topColor
+        if self.inputText.value == "" {
+            self.sendButton.isEnabled = false
+        }
         self.attachButton.tintColor = self.topColor
         self.bottomButton.tintColor = self.topColor
-        //self.documentButton.tintColor = self.bottomColor
-        //self.galeryButton.tintColor = self.bottomColor
-        //self.cameraButton.tintColor = self.bottomColor
         self.emptyChatImage.tintColor = self.bottomColor
-        //self.audioButton.tintColor = self.bottomColor
     }
     func showNoConnectionToast(){
         QToasterSwift.toast(target: self, text: QiscusTextConfiguration.sharedInstance.noConnectionText, backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)

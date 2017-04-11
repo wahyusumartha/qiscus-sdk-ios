@@ -29,17 +29,10 @@ extension QiscusChatVC: ChatInputTextDelegate {
         }
     }
     open func valueChanged(value:String){
-        let sendButtonEnabled =  self.sendButton.isEnabled
         Qiscus.logicThread.async {
             if value == "" {
                 self.linkToPreview = ""
-                self.sendButton.tintColor = UIColor(red: 142/255, green: 142/255, blue: 146/255, alpha: 1)
             }else{
-                if !sendButtonEnabled{
-                    Qiscus.uiThread.async {
-                        self.sendButton.isEnabled = true
-                    }
-                }
                 if let link = QiscusHelper.getFirstLinkInString(text: value){
                     if link != self.linkToPreview{
                         self.linkToPreview = link
@@ -47,7 +40,6 @@ extension QiscusChatVC: ChatInputTextDelegate {
                 }else{
                     self.linkToPreview = ""
                 }
-                self.sendButton.tintColor = self.topColor
             }
         }
     }

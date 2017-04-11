@@ -18,7 +18,7 @@ open class ChatInputText: UITextView, UITextViewDelegate {
     
     var chatInputDelegate: ChatInputTextDelegate?
     
-    var value: String = ""
+    var value: String = "" 
     var placeHolderColor = UIColor(red: 153/255.0, green: 153/255.0, blue: 153/255.0, alpha: 1.0)
     var activeTextColor = UIColor(red: 77/255.0, green: 77/255.0, blue: 77/255.0, alpha: 1.0)
     
@@ -62,7 +62,7 @@ open class ChatInputText: UITextView, UITextViewDelegate {
         let minHeight:CGFloat = 28
         let fixedWidth = textView.frame.width
         
-        self.value = textView.text
+        self.value = textView.text.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         self.chatInputDelegate?.valueChanged(value: self.value)
         var newHeight = textView.sizeThatFits(CGSize(width: fixedWidth, height: maxHeight)).height
         
@@ -72,7 +72,11 @@ open class ChatInputText: UITextView, UITextViewDelegate {
         if newHeight > maxHeight {
             newHeight = maxHeight
         }
-        
+        if self.value == "" {
+            QiscusChatVC.sharedInstance.sendButton.isEnabled = false
+        }else{
+            QiscusChatVC.sharedInstance.sendButton.isEnabled = true
+        }
         self.chatInputDelegate?.chatInputTextDidChange(chatInput: self, height: newHeight)
         
     }
@@ -86,6 +90,7 @@ open class ChatInputText: UITextView, UITextViewDelegate {
         if value == "" {
             textView.text = self.placeholder
             textView.textColor = self.placeHolderColor
+            QiscusChatVC.sharedInstance.sendButton.isEnabled = false
         }
         textView.resignFirstResponder()
         self.chatInputDelegate?.chatInputDidEndEditing(chatInput: self)
