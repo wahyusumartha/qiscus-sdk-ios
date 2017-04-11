@@ -59,14 +59,14 @@ open class ChatInputText: UITextView, UITextViewDelegate {
     // MARK: - UITextViewDelegate
     open func textViewDidChange(_ textView: UITextView) {
         let maxHeight:CGFloat = 85
-        let minHeight:CGFloat = 28
+        let minHeight:CGFloat = 32
         let fixedWidth = textView.frame.width
         
         self.value = textView.text.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         self.chatInputDelegate?.valueChanged(value: self.value)
         var newHeight = textView.sizeThatFits(CGSize(width: fixedWidth, height: maxHeight)).height
         
-        if newHeight <= 28 {
+        if newHeight <= minHeight {
             newHeight = minHeight
         }
         if newHeight > maxHeight {
