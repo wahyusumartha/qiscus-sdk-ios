@@ -27,12 +27,9 @@ public class QiscusChatVC: UIViewController{
     @IBOutlet weak var welcomeText: UILabel!
     @IBOutlet weak var welcomeSubtitle: UILabel!
     @IBOutlet weak var sendButton: UIButton!
-    @IBOutlet weak var galeryButton: UIButton!
+    @IBOutlet weak var attachButton: UIButton!
     @IBOutlet weak var archievedNotifView: UIView!
     @IBOutlet weak var archievedNotifLabel: UILabel!
-    @IBOutlet weak var cameraButton: UIButton!
-    @IBOutlet weak var audioButton: UIButton!
-    @IBOutlet weak var documentButton: UIButton!
     @IBOutlet weak var unlockButton: UIButton!
     @IBOutlet weak var emptyChatImage: UIImageView!
     @IBOutlet weak var collectionView: UICollectionView!
@@ -320,16 +317,10 @@ public class QiscusChatVC: UIViewController{
         self.isPresence = true
         self.emptyChatImage.image = Qiscus.image(named: "empty_messages")?.withRenderingMode(.alwaysTemplate)
         self.emptyChatImage.tintColor = self.bottomColor
-        let sendImage = Qiscus.image(named: "ic_send_on")?.withRenderingMode(.alwaysTemplate)
-        let documentImage = Qiscus.image(named: "ic_add_file")?.withRenderingMode(.alwaysTemplate)
-        let galeryImage = Qiscus.image(named: "ic_add_image")?.withRenderingMode(.alwaysTemplate)
-        let cameraImage = Qiscus.image(named: "ic_pick_picture")?.withRenderingMode(.alwaysTemplate)
-        let audioImage = Qiscus.image(named: "ic_add_audio")?.withRenderingMode(.alwaysTemplate)
+        let sendImage = Qiscus.image(named: "send")?.withRenderingMode(.alwaysTemplate)
+        let attachmentImage = Qiscus.image(named: "share_attachment")?.withRenderingMode(.alwaysTemplate)
         self.sendButton.setImage(sendImage, for: .normal)
-        self.documentButton.setImage(documentImage, for: .normal)
-        self.galeryButton.setImage(galeryImage, for: .normal)
-        self.cameraButton.setImage(cameraImage, for: .normal)
-        self.audioButton.setImage(audioImage, for: .normal)
+        self.attachButton.setImage(attachmentImage, for: .normal)
         if self.room != nil && !firstLoad {
             if let newRoom = QiscusRoom.room(withId: self.room!.roomId){
                 self.room = newRoom
@@ -412,11 +403,7 @@ public class QiscusChatVC: UIViewController{
         }else{
             self.archievedNotifTop.constant = 65
         }
-        if Qiscus.sharedInstance.iCloudUpload {
-            self.documentButton.isHidden = false
-        }else{
-            self.documentButton.isHidden = true
-        }
+        
         self.collectionView.delegate = self
         self.collectionView.dataSource = self
         
@@ -462,16 +449,8 @@ public class QiscusChatVC: UIViewController{
         self.welcomeText.text = QiscusTextConfiguration.sharedInstance.emptyTitle
         self.welcomeSubtitle.text = QiscusTextConfiguration.sharedInstance.emptyMessage
         
-        self.inputText.textContainerInset = UIEdgeInsets.zero
         self.inputText.placeholder = QiscusTextConfiguration.sharedInstance.textPlaceholder
         self.inputText.chatInputDelegate = self
-        //self.defaultViewHeight = self.view.frame.height - (self.navigationController?.navigationBar.frame.height)! - QiscusHelper.statusBarSize().height
-        
-        // upload button setup
-        self.galeryButton.addTarget(self, action: #selector(self.uploadImage), for: .touchUpInside)
-        self.cameraButton.addTarget(self, action: #selector(QiscusChatVC.uploadFromCamera), for: .touchUpInside)
-        self.documentButton.addTarget(self, action: #selector(QiscusChatVC.iCloudOpen), for: .touchUpInside)
-        self.audioButton.addTarget(self, action: #selector(QiscusChatVC.recordAudio), for: .touchUpInside)
         
         // Keyboard stuff.
         let center: NotificationCenter = NotificationCenter.default
@@ -602,15 +581,16 @@ public class QiscusChatVC: UIViewController{
     }
     func goBack() {
         self.isPresence = false
-        self.reset()
         if self.backAction != nil{
             self.backAction!()
+            self.reset()
         }else{
             if Qiscus.sharedInstance.isPushed {
                 let _ = self.navigationController?.popViewController(animated: true)
             }else{
                 self.navigationController?.dismiss(animated: true, completion: nil)
             }
+            self.reset()
         }
     }
     
@@ -874,12 +854,13 @@ public class QiscusChatVC: UIViewController{
         self.navigationController?.navigationBar.tintColor = self.tintColor
         let _ = self.view
         self.sendButton.tintColor = self.topColor
+        self.attachButton.tintColor = self.topColor
         self.bottomButton.tintColor = self.topColor
-        self.documentButton.tintColor = self.bottomColor
-        self.galeryButton.tintColor = self.bottomColor
-        self.cameraButton.tintColor = self.bottomColor
+        //self.documentButton.tintColor = self.bottomColor
+        //self.galeryButton.tintColor = self.bottomColor
+        //self.cameraButton.tintColor = self.bottomColor
         self.emptyChatImage.tintColor = self.bottomColor
-        self.audioButton.tintColor = self.bottomColor
+        //self.audioButton.tintColor = self.bottomColor
     }
     func setNavigationColor(_ color:UIColor, tintColor:UIColor){
         self.topColor = color
@@ -889,12 +870,13 @@ public class QiscusChatVC: UIViewController{
         self.navigationController?.navigationBar.tintColor = tintColor
         let _ = self.view
         self.sendButton.tintColor = self.topColor
+        self.attachButton.tintColor = self.topColor
         self.bottomButton.tintColor = self.topColor
-        self.documentButton.tintColor = self.bottomColor
-        self.galeryButton.tintColor = self.bottomColor
-        self.cameraButton.tintColor = self.bottomColor
+        //self.documentButton.tintColor = self.bottomColor
+        //self.galeryButton.tintColor = self.bottomColor
+        //self.cameraButton.tintColor = self.bottomColor
         self.emptyChatImage.tintColor = self.bottomColor
-        self.audioButton.tintColor = self.bottomColor
+        //self.audioButton.tintColor = self.bottomColor
     }
     func showNoConnectionToast(){
         QToasterSwift.toast(target: self, text: QiscusTextConfiguration.sharedInstance.noConnectionText, backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
@@ -1121,6 +1103,40 @@ public class QiscusChatVC: UIViewController{
         self.collectionView.reloadData()
     }
     
+    @IBAction func showAttcahMenu(_ sender: UIButton) {
+        let actionSheetController = UIAlertController(title: "Share Files", message: "Share your photo, video, sound, or document by choosing the source", preferredStyle: .actionSheet)
+
+        let cancelActionButton = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+            print("Cancel")
+        }
+        actionSheetController.addAction(cancelActionButton)
+        
+        let cameraActionButton = UIAlertAction(title: "Camera", style: .default) { action -> Void in
+            self.uploadFromCamera()
+        }
+        
+        actionSheetController.addAction(cameraActionButton)
+        
+        let galeryActionButton = UIAlertAction(title: "Galery", style: .default) { action -> Void in
+            self.uploadImage()
+        }
+        actionSheetController.addAction(galeryActionButton)
+        
+        if Qiscus.sharedInstance.iCloudUpload {
+            let iCloudActionButton = UIAlertAction(title: "iCloud", style: .default) { action -> Void in
+                self.iCloudOpen()
+            }
+            actionSheetController.addAction(iCloudActionButton)
+        }
+        
+        let audioActionButton = UIAlertAction(title: "Voice Message", style: .default) { action -> Void in
+            self.recordAudio()
+        }
+        
+        actionSheetController.addAction(audioActionButton)
+        
+        self.present(actionSheetController, animated: true, completion: nil)
+    }
 }
 
 // MARK: - QiscusDataPresenterDelegate

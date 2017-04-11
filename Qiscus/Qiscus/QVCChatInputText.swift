@@ -33,6 +33,7 @@ extension QiscusChatVC: ChatInputTextDelegate {
         Qiscus.logicThread.async {
             if value == "" {
                 self.linkToPreview = ""
+                self.sendButton.tintColor = UIColor(red: 142/255, green: 142/255, blue: 146/255, alpha: 1)
             }else{
                 if !sendButtonEnabled{
                     Qiscus.uiThread.async {
@@ -46,6 +47,7 @@ extension QiscusChatVC: ChatInputTextDelegate {
                 }else{
                     self.linkToPreview = ""
                 }
+                self.sendButton.tintColor = self.topColor
             }
         }
     }
