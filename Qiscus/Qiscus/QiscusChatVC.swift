@@ -1127,7 +1127,7 @@ public class QiscusChatVC: UIViewController{
             actionSheetController.addAction(iCloudActionButton)
         }
         
-        let audioActionButton = UIAlertAction(title: "Voice Message", style: .default) { action -> Void in
+        let audioActionButton = UIAlertAction(title: "Record Voice", style: .default) { action -> Void in
             self.recordAudio()
         }
         
