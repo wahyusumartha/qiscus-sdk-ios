@@ -672,7 +672,7 @@ public class QiscusChatVC: UIViewController{
                 self.showLink = false
                 Qiscus.uiThread.async {
                     self.inputText.text = ""
-                    self.minInputHeight.constant = 25
+                    self.minInputHeight.constant = 32
                     self.sendButton.isEnabled = false
                     self.inputText.layoutIfNeeded()
                 }
