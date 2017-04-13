@@ -162,10 +162,20 @@ class ViewController: UIViewController {
 
 .....
 
-func goToChat(){
-print("go to chat")
-Qiscus.chat(withUsers: ["e2@qiscus.com"], target: self)
-}
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+        let button = UIButton(frame: CGRect(x: 100, y:100, width:100, height:30))
+        button.backgroundColor = UIColor.green
+        button.setTitle("Start Chat", for: .normal)
+        button.addTarget(self, action: #selector(ViewController.startChat), for: .touchUpInside)
+        self.view.addSubview(button)
+        
+    }
+    
+    func startChat(){
+        Qiscus.chat(withUsers: ["fikri@qiscus.com"], target: self)
+    }
 
 .....
 }
