@@ -60,6 +60,7 @@ public class QiscusChatVC: UIViewController{
     var room:QiscusRoom?{
         didSet{
             if room != nil{
+                let _ = self.view
                 let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
                 self.navigationItem.setHidesBackButton(true, animated: false)
                 self.navigationItem.leftBarButtonItems = [
