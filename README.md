@@ -95,12 +95,13 @@ func application(application: UIApplication, didFinishLaunchingWithOptions launc
 let viewController = ViewController()
 let navigationController = UINavigationController(rootViewController: viewController)
 
-Qiscus.setup(withAppId: "QISME" 
-userEmail: "081111111111@qiscuswa.com", 
-userKey: "passKey", 
-username: "Sample User",
-avatarURL: "https://qiscuss3.s3.amazonaws.com/uploads/36976206a8b1fd2778938dbcd72b6624/qiscus-dp.png",
-delegate: self)
+        Qiscus.setup( withAppId: "DragonGo",
+                      userEmail: "abcde@qiscus.coom",
+                      userKey: "abcd1234",
+                      username: "Steve Kusuma",
+                      avatarURL: "",
+                      delegate: nil
+        )
 
 self.window = UIWindow(frame: UIScreen.mainScreen().bounds)
 window?.rootViewController = navigationController
