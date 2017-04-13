@@ -92,9 +92,9 @@ For example :
 func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
 // Override point for customization after application launch.
 
-let viewController = ViewController()
-let navigationController = UINavigationController(rootViewController: viewController)
-
+        let viewController = ViewController()
+        let navigationController = UINavigationController(rootViewController: viewController)
+        
         Qiscus.setup( withAppId: "DragonGo",
                       userEmail: "abcde@qiscus.coom",
                       userKey: "abcd1234",
@@ -102,10 +102,10 @@ let navigationController = UINavigationController(rootViewController: viewContro
                       avatarURL: "",
                       delegate: nil
         )
-
-self.window = UIWindow(frame: UIScreen.mainScreen().bounds)
-window?.rootViewController = navigationController
-window?.makeKeyAndVisible()
+        
+        self.window = UIWindow(frame: UIScreen.main.bounds)
+        window?.rootViewController = navigationController
+        window?.makeKeyAndVisible()
 
 return true
 }
