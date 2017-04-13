@@ -1157,7 +1157,9 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                 QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: commentId, roomId: roomId, status: .read, withCompletion: {_ in })
             }
         }
-        
+        if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate{
+            roomDelegate.didFinishLoadRoom(onRoom: inRoom)
+        }
     }
     public func dataPresenter(didFinishLoadMore comments: [[QiscusCommentPresenter]], inRoom: QiscusRoom) {
         Qiscus.logicThread.async {
@@ -1563,6 +1565,9 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
     public func dataPresenter(didFailLoad error: String) {
         self.dismissLoading()
         QToasterSwift.toast(target: self, text: error, backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+        if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate{
+            roomDelegate.didFailLoadRoom(withError: error)
+        }
     }
 }
 

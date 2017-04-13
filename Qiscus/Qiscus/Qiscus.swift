@@ -853,6 +853,22 @@ extension Qiscus:CocoaMQTTDelegate{
                     let commentId = json["id"].intValue
                     let email = json["email"].stringValue
                     
+                    var comment = QiscusComment()
+                    var saved = false
+                    let uniqueId = json["unique_temp_id"].stringValue
+                    if let dbComment = QiscusComment.comment(withId: commentId, andUniqueId: uniqueId){
+                        comment = dbComment
+                    }else{
+                        comment = QiscusComment.newComment(withId: commentId, andUniqueId: uniqueId)
+                        saved = true
+                    }
+                    comment.commentText = json["message"].stringValue
+                    comment.commentSenderEmail = email
+                    comment.showLink = !(json["disable_link_preview"].boolValue)
+                    comment.commentCreatedAt = Double(json["unix_timestamp"].doubleValue)
+                    comment.commentBeforeId = commentBeforeId
+                    comment.commentTopicId = notifTopicId
+                    
                     if let room = QiscusRoom.room(withLastTopicId: notifTopicId){
                         let dataCount = QiscusComment.getComments(inTopicId: notifTopicId).count
                         if  dataCount > 0 && QiscusComment.comment(withId: commentBeforeId) == nil {
@@ -860,22 +876,6 @@ extension Qiscus:CocoaMQTTDelegate{
                                 QiscusCommentClient.shared.syncMessage(inRoom: room, fromComment: syncId, silent: true, triggerDelegate: true)
                             }
                         }else{
-                            var comment = QiscusComment()
-                            var saved = false
-                            let uniqueId = json["unique_temp_id"].stringValue
-                            if let dbComment = QiscusComment.comment(withId: commentId, andUniqueId: uniqueId){
-                                comment = dbComment
-                            }else{
-                                comment = QiscusComment.newComment(withId: commentId, andUniqueId: uniqueId)
-                                saved = true
-                            }
-                            comment.commentText = json["message"].stringValue
-                            comment.commentSenderEmail = email
-                            comment.showLink = !(json["disable_link_preview"].boolValue)
-                            comment.commentCreatedAt = Double(json["unix_timestamp"].doubleValue)
-                            comment.commentBeforeId = commentBeforeId
-                            comment.commentTopicId = notifTopicId
-                            
                             var roomChanged = false
                             var userChanged = false
                             if let user = QiscusUser.getUserWithEmail(email){
@@ -936,9 +936,6 @@ extension Qiscus:CocoaMQTTDelegate{
                                         delegate.qiscusService(gotNewMessage: presenter)
                                     }
                                 }
-                                if let roomDelegate = service.roomDelegate {
-                                    roomDelegate.gotNewComment(comment)
-                                }
                             }
                         }
                     }
@@ -947,7 +944,9 @@ extension Qiscus:CocoaMQTTDelegate{
                             thisComment.updateCommentStatus(.read, email: thisComment.commentSenderEmail)
                         }
                     })
-                    
+                    if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                        roomDelegate.gotNewComment(comment)
+                    }
                     break
                 case "t":
                     let topicId:Int = Int(String(channelArr[2]))!
