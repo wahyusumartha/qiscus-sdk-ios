@@ -99,7 +99,9 @@ class QCellMediaLeft: QChatCell {
         if data.commentType == .video || data.fileType == "gif"{
             if data.fileType == "gif" {
                 self.videoPlay.image = Qiscus.image(named: "ic_gif")
+                self.videoFrame.isHidden = true
             }else{
+                self.videoPlay.image = Qiscus.image(named: "play_button")
                 self.videoFrame.isHidden = false
             }
             self.videoPlay.isHidden = false
