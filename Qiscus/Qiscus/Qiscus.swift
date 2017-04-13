@@ -242,7 +242,7 @@ import CocoaMQTT
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
         let chatVC = QiscusChatVC.sharedInstance
-        chatVC.reset()
+        //chatVC.reset()
         if distinctId != nil{
             chatVC.distincId = distinctId!
         }else{
@@ -277,7 +277,7 @@ import CocoaMQTT
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
         let chatVC = QiscusChatVC.sharedInstance
-        chatVC.reset()
+        //chatVC.reset()
         if distinctId != nil{
             chatVC.distincId = distinctId!
         }else{
@@ -312,7 +312,7 @@ import CocoaMQTT
         
         
         let chatVC = QiscusChatVC.sharedInstance
-        chatVC.reset()
+        //chatVC.reset()
         if distinctId != nil{
             chatVC.distincId = distinctId!
         }else{
@@ -346,7 +346,7 @@ import CocoaMQTT
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
         let chatVC = QiscusChatVC.sharedInstance
-        chatVC.reset()
+        //chatVC.reset()
         chatVC.message = withMessage
         chatVC.users = users
         
@@ -371,7 +371,7 @@ import CocoaMQTT
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
         let chatVC = QiscusChatVC.sharedInstance
-        chatVC.reset()
+        //chatVC.reset()
         chatVC.roomId = roomId
         chatVC.message = withMessage
         
@@ -548,7 +548,7 @@ import CocoaMQTT
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
         let chatVC = QiscusChatVC.sharedInstance
-        chatVC.reset()
+        //chatVC.reset()
         if distinctId != nil{
             chatVC.distincId = distinctId!
         }else{
@@ -577,7 +577,7 @@ import CocoaMQTT
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
         let chatVC = QiscusChatVC.sharedInstance
-        chatVC.reset()
+        //chatVC.reset()
         if distinctId != nil{
             chatVC.distincId = distinctId!
         }else{
