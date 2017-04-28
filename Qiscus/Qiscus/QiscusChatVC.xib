@@ -16,6 +16,7 @@
                 <outlet property="attachButton" destination="P1J-Dm-NtK" id="Owi-Sh-Tx5"/>
                 <outlet property="backgroundView" destination="mj1-l5-Egx" id="Nuj-jr-BZG"/>
                 <outlet property="bottomButton" destination="VVv-f6-GJj" id="IK9-O8-Zsd"/>
+                <outlet property="cancelRecordButton" destination="dli-tG-IHL" id="c3p-7c-caL"/>
                 <outlet property="collectionView" destination="0Xr-3o-do9" id="NGJ-8K-b66"/>
                 <outlet property="collectionViewBottomConstrain" destination="2Zl-GO-ecr" id="162-Up-M52"/>
                 <outlet property="emptyChatImage" destination="DzU-AP-3jK" id="cbH-uS-dJw"/>
@@ -28,6 +29,9 @@
                 <outlet property="linkPreviewTopMargin" destination="pIV-fs-oOs" id="QdC-GD-MtU"/>
                 <outlet property="linkTitle" destination="OBI-GP-cgm" id="vxR-n7-kNS"/>
                 <outlet property="minInputHeight" destination="hlr-e1-m3g" id="Xu1-Q9-5dG"/>
+                <outlet property="recordBackground" destination="kKk-jY-Y3u" id="LTd-es-Xvu"/>
+                <outlet property="recordButton" destination="Q10-A0-ql9" id="l7L-fV-2kM"/>
+                <outlet property="recordViewLeading" destination="YQm-eL-4wc" id="UHK-2c-yiN"/>
                 <outlet property="sendButton" destination="Vv3-xa-Z9g" id="fUO-O6-xCa"/>
                 <outlet property="unlockButton" destination="3HM-Kj-OyG" id="QU7-lb-lnW"/>
                 <outlet property="unreadIndicator" destination="AR2-0m-moA" id="A6Q-zC-Lxe"/>
@@ -261,6 +265,26 @@
                                 <action selector="showAttcahMenu:" destination="-1" eventType="touchUpInside" id="yie-cX-B3X"/>
                             </connections>
                         </button>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kKk-jY-Y3u">
+                            <rect key="frame" x="330" y="8" width="32" height="32"/>
+                            <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                        </view>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dli-tG-IHL">
+                            <rect key="frame" x="332" y="10" width="28" height="28"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="28" id="hxP-b4-BBh"/>
+                                <constraint firstAttribute="height" constant="28" id="x6Q-pA-BuH"/>
+                            </constraints>
+                            <state key="normal" image="ar_cancel"/>
+                        </button>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Q10-A0-ql9">
+                            <rect key="frame" x="332" y="10" width="28" height="28"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="28" id="QAQ-Fz-hee"/>
+                                <constraint firstAttribute="height" constant="28" id="jOO-ua-fYl"/>
+                            </constraints>
+                            <state key="normal" image="ar_record"/>
+                        </button>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Vv3-xa-Z9g">
                             <rect key="frame" x="332" y="10" width="28" height="28"/>
                             <constraints>
@@ -274,11 +298,19 @@
                     <constraints>
                         <constraint firstAttribute="bottom" secondItem="f4G-BC-QRU" secondAttribute="bottom" constant="8" id="4ux-Tg-e9A"/>
                         <constraint firstItem="f4G-BC-QRU" firstAttribute="top" secondItem="wZm-gC-isB" secondAttribute="top" constant="8" id="EZU-hO-VW5"/>
+                        <constraint firstAttribute="trailing" secondItem="Q10-A0-ql9" secondAttribute="trailing" constant="15" id="FYJ-LK-SrS"/>
+                        <constraint firstItem="kKk-jY-Y3u" firstAttribute="top" secondItem="Vv3-xa-Z9g" secondAttribute="top" constant="-2" id="Hgu-UI-KkS"/>
                         <constraint firstAttribute="height" secondItem="f4G-BC-QRU" secondAttribute="height" constant="16" id="Mjb-2I-awk"/>
                         <constraint firstItem="f4G-BC-QRU" firstAttribute="leading" secondItem="wZm-gC-isB" secondAttribute="leading" constant="58" id="N9u-PM-kl3"/>
                         <constraint firstItem="P1J-Dm-NtK" firstAttribute="leading" secondItem="wZm-gC-isB" secondAttribute="leading" constant="15" id="OiI-a5-wYU"/>
                         <constraint firstAttribute="trailing" secondItem="f4G-BC-QRU" secondAttribute="trailing" constant="58" id="Phg-FG-zof"/>
+                        <constraint firstItem="dli-tG-IHL" firstAttribute="top" secondItem="kKk-jY-Y3u" secondAttribute="top" constant="2" id="Rvr-1x-Bee"/>
                         <constraint firstAttribute="bottom" secondItem="P1J-Dm-NtK" secondAttribute="bottom" constant="10" id="SwX-Cf-dfN"/>
+                        <constraint firstItem="dli-tG-IHL" firstAttribute="leading" secondItem="kKk-jY-Y3u" secondAttribute="leading" constant="2" id="To9-ir-9LN"/>
+                        <constraint firstItem="kKk-jY-Y3u" firstAttribute="trailing" secondItem="Vv3-xa-Z9g" secondAttribute="trailing" constant="2" id="W3j-Vz-zC0"/>
+                        <constraint firstItem="kKk-jY-Y3u" firstAttribute="leading" secondItem="Vv3-xa-Z9g" secondAttribute="leading" constant="-2" id="YQm-eL-4wc"/>
+                        <constraint firstAttribute="bottom" secondItem="Q10-A0-ql9" secondAttribute="bottom" constant="10" id="cNQ-7n-jUW"/>
+                        <constraint firstItem="kKk-jY-Y3u" firstAttribute="bottom" secondItem="Q10-A0-ql9" secondAttribute="bottom" constant="2" id="kca-NQ-Yc8"/>
                         <constraint firstAttribute="bottom" secondItem="Vv3-xa-Z9g" secondAttribute="bottom" constant="10" id="n2b-va-egx"/>
                         <constraint firstAttribute="trailing" secondItem="Vv3-xa-Z9g" secondAttribute="trailing" constant="15" id="tJc-ri-29a"/>
                     </constraints>
@@ -318,6 +350,8 @@
         </view>
     </objects>
     <resources>
+        <image name="ar_cancel" width="28" height="28"/>
+        <image name="ar_record" width="28" height="28"/>
         <image name="bottom" width="50" height="50"/>
         <image name="chat_bg" width="1080" height="1917"/>
         <image name="close" width="25" height="24"/>

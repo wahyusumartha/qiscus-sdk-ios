@@ -72,6 +72,8 @@ open class ChatInputText: UITextView, UITextViewDelegate {
         if newHeight > maxHeight {
             newHeight = maxHeight
         }
+        QiscusChatVC.sharedInstance.sendButton.isHidden = false
+        QiscusChatVC.sharedInstance.recordButton.isHidden = true
         if self.value == "" {
             QiscusChatVC.sharedInstance.sendButton.isEnabled = false
         }else{
@@ -84,6 +86,14 @@ open class ChatInputText: UITextView, UITextViewDelegate {
     open func textViewDidBeginEditing(_ textView: UITextView) {
         textView.text = self.value
         textView.textColor = self.activeTextColor
+        QiscusChatVC.sharedInstance.sendButton.isHidden = false
+        QiscusChatVC.sharedInstance.recordButton.isHidden = true
+        
+        if self.value == "" {
+            QiscusChatVC.sharedInstance.sendButton.isEnabled = false
+        }else{
+            QiscusChatVC.sharedInstance.sendButton.isEnabled = true
+        }
         textView.becomeFirstResponder()
     }
     open func textViewDidEndEditing(_ textView: UITextView) {
@@ -91,6 +101,8 @@ open class ChatInputText: UITextView, UITextViewDelegate {
             textView.text = self.placeholder
             textView.textColor = self.placeHolderColor
             QiscusChatVC.sharedInstance.sendButton.isEnabled = false
+            QiscusChatVC.sharedInstance.sendButton.isHidden = true
+            QiscusChatVC.sharedInstance.recordButton.isHidden = false
         }
         textView.resignFirstResponder()
         self.chatInputDelegate?.chatInputDidEndEditing(chatInput: self)

@@ -29,6 +29,5 @@ s.dependency 'RealmSwift', '~> 2.5.0'
 s.dependency 'SwiftyJSON', '~> 3.1.4'
 s.dependency 'ImageViewer', '~> 4.0'
 s.dependency 'CocoaMQTT', '1.0.11'
-s.dependency 'IQAudioRecorderController', '~> 1.2.0'
 
 end
