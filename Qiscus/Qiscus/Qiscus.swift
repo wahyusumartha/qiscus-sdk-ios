@@ -423,9 +423,11 @@ import CocoaMQTT
      - parameter tintColor: The **UIColor** as your tint gradient navigation color.
      */
     @objc public class func setGradientChatNavigation(_ topColor:UIColor, bottomColor:UIColor, tintColor:UIColor){
-        QiscusChatVC.sharedInstance.setGradientChatNavigation(withTopColor: topColor, bottomColor: bottomColor, tintColor: tintColor)
-        QPopUpView.sharedInstance.topColor = topColor
-        QPopUpView.sharedInstance.bottomColor = bottomColor
+        Qiscus.uiThread.async {
+            QiscusChatVC.sharedInstance.setGradientChatNavigation(withTopColor: topColor, bottomColor: bottomColor, tintColor: tintColor)
+            QPopUpView.sharedInstance.topColor = topColor
+            QPopUpView.sharedInstance.bottomColor = bottomColor
+        }
     }
     /**
      Class function to set color chat navigation without gradient
