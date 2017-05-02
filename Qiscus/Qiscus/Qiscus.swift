@@ -128,8 +128,12 @@ import CocoaMQTT
             realm.deleteAll()
         }
         Qiscus.deleteAllFiles()
+        Qiscus.unRegisterPN()
     }
     
+    @objc public class func unRegisterPN(){
+        QiscusCommentClient.sharedInstance.unRegisterDevice()
+    }
     // need Documentation
     func backgroundCheck(){
         if Qiscus.isLoggedIn{
@@ -611,6 +615,7 @@ import CocoaMQTT
                 token += String(format: "%02.2hhx", deviceToken[i] as CVarArg)
             }
             Qiscus.qiscusDeviceToken = token
+            QiscusMe.sharedInstance.deviceToken = token
             Qiscus.printLog(text: "Device token: \(token)")
             QiscusCommentClient.sharedInstance.registerDevice(withToken: token)
         }
@@ -638,6 +643,7 @@ import CocoaMQTT
                 tokenString += String(format: "%02.2hhx", token[i] as CVarArg)
             }
             Qiscus.qiscusDeviceToken = tokenString
+            QiscusMe.sharedInstance.deviceToken = tokenString
             Qiscus.printLog(text: "Device token: \(tokenString)")
             QiscusCommentClient.sharedInstance.registerDevice(withToken: tokenString)
         }
