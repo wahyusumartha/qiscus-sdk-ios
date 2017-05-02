@@ -13,4 +13,5 @@ import UIKit
     func qiscusConnected()
     @objc optional func failToRegisterQiscusPushNotification(withError error:String?, andDeviceToken token:String)
     @objc optional func didRegisterQiscusPushNotification(withDeviceToken token:String)
+    @objc optional func didUnregisterQiscusPushNotification(success:Bool, error:String?, deviceToken:String)
 }
