@@ -44,13 +44,21 @@ public class QiscusComment: NSObject {
                     let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     if self.commentIsFile{
                         let fileURL = self.getMediaURL()
+                        //let oldURL = self.getURL(fromMessage: oldValue)
                         var file = QiscusFile()
-                        if let savedFile = QiscusFile.file(withURL: fileURL) {
+                        if let savedFile = QiscusFile.file(forComment: self) {
                             file = savedFile
                         }else{
-                            file = QiscusFile.newFile()
-                            file.fileURL = fileURL
-                            file.fileCommentId = self.commentId
+                            if fileURL.contains("http"){
+                                file = QiscusFile.newFile()
+                                file.fileURL = fileURL
+                                file.fileCommentId = self.commentId
+                            }else{
+                                file = QiscusFile.newFile()
+                                file.fileURL = fileURL
+                                file.fileLocalPath = fileURL
+                                file.fileCommentId = self.commentId
+                            }
                         }
                         self.commentFileId = file.fileId
                     }
@@ -494,7 +502,12 @@ public class QiscusComment: NSObject {
         let mediaUrlString = component2.first?.trimmingCharacters(in: CharacterSet.whitespaces)
         return mediaUrlString!
     }
-    
+    func getURL(fromMessage message:String) -> String{
+        let component1 = message.components(separatedBy: "[file]")
+        let component2 = component1.last!.components(separatedBy: "[/file]")
+        let mediaUrlString = component2.first?.trimmingCharacters(in: CharacterSet.whitespaces)
+        return mediaUrlString!
+    }
     
     // MARK: - Updater Methode
     open class func getLastSentComent(inRoom roomId:Int)->QiscusComment?{
