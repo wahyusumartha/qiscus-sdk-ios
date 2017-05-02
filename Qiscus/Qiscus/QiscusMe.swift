@@ -33,6 +33,12 @@ open class QiscusMe: NSObject {
     open var userKey = ""
     open var baseUrl = ""
     open var lastCommentId = Int(0)
+    open var deviceToken:String = ""{
+        didSet{
+            let userData = UserDefaults.standard
+            userData.set(deviceToken, forKey: "qiscus_device_token")
+        }
+    }
     
     fileprivate override init(){
         let userData = UserDefaults.standard
@@ -63,8 +69,11 @@ open class QiscusMe: NSObject {
         if let lastComment = userData.value(forKey: "qiscus_lastComment_id") as? Int{
             self.lastCommentId = lastComment
         }
+        if let dToken = userData.value(forKey: "qiscus_device_token") as? String{
+            self.deviceToken = dToken
+        }
     }
-
+    
     open class func saveData(fromJson json:JSON)->QiscusMe{
         Qiscus.printLog(text: "jsonFron saveData: \(json)")
         QiscusMe.sharedInstance.id = json["id"].intValue
