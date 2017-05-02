@@ -83,19 +83,20 @@ For example :
 func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
 // Override point for customization after application launch.
 
-let viewController = ViewController()
-let navigationController = UINavigationController(rootViewController: viewController)
-
-Qiscus.setup(withAppId: "QISME" 
-userEmail: "081111111111@qiscuswa.com", 
-userKey: "passKey", 
-username: "Sample User",
-avatarURL: "https://qiscuss3.s3.amazonaws.com/uploads/36976206a8b1fd2778938dbcd72b6624/qiscus-dp.png",
-delegate: self)
-
-self.window = UIWindow(frame: UIScreen.mainScreen().bounds)
-window?.rootViewController = navigationController
-window?.makeKeyAndVisible()
+        let viewController = ViewController()
+        let navigationController = UINavigationController(rootViewController: viewController)
+        
+        Qiscus.setup( withAppId: "DragonGo",
+                      userEmail: "abcde@qiscus.coom",
+                      userKey: "abcd1234",
+                      username: "Steve Kusuma",
+                      avatarURL: "",
+                      delegate: nil
+        )
+        
+        self.window = UIWindow(frame: UIScreen.main.bounds)
+        window?.rootViewController = navigationController
+        window?.makeKeyAndVisible()
 
 return true
 }
@@ -159,10 +160,20 @@ class ViewController: UIViewController {
 
 .....
 
-func goToChat(){
-print("go to chat")
-Qiscus.chat(withUsers: ["e2@qiscus.com"], target: self)
-}
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+        let button = UIButton(frame: CGRect(x: 100, y:100, width:100, height:30))
+        button.backgroundColor = UIColor.green
+        button.setTitle("Start Chat", for: .normal)
+        button.addTarget(self, action: #selector(ViewController.startChat), for: .touchUpInside)
+        self.view.addSubview(button)
+        
+    }
+    
+    func startChat(){
+        Qiscus.chat(withUsers: ["fikri@qiscus.com"], target: self)
+    }
 
 .....
 }

@@ -11,7 +11,6 @@ import MobileCoreServices
 import AVFoundation
 import Photos
 import ImageViewer
-import IQAudioRecorderController
 import SwiftyJSON
 import UserNotifications
 
@@ -39,6 +38,9 @@ public class QiscusChatVC: UIViewController{
     @IBOutlet weak var linkDescription: UITextView!
     @IBOutlet weak var linkImage: UIImageView!
     @IBOutlet weak var linkTitle: UILabel!
+    @IBOutlet weak var recordBackground: UIView!
+    @IBOutlet weak var recordButton: UIButton!
+    @IBOutlet weak var cancelRecordButton: UIButton!
     
     // MARK: - Constrain
     @IBOutlet weak var minInputHeight: NSLayoutConstraint!
@@ -46,6 +48,7 @@ public class QiscusChatVC: UIViewController{
     @IBOutlet weak var inputBarBottomMargin: NSLayoutConstraint!
     @IBOutlet weak var collectionViewBottomConstrain: NSLayoutConstraint!
     @IBOutlet weak var linkPreviewTopMargin: NSLayoutConstraint!
+    @IBOutlet weak var recordViewLeading: NSLayoutConstraint!
     
     var isPresence:Bool = false
     var titleLabel = UILabel()
@@ -60,6 +63,7 @@ public class QiscusChatVC: UIViewController{
     var room:QiscusRoom?{
         didSet{
             if room != nil{
+                let _ = self.view
                 let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
                 self.navigationItem.setHidesBackButton(true, animated: false)
                 self.navigationItem.leftBarButtonItems = [
@@ -155,6 +159,14 @@ public class QiscusChatVC: UIViewController{
     var isSelfTyping = false
     var firstLoad = true
     
+    // MARK: - Audio recording variable
+    var isRecording = false
+    var recordingURL:URL?
+    var recorder:AVAudioRecorder?
+    var recordingSession = AVAudioSession.sharedInstance()
+    var recordTimer:Timer?
+    var recordDuration:Int = 0
+    
     var showLink:Bool = false{
         didSet{
             if !showLink{
@@ -244,6 +256,10 @@ public class QiscusChatVC: UIViewController{
     // MARK: - UI Lifecycle
     override open func viewDidLoad() {
         super.viewDidLoad()
+        recordBackground.layer.cornerRadius = 16
+        let lightColor = self.topColor.withAlphaComponent(0.4)
+        recordBackground.backgroundColor = lightColor
+        
         bottomButton.setImage(Qiscus.image(named: "bottom")?.withRenderingMode(.alwaysTemplate), for: .normal)
         bottomButton.layer.cornerRadius = 17.5
         bottomButton.clipsToBounds = true
@@ -270,8 +286,6 @@ public class QiscusChatVC: UIViewController{
         let menuItems:[UIMenuItem] = [resendMenuItem,deleteMenuItem]
         UIMenuController.shared.menuItems = menuItems
         setupNavigationTitle()
-        
-        //self.navigationItem.setTitleWithSubtitle(title: "Chat Room", subtitle: "chat subtitle")
     }
     override open func viewWillDisappear(_ animated: Bool) {
         self.isPresence = false
@@ -317,10 +331,27 @@ public class QiscusChatVC: UIViewController{
         self.isPresence = true
         self.emptyChatImage.image = Qiscus.image(named: "empty_messages")?.withRenderingMode(.alwaysTemplate)
         self.emptyChatImage.tintColor = self.bottomColor
+        
         let sendImage = Qiscus.image(named: "send")?.withRenderingMode(.alwaysTemplate)
         let attachmentImage = Qiscus.image(named: "share_attachment")?.withRenderingMode(.alwaysTemplate)
+        let recordImage = Qiscus.image(named: "ar_record")?.withRenderingMode(.alwaysTemplate)
+        let cancelRecordImage = Qiscus.image(named: "ar_cancel")?.withRenderingMode(.alwaysTemplate)
+        
         self.sendButton.setImage(sendImage, for: .normal)
         self.attachButton.setImage(attachmentImage, for: .normal)
+        self.recordButton.setImage(recordImage, for: .normal)
+        self.cancelRecordButton.setImage(cancelRecordImage, for: .normal)
+        
+        self.cancelRecordButton.isHidden = true
+        
+        if self.inputText.value == "" {
+            self.sendButton.isHidden = true
+            self.recordButton.isHidden = false
+        }else{
+            self.sendButton.isHidden = false
+            self.recordButton.isHidden = true
+        }
+        
         if self.room != nil && !firstLoad {
             if let newRoom = QiscusRoom.room(withId: self.room!.roomId){
                 self.room = newRoom
@@ -441,6 +472,8 @@ public class QiscusChatVC: UIViewController{
             sendButton.isEnabled = true
         }
         sendButton.addTarget(self, action: #selector(QiscusChatVC.sendMessage), for: .touchUpInside)
+        recordButton.addTarget(self, action: #selector(QiscusChatVC.recordVoice), for: .touchUpInside)
+        cancelRecordButton.addTarget(self, action: #selector(QiscusChatVC.cancelRecordVoice), for: .touchUpInside)
         
         //welcomeView Setup
         self.unlockButton.addTarget(self, action: #selector(QiscusChatVC.confirmUnlockChat), for: .touchUpInside)
@@ -652,34 +685,41 @@ public class QiscusChatVC: UIViewController{
     func sendMessage(){
         Qiscus.logicThread.async {
             if Qiscus.sharedInstance.connected{
-                let value = self.inputText.value.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-                var indexPath = IndexPath(row: 0, section: 0)
-                
-                if self.comments.count > 0 {
-                    let lastComment = self.comments.last!.last!
-                    if lastComment.userEmail == QiscusMe.sharedInstance.email && lastComment.isToday {
-                        indexPath.section = lastComment.commentIndexPath!.section
-                        indexPath.row = lastComment.commentIndexPath!.row + 1
-                    }else{
-                        indexPath.section = lastComment.commentIndexPath!.section + 1
-                        indexPath.row = 0
+                if !self.isRecording {
+                    let value = self.inputText.value.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+                    var indexPath = IndexPath(row: 0, section: 0)
+                    
+                    if self.comments.count > 0 {
+                        let lastComment = self.comments.last!.last!
+                        if lastComment.userEmail == QiscusMe.sharedInstance.email && lastComment.isToday {
+                            indexPath.section = lastComment.commentIndexPath!.section
+                            indexPath.row = lastComment.commentIndexPath!.row + 1
+                        }else{
+                            indexPath.section = lastComment.commentIndexPath!.section + 1
+                            indexPath.row = 0
+                        }
                     }
+                    if let chatRoom = self.room {
+                        self.commentClient.postMessage(message: value, topicId: chatRoom.roomLastCommentTopicId, linkData: self.linkData, indexPath: indexPath)
+                    }
+                    self.inputText.clearValue()
+                    self.showLink = false
+                    Qiscus.uiThread.async {
+                        self.inputText.text = ""
+                        self.minInputHeight.constant = 32
+                        self.sendButton.isEnabled = false
+                        self.inputText.layoutIfNeeded()
+                    }
+                }else{
+                    
+                    self.finishRecording()
                 }
-                if let chatRoom = self.room {
-                    self.commentClient.postMessage(message: value, topicId: chatRoom.roomLastCommentTopicId, linkData: self.linkData, indexPath: indexPath)
-                }
-                self.inputText.clearValue()
-                self.showLink = false
-                Qiscus.uiThread.async {
-                    self.inputText.text = ""
-                    self.minInputHeight.constant = 32
-                    self.sendButton.isEnabled = false
-                    self.inputText.layoutIfNeeded()
-                }
-                
             }else{
                 Qiscus.uiThread.async {
                     self.showNoConnectionToast()
+                    if self.isRecording {
+                        self.cancelRecordVoice()
+                    }
                 }
             }
         }
@@ -747,36 +787,182 @@ public class QiscusChatVC: UIViewController{
             self.showNoConnectionToast()
         }
     }
-    func recordAudio(){
-        self.view.endEditing(true)
-        if Qiscus.sharedInstance.connected{
-            if AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeAudio) == AVAuthorizationStatus.authorized{
-                DispatchQueue.main.async(execute: {
-                    let controller = IQAudioRecorderViewController()
-                    controller.delegate = self
-                    controller.title = NSLocalizedString("RECORDER", comment: "Recorder")
-                    controller.allowCropping = true
-                    self.presentBlurredAudioRecorderViewControllerAnimated(controller)
-                })
-            }else{
-                AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeAudio, completionHandler: { (granted :Bool) -> Void in
-                    if granted {
-                        let controller = IQAudioRecorderViewController()
-                        controller.delegate = self
-                        controller.title = NSLocalizedString("RECORDER", comment: "Recorder")
-                        controller.allowCropping = true
-                        self.presentBlurredAudioRecorderViewControllerAnimated(controller)
-                    }else{
-                        DispatchQueue.main.async(execute: {
-                            self.showMicrophoneAccessAlert()
-                        })
+    func recordVoice(){
+        self.prepareRecording()
+    }
+    func startRecording(){
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let time = Double(Date().timeIntervalSince1970)
+        let timeToken = UInt64(time * 10000)
+        let fileName = "audio-\(timeToken).m4a"
+        let audioURL = documentsPath.appendingPathComponent(fileName)
+        print ("audioURL: \(audioURL)")
+        self.recordingURL = audioURL
+        let settings:[String : Any] = [
+            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+            AVSampleRateKey: Float(44100),
+            AVNumberOfChannelsKey: Int(2),
+            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+        ]
+        
+        self.recordButton.isHidden = true
+        self.sendButton.isHidden = false
+        self.recordBackground.clipsToBounds = true
+        let inputWidth = self.inputText.frame.width
+        let recorderWidth = inputWidth + 17
+        self.recordViewLeading.constant = 0 - recorderWidth
+        
+        Qiscus.uiThread.async {
+            UIView.animate(withDuration: 0.5, animations: {
+                self.inputText.isHidden = true
+                self.cancelRecordButton.isHidden = false
+                self.view.layoutIfNeeded()
+            }, completion: { success in
+                
+                var timerLabel = self.recordBackground.viewWithTag(543) as? UILabel
+                if timerLabel == nil {
+                    timerLabel = UILabel(frame: CGRect(x: 34, y: 5, width: 40, height: 20))
+                    timerLabel!.backgroundColor = UIColor.clear
+                    timerLabel!.textColor = UIColor.white
+                    timerLabel!.tag = 543
+                    timerLabel!.font = UIFont.systemFont(ofSize: 12)
+                    self.recordBackground.addSubview(timerLabel!)
+                }
+                timerLabel!.text = "00:00"
+                
+                var waveView = self.recordBackground.viewWithTag(544) as? QSiriWaveView
+                if waveView == nil {
+                    let backgroundFrame = self.recordBackground.bounds
+                    waveView = QSiriWaveView(frame: CGRect(x: 76, y: 2, width: backgroundFrame.width - 110, height: 28))
+                    waveView!.waveColor = UIColor.white
+                    waveView!.numberOfWaves = 6
+                    waveView!.primaryWaveWidth = 1.0
+                    waveView!.secondaryWaveWidth = 0.75
+                    waveView!.tag = 544
+                    waveView!.layer.cornerRadius = 14.0
+                    waveView!.clipsToBounds = true
+                    waveView!.backgroundColor = UIColor.clear
+                    self.recordBackground.addSubview(waveView!)
+                }
+                do {
+                    self.recorder = nil
+                    if self.recorder == nil {
+                        self.recorder = try AVAudioRecorder(url: audioURL, settings: settings)
                     }
-                })
-            }
-        }else{
-            self.showNoConnectionToast()
+                    self.recorder?.prepareToRecord()
+                    self.recorder?.isMeteringEnabled = true
+                    self.recorder?.record()
+                    self.sendButton.isEnabled = true
+                    self.recordDuration = 0
+                    if self.recordTimer != nil {
+                        self.recordTimer?.invalidate()
+                        self.recordTimer = nil
+                    }
+                    self.recordTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(QiscusChatVC.updateTimer), userInfo: nil, repeats: true)
+                    self.isRecording = true
+                    let displayLink = CADisplayLink(target: self, selector: #selector(QiscusChatVC.updateAudioMeter))
+                    displayLink.add(to: RunLoop.current, forMode: RunLoopMode.commonModes)
+                } catch {
+                    print("error recording")
+                }
+            })
+
         }
     }
+    func prepareRecording(){
+        do {
+            try recordingSession.setCategory(AVAudioSessionCategoryPlayAndRecord)
+            try recordingSession.setActive(true)
+            recordingSession.requestRecordPermission() { [unowned self] allowed in
+                if allowed {
+                    self.startRecording()
+                } else {
+                    Qiscus.uiThread.async {
+                        self.showMicrophoneAccessAlert()
+                    }
+                }
+            }
+        } catch {
+            Qiscus.uiThread.async {
+                self.showMicrophoneAccessAlert()
+            }
+        }
+    }
+    func updateTimer(){
+        if let timerLabel = self.recordBackground.viewWithTag(543) as? UILabel {
+            self.recordDuration += 1
+            let minutes = Int(self.recordDuration / 60)
+            let seconds = self.recordDuration % 60
+            var minutesString = "\(minutes)"
+            if minutes < 10 {
+                minutesString = "0\(minutes)"
+            }
+            var secondsString = "\(seconds)"
+            if seconds < 10 {
+                secondsString = "0\(seconds)"
+            }
+            timerLabel.text = "\(minutesString):\(secondsString)"
+        }
+    }
+    func updateAudioMeter(){
+        if let audioRecorder = self.recorder{
+            audioRecorder.updateMeters()
+            let normalizedValue:CGFloat = pow(10.0, CGFloat(audioRecorder.averagePower(forChannel: 0)) / 20)
+            Qiscus.uiThread.async {
+                if let waveView = self.recordBackground.viewWithTag(544) as? QSiriWaveView {
+                    waveView.update(withLevel: normalizedValue)
+                }
+            }
+        }
+    }
+    func finishRecording(){
+        self.recorder?.stop()
+        self.recorder = nil
+        self.recordViewLeading.constant = 0 - 2
+        Qiscus.uiThread.async {
+            UIView.animate(withDuration: 0.5, animations: {
+                self.inputText.isHidden = false
+                self.cancelRecordButton.isHidden = true
+                self.view.layoutIfNeeded()
+            }) { (_) in
+                self.recordButton.isHidden = false
+                self.sendButton.isHidden = true
+                if self.recordTimer != nil {
+                    self.recordTimer?.invalidate()
+                    self.recordTimer = nil
+                    self.recordDuration = 0
+                }
+                self.isRecording = false
+            }
+        }
+        if let audioURL = self.recordingURL {
+            var fileContent: Data?
+            fileContent = try! Data(contentsOf: audioURL)
+            
+            let fileName = audioURL.lastPathComponent
+            self.continueImageUpload(imageName: fileName, imageNSData: fileContent, audioFile: true)
+        }
+    }
+    func cancelRecordVoice(){
+        self.recordViewLeading.constant = 0 - 2
+        Qiscus.uiThread.async {
+            UIView.animate(withDuration: 0.5, animations: {
+                self.inputText.isHidden = false
+                self.cancelRecordButton.isHidden = true
+                self.view.layoutIfNeeded()
+            }) { (_) in
+                self.recordButton.isHidden = false
+                self.sendButton.isHidden = true
+                if self.recordTimer != nil {
+                    self.recordTimer?.invalidate()
+                    self.recordTimer = nil
+                    self.recordDuration = 0
+                }
+                self.isRecording = false
+            }
+        }
+    }
+
     func iCloudOpen(){
         if Qiscus.sharedInstance.connected{
             let documentPicker = UIDocumentPickerViewController(documentTypes: self.UTIs, in: UIDocumentPickerMode.import)
@@ -859,7 +1045,10 @@ public class QiscusChatVC: UIViewController{
         }
         self.attachButton.tintColor = self.topColor
         self.bottomButton.tintColor = self.topColor
+        self.recordButton.tintColor = self.topColor
+        self.cancelRecordButton.tintColor = self.topColor
         self.emptyChatImage.tintColor = self.bottomColor
+        
     }
     func setNavigationColor(_ color:UIColor, tintColor:UIColor){
         self.topColor = color
@@ -874,6 +1063,8 @@ public class QiscusChatVC: UIViewController{
         }
         self.attachButton.tintColor = self.topColor
         self.bottomButton.tintColor = self.topColor
+        self.recordButton.tintColor = self.topColor
+        self.cancelRecordButton.tintColor = self.topColor
         self.emptyChatImage.tintColor = self.bottomColor
     }
     func showNoConnectionToast(){
@@ -1053,15 +1244,16 @@ public class QiscusChatVC: UIViewController{
             urlToCheck = "http://\(url.lowercased())"
         }
         commentClient.getLinkMetadata(url: urlToCheck, withCompletion: {linkData in
-            
-            self.linkImage.loadAsync(linkData.linkImageURL, placeholderImage: Qiscus.image(named: "link"))
-            self.linkDescription.text = linkData.linkDescription
-            self.linkTitle.text = linkData.linkTitle
-            self.linkData = linkData
-            self.linkPreviewTopMargin.constant = -65
-            UIView.animate(withDuration: 0.65, animations: {
-                self.view.layoutIfNeeded()
-            }, completion: nil)
+            Qiscus.uiThread.async {
+                self.linkImage.loadAsync(linkData.linkImageURL, placeholderImage: Qiscus.image(named: "link"))
+                self.linkDescription.text = linkData.linkDescription
+                self.linkTitle.text = linkData.linkTitle
+                self.linkData = linkData
+                self.linkPreviewTopMargin.constant = -65
+                UIView.animate(withDuration: 0.65, animations: {
+                    self.view.layoutIfNeeded()
+                }, completion: nil)
+            }
         }, withFailCompletion: {
             self.showLink = false
         })
@@ -1126,12 +1318,6 @@ public class QiscusChatVC: UIViewController{
             }
             actionSheetController.addAction(iCloudActionButton)
         }
-        
-        let audioActionButton = UIAlertAction(title: "Record Voice", style: .default) { action -> Void in
-            self.recordAudio()
-        }
-        
-        actionSheetController.addAction(audioActionButton)
         
         self.present(actionSheetController, animated: true, completion: nil)
     }
@@ -2001,27 +2187,6 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
     }
     open func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
-    }
-}
-// MARK: - IQAudioRecorderViewControllerDelegate
-extension QiscusChatVC:IQAudioRecorderViewControllerDelegate{
-    public func audioRecorderController(_ controller: IQAudioRecorderViewController, didFinishWithAudioAtPath filePath: String) {
-        let fileURL = URL(fileURLWithPath: filePath)
-        Qiscus.printLog(text: "filePath \(filePath)")
-        Qiscus.printLog(text: "fileURL \(fileURL)")
-        var fileContent: Data?
-        fileContent = try! Data(contentsOf: fileURL)
-        
-        let fileName = fileURL.lastPathComponent
-        
-        self.continueImageUpload(imageName: fileName, imageNSData: fileContent, audioFile: true)
-        //commentClient.uploadAudio(self.room.roomLastCommentTopicId, fileName: fileName, filePath: fileURL, roomId: self.room.roomId)
-        
-        controller.dismiss(animated: true, completion: nil)
-    }
-    
-    public func audioRecorderControllerDidCancel(_ controller: IQAudioRecorderViewController) {
-        controller.dismiss(animated: true, completion: nil)
     }
 }
 
