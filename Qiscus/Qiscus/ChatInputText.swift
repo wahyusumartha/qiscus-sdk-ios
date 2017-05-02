@@ -44,6 +44,7 @@ open class ChatInputText: UITextView, UITextViewDelegate {
     fileprivate func commonInit(){
         self.delegate = self
         self.placeholder = ""
+        self.font = Qiscus.sharedInstance.styleConfiguration.chatFont
         if self.value == "" {
             self.textColor = placeHolderColor
             self.text = placeholder

@@ -425,8 +425,9 @@ import CocoaMQTT
     @objc public class func setGradientChatNavigation(_ topColor:UIColor, bottomColor:UIColor, tintColor:UIColor){
         Qiscus.uiThread.async {
             QiscusChatVC.sharedInstance.setGradientChatNavigation(withTopColor: topColor, bottomColor: bottomColor, tintColor: tintColor)
-            QPopUpView.sharedInstance.topColor = topColor
-            QPopUpView.sharedInstance.bottomColor = bottomColor
+            let popUpView = QPopUpView.sharedInstance
+            popUpView.topColor = topColor
+            popUpView.bottomColor = bottomColor
         }
     }
     /**
