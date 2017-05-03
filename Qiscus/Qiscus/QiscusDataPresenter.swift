@@ -12,7 +12,8 @@ import Photos
 
 @objc public protocol QiscusDataPresenterDelegate {
     func dataPresenter(didFinishLoad comments:[[QiscusCommentPresenter]], inRoom:QiscusRoom)
-    func dataPresenter(gotNewData presenter:QiscusCommentPresenter, inRoom:QiscusRoom)
+    func dataPresenter(didFinishSnyc hasNewData:Bool)
+    func dataPresenter(gotNewData presenter:QiscusCommentPresenter, inRoom:QiscusRoom, realtime:Bool)
     func dataPresenter(didChangeStatusFrom commentId: Int, toStatus: QiscusCommentStatus, topicId: Int)
     func dataPresenter(didChangeContent data:QiscusCommentPresenter, inRoom:QiscusRoom)
     func dataPresenter(didChangeCellSize presenter:QiscusCommentPresenter, inRoom:QiscusRoom)
@@ -97,7 +98,7 @@ import Photos
             }
         }
     }
-    fileprivate class func getPresenters(fromComments comments:[[QiscusComment]])->[[QiscusCommentPresenter]]{
+    public class func getPresenters(fromComments comments:[[QiscusComment]])->[[QiscusCommentPresenter]]{
         var commentsPresenter = [[QiscusCommentPresenter]]()
         
         var section = 0
@@ -376,7 +377,7 @@ import Photos
             
             if let room = QiscusRoom.room(withLastTopicId: topicId){
                 Qiscus.uiThread.async {
-                    self.delegate?.dataPresenter(gotNewData: presenter, inRoom: room)
+                    self.delegate?.dataPresenter(gotNewData: presenter, inRoom: room, realtime:true)
                 }
             }
         }
@@ -420,13 +421,17 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
             }
         }
     }
-    func qiscusService(gotNewMessage data: QiscusCommentPresenter) {
+    func qiscusService(didFinishSync hasNewData: Bool) {
+        self.delegate?.dataPresenter(didFinishSnyc: hasNewData)
+    }
+    func qiscusService(gotNewMessage data: QiscusCommentPresenter, realtime:Bool) {
         if QiscusChatVC.sharedInstance.isPresence && (data.topicId == QiscusChatVC.sharedInstance.room?.roomLastCommentTopicId){
             if let room = QiscusRoom.room(withLastTopicId: data.topicId){
-                self.delegate?.dataPresenter(gotNewData: data, inRoom: room)
+                self.delegate?.dataPresenter(gotNewData: data, inRoom: room, realtime: realtime)
             }
         }
     }
+    
     func qiscusService(didChangeContent data:QiscusCommentPresenter){
         if let room  = QiscusRoom.room(withLastTopicId: data.topicId){
             self.delegate?.dataPresenter(didChangeContent: data, inRoom: room)

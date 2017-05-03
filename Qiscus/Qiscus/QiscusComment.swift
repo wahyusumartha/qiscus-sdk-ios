@@ -457,8 +457,8 @@ public class QiscusComment: NSObject {
     public class func checkSync(inTopicId topicId: Int)->Int?{
         return QiscusCommentDB.checkSync(inTopicId:topicId)
     }
-    public class func getComments(inTopicId topicId: Int, limit:Int = 0, fromCommentId:Int? = nil)->[QiscusComment]{
-        return QiscusCommentDB.getComments(inTopicId:topicId,limit:limit,fromCommentId:fromCommentId)
+    public class func getComments(inTopicId topicId: Int, limit:Int = 0, fromCommentId:Int? = nil, after:Bool = false)->[QiscusComment]{
+        return QiscusCommentDB.getComments(inTopicId:topicId,limit:limit,fromCommentId:fromCommentId, after: after)
     }
     open class func getFirstUnsyncComment(inTopicId topicId:Int)->QiscusComment?{
         return QiscusCommentDB.firstUnsyncComment(inTopicId:topicId)
@@ -468,10 +468,10 @@ public class QiscusComment: NSObject {
     }
     
     //MARK: [[QiscusComment]]
-    open class func grouppedComment(inTopicId topicId:Int, fromCommentId:Int? = nil, limit:Int = 0)->[[QiscusComment]]{
+    open class func grouppedComment(inTopicId topicId:Int, fromCommentId:Int? = nil, limit:Int = 0, after:Bool = false)->[[QiscusComment]]{
         var allComment = [[QiscusComment]]()
         
-        let commentData = QiscusComment.getComments(inTopicId: topicId, limit: limit,fromCommentId: fromCommentId)
+        let commentData = QiscusComment.getComments(inTopicId: topicId, limit: limit,fromCommentId: fromCommentId, after: after)
         
         if(commentData.count > 0){
             var first = commentData.first!

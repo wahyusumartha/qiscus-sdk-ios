@@ -942,7 +942,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                 if QiscusChatVC.sharedInstance.isPresence && QiscusChatVC.sharedInstance.room?.roomId == roomId && !Qiscus.shared.syncing{
                                     if let delegate = service.delegate {
                                         let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                                        delegate.qiscusService(gotNewMessage: presenter)
+                                        delegate.qiscusService(gotNewMessage: presenter,realtime:true)
                                     }
                                 }
                             }

@@ -249,14 +249,18 @@ public class QiscusCommentDB: Object {
     }
     
     // MARK: - [QiscusComment]
-    public class func getComments(inTopicId topicId: Int, limit:Int = 0, fromCommentId:Int? = nil)->[QiscusComment]{ //
+    public class func getComments(inTopicId topicId: Int, limit:Int = 0, fromCommentId:Int? = nil, after:Bool)->[QiscusComment]{ //
         
         var allComment = [QiscusComment]()
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let sortProperties = [SortDescriptor(keyPath: "commentCreatedAt", ascending: false)]
         var query = "commentTopicId == \(topicId)"
         if fromCommentId != nil{
-            query = "\(query) AND commentId < \(fromCommentId!)"
+            if after {
+                query = "\(query) AND commentId > \(fromCommentId!)"
+            }else{
+                query = "\(query) AND commentId < \(fromCommentId!)"
+            }
         }
         let searchQuery:NSPredicate = NSPredicate(format: query)
         

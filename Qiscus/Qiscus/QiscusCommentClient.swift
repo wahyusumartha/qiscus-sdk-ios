@@ -37,7 +37,8 @@ fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
 }
 @objc public protocol QiscusServiceDelegate {
     func qiscusService(didFinishLoadRoom inRoom:QiscusRoom)
-    func qiscusService(gotNewMessage data:QiscusCommentPresenter)
+    func qiscusService(didFinishSync hasNewData:Bool)
+    func qiscusService(gotNewMessage data:QiscusCommentPresenter, realtime: Bool)
     func qiscusService(didChangeContent data:QiscusCommentPresenter)
     func qiscusService(didFinishLoadMore inRoom:QiscusRoom, dataCount:Int, from commentId:Int)
     func qiscusService(didFailLoadMore inRoom:QiscusRoom)
@@ -396,7 +397,7 @@ open class QiscusCommentClient: NSObject {
                 self.postComment(commentPresenter, roomId: roomId, linkData:linkData)
             }
             Qiscus.uiThread.async {
-                self.delegate?.qiscusService(gotNewMessage: commentPresenter)
+                self.delegate?.qiscusService(gotNewMessage: commentPresenter, realtime:true)
                 self.commentDelegate?.gotNewComment([comment])
             }
             if QiscusCommentClient.sharedInstance.roomDelegate != nil{
@@ -896,7 +897,7 @@ open class QiscusCommentClient: NSObject {
             presenter.uploadData = imageData
             
             Qiscus.uiThread.async {
-                self.delegate?.qiscusService(gotNewMessage: presenter)
+                self.delegate?.qiscusService(gotNewMessage: presenter, realtime: true)
             }
             
             let headers = QiscusConfig.sharedInstance.requestHeader
@@ -1077,7 +1078,7 @@ open class QiscusCommentClient: NSObject {
                                     if QiscusChatVC.sharedInstance.isPresence && QiscusChatVC.sharedInstance.room == room && triggerDelegate && saved{
                                         if let delegate = service.delegate {
                                             let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                                            delegate.qiscusService(gotNewMessage: presenter)
+                                            delegate.qiscusService(gotNewMessage: presenter, realtime:false)
                                         }
                                         if let roomDelegate = service.roomDelegate {
                                             Qiscus.uiThread.async {
@@ -1131,7 +1132,6 @@ open class QiscusCommentClient: NSObject {
                         if comments.count > 0 {
                             if state == .active{
                                 Qiscus.logicThread.async {
-                                    
                                     for newComment in comments.reversed() {
                                         let topicId = newComment["topic_id"].intValue
                                         let roomId = newComment["room_id"].intValue
@@ -1177,19 +1177,16 @@ open class QiscusCommentClient: NSObject {
                                         
                                         if saved{
                                             let service = QiscusCommentClient.shared
-                                            if QiscusChatVC.sharedInstance.isPresence && QiscusChatVC.sharedInstance.room?.roomId == roomId{
-                                                
-                                                if let delegate = service.delegate {
-                                                    let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                                                    delegate.qiscusService(gotNewMessage: presenter)
-                                                }
-                                            }
                                             if let roomDelegate = service.roomDelegate {
                                                 Qiscus.uiThread.async {
                                                     roomDelegate.gotNewComment(comment)
                                                 }
                                             }
                                         }
+                                    }
+                                    let service = QiscusCommentClient.shared
+                                    if let delegate = service.delegate {
+                                        delegate.qiscusService(didFinishSync: true)
                                     }
                                 }
                             }
