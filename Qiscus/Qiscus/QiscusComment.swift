@@ -136,7 +136,7 @@ public class QiscusComment: NSObject {
                     self.commentStatusRaw != QiscusCommentStatus.read.rawValue{
                     if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
                         if savedComment.commentStatusRaw != self.commentStatusRaw{
-                            if self.commentStatusRaw > savedComment.commentStatusRaw || self.commentStatusRaw == QiscusCommentStatus.failed.rawValue{
+                            if self.commentStatusRaw > savedComment.commentStatusRaw || savedComment.commentStatusRaw == QiscusCommentStatus.failed.rawValue{
                                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                                 try! realm.write {
                                     savedComment.commentStatusRaw = self.commentStatusRaw
