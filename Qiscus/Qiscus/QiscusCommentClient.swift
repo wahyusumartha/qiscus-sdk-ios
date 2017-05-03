@@ -308,34 +308,43 @@ open class QiscusCommentClient: NSObject {
     }
     // MARK: - Remove deviceToken
     open func unRegisterDevice(){
-        let parameters:[String: AnyObject] = [
-            "token"  : qiscus.config.USER_TOKEN as AnyObject,
-            "device_token" : QiscusMe.sharedInstance.deviceToken as AnyObject,
-            "device_platform" : "ios" as AnyObject
-        ]
-        
-        Qiscus.printLog(text: "registerDevice url: \(QiscusConfig.REMOVE_DEVICE_TOKEN_URL)")
-        Qiscus.printLog(text: "post parameters: \(parameters)")
-        
-        Alamofire.request(QiscusConfig.REMOVE_DEVICE_TOKEN_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
-            Qiscus.printLog(text: "unregisterDevice result: \(response)")
-            Qiscus.printLog(text: "unregisterDevice url: \(QiscusConfig.LOGIN_REGISTER)")
-            Qiscus.printLog(text: "unregisterDevice parameters: \(parameters)")
-            Qiscus.printLog(text: "unregisterDevice headers: \(QiscusConfig.sharedInstance.requestHeader)")
-            switch response.result {
-            case .success:
-                DispatchQueue.main.async(execute: {
-                    if let result = response.result.value{
-                        let json = JSON(result)
-                        let success:Bool = (json["status"].intValue == 200)
-                        
-                        if success {
-                            let pnData = json["results"]
-                            let success = pnData["success"].boolValue
+        if QiscusMe.sharedInstance.deviceToken != "" {
+            let parameters:[String: AnyObject] = [
+                "token"  : qiscus.config.USER_TOKEN as AnyObject,
+                "device_token" : QiscusMe.sharedInstance.deviceToken as AnyObject,
+                "device_platform" : "ios" as AnyObject
+            ]
+            
+            Qiscus.printLog(text: "registerDevice url: \(QiscusConfig.REMOVE_DEVICE_TOKEN_URL)")
+            Qiscus.printLog(text: "post parameters: \(parameters)")
+            
+            Alamofire.request(QiscusConfig.REMOVE_DEVICE_TOKEN_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+                Qiscus.printLog(text: "unregisterDevice result: \(response)")
+                Qiscus.printLog(text: "unregisterDevice url: \(QiscusConfig.LOGIN_REGISTER)")
+                Qiscus.printLog(text: "unregisterDevice parameters: \(parameters)")
+                Qiscus.printLog(text: "unregisterDevice headers: \(QiscusConfig.sharedInstance.requestHeader)")
+                switch response.result {
+                case .success:
+                    DispatchQueue.main.async(execute: {
+                        if let result = response.result.value{
+                            let json = JSON(result)
+                            let success:Bool = (json["status"].intValue == 200)
+                            
                             if success {
-                                if let delegate = self.configDelegate {
-                                    delegate.didUnregisterQiscusPushNotification?(success: true, error: nil, deviceToken: QiscusMe.sharedInstance.deviceToken)
-                                    QiscusMe.sharedInstance.deviceToken = ""
+                                let pnData = json["results"]
+                                let success = pnData["success"].boolValue
+                                if success {
+                                    if let delegate = self.configDelegate {
+                                        delegate.didUnregisterQiscusPushNotification?(success: true, error: nil, deviceToken: QiscusMe.sharedInstance.deviceToken)
+                                        QiscusMe.sharedInstance.deviceToken = ""
+                                    }
+                                }else{
+                                    if let delegate = self.configDelegate {
+                                        delegate.didUnregisterQiscusPushNotification?(success: false, error: "cannot unregister device", deviceToken: QiscusMe.sharedInstance.deviceToken)
+                                    }
+                                    Qiscus.logicThread.async {
+                                        self.unRegisterDevice()
+                                    }
                                 }
                             }else{
                                 if let delegate = self.configDelegate {
@@ -353,28 +362,21 @@ open class QiscusCommentClient: NSObject {
                                 self.unRegisterDevice()
                             }
                         }
-                    }else{
+                    })
+                    break
+                case .failure(let error):
+                    DispatchQueue.main.async(execute: {
                         if let delegate = self.configDelegate {
                             delegate.didUnregisterQiscusPushNotification?(success: false, error: "cannot unregister device", deviceToken: QiscusMe.sharedInstance.deviceToken)
                         }
                         Qiscus.logicThread.async {
                             self.unRegisterDevice()
                         }
-                    }
-                })
-                break
-            case .failure(let error):
-                DispatchQueue.main.async(execute: {
-                    if let delegate = self.configDelegate {
-                        delegate.didUnregisterQiscusPushNotification?(success: false, error: "cannot unregister device", deviceToken: QiscusMe.sharedInstance.deviceToken)
-                    }
-                    Qiscus.logicThread.async {
-                        self.unRegisterDevice()
-                    }
-                })
-                break
-            }
-        })
+                    })
+                    break
+                }
+            })
+        }
     }
     // MARK: - Comment Methode
     open func postMessage(message: String, topicId: Int, roomId:Int? = nil, linkData:QiscusLinkData? = nil, indexPath:IndexPath? = nil){ //
