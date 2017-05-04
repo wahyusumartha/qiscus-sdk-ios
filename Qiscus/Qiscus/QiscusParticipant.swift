@@ -124,6 +124,20 @@ open class QiscusParticipant: Object {
             }
         }
     }
+    public func remove(){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        var searchQuery = NSPredicate()
+        
+        searchQuery = NSPredicate(format: "localId == %d", self.localId)
+        let participantData = realm.objects(QiscusParticipant.self).filter(searchQuery)
+        
+        if participantData.count > 0 {
+            try! realm.write {
+                realm.delete(participantData)
+            }
+        }
+        
+    }
     open class func removeAllParticipant(inRoom roomId:Int){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         var searchQuery = NSPredicate()

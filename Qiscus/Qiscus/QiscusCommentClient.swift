@@ -316,14 +316,7 @@ open class QiscusCommentClient: NSObject {
                 "device_platform" : "ios" as AnyObject
             ]
             
-            Qiscus.printLog(text: "registerDevice url: \(QiscusConfig.REMOVE_DEVICE_TOKEN_URL)")
-            Qiscus.printLog(text: "post parameters: \(parameters)")
-            
             Alamofire.request(QiscusConfig.REMOVE_DEVICE_TOKEN_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
-                Qiscus.printLog(text: "unregisterDevice result: \(response)")
-                Qiscus.printLog(text: "unregisterDevice url: \(QiscusConfig.LOGIN_REGISTER)")
-                Qiscus.printLog(text: "unregisterDevice parameters: \(parameters)")
-                Qiscus.printLog(text: "unregisterDevice headers: \(QiscusConfig.sharedInstance.requestHeader)")
                 switch response.result {
                 case .success:
                     DispatchQueue.main.async(execute: {
@@ -1333,7 +1326,8 @@ open class QiscusCommentClient: NSObject {
                     QiscusChatVC.sharedInstance.topicId = topicId
                     
                     if let participants = roomData["participants"].array {
-                        for participant in participants{
+                        var participantArray = [String]()
+                        for participant in participants {
                             let userEmail = participant["email"].stringValue
                             let userFullName = participant["username"].stringValue
                             let userAvatarURL = participant["avatar_url"].stringValue
@@ -1354,9 +1348,21 @@ open class QiscusCommentClient: NSObject {
                                 user.userFullName = userFullName
                                 user.userAvatarURL = userAvatarURL
                                 let _ = user.saveUser()
-                                QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
+                                //QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
+                            }
+                            if QiscusParticipant.getParticipant(withEmail: userEmail, roomId: room.roomId) == nil {
+                                QiscusParticipant.addParticipant(userEmail, roomId: room.roomId)
+                            }
+                            participantArray.append(userEmail)
+                        }
+                        
+                        let roomMembers = QiscusParticipant.getParticipant(onRoomId: room.roomId)
+                        for member in roomMembers {
+                            if !participantArray.contains(member.participantEmail) {
+                                member.remove()
                             }
                         }
+                        self.delegate?.qiscusService(didChangeRoom: room, onRoomWithId: room.roomId)
                     }
                     QiscusChatVC.sharedInstance.loadTitle()
                     self.commentDelegate?.finishedLoadFromAPI(topicId)
@@ -1469,7 +1475,8 @@ open class QiscusCommentClient: NSObject {
                     QiscusChatVC.sharedInstance.topicId = topicId
                     
                     if let participants = roomData["participants"].array {
-                        for participant in participants{
+                        var participantArray = [String]()
+                        for participant in participants {
                             let userEmail = participant["email"].stringValue
                             let userFullName = participant["username"].stringValue
                             let userAvatarURL = participant["avatar_url"].stringValue
@@ -1490,9 +1497,21 @@ open class QiscusCommentClient: NSObject {
                                 user.userFullName = userFullName
                                 user.userAvatarURL = userAvatarURL
                                 let _ = user.saveUser()
-                                QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
+                                //QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
+                            }
+                            if QiscusParticipant.getParticipant(withEmail: userEmail, roomId: room.roomId) == nil {
+                                QiscusParticipant.addParticipant(userEmail, roomId: room.roomId)
+                            }
+                            participantArray.append(userEmail)
+                        }
+                        
+                        let roomMembers = QiscusParticipant.getParticipant(onRoomId: room.roomId)
+                        for member in roomMembers {
+                            if !participantArray.contains(member.participantEmail) {
+                                member.remove()
                             }
                         }
+                        self.delegate?.qiscusService(didChangeRoom: room, onRoomWithId: room.roomId)
                     }
                     QiscusChatVC.sharedInstance.loadTitle()
                     self.commentDelegate?.finishedLoadFromAPI(topicId)
@@ -1601,7 +1620,8 @@ open class QiscusCommentClient: NSObject {
                     QiscusChatVC.sharedInstance.topicId = topicId
                     
                     if let participants = roomData["participants"].array {
-                        for participant in participants{
+                        var participantArray = [String]()
+                        for participant in participants {
                             let userEmail = participant["email"].stringValue
                             let userFullName = participant["username"].stringValue
                             let userAvatarURL = participant["avatar_url"].stringValue
@@ -1622,9 +1642,21 @@ open class QiscusCommentClient: NSObject {
                                 user.userFullName = userFullName
                                 user.userAvatarURL = userAvatarURL
                                 let _ = user.saveUser()
-                                QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
+                                //QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
+                            }
+                            if QiscusParticipant.getParticipant(withEmail: userEmail, roomId: room.roomId) == nil {
+                                QiscusParticipant.addParticipant(userEmail, roomId: room.roomId)
+                            }
+                            participantArray.append(userEmail)
+                        }
+                        
+                        let roomMembers = QiscusParticipant.getParticipant(onRoomId: room.roomId)
+                        for member in roomMembers {
+                            if !participantArray.contains(member.participantEmail) {
+                                member.remove()
                             }
                         }
+                        self.delegate?.qiscusService(didChangeRoom: room, onRoomWithId: room.roomId)
                     }
                     QiscusChatVC.sharedInstance.loadTitle()
                     self.commentDelegate?.finishedLoadFromAPI(topicId)
@@ -1748,18 +1780,43 @@ open class QiscusCommentClient: NSObject {
                             }
                             
                             if let participants = roomData["participants"].array {
-                                QiscusParticipant.removeAllParticipant(inRoom: room.roomId)
-                                for participant in participants{
-                                    let email = participant["email"].stringValue
-                                    if QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId) == nil{
+                                var participantArray = [String]()
+                                for participant in participants {
+                                    let userEmail = participant["email"].stringValue
+                                    let userFullName = participant["username"].stringValue
+                                    let userAvatarURL = participant["avatar_url"].stringValue
+                                    
+                                    if let member = QiscusUser.getUserWithEmail(userEmail){
+                                        if member.userFullName != userFullName {
+                                            member.updateUserFullName(userFullName)
+                                            let user = QiscusUser.copyUser(user: member)
+                                            user.userFullName = userFullName
+                                            QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
+                                        }
+                                        if member.userAvatarURL != userAvatarURL {
+                                            member.updateUserAvatarURL(userAvatarURL)
+                                        }
+                                    }else{
                                         let user = QiscusUser()
-                                        user.userEmail = participant["email"].stringValue
-                                        user.userFullName = participant["username"].stringValue
-                                        user.userAvatarURL = participant["avatar_url"].stringValue
+                                        user.userEmail = userEmail
+                                        user.userFullName = userFullName
+                                        user.userAvatarURL = userAvatarURL
                                         let _ = user.saveUser()
-                                        QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
+                                        //QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
+                                    }
+                                    if QiscusParticipant.getParticipant(withEmail: userEmail, roomId: room.roomId) == nil {
+                                        QiscusParticipant.addParticipant(userEmail, roomId: room.roomId)
+                                    }
+                                    participantArray.append(userEmail)
+                                }
+                                
+                                let roomMembers = QiscusParticipant.getParticipant(onRoomId: room.roomId)
+                                for member in roomMembers {
+                                    if !participantArray.contains(member.participantEmail) {
+                                        member.remove()
                                     }
                                 }
+                                self.delegate?.qiscusService(didChangeRoom: room, onRoomWithId: room.roomId)
                             }
                             QiscusChatVC.sharedInstance.loadTitle()
                             if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
@@ -1849,6 +1906,46 @@ open class QiscusCommentClient: NSObject {
                         
                         if results != JSON.null{
                             Qiscus.printLog(text: "success change comment status on \(commentId) to \(status.rawValue)")
+                            let roomJson = results["room"]
+                            let room = QiscusRoom.room(fromJSON: roomJson)
+                            let participantsJson = roomJson["participants"].arrayValue
+                            var participantArray = [String]()
+                            for participant in participantsJson {
+                                let userEmail = participant["email"].stringValue
+                                let userFullName = participant["username"].stringValue
+                                let userAvatarURL = participant["avatar_url"].stringValue
+                                
+                                if let member = QiscusUser.getUserWithEmail(userEmail){
+                                    if member.userFullName != userFullName {
+                                        member.updateUserFullName(userFullName)
+                                        let user = QiscusUser.copyUser(user: member)
+                                        user.userFullName = userFullName
+                                        QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
+                                    }
+                                    if member.userAvatarURL != userAvatarURL {
+                                        member.updateUserAvatarURL(userAvatarURL)
+                                    }
+                                }else{
+                                    let user = QiscusUser()
+                                    user.userEmail = userEmail
+                                    user.userFullName = userFullName
+                                    user.userAvatarURL = userAvatarURL
+                                    let _ = user.saveUser()
+                                    //QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
+                                }
+                                if QiscusParticipant.getParticipant(withEmail: userEmail, roomId: room.roomId) == nil {
+                                    QiscusParticipant.addParticipant(userEmail, roomId: room.roomId)
+                                }
+                                participantArray.append(userEmail)
+                            }
+                            
+                            let roomMembers = QiscusParticipant.getParticipant(onRoomId: room.roomId)
+                            for member in roomMembers {
+                                if !participantArray.contains(member.participantEmail) {
+                                    member.remove()
+                                }
+                            }
+                            self.delegate?.qiscusService(didChangeRoom: room, onRoomWithId: room.roomId)
                             withCompletion()
                         }else if error != JSON.null{
                             Qiscus.printLog(text: "error update message status: \(error)")
@@ -1860,4 +1957,107 @@ open class QiscusCommentClient: NSObject {
             }
         }
     }
+    public func syncRoom(withID roomId:Int){
+        let loadURL = QiscusConfig.ROOM_REQUEST_ID_URL
+        
+        let parameters:[String : AnyObject] =  [
+            "id" : roomId as AnyObject,
+            "token"  : qiscus.config.USER_TOKEN as AnyObject
+        ]
+        Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+            Qiscus.printLog(text: "response sync room data: \(responseData)")
+            if let response = responseData.result.value {
+                Qiscus.printLog(text: "sync room api response:\n\(response)")
+                let json = JSON(response)
+                let results = json["results"]
+                
+                if results != JSON.null{
+                    Qiscus.printLog(text: "getListComment with id response: \(responseData)")
+                    let roomData = results["room"]
+                    let room = QiscusRoom.room(fromJSON: roomData)
+                    let commentData = results["comments"].arrayValue
+                    let topicId = roomData["last_topic_id"].intValue
+                    
+                    if let participants = roomData["participants"].array {
+                        var participantArray = [String]()
+                        for participant in participants {
+                            let userEmail = participant["email"].stringValue
+                            let userFullName = participant["username"].stringValue
+                            let userAvatarURL = participant["avatar_url"].stringValue
+                            
+                            if let member = QiscusUser.getUserWithEmail(userEmail){
+                                if member.userFullName != userFullName {
+                                    member.updateUserFullName(userFullName)
+                                    let user = QiscusUser.copyUser(user: member)
+                                    user.userFullName = userFullName
+                                    QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
+                                }
+                                if member.userAvatarURL != userAvatarURL {
+                                    member.updateUserAvatarURL(userAvatarURL)
+                                }
+                            }else{
+                                let user = QiscusUser()
+                                user.userEmail = userEmail
+                                user.userFullName = userFullName
+                                user.userAvatarURL = userAvatarURL
+                                let _ = user.saveUser()
+                                //QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
+                            }
+                            if QiscusParticipant.getParticipant(withEmail: userEmail, roomId: room.roomId) == nil {
+                                QiscusParticipant.addParticipant(userEmail, roomId: room.roomId)
+                            }
+                            participantArray.append(userEmail)
+                        }
+                        
+                        let roomMembers = QiscusParticipant.getParticipant(onRoomId: room.roomId)
+                        for member in roomMembers {
+                            if !participantArray.contains(member.participantEmail) {
+                                member.remove()
+                            }
+                        }
+                        self.delegate?.qiscusService(didChangeRoom: room, onRoomWithId: room.roomId)
+                    }
+                    var gotNewComment = false
+                    for payload in commentData{
+                        let id = payload["id"].intValue
+                        let uId = payload["unique_temp_id"].stringValue
+                        let email = payload["email"].stringValue
+                        
+                        var comment = QiscusComment()
+                        if let old = QiscusComment.comment(withId: id, andUniqueId: uId){
+                            gotNewComment = true
+                            comment = old
+                        }else{
+                            comment = QiscusComment.newComment(withId: id, andUniqueId: uId)
+                            comment.commentText = payload["message"].stringValue
+                            comment.showLink = !(payload["disable_link_preview"].boolValue)
+                        }
+                        comment.commentId = id
+                        comment.commentBeforeId = payload["comment_before_id"].intValue
+                        comment.commentSenderEmail = email
+                        comment.commentTopicId = topicId
+                        
+                        comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)
+                        
+                        comment.updateCommentStatus(.sent)
+                        
+                        if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
+                            participant.updateLastReadCommentId(commentId: comment.commentId)
+                        }
+                    }
+                    
+                    if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                        roomDelegate.didFinishLoadRoom(onRoom: room)
+                    }
+                    
+                    QiscusChatVC.sharedInstance.loadTitle()
+                    self.delegate?.qiscusService(didFinishLoadRoom: room)
+                    if gotNewComment {
+                        self.delegate?.qiscusService(didFinishSync: true)
+                    }
+                }
+            }
+        })
+    }
+
 }

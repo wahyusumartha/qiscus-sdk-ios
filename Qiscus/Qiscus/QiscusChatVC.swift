@@ -1534,6 +1534,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate{
             roomDelegate.didFinishLoadRoom(onRoom: inRoom)
         }
+        QiscusCommentClient.shared.syncRoom(withID: inRoom.roomId)
     }
     public func dataPresenter(didFinishLoadMore comments: [[QiscusCommentPresenter]], inRoom: QiscusRoom) {
         Qiscus.logicThread.async {

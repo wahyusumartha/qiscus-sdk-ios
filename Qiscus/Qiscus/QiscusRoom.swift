@@ -261,6 +261,7 @@ public class QiscusRoom: NSObject {
             if let roomAvatar = json["avatar_url"].string {
                 room.roomAvatarURL = roomAvatar
             }
+            
         }
         return room
     }
