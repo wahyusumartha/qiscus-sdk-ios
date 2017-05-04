@@ -83,9 +83,11 @@ public class QiscusChatVC: UIViewController{
                     self.roomAvatar.loadAsync(self.room!.roomAvatarURL, placeholderImage: image)
                 }
                 self.subscribeRealtime(onRoom: room)
+                self.syncRoom()
             }else{
                 self.titleLabel.text = ""
                 self.subtitleLabel.text = ""
+                self.roomSynced = false
             }
         }
     }
@@ -170,6 +172,7 @@ public class QiscusChatVC: UIViewController{
     
     //data flag
     var checkingData:Bool = false
+    var roomSynced = false
     
     var showLink:Bool = false{
         didSet{
@@ -225,7 +228,7 @@ public class QiscusChatVC: UIViewController{
             return UIImage(named: "ic_send_off", in: self.bundle, compatibleWith: nil)?.localizedImage()
         }
     }
-
+    
     var isLastRowVisible: Bool = false {
         didSet{
             bottomButton.isHidden = isLastRowVisible
@@ -305,6 +308,7 @@ public class QiscusChatVC: UIViewController{
         if self.room != nil{
             self.unsubscribeTypingRealtime(onRoom: room!)
         }
+        self.roomSynced = false
         self.dismissLoading()
     }
     override open func viewWillAppear(_ animated: Bool) {
@@ -320,7 +324,7 @@ public class QiscusChatVC: UIViewController{
             self.isBeforeTranslucent = navController.navigationBar.isTranslucent
             self.navigationController?.navigationBar.isTranslucent = false
         }
-        
+        self.roomSynced = false
         unreadIndexPath = [IndexPath]()
         bottomButton.isHidden = true
         dataPresenter.delegate = self
@@ -870,7 +874,7 @@ public class QiscusChatVC: UIViewController{
                     print("error recording")
                 }
             })
-
+            
         }
     }
     func prepareRecording(){
@@ -966,7 +970,7 @@ public class QiscusChatVC: UIViewController{
             }
         }
     }
-
+    
     func iCloudOpen(){
         if Qiscus.sharedInstance.connected{
             let documentPicker = UIDocumentPickerViewController(documentTypes: self.UTIs, in: UIDocumentPickerMode.import)
@@ -1093,7 +1097,7 @@ public class QiscusChatVC: UIViewController{
             GalleryConfigurationItem.thumbnailsButtonMode(.custom(seeAllButton))
         ]
     }
-   
+    
     
     func loadTitle(){
         Qiscus.logicThread.async {
@@ -1299,7 +1303,7 @@ public class QiscusChatVC: UIViewController{
     
     @IBAction func showAttcahMenu(_ sender: UIButton) {
         let actionSheetController = UIAlertController(title: "Share Files", message: "Share your photo, video, sound, or document by choosing the source", preferredStyle: .actionSheet)
-
+        
         let cancelActionButton = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
             print("Cancel")
         }
@@ -1512,7 +1516,14 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
             }
         })
     }
-
+    public func syncRoom(){
+        if !self.roomSynced {
+            if let roomToSync = self.room {
+                self.roomSynced = true
+                QiscusCommentClient.shared.syncRoom(withID: roomToSync.roomId)
+            }
+        }
+    }
     public func dataPresenter(didFinishLoad comments: [[QiscusCommentPresenter]], inRoom: QiscusRoom) {
         self.dismissLoading()
         self.firstLoad = false
@@ -1534,7 +1545,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate{
             roomDelegate.didFinishLoadRoom(onRoom: inRoom)
         }
-        QiscusCommentClient.shared.syncRoom(withID: inRoom.roomId)
+        
     }
     public func dataPresenter(didFinishLoadMore comments: [[QiscusCommentPresenter]], inRoom: QiscusRoom) {
         Qiscus.logicThread.async {
@@ -1733,7 +1744,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                     }
                 }
             }
-
+            
         }
     }
     public func dataPresenter(didChangeContent data: QiscusCommentPresenter, inRoom: QiscusRoom) {
@@ -2246,9 +2257,9 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
             let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
             
             QPopUpView.showAlert(withTarget: self, image: image, message: text, firstActionTitle: okText, secondActionTitle: cancelText,doneAction: {
-                 self.continueImageUpload(image, imageName: imageName, imagePath: imagePath)
+                self.continueImageUpload(image, imageName: imageName, imagePath: imagePath)
             },
-                 cancelAction: {}
+                                 cancelAction: {}
             )
         }else if fileType == "public.movie" {
             let mediaURL = info[UIImagePickerControllerMediaURL] as! URL
