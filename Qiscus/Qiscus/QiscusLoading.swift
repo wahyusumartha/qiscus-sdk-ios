@@ -13,7 +13,6 @@ public extension UIViewController{
         Qiscus.uiThread.async {
             let loadingView = QLoadingViewController.sharedInstance
             if !loadingView.isPresence{
-                self.dismissQiscusLoading()
                 loadingView.modalTransitionStyle = .crossDissolve
                 loadingView.modalPresentationStyle = .overCurrentContext
                 loadingView.view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.7)
