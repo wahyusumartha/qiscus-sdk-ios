@@ -1122,10 +1122,10 @@ public class QiscusChatVC: UIViewController{
             
             var navSubtitle = ""
             if subtitle == "" {
-                if self.room != nil {
-                    if self.room!.roomType == .group {
-                        if self.room!.participants.count > 0{
-                            for participant in self.room!.participants {
+                if let targetRoom = self.room {
+                    if targetRoom.roomType == .group {
+                        if targetRoom.participants.count > 0{
+                            for participant in targetRoom.participants {
                                 if participant.participantEmail != QiscusConfig.sharedInstance.USER_EMAIL{
                                     if let user = QiscusUser.getUserWithEmail(participant.participantEmail){
                                         if navSubtitle == "" {
@@ -1138,8 +1138,8 @@ public class QiscusChatVC: UIViewController{
                             }
                         }
                     }else{
-                        if self.room!.participants.count > 0 {
-                            for participant in self.room!.participants {
+                        if targetRoom.participants.count > 0 {
+                            for participant in targetRoom.participants {
                                 if participant.participantEmail != QiscusConfig.sharedInstance.USER_EMAIL{
                                     if let user = QiscusUser.getUserWithEmail(participant.participantEmail){
                                         if user.isOnline {
