@@ -241,7 +241,7 @@ import CocoaMQTT
         }
         
         Qiscus.sharedInstance.isPushed = true
-        QiscusUIConfiguration.sharedInstance.readOnly = readOnly
+        QiscusChatVC.sharedInstance.archived = readOnly
         QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
@@ -276,7 +276,7 @@ import CocoaMQTT
         }
         
         Qiscus.sharedInstance.isPushed = false
-        QiscusUIConfiguration.sharedInstance.readOnly = readOnly
+        QiscusChatVC.sharedInstance.archived = readOnly
         QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
@@ -310,7 +310,7 @@ import CocoaMQTT
         }
         
         Qiscus.sharedInstance.isPushed = false
-        QiscusUIConfiguration.sharedInstance.readOnly = readOnly
+        QiscusChatVC.sharedInstance.archived = readOnly
         QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
@@ -345,7 +345,7 @@ import CocoaMQTT
             Qiscus.setupReachability()
         }
         Qiscus.sharedInstance.isPushed = true
-        QiscusUIConfiguration.sharedInstance.readOnly = readOnly
+        QiscusChatVC.sharedInstance.archived = readOnly
         QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
@@ -370,7 +370,7 @@ import CocoaMQTT
             Qiscus.setupReachability()
         }
         Qiscus.sharedInstance.isPushed = true
-        QiscusUIConfiguration.sharedInstance.readOnly = readOnly
+        QiscusChatVC.sharedInstance.archived = readOnly
         QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
@@ -550,7 +550,7 @@ import CocoaMQTT
         }
         
         Qiscus.sharedInstance.isPushed = true
-        QiscusUIConfiguration.sharedInstance.readOnly = readOnly
+        QiscusChatVC.sharedInstance.archived = readOnly
         QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
@@ -579,7 +579,7 @@ import CocoaMQTT
         }
         
         Qiscus.sharedInstance.isPushed = false
-        QiscusUIConfiguration.sharedInstance.readOnly = readOnly
+        QiscusChatVC.sharedInstance.archived = readOnly
         QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
