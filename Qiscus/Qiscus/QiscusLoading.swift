@@ -15,7 +15,7 @@ public extension UIViewController{
             if !loadingView.isPresence{
                 loadingView.modalTransitionStyle = .crossDissolve
                 loadingView.modalPresentationStyle = .overCurrentContext
-                loadingView.view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.7)
+                loadingView.view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.1)
                 
                 if text == nil {
                     loadingView.loadingLabel.isHidden = true
