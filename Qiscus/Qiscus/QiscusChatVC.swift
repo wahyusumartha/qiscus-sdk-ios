@@ -16,7 +16,7 @@ import UserNotifications
 
 public class QiscusChatVC: UIViewController{
     
-    static let sharedInstance = QiscusChatVC()
+    public static let sharedInstance = QiscusChatVC()
     
     // MARK: - IBOutlet Properties
     @IBOutlet weak var inputBar: UIView!
@@ -85,8 +85,8 @@ public class QiscusChatVC: UIViewController{
                 self.subscribeRealtime(onRoom: room)
                 self.syncRoom()
             }else{
-                self.titleLabel.text = ""
-                self.subtitleLabel.text = ""
+                self.titleLabel.text = QiscusTextConfiguration.sharedInstance.chatTitle
+                self.subtitleLabel.text = QiscusTextConfiguration.sharedInstance.chatSubtitle
                 self.roomSynced = false
             }
         }
@@ -671,7 +671,7 @@ public class QiscusChatVC: UIViewController{
     @objc public func dismissLoading(){
         self.dismissQiscusLoading()
     }
-    func unlockChat(){
+    @objc public func unlockChat(){
         self.archievedNotifTop.constant = 65
         UIView.animate(withDuration: 0.6, animations: {
             self.view.layoutIfNeeded()
@@ -679,7 +679,7 @@ public class QiscusChatVC: UIViewController{
             self.archievedNotifView.isHidden = true
         })
     }
-    func lockChat(){
+    @objc public func lockChat(){
         self.archievedNotifView.isHidden = false
         self.archievedNotifTop.constant = 0
         UIView.animate(withDuration: 0.6, animations: {
@@ -1120,7 +1120,7 @@ public class QiscusChatVC: UIViewController{
         Qiscus.logicThread.async {
             let subtitle = QiscusTextConfiguration.sharedInstance.chatSubtitle
             
-            var navSubtitle = ""
+            var navSubtitle = subtitle
             if subtitle == "" {
                 if let targetRoom = self.room {
                     if targetRoom.roomType == .group {
