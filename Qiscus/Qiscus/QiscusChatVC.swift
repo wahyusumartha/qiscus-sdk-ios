@@ -702,10 +702,10 @@ public class QiscusChatVC: UIViewController{
                     if self.comments.count > 0 {
                         let lastComment = self.comments.last!.last!
                         if lastComment.userEmail == QiscusMe.sharedInstance.email && lastComment.isToday {
-                            indexPath.section = lastComment.commentIndexPath!.section
-                            indexPath.row = lastComment.commentIndexPath!.row + 1
+                            indexPath.section = self.comments.count - 1
+                            indexPath.row = self.comments[indexPath.section].count
                         }else{
-                            indexPath.section = lastComment.commentIndexPath!.section + 1
+                            indexPath.section = self.comments.count
                             indexPath.row = 0
                         }
                     }
@@ -1479,6 +1479,12 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                     }
                     else{
                         let lastComment = self.comments.last!.last!
+                        
+                        if lastComment.commentIndexPath == nil {
+                            let lastSection = self.comments.count - 1
+                            let lastRow = self.comments[lastSection].count - 1
+                            lastComment.commentIndexPath = IndexPath(row: lastRow, section: lastSection)
+                        }
                         if lastComment.createdAt < presenter.createdAt {
                             if lastComment.userEmail == presenter.userEmail && lastComment.commentDate == presenter.commentDate{
                                 indexPath = IndexPath(row: self.comments[self.comments.count - 1].count , section: self.comments.count - 1)
