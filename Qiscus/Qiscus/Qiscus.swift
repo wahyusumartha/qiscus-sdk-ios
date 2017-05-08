@@ -969,23 +969,15 @@ extension Qiscus:CocoaMQTTDelegate{
                                     user.updateStatus(isOnline: true)
                                     
                                     let userFullName = user.userFullName
-                                    if !QiscusChatVC.sharedInstance.isTypingOn || (QiscusChatVC.sharedInstance.typingIndicatorUser != userFullName){
+                                    
                                         QiscusChatVC.sharedInstance.startTypingIndicator(withUser: userFullName)
-                                    }
-                                }else{
-                                    if !QiscusChatVC.sharedInstance.isTypingOn || (QiscusChatVC.sharedInstance.typingIndicatorUser != userEmail){
-                                        QiscusChatVC.sharedInstance.startTypingIndicator(withUser: userEmail)
-                                    }
                                 }
+                                
                                 break
                             default:
                                 if let user = QiscusUser.getUserWithEmail(userEmail) {
                                     let userFullName = user.userFullName
                                     if QiscusChatVC.sharedInstance.isTypingOn && (QiscusChatVC.sharedInstance.typingIndicatorUser == userFullName){
-                                        QiscusChatVC.sharedInstance.stopTypingIndicator()
-                                    }
-                                }else{
-                                    if QiscusChatVC.sharedInstance.isTypingOn && (QiscusChatVC.sharedInstance.typingIndicatorUser == userEmail){
                                         QiscusChatVC.sharedInstance.stopTypingIndicator()
                                     }
                                 }

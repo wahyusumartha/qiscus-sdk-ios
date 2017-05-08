@@ -19,11 +19,19 @@ extension QiscusChatVC: ChatInputTextDelegate {
                     input.layoutIfNeeded()
                 }
             }
-            if !self.isSelfTyping{
-                if self.room != nil {
-                    let message: String = "1";
-                    let channel = "r/\(self.room!.roomId)/\(self.room!.roomLastCommentTopicId)/\(QiscusMe.sharedInstance.email)/t"
-                    Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
+            
+            if self.room != nil {
+                let message: String = "1";
+                let channel = "r/\(self.room!.roomId)/\(self.room!.roomLastCommentTopicId)/\(QiscusMe.sharedInstance.email)/t"
+                Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
+                if self.typingTimer != nil {
+                    if self.typingTimer!.isValid {
+                        self.typingTimer!.invalidate()
+                    }
+                    self.typingTimer = nil
+                    Qiscus.uiThread.async {
+                        self.typingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.sendStopTyping), userInfo: nil, repeats: false)
+                    }
                 }
             }
         }
@@ -45,12 +53,19 @@ extension QiscusChatVC: ChatInputTextDelegate {
     }
     open func chatInputDidEndEditing(chatInput input: ChatInputText) {
         Qiscus.logicThread.async {
-            if self.isSelfTyping{
-                if self.room != nil {
-                    let message: String = "0";
-                    let channel = "r/\(self.room!.roomId)/\(self.room!.roomLastCommentTopicId)/\(QiscusMe.sharedInstance.email)/t"
-                    Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
+            self.sendStopTyping()
+        }
+    }
+    public func sendStopTyping(){
+        if self.room != nil {
+            let message: String = "0";
+            let channel = "r/\(self.room!.roomId)/\(self.room!.roomLastCommentTopicId)/\(QiscusMe.sharedInstance.email)/t"
+            Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
+            if self.typingTimer != nil {
+                if self.typingTimer!.isValid {
+                    self.typingTimer!.invalidate()
                 }
+                self.typingTimer = nil
             }
         }
     }

@@ -173,6 +173,8 @@ public class QiscusChatVC: UIViewController{
     //data flag
     var checkingData:Bool = false
     var roomSynced = false
+    var remoteTypingTimer:Timer?
+    var typingTimer:Timer?
     
     var showLink:Bool = false{
         didSet{
@@ -1172,6 +1174,7 @@ public class QiscusChatVC: UIViewController{
         self.loadTitle()
     }
     func startTypingIndicator(withUser user:String){
+        print("starting typing indicator")
         Qiscus.logicThread.async {
             self.typingIndicatorUser = user
             self.isTypingOn = true
@@ -1179,12 +1182,25 @@ public class QiscusChatVC: UIViewController{
             Qiscus.uiThread.async {
                 self.subtitleLabel.text = typingText
             }
+            if self.remoteTypingTimer != nil {
+                if self.remoteTypingTimer!.isValid {
+                    self.remoteTypingTimer?.invalidate()
+                    //self.remoteTypingTimer = nil
+                }
+            }
+            Qiscus.uiThread.sync {
+                self.remoteTypingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.stopTypingIndicator), userInfo: nil, repeats: false)
+            }
         }
     }
     func stopTypingIndicator(){
+        self.typingIndicatorUser = ""
+        self.isTypingOn = false
+        if self.remoteTypingTimer != nil {
+            self.remoteTypingTimer?.invalidate()
+            self.remoteTypingTimer = nil
+        }
         Qiscus.logicThread.async {
-            self.typingIndicatorUser = ""
-            self.isTypingOn = false
             self.loadSubtitle()
         }
     }
