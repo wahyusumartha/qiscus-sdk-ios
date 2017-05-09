@@ -284,8 +284,7 @@ public class QiscusChatVC: UIViewController{
         inputText.font = Qiscus.style.chatFont
         self.collectionView.delegate = self
         self.collectionView.dataSource = self
-        self.emptyChatImage.image = Qiscus.image(named: "empty_messages")?.withRenderingMode(.alwaysTemplate)
-        self.emptyChatImage.tintColor = self.bottomColor
+        self.emptyChatImage.tintColor = self.topColor
         
         let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout
         layout?.sectionHeadersPinToVisibleBounds = true
@@ -367,6 +366,7 @@ public class QiscusChatVC: UIViewController{
                 self.room = newRoom
             }
         }
+        
         setupPage()
     }
     override public func viewDidAppear(_ animated: Bool) {
@@ -491,7 +491,10 @@ public class QiscusChatVC: UIViewController{
         
         self.welcomeText.text = QiscusTextConfiguration.sharedInstance.emptyTitle
         self.welcomeSubtitle.text = QiscusTextConfiguration.sharedInstance.emptyMessage
-        
+        self.emptyChatImage.image = Qiscus.style.assets.emptyChat
+        if self.comments.count == 0 {
+            self.welcomeView.isHidden = false
+        }
         self.inputText.placeholder = QiscusTextConfiguration.sharedInstance.textPlaceholder
         self.inputText.chatInputDelegate = self
         
