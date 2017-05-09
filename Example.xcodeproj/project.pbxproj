@@ -19,6 +19,7 @@
 		39128CA51D6C357E00C3BEA2 /* ChatTapRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39128C9B1D6C357E00C3BEA2 /* ChatTapRecognizer.swift */; };
 		39128CA61D6C357E00C3BEA2 /* ChatInputText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39128C9C1D6C357E00C3BEA2 /* ChatInputText.swift */; };
 		39128CA71D6C357E00C3BEA2 /* ChatFileButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39128C9D1D6C357E00C3BEA2 /* ChatFileButton.swift */; };
+		3913D98B1EC16E5800B09DD9 /* QiscusAssetsConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3913D98A1EC16E5800B09DD9 /* QiscusAssetsConfiguration.swift */; };
 		391B05C61D3D19D200763760 /* QiscusFileHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 391B05C51D3D19D200763760 /* QiscusFileHelper.swift */; };
 		392015A01D425148005561C2 /* QiscusHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3920159F1D425148005561C2 /* QiscusHelper.swift */; };
 		392A525C1D7FA0910007300D /* QiscusColorConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 392A525B1D7FA0910007300D /* QiscusColorConfiguration.swift */; };
@@ -156,6 +157,7 @@
 		39128C9B1D6C357E00C3BEA2 /* ChatTapRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChatTapRecognizer.swift; path = Qiscus/ChatTapRecognizer.swift; sourceTree = "<group>"; };
 		39128C9C1D6C357E00C3BEA2 /* ChatInputText.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChatInputText.swift; path = Qiscus/ChatInputText.swift; sourceTree = "<group>"; };
 		39128C9D1D6C357E00C3BEA2 /* ChatFileButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChatFileButton.swift; path = Qiscus/ChatFileButton.swift; sourceTree = "<group>"; };
+		3913D98A1EC16E5800B09DD9 /* QiscusAssetsConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusAssetsConfiguration.swift; path = Qiscus/QiscusAssetsConfiguration.swift; sourceTree = "<group>"; };
 		391B05C51D3D19D200763760 /* QiscusFileHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusFileHelper.swift; path = Qiscus/QiscusFileHelper.swift; sourceTree = "<group>"; };
 		3920159F1D425148005561C2 /* QiscusHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusHelper.swift; path = Qiscus/QiscusHelper.swift; sourceTree = "<group>"; };
 		392A525B1D7FA0910007300D /* QiscusColorConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusColorConfiguration.swift; path = Qiscus/QiscusColorConfiguration.swift; sourceTree = "<group>"; };
@@ -472,6 +474,7 @@
 				39955B7E1D65992200927ADD /* QiscusUIConfiguration.swift */,
 				392A525B1D7FA0910007300D /* QiscusColorConfiguration.swift */,
 				392A525D1D7FA1700007300D /* QiscusTextConfiguration.swift */,
+				3913D98A1EC16E5800B09DD9 /* QiscusAssetsConfiguration.swift */,
 			);
 			name = Configuration;
 			sourceTree = "<group>";
@@ -817,6 +820,7 @@
 				392C85B11E1F17BE0059D5BD /* QCellFileLeft.swift in Sources */,
 				39DC748D1E8F2894005487C1 /* QiscusCommentDB.swift in Sources */,
 				392A52621D80EF1D0007300D /* QiscusConfigDelegate.swift in Sources */,
+				3913D98B1EC16E5800B09DD9 /* QiscusAssetsConfiguration.swift in Sources */,
 				3996D6B41E8F6BF400EFC462 /* QiscusFileDB.swift in Sources */,
 				39128CA51D6C357E00C3BEA2 /* ChatTapRecognizer.swift in Sources */,
 				39E195F11DBDE9CC000DDF76 /* QToasterSwift.swift in Sources */,

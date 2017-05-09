@@ -13,6 +13,8 @@ open class QiscusUIConfiguration: NSObject {
     
     open var color = QiscusColorConfiguration.sharedInstance
     open var copyright = QiscusTextConfiguration.sharedInstance
+    public var assets = QiscusAssetsConfiguration.shared
+    
     open var chatFont = UIFont.preferredFont(forTextStyle: UIFontTextStyle.body){
         didSet{
             if chatFont.pointSize != UIFont.preferredFont(forTextStyle: UIFontTextStyle.body).pointSize{
