@@ -57,7 +57,7 @@ open class ChatPreviewDocVC: UIViewController, UIWebViewDelegate, WKNavigationDe
         view.layoutIfNeeded()
         
         self.webView.backgroundColor = UIColor.red
-        let openURL = URL(string:  self.url)
+        let openURL = URL(string:  self.url.replacingOccurrences(of: " ", with: "%20"))
         self.webView.load(URLRequest(url: openURL!))
     }
     
