@@ -44,7 +44,9 @@ class QChatCell: UICollectionViewCell {
             let preview = ChatPreviewDocVC()
             preview.fileName = fileName
             preview.url = url
-            preview.roomName = QiscusTextConfiguration.sharedInstance.chatTitle
+            if let room = QiscusChatVC.sharedInstance.room {
+                preview.roomName = room.roomName
+            }
             QiscusChatVC.sharedInstance.navigationController?.pushViewController(preview, animated: true)
         }else{
             if let url = URL(string: data.remoteURL!){
