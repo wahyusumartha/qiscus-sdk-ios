@@ -1,32 +1,33 @@
-Qiscus SDK [![CocoaPods Compatible](https://img.shields.io/cocoapods/v/Qiscus.svg)](https://img.shields.io/cocoapods/v/qiscus-sdk-ios.svg)
-======
-<p align="center"><img src="https://res.cloudinary.com/qiscus/raw/upload/v1485736947/1485736946/Screen%20Shot%202017-01-30%20at%207.26.07%20AM.png" width="30%" /> <img src="https://res.cloudinary.com/qiscus/raw/upload/v1485736958/1485736957/Screen%20Shot%202017-01-30%20at%207.26.59%20AM.png" width="30%" /> <img src="https://res.cloudinary.com/qiscus/raw/upload/v1485736969/1485736967/Screen%20Shot%202017-01-30%20at%207.41.09%20AM.png" width="30%" />
-</p>
+# Documentation Qiscus SDK iOS
 
-Qiscus SDK is a lightweight and powerful chat library. Qiscus SDK will allow you to easily integrating Qiscus engine with your apps to make cool chatting application.
+## Quick Start
 
-# Quick Start
-## Requirements
+### Create a new SDK application in the Dashboard and get app_id
 
-- iOS 9.0+ 
-- Xcode 8.0+
-- Swift 3.0+
-### Create a new SDK application in the Dashboard and get app_id 
-[**Request access**](http://sdk.qiscus.com/start.html) to get new Qiscus APP_ID
-### Integrating SDK with an existing app 
-##### CocoaPods
+Register on [https://dashboard.qiscus.com](https://dashboard.qiscus.com/) using your email and password and then create new application
 
-[CocoaPods](http://cocoapods.org) is a dependency manager for Cocoa projects. You can install it with the following command:
+You should create one application per service, regardless of the platform. For example, an app released in both Android and iOS would require only one application to be created in the Dashboard.
 
-```bash
+All users within the same Qiscus application are able to communicate with each other, across all platforms. This means users using iOS, Android, web clients, etc. can all chat with one another. However, users in different Qiscus applications cannot talk to each other.
+
+Done! Now you can use the APP_ID into your apps and get chat functionality by implementing Qiscus into your app.
+
+
+### integrating SDK with an existing app
+
+[CocoaPods](http://cocoapods.org/) is a dependency manager for Cocoa projects. You can install it with the following command:
+
+
+```
 $ gem install cocoapods
 ```
+
 > CocoaPods 1.1.0+ is required.
 
-Podfile file : 
+Podfile :
 
 ```
-target 'Sample' do
+`target 'Sample' do
 
   .....
   use_frameworks!
@@ -35,54 +36,59 @@ target 'Sample' do
   pod 'Qiscus'
   .....
 
-  post_install do |installer|
-    installer.pods_project.targets.each do |target|
-      target.build_configurations.each do |config|
-        config.build_settings['ENABLE_BITCODE'] = 'YES'
-        config.build_settings['SWIFT_VERSION'] = '3.0'
-      end
-    end
-  end
 end
+
+`
 ```
 
+Install Qiscus through CocoaPods
 
-# Authentication 
-### Initializing with APP_ID
+```
+$ pod install
+```
+
+## Authentication
+
+### Init with APP_ID & Login or register
+
 To initiate Qiscus SDK, you need to import Qiscus and then add this in your code everywhere you want
 
-##### Swift 3.0:
+**Swift 3.0:**
 
 ```
+`import Qiscus
+
+
 Qiscus.setup( withAppId: YOUR_APP_ID, 
               userEmail: CURRENT_USER_EMAIL, 
               userKey: CURRENT_USER_PASSWORD, 
               username: CURRENT_USER_USERNAME, 
               avatarURL: CURRENT_USER_AVATAR_URL, 
               delegate: self
-)
+)`
 ```
-##### Objective C
+
+**Using the  SDK in Objective-C**
+
 
 ```
+`import Qiscus
+
 [Qiscus setupWithAppId:<YOUR_APP_ID> 
         userEmail:<USER_EMAIL> 
         userKey:<USER_KEY> 
         username:<USER_NAME> 
         avatarURL:<USER_AVATAR_URL> 
         delegate:self 
-        secureURl:<true|false>];
+        secureURl:<true|false>];`
 ```
 
 
+**Example on AppDelegate.swift**
 
-For example : 
-##### Swift 3.0:
 
 ```
-func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-// Override point for customization after application launch.
-
+`func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         let viewController = ViewController()
         let navigationController = UINavigationController(rootViewController: viewController)
         
@@ -98,62 +104,58 @@ func application(application: UIApplication, didFinishLaunchingWithOptions launc
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
 
-return true
-}
+        return true
+}`
 ```
 
-##### Objective C:
+### 
+Updating a User Profile and Avatar
+
+Updating user profile and details is simply by re-init the user using new details :
+
+
 ```
-@import Qiscus;
-#import "ViewController.h"
-
-@interface ViewController ()
-...
-...
-@end
-
-@implementation ViewController
-
-...
-
-- (void)login {
-NSLog(@"Login");
-[Qiscus setupWithAppId:@"qisme" 
-userEmail:@"081111111111@qiscuswa.com" 
-userKey:@"passKey" 
-username:@"John Smith" 
-avatarURL:nil 
-delegate:self 
-secureURl:true
-];
-}
-
-...
-@end
+`        Qiscus.setup( withAppId: "DragonGo",
+                      userEmail: "abcde@qiscus.coom",
+                      userKey: "abcd1234",
+                      username: "Steve Kusuma New Name",
+                      avatarURL: "https://myimage.com/myNewImage.png",
+                      delegate: nil
+        )`
 ```
-##### Note:
-Don't forget to add usage description for camera, photo library and microphone to your info.plist
-![alt tag](https://res.cloudinary.com/qiscus/raw/upload/v1485738688/1485738687/Screen%20Shot%202017-01-30%20at%208.10.46%20AM.png)
 
-# Room Types 
-### Group Room
-A Group Room is a chat for several users. A user can join the chat only through an invitation.
-### 1 on 1 
-A 1 on 1 Room is a chat for two users. The chat initiator only need to add the target's messaging username
+## Room Types 
 
-# 1-to-1 Chat 
-### Creating and starting 1-to-1 chat by target
-Start chat with target is very easy, all you need is just call 
-###### Swift 3.0 :
-`Qiscus.chat(withUsers: ["TARGET_EMAIL"], target: self)` 
-###### Objective C:
-`[Qiscus chatWithUsers:<ARRAY_OF_TARGET_EMAIL> target:self readOnly:<false|true> title:<CHAT_TITLE> subtitle:<CHAT_SUBTITLE> distinctId:NULL optionalData:NULL withMessage:NULL]`
+### 1-on-1 Chat
+
+1-on-1 messaging is a private channel between two users. You can enable the **distinct property** for the channel in order to reuse a channel for the same members
+
+### Group Room 
+
+ Group messaging is a private channel among multiple users. You can invite up to hundreds of members into a group room
+
+## **1-on-1 Chat**
+
+### Creating and starting 1-to-1 chat
+
+Start chat with target is very easy, all you need is just call
+
+Swift 3.0 :
+
+`Qiscus.chat(withUsers: ["TARGET_EMAIL"], target: self)`
+
+Objective C:
+
+`[Qiscus chatWithUsers:<ARRAY_OF_TARGET_EMAIL> target:self readOnly:<false|true> title:<CHAT_TITLE> subtitle:<CHAT_SUBTITLE> distinctId:NULL optionalData:NULL withMessage:NULL]` 
+
 in your code
 
-For example in your ViewController : 
-##### Swift 3.0:
+For example in your ViewController :
+
+Swift 3.0:
+
 ```
-import UIKit
+`import UIKit
 import Qiscus
 
 class ViewController: UIViewController {
@@ -176,12 +178,13 @@ class ViewController: UIViewController {
     }
 
 .....
-}
+}`
 ```
 
-##### Objective C:
+Objective C:
+
 ```
-#import "MainVC.h"
+`#import "MainVC.h"
 
 @import Qiscus;
 
@@ -194,51 +197,59 @@ class ViewController: UIViewController {
 ...
 - (void)goToChat{
 [Qiscus chatWithUsers:[NSArray arrayWithObject:@"081234567890@qiscuswa.com"] 
-target:self 
-readOnly:false 
-title:@"Sample Chat" 
-subtitle:@"chat with user" 
-distinctId:NULL 
-withMessage:NULL 
-optionalData:NULL];
+        target:self 
+        readOnly:false 
+        title:@"Sample Chat" 
+        subtitle:@"chat with user" 
+        distinctId:NULL 
+        withMessage:NULL 
+        optionalData:NULL];
 }
 
 ...
-@end
-
+@end`
 ```
 
 
 
-# Group Room 
-### Creating a Group Room 
-Qiscus also support group chat. To create new group chat, all you need is just call 
-###### Swift 3.0:
-`Qiscus.createChat(withUsers users:["TARGET_EMAIL_1, TARGET_EMAIL_2"], target:self)` 
-###### Objective C:
+
+## **Group Room**
+
+### Creating a Group Room
+
+Qiscus also support group chat. To create new group chat, all you need is just call
+
+Swift 3.0:
+
+`Qiscus.createChat(withUsers users:["TARGET_EMAIL_1, TARGET_EMAIL_2"], target:self)`
+
+Objective C:
+
 `[Qiscus createChatViewWithUsers:<ARRAY_OF_TARGET_EMAIL> target:self readOnly:<false|true> title:<CHAT_TITLE> subtitle:<CHAT_SUBTITLE> distinctId:NULL optionalData:NULL withMessage:NULL]`
 
-For example in your ViewController : 
+For example in your ViewController :
 
-##### Swift 3.0
+Swift 3.0
+
 ```
-import UIKit
+`import UIKit
 import Qiscus
 
 class ViewController: UIViewController {
 
-.....
-func goToChat(){
-let chatTargets = ["081111111111@qiscuswa.com, 081234567890@qiscuswa.com"]
-Qiscus.createChat(withUsers:chatTargets, target:self)
-}
-.....
-}
+    .....
+    func goToChat(){
+        let chatTargets = ["081111111111@qiscuswa.com, 081234567890@qiscuswa.com"]
+        Qiscus.createChat(withUsers:chatTargets, target:self)
+    }
+    .....
+}`
 ```
 
-##### Objective C:
+Objective C:
+
 ```
-#import "MainVC.h"
+`#import "MainVC.h"
 
 @import Qiscus;
 
@@ -250,32 +261,42 @@ Qiscus.createChat(withUsers:chatTargets, target:self)
 @implementation MainVC
 ...
 - (void)goToChat{
-[Qiscus createChatViewWithUsers:emails 
-target:self 
-readOnly:false 
-title:@"New Group Chat" 
-subtitle:@"always new chat" 
-distinctId:NULL 
-optionalData:NULL 
-withMessage:NULL];
+    [Qiscus createChatViewWithUsers:emails 
+            target:self 
+            readOnly:false 
+            title:@"New Group Chat" 
+            subtitle:@"always new chat" 
+            distinctId:NULL 
+            optionalData:NULL 
+            withMessage:NULL];
 }
 
 ...
-@end
-
+@end`
 ```
-### Getting a Group Room instance with room id 
+
+for accesing room that created by this call, you need to call it with its roomId. This methode is always creating new chat room.
+
+
+### Getting a Group Room instance with room id
+
+
 When you already know your chat room id, you can easily go to that room. Just call
-###### Swift 3.0:
-`Qiscus.chat(withRoomId roomId:[ROOM_ID], target:self, optionalDataCompletion: {_ in})` 
-###### Objective C:
+
+Swift 3.0:
+
+`Qiscus.chat(withRoomId roomId:[ROOM_ID], target:self, optionalDataCompletion: {_ in})`
+
+Objective C:
+
 `[Qiscus chatWithRoomId:<CHAT_ROOM_ID> target:self readOnly:<true|false> title:<CHAT_TITLE> subtitle:<CHAT_SUBTITLE> distinctId:NULL withMessage:NULL optionalData:NULL optionalDataCompletion:^(NSString * _) {}]`
 
+For example in your ViewController :
 
-For example in your ViewController : 
-##### Swift 3.0
+Swift 3.0
+
 ```
-import UIKit
+`import UIKit
 import Qiscus
 
 class ViewController: UIViewController {
@@ -283,20 +304,21 @@ class ViewController: UIViewController {
 .....
 
 func goToChat(){
-print("go to chat")
-Qiscus.chat(withRoomId: roomId, target: self, 
-optionalDataCompletion: {_ in 
 
-})
+    Qiscus.chat(withRoomId: roomId, target: self, 
+        optionalDataCompletion: {_ in 
+    
+    })
 }
 
 .....
-}
+}`
 ```
 
-##### Objective C:
+Objective C:
+
 ```
-#import "MainVC.h"
+`#import "MainVC.h"
 
 @import Qiscus;
 
@@ -309,51 +331,111 @@ optionalDataCompletion: {_ in
 ...
 - (void)goToChat{
 [Qiscus chatWithRoomId:135 
-target:self 
-readOnly:false 
-title:@"" 
-subtitle:@"chat with room id" 
-distinctId:NULL 
-withMessage:NULL 
-optionalData:NULL 
-optionalDataCompletion:^(NSString * _) {
-
-}];
+        target:self 
+        readOnly:false 
+        title:@"" 
+        subtitle:@"chat with room id" 
+        distinctId:NULL 
+        withMessage:NULL 
+        optionalData:NULL 
+        optionalDataCompletion:^(NSString * _) {
+        
+   }];
 }
 ...
-@end
+@end`
+```
+
+
+
+### Inviting users to an existing Room
+
+Currently we recommend to invite user into existing room through our **REST API** for simplicity and security reason
+
+### Leaving a Group Room
+
+Currently we recommend to kick user out of specific room through our **REST API** for simplicity and security reason
+
+## **Event Handler **
+
+**QiscusConfigDelegate**
 
 ```
+class MainView: UIViewController, QiscusConfigDelegate {
+
+    // MARK: - QiscusConfigDelegate
+    func qiscusFailToConnect(_ withMessage:String){
+        print(withMessage)
+        ...
+    }
+    func qiscusConnected(){
+        appDelegate.goToChatNavigationView()
+        ...
+    }
+}
+```
+
+
+**QiscusRoomDelegate**
+
+```
+class SampleAppRealtime: QiscusRoomDelegate {
     
-# UI Customization
-### Theme Customization 
-you can explore customisation of chat interface by calling method style
+    // MARK: - Member of QiscusRoomDelegate
+    internal func gotNewComment(_ comments: QiscusComment) {
+        print("getting new messages")
+    }
+    
+    internal func didFinishLoadRoom(onRoom room: QiscusRoom) {
+        print("did finish load roomId: \(localRoom.roomId), roomName: \(localRoom.roomName)")
+    }
+    
+    internal func didFailLoadRoom(withError error: String) {
+        print("did fail load room error: \(error)")
+    }
 
-For Example : 
-##### Swift 3.0:
+    func didFinishUpdateRoom(onRoom room: QiscusRoom) {
+        print("did finish update room roomId: \(localRoom.roomId), roomName: \(localRoom.roomName)")
+    }
+    
+    func didFailUpdateRoom(withError error:String) {
+        print("did fail update room: \(error)")
+    }
+    
+}
 ```
-Qiscus.style.color.leftBaloonColor = UIColor.blueColor()
-Qiscus.style.color.rightBaloonColor = UIColor.greenColor()
+
+## **UI Customization**
+
+### Theme Customization
+
+Lots of our items inside Chat Room can be modified based on our needs, here is the example of the customisation that can be done easily
+
 ```
-##### Objective C:
+ 
+  let qiscusColor = Qiscus.style.color
+  qiscusColor.welcomeIconColor = colorConfig.chatWelcomeIconColor
+  qiscusColor.leftBaloonColor = colorConfig.chatLeftBaloonColor
+  qiscusColor.leftBaloonTextColor = colorConfig.chatLeftTextColor
+  qiscusColor.leftBaloonLinkColor = colorConfig.chatLeftBaloonLinkColor
+  qiscusColor.rightBaloonColor = colorConfig.chatRightBaloonColor
+  qiscusColor.rightBaloonTextColor = colorConfig.chatRightTextColor
+        
+  Qiscus.setNavigationColor(colorConfig.baseNavigateColor, tintColor: colorConfig.baseNavigateTextColor)
+
+  let fontSize: CGFloat = CGFloat(17).flexibleIphoneFont()
+  Qiscus.style.chatFont = UIFont.systemFont(ofSize: fontSize)
+  
 ```
-Qiscus.style.color.leftBaloonColor = [UIColor colorWithRed:0.5 green:0.5 blue:0.5 alpha:1];
-Qiscus.style.color.welcomeIconColor = [UIColor colorWithRed:0.6 green:0.6 blue:0.6 alpha:1];
-Qiscus.style.color.leftBaloonTextColor = [UIColor whiteColor];
-Qiscus.style.color.rightBaloonColor = [UIColor colorWithRed:0.3 green:0.3 blue:0.3 alpha:1];
-Qiscus.style.color.rightBaloonTextColor = [UIColor whiteColor];
-Qiscus.style.color.rightBaloonLinkColor = [UIColor whiteColor];
-[Qiscus setGradientChatNavigation:[UIColor blackColor] 
-bottomColor:[UIColor colorWithRed:0.2 green:0.2 blue:0.2 alpha:1] 
-tintColor:[UIColor whiteColor]];
-```
 
+### UI Source code
 
+If you want full customisations, you can modify everything on the view by forking our repository or just right away modifying our[ QiscusUIConfiguration.swift](https://github.com/qiscus/qiscus-sdk-ios/blob/master/Qiscus/Qiscus/QiscusUIConfiguration.swift) and [QiscusTextConfiguration.swift](https://github.com/qiscus/qiscus-sdk-ios/blob/master/Qiscus/Qiscus/QiscusTextConfiguration.swift)** **based on your needs.
 
-Check sample apps -> [Swift](https://github.com/qiscus/qiscus-sdk-ios-sample) or [Objective C](https://github.com/qiscus/qiscus-sdk-ios-sample-obj-c)
+## Push Notifications 
 
+Currently we recommend to use our Webhook-API to push notification from your own server to client app for simplicity and flexibility handling
 
+## Notes :
 
-## License
-
-Qiscus-SDK-IOS is released under the MIT license. See LICENSE for details.
+Don't forget to add usage description for camera, photo library and microphone to your **info.plist **to use our attachment functionality in chat SDK
