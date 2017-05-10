@@ -358,7 +358,7 @@ open class QiscusCommentClient: NSObject {
                         }
                     })
                     break
-                case .failure(let error):
+                case .failure(let _):
                     DispatchQueue.main.async(execute: {
                         if let delegate = self.configDelegate {
                             delegate.didUnregisterQiscusPushNotification?(success: false, error: "cannot unregister device", deviceToken: QiscusMe.sharedInstance.deviceToken)
