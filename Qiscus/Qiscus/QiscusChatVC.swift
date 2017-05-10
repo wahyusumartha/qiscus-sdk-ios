@@ -329,7 +329,6 @@ public class QiscusChatVC: UIViewController{
         super.viewWillAppear(animated)
         
         if let navController = self.navigationController {
-            print("navBarHidden: - \(self.navigationController?.isNavigationBarHidden)")
             self.isBeforeTranslucent = navController.navigationBar.isTranslucent
             self.navigationController?.navigationBar.isTranslucent = false
             self.defaultNavBarVisibility = self.navigationController!.isNavigationBarHidden
@@ -1188,7 +1187,6 @@ public class QiscusChatVC: UIViewController{
         self.loadTitle()
     }
     func startTypingIndicator(withUser user:String){
-        print("starting typing indicator")
         Qiscus.logicThread.async {
             self.typingIndicatorUser = user
             self.isTypingOn = true
