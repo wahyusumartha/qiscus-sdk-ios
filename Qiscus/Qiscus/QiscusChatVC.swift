@@ -177,6 +177,7 @@ public class QiscusChatVC: UIViewController{
     var typingTimer:Timer?
     var defaultBackButtonVisibility = true
     var defaultNavBarVisibility = true
+    var defaultLeftButton:[UIBarButtonItem]? = nil
     
     var showLink:Bool = false{
         didSet{
@@ -303,10 +304,10 @@ public class QiscusChatVC: UIViewController{
         if self.navigationController != nil {
             self.navigationController?.navigationBar.isTranslucent = self.isBeforeTranslucent
             self.navigationController?.setNavigationBarHidden(self.defaultNavBarVisibility, animated: false)
-            self.navigationItem.setHidesBackButton(self.defaultBackButtonVisibility, animated: false)
-            self.navigationItem.leftBarButtonItems = []
+            
         }
-        
+        self.navigationItem.setHidesBackButton(self.defaultBackButtonVisibility, animated: false)
+        self.navigationItem.leftBarButtonItems = self.defaultLeftButton
         super.viewWillDisappear(animated)
         
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
@@ -483,8 +484,17 @@ public class QiscusChatVC: UIViewController{
         
         let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
         self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
+        
+        if self.navigationItem.leftBarButtonItems != nil {
+            self.defaultLeftButton = self.navigationItem.leftBarButtonItems
+        }else{
+            self.defaultLeftButton = nil
+        }
+        
         self.navigationItem.setHidesBackButton(true, animated: false)
+        
         self.navigationItem.leftBarButtonItems = [backButton]
+        
         
         if inputText.value == "" {
             sendButton.isEnabled = false
