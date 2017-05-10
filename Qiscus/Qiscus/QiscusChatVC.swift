@@ -175,6 +175,8 @@ public class QiscusChatVC: UIViewController{
     var roomSynced = false
     var remoteTypingTimer:Timer?
     var typingTimer:Timer?
+    var defaultBackButtonVisibility = true
+    var defaultNavBarVisibility = true
     
     var showLink:Bool = false{
         didSet{
@@ -300,7 +302,11 @@ public class QiscusChatVC: UIViewController{
         dataPresenter.delegate = nil
         if self.navigationController != nil {
             self.navigationController?.navigationBar.isTranslucent = self.isBeforeTranslucent
+            self.navigationController?.setNavigationBarHidden(self.defaultNavBarVisibility, animated: false)
+            self.navigationItem.setHidesBackButton(self.defaultBackButtonVisibility, animated: false)
+            self.navigationItem.leftBarButtonItems = []
         }
+        
         super.viewWillDisappear(animated)
         
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
@@ -321,9 +327,12 @@ public class QiscusChatVC: UIViewController{
             UIApplication.shared.cancelAllLocalNotifications()
         }
         super.viewWillAppear(animated)
+        
         if let navController = self.navigationController {
+            print("navBarHidden: - \(self.navigationController?.isNavigationBarHidden)")
             self.isBeforeTranslucent = navController.navigationBar.isTranslucent
             self.navigationController?.navigationBar.isTranslucent = false
+            self.defaultNavBarVisibility = self.navigationController!.isNavigationBarHidden
         }
         self.roomSynced = false
         unreadIndexPath = [IndexPath]()
@@ -376,6 +385,7 @@ public class QiscusChatVC: UIViewController{
             loadData()
         }
     }
+
     // MARK: - Memory Warning
     override open func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -473,6 +483,7 @@ public class QiscusChatVC: UIViewController{
         self.navigationController?.navigationBar.tintColor = tintColor
         
         let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
+        self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
         self.navigationItem.setHidesBackButton(true, animated: false)
         self.navigationItem.leftBarButtonItems = [backButton]
         
