@@ -27,7 +27,7 @@ $ gem install cocoapods
 Podfile :
 
 ```
-`target 'Sample' do
+target 'Sample' do
 
   .....
   use_frameworks!
@@ -38,7 +38,6 @@ Podfile :
 
 end
 
-`
 ```
 
 Install Qiscus through CocoaPods
@@ -56,7 +55,7 @@ To initiate Qiscus SDK, you need to import Qiscus and then add this in your code
 **Swift 3.0:**
 
 ```
-`import Qiscus
+import Qiscus
 
 
 Qiscus.setup( withAppId: YOUR_APP_ID, 
@@ -65,14 +64,14 @@ Qiscus.setup( withAppId: YOUR_APP_ID,
               username: CURRENT_USER_USERNAME, 
               avatarURL: CURRENT_USER_AVATAR_URL, 
               delegate: self
-)`
+)
 ```
 
 **Using the  SDK in Objective-C**
 
 
 ```
-`import Qiscus
+import Qiscus
 
 [Qiscus setupWithAppId:<YOUR_APP_ID> 
         userEmail:<USER_EMAIL> 
@@ -80,7 +79,7 @@ Qiscus.setup( withAppId: YOUR_APP_ID,
         username:<USER_NAME> 
         avatarURL:<USER_AVATAR_URL> 
         delegate:self 
-        secureURl:<true|false>];`
+        secureURl:<true|false>];
 ```
 
 
@@ -88,7 +87,7 @@ Qiscus.setup( withAppId: YOUR_APP_ID,
 
 
 ```
-`func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         let viewController = ViewController()
         let navigationController = UINavigationController(rootViewController: viewController)
         
@@ -105,7 +104,7 @@ Qiscus.setup( withAppId: YOUR_APP_ID,
         window?.makeKeyAndVisible()
 
         return true
-}`
+}
 ```
 
 ### 
@@ -115,13 +114,13 @@ Updating user profile and details is simply by re-init the user using new detail
 
 
 ```
-`        Qiscus.setup( withAppId: "DragonGo",
+        Qiscus.setup( withAppId: "DragonGo",
                       userEmail: "abcde@qiscus.coom",
                       userKey: "abcd1234",
                       username: "Steve Kusuma New Name",
                       avatarURL: "https://myimage.com/myNewImage.png",
                       delegate: nil
-        )`
+        )
 ```
 
 ## Room Types 
@@ -155,7 +154,7 @@ For example in your ViewController :
 Swift 3.0:
 
 ```
-`import UIKit
+import UIKit
 import Qiscus
 
 class ViewController: UIViewController {
@@ -178,13 +177,13 @@ class ViewController: UIViewController {
     }
 
 .....
-}`
+}
 ```
 
 Objective C:
 
 ```
-`#import "MainVC.h"
+#import "MainVC.h"
 
 @import Qiscus;
 
@@ -207,7 +206,7 @@ Objective C:
 }
 
 ...
-@end`
+@end
 ```
 
 
@@ -232,7 +231,7 @@ For example in your ViewController :
 Swift 3.0
 
 ```
-`import UIKit
+import UIKit
 import Qiscus
 
 class ViewController: UIViewController {
@@ -243,13 +242,13 @@ class ViewController: UIViewController {
         Qiscus.createChat(withUsers:chatTargets, target:self)
     }
     .....
-}`
+}
 ```
 
 Objective C:
 
 ```
-`#import "MainVC.h"
+#import "MainVC.h"
 
 @import Qiscus;
 
@@ -272,7 +271,7 @@ Objective C:
 }
 
 ...
-@end`
+@end
 ```
 
 for accesing room that created by this call, you need to call it with its roomId. This methode is always creating new chat room.
@@ -296,7 +295,7 @@ For example in your ViewController :
 Swift 3.0
 
 ```
-`import UIKit
+import UIKit
 import Qiscus
 
 class ViewController: UIViewController {
@@ -312,13 +311,13 @@ func goToChat(){
 }
 
 .....
-}`
+}
 ```
 
 Objective C:
 
 ```
-`#import "MainVC.h"
+#import "MainVC.h"
 
 @import Qiscus;
 
@@ -343,7 +342,7 @@ Objective C:
    }];
 }
 ...
-@end`
+@end
 ```
 
 
