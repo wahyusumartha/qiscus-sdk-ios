@@ -34,7 +34,7 @@ public extension UIViewController{
                     loadingView.percentageLabel.isHidden = false
                 }
                 
-                self.present(loadingView, animated: false, completion: {
+                UIApplication.shared.keyWindow?.rootViewController?.present(loadingView, animated: false, completion: {
                     if QLoadingViewController.sharedInstance.dismissImmediately{
                         self.dismissQiscusLoading()
                     }else{

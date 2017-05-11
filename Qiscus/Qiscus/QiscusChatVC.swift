@@ -320,6 +320,7 @@ public class QiscusChatVC: UIViewController{
         self.dismissLoading()
     }
     override open func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         if #available(iOS 10.0, *) {
             let center = UNUserNotificationCenter.current()
             center.removeAllDeliveredNotifications() // To remove all delivered notifications
@@ -327,8 +328,6 @@ public class QiscusChatVC: UIViewController{
         }else{
             UIApplication.shared.cancelAllLocalNotifications()
         }
-        super.viewWillAppear(animated)
-        
         if let navController = self.navigationController {
             self.isBeforeTranslucent = navController.navigationBar.isTranslucent
             self.navigationController?.navigationBar.isTranslucent = false
@@ -381,6 +380,7 @@ public class QiscusChatVC: UIViewController{
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if firstLoad{
+            self.showLoading("Load data ...")
             self.room = nil
             loadData()
         }
@@ -662,7 +662,7 @@ public class QiscusChatVC: UIViewController{
     
     // MARK: - Load DataSource on firstTime
     func loadData(){
-        self.showLoading("Load Data ...")
+        //self.showLoading("Load Data ...")
         if newRoom && (self.users != nil){
             dataPresenter.loadComments(inNewGroupChat: users!, optionalData: self.optionalData, withMessage: self.message)
         }else{
@@ -1449,9 +1449,6 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                     }
                 }
                 self.checkingData = false
-                
-                
-                
             }
         }
     }

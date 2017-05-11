@@ -161,6 +161,6 @@ public class QPopUpView: UIViewController {
         alert.modalTransitionStyle = .crossDissolve
         alert.modalPresentationStyle = .overCurrentContext
         alert.view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.4)
-        target.present(alert, animated: true, completion: {})
+        UIApplication.shared.keyWindow?.rootViewController?.present(alert, animated: true, completion: {})
     }
 }

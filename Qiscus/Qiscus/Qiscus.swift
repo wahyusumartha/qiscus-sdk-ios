@@ -301,7 +301,7 @@ import CocoaMQTT
         let navController = UINavigationController()
         navController.viewControllers = [chatVC]
         
-        target.navigationController?.present(navController, animated: true, completion: nil)
+        UIApplication.shared.keyWindow?.rootViewController?.present(navController, animated: true, completion: nil)
     }
     @objc public class func chat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
         Qiscus.checkDatabaseMigration()
@@ -334,7 +334,7 @@ import CocoaMQTT
         let navController = UINavigationController()
         navController.viewControllers = [chatVC]
         
-        target.navigationController?.present(navController, animated: true, completion: nil)
+        UIApplication.shared.keyWindow?.rootViewController?.present(navController, animated: true, completion: nil)
     }
     /**
      No Documentation
@@ -601,7 +601,7 @@ import CocoaMQTT
         if QiscusChatVC.sharedInstance.isPresence {
             QiscusChatVC.sharedInstance.goBack()
         }
-        target.navigationController?.present(navController, animated: true, completion: nil)
+        UIApplication.shared.keyWindow?.rootViewController?.present(navController, animated: true, completion: nil)
     }
     
     // MARK: - Update Room Methode
