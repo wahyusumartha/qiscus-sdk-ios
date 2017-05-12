@@ -121,6 +121,7 @@ import CocoaMQTT
     @objc public class func clear(){
         Qiscus.publishUserStatus(offline: true)
         Qiscus.shared.mqtt?.disconnect()
+        Qiscus.unRegisterPN()
         QiscusMe.clear()
         Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
@@ -128,11 +129,13 @@ import CocoaMQTT
             realm.deleteAll()
         }
         Qiscus.deleteAllFiles()
-        Qiscus.unRegisterPN()
+        
     }
     
     @objc public class func unRegisterPN(){
-        QiscusCommentClient.sharedInstance.unRegisterDevice()
+        if Qiscus.isLoggedIn {
+            QiscusCommentClient.sharedInstance.unRegisterDevice()
+        }
     }
     // need Documentation
     func backgroundCheck(){
