@@ -1806,7 +1806,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                             }else{
                                 self.comments[indexPath.section][indexPath.row] = data
                                 Qiscus.uiThread.async {
-                                    self.collectionView.reloadItems(at: [indexPath])
+                                    self.collectionView.reloadData()
                                 }
                             }
                         }
