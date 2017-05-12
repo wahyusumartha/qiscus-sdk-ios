@@ -1566,7 +1566,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         }
     }
     public func dataPresenter(didFinishLoad comments: [[QiscusCommentPresenter]], inRoom: QiscusRoom) {
-        self.dismissLoading()
+        
         self.firstLoad = false
         self.room = inRoom
         
@@ -1586,7 +1586,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate{
             roomDelegate.didFinishLoadRoom(onRoom: inRoom)
         }
-        
+        self.dismissLoading()
     }
     public func dataPresenter(didFinishLoadMore comments: [[QiscusCommentPresenter]], inRoom: QiscusRoom) {
         Qiscus.logicThread.async {
