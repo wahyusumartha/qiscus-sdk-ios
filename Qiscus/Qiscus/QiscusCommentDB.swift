@@ -279,6 +279,7 @@ public class QiscusCommentDB: Object {
                         try! realm.write {
                             realm.delete(commentDB)
                         }
+                        break
                     }
                 }else{
                     break
