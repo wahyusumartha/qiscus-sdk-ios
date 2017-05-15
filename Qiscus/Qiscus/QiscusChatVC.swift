@@ -324,6 +324,7 @@ public class QiscusChatVC: UIViewController{
         bottomButton.setImage(Qiscus.image(named: "bottom")?.withRenderingMode(.alwaysTemplate), for: .normal)
         bottomButton.layer.cornerRadius = 17.5
         bottomButton.clipsToBounds = true
+        
         unreadIndicator.isHidden = true
         unreadIndicator.layer.cornerRadius = 11.5
         unreadIndicator.clipsToBounds = true
