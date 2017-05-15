@@ -50,6 +50,10 @@ open class QiscusColorConfiguration: NSObject {
     /// Welcome image color, using UIColor class, Default value: UIColor(red: 18/255.0, green: 180/255.0, blue: 147/255.0, alpha: 1)
     open var welcomeIconColor = UIColor(red: 18/255.0, green: 180/255.0, blue: 147/255.0, alpha: 1)
     
+    public var topColor = UIColor(red: 8/255.0, green: 153/255.0, blue: 140/255.0, alpha: 1.0)
+    public var bottomColor = UIColor(red: 23/255.0, green: 177/255.0, blue: 149/255.0, alpha: 1)
+    public var tintColor = UIColor.white
+    
     open var baseColor:UIColor{
         get{
             return QiscusChatVC.sharedInstance.topColor

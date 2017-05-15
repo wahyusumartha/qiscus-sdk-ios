@@ -132,9 +132,9 @@ public class QiscusChatVC: UIViewController{
     var message:String?
     var newRoom = false
     
-    var topColor = UIColor(red: 8/255.0, green: 153/255.0, blue: 140/255.0, alpha: 1.0)
-    var bottomColor = UIColor(red: 23/255.0, green: 177/255.0, blue: 149/255.0, alpha: 1)
-    var tintColor = UIColor.white
+    var topColor = Qiscus.shared.styleConfiguration.color.topColor
+    var bottomColor = Qiscus.shared.styleConfiguration.color.bottomColor
+    var tintColor = Qiscus.shared.styleConfiguration.color.tintColor
     
     // MARK: Galery variable
     var galleryItems:[QiscusGalleryItem] = [QiscusGalleryItem]()
@@ -273,26 +273,6 @@ public class QiscusChatVC: UIViewController{
     // MARK: - UI Lifecycle
     override open func viewDidLoad() {
         super.viewDidLoad()
-        recordBackground.layer.cornerRadius = 16
-        let lightColor = self.topColor.withAlphaComponent(0.4)
-        recordBackground.backgroundColor = lightColor
-        
-        bottomButton.setImage(Qiscus.image(named: "bottom")?.withRenderingMode(.alwaysTemplate), for: .normal)
-        bottomButton.layer.cornerRadius = 17.5
-        bottomButton.clipsToBounds = true
-        unreadIndicator.isHidden = true
-        unreadIndicator.layer.cornerRadius = 11.5
-        unreadIndicator.clipsToBounds = true
-        backgroundView.image = Qiscus.image(named: "chat_bg")
-        collectionView.decelerationRate = UIScrollViewDecelerationRateNormal
-        linkPreviewContainer.layer.shadowColor = UIColor.black.cgColor
-        linkPreviewContainer.layer.shadowOpacity = 0.6
-        linkPreviewContainer.layer.shadowOffset = CGSize(width: -5, height: 0)
-        roomAvatar.contentMode = .scaleAspectFill
-        inputText.font = Qiscus.style.chatFont
-        self.collectionView.delegate = self
-        self.collectionView.dataSource = self
-        self.emptyChatImage.tintColor = self.topColor
         
         let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout
         layout?.sectionHeadersPinToVisibleBounds = true
@@ -301,7 +281,7 @@ public class QiscusChatVC: UIViewController{
         let deleteMenuItem: UIMenuItem = UIMenuItem(title: "Delete", action: #selector(QChatCell.deleteComment))
         let menuItems:[UIMenuItem] = [resendMenuItem,deleteMenuItem]
         UIMenuController.shared.menuItems = menuItems
-        setupNavigationTitle()
+        
     }
     override open func viewWillDisappear(_ animated: Bool) {
         self.isPresence = false
@@ -327,6 +307,10 @@ public class QiscusChatVC: UIViewController{
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         QiscusChatVC.sharedInstance = self
+        self.topColor = Qiscus.shared.styleConfiguration.color.topColor
+        self.bottomColor = Qiscus.shared.styleConfiguration.color.bottomColor
+        self.tintColor = Qiscus.shared.styleConfiguration.color.tintColor
+        
         if #available(iOS 10.0, *) {
             let center = UNUserNotificationCenter.current()
             center.removeAllDeliveredNotifications() // To remove all delivered notifications
@@ -334,6 +318,26 @@ public class QiscusChatVC: UIViewController{
         }else{
             UIApplication.shared.cancelAllLocalNotifications()
         }
+        let lightColor = self.topColor.withAlphaComponent(0.4)
+        recordBackground.backgroundColor = lightColor
+        recordBackground.layer.cornerRadius = 16
+        bottomButton.setImage(Qiscus.image(named: "bottom")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        bottomButton.layer.cornerRadius = 17.5
+        bottomButton.clipsToBounds = true
+        unreadIndicator.isHidden = true
+        unreadIndicator.layer.cornerRadius = 11.5
+        unreadIndicator.clipsToBounds = true
+        backgroundView.image = Qiscus.image(named: "chat_bg")
+        collectionView.decelerationRate = UIScrollViewDecelerationRateNormal
+        linkPreviewContainer.layer.shadowColor = UIColor.black.cgColor
+        linkPreviewContainer.layer.shadowOpacity = 0.6
+        linkPreviewContainer.layer.shadowOffset = CGSize(width: -5, height: 0)
+        roomAvatar.contentMode = .scaleAspectFill
+        inputText.font = Qiscus.style.chatFont
+        self.collectionView.delegate = self
+        self.collectionView.dataSource = self
+        self.emptyChatImage.tintColor = self.topColor
+        
         if let navController = self.navigationController {
             self.isBeforeTranslucent = navController.navigationBar.isTranslucent
             self.navigationController?.navigationBar.isTranslucent = false
@@ -369,6 +373,11 @@ public class QiscusChatVC: UIViewController{
         
         self.cancelRecordButton.isHidden = true
         
+        self.sendButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
+        self.attachButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
+        self.recordButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
+        self.cancelRecordButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
+        
         if self.inputText.value == "" {
             self.sendButton.isHidden = true
             self.recordButton.isHidden = false
@@ -382,7 +391,7 @@ public class QiscusChatVC: UIViewController{
                 self.room = newRoom
             }
         }
-        
+        setupNavigationTitle()
         setupPage()
     }
     override public func viewDidAppear(_ animated: Bool) {

@@ -426,12 +426,21 @@ import CocoaMQTT
      - parameter tintColor: The **UIColor** as your tint gradient navigation color.
      */
     @objc public class func setGradientChatNavigation(_ topColor:UIColor, bottomColor:UIColor, tintColor:UIColor){
-        Qiscus.uiThread.async {
-            QiscusChatVC.sharedInstance.setGradientChatNavigation(withTopColor: topColor, bottomColor: bottomColor, tintColor: tintColor)
-            let popUpView = QPopUpView.sharedInstance
-            popUpView.topColor = topColor
-            popUpView.bottomColor = bottomColor
+        Qiscus.shared.styleConfiguration.color.topColor = topColor
+        Qiscus.shared.styleConfiguration.color.bottomColor = bottomColor
+        Qiscus.shared.styleConfiguration.color.tintColor = tintColor
+        
+        for (_,chatView) in Qiscus.shared.chatViews {
+            chatView.topColor = topColor
+            chatView.bottomColor = bottomColor
+            chatView.tintColor = tintColor
         }
+        //        Qiscus.uiThread.async {
+        //            QiscusChatVC.sharedInstance.setGradientChatNavigation(withTopColor: topColor, bottomColor: bottomColor, tintColor: tintColor)
+        //            let popUpView = QPopUpView.sharedInstance
+        //            popUpView.topColor = topColor
+        //            popUpView.bottomColor = bottomColor
+        //        }
     }
     /**
      Class function to set color chat navigation without gradient
@@ -439,7 +448,15 @@ import CocoaMQTT
      - parameter tintColor: The **UIColor** as your tint navigation color.
      */
     @objc public class func setNavigationColor(_ color:UIColor, tintColor: UIColor){
-        QiscusChatVC.sharedInstance.setNavigationColor(color, tintColor: tintColor)
+        Qiscus.shared.styleConfiguration.color.topColor = color
+        Qiscus.shared.styleConfiguration.color.bottomColor = color
+        Qiscus.shared.styleConfiguration.color.tintColor = tintColor
+        for (_,chatView) in Qiscus.shared.chatViews {
+            chatView.topColor = color
+            chatView.bottomColor = color
+            chatView.tintColor = tintColor
+        }
+        //        QiscusChatVC.sharedInstance.setNavigationColor(color, tintColor: tintColor)
     }
     /**
      Class function to set upload from iCloud active or not

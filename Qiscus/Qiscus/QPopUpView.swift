@@ -9,7 +9,7 @@
 import UIKit
 
 public class QPopUpView: UIViewController {
-
+    
     open static let sharedInstance = QPopUpView()
     
     var text:String = ""
@@ -57,7 +57,7 @@ public class QPopUpView: UIViewController {
         self.imageView.contentMode = UIViewContentMode.scaleAspectFill
         // Do any additional setup after loading the view.
     }
-
+    
     override public func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -67,6 +67,9 @@ public class QPopUpView: UIViewController {
         super.viewWillAppear(animated)
         let parentView = self.view
         parentView!.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.4)
+        
+        self.topColor = Qiscus.shared.styleConfiguration.color.topColor
+        self.bottomColor = Qiscus.shared.styleConfiguration.color.bottomColor
         
         if self.image != nil {
             self.imageView.image = self.image
@@ -113,20 +116,20 @@ public class QPopUpView: UIViewController {
         self.isPresent = false
     }
     /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
+     // MARK: - Navigation
+     
+     // In a storyboard-based application, you will often want to do a little preparation before navigation
+     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+     // Get the new view controller using segue.destinationViewController.
+     // Pass the selected object to the new view controller.
+     }
+     */
     @IBAction func firstButtonAction(_ sender: AnyObject) {
         self.dismiss(animated: true, completion: {})
         self.isPresent = false
         self.secondAction()
     }
-
+    
     @IBAction func secondButtonAction(_ sender: AnyObject) {
         self.dismiss(animated: true, completion: {})
         self.isPresent = false
@@ -147,7 +150,7 @@ public class QPopUpView: UIViewController {
         }else{
             alert.isPresent = true
         }
-
+        
         alert.secondAction = cancelAction
         alert.firstAction = doneAction
         alert.image = image
