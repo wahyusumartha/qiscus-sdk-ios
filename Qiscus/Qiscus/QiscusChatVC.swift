@@ -378,6 +378,7 @@ public class QiscusChatVC: UIViewController{
         self.attachButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
         self.recordButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
         self.cancelRecordButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
+        self.bottomButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
         
         if self.inputText.value == "" {
             self.sendButton.isHidden = true
