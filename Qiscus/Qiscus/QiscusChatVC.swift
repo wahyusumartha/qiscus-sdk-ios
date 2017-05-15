@@ -324,7 +324,6 @@ public class QiscusChatVC: UIViewController{
         bottomButton.setImage(Qiscus.image(named: "bottom")?.withRenderingMode(.alwaysTemplate), for: .normal)
         bottomButton.layer.cornerRadius = 17.5
         bottomButton.clipsToBounds = true
-        
         unreadIndicator.isHidden = true
         unreadIndicator.layer.cornerRadius = 11.5
         unreadIndicator.clipsToBounds = true
@@ -392,6 +391,11 @@ public class QiscusChatVC: UIViewController{
             if let newRoom = QiscusRoom.room(withId: self.room!.roomId){
                 self.room = newRoom
             }
+        }
+        if !self.isLastRowVisible {
+            self.bottomButton.isHidden = false
+        }else{
+            self.bottomButton.isHidden = true
         }
         setupNavigationTitle()
         setupPage()
@@ -1588,14 +1592,18 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         
         self.firstLoad = false
         self.room = inRoom
-        
+        var needScrollToBottom = true
+        if self.comments.count > 0 {
+            needScrollToBottom = false
+        }
         if comments.count > 0 {
             self.comments = comments
             self.welcomeView.isHidden = true
             
             self.collectionView.reloadData()
-            self.scrollToBottom()
-            
+            if needScrollToBottom {
+                self.scrollToBottom()
+            }
             let commentId = comments.last!.last!.commentId
             let roomId = inRoom.roomId
             if Qiscus.shared.chatViews[inRoom.roomId] == nil {
