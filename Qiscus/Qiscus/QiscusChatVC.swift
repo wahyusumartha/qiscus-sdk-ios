@@ -16,7 +16,7 @@ import UserNotifications
 
 public class QiscusChatVC: UIViewController{
     
-    public static let sharedInstance = QiscusChatVC()
+    public static var sharedInstance = QiscusChatVC()
     
     // MARK: - IBOutlet Properties
     @IBOutlet weak var inputBar: UIView!
@@ -179,6 +179,11 @@ public class QiscusChatVC: UIViewController{
     var defaultNavBarVisibility = true
     var defaultLeftButton:[UIBarButtonItem]? = nil
     
+    
+    // navigation
+    var navTitle:String = ""
+    var navSubtitle:String = ""
+    
     var showLink:Bool = false{
         didSet{
             if !showLink{
@@ -257,7 +262,7 @@ public class QiscusChatVC: UIViewController{
         }
     }
     
-    fileprivate init() {
+    public init() {
         super.init(nibName: "QiscusChatVC", bundle: Qiscus.bundle)
     }
     
@@ -321,6 +326,7 @@ public class QiscusChatVC: UIViewController{
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        QiscusChatVC.sharedInstance = self
         if #available(iOS 10.0, *) {
             let center = UNUserNotificationCenter.current()
             center.removeAllDeliveredNotifications() // To remove all delivered notifications
@@ -337,9 +343,11 @@ public class QiscusChatVC: UIViewController{
         unreadIndexPath = [IndexPath]()
         bottomButton.isHidden = true
         dataPresenter.delegate = self
+        
         if self.loadMoreControl.isRefreshing {
             self.loadMoreControl.endRefreshing()
         }
+        
         self.inputBarBottomMargin.constant = 0
         self.view.layoutIfNeeded()
         self.view.endEditing(true)
@@ -379,13 +387,13 @@ public class QiscusChatVC: UIViewController{
     }
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        if firstLoad{
+        if self.room == nil{
             self.showLoading("Load data ...")
-            self.room = nil
-            loadData()
+            //            self.room = nil
+            self.loadData()
         }
     }
-
+    
     // MARK: - Memory Warning
     override open func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -407,14 +415,14 @@ public class QiscusChatVC: UIViewController{
         titleLabel.backgroundColor = UIColor.clear
         titleLabel.textColor = UIColor.white
         titleLabel.font = UIFont.boldSystemFont(ofSize: UIFont.systemFontSize)
-        titleLabel.text = ""
+        titleLabel.text = self.navTitle
         titleLabel.textAlignment = .left
         
         subtitleLabel = UILabel(frame:CGRect(x: 40, y: 25, width: titleWidth, height: 13))
         subtitleLabel.backgroundColor = UIColor.clear
         subtitleLabel.textColor = UIColor.white
         subtitleLabel.font = UIFont.systemFont(ofSize: 11)
-        subtitleLabel.text = ""
+        subtitleLabel.text = self.navSubtitle
         subtitleLabel.textAlignment = .left
         
         self.roomAvatar = UIImageView()
@@ -649,14 +657,14 @@ public class QiscusChatVC: UIViewController{
         self.isPresence = false
         if self.backAction != nil{
             self.backAction!()
-            self.reset()
+            //self.reset()
         }else{
             if Qiscus.sharedInstance.isPushed {
                 let _ = self.navigationController?.popViewController(animated: true)
             }else{
                 self.navigationController?.dismiss(animated: true, completion: nil)
             }
-            self.reset()
+            //self.reset()
         }
     }
     
@@ -1579,6 +1587,9 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
             
             let commentId = comments.last!.last!.commentId
             let roomId = inRoom.roomId
+            if Qiscus.shared.chatViews[inRoom.roomId] == nil {
+                Qiscus.shared.chatViews[inRoom.roomId] = self
+            }
             Qiscus.logicThread.async {
                 QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: commentId, roomId: roomId, status: .read, withCompletion: {_ in })
             }

@@ -51,6 +51,8 @@ import CocoaMQTT
     let application = UIApplication.shared
     let appDelegate = UIApplication.shared.delegate
     
+    public var chatViews = [Int:QiscusChatVC]()
+    
     @objc public class var versionNumber:String{
         get{
             return Qiscus.qiscusVersionNumber
@@ -372,21 +374,19 @@ import CocoaMQTT
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
-        Qiscus.sharedInstance.isPushed = true
-        QiscusChatVC.sharedInstance.archived = readOnly
-        QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
-        QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
-        let chatVC = QiscusChatVC.sharedInstance
-        //chatVC.reset()
-        chatVC.roomId = roomId
-        chatVC.message = withMessage
-        
-        if chatVC.isPresence {
-            chatVC.goBack()
+        var chatVC = QiscusChatVC()
+        if let chatView = Qiscus.shared.chatViews[roomId] {
+            chatVC = chatView
+        }else{
+            chatVC.navTitle = title
+            chatVC.navSubtitle = subtitle
+            chatVC.archived = readOnly
+            chatVC.roomId = roomId
+            chatVC.message = withMessage
+            chatVC.backAction = nil
+            Qiscus.shared.chatViews[roomId] = chatVC
         }
-        chatVC.backAction = nil
-        
         return chatVC
     }
     @objc public class func image(named name:String)->UIImage?{
@@ -498,7 +498,7 @@ import CocoaMQTT
     }
     
     
-
+    
     func applicationDidBecomeActife(){
         if Qiscus.isLoggedIn{
             Qiscus.sharedInstance.RealtimeConnect()
@@ -842,13 +842,13 @@ extension Qiscus:CocoaMQTTDelegate{
         }
     }
     public func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck){
-    
+        
     }
     public func mqtt(_ mqtt: CocoaMQTT, didPublishMessage message: CocoaMQTTMessage, id: UInt16){
-    
+        
     }
     public func mqtt(_ mqtt: CocoaMQTT, didPublishAck id: UInt16){
-    
+        
     }
     public func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16 ){
         Qiscus.logicThread.async {
@@ -880,6 +880,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     comment.commentCreatedAt = Double(json["unix_timestamp"].doubleValue)
                     comment.commentBeforeId = commentBeforeId
                     comment.commentTopicId = notifTopicId
+                    comment.commentStatusRaw = QiscusCommentStatus.sent.rawValue
                     
                     if let room = QiscusRoom.room(withLastTopicId: notifTopicId){
                         let dataCount = QiscusComment.getComments(inTopicId: notifTopicId).count
@@ -973,7 +974,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                     
                                     let userFullName = user.userFullName
                                     
-                                        QiscusChatVC.sharedInstance.startTypingIndicator(withUser: userFullName)
+                                    QiscusChatVC.sharedInstance.startTypingIndicator(withUser: userFullName)
                                 }
                                 
                                 break
@@ -1046,14 +1047,14 @@ extension Qiscus:CocoaMQTTDelegate{
         Qiscus.printLog(text: "topic : \(topic) subscribed")
     }
     public func mqtt(_ mqtt: CocoaMQTT, didUnsubscribeTopic topic: String){
-    
+        
     }
     public func mqttDidPing(_ mqtt: CocoaMQTT){
     }
     public func mqttDidReceivePong(_ mqtt: CocoaMQTT){
-    
+        
     }
     public func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?){
-    
+        
     }
 }
