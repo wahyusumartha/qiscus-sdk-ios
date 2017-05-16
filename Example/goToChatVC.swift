@@ -43,6 +43,9 @@ class goToChatVC: UIViewController {
                 view.titleAction = {
                     print("title clicked")
                 }
+                view.setBackButton {
+                    let _ = view.navigationController?.popViewController(animated: true)
+                }
             }else{
                 Qiscus.chat(withUsers: [targetField.text!] , target: self)
             }
