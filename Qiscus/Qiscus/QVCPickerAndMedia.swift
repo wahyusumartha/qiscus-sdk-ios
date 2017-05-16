@@ -12,6 +12,25 @@ import AVFoundation
 
 // MARK: - GaleryItemDataSource
 extension QiscusChatVC:GalleryItemsDatasource{
+    // MARK: - Galery Function
+    public func galleryConfiguration()-> GalleryConfiguration{
+        let closeButton = UIButton(frame: CGRect(origin: CGPoint.zero, size: CGSize(width: 20, height: 20)))
+        closeButton.setImage(Qiscus.image(named: "close")?.withRenderingMode(.alwaysTemplate), for: UIControlState())
+        closeButton.tintColor = UIColor.white
+        closeButton.imageView?.contentMode = .scaleAspectFit
+        
+        let seeAllButton = UIButton(frame: CGRect(origin: CGPoint.zero, size: CGSize(width: 20, height: 20)))
+        seeAllButton.setTitle("", for: UIControlState())
+        seeAllButton.setImage(Qiscus.image(named: "viewmode")?.withRenderingMode(.alwaysTemplate), for: UIControlState())
+        seeAllButton.tintColor = UIColor.white
+        seeAllButton.imageView?.contentMode = .scaleAspectFit
+        
+        return [
+            GalleryConfigurationItem.closeButtonMode(.custom(closeButton)),
+            GalleryConfigurationItem.thumbnailsButtonMode(.custom(seeAllButton))
+        ]
+    }
+    
     public func itemCount() -> Int{
         return self.galleryItems.count
     }
