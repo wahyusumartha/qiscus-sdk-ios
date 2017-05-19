@@ -1,4 +1,4 @@
-# Documentation Qiscus SDK iOS
+# Qiscus SDK iOS
 
 ## Quick Start
 
