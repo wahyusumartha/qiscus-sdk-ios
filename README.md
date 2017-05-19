@@ -2,7 +2,7 @@
 
 # Quick Start
 
-### Create a new SDK application in the Dashboard and get app_id
+### Create a new app
 
 Register on [https://dashboard.qiscus.com](https://dashboard.qiscus.com/) using your email and password and then create new application
 
@@ -48,7 +48,7 @@ $ pod install
 
 # Authentication
 
-### Init with APP_ID & Login or register
+### Init with App ID
 
 To initiate Qiscus SDK, you need to import Qiscus and then add this in your code everywhere you want
 
