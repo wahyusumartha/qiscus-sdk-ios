@@ -125,15 +125,8 @@ Updating user profile and details is simply by re-init the user using new detail
 
 ## Room Types 
 
-### 1-on-1 Chat
 
-1-on-1 messaging is a private channel between two users. You can enable the **distinct property** for the channel in order to reuse a channel for the same members
-
-### Group Room 
-
- Group messaging is a private channel among multiple users. You can invite up to hundreds of members into a group room
-
-## **1-on-1 Chat**
+## 1-on-1 Chat
 
 ### Creating and starting 1-to-1 chat
 
@@ -212,7 +205,7 @@ Objective C:
 
 
 
-## **Group Room**
+## Group Room
 
 ### Creating a Group Room
 
@@ -355,7 +348,7 @@ Currently we recommend to invite user into existing room through our **REST API*
 
 Currently we recommend to kick user out of specific room through our **REST API** for simplicity and security reason
 
-## **Event Handler **
+## Event Handler
 
 **QiscusConfigDelegate**
 
@@ -404,7 +397,7 @@ class SampleAppRealtime: QiscusRoomDelegate {
 }
 ```
 
-## **UI Customization**
+## UI Customization
 
 ### Theme Customization
 
