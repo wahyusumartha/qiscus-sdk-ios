@@ -125,9 +125,6 @@ Updating user profile and details is simply by re-init the user using new detail
 
 ## Room Types 
 
-
-## 1-on-1 Chat
-
 ### Creating and starting 1-to-1 chat
 
 Start chat with target is very easy, all you need is just call
@@ -202,10 +199,6 @@ Objective C:
 @end
 ```
 
-
-
-
-## Group Room
 
 ### Creating a Group Room
 
