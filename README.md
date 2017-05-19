@@ -1,6 +1,6 @@
 # Qiscus SDK iOS
 
-## Quick Start
+# Quick Start
 
 ### Create a new SDK application in the Dashboard and get app_id
 
@@ -46,7 +46,7 @@ Install Qiscus through CocoaPods
 $ pod install
 ```
 
-## Authentication
+# Authentication
 
 ### Init with APP_ID & Login or register
 
@@ -123,7 +123,7 @@ Updating user profile and details is simply by re-init the user using new detail
         )
 ```
 
-## Room Types 
+# Room Types 
 
 ### Creating and starting 1-to-1 chat
 
@@ -341,7 +341,7 @@ Currently we recommend to invite user into existing room through our **REST API*
 
 Currently we recommend to kick user out of specific room through our **REST API** for simplicity and security reason
 
-## Event Handler
+# Event Handler
 
 **QiscusConfigDelegate**
 
@@ -390,7 +390,7 @@ class SampleAppRealtime: QiscusRoomDelegate {
 }
 ```
 
-## UI Customization
+# UI Customization
 
 ### Theme Customization
 
@@ -417,10 +417,10 @@ Lots of our items inside Chat Room can be modified based on our needs, here is t
 
 If you want full customisations, you can modify everything on the view by forking our repository or just right away modifying our[ QiscusUIConfiguration.swift](https://github.com/qiscus/qiscus-sdk-ios/blob/master/Qiscus/Qiscus/QiscusUIConfiguration.swift) and [QiscusTextConfiguration.swift](https://github.com/qiscus/qiscus-sdk-ios/blob/master/Qiscus/Qiscus/QiscusTextConfiguration.swift)** **based on your needs.
 
-## Push Notifications 
+# Push Notifications 
 
 Currently we recommend to use our Webhook-API to push notification from your own server to client app for simplicity and flexibility handling
 
-## Notes :
+# Notes
 
 Don't forget to add usage description for camera, photo library and microphone to your **info.plist **to use our attachment functionality in chat SDK
