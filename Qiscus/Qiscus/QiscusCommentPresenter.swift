@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import SwiftyJSON
+
 public enum QiscusCommentPresenterType:Int {
     case text
     case image
@@ -14,6 +16,7 @@ public enum QiscusCommentPresenterType:Int {
     case audio
     case document
     case file
+    case postback
 }
 @objc public class QiscusCommentPresenter: NSObject {
     // commentAttribute
@@ -146,8 +149,41 @@ public enum QiscusCommentPresenterType:Int {
         if comment.isOwnMessage{
             position = "Right"
         }
-
+        print("\(comment.commentType) commentButton: \(comment.commentButton)")
         switch comment.commentType {
+        case .postback:
+            commentPresenter.commentType = .postback
+            commentPresenter.cellIdentifier = "cellPostback\(position)"
+            commentPresenter.showLink = false
+            
+            let attributedText = NSMutableAttributedString(string: commentPresenter.commentText)
+            
+            let allRange = (commentPresenter.commentText as NSString).range(of: commentPresenter.commentText)
+            attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
+
+            commentPresenter.commentAttributedText = attributedText
+            
+            let fontSize = Qiscus.shared.styleConfiguration.chatFont.pointSize
+            let fontName = Qiscus.shared.styleConfiguration.chatFont.fontName
+            
+            var needCalculate = false
+            if fontName != comment.commentFontName || fontSize != comment.commentFontSize{
+                needCalculate = true
+            }
+            
+            if comment.cellSize != nil && !needCalculate{
+                commentPresenter.cellSize = comment.cellSize!
+            }else{
+                Qiscus.uiThread.sync {
+                    let cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText, postback: true, buttonPayload: comment.commentButton)
+                    commentPresenter.cellSize = cellSize
+                    comment.commentCellHeight = cellSize.height
+                    comment.commentCellWidth = cellSize.width
+                }
+                comment.commentFontName = fontName
+                comment.commentFontSize = fontSize
+            }
+            break
         case .text:
             commentPresenter.commentType = .text
             commentPresenter.cellIdentifier = "cellText\(position)"
@@ -346,7 +382,7 @@ public enum QiscusCommentPresenterType:Int {
         return commentPresenter
     }
     
-    class func calculateTextSize(attributedText : NSMutableAttributedString) -> CGSize {
+    class func calculateTextSize(attributedText : NSMutableAttributedString, postback:Bool = false, buttonPayload:String? = nil) -> CGSize {
         var size = CGSize()
         let textView = UITextView()
         textView.font = Qiscus.style.chatFont
@@ -357,6 +393,13 @@ public enum QiscusCommentPresenterType:Int {
         textView.attributedText = attributedText
         
         size = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
+        print("height before: \(size.height)")
+        if postback && buttonPayload != nil{
+            let payload = JSON(parseJSON: buttonPayload!).arrayValue
+            let heightAdd = CGFloat(35 * payload.count)
+            size.height += heightAdd
+            print("height after: \(size.height)")
+        }
         
         return size
     }

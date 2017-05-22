@@ -12,6 +12,8 @@ import Alamofire
 public enum QiscusCommentType:Int {
     case text
     case attachment
+    case postback
+    case account
 }
 @objc public enum QiscusCommentStatus:Int{
     case sending
@@ -32,6 +34,18 @@ public class QiscusComment: NSObject {
                     let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
                         savedComment.commentId = self.commentId
+                    }
+                }
+            }
+        }
+    }
+    public var commentButton:String = "" {
+        didSet{
+            if !self.copyProcess && self.commentButton != ""{
+                if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    try! realm.write {
+                        savedComment.commentButton = self.commentButton
                     }
                 }
             }
@@ -341,6 +355,8 @@ public class QiscusComment: NSObject {
             var type = QiscusCommentType.text
             if self.commentIsFile{
                 type = QiscusCommentType.attachment
+            }else if self.commentButton != ""{
+                type = QiscusCommentType.postback
             }
             return type
         }

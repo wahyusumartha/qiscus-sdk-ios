@@ -27,6 +27,7 @@ public class QiscusCommentDB: Object {
     public dynamic var commentLinkPreviewed:String = ""
     public dynamic var commentFontSize:CGFloat = 0
     public dynamic var commentFontName:String = ""
+    public dynamic var commentButton:String = ""
     
     // MARK: - Primary Key
     override open class func primaryKey() -> String {
@@ -52,6 +53,7 @@ public class QiscusCommentDB: Object {
         newComment.copyProcess = true
         newComment.localId = self.localId
         newComment.commentId = self.commentId
+        newComment.commentButton = self.commentButton
         newComment.commentText = self.commentText
         newComment.commentCreatedAt = self.commentCreatedAt
         newComment.commentUniqueId = self.commentUniqueId
@@ -96,7 +98,7 @@ public class QiscusCommentDB: Object {
         let searchQuery:NSPredicate?
         var query = "commentId == \(commentId)"
         if uniqueId != nil {
-            query = "\(query) OR commentUniqueId == '\(uniqueId!)'"
+            query = "commentId == \(commentId) OR commentUniqueId == '\(uniqueId!)'"
         }
         searchQuery = NSPredicate(format: query)
         let commentData = realm.objects(QiscusCommentDB.self).filter(searchQuery!)
@@ -119,6 +121,7 @@ public class QiscusCommentDB: Object {
         }
     }
     public class func commentDB(withUniqueId uniqueId: String)->QiscusCommentDB?{
+        
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         
         let searchQuery:NSPredicate = NSPredicate(format: "commentUniqueId == '\(uniqueId)'")
