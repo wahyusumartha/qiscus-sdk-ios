@@ -503,9 +503,8 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
     }
     public func dataPresenter(didChangeUser user: QiscusUser, onUserWithEmail email: String) {
         Qiscus.logicThread.async {
-            var indexPathToReload = [IndexPath]()
-            var imageIndexPath = [IndexPath]()
             var section = 0
+            var found = false
             for dataGroup in self.comments{
                 var row = 0
                 for data in dataGroup{
@@ -514,12 +513,12 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                             data.userFullName = user.userFullName
                             self.comments[section][row] = data
                             if row == 0 {
-                                indexPathToReload.append(IndexPath(row: row, section: section))
+                                found = true
                             }
                         }
                         if !data.userIsOwn{
                             if row == 0 {
-                                imageIndexPath.append(IndexPath(row: row, section: section))
+                                found = true
                             }
                         }
                     }
@@ -527,16 +526,9 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                 }
                 section += 1
             }
-            if indexPathToReload.count > 0 {
+            if found {
                 Qiscus.uiThread.async {
-                    self.collectionView.reloadItems(at: indexPathToReload)
-                }
-            }
-            for indexPath in imageIndexPath.reversed(){
-                if let footerCell = self.collectionView.supplementaryView(forElementKind: UICollectionElementKindSectionFooter, at: indexPath) as? QChatFooterLeft{
-                    if let image = user.avatar{
-                        footerCell.setup(withImage: image)
-                    }
+                    self.collectionView.reloadData()
                 }
             }
         }
