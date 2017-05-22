@@ -19,7 +19,9 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     }
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let data = self.comments[indexPath.section][indexPath.row]
-        
+        if data.commentType == .postback {
+            print("postBack detected: \(data.cellIdentifier)")
+        }
         if data.commentIndexPath != indexPath {
             data.commentIndexPath = indexPath
             data.balloonImage = data.getBalloonImage()
@@ -35,6 +37,9 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         if let audioCell = cell as? QCellAudio{
             audioCell.audioCellDelegate = self
             return audioCell
+        }else if let postbackCell = cell as? QCellPostbackLeft{
+            postbackCell.postbackDelegate = self
+            return postbackCell
         }else{
             return cell
         }
@@ -176,7 +181,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let comment = self.comments[indexPath.section][indexPath.row]
         var size = comment.cellSize
-        if comment.commentType == .text{
+        if comment.commentType == .text || comment.commentType == .postback{
             size.height += 15
             if comment.showLink {
                 size.height += 75
