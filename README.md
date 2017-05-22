@@ -1,8 +1,8 @@
-# Documentation Qiscus SDK iOS
+# Qiscus SDK iOS
 
-## Quick Start
+# Quick Start
 
-### Create a new SDK application in the Dashboard and get app_id
+### Create a new app
 
 Register on [https://dashboard.qiscus.com](https://dashboard.qiscus.com/) using your email and password and then create new application
 
@@ -46,9 +46,9 @@ Install Qiscus through CocoaPods
 $ pod install
 ```
 
-## Authentication
+# Authentication
 
-### Init with APP_ID & Login or register
+### Init with App ID
 
 To initiate Qiscus SDK, you need to import Qiscus and then add this in your code everywhere you want
 
@@ -107,8 +107,7 @@ func application(application: UIApplication, didFinishLaunchingWithOptions launc
 }
 ```
 
-### 
-Updating a User Profile and Avatar
+### Updating a User Profile and Avatar
 
 Updating user profile and details is simply by re-init the user using new details :
 
@@ -123,17 +122,7 @@ Updating user profile and details is simply by re-init the user using new detail
         )
 ```
 
-## Room Types 
-
-### 1-on-1 Chat
-
-1-on-1 messaging is a private channel between two users. You can enable the **distinct property** for the channel in order to reuse a channel for the same members
-
-### Group Room 
-
- Group messaging is a private channel among multiple users. You can invite up to hundreds of members into a group room
-
-## **1-on-1 Chat**
+# Room Types 
 
 ### Creating and starting 1-to-1 chat
 
@@ -209,10 +198,6 @@ Objective C:
 @end
 ```
 
-
-
-
-## **Group Room**
 
 ### Creating a Group Room
 
@@ -355,7 +340,7 @@ Currently we recommend to invite user into existing room through our **REST API*
 
 Currently we recommend to kick user out of specific room through our **REST API** for simplicity and security reason
 
-## **Event Handler **
+# Event Handler
 
 **QiscusConfigDelegate**
 
@@ -404,7 +389,7 @@ class SampleAppRealtime: QiscusRoomDelegate {
 }
 ```
 
-## **UI Customization**
+# UI Customization
 
 ### Theme Customization
 
@@ -431,10 +416,10 @@ Lots of our items inside Chat Room can be modified based on our needs, here is t
 
 If you want full customisations, you can modify everything on the view by forking our repository or just right away modifying our[ QiscusUIConfiguration.swift](https://github.com/qiscus/qiscus-sdk-ios/blob/master/Qiscus/Qiscus/QiscusUIConfiguration.swift) and [QiscusTextConfiguration.swift](https://github.com/qiscus/qiscus-sdk-ios/blob/master/Qiscus/Qiscus/QiscusTextConfiguration.swift)** **based on your needs.
 
-## Push Notifications 
+# Push Notifications 
 
 Currently we recommend to use our Webhook-API to push notification from your own server to client app for simplicity and flexibility handling
 
-## Notes :
+# Notes
 
 Don't forget to add usage description for camera, photo library and microphone to your **info.plist **to use our attachment functionality in chat SDK
