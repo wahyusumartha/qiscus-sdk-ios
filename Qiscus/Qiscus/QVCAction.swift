@@ -143,7 +143,7 @@ extension QiscusChatVC {
         self.titleAction = {}
         self.unlockAction = {}
         self.room = nil
-        self.collectionView.reloadData()
+        //self.collectionView.reloadData()
     }
     func showNoConnectionToast(){
         QToasterSwift.toast(target: self, text: QiscusTextConfiguration.sharedInstance.noConnectionText, backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
@@ -656,7 +656,6 @@ extension QiscusChatVC {
     }
     
     
-    
     // MARK: - Upload Action
     func continueImageUpload(_ image:UIImage? = nil,imageName:String,imagePath:URL? = nil, imageNSData:Data? = nil, videoFile:Bool = false, audioFile:Bool = false){
         if let chatRoom = self.room{
@@ -699,7 +698,6 @@ extension QiscusChatVC {
             backIcon.frame = CGRect(x: 22,y: 11,width: 13,height: 22)
         }
         
-        
         let backButton = UIButton(frame:CGRect(x: 0,y: 0,width: 23,height: 44))
         backButton.addSubview(backIcon)
         backButton.addTarget(target, action: action, for: UIControlEvents.touchUpInside)
@@ -726,7 +724,6 @@ extension QiscusChatVC {
     }
     // MARK: - Load DataSource on firstTime
     func loadData(){
-        //self.showLoading("Load Data ...")
         if newRoom && (self.users != nil){
             dataPresenter.loadComments(inNewGroupChat: users!, optionalData: self.optionalData, withMessage: self.message)
         }else{
@@ -742,14 +739,4 @@ extension QiscusChatVC {
         }
     }
     
-    open func scrollToBotomFromNoData(){
-        let delay = 0.1 * Double(NSEC_PER_SEC)
-        let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
-        DispatchQueue.main.asyncAfter(deadline: time, execute: {
-            if self.comments.count > 0 {
-                self.scrollToBottom()
-                self.collectionView.isHidden = false
-            }
-        })
-    }
 }

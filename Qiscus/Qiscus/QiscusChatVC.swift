@@ -92,7 +92,6 @@ public class QiscusChatVC: UIViewController{
     }
     var hasMoreComment = true
     var comments = [[QiscusCommentPresenter]]()
-    
     var loadMoreControl = UIRefreshControl()
     
     // MARK: - External data configuration
@@ -305,6 +304,12 @@ public class QiscusChatVC: UIViewController{
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         QiscusChatVC.sharedInstance = self
+        if self.comments.count == 0{
+            self.showLoading("Load data ...")
+            Qiscus.logicThread.async {
+                self.loadData()
+            }
+        }
         self.topColor = Qiscus.shared.styleConfiguration.color.topColor
         self.bottomColor = Qiscus.shared.styleConfiguration.color.bottomColor
         self.tintColor = Qiscus.shared.styleConfiguration.color.tintColor
@@ -398,16 +403,13 @@ public class QiscusChatVC: UIViewController{
         if self.comments.count > 0 {
             self.welcomeView.isHidden = true
         }
+        
         setupNavigationTitle()
         setupPage()
     }
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        if self.room == nil{
-            self.showLoading("Load data ...")
-            //            self.room = nil
-            self.loadData()
-        }
+        
     }
     
     // MARK: - Memory Warning
