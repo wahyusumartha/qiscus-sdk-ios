@@ -333,14 +333,14 @@ extension QiscusChatVC {
         self.titleAction()
     }
     func scrollToBottom(_ animated:Bool = false){
-        self.collectionView.performBatchUpdates({}, completion: { _ in
-            let bottomPoint = CGPoint(x: 0, y: self.collectionView.contentSize.height - self.collectionView.bounds.size.height)
-            
-            if self.collectionView.contentSize.height > self.collectionView.bounds.size.height{
-                self.collectionView.setContentOffset(bottomPoint, animated: animated)
+        if self.comments.count > 0 {
+            Qiscus.uiThread.async {
+                let section = self.comments.count - 1
+                let row = self.comments[section].count - 1
+                let lastIndexPath = IndexPath(row: row, section: section)
+                self.collectionView.scrollToItem(at: lastIndexPath, at: .bottom, animated: animated)
             }
-            self.isLastRowVisible = true
-        })
+        }
     }
     func scrollToIndexPath(_ indexPath:IndexPath, position: UICollectionViewScrollPosition, animated:Bool, delayed:Bool = true){
         
