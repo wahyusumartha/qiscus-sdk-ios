@@ -54,11 +54,11 @@
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                 <dataDetectorType key="dataDetectorTypes" phoneNumber="YES" link="YES" address="YES" calendarEvent="YES"/>
                             </textView>
-                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="3" translatesAutoresizingMaskIntoConstraints="NO" id="7pL-aj-pYi">
-                                <rect key="frame" x="45" y="-8" width="215" height="40"/>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="1" translatesAutoresizingMaskIntoConstraints="NO" id="7pL-aj-pYi">
+                                <rect key="frame" x="42" y="50" width="221" height="0.0"/>
                                 <color key="backgroundColor" red="0.92455440759999996" green="0.43101489539999999" blue="0.44916653629999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="40" id="vX1-lG-QfZ"/>
+                                    <constraint firstAttribute="height" id="vX1-lG-QfZ"/>
                                 </constraints>
                             </stackView>
                         </subviews>
@@ -67,15 +67,15 @@
                             <constraint firstItem="ZPh-Wf-ltO" firstAttribute="leading" secondItem="e1C-nF-XhG" secondAttribute="leading" constant="60" id="268-4v-x6E"/>
                             <constraint firstItem="72O-5x-QSl" firstAttribute="top" secondItem="e1C-nF-XhG" secondAttribute="top" id="27i-Re-dpM"/>
                             <constraint firstItem="72O-5x-QSl" firstAttribute="height" secondItem="wmx-Cd-4mN" secondAttribute="height" constant="10" id="2GB-P6-pxU"/>
-                            <constraint firstItem="fFB-0D-apw" firstAttribute="bottom" secondItem="72O-5x-QSl" secondAttribute="bottom" id="3ax-NQ-arn"/>
-                            <constraint firstItem="7pL-aj-pYi" firstAttribute="trailing" secondItem="72O-5x-QSl" secondAttribute="trailing" constant="-3" id="ItN-Ez-jWh"/>
+                            <constraint firstItem="7pL-aj-pYi" firstAttribute="trailing" secondItem="72O-5x-QSl" secondAttribute="trailing" id="ItN-Ez-jWh"/>
                             <constraint firstItem="fFB-0D-apw" firstAttribute="trailing" secondItem="72O-5x-QSl" secondAttribute="trailing" constant="-5" id="JK9-LF-qV3"/>
+                            <constraint firstItem="fFB-0D-apw" firstAttribute="bottom" secondItem="7pL-aj-pYi" secondAttribute="top" id="K9J-f9-Cfn"/>
                             <constraint firstAttribute="height" secondItem="72O-5x-QSl" secondAttribute="height" id="XJJ-Mo-nvi"/>
                             <constraint firstItem="72O-5x-QSl" firstAttribute="leading" secondItem="e1C-nF-XhG" secondAttribute="leading" constant="42" id="Xza-ww-iMK"/>
                             <constraint firstItem="72O-5x-QSl" firstAttribute="width" secondItem="wmx-Cd-4mN" secondAttribute="width" constant="31" id="aN6-GV-DZd"/>
                             <constraint firstItem="wmx-Cd-4mN" firstAttribute="leading" secondItem="72O-5x-QSl" secondAttribute="leading" constant="8" id="aQ4-6Y-r3Q"/>
-                            <constraint firstItem="7pL-aj-pYi" firstAttribute="leading" secondItem="wmx-Cd-4mN" secondAttribute="leading" constant="-5" id="c02-dL-7oF"/>
-                            <constraint firstItem="7pL-aj-pYi" firstAttribute="bottom" secondItem="wmx-Cd-4mN" secondAttribute="bottom" constant="-8" id="f54-2w-c8H"/>
+                            <constraint firstItem="7pL-aj-pYi" firstAttribute="leading" secondItem="wmx-Cd-4mN" secondAttribute="leading" constant="-8" id="c02-dL-7oF"/>
+                            <constraint firstItem="7pL-aj-pYi" firstAttribute="bottom" secondItem="wmx-Cd-4mN" secondAttribute="bottom" constant="10" id="f54-2w-c8H"/>
                             <constraint firstItem="ZPh-Wf-ltO" firstAttribute="top" secondItem="e1C-nF-XhG" secondAttribute="top" id="jUW-Jr-s3d"/>
                         </constraints>
                         <edgeInsets key="layoutMargins" top="0.0" left="8" bottom="0.0" right="8"/>
