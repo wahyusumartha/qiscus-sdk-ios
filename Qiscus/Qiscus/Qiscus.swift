@@ -18,7 +18,7 @@ import CocoaMQTT
     
     static let sharedInstance = Qiscus()
     static let qiscusVersionNumber:String = "2.2.8"
-    static let showDebugPrint = true
+    static let showDebugPrint = false
     
     // MARK: - Thread
     static let realtimeThread = DispatchQueue.global()
@@ -131,7 +131,7 @@ import CocoaMQTT
             realm.deleteAll()
         }
         Qiscus.deleteAllFiles()
-        
+        Qiscus.shared.chatViews = [Int:QiscusChatVC]()
     }
     
     @objc public class func unRegisterPN(){
@@ -560,6 +560,7 @@ import CocoaMQTT
         
         let _ = try! Realm(configuration: Qiscus.dbConfiguration)
         Qiscus.printLog(text:"realmURL \(Qiscus.dbConfiguration.fileURL!)")
+        print("realmURL \(Qiscus.dbConfiguration.fileURL!)")
     }
     
     // MARK: - Create NEW Chat
@@ -898,6 +899,14 @@ extension Qiscus:CocoaMQTTDelegate{
                     comment.commentBeforeId = commentBeforeId
                     comment.commentTopicId = notifTopicId
                     comment.commentStatusRaw = QiscusCommentStatus.sent.rawValue
+                    print("mqtt payload: \(json)")
+                    
+                    if json["type"].string == "buttons" {
+                        comment.commentText = json["payload"]["text"].stringValue
+                        comment.commentButton = "\(json["payload"]["buttons"])"
+                        print("postback payload: \(json["payload"])")
+                        print("buttons payload: \(json["payload"]["buttons"])")
+                    }
                     
                     if let room = QiscusRoom.room(withLastTopicId: notifTopicId){
                         let dataCount = QiscusComment.getComments(inTopicId: notifTopicId).count
@@ -1011,9 +1020,11 @@ extension Qiscus:CocoaMQTTDelegate{
                     let commentId = Int(String(messageArr[0]))!
                     let commentUniqueId:String = String(messageArr[1])
                     let userEmail = String(channelArr[3])
+                    print("mqtt d : \(commentUniqueId)")
                     if let comment = QiscusComment.comment(withId: commentId){
                         comment.updateCommentStatus(.delivered, email: userEmail)
-                    }else if let comment = QiscusComment.comment(withUniqueId: commentUniqueId){
+                    }
+                    else if let comment = QiscusComment.comment(withUniqueId: commentUniqueId){
                         comment.updateCommentStatus(.delivered, email: userEmail)
                     }
                     break
@@ -1022,9 +1033,11 @@ extension Qiscus:CocoaMQTTDelegate{
                     let commentId = Int(String(messageArr[0]))!
                     let commentUniqueId:String = String(messageArr[1])
                     let userEmail = String(channelArr[3])
+                    print("mqtt r : \(commentUniqueId)")
                     if let comment = QiscusComment.comment(withId: commentId){
                         comment.updateCommentStatus(.read, email: userEmail)
-                    }else if let comment = QiscusComment.comment(withUniqueId: commentUniqueId){
+                    }
+                    else if let comment = QiscusComment.comment(withUniqueId: commentUniqueId){
                         comment.updateCommentStatus(.read, email: userEmail)
                     }
                     break
