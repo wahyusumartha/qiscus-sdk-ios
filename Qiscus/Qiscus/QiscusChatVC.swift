@@ -537,9 +537,6 @@ public class QiscusChatVC: UIViewController{
         self.welcomeText.text = QiscusTextConfiguration.sharedInstance.emptyTitle
         self.welcomeSubtitle.text = QiscusTextConfiguration.sharedInstance.emptyMessage
         self.emptyChatImage.image = Qiscus.style.assets.emptyChat
-        if self.comments.count == 0 {
-            self.welcomeView.isHidden = false
-        }
         self.inputText.placeholder = QiscusTextConfiguration.sharedInstance.textPlaceholder
         self.inputText.chatInputDelegate = self
         
