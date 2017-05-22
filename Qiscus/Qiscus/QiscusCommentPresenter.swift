@@ -149,7 +149,6 @@ public enum QiscusCommentPresenterType:Int {
         if comment.isOwnMessage{
             position = "Right"
         }
-        print("\(comment.commentType) commentButton: \(comment.commentButton)")
         switch comment.commentType {
         case .postback:
             commentPresenter.commentType = .postback
@@ -393,12 +392,10 @@ public enum QiscusCommentPresenterType:Int {
         textView.attributedText = attributedText
         
         size = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
-        print("height before: \(size.height)")
         if postback && buttonPayload != nil{
             let payload = JSON(parseJSON: buttonPayload!).arrayValue
             let heightAdd = CGFloat(35 * payload.count)
             size.height += heightAdd
-            print("height after: \(size.height)")
         }
         
         return size

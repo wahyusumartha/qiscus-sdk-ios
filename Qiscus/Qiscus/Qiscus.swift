@@ -560,7 +560,6 @@ import CocoaMQTT
         
         let _ = try! Realm(configuration: Qiscus.dbConfiguration)
         Qiscus.printLog(text:"realmURL \(Qiscus.dbConfiguration.fileURL!)")
-        print("realmURL \(Qiscus.dbConfiguration.fileURL!)")
     }
     
     // MARK: - Create NEW Chat
@@ -899,13 +898,10 @@ extension Qiscus:CocoaMQTTDelegate{
                     comment.commentBeforeId = commentBeforeId
                     comment.commentTopicId = notifTopicId
                     comment.commentStatusRaw = QiscusCommentStatus.sent.rawValue
-                    print("mqtt payload: \(json)")
                     
                     if json["type"].string == "buttons" {
                         comment.commentText = json["payload"]["text"].stringValue
                         comment.commentButton = "\(json["payload"]["buttons"])"
-                        print("postback payload: \(json["payload"])")
-                        print("buttons payload: \(json["payload"]["buttons"])")
                     }
                     
                     if let room = QiscusRoom.room(withLastTopicId: notifTopicId){
@@ -1020,7 +1016,6 @@ extension Qiscus:CocoaMQTTDelegate{
                     let commentId = Int(String(messageArr[0]))!
                     let commentUniqueId:String = String(messageArr[1])
                     let userEmail = String(channelArr[3])
-                    print("mqtt d : \(commentUniqueId)")
                     if let comment = QiscusComment.comment(withId: commentId){
                         comment.updateCommentStatus(.delivered, email: userEmail)
                     }
@@ -1033,7 +1028,6 @@ extension Qiscus:CocoaMQTTDelegate{
                     let commentId = Int(String(messageArr[0]))!
                     let commentUniqueId:String = String(messageArr[1])
                     let userEmail = String(channelArr[3])
-                    print("mqtt r : \(commentUniqueId)")
                     if let comment = QiscusComment.comment(withId: commentId){
                         comment.updateCommentStatus(.read, email: userEmail)
                     }

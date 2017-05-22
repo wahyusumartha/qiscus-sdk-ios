@@ -118,7 +118,6 @@ class QCellPostbackLeft: QChatCell {
     }
     
     func postback(sender:UIButton){
-        print("postback button \(sender.tag) pressed")
         let allData = JSON(parseJSON: self.data.comment!.commentButton).arrayValue
         if allData.count > sender.tag {
             let data = allData[sender.tag]

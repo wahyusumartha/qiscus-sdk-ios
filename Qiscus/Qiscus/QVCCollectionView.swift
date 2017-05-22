@@ -19,9 +19,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     }
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let data = self.comments[indexPath.section][indexPath.row]
-        if data.commentType == .postback {
-            print("postBack detected: \(data.cellIdentifier)")
-        }
+
         if data.commentIndexPath != indexPath {
             data.commentIndexPath = indexPath
             data.balloonImage = data.getBalloonImage()

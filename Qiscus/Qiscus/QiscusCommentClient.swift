@@ -423,11 +423,7 @@ open class QiscusCommentClient: NSObject {
             parameters["room_id"] = roomId as AnyObject?
         }
         Qiscus.apiThread.async {
-            print("post url: \(QiscusConfig.postCommentURL)")
-            print("post parameters: \(parameters)")
-            print("post headers: \(QiscusConfig.sharedInstance.requestHeader)")
             Alamofire.request(QiscusConfig.postCommentURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {response in
-                print("post message result: \(response)")
                 if let comment = data.comment {
                     switch response.result {
                     case .success:
@@ -1061,7 +1057,6 @@ open class QiscusCommentClient: NSObject {
                                     comment.commentSenderEmail = email
                                     comment.commentTopicId = topicId
                                     comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue)
-                                    print("payload: \(newComment)")
                                     if newComment["type"].string == "buttons" {
                                         comment.commentText = newComment["payload"]["text"].stringValue
                                         comment.commentButton = newComment["payload"]["buttons"].stringValue
@@ -1328,11 +1323,9 @@ open class QiscusCommentClient: NSObject {
                         comment.commentSenderEmail = email
                         comment.commentTopicId = topicId
                         comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)
-                        print("payload room: \(payload)")
                         if payload["type"].string == "buttons" {
                             comment.commentText = payload["payload"]["text"].stringValue
                             comment.commentButton = "\(payload["payload"]["buttons"].arrayValue)"
-                            print("comment.commentButton : \(comment.commentButton)")
                         }
                         comment.updateCommentStatus(.sent)
                         if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
@@ -1625,7 +1618,6 @@ open class QiscusCommentClient: NSObject {
                         comment.commentSenderEmail = email
                         comment.commentTopicId = topicId
                         comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)
-                        print("payload: \(payload)")
                         if payload["type"].string == "buttons" {
                             comment.commentText = payload["payload"]["text"].stringValue
                             comment.commentButton = payload["payload"]["buttons"].stringValue

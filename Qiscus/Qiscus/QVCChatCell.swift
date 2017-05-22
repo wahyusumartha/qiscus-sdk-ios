@@ -15,15 +15,12 @@ import SwiftyJSON
 extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate, ChatCellPostbackDelegate{
     // MARK: ChatCellPostbackDelegate
     func didTapPostbackButton(withData data: JSON) {
-        print("postback data:\n\(data)")
-        
         Qiscus.logicThread.async {
             if Qiscus.sharedInstance.connected{
                 var indexPath = IndexPath(row: 0, section: 0)
                 let text = data["label"].stringValue
                 let payload = data["payload"]
                 let type = "button_postback_response"
-                print("payload: \(payload)")
                 if self.comments.count > 0 {
                     let lastComment = self.comments.last!.last!
                     if lastComment.userEmail == QiscusMe.sharedInstance.email && lastComment.isToday {
