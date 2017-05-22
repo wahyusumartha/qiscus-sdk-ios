@@ -9,9 +9,43 @@
 import UIKit
 import ImageViewer
 import AVFoundation
+import SwiftyJSON
 
 // MARK: - ChatCell Delegate
-extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
+extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate, ChatCellPostbackDelegate{
+    // MARK: ChatCellPostbackDelegate
+    func didTapPostbackButton(withData data: JSON) {
+        print("postback data:\n\(data)")
+        
+        Qiscus.logicThread.async {
+            if Qiscus.sharedInstance.connected{
+                var indexPath = IndexPath(row: 0, section: 0)
+                let text = data["label"].stringValue
+                let payload = data["payload"]
+                let type = "button_postback_response"
+                print("payload: \(payload)")
+                if self.comments.count > 0 {
+                    let lastComment = self.comments.last!.last!
+                    if lastComment.userEmail == QiscusMe.sharedInstance.email && lastComment.isToday {
+                        indexPath.section = self.comments.count - 1
+                        indexPath.row = self.comments[indexPath.section].count
+                    }else{
+                        indexPath.section = self.comments.count
+                        indexPath.row = 0
+                    }
+                }
+                if let chatRoom = self.room {
+                    self.commentClient.postMessage(message: text, topicId: chatRoom.roomLastCommentTopicId, linkData: self.linkData, indexPath: indexPath, payload: payload, type: type)
+                }
+                self.scrollToBottom()
+            }else{
+                Qiscus.uiThread.async {
+                    self.showNoConnectionToast()
+                }
+            }
+        }
+    }
+    
     // MARK: ChatCellDelegate
     func didChangeSize(onCell cell:QChatCell){
         if let indexPath = cell.data.commentIndexPath {
