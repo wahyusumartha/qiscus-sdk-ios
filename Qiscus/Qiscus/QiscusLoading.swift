@@ -35,11 +35,7 @@ public extension UIViewController{
                 }
                 
                 UIApplication.shared.keyWindow?.rootViewController?.present(loadingView, animated: false, completion: {
-                    if QLoadingViewController.sharedInstance.dismissImmediately{
-                        self.dismissQiscusLoading()
-                    }else{
                         loadingView.isPresence = true
-                    }
                 })
             }
         }
@@ -52,8 +48,6 @@ public extension UIViewController{
                     loadingView.dismissImmediately = false
                     loadingView.isPresence = false
                 })
-            }else{
-                QLoadingViewController.sharedInstance.dismissImmediately = true
             }
         }
     }
