@@ -17,7 +17,7 @@ import CocoaMQTT
 @objc public class Qiscus: NSObject, PKPushRegistryDelegate, UNUserNotificationCenterDelegate {
     
     static let sharedInstance = Qiscus()
-    static let qiscusVersionNumber:String = "2.2.17"
+    static let qiscusVersionNumber:String = "2.2.18"
     static let showDebugPrint = false
     
     // MARK: - Thread
