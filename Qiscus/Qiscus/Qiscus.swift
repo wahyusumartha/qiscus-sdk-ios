@@ -246,11 +246,10 @@ import CocoaMQTT
         }
         
         Qiscus.sharedInstance.isPushed = true
-        QiscusChatVC.sharedInstance.archived = readOnly
         QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
-        let chatVC = QiscusChatVC.sharedInstance
+        let chatVC = QiscusChatVC()
         //chatVC.reset()
         if distinctId != nil{
             chatVC.distincId = distinctId!
@@ -261,6 +260,7 @@ import CocoaMQTT
         chatVC.message = withMessage
         chatVC.users = users
         chatVC.optionalData = optionalData
+        chatVC.archived = readOnly
         
         if chatVC.isPresence {
             chatVC.goBack()
@@ -281,12 +281,10 @@ import CocoaMQTT
         }
         
         Qiscus.sharedInstance.isPushed = false
-        QiscusChatVC.sharedInstance.archived = readOnly
         QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
-        let chatVC = QiscusChatVC.sharedInstance
-        //chatVC.reset()
+        let chatVC = QiscusChatVC()
         if distinctId != nil{
             chatVC.distincId = distinctId!
         }else{
@@ -296,6 +294,7 @@ import CocoaMQTT
         chatVC.optionalData = optionalData
         chatVC.message = withMessage
         chatVC.newRoom = false
+        chatVC.archived = readOnly
         
         if chatVC.isPresence {
             chatVC.goBack()
@@ -315,12 +314,11 @@ import CocoaMQTT
         }
         
         Qiscus.sharedInstance.isPushed = false
-        QiscusChatVC.sharedInstance.archived = readOnly
         QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
         
-        let chatVC = QiscusChatVC.sharedInstance
+        let chatVC = QiscusChatVC()
         //chatVC.reset()
         if distinctId != nil{
             chatVC.distincId = distinctId!
@@ -330,6 +328,7 @@ import CocoaMQTT
         chatVC.optionalData = optionalData
         chatVC.message = withMessage
         chatVC.users = users
+        chatVC.archived = readOnly
         
         if chatVC.isPresence {
             chatVC.goBack()
@@ -350,11 +349,10 @@ import CocoaMQTT
             Qiscus.setupReachability()
         }
         Qiscus.sharedInstance.isPushed = true
-        QiscusChatVC.sharedInstance.archived = readOnly
         QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
-        let chatVC = QiscusChatVC.sharedInstance
+        let chatVC = QiscusChatVC()
         //chatVC.reset()
         chatVC.message = withMessage
         chatVC.users = users
@@ -363,7 +361,7 @@ import CocoaMQTT
             chatVC.goBack()
         }
         chatVC.backAction = nil
-        
+        chatVC.archived = readOnly
         return chatVC
     }
     /**
@@ -397,26 +395,26 @@ import CocoaMQTT
      - parameter action: **()->Void** as unlock action for your chat
      */
     @objc public class func unlockAction(_ action:@escaping (()->Void)){
-        QiscusChatVC.sharedInstance.unlockAction = action
+        print("[Qiscus] - methode deprecated")
     }
     /**
      Class function to show alert in chat with UIAlertController
      - parameter alert: The **UIAlertController** to show alert message in chat
      */
     @objc public class func showChatAlert(alertController alert:UIAlertController){
-        QiscusChatVC.sharedInstance.showAlert(alert: alert)
+        print("[Qiscus] - methode deprecated")
     }
     /**
      Class function to unlock chat
      */
     @objc public class func unlockChat(){
-        QiscusChatVC.sharedInstance.unlockChat()
+        print("[Qiscus] - methode deprecated")
     }
     /**
      Class function to lock chat
      */
     @objc public class func lockChat(){
-        QiscusChatVC.sharedInstance.lockChat()
+        print("[Qiscus] - methode deprecated")
     }
     
     /**
@@ -435,12 +433,6 @@ import CocoaMQTT
             chatView.bottomColor = bottomColor
             chatView.tintColor = tintColor
         }
-        //        Qiscus.uiThread.async {
-        //            QiscusChatVC.sharedInstance.setGradientChatNavigation(withTopColor: topColor, bottomColor: bottomColor, tintColor: tintColor)
-        //            let popUpView = QPopUpView.sharedInstance
-        //            popUpView.topColor = topColor
-        //            popUpView.bottomColor = bottomColor
-        //        }
     }
     /**
      Class function to set color chat navigation without gradient
@@ -456,7 +448,6 @@ import CocoaMQTT
             chatView.bottomColor = color
             chatView.tintColor = tintColor
         }
-        //        QiscusChatVC.sharedInstance.setNavigationColor(color, tintColor: tintColor)
     }
     /**
      Class function to set upload from iCloud active or not
@@ -464,7 +455,6 @@ import CocoaMQTT
      */
     @objc public class func iCloudUploadActive(_ active:Bool){
         Qiscus.sharedInstance.iCloudUpload = active
-        //QiscusChatVC.sharedInstance.documentButton.hidden = !active
     }
     
     class func setupReachability(){
@@ -480,9 +470,7 @@ import CocoaMQTT
         }
         
         Qiscus.sharedInstance.reachability?.whenReachable = { reachability in
-            
             DispatchQueue.main.async {
-                
                 if reachability.isReachableViaWiFi {
                     Qiscus.printLog(text: "connected via wifi")
                 } else {
@@ -492,13 +480,7 @@ import CocoaMQTT
                 if Qiscus.isLoggedIn {
                     Qiscus.sharedInstance.RealtimeConnect()
                 }
-                if QiscusChatVC.sharedInstance.isPresence {
-                    Qiscus.printLog(text: "try to sync after connected")
-                    if let lastComment = QiscusComment.getLastComment() {
-                        QiscusCommentClient.shared.syncChat(fromComment: lastComment.commentId)
-                    }
-                }
-                
+                QiscusCommentClient.shared.sync()
             }
         }
         Qiscus.sharedInstance.reachability?.whenUnreachable = { reachability in
@@ -570,11 +552,10 @@ import CocoaMQTT
         }
         
         Qiscus.sharedInstance.isPushed = true
-        QiscusChatVC.sharedInstance.archived = readOnly
         QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
-        let chatVC = QiscusChatVC.sharedInstance
+        let chatVC = QiscusChatVC()
         //chatVC.reset()
         if distinctId != nil{
             chatVC.distincId = distinctId!
@@ -584,11 +565,7 @@ import CocoaMQTT
         chatVC.optionalData = optionalData
         chatVC.message = withMessage
         chatVC.newRoom = true
-        chatVC.users = users
-        
-        if QiscusChatVC.sharedInstance.isPresence {
-            QiscusChatVC.sharedInstance.goBack()
-        }
+        chatVC.archived = readOnly
         
         return chatVC
     }
@@ -599,11 +576,10 @@ import CocoaMQTT
         }
         
         Qiscus.sharedInstance.isPushed = false
-        QiscusChatVC.sharedInstance.archived = readOnly
         QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
-        let chatVC = QiscusChatVC.sharedInstance
+        let chatVC = QiscusChatVC()
         //chatVC.reset()
         if distinctId != nil{
             chatVC.distincId = distinctId!
@@ -614,13 +590,11 @@ import CocoaMQTT
         chatVC.message = withMessage
         chatVC.newRoom = true
         chatVC.users = users
+        chatVC.archived = readOnly
         
         let navController = UINavigationController()
         navController.viewControllers = [chatVC]
         
-        if QiscusChatVC.sharedInstance.isPresence {
-            QiscusChatVC.sharedInstance.goBack()
-        }
         UIApplication.shared.keyWindow?.rootViewController?.present(navController, animated: true, completion: nil)
     }
     
@@ -696,9 +670,6 @@ import CocoaMQTT
                 Qiscus.sharedInstance.notificationAction!(chatVC)
             }else{
                 if let currenRootView = window.rootViewController as? UINavigationController{
-                    if QiscusChatVC.sharedInstance.isPresence{
-                        QiscusChatVC.sharedInstance.goBack()
-                    }
                     
                     let viewController = currenRootView.viewControllers[currenRootView.viewControllers.count - 1]
                     if Qiscus.sharedInstance.isPushed{
@@ -710,9 +681,6 @@ import CocoaMQTT
                 }
                 else if let currentRootView = window.rootViewController as? UITabBarController{
                     if let navigation = currentRootView.selectedViewController as? UINavigationController{
-                        if QiscusChatVC.sharedInstance.isPresence{
-                            QiscusChatVC.sharedInstance.goBack()
-                        }
                         let viewController = navigation.viewControllers[navigation.viewControllers.count - 1]
                         if Qiscus.sharedInstance.isPushed{
                             let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
@@ -736,10 +704,6 @@ import CocoaMQTT
                         Qiscus.sharedInstance.notificationAction!(chatVC)
                     }else{
                         if let currenRootView = window.rootViewController as? UINavigationController{
-                            if QiscusChatVC.sharedInstance.isPresence{
-                                QiscusChatVC.sharedInstance.goBack()
-                            }
-                            
                             let viewController = currenRootView.viewControllers[currenRootView.viewControllers.count - 1]
                             if Qiscus.sharedInstance.isPushed{
                                 let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
@@ -750,9 +714,6 @@ import CocoaMQTT
                         }
                         else if let currentRootView = window.rootViewController as? UITabBarController{
                             if let navigation = currentRootView.selectedViewController as? UINavigationController{
-                                if QiscusChatVC.sharedInstance.isPresence{
-                                    QiscusChatVC.sharedInstance.goBack()
-                                }
                                 let viewController = navigation.viewControllers[navigation.viewControllers.count - 1]
                                 if Qiscus.sharedInstance.isPushed{
                                     let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
@@ -817,10 +778,10 @@ import CocoaMQTT
         }
     }
     func goToBackgroundMode(){
-        if QiscusChatVC.sharedInstance.isPresence {
-            QiscusChatVC.sharedInstance.goBack()
-            QiscusChatVC.sharedInstance.room = nil
-            QiscusChatVC.sharedInstance.comments = [[QiscusCommentPresenter]]()
+        for (_,chatView) in self.chatViews {
+            if chatView.isPresence {
+                chatView.goBack()
+            }
         }
         Qiscus.publishUserStatus(offline: true)
     }
@@ -948,7 +909,8 @@ extension Qiscus:CocoaMQTTDelegate{
                                         }
                                     }
                                 }
-                            }else if let room = QiscusRoom.room(withId: roomId){
+                            }
+                            else if let room = QiscusRoom.room(withId: roomId){
                                 let user = QiscusUser()
                                 user.userEmail = email
                                 user.userFullName = json["username"].stringValue
@@ -965,10 +927,11 @@ extension Qiscus:CocoaMQTTDelegate{
                             }
                             if saved {
                                 let service = QiscusCommentClient.sharedInstance
-                                if QiscusChatVC.sharedInstance.isPresence && QiscusChatVC.sharedInstance.room?.roomId == roomId && !Qiscus.shared.syncing{
+                                
+                                if !Qiscus.shared.syncing{
                                     if let delegate = service.delegate {
                                         let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                                        delegate.qiscusService(gotNewMessage: presenter,realtime:true)
+                                        delegate.qiscusService(gotNewMessage: presenter, inRoom: room, realtime: true)
                                     }
                                 }
                             }
@@ -987,24 +950,26 @@ extension Qiscus:CocoaMQTTDelegate{
                     let topicId:Int = Int(String(channelArr[2]))!
                     let userEmail:String = String(channelArr[3])
                     if userEmail != QiscusMe.sharedInstance.email {
-                        if QiscusChatVC.sharedInstance.isPresence && QiscusChatVC.sharedInstance.room?.roomLastCommentTopicId == topicId {
-                            switch messageData {
-                            case "1":
-                                if let user = QiscusUser.getUserWithEmail(userEmail) {
-                                    user.updateLastSeen()
-                                    user.updateStatus(isOnline: true)
+                        if let room = QiscusRoom.room(withLastTopicId: topicId){
+                            if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                                switch messageData {
+                                case "1":
+                                    if let user = QiscusUser.getUserWithEmail(userEmail) {
+                                        user.updateLastSeen()
+                                        user.updateStatus(isOnline: true)
+                                        
+                                        let userFullName = user.userFullName
+                                        
+                                       chatView.startTypingIndicator(withUser: userFullName)
+                                    }
                                     
-                                    let userFullName = user.userFullName
-                                    
-                                    QiscusChatVC.sharedInstance.startTypingIndicator(withUser: userFullName)
-                                }
-                                
-                                break
-                            default:
-                                if let user = QiscusUser.getUserWithEmail(userEmail) {
-                                    let userFullName = user.userFullName
-                                    if QiscusChatVC.sharedInstance.isTypingOn && (QiscusChatVC.sharedInstance.typingIndicatorUser == userFullName){
-                                        QiscusChatVC.sharedInstance.stopTypingIndicator()
+                                    break
+                                default:
+                                    if let user = QiscusUser.getUserWithEmail(userEmail) {
+                                        let userFullName = user.userFullName
+                                        if chatView.isTypingOn && (chatView.typingIndicatorUser == userFullName){
+                                            chatView.stopTypingIndicator()
+                                        }
                                     }
                                 }
                             }

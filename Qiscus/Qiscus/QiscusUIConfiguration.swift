@@ -35,7 +35,7 @@ open class QiscusUIConfiguration: NSObject {
     open var chatUsers:[String] = [String]()
     open var baseColor:UIColor{
         get{
-            return QiscusChatVC.sharedInstance.topColor
+            return self.color.topColor
         }
     }
     fileprivate override init() {}

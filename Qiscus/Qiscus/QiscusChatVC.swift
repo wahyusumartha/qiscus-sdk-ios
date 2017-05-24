@@ -15,8 +15,6 @@ import UserNotifications
 
 public class QiscusChatVC: UIViewController{
     
-    public static var sharedInstance = QiscusChatVC()
-    
     // MARK: - IBOutlet Properties
     @IBOutlet weak var inputBar: UIView!
     @IBOutlet weak var backgroundView: UIImageView!
@@ -167,7 +165,6 @@ public class QiscusChatVC: UIViewController{
     var recordTimer:Timer?
     var recordDuration:Int = 0
     
-    
     //data flag
     var checkingData:Bool = false
     var roomSynced = false
@@ -178,8 +175,8 @@ public class QiscusChatVC: UIViewController{
     var defaultLeftButton:[UIBarButtonItem]? = nil
     
     // navigation
-    var navTitle:String = ""
-    var navSubtitle:String = ""
+    public var navTitle:String = ""
+    public var navSubtitle:String = ""
     
     var showLink:Bool = false{
         didSet{
@@ -303,7 +300,6 @@ public class QiscusChatVC: UIViewController{
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        QiscusChatVC.sharedInstance = self
         if self.comments.count == 0{
             self.showLoading("Load data ...")
             Qiscus.logicThread.async {
@@ -594,14 +590,8 @@ public class QiscusChatVC: UIViewController{
         self.isPresence = false
         if self.backAction != nil{
             self.backAction!()
-            //self.reset()
         }else{
-            if Qiscus.sharedInstance.isPushed {
-                let _ = self.navigationController?.popViewController(animated: true)
-            }else{
-                self.navigationController?.dismiss(animated: true, completion: nil)
-            }
-            //self.reset()
+            let _ = self.navigationController?.popViewController(animated: true)
         }
     }
     

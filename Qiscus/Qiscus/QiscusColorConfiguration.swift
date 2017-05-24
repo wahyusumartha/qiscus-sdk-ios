@@ -54,9 +54,9 @@ open class QiscusColorConfiguration: NSObject {
     public var bottomColor = UIColor(red: 23/255.0, green: 177/255.0, blue: 149/255.0, alpha: 1)
     public var tintColor = UIColor.white
     
-    open var baseColor:UIColor{
+    public var baseColor:UIColor{
         get{
-            return QiscusChatVC.sharedInstance.topColor
+            return self.topColor
         }
     }
     

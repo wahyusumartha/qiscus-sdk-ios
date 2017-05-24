@@ -170,15 +170,12 @@ import Photos
                     }
                     
                     if let comment = data.comment{
-                        if comment.commentRoom.roomId == QiscusChatVC.sharedInstance.room?.roomId{
-                            if let room = QiscusRoom.room(withId: comment.commentRoom.roomId){
-                                Qiscus.uiThread.async {
-                                    QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeContent: data, inRoom: room)
-                                }
+                        if let room = QiscusRoom.room(withId: comment.commentRoom.roomId){
+                            if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                                chatView.dataPresenter(didChangeContent: data, inRoom: room)
                             }
                         }
                     }
-                    
                 }else{
                     data.linkTitle = "Not Found"
                     data.linkDescription = "No description found"
@@ -190,12 +187,9 @@ import Photos
                             comment.showLink = false
                             comment.commentCellHeight = data.cellSize.height
                             comment.commentCellWidth = data.cellSize.width
-                            if comment.commentRoom.roomId == QiscusChatVC.sharedInstance.room?.roomId{
-                                if let room = QiscusRoom.room(withId: comment.commentRoom.roomId){
-                                    Qiscus.uiThread.async {
-                                        QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeContent: data, inRoom: room)
-                                    }
-                                }
+                            let room = comment.commentRoom
+                            if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                                chatView.dataPresenter(didChangeContent: data, inRoom: room)
                             }
                         }
                     }
@@ -214,11 +208,9 @@ import Photos
                         comment.showLink = false
                         comment.commentCellHeight = data.cellSize.height
                         comment.commentCellWidth = data.cellSize.width
-                        if comment.commentRoom.roomId == QiscusChatVC.sharedInstance.room?.roomId{
-                            if let room = QiscusRoom.room(withId: comment.commentRoom.roomId){
-                                Qiscus.uiThread.async {
-                                    QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeContent: data, inRoom: room)
-                                }
+                        if let room = QiscusRoom.room(withId: comment.commentRoom.roomId){
+                            if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                                chatView.dataPresenter(didChangeContent: data, inRoom: room)
                             }
                         }
                     }
@@ -398,7 +390,7 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
         self.delegate?.dataPresenter(didFailLoad: withError)
     }
     func qiscusService(didFinishLoadMore inRoom: QiscusRoom, dataCount: Int, from commentId:Int) {
-        if QiscusChatVC.sharedInstance.isPresence && (inRoom.roomId == QiscusChatVC.sharedInstance.room?.roomId){
+        if let chatView = Qiscus.shared.chatViews[inRoom.roomId]{
             Qiscus.logicThread.async {
                 var newData = [[QiscusCommentPresenter]]()
                 let topicId = inRoom.roomLastCommentTopicId
@@ -417,21 +409,18 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
                 }else{
                     inRoom.hasLoadMore = false
                 }
-                self.delegate?.dataPresenter(didFinishLoadMore: newData, inRoom: inRoom)
+                chatView.dataPresenter(didFinishLoadMore: newData, inRoom: inRoom)
             }
         }
     }
     func qiscusService(didFinishSync hasNewData: Bool) {
         self.delegate?.dataPresenter(didFinishSnyc: hasNewData)
     }
-    func qiscusService(gotNewMessage data: QiscusCommentPresenter, realtime:Bool) {
-        if QiscusChatVC.sharedInstance.isPresence && (data.topicId == QiscusChatVC.sharedInstance.room?.roomLastCommentTopicId){
-            if let room = QiscusRoom.room(withLastTopicId: data.topicId){
-                self.delegate?.dataPresenter(gotNewData: data, inRoom: room, realtime: realtime)
-            }
+    func qiscusService(gotNewMessage data: QiscusCommentPresenter, inRoom room: QiscusRoom, realtime: Bool) {
+        if let chatView = Qiscus.shared.chatViews[room.roomId] {
+            chatView.dataPresenter(gotNewData: data, inRoom: room, realtime: realtime)
         }
     }
-    
     func qiscusService(didChangeContent data:QiscusCommentPresenter){
         if let room  = QiscusRoom.room(withLastTopicId: data.topicId){
             self.delegate?.dataPresenter(didChangeContent: data, inRoom: room)
@@ -439,10 +428,8 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
     }
     func qiscusService(didFailLoadMore inRoom: QiscusRoom) {
         Qiscus.logicThread.async {
-            if QiscusChatVC.sharedInstance.isPresence && (inRoom.roomId == QiscusChatVC.sharedInstance.room?.roomId) {
-                Qiscus.uiThread.async {
-                    self.delegate?.dataPresenter(didFailLoadMore: inRoom)
-                }
+            if let chatView = Qiscus.shared.chatViews[inRoom.roomId]{
+                chatView.dataPresenter(didFailLoadMore: inRoom)
             }
         }
     }
@@ -450,8 +437,8 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
         self.delegate?.dataPresenter(didChangeUser: user, onUserWithEmail: email)
     }
     func qiscusService(didChangeRoom room: QiscusRoom, onRoomWithId roomId: Int) {
-        if QiscusChatVC.sharedInstance.isPresence && (roomId == QiscusChatVC.sharedInstance.room?.roomId){
-            self.delegate?.dataPresenter(didChangeRoom: room, onRoomWithId: roomId)
+        if let chatView = Qiscus.shared.chatViews[room.roomId]{
+            chatView.dataPresenter(didChangeRoom: room, onRoomWithId: roomId)
         }
     }
 }

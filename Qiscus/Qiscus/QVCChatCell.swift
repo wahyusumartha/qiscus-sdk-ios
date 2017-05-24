@@ -120,7 +120,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate, ChatCellPostbac
             seeAllButton.imageView?.contentMode = .scaleAspectFit
             
             let gallery = GalleryViewController(startIndex: currentIndex, itemsDatasource: self, displacedViewsDatasource: nil, configuration: self.galleryConfiguration())
-            QiscusChatVC.sharedInstance.presentImageGallery(gallery)
+            self.presentImageGallery(gallery)
         }
     }
     

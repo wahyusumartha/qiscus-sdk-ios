@@ -37,30 +37,33 @@ class QChatCell: UICollectionViewCell {
         }
     }
     open func showFile(){
-        if data.isUploaded && (data.commentType == .document){
-            let url = data.remoteURL!
-            let fileName = data.fileName
-            
-            let preview = ChatPreviewDocVC()
-            preview.fileName = fileName
-            preview.url = url
-            if let room = QiscusChatVC.sharedInstance.room {
-                preview.roomName = room.roomName
-            }
-            QiscusChatVC.sharedInstance.navigationController?.pushViewController(preview, animated: true)
-        }else{
-            if let url = URL(string: data.remoteURL!){
-                if #available(iOS 10.0, *) {
-                    UIApplication.shared.open(url, completionHandler: { success in
-                        if !success {
-                            Qiscus.printLog(text: "fail to open file")
+        if let room = QiscusRoom.room(withLastTopicId: data.topicId) {
+            if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                if data.isUploaded && (data.commentType == .document){
+                    let url = data.remoteURL!
+                    let fileName = data.fileName
+                    
+                    let preview = ChatPreviewDocVC()
+                    preview.fileName = fileName
+                    preview.url = url
+                    preview.roomName = room.roomName
+                    
+                    chatView.navigationController?.pushViewController(preview, animated: true)
+                }else{
+                    if let url = URL(string: data.remoteURL!){
+                        if #available(iOS 10.0, *) {
+                            UIApplication.shared.open(url, completionHandler: { success in
+                                if !success {
+                                    Qiscus.printLog(text: "fail to open file")
+                                }
+                            })
+                        } else {
+                            UIApplication.shared.openURL(url)
                         }
-                    })
-                } else {
-                    UIApplication.shared.openURL(url)
+                    }else{
+                        Qiscus.printLog(text: "cant open file url")
+                    }
                 }
-            }else{
-                Qiscus.printLog(text: "cant open file url")
             }
         }
     }

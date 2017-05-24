@@ -214,37 +214,34 @@ extension QiscusChatVC {
     
     func loadTitle(){
         Qiscus.logicThread.async {
-            let title = QiscusUIConfiguration.sharedInstance.copyright.chatTitle
-            var navTitle = ""
-            if title != ""{
-                navTitle = title
+            var roomTitle = ""
+            if self.navTitle != ""{
+                roomTitle = self.navTitle
             }else{
                 if self.room != nil{
-                    navTitle = self.room!.roomName
+                    roomTitle = self.room!.roomName
                 }
             }
             Qiscus.uiThread.async {
-                self.titleLabel.text = navTitle
+                self.titleLabel.text = roomTitle
             }
             self.loadSubtitle()
         }
     }
     func loadSubtitle(){
         Qiscus.logicThread.async {
-            let subtitle = QiscusTextConfiguration.sharedInstance.chatSubtitle
-            
-            var navSubtitle = subtitle
-            if subtitle == "" {
+            var roomSubtitle = self.navSubtitle
+            if roomSubtitle == "" {
                 if let targetRoom = self.room {
                     if targetRoom.roomType == .group {
                         if targetRoom.participants.count > 0{
                             for participant in targetRoom.participants {
                                 if participant.participantEmail != QiscusConfig.sharedInstance.USER_EMAIL{
                                     if let user = QiscusUser.getUserWithEmail(participant.participantEmail){
-                                        if navSubtitle == "" {
-                                            navSubtitle = "You, \(user.userFullName)"
+                                        if roomSubtitle == "" {
+                                            roomSubtitle = "You, \(user.userFullName)"
                                         }else{
-                                            navSubtitle += ", \(user.userFullName)"
+                                            roomSubtitle += ", \(user.userFullName)"
                                         }
                                     }
                                 }
@@ -256,24 +253,24 @@ extension QiscusChatVC {
                                 if participant.participantEmail != QiscusConfig.sharedInstance.USER_EMAIL{
                                     if let user = QiscusUser.getUserWithEmail(participant.participantEmail){
                                         if user.isOnline {
-                                            navSubtitle = "is online"
+                                            roomSubtitle = "is online"
                                         }else if user.userLastSeen == Double(0){
-                                            navSubtitle = "is offline"
+                                            roomSubtitle = "is offline"
                                         }else{
-                                            navSubtitle = "last seen: \(user.lastSeenString)"
+                                            roomSubtitle = "last seen: \(user.lastSeenString)"
                                         }
                                     }
                                     break
                                 }
                             }
                         }else{
-                            navSubtitle = "not available"
+                            roomSubtitle = "not available"
                         }
                     }
                 }
             }
             Qiscus.uiThread.async {
-                self.subtitleLabel.text = navSubtitle
+                self.subtitleLabel.text = roomSubtitle
             }
         }
     }
