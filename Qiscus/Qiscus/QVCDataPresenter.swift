@@ -212,6 +212,16 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         if self.comments.count > 0 {
             needScrollToBottom = false
         }
+        Qiscus.logicThread.async {
+            if !inRoom.isGroup{
+                self.users = [String]()
+                for user in inRoom.participants {
+                    if user.participantEmail != QiscusMe.sharedInstance.email {
+                        self.users?.append(user.participantEmail)
+                    }
+                }
+            }
+        }
         if comments.count > 0 {
             self.comments = comments
             self.welcomeView.isHidden = true
