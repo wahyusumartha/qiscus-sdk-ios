@@ -354,14 +354,17 @@ public class QiscusCommentDB: Object {
                                     changeStatus = true
                                 }
                             }
+                            
                         }
                     }
                 }
             }
             if changeStatus {
-                let copyComment = self.comment()
-                Qiscus.uiThread.async {
-                    QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeStatusFrom: copyComment.commentId, toStatus: status, topicId: copyComment.commentTopicId)
+                if let room = QiscusRoom.room(withLastTopicId: self.commentTopicId){
+                    if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                        let copyComment = self.comment()
+                        chatView.dataPresenter(didChangeStatusFrom: copyComment.commentId, toStatus: status, topicId: copyComment.commentTopicId)
+                    }
                 }
             }
         }

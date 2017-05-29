@@ -59,32 +59,23 @@ public class QiscusChatVC: UIViewController{
     // MARK: - Data Properties
     var room:QiscusRoom?{
         didSet{
-            if room != nil{
-                let _ = self.view
-                let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
-                self.navigationItem.setHidesBackButton(true, animated: false)
-                self.navigationItem.leftBarButtonItems = [
-                    backButton
-                ]
-                self.loadMoreControl.removeFromSuperview()
-                if room!.hasLoadMore{
-                    self.loadMoreControl = UIRefreshControl()
-                    self.loadMoreControl.addTarget(self, action: #selector(QiscusChatVC.loadMore), for: UIControlEvents.valueChanged)
-                    self.collectionView.addSubview(self.loadMoreControl)
+            if oldValue == nil{
+                if let chatRoom = room{
+                    let _ = self.view
+                    let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
+                    self.navigationItem.setHidesBackButton(true, animated: false)
+                    self.navigationItem.leftBarButtonItems = [
+                        backButton
+                    ]
+                    self.loadMoreControl.removeFromSuperview()
+                    if chatRoom.hasLoadMore {
+                        self.loadMoreControl = UIRefreshControl()
+                        self.loadMoreControl.addTarget(self, action: #selector(QiscusChatVC.loadMore), for: UIControlEvents.valueChanged)
+                        self.collectionView.addSubview(self.loadMoreControl)
+                    }
+                    
+                    self.subscribeRealtime(onRoom: chatRoom)
                 }
-                self.loadTitle()
-                let image = Qiscus.image(named: "room_avatar")
-                if let avatar = self.room!.avatarImage {
-                    self.roomAvatar.image = avatar
-                }else{
-                    self.roomAvatar.loadAsync(self.room!.roomAvatarURL, placeholderImage: image)
-                }
-                self.subscribeRealtime(onRoom: room)
-                self.syncRoom()
-            }else{
-                self.titleLabel.text = QiscusTextConfiguration.sharedInstance.chatTitle
-                self.subtitleLabel.text = QiscusTextConfiguration.sharedInstance.chatSubtitle
-                self.roomSynced = false
             }
         }
     }
@@ -305,6 +296,16 @@ public class QiscusChatVC: UIViewController{
             Qiscus.logicThread.async {
                 self.loadData()
             }
+        }else{
+            if let chatRoom = self.room {
+                self.loadTitle()
+                let image = Qiscus.image(named: "room_avatar")
+                if let avatar = chatRoom.avatarImage {
+                    self.roomAvatar.image = avatar
+                }else{
+                    self.roomAvatar.loadAsync(chatRoom.roomAvatarURL, placeholderImage: image)
+                }
+            }
         }
         self.topColor = Qiscus.shared.styleConfiguration.color.topColor
         self.bottomColor = Qiscus.shared.styleConfiguration.color.bottomColor
@@ -402,6 +403,9 @@ public class QiscusChatVC: UIViewController{
         
         setupNavigationTitle()
         setupPage()
+        Qiscus.logicThread.async {
+            self.syncRoom()
+        }
     }
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)

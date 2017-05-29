@@ -32,9 +32,12 @@ class QChatCell: UICollectionViewCell {
         QiscusDataPresenter.shared.resend(DataPresenter: self.data)
     }
     open func deleteComment(){
-        if let presenterDelegate = QiscusDataPresenter.shared.delegate{
-            presenterDelegate.dataPresenter(dataDeleted: self.data)
+        if let comment = self.data.comment {
+            if let chatView = Qiscus.shared.chatViews[comment.roomId]{
+                chatView.dataPresenter(dataDeleted: self.data)
+            }
         }
+        
     }
     open func showFile(){
         if let room = QiscusRoom.room(withLastTopicId: data.topicId) {

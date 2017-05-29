@@ -49,8 +49,8 @@ import Photos
                     let comments = QiscusComment.grouppedComment(inTopicId: topicId, limit: 20)
                     let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
                     let chatRoom = room.room()
-                    Qiscus.uiThread.async {
-                        self.delegate?.dataPresenter(didFinishLoad: presenters, inRoom: chatRoom)
+                    if let chatView = Qiscus.shared.chatViews[chatRoom.roomId] {
+                        chatView.dataPresenter(didFinishLoad: presenters, inRoom: chatRoom)
                     }
                     if let message = withMessage {
                         self.commentClient.postMessage(message: message, topicId: topicId)
@@ -72,8 +72,8 @@ import Photos
                 }else{
                     let comments = QiscusComment.grouppedComment(inTopicId: room.roomLastCommentTopicId,limit:20)
                     let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
-                    Qiscus.uiThread.async {
-                        self.delegate?.dataPresenter(didFinishLoad: presenters, inRoom: room)
+                    if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                        chatView.dataPresenter(didFinishLoad: presenters, inRoom: room)
                     }
                     if let message = withMessage {
                         self.commentClient.postMessage(message: message, topicId: room.roomLastCommentTopicId)
@@ -91,8 +91,10 @@ import Photos
         Qiscus.logicThread.async {
             let comments = QiscusComment.grouppedComment(inTopicId: room.roomLastCommentTopicId, fromCommentId: commentId, limit: 20)
             if comments.count > 0 {
-                let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
-                self.delegate?.dataPresenter(didFinishLoadMore: presenters, inRoom: room)
+                if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                    let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
+                    chatView.dataPresenter(didFinishLoadMore: presenters, inRoom: room)
+                }
             }else{
                 self.commentClient.loadMore(room: room, fromComment: commentId)
             }
@@ -227,23 +229,31 @@ import Photos
         }
     }
     func delete(DataPresenter data:QiscusCommentPresenter){
-        self.delegate?.dataPresenter(dataDeleted: data)
+        if let room = QiscusRoom.room(withLastTopicId: data.topicId){
+            if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                chatView.dataPresenter(dataDeleted: data)
+            }
+        }
     }
     func resend(DataPresenter data:QiscusCommentPresenter){
         data.commentStatus = .sending
-        self.delegate?.dataPresenter(willResendData: data)
-        if data.commentType == .text {
-            Qiscus.uiThread.async {
-                self.commentClient.postComment(data)
-            }
-        }else{
-            if data.isUploaded{
-                Qiscus.uiThread.async {
-                    self.commentClient.postComment(data)
-                }
-            }else{
-                if data.localFileExist {
-                    self.commentClient.uploadMediaData(withData: data)
+        if let room = QiscusRoom.room(withLastTopicId: data.topicId){
+            if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                chatView.dataPresenter(willResendData: data)
+                if data.commentType == .text {
+                    Qiscus.uiThread.async {
+                        self.commentClient.postComment(data)
+                    }
+                }else{
+                    if data.isUploaded{
+                        Qiscus.uiThread.async {
+                            self.commentClient.postComment(data)
+                        }
+                    }else{
+                        if data.localFileExist {
+                            self.commentClient.uploadMediaData(withData: data)
+                        }
+                    }
                 }
             }
         }
@@ -368,8 +378,8 @@ import Photos
             presenter.displayImage = UIImage(data: thumbData)
             
             if let room = QiscusRoom.room(withLastTopicId: topicId){
-                Qiscus.uiThread.async {
-                    self.delegate?.dataPresenter(gotNewData: presenter, inRoom: room, realtime:true)
+                if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                    chatView.dataPresenter(gotNewData: presenter, inRoom: room, realtime:true)
                 }
             }
         }
@@ -381,8 +391,8 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
         Qiscus.logicThread.async {
             let comments = QiscusComment.grouppedComment(inTopicId: inRoom.roomLastCommentTopicId, limit:20)
             let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
-            Qiscus.uiThread.async {
-                self.delegate?.dataPresenter(didFinishLoad: presenters, inRoom: inRoom)
+            if let chatView = Qiscus.shared.chatViews[inRoom.roomId] {
+                chatView.dataPresenter(didFinishLoad: presenters, inRoom: inRoom)
             }
         }
     }
@@ -423,7 +433,9 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
     }
     func qiscusService(didChangeContent data:QiscusCommentPresenter){
         if let room  = QiscusRoom.room(withLastTopicId: data.topicId){
-            self.delegate?.dataPresenter(didChangeContent: data, inRoom: room)
+            if let chatView = Qiscus.shared.chatViews[room.roomId]{
+                chatView.dataPresenter(didChangeContent: data, inRoom: room)
+            }
         }
     }
     func qiscusService(didFailLoadMore inRoom: QiscusRoom) {

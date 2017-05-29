@@ -1288,8 +1288,10 @@ open class QiscusCommentClient: NSObject {
                                     user.updateUserFullName(newComment["username"].stringValue)
                                 }
                                 if userChanged {
-                                    if let delegate = QiscusDataPresenter.shared.delegate {
-                                        delegate.dataPresenter(didChangeUser: QiscusUser.copyUser(user: user), onUserWithEmail: email)
+                                    if let room = QiscusRoom.room(withLastTopicId: topicId){
+                                        if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                                            chatView.dataPresenter(didChangeUser: QiscusUser.copyUser(user: user), onUserWithEmail: email)
+                                        }
                                     }
                                 }
                             }
@@ -1540,7 +1542,9 @@ open class QiscusCommentClient: NSObject {
                                         member.updateUserFullName(userFullName)
                                         let user = QiscusUser.copyUser(user: member)
                                         user.userFullName = userFullName
-                                        QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
+                                        if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                                            chatView.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
+                                        }
                                     }
                                     if member.userAvatarURL != userAvatarURL {
                                         member.updateUserAvatarURL(userAvatarURL)
@@ -1701,7 +1705,9 @@ open class QiscusCommentClient: NSObject {
                                         member.updateUserFullName(userFullName)
                                         let user = QiscusUser.copyUser(user: member)
                                         user.userFullName = userFullName
-                                        QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
+                                        if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                                            chatView.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
+                                        }
                                     }
                                     if member.userAvatarURL != userAvatarURL {
                                         member.updateUserAvatarURL(userAvatarURL)
@@ -1879,7 +1885,9 @@ open class QiscusCommentClient: NSObject {
                                                 member.updateUserFullName(userFullName)
                                                 let user = QiscusUser.copyUser(user: member)
                                                 user.userFullName = userFullName
-                                                QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
+                                                if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                                                    chatView.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
+                                                }
                                             }
                                             if member.userAvatarURL != userAvatarURL {
                                                 member.updateUserAvatarURL(userAvatarURL)
@@ -2019,7 +2027,9 @@ open class QiscusCommentClient: NSObject {
                                         member.updateUserFullName(userFullName)
                                         let user = QiscusUser.copyUser(user: member)
                                         user.userFullName = userFullName
-                                        QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
+                                        if let chatView = Qiscus.shared.chatViews[roomId] {
+                                            chatView.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
+                                        }
                                     }
                                     if member.userAvatarURL != userAvatarURL {
                                         member.updateUserAvatarURL(userAvatarURL)
@@ -2089,7 +2099,9 @@ open class QiscusCommentClient: NSObject {
                                     member.updateUserFullName(userFullName)
                                     let user = QiscusUser.copyUser(user: member)
                                     user.userFullName = userFullName
-                                    QiscusDataPresenter.shared.delegate?.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
+                                    if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                                        chatView.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
+                                    }
                                 }
                                 if member.userAvatarURL != userAvatarURL {
                                     member.updateUserAvatarURL(userAvatarURL)
@@ -2100,7 +2112,6 @@ open class QiscusCommentClient: NSObject {
                                 user.userFullName = userFullName
                                 user.userAvatarURL = userAvatarURL
                                 let _ = user.saveUser()
-                                //QiscusParticipant.addParticipant(user.userEmail, roomId: room.roomId)
                             }
                             if QiscusParticipant.getParticipant(withEmail: userEmail, roomId: room.roomId) == nil {
                                 QiscusParticipant.addParticipant(userEmail, roomId: room.roomId)

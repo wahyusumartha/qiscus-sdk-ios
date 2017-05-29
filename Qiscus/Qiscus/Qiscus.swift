@@ -927,10 +927,14 @@ extension Qiscus:CocoaMQTTDelegate{
                                     if let presenterDelegate = QiscusDataPresenter.shared.delegate {
                                         if userChanged {
                                             let copyUser = QiscusUser.copyUser(user: user)
-                                            presenterDelegate.dataPresenter(didChangeUser: copyUser, onUserWithEmail: copyUser.userEmail)
+                                            if let chatView = Qiscus.shared.chatViews[room.roomId]{
+                                                chatView.dataPresenter(didChangeUser: copyUser, onUserWithEmail: copyUser.userEmail)
+                                            }
                                         }
                                         if roomChanged {
-                                            presenterDelegate.dataPresenter(didChangeRoom: room, onRoomWithId: roomId)
+                                            if let chatView = Qiscus.shared.chatViews[room.roomId]{
+                                                chatView.dataPresenter(didChangeRoom: room, onRoomWithId: roomId)
+                                            }
                                         }
                                     }
                                 }
@@ -942,9 +946,9 @@ extension Qiscus:CocoaMQTTDelegate{
                                 user.userAvatarURL = json["user_avatar"].stringValue
                                 let newUser = QiscusUser.copyUser(user: user.saveUser())
                                 QiscusParticipant.addParticipant(newUser.userEmail, roomId: room.roomId)
-                                if let presenterDelegate = QiscusDataPresenter.shared.delegate {
-                                    presenterDelegate.dataPresenter(didChangeUser: newUser, onUserWithEmail: newUser.userEmail)
-                                    presenterDelegate.dataPresenter(didChangeRoom: room, onRoomWithId: roomId)
+                                if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                                    chatView.dataPresenter(didChangeUser: newUser, onUserWithEmail: newUser.userEmail)
+                                    chatView.dataPresenter(didChangeRoom: room, onRoomWithId: roomId)
                                 }
                             }
                             if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){

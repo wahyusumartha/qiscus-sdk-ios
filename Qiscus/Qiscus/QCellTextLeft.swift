@@ -52,74 +52,76 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
     }
     
     open override func setupCell(){
-        textView.attributedText = data.commentAttributedText
-        textView.linkTextAttributes = data.linkTextAttributes
-        balloonView.image = data.balloonImage
-        
-        let textSize = data.cellSize
-        var textWidth = data.cellSize.width
-        
-        if textWidth > minWidth {
-            textWidth = textSize.width
-        }else{
-            textWidth = minWidth
-        }
-        
-        if data.showLink{
-            self.linkTitle.text = data.linkTitle
-            self.linkDescription.text = data.linkDescription
-            self.linkImage.image = data.linkImage
-            self.LinkContainer.isHidden = false
-            self.ballonHeight.constant = 83
-            self.textTopMargin.constant = 73
-            self.linkHeight.constant = 65
-            textWidth = maxWidth
+        Qiscus.uiThread.async {
+            self.textView.attributedText = self.data.commentAttributedText
+            self.textView.linkTextAttributes = self.data.linkTextAttributes
+            self.balloonView.image = self.data.balloonImage
             
-            if !data.linkSaved{
-                QiscusDataPresenter.getLinkData(withData: data)
+            let textSize = self.data.cellSize
+            var textWidth = self.data.cellSize.width
+            
+            if textWidth > self.minWidth {
+                textWidth = textSize.width
+            }else{
+                textWidth = self.minWidth
             }
-        }else{
-            self.linkTitle.text = ""
-            self.linkDescription.text = ""
-            self.linkImage.image = Qiscus.image(named: "link")
-            self.LinkContainer.isHidden = true
-            self.ballonHeight.constant = 10
-            self.textTopMargin.constant = 0
+            
+            if self.data.showLink{
+                self.linkTitle.text = self.data.linkTitle
+                self.linkDescription.text = self.data.linkDescription
+                self.linkImage.image = self.data.linkImage
+                self.LinkContainer.isHidden = false
+                self.ballonHeight.constant = 83
+                self.textTopMargin.constant = 73
+                self.linkHeight.constant = 65
+                textWidth = self.maxWidth
+                
+                if !self.data.linkSaved{
+                    QiscusDataPresenter.getLinkData(withData: self.data)
+                }
+            }else{
+                self.linkTitle.text = ""
+                self.linkDescription.text = ""
+                self.linkImage.image = Qiscus.image(named: "link")
+                self.LinkContainer.isHidden = true
+                self.ballonHeight.constant = 10
+                self.textTopMargin.constant = 0
+            }
+            
+            self.textViewWidth.constant = textWidth
+            self.textViewHeight.constant = textSize.height
+            
+            self.userNameLabel.textAlignment = .left
+            
+            self.dateLabel.text = self.data.commentTime.lowercased()
+            self.balloonView.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor
+            self.dateLabel.textColor = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
+            
+            if self.data.cellPos == .first || self.data.cellPos == .single{
+                self.userNameLabel.text = self.data.userFullName
+                self.userNameLabel.isHidden = false
+                self.balloonTopMargin.constant = 20
+                self.cellHeight.constant = 20
+            }else{
+                self.userNameLabel.text = ""
+                self.userNameLabel.isHidden = true
+                self.balloonTopMargin.constant = 0
+                self.cellHeight.constant = 0
+            }
+            
+            // last cell
+            if self.data.cellPos == .last || self.data.cellPos == .single{
+                self.leftMargin.constant = 35
+                self.textLeading.constant = 23
+                self.balloonWidth.constant = 31
+            }else{
+                self.textLeading.constant = 8
+                self.leftMargin.constant = 50
+                self.balloonWidth.constant = 16
+            }
+            
+            self.textView.layoutIfNeeded()
         }
-        
-        textViewWidth.constant = textWidth
-        textViewHeight.constant = textSize.height
-        
-        userNameLabel.textAlignment = .left
-        
-        dateLabel.text = data.commentTime.lowercased()
-        balloonView.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor
-        dateLabel.textColor = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
-        
-        if data.cellPos == .first || data.cellPos == .single{
-            userNameLabel.text = data.userFullName
-            userNameLabel.isHidden = false
-            balloonTopMargin.constant = 20
-            cellHeight.constant = 20
-        }else{
-            userNameLabel.text = ""
-            userNameLabel.isHidden = true
-            balloonTopMargin.constant = 0
-            cellHeight.constant = 0
-        }
-        
-        // last cell
-        if data.cellPos == .last || data.cellPos == .single{
-            leftMargin.constant = 35
-            textLeading.constant = 23
-            balloonWidth.constant = 31
-        }else{
-            textLeading.constant = 8
-            leftMargin.constant = 50
-            balloonWidth.constant = 16
-        }
-        
-        textView.layoutIfNeeded()
     }
     override func clearContext() {
         textView.layoutIfNeeded()
