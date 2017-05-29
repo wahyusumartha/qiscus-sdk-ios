@@ -33,6 +33,12 @@ open class QiscusMe: NSObject {
     open var userKey = ""
     open var baseUrl = ""
     open var lastCommentId = Int(0)
+    
+    open var paramEmail = ""
+    open var paramPass = ""
+    open var paramUsername = ""
+    open var paramAvatar = ""
+    
     open var deviceToken:String = ""{
         didSet{
             let userData = UserDefaults.standard
@@ -71,6 +77,18 @@ open class QiscusMe: NSObject {
         }
         if let dToken = userData.value(forKey: "qiscus_device_token") as? String{
             self.deviceToken = dToken
+        }
+        if let paramEmail = userData.value(forKey: "qiscus_param_email") as? String{
+            self.paramEmail = paramEmail
+        }
+        if let paramPass = userData.value(forKey: "qiscus_param_pass") as? String{
+            self.paramPass = paramPass
+        }
+        if let paramUsername = userData.value(forKey: "qiscus_param_username") as? String{
+            self.paramUsername = paramUsername
+        }
+        if let paramAvatar = userData.value(forKey: "qiscus_param_avatar") as? String{
+            self.paramAvatar = paramAvatar
         }
     }
     

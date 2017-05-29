@@ -18,7 +18,7 @@ import CocoaMQTT
     
     static let sharedInstance = Qiscus()
     static let qiscusVersionNumber:String = "2.2.18"
-    static let showDebugPrint = false
+    static let showDebugPrint = true
     
     // MARK: - Thread
     static let realtimeThread = DispatchQueue.global()
@@ -42,6 +42,7 @@ import CocoaMQTT
     var notificationAction:((QiscusChatVC)->Void)? = nil
     var realtimeConnected = false
     var syncing = false
+    var syncTimer: Timer?
     
     @objc public var styleConfiguration = QiscusUIConfiguration.sharedInstance
     @objc public var connected:Bool = false
@@ -166,6 +167,7 @@ import CocoaMQTT
             Qiscus.mqttConnect()
         }
     }
+    
     @objc public class func setup(withAppId appId:String, userEmail:String, userKey:String, username:String, avatarURL:String? = nil, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true){
         Qiscus.checkDatabaseMigration()
         var requestProtocol = "https"
@@ -177,6 +179,12 @@ import CocoaMQTT
         
         QiscusMe.sharedInstance.baseUrl = baseUrl
         QiscusMe.sharedInstance.userData.set(baseUrl, forKey: "qiscus_base_url")
+        QiscusMe.sharedInstance.userData.set(email, forKey: "qiscus_param_email")
+        QiscusMe.sharedInstance.userData.set(userKey, forKey: "qiscus_param_pass")
+        QiscusMe.sharedInstance.userData.set(username, forKey: "qiscus_param_username")
+        if avatarURL != nil{
+            QiscusMe.sharedInstance.userData.set(avatarURL, forKey: "qiscus_param_avatar")
+        }
         if delegate != nil {
             QiscusCommentClient.sharedInstance.configDelegate = delegate
         }
@@ -249,7 +257,19 @@ import CocoaMQTT
         QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
-        let chatVC = QiscusChatVC()
+        var chatVC = QiscusChatVC()
+        for (_,chatRoom) in Qiscus.sharedInstance.chatViews {
+            if let room = chatRoom.room {
+                if !room.isGroup {
+                    if let user = chatRoom.users?.first {
+                        if user == users.first! {
+                            chatVC = chatRoom
+                            break
+                        }
+                    }
+                }
+            }
+        }
         //chatVC.reset()
         if distinctId != nil{
             chatVC.distincId = distinctId!
@@ -266,6 +286,7 @@ import CocoaMQTT
             chatVC.goBack()
         }
         chatVC.backAction = nil
+        
         
         return chatVC
     }
@@ -818,6 +839,10 @@ extension Qiscus:CocoaMQTTDelegate{
             }
             Qiscus.shared.mqtt = mqtt
         }
+        if self.syncTimer != nil {
+            self.syncTimer?.invalidate()
+            self.syncTimer = nil
+        }
     }
     public func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck){
         
@@ -1044,6 +1069,17 @@ extension Qiscus:CocoaMQTTDelegate{
         
     }
     public func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?){
-        
+        if Qiscus.isLoggedIn {
+            if self.syncTimer == nil {
+                self.syncTimer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.sync), userInfo: nil, repeats: true)
+            }
+        }
+    }
+    @objc private func sync(){
+        self.backgroundCheck()
+    }
+    public class func sync(){
+        Qiscus.sharedInstance.backgroundCheck()
     }
 }
+
