@@ -1514,7 +1514,6 @@ open class QiscusCommentClient: NSObject {
                             if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
                                 participant.updateLastReadCommentId(commentId: comment.commentId)
                             }
-                            
                         }
                         
                         if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
@@ -1574,12 +1573,11 @@ open class QiscusCommentClient: NSObject {
                         
                         self.commentDelegate?.finishedLoadFromAPI(topicId)
                         self.delegate?.qiscusService(didFinishLoadRoom: room)
-                        if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                            chatView.topicId = topicId
-                            chatView.loadTitle()
+                        if let delegate = QiscusDataPresenter.shared.delegate as? QiscusChatVC{
+                            delegate.topicId = topicId
                             if withMessage != nil {
                                 self.postMessage(message: withMessage!, topicId: topicId)
-                                chatView.message = nil
+                                delegate.message = nil
                             }
                         }
                     }else if error != JSON.null{

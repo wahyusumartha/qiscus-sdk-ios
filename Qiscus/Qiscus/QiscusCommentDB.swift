@@ -136,13 +136,21 @@ public class QiscusCommentDB: Object {
     
     // MARK: - add newComment to DB
     public class func new(commentWithId commentId:Int, andUniqueId uniqueId:String)->QiscusCommentDB{
-        let commentDB = QiscusCommentDB()
+        var commentDB = QiscusCommentDB()
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        try! realm.write {
-            commentDB.localId = QiscusCommentDB.lastId + 1
-            realm.add(commentDB)
-            commentDB.commentId = commentId
-            commentDB.commentUniqueId = uniqueId
+        if let comment = QiscusCommentDB.commentDB(withId: commentId, andUniqueId: uniqueId) {
+            commentDB = comment
+            try! realm.write {
+                commentDB.commentId = commentId
+                commentDB.commentUniqueId = uniqueId
+            }
+        }else{
+            try! realm.write {
+                commentDB.localId = QiscusCommentDB.lastId + 1
+                realm.add(commentDB)
+                commentDB.commentId = commentId
+                commentDB.commentUniqueId = uniqueId
+            }
         }
         return commentDB
     }

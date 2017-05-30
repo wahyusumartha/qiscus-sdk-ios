@@ -364,26 +364,29 @@ import CocoaMQTT
     /**
      No Documentation
      */
-    @objc public class func chatView(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
-        Qiscus.checkDatabaseMigration()
-        if !Qiscus.sharedInstance.connected {
-            Qiscus.setupReachability()
-        }
-        Qiscus.sharedInstance.isPushed = true
-        QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
-        QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
+    @objc public class func chatView(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String = "", withMessage:String? = nil)->QiscusChatVC{
         
-        let chatVC = QiscusChatVC()
-        //chatVC.reset()
-        chatVC.message = withMessage
-        chatVC.users = users
-        
-        if chatVC.isPresence {
-            chatVC.goBack()
+        if let room = QiscusRoom.room(withDistinctId: distinctId, andUserEmail: users.first!) {
+            return Qiscus.chatView(withRoomId: room.roomId, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
+        }else{
+            Qiscus.checkDatabaseMigration()
+            if !Qiscus.sharedInstance.connected {
+                Qiscus.setupReachability()
+            }
+            Qiscus.sharedInstance.isPushed = true
+            
+            let chatVC = QiscusChatVC()
+            
+            chatVC.message = withMessage
+            chatVC.users = users
+            chatVC.loadWithUser = true
+            if chatVC.isPresence {
+                chatVC.goBack()
+            }
+            chatVC.backAction = nil
+            chatVC.archived = readOnly
+            return chatVC
         }
-        chatVC.backAction = nil
-        chatVC.archived = readOnly
-        return chatVC
     }
     /**
      No Documentation
@@ -395,17 +398,19 @@ import CocoaMQTT
         }
         
         var chatVC = QiscusChatVC()
+        
         if let chatView = Qiscus.shared.chatViews[roomId] {
             chatVC = chatView
         }else{
-            chatVC.navTitle = title
-            chatVC.navSubtitle = subtitle
-            chatVC.archived = readOnly
             chatVC.roomId = roomId
-            chatVC.message = withMessage
-            chatVC.backAction = nil
-            Qiscus.shared.chatViews[roomId] = chatVC
         }
+        chatVC.navTitle = title
+        chatVC.navSubtitle = subtitle
+        chatVC.archived = readOnly
+        chatVC.message = withMessage
+        chatVC.backAction = nil
+        Qiscus.shared.chatViews[roomId] = chatVC
+        
         return chatVC
     }
     @objc public class func image(named name:String)->UIImage?{
@@ -924,17 +929,15 @@ extension Qiscus:CocoaMQTTDelegate{
                                             user.updateUserAvatarURL(json["user_avatar"].stringValue)
                                         }
                                     }
-                                    if let presenterDelegate = QiscusDataPresenter.shared.delegate {
-                                        if userChanged {
-                                            let copyUser = QiscusUser.copyUser(user: user)
-                                            if let chatView = Qiscus.shared.chatViews[room.roomId]{
-                                                chatView.dataPresenter(didChangeUser: copyUser, onUserWithEmail: copyUser.userEmail)
-                                            }
+                                    if userChanged {
+                                        let copyUser = QiscusUser.copyUser(user: user)
+                                        if let chatView = Qiscus.shared.chatViews[room.roomId]{
+                                            chatView.dataPresenter(didChangeUser: copyUser, onUserWithEmail: copyUser.userEmail)
                                         }
-                                        if roomChanged {
-                                            if let chatView = Qiscus.shared.chatViews[room.roomId]{
-                                                chatView.dataPresenter(didChangeRoom: room, onRoomWithId: roomId)
-                                            }
+                                    }
+                                    if roomChanged {
+                                        if let chatView = Qiscus.shared.chatViews[room.roomId]{
+                                            chatView.dataPresenter(didChangeRoom: room, onRoomWithId: roomId)
                                         }
                                     }
                                 }

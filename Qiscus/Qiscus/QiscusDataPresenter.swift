@@ -393,6 +393,12 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
             let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
             if let chatView = Qiscus.shared.chatViews[inRoom.roomId] {
                 chatView.dataPresenter(didFinishLoad: presenters, inRoom: inRoom)
+            }else{
+                if let chatView = self.delegate as? QiscusChatVC {
+                    chatView.dataPresenter(didFinishLoad: presenters, inRoom: inRoom)
+                    chatView.loadTitle()
+                    Qiscus.shared.chatViews[inRoom.roomId] = chatView
+                }
             }
         }
     }

@@ -205,7 +205,6 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         }
     }
     public func dataPresenter(didFinishLoad comments: [[QiscusCommentPresenter]], inRoom: QiscusRoom) {
-        
         self.firstLoad = false
         self.room = inRoom
         var needScrollToBottom = true
@@ -224,7 +223,6 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         }
         if comments.count > 0 {
             self.comments = comments
-            self.welcomeView.isHidden = true
             
             self.collectionView.reloadData()
             if needScrollToBottom {

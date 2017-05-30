@@ -43,9 +43,6 @@ class goToChatVC: UIViewController {
                 view.titleAction = {
                     print("title clicked")
                 }
-//                view.setBackButton {
-//                    let _ = view.navigationController?.popViewController(animated: true)
-//                }
             }else{
                 let email = targetField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
                 let view = Qiscus.chatView(withUsers: [email])

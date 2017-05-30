@@ -15,6 +15,13 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         return self.comments[section].count
     }
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
+        Qiscus.uiThread.async {
+            if self.comments.count > 0 {
+                self.welcomeView.isHidden = true
+            }else{
+                self.welcomeView.isHidden = false
+            }
+        }
         return self.comments.count
     }
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
