@@ -770,7 +770,7 @@ import CocoaMQTT
         let mqtt = CocoaMQTT(clientID: clientID, host: "mqtt.qiscus.com", port: 1883)
         mqtt.username = ""
         mqtt.password = ""
-        mqtt.cleanSession = false
+        mqtt.cleanSession = true
         mqtt.willMessage = CocoaMQTTWill(topic: "u/\(QiscusMe.sharedInstance.email)/s", message: "0")
         mqtt.keepAlive = 60
         mqtt.delegate = Qiscus.shared
