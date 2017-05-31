@@ -38,17 +38,18 @@ extension QiscusChatVC: ChatInputTextDelegate {
     }
     open func valueChanged(value:String){
         Qiscus.logicThread.async {
-            if value == "" {
-                self.linkToPreview = ""
-            }else{
-                if let link = QiscusHelper.getFirstLinkInString(text: value){
-                    if link != self.linkToPreview{
-                        self.linkToPreview = link
-                    }
-                }else{
-                    self.linkToPreview = ""
-                }
-            }
+            self.linkToPreview = ""
+//            if value == "" {
+//                self.linkToPreview = ""
+//            }else{
+//                if let link = QiscusHelper.getFirstLinkInString(text: value){
+//                    if link != self.linkToPreview{
+//                        self.linkToPreview = link
+//                    }
+//                }else{
+//                    self.linkToPreview = ""
+//                }
+//            }
         }
     }
     open func chatInputDidEndEditing(chatInput input: ChatInputText) {

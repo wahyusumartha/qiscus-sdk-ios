@@ -193,68 +193,69 @@ public enum QiscusCommentPresenterType:Int {
             let allRange = (commentPresenter.commentText as NSString).range(of: commentPresenter.commentText)
             attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
             
-            if comment.showLink {
-                if let url = comment.commentLink{
-                    commentPresenter.linkTitle = "Load data ..."
-                    commentPresenter.linkDescription = "Load url description"
-                    commentPresenter.linkImage = Qiscus.image(named: "link")
-                    
-                    var urlToCheck = url.lowercased()
-                    if !urlToCheck.contains("http"){
-                        urlToCheck = "http://\(url.lowercased())"
-                    }
-                    
-                    commentPresenter.linkURL = urlToCheck
-                    
-                    if let linkData = QiscusLinkData.getLinkData(fromURL: urlToCheck){
-                        commentPresenter.linkDescription = linkData.linkDescription
-                        commentPresenter.linkImageURL = linkData.linkImageURL
-                        commentPresenter.linkSaved = true
-                        
-                        if let image = linkData.thumbImage{
-                            commentPresenter.linkImage = image
-                        }
-                        if linkData.linkTitle != "" {
-                            commentPresenter.linkTitle = linkData.linkTitle
-                            let text = commentPresenter.commentText.replacingOccurrences(of: linkData.linkURL, with: linkData.linkTitle)
-                            
-                            let allRange = (text as NSString).range(of: text)
-                            let titleRange = (text as NSString).range(of: linkData.linkTitle)
-                            
-                            attributedText = NSMutableAttributedString(string: text)
-                            attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
-                            
-                            for (attribute,_) in commentPresenter.textAttribute {
-                                attributedText.removeAttribute(attribute, range: titleRange)
-                            }
-                            attributedText.addAttributes(commentPresenter.linkTextAttributes, range: titleRange)
-                            
-                            let url = NSURL(string: linkData.linkURL)!
-                            attributedText.addAttribute(NSLinkAttributeName, value: url, range: titleRange)
-                        }else{
-                            commentPresenter.showLink = false
-                            comment.showLink = false
-                            attributedText = NSMutableAttributedString(string: commentPresenter.commentText)
-                            attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
-                        }
-                    }
-                }else{
-                    commentPresenter.showLink = false
-                    comment.showLink = false
-                    attributedText = NSMutableAttributedString(string: commentPresenter.commentText)
-                    attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
-                }
-            }else{
+//            if comment.showLink {
+//                if let url = comment.commentLink{
+//                    commentPresenter.linkTitle = "Load data ..."
+//                    commentPresenter.linkDescription = "Load url description"
+//                    commentPresenter.linkImage = Qiscus.image(named: "link")
+//                    
+//                    var urlToCheck = url.lowercased()
+//                    if !urlToCheck.contains("http"){
+//                        urlToCheck = "http://\(url.lowercased())"
+//                    }
+//                    
+//                    commentPresenter.linkURL = urlToCheck
+//                    
+//                    if let linkData = QiscusLinkData.getLinkData(fromURL: urlToCheck){
+//                        commentPresenter.linkDescription = linkData.linkDescription
+//                        commentPresenter.linkImageURL = linkData.linkImageURL
+//                        commentPresenter.linkSaved = true
+//                        
+//                        if let image = linkData.thumbImage{
+//                            commentPresenter.linkImage = image
+//                        }
+//                        if linkData.linkTitle != "" {
+//                            commentPresenter.linkTitle = linkData.linkTitle
+//                            let text = commentPresenter.commentText.replacingOccurrences(of: linkData.linkURL, with: linkData.linkTitle)
+//                            
+//                            let allRange = (text as NSString).range(of: text)
+//                            let titleRange = (text as NSString).range(of: linkData.linkTitle)
+//                            
+//                            attributedText = NSMutableAttributedString(string: text)
+//                            attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
+//                            
+//                            for (attribute,_) in commentPresenter.textAttribute {
+//                                attributedText.removeAttribute(attribute, range: titleRange)
+//                            }
+//                            attributedText.addAttributes(commentPresenter.linkTextAttributes, range: titleRange)
+//                            
+//                            let url = NSURL(string: linkData.linkURL)!
+//                            attributedText.addAttribute(NSLinkAttributeName, value: url, range: titleRange)
+//                        }else{
+//                            commentPresenter.showLink = false
+//                            comment.showLink = false
+//                            attributedText = NSMutableAttributedString(string: commentPresenter.commentText)
+//                            attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
+//                        }
+//                    }
+//                }
+//                else{
+//                    commentPresenter.showLink = false
+//                    comment.showLink = false
+//                    attributedText = NSMutableAttributedString(string: commentPresenter.commentText)
+//                    attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
+//                }
+//            }
+            //else{
                 commentPresenter.showLink = false
                 comment.showLink = false
                 attributedText = NSMutableAttributedString(string: commentPresenter.commentText)
                 attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
-            }
+            //}
             commentPresenter.commentAttributedText = attributedText
             
             let fontSize = Qiscus.shared.styleConfiguration.chatFont.pointSize
             let fontName = Qiscus.shared.styleConfiguration.chatFont.fontName
-            
             
             var needCalculate = false
             if fontName != comment.commentFontName || fontSize != comment.commentFontSize{
