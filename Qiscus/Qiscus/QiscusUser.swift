@@ -357,11 +357,9 @@ open class QiscusUser: Object {
             if !Qiscus.qiscusDownload.contains("\(user.userAvatarURL):user:\(user.userId)"){
                 let checkURL = "\(user.userAvatarURL):user:\(user.userId)"
                 Qiscus.qiscusDownload.append(checkURL)
-                Qiscus.printLog(text: "Downloading avatar for user \(user.userEmail)")
                 
                 Alamofire.request(user.userAvatarURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
                     .responseData(completionHandler: { response in
-                        Qiscus.printLog(text: "download avatar result: \(response)")
                         if let data = response.data {
                             if let image = UIImage(data: data) {
                                 var thumbImage = UIImage()
@@ -437,8 +435,7 @@ open class QiscusUser: Object {
                             }
                         }
                     }).downloadProgress(closure: { progressData in
-                        let progress = CGFloat(progressData.fractionCompleted)
-                        Qiscus.printLog(text: "Download avatar progress: \(progress)")
+                        let _ = CGFloat(progressData.fractionCompleted)
                     })
                 
             }
