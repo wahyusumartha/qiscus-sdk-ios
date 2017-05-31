@@ -775,7 +775,6 @@ import CocoaMQTT
         mqtt.keepAlive = 60
         mqtt.delegate = Qiscus.shared
         mqtt.connect()
-        
     }
     class func publishUserStatus(offline:Bool = false){
         if Qiscus.isLoggedIn{
