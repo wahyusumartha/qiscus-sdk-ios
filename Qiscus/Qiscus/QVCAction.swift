@@ -143,7 +143,7 @@ extension QiscusChatVC {
         self.titleAction = {}
         self.unlockAction = {}
         self.room = nil
-        //self.collectionView.reloadData()
+        
     }
     func showNoConnectionToast(){
         QToasterSwift.toast(target: self, text: QiscusTextConfiguration.sharedInstance.noConnectionText, backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)

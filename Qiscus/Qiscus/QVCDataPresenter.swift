@@ -223,10 +223,11 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         }
         if comments.count > 0 {
             self.comments = comments
-            
-            self.collectionView.reloadData()
-            if needScrollToBottom {
-                self.scrollToBottom()
+            Qiscus.uiThread.async {
+                self.collectionView.reloadData()
+                if needScrollToBottom {
+                    self.scrollToBottom()
+                }
             }
             let commentId = comments.last!.last!.commentId
             let roomId = inRoom.roomId
