@@ -36,7 +36,4 @@ class QChatFooterLeft: UICollectionReusableView {
             }
         }
     }
-    func setup(withImage image:UIImage){
-        avatarImage.image = image
-    }
 }

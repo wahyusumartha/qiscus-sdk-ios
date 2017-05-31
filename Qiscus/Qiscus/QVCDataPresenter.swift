@@ -459,9 +459,9 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                                     }
                                 }
                             }else{
-                                self.comments[indexPath.section][indexPath.row] = data
                                 Qiscus.uiThread.async {
-                                    self.collectionView.reloadData()
+                                    self.comments[indexPath.section][indexPath.row] = data
+                                    self.collectionView.reloadItems(at: [indexPath])
                                 }
                             }
                         }
@@ -511,36 +511,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         }
     }
     public func dataPresenter(didChangeUser user: QiscusUser, onUserWithEmail email: String) {
-        Qiscus.logicThread.async {
-            var section = 0
-            var found = false
-            for dataGroup in self.comments{
-                var row = 0
-                for data in dataGroup{
-                    if data.userEmail == email{
-                        if data.userFullName != user.userFullName{
-                            data.userFullName = user.userFullName
-                            self.comments[section][row] = data
-                            if row == 0 {
-                                found = true
-                            }
-                        }
-                        if !data.userIsOwn{
-                            if row == 0 {
-                                found = true
-                            }
-                        }
-                    }
-                    row += 1
-                }
-                section += 1
-            }
-            if found {
-                Qiscus.uiThread.async {
-                    self.collectionView.reloadData()
-                }
-            }
-        }
+       
     }
     public func dataPresenter(didChangeRoom room: QiscusRoom, onRoomWithId roomId: Int) {
         if self.room?.roomId == room.roomId{
