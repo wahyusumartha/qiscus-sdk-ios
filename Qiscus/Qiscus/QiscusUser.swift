@@ -308,8 +308,9 @@ open class QiscusUser: Object {
                 self.localId = getLastId() + 1
                 realm.add(self)
             }
+            let thisUser = QiscusUser.copyUser(user: self)
             Qiscus.logicThread.async {
-                self.downloadAvatar()
+                thisUser.downloadAvatar()
             }
             let userEmail = self.userEmail
             
