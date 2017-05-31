@@ -29,21 +29,21 @@ open class QiscusUser: Object {
     override open class func primaryKey() -> String {
         return "localId"
     }
-    var avatar:UIImage?{
-        get{
-            if QiscusHelper.isFileExist(inLocalPath: self.userAvatarLocalPath){
-                if let image =  UIImage(contentsOfFile: self.userAvatarLocalPath){
-                    return image
-                }else{
-                    self.downloadAvatar()
-                    return nil
-                }
-            }else{
-                self.downloadAvatar()
-                return nil
-            }
-        }
-    }
+//    var avatar:UIImage?{
+//        get{
+//            if QiscusHelper.isFileExist(inLocalPath: self.userAvatarLocalPath){
+//                if let image =  UIImage(contentsOfFile: self.userAvatarLocalPath){
+//                    return image
+//                }else{
+//                    self.downloadAvatar()
+//                    return nil
+//                }
+//            }else{
+//                self.downloadAvatar()
+//                return nil
+//            }
+//        }
+//    }
     var isSelf:Bool{
         get{
             if self.userEmail == QiscusConfig.sharedInstance.USER_EMAIL{
@@ -308,7 +308,7 @@ open class QiscusUser: Object {
                 self.localId = getLastId() + 1
                 realm.add(self)
             }
-            DispatchQueue.main.async {
+            Qiscus.logicThread.async {
                 self.downloadAvatar()
             }
             let userEmail = self.userEmail
@@ -322,7 +322,7 @@ open class QiscusUser: Object {
                 try! realm.write {
                     user.userAvatarURL = self.userAvatarURL
                 }
-                DispatchQueue.main.async {
+                Qiscus.logicThread.async {
                     self.downloadAvatar()
                 }
             }
