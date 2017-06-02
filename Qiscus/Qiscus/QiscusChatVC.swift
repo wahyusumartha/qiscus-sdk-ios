@@ -397,7 +397,7 @@ public class QiscusChatVC: UIViewController{
             UIApplication.shared.cancelAllLocalNotifications()
         }
         self.dataPresenter.delegate = self
-        self.inputText.chatInputDelegate = self
+        
         if self.comments.count > 0 {
             Qiscus.logicThread.async {
                 self.syncRoom()
@@ -522,7 +522,7 @@ public class QiscusChatVC: UIViewController{
         self.welcomeSubtitle.text = QiscusTextConfiguration.sharedInstance.emptyMessage
         self.emptyChatImage.image = Qiscus.style.assets.emptyChat
         self.inputText.placeholder = QiscusTextConfiguration.sharedInstance.textPlaceholder
-        
+        self.inputText.chatInputDelegate = self
         
         // Keyboard stuff.
         self.hideKeyboardWhenTappedAround()
