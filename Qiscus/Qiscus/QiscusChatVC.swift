@@ -396,13 +396,18 @@ public class QiscusChatVC: UIViewController{
         }else{
             UIApplication.shared.cancelAllLocalNotifications()
         }
-        dataPresenter.delegate = self
+        self.dataPresenter.delegate = self
+        self.inputText.chatInputDelegate = self
         if self.comments.count > 0 {
             Qiscus.logicThread.async {
                 self.syncRoom()
             }
         }
         self.view.endEditing(true)
+        let center: NotificationCenter = NotificationCenter.default
+        center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        center.addObserver(self, selector: #selector(QiscusChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
+        center.addObserver(self, selector: #selector(QiscusChatVC.appDidEnterBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
     }
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -517,13 +522,9 @@ public class QiscusChatVC: UIViewController{
         self.welcomeSubtitle.text = QiscusTextConfiguration.sharedInstance.emptyMessage
         self.emptyChatImage.image = Qiscus.style.assets.emptyChat
         self.inputText.placeholder = QiscusTextConfiguration.sharedInstance.textPlaceholder
-        self.inputText.chatInputDelegate = self
+        
         
         // Keyboard stuff.
-        let center: NotificationCenter = NotificationCenter.default
-        center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
-        center.addObserver(self, selector: #selector(QiscusChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
-        center.addObserver(self, selector: #selector(QiscusChatVC.appDidEnterBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
         self.hideKeyboardWhenTappedAround()
     }
     
