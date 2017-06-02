@@ -183,9 +183,6 @@ Swift 3.0:
 
 `Qiscus.createChat(withUsers users:["TARGET_EMAIL_1, TARGET_EMAIL_2"], target:self)`
 
-Objective C:
-
-`[Qiscus createChatViewWithUsers:<ARRAY_OF_TARGET_EMAIL> target:self readOnly:<false|true> title:<CHAT_TITLE> subtitle:<CHAT_SUBTITLE> distinctId:NULL optionalData:NULL withMessage:NULL]`
 
 For example in your ViewController :
 
