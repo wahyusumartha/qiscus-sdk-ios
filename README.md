@@ -130,11 +130,13 @@ Start chat with target is very easy, all you need is just call
 
 Swift 3.0 :
 
-`Qiscus.chat(withUsers: ["TARGET_EMAIL"], target: self)`
+```
+      let email = targetField.text!
+      let view = Qiscus.chatView(withUsers: [email])
+      self.navigationController?.pushViewController(view, animated: true)
+```
 
-Objective C:
 
-`[Qiscus chatWithUsers:<ARRAY_OF_TARGET_EMAIL> target:self readOnly:<false|true> title:<CHAT_TITLE> subtitle:<CHAT_SUBTITLE> distinctId:NULL optionalData:NULL withMessage:NULL]` 
 
 in your code
 
@@ -162,41 +164,15 @@ class ViewController: UIViewController {
     }
     
     func startChat(){
-        Qiscus.chat(withUsers: ["fikri@qiscus.com"], target: self)
+        let email = targetField.text!
+        let view = Qiscus.chatView(withUsers: [email])
+        self.navigationController?.pushViewController(view, animated: true)
     }
 
 .....
 }
 ```
 
-Objective C:
-
-```
-#import "MainVC.h"
-
-@import Qiscus;
-
-@interface MainVC ()
-...
-...
-@end
-
-@implementation MainVC
-...
-- (void)goToChat{
-[Qiscus chatWithUsers:[NSArray arrayWithObject:@"081234567890@qiscuswa.com"] 
-        target:self 
-        readOnly:false 
-        title:@"Sample Chat" 
-        subtitle:@"chat with user" 
-        distinctId:NULL 
-        withMessage:NULL 
-        optionalData:NULL];
-}
-
-...
-@end
-```
 
 
 ### Creating a Group Room
@@ -230,34 +206,6 @@ class ViewController: UIViewController {
 }
 ```
 
-Objective C:
-
-```
-#import "MainVC.h"
-
-@import Qiscus;
-
-@interface MainVC ()
-...
-...
-@end
-
-@implementation MainVC
-...
-- (void)goToChat{
-    [Qiscus createChatViewWithUsers:emails 
-            target:self 
-            readOnly:false 
-            title:@"New Group Chat" 
-            subtitle:@"always new chat" 
-            distinctId:NULL 
-            optionalData:NULL 
-            withMessage:NULL];
-}
-
-...
-@end
-```
 
 for accesing room that created by this call, you need to call it with its roomId. This methode is always creating new chat room.
 
@@ -269,11 +217,8 @@ When you already know your chat room id, you can easily go to that room. Just ca
 
 Swift 3.0:
 
-`Qiscus.chat(withRoomId roomId:[ROOM_ID], target:self, optionalDataCompletion: {_ in})`
+`Qiscus.chatView(withRoomId: roomId)`
 
-Objective C:
-
-`[Qiscus chatWithRoomId:<CHAT_ROOM_ID> target:self readOnly:<true|false> title:<CHAT_TITLE> subtitle:<CHAT_SUBTITLE> distinctId:NULL withMessage:NULL optionalData:NULL optionalDataCompletion:^(NSString * _) {}]`
 
 For example in your ViewController :
 
@@ -287,47 +232,14 @@ class ViewController: UIViewController {
 
 .....
 
-func goToChat(){
-
-    Qiscus.chat(withRoomId: roomId, target: self, 
-        optionalDataCompletion: {_ in 
-    
-    })
-}
+  func goToChat(){
+          let roomId = Int(targetField.text!)
+          let view = Qiscus.chatView(withRoomId: roomId)
+          self.navigationController?.pushViewController(view, animated: true)
+  }
 
 .....
 }
-```
-
-Objective C:
-
-```
-#import "MainVC.h"
-
-@import Qiscus;
-
-@interface MainVC ()
-...
-...
-@end
-
-@implementation MainVC
-...
-- (void)goToChat{
-[Qiscus chatWithRoomId:135 
-        target:self 
-        readOnly:false 
-        title:@"" 
-        subtitle:@"chat with room id" 
-        distinctId:NULL 
-        withMessage:NULL 
-        optionalData:NULL 
-        optionalDataCompletion:^(NSString * _) {
-        
-   }];
-}
-...
-@end
 ```
 
 
