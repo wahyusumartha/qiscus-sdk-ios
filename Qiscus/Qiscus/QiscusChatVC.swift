@@ -258,15 +258,6 @@ public class QiscusChatVC: UIViewController{
         self.navigationController?.navigationBar.verticalGradientColor(topColor, bottomColor: bottomColor)
         self.navigationController?.navigationBar.tintColor = tintColor
         
-        let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
-        self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
-        
-        if self.navigationItem.leftBarButtonItems != nil {
-            self.defaultLeftButton = self.navigationItem.leftBarButtonItems
-        }else{
-            self.defaultLeftButton = nil
-        }
-        self.navigationItem.leftBarButtonItems = [backButton]
         
         let lightColor = self.topColor.withAlphaComponent(0.4)
         recordBackground.backgroundColor = lightColor
@@ -370,7 +361,7 @@ public class QiscusChatVC: UIViewController{
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
+        
         self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
         
         if self.navigationItem.leftBarButtonItems != nil {
@@ -378,14 +369,17 @@ public class QiscusChatVC: UIViewController{
         }else{
             self.defaultLeftButton = nil
         }
-        self.navigationItem.leftBarButtonItems = [backButton]
-        
         if let navController = self.navigationController {
             self.isBeforeTranslucent = navController.navigationBar.isTranslucent
             self.navigationController?.navigationBar.isTranslucent = false
             self.defaultNavBarVisibility = self.navigationController!.isNavigationBarHidden
         }
         self.navigationController?.setNavigationBarHidden(false , animated: false)
+        
+        let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
+
+        self.navigationItem.setHidesBackButton(true, animated: false)
+        self.navigationItem.leftBarButtonItems = [backButton]
         if self.room != nil {
             self.loadTitle()
         }
@@ -411,7 +405,6 @@ public class QiscusChatVC: UIViewController{
     }
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
     }
     
     // MARK: - Memory Warning
