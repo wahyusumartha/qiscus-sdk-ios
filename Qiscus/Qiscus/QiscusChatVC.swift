@@ -62,11 +62,6 @@ public class QiscusChatVC: UIViewController{
             if oldValue == nil{
                 if let chatRoom = room{
                     let _ = self.view
-                    let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
-                    self.navigationItem.setHidesBackButton(true, animated: false)
-                    self.navigationItem.leftBarButtonItems = [
-                        backButton
-                    ]
                     self.loadMoreControl.removeFromSuperview()
                     if chatRoom.hasLoadMore {
                         self.loadMoreControl = UIRefreshControl()
