@@ -268,51 +268,6 @@ public class QiscusChatVC: UIViewController{
         }
         self.navigationItem.leftBarButtonItems = [backButton]
         
-        
-    }
-    override open func viewWillDisappear(_ animated: Bool) {
-        self.isPresence = false
-        dataPresenter.delegate = nil
-        if self.navigationController != nil {
-            self.navigationController?.navigationBar.isTranslucent = self.isBeforeTranslucent
-            self.navigationController?.setNavigationBarHidden(self.defaultNavBarVisibility, animated: false)
-            
-        }
-        self.navigationItem.setHidesBackButton(self.defaultBackButtonVisibility, animated: false)
-        self.navigationItem.leftBarButtonItems = self.defaultLeftButton
-        super.viewWillDisappear(animated)
-        
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
-        self.view.endEditing(true)
-        if self.room != nil{
-            self.unsubscribeTypingRealtime(onRoom: room!)
-        }
-        self.roomSynced = false
-        self.dismissLoading()
-    }
-    override open func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
-        self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
-        
-        if self.navigationItem.leftBarButtonItems != nil {
-            self.defaultLeftButton = self.navigationItem.leftBarButtonItems
-        }else{
-            self.defaultLeftButton = nil
-        }
-        self.navigationItem.leftBarButtonItems = [backButton]
-        
-        if self.room != nil {
-            self.loadTitle()
-        }
-        if #available(iOS 10.0, *) {
-            let center = UNUserNotificationCenter.current()
-            center.removeAllDeliveredNotifications() // To remove all delivered notifications
-            center.removeAllPendingNotificationRequests()
-        }else{
-            UIApplication.shared.cancelAllLocalNotifications()
-        }
         let lightColor = self.topColor.withAlphaComponent(0.4)
         recordBackground.backgroundColor = lightColor
         recordBackground.layer.cornerRadius = 16
@@ -341,7 +296,7 @@ public class QiscusChatVC: UIViewController{
         self.roomSynced = false
         unreadIndexPath = [IndexPath]()
         bottomButton.isHidden = true
-        dataPresenter.delegate = self
+        
         
         if self.loadMoreControl.isRefreshing {
             self.loadMoreControl.endRefreshing()
@@ -350,9 +305,7 @@ public class QiscusChatVC: UIViewController{
         self.inputBarBottomMargin.constant = 0
         self.view.layoutIfNeeded()
         self.view.endEditing(true)
-        self.isPresence = true
-        self.navigationController?.setNavigationBarHidden(false , animated: false)
-        self.isPresence = true
+        
         self.emptyChatImage.image = Qiscus.image(named: "empty_messages")?.withRenderingMode(.alwaysTemplate)
         self.emptyChatImage.tintColor = self.bottomColor
         
@@ -393,9 +346,63 @@ public class QiscusChatVC: UIViewController{
         
         setupNavigationTitle()
         setupPage()
-        Qiscus.logicThread.async {
-            self.syncRoom()
+    }
+    override open func viewWillDisappear(_ animated: Bool) {
+        self.isPresence = false
+        dataPresenter.delegate = nil
+        if self.navigationController != nil {
+            self.navigationController?.navigationBar.isTranslucent = self.isBeforeTranslucent
+            self.navigationController?.setNavigationBarHidden(self.defaultNavBarVisibility, animated: false)
+            
         }
+        self.navigationItem.setHidesBackButton(self.defaultBackButtonVisibility, animated: false)
+        self.navigationItem.leftBarButtonItems = self.defaultLeftButton
+        super.viewWillDisappear(animated)
+        
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
+        self.view.endEditing(true)
+        if self.room != nil{
+            self.unsubscribeTypingRealtime(onRoom: room!)
+        }
+        self.roomSynced = false
+        self.dismissLoading()
+    }
+    override open func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
+        self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
+        
+        if self.navigationItem.leftBarButtonItems != nil {
+            self.defaultLeftButton = self.navigationItem.leftBarButtonItems
+        }else{
+            self.defaultLeftButton = nil
+        }
+        self.navigationItem.leftBarButtonItems = [backButton]
+        
+        if let navController = self.navigationController {
+            self.isBeforeTranslucent = navController.navigationBar.isTranslucent
+            self.navigationController?.navigationBar.isTranslucent = false
+            self.defaultNavBarVisibility = self.navigationController!.isNavigationBarHidden
+        }
+        self.navigationController?.setNavigationBarHidden(false , animated: false)
+        if self.room != nil {
+            self.loadTitle()
+        }
+        if #available(iOS 10.0, *) {
+            let center = UNUserNotificationCenter.current()
+            center.removeAllDeliveredNotifications() // To remove all delivered notifications
+            center.removeAllPendingNotificationRequests()
+        }else{
+            UIApplication.shared.cancelAllLocalNotifications()
+        }
+        dataPresenter.delegate = self
+        if self.comments.count > 0 {
+            Qiscus.logicThread.async {
+                self.syncRoom()
+            }
+        }
+        self.view.endEditing(true)
     }
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -494,7 +501,6 @@ public class QiscusChatVC: UIViewController{
         self.collectionView.register(UINib(nibName: "QCellFileRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellFileRight")
         
         
-        
         if inputText.value == "" {
             sendButton.isEnabled = false
         }else{
@@ -506,7 +512,6 @@ public class QiscusChatVC: UIViewController{
         
         //welcomeView Setup
         self.unlockButton.addTarget(self, action: #selector(QiscusChatVC.confirmUnlockChat), for: .touchUpInside)
-        
         
         self.welcomeText.text = QiscusTextConfiguration.sharedInstance.emptyTitle
         self.welcomeSubtitle.text = QiscusTextConfiguration.sharedInstance.emptyMessage
