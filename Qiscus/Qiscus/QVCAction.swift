@@ -125,26 +125,7 @@ extension QiscusChatVC {
             self.loadSubtitle()
         }
     }
-    //MARK: -reset chat view
-    func reset(){
-        self.firstLoad = true
-        self.topicId = nil
-        self.users = nil
-        self.roomId = nil
-        self.distincId = ""
-        self.optionalData = nil
-        self.message = nil
-        self.newRoom = false
-        self.comments = [[QiscusCommentPresenter]]()
-        if audioPlayer != nil{
-            audioPlayer?.stop()
-        }
-        self.backAction = nil
-        self.titleAction = {}
-        self.unlockAction = {}
-        self.room = nil
-        
-    }
+    
     func showNoConnectionToast(){
         QToasterSwift.toast(target: self, text: QiscusTextConfiguration.sharedInstance.noConnectionText, backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
     }

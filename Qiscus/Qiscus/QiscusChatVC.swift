@@ -73,7 +73,13 @@ public class QiscusChatVC: UIViewController{
                         self.loadMoreControl.addTarget(self, action: #selector(QiscusChatVC.loadMore), for: UIControlEvents.valueChanged)
                         self.collectionView.addSubview(self.loadMoreControl)
                     }
-                    
+                    self.loadTitle()
+                    let image = Qiscus.image(named: "room_avatar")
+                    if QiscusHelper.isFileExist(inLocalPath: chatRoom.roomAvatarLocalPath){
+                        self.roomAvatar.loadAsync(fromLocalPath: chatRoom.roomAvatarLocalPath)
+                    }else{
+                        self.roomAvatar.loadAsync(chatRoom.roomAvatarURL, placeholderImage: image)
+                    }
                     self.subscribeRealtime(onRoom: chatRoom)
                 }
             }
@@ -84,36 +90,10 @@ public class QiscusChatVC: UIViewController{
     var loadMoreControl = UIRefreshControl()
     
     // MARK: - External data configuration
-    var topicId:Int?{
-        didSet{
-            if topicId != nil{
-                room = QiscusRoom.room(withLastTopicId: topicId!)
-            }else{
-                room = nil
-            }
-        }
-    }
+    var topicId:Int?
     
-    var users:[String]?{
-        didSet{
-            if users != nil && !newRoom{
-                loadWithUser = true
-                if users!.count == 1 {
-                    let user = users![0]
-                    room = QiscusRoom.room(withDistinctId: distincId, andUserEmail: user)
-                }
-            }
-        }
-    }
-    var roomId:Int?{
-        didSet{
-            if roomId != nil {
-                room = QiscusRoom.room(withId: self.roomId!)
-            }else{
-                room = nil
-            }
-        }
-    }
+    var users:[String]?
+    var roomId:Int?
     var distincId:String = ""
     var optionalData:String?
     var message:String?
@@ -258,7 +238,12 @@ public class QiscusChatVC: UIViewController{
     // MARK: - UI Lifecycle
     override open func viewDidLoad() {
         super.viewDidLoad()
-        
+        if self.comments.count == 0{
+            self.showLoading("Load data ...")
+            Qiscus.logicThread.async {
+                self.loadData()
+            }
+        }
         let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout
         layout?.sectionHeadersPinToVisibleBounds = true
         layout?.sectionFootersPinToVisibleBounds = true
@@ -266,6 +251,23 @@ public class QiscusChatVC: UIViewController{
         let deleteMenuItem: UIMenuItem = UIMenuItem(title: "Delete", action: #selector(QChatCell.deleteComment))
         let menuItems:[UIMenuItem] = [resendMenuItem,deleteMenuItem]
         UIMenuController.shared.menuItems = menuItems
+        
+        self.loadMoreControl.addTarget(self, action: #selector(QiscusChatVC.loadMore), for: UIControlEvents.valueChanged)
+        self.collectionView.addSubview(self.loadMoreControl)
+        
+        self.navigationController?.navigationBar.verticalGradientColor(topColor, bottomColor: bottomColor)
+        self.navigationController?.navigationBar.tintColor = tintColor
+        
+        let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
+        self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
+        
+        if self.navigationItem.leftBarButtonItems != nil {
+            self.defaultLeftButton = self.navigationItem.leftBarButtonItems
+        }else{
+            self.defaultLeftButton = nil
+        }
+        self.navigationItem.leftBarButtonItems = [backButton]
+        
         
     }
     override open func viewWillDisappear(_ animated: Bool) {
@@ -291,26 +293,19 @@ public class QiscusChatVC: UIViewController{
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        if self.comments.count == 0{
-            self.showLoading("Load data ...")
-            Qiscus.logicThread.async {
-                self.loadData()
-            }
-        }else{
-            if let chatRoom = self.room {
-                self.loadTitle()
-                let image = Qiscus.image(named: "room_avatar")
-                if let avatar = chatRoom.avatarImage {
-                    self.roomAvatar.image = avatar
-                }else{
-                    self.roomAvatar.loadAsync(chatRoom.roomAvatarURL, placeholderImage: image)
-                }
-            }
-        }
-        self.topColor = Qiscus.shared.styleConfiguration.color.topColor
-        self.bottomColor = Qiscus.shared.styleConfiguration.color.bottomColor
-        self.tintColor = Qiscus.shared.styleConfiguration.color.tintColor
+        let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
+        self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
         
+        if self.navigationItem.leftBarButtonItems != nil {
+            self.defaultLeftButton = self.navigationItem.leftBarButtonItems
+        }else{
+            self.defaultLeftButton = nil
+        }
+        self.navigationItem.leftBarButtonItems = [backButton]
+        
+        if self.room != nil {
+            self.loadTitle()
+        }
         if #available(iOS 10.0, *) {
             let center = UNUserNotificationCenter.current()
             center.removeAllDeliveredNotifications() // To remove all delivered notifications
@@ -387,11 +382,6 @@ public class QiscusChatVC: UIViewController{
             self.recordButton.isHidden = true
         }
         
-        if self.room != nil && !firstLoad {
-            if let newRoom = QiscusRoom.room(withId: self.room!.roomId){
-                self.room = newRoom
-            }
-        }
         if !self.isLastRowVisible {
             self.bottomButton.isHidden = false
         }else{
@@ -503,24 +493,6 @@ public class QiscusChatVC: UIViewController{
         self.collectionView.register(UINib(nibName: "QCellFileLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellFileLeft")
         self.collectionView.register(UINib(nibName: "QCellFileRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellFileRight")
         
-        self.loadMoreControl.addTarget(self, action: #selector(QiscusChatVC.loadMore), for: UIControlEvents.valueChanged)
-        self.collectionView.addSubview(self.loadMoreControl)
-        
-        self.navigationController?.navigationBar.verticalGradientColor(topColor, bottomColor: bottomColor)
-        self.navigationController?.navigationBar.tintColor = tintColor
-        
-        let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
-        self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
-        
-        if self.navigationItem.leftBarButtonItems != nil {
-            self.defaultLeftButton = self.navigationItem.leftBarButtonItems
-        }else{
-            self.defaultLeftButton = nil
-        }
-        
-        self.navigationItem.setHidesBackButton(true, animated: false)
-        
-        self.navigationItem.leftBarButtonItems = [backButton]
         
         
         if inputText.value == "" {

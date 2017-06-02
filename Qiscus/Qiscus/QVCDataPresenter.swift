@@ -472,7 +472,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
     }
     public func dataPresenter(didChangeStatusFrom commentId: Int, toStatus: QiscusCommentStatus, topicId: Int){
         Qiscus.logicThread.async {
-            if let chatRoom = self.room{
+            if let chatRoom = self.room {
                 if topicId == chatRoom.roomLastCommentTopicId{
                     var indexToReload = [IndexPath]()
                     
@@ -514,9 +514,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
        
     }
     public func dataPresenter(didChangeRoom room: QiscusRoom, onRoomWithId roomId: Int) {
-        if self.room?.roomId == room.roomId{
-            self.room = room
-        }
+        self.room = room
     }
     public func dataPresenter(didFailLoad error: String) {
         self.dismissLoading()

@@ -387,17 +387,24 @@ import Photos
 }
 // MARK: QiscusServiceDelegate
 extension QiscusDataPresenter: QiscusServiceDelegate{
-    func qiscusService(didFinishLoadRoom inRoom: QiscusRoom) {
+    func qiscusService(didFinishLoadRoom inRoom: QiscusRoom, withMessage message: String?) {
         Qiscus.logicThread.async {
             let comments = QiscusComment.grouppedComment(inTopicId: inRoom.roomLastCommentTopicId, limit:20)
             let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
             if let chatView = Qiscus.shared.chatViews[inRoom.roomId] {
                 chatView.dataPresenter(didFinishLoad: presenters, inRoom: inRoom)
+                if message != nil {
+                    QiscusCommentClient.shared.postMessage(message: message!, topicId: inRoom.roomLastCommentTopicId)
+                    chatView.message = nil
+                }
             }else{
                 if let chatView = self.delegate as? QiscusChatVC {
                     chatView.dataPresenter(didFinishLoad: presenters, inRoom: inRoom)
-                    chatView.loadTitle()
                     Qiscus.shared.chatViews[inRoom.roomId] = chatView
+                    if message != nil {
+                        QiscusCommentClient.shared.postMessage(message: message!, topicId: inRoom.roomLastCommentTopicId)
+                        chatView.message = nil
+                    }
                 }
             }
         }

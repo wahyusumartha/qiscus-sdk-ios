@@ -36,7 +36,7 @@ fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
   }
 }
 @objc public protocol QiscusServiceDelegate {
-    func qiscusService(didFinishLoadRoom inRoom:QiscusRoom)
+    func qiscusService(didFinishLoadRoom inRoom:QiscusRoom, withMessage message:String?)
     func qiscusService(didFinishSync hasNewData:Bool)
     func qiscusService(gotNewMessage data:QiscusCommentPresenter, inRoom room:QiscusRoom,realtime: Bool)
     func qiscusService(didChangeContent data:QiscusCommentPresenter)
@@ -1406,13 +1406,9 @@ open class QiscusCommentClient: NSObject {
                                 }
                                 self.delegate?.qiscusService(didChangeRoom: room, onRoomWithId: room.roomId)
                             }
-                            chatView.loadTitle()
+//                            chatView.loadTitle()
                             self.commentDelegate?.finishedLoadFromAPI(topicId)
-                            self.delegate?.qiscusService(didFinishLoadRoom: room)
-                            if withMessage != nil {
-                                self.postMessage(message: withMessage!, topicId: topicId)
-                                chatView.message = nil
-                            }
+                            self.delegate?.qiscusService(didFinishLoadRoom: room, withMessage: withMessage)
                         }
                     }else if error != JSON.null{
                         Qiscus.printLog(text: "error getRoom: \(error)")
@@ -1572,14 +1568,7 @@ open class QiscusCommentClient: NSObject {
                         
                         
                         self.commentDelegate?.finishedLoadFromAPI(topicId)
-                        self.delegate?.qiscusService(didFinishLoadRoom: room)
-                        if let delegate = QiscusDataPresenter.shared.delegate as? QiscusChatVC{
-                            delegate.topicId = topicId
-                            if withMessage != nil {
-                                self.postMessage(message: withMessage!, topicId: topicId)
-                                delegate.message = nil
-                            }
-                        }
+                        self.delegate?.qiscusService(didFinishLoadRoom: room, withMessage: withMessage)
                     }else if error != JSON.null{
                         Qiscus.printLog(text: "error getListComment: \(error)")
                         var errorMessage = "Failed to load room data"
@@ -1734,16 +1723,10 @@ open class QiscusCommentClient: NSObject {
                         }
                         
                         self.commentDelegate?.finishedLoadFromAPI(topicId)
-                        self.delegate?.qiscusService(didFinishLoadRoom: room)
-                        if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                            chatView.topicId = topicId
-                            chatView.loadTitle()
-                            if withMessage != nil {
-                                self.postMessage(message: withMessage!, topicId: topicId)
-                                chatView.message = nil
-                            }
+                        self.delegate?.qiscusService(didFinishLoadRoom: room, withMessage: withMessage)
+                        if withMessage != nil {
+                            self.postMessage(message: withMessage!, topicId: topicId)
                         }
-                        
                     }else if error != JSON.null{
                         Qiscus.printLog(text: "error getListComment: \(error)")
                         var errorMessage = "Failed to load room data"
@@ -1911,9 +1894,7 @@ open class QiscusCommentClient: NSObject {
                                     }
                                     self.delegate?.qiscusService(didChangeRoom: room, onRoomWithId: room.roomId)
                                 }
-                                if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                                    chatView.loadTitle()
-                                }
+
                                 if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
                                     roomDelegate.didFinishUpdateRoom(onRoom: room)
                                 }
@@ -2156,14 +2137,14 @@ open class QiscusCommentClient: NSObject {
                         }
                     }
                     
-                    if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
-                        roomDelegate.didFinishLoadRoom(onRoom: room)
-                    }
-                    if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                        chatView.loadTitle()
-                    }
+//                    if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+//                        roomDelegate.didFinishLoadRoom(onRoom: room)
+//                    }
+//                    if let chatView = Qiscus.shared.chatViews[room.roomId] {
+//                        chatView.loadTitle()
+//                    }
                     
-                    self.delegate?.qiscusService(didFinishLoadRoom: room)
+//                    self.delegate?.qiscusService(didFinishLoadRoom: room)
                     if gotNewComment {
                         self.delegate?.qiscusService(didFinishSync: true)
                     }

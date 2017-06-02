@@ -270,7 +270,6 @@ import CocoaMQTT
                 }
             }
         }
-        //chatVC.reset()
         if distinctId != nil{
             chatVC.distincId = distinctId!
         }else{
