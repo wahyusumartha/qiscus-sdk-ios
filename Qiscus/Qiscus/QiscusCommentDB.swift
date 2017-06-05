@@ -145,11 +145,15 @@ public class QiscusCommentDB: Object {
                 commentDB.commentUniqueId = uniqueId
             }
         }else{
-            try! realm.write {
-                commentDB.localId = QiscusCommentDB.lastId + 1
-                realm.add(commentDB)
-                commentDB.commentId = commentId
-                commentDB.commentUniqueId = uniqueId
+            do {
+                try realm.write {
+                    commentDB.localId = commentId
+                    realm.add(commentDB)
+                    commentDB.commentId = commentId
+                    commentDB.commentUniqueId = uniqueId
+                }
+            } catch let error {
+                print("\(error)")
             }
         }
         return commentDB
