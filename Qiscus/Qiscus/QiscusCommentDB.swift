@@ -270,7 +270,7 @@ public class QiscusCommentDB: Object {
             if after {
                 query = "\(query) AND commentId > \(fromCommentId!)"
             }else{
-                query = "\(query) AND commentId < \(fromCommentId!)"
+                query = "\(query) AND commentId <= \(fromCommentId!)"
             }
         }
         let searchQuery:NSPredicate = NSPredicate(format: query)

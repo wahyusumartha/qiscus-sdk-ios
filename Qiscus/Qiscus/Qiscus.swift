@@ -874,11 +874,14 @@ extension Qiscus:CocoaMQTTDelegate{
                     var comment = QiscusComment()
                     var saved = false
                     let uniqueId = json["unique_temp_id"].stringValue
+                    
                     if let dbComment = QiscusComment.comment(withId: commentId, andUniqueId: uniqueId){
                         comment = dbComment
                     }else{
-                        comment = QiscusComment.newComment(withId: commentId, andUniqueId: uniqueId)
-                        saved = true
+                        if QiscusRoom.room(withId: roomId) != nil {
+                            comment = QiscusComment.newComment(withId: commentId, andUniqueId: uniqueId)
+                            saved = true
+                        }
                     }
                     comment.commentText = json["message"].stringValue
                     comment.commentSenderEmail = email
@@ -899,7 +902,8 @@ extension Qiscus:CocoaMQTTDelegate{
                             if let syncId = QiscusComment.getLastSyncCommentId(notifTopicId, unsyncCommentId: commentId){
                                 QiscusCommentClient.shared.syncMessage(inRoom: room, fromComment: syncId, silent: true, triggerDelegate: true)
                             }
-                        }else{
+                        }
+                        else{
                             var roomChanged = false
                             var userChanged = false
                             if let user = QiscusUser.getUserWithEmail(email){

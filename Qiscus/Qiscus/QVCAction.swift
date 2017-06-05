@@ -651,7 +651,7 @@ extension QiscusChatVC {
             if Qiscus.shared.connected{
                 var firstCommentId = Int(0)
                 if self.comments.count > 0 {
-                    firstCommentId = self.comments.first!.first!.commentId
+                    firstCommentId = self.comments.first!.first!.commentBeforeId
                 }
                 dataPresenter.loadMore(inRoom: self.room!, fromComment: firstCommentId)
             }else{

@@ -41,20 +41,24 @@ import Photos
         Qiscus.logicThread.async {
             if let room = QiscusRoomDB.roomDB(withId: roomId){
                 let topicId = room.roomLastCommentTopicId
-                if let unsyncCommentId = QiscusComment.checkSync(inTopicId: topicId){
-                    if let syncId = QiscusComment.getLastSyncCommentId(topicId, unsyncCommentId: unsyncCommentId){
-                        QiscusCommentClient.shared.syncMessage(inRoom: room.room(), fromComment: syncId)
+                if QiscusComment.getComments(inTopicId: topicId).count >= 10 {
+                    if let unsyncCommentId = QiscusComment.checkSync(inTopicId: topicId){
+                        if let syncId = QiscusComment.getLastSyncCommentId(topicId, unsyncCommentId: unsyncCommentId){
+                            QiscusCommentClient.shared.syncMessage(inRoom: room.room(), fromComment: syncId)
+                        }
+                    }else{
+                        let comments = QiscusComment.grouppedComment(inTopicId: topicId, limit: 20)
+                        let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
+                        let chatRoom = room.room()
+                        if let chatView = Qiscus.shared.chatViews[chatRoom.roomId] {
+                            chatView.dataPresenter(didFinishLoad: presenters, inRoom: chatRoom)
+                        }
+                        if let message = withMessage {
+                            self.commentClient.postMessage(message: message, topicId: topicId)
+                        }
                     }
                 }else{
-                    let comments = QiscusComment.grouppedComment(inTopicId: topicId, limit: 20)
-                    let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
-                    let chatRoom = room.room()
-                    if let chatView = Qiscus.shared.chatViews[chatRoom.roomId] {
-                        chatView.dataPresenter(didFinishLoad: presenters, inRoom: chatRoom)
-                    }
-                    if let message = withMessage {
-                        self.commentClient.postMessage(message: message, topicId: topicId)
-                    }
+                    self.commentClient.getRoom(withID: roomId, withMessage: withMessage)
                 }
             }else{
                 self.commentClient.getRoom(withID: roomId, withMessage: withMessage)
@@ -65,19 +69,23 @@ import Photos
         Qiscus.logicThread.async {
             if let room = QiscusRoom.room(withDistinctId: distinctId, andUserEmail: user){
                 let topicId = room.roomLastCommentTopicId
-                if let unsyncCommentId = QiscusComment.checkSync(inTopicId: topicId){
-                    if let syncId = QiscusComment.getLastSyncCommentId(topicId, unsyncCommentId: unsyncCommentId){
-                        QiscusCommentClient.shared.syncMessage(inRoom: room, fromComment: syncId)
+                if QiscusComment.getComments(inTopicId: topicId).count >= 10 {
+                    if let unsyncCommentId = QiscusComment.checkSync(inTopicId: topicId){
+                        if let syncId = QiscusComment.getLastSyncCommentId(topicId, unsyncCommentId: unsyncCommentId){
+                            QiscusCommentClient.shared.syncMessage(inRoom: room, fromComment: syncId)
+                        }
+                    }else{
+                        let comments = QiscusComment.grouppedComment(inTopicId: room.roomLastCommentTopicId,limit:20)
+                        let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
+                        if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                            chatView.dataPresenter(didFinishLoad: presenters, inRoom: room)
+                        }
+                        if let message = withMessage {
+                            self.commentClient.postMessage(message: message, topicId: room.roomLastCommentTopicId)
+                        }
                     }
                 }else{
-                    let comments = QiscusComment.grouppedComment(inTopicId: room.roomLastCommentTopicId,limit:20)
-                    let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
-                    if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                        chatView.dataPresenter(didFinishLoad: presenters, inRoom: room)
-                    }
-                    if let message = withMessage {
-                        self.commentClient.postMessage(message: message, topicId: room.roomLastCommentTopicId)
-                    }
+                    self.commentClient.getListComment(withUsers: [user], distincId: distinctId, optionalData:optionalData, withMessage: withMessage)
                 }
             }else{
                 self.commentClient.getListComment(withUsers: [user], distincId: distinctId, optionalData:optionalData, withMessage: withMessage)

@@ -29,6 +29,7 @@ public enum QiscusCommentPresenterType:Int {
     var commentStatus = QiscusCommentStatus.sent
     var commentType = QiscusCommentPresenterType.text
     var commentUniqueid = ""
+    var commentBeforeId:Int = 0
     var commentIndexPath:IndexPath?
     var createdAt:Double = Double(0)
     var isToday:Bool = false
@@ -138,6 +139,7 @@ public enum QiscusCommentPresenterType:Int {
         commentPresenter.userEmail = comment.commentSenderEmail
         commentPresenter.commentUniqueid = comment.commentUniqueId
         commentPresenter.topicId = comment.commentTopicId
+        commentPresenter.commentBeforeId = comment.commentBeforeId
         
         if let user = comment.sender{
             commentPresenter.userFullName = user.userFullName
