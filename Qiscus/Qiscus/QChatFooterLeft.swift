@@ -16,36 +16,45 @@ class QChatFooterLeft: UICollectionReusableView {
     public var comment:QiscusCommentPresenter?{
         didSet{
             if let data = comment {
-                avatarImage.image = nil
-                avatarLabel.isHidden = false
-                avatarImage.backgroundColor = UIColor.clear
-                let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
-                let colorIndex = data.userFullName.characters.count % bgColor.count
-                avatarImage.backgroundColor = bgColor[colorIndex]
-                avatarLabel.text = String(data.userFullName.characters.first!).uppercased()
                 
-                if QiscusHelper.isFileExist(inLocalPath: data.userAvatarLocalPath){
-                    let commentId = data.commentId as AnyObject
-                    avatarImage.loadAsync(fromLocalPath: data.userAvatarLocalPath, onLoaded: { (image, data) in
-                        if let commentId = data as? Int {
-                            if self.comment?.commentId == commentId {
-                                self.avatarLabel.isHidden = true
-                                self.avatarImage.image = image
-                                self.avatarImage.backgroundColor = UIColor.clear
-                            }
-                        }
-                    },optionalData:commentId)
+                
+                if let avatar = data.userAvatar {
+                    avatarLabel.isHidden = true
+                    avatarImage.image = avatar
+                    avatarImage.backgroundColor = UIColor.clear
                 }else{
-                    let commentId = data.commentId as AnyObject
-                    avatarImage.loadAsync(data.userAvatarURL, onLoaded: { (image,data) in
-                        if let commentId = data as? Int {
-                            if self.comment?.commentId == commentId {
-                                self.avatarLabel.isHidden = true
-                                self.avatarImage.image = image
-                                self.avatarImage.backgroundColor = UIColor.clear
+                    avatarImage.image = nil
+                    avatarLabel.isHidden = false
+                    avatarImage.backgroundColor = UIColor.clear
+                    let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
+                    let colorIndex = data.userFullName.characters.count % bgColor.count
+                    avatarImage.backgroundColor = bgColor[colorIndex]
+                    avatarLabel.text = String(data.userFullName.characters.first!).uppercased()
+                    if QiscusHelper.isFileExist(inLocalPath: data.userAvatarLocalPath){
+                        let commentId = data.commentId as AnyObject
+                        avatarImage.loadAsync(fromLocalPath: data.userAvatarLocalPath, onLoaded: { (image, data) in
+                            if let commentId = data as? Int {
+                                if self.comment?.commentId == commentId {
+                                    self.avatarLabel.isHidden = true
+                                    self.avatarImage.image = image
+                                    self.avatarImage.backgroundColor = UIColor.clear
+                                    self.comment?.userAvatar = image
+                                }
                             }
-                        }
-                    },optionalData:commentId)
+                        },optionalData:commentId)
+                    }else{
+                        let commentId = data.commentId as AnyObject
+                        avatarImage.loadAsync(data.userAvatarURL, onLoaded: { (image,data) in
+                            if let commentId = data as? Int {
+                                if self.comment?.commentId == commentId {
+                                    self.avatarLabel.isHidden = true
+                                    self.avatarImage.image = image
+                                    self.avatarImage.backgroundColor = UIColor.clear
+                                    self.comment?.userAvatar = image
+                                }
+                            }
+                        },optionalData:commentId)
+                    }
                 }
             }
         }

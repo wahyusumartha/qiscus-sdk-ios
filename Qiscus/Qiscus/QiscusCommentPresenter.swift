@@ -42,6 +42,7 @@ public enum QiscusCommentPresenterType:Int {
     var userAvatarLocalPath = ""
     var userAvatarURL = ""
     var userEmail = ""
+    var userAvatar:UIImage?
     
     // link attribute
     var showLink = false
