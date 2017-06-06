@@ -49,8 +49,7 @@ class QCellTextRight: QChatCell {
         LinkContainer.addGestureRecognizer(tapRecognizer)
         linkImage.clipsToBounds = true
     }
-    
-    open override func setupCell(){
+    public override func dataChanged(oldValue: QiscusCommentPresenter, new: QiscusCommentPresenter) {
         Qiscus.uiThread.async {
             self.textView.attributedText = self.data.commentAttributedText
             self.textView.linkTextAttributes = self.data.linkTextAttributes
@@ -122,6 +121,9 @@ class QCellTextRight: QChatCell {
             self.updateStatus(toStatus: self.data.commentStatus)
             self.textView.layoutIfNeeded()
         }
+    }
+    open override func setupCell(){
+        
     }
     open override func updateStatus(toStatus status:QiscusCommentStatus){
         switch status {

@@ -54,6 +54,27 @@ open class QiscusColorConfiguration: NSObject {
     public var bottomColor = UIColor(red: 23/255.0, green: 177/255.0, blue: 149/255.0, alpha: 1)
     public var tintColor = UIColor.white
     
+    public var avatarBackgroundColor:[UIColor] = [
+        UIColor(red: 1, green: 23/255, blue: 68/255, alpha: 1),
+        UIColor(red: 61/255, green: 90/255, blue: 254/255, alpha: 1),
+        UIColor(red: 198/255, green: 1, blue: 0, alpha: 1),
+        UIColor(red: 29/255, green: 233/255, blue: 182/255, alpha: 1),
+        UIColor(red: 1, green: 145/255, blue: 0, alpha: 1),
+        UIColor(red: 0, green: 176/255, blue: 1, alpha: 1),
+        UIColor(red: 118/255, green: 1, blue: 3/255, alpha: 1),
+        UIColor(red: 1, green: 61/255, blue: 0, alpha: 1),
+        UIColor(red: 101/255, green: 31/255, blue: 1, alpha: 1),
+        UIColor(red: 1, green: 196/255, blue: 0, alpha: 1),
+        UIColor(red: 41/255, green: 121/255, blue: 1, alpha: 1),
+        UIColor(red: 1, green: 234/255, blue: 0, alpha: 1),
+        UIColor(red: 213/255, green: 0, blue: 249/255, alpha: 1),
+        UIColor(red: 0, green: 230/255, blue: 118/255, alpha: 1),
+        UIColor(red: 245/255, green: 0, blue: 87/255, alpha: 1),
+        UIColor(red: 0, green: 229/255, blue: 1, alpha: 1)
+    ]
+    
+    
+    
     public var baseColor:UIColor{
         get{
             return self.topColor

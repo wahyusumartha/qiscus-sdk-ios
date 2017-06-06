@@ -58,21 +58,13 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                 return footerCell
             }else{
                 let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterLeft", for: indexPath) as! QChatFooterLeft
-                footerCell.setup(withComent: comment)
+                footerCell.comment = comment
                 return footerCell
             }
         }else{
             let headerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellHeader", for: indexPath) as! QChatHeaderCell
-            
-            var date:String = ""
-            
-            if comment.commentDate == QiscusHelper.thisDateString {
-                date = QiscusTextConfiguration.sharedInstance.todayText
-            }else{
-                date = comment.commentDate
-            }
-            headerCell.setupHeader(withText: date)
-            headerCell.clipsToBounds = true
+        
+            headerCell.dateString = comment.commentDate
             return headerCell
         }
     }

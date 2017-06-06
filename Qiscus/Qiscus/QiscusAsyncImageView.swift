@@ -15,7 +15,7 @@ open class QiscusAsyncImageView: UIImageView {
     
 }
 public extension UIImageView {
-    public func loadAsync(_ url:String, placeholderImage:UIImage? = nil, header : [String : String] = [String : String](), useCache:Bool = true){
+    public func loadAsync(_ url:String, placeholderImage:UIImage? = nil, header : [String : String] = [String : String](), useCache:Bool = true, onLoaded: (()->Void)? = nil){
         var returnImage = UIImage()
         if placeholderImage != nil {
             returnImage = placeholderImage!
@@ -24,10 +24,13 @@ public extension UIImageView {
         imageForUrl(url: url, header: header, useCache: useCache, completionHandler:{(image: UIImage?, url: String) in
             if let returnImage = image{
                 self.image = returnImage
+                if let completion = onLoaded{
+                    completion()
+                }
             }
         })
     }
-    public func loadAsync(fromLocalPath localPath:String, placeholderImage:UIImage? = nil){
+    public func loadAsync(fromLocalPath localPath:String, placeholderImage:UIImage? = nil,onLoaded: (()->Void)? = nil){
         var returnImage = UIImage()
         if placeholderImage != nil {
             returnImage = placeholderImage!
@@ -37,6 +40,9 @@ public extension UIImageView {
             if let image = UIImage(contentsOfFile: localPath){
                 DispatchQueue.main.async {
                     self.image = image
+                    if let completion = onLoaded{
+                        completion()
+                    }
                 }
             }
         }

@@ -15,7 +15,11 @@ import UIKit
 class QChatCell: UICollectionViewCell {
     var chatCellDelegate:ChatCellDelegate?
     var delegate: ChatCellDelegate?
-    var data = QiscusCommentPresenter()
+    var data: QiscusCommentPresenter = QiscusCommentPresenter(){
+        didSet{
+            self.dataChanged(oldValue: oldValue, new: data)
+        }
+    }
     
     func setupCell(){
         // implementation will be overrided on child class
@@ -74,6 +78,9 @@ class QChatCell: UICollectionViewCell {
         // implementation will be overrided on child class
     }
     func clearContext(){
+        
+    }
+    public func dataChanged(oldValue: QiscusCommentPresenter, new: QiscusCommentPresenter){
         
     }
 }

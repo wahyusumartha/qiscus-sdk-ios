@@ -29,6 +29,7 @@ public class QiscusCommentDB: Object {
     public dynamic var commentFontName:String = ""
     public dynamic var commentButton:String = ""
     
+    
     // MARK: - Primary Key
     override open class func primaryKey() -> String {
         return "localId"
@@ -148,9 +149,10 @@ public class QiscusCommentDB: Object {
             do {
                 try realm.write {
                     commentDB.localId = commentId
-                    realm.add(commentDB)
                     commentDB.commentId = commentId
                     commentDB.commentUniqueId = uniqueId
+                    realm.create(QiscusCommentDB.self, value: commentDB, update: true)
+                    
                 }
             } catch let error {
                 print("\(error)")
