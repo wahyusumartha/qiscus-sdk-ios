@@ -22,20 +22,30 @@ class QChatFooterLeft: UICollectionReusableView {
                 let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
                 let colorIndex = data.userFullName.characters.count % bgColor.count
                 avatarImage.backgroundColor = bgColor[colorIndex]
-                avatarLabel.text = String(data.userFullName.characters.first!)
+                avatarLabel.text = String(data.userFullName.characters.first!).uppercased()
                 
-                //avatarImage.image = Qiscus.image(named: "in_chat_avatar")
                 if QiscusHelper.isFileExist(inLocalPath: data.userAvatarLocalPath){
-                    avatarImage.loadAsync(fromLocalPath: data.userAvatarLocalPath, onLoaded: {
-                        self.avatarLabel.isHidden = true
-                        self.avatarImage.backgroundColor = UIColor.clear
-                    })
+                    let commentId = data.commentId as AnyObject
+                    avatarImage.loadAsync(fromLocalPath: data.userAvatarLocalPath, onLoaded: { (image, data) in
+                        if let commentId = data as? Int {
+                            if self.comment?.commentId == commentId {
+                                self.avatarLabel.isHidden = true
+                                self.avatarImage.image = image
+                                self.avatarImage.backgroundColor = UIColor.clear
+                            }
+                        }
+                    },optionalData:commentId)
                 }else{
-                    avatarImage.loadAsync(data.userAvatarURL,onLoaded: {
-                        self.avatarLabel.isHidden = true
-                        self.avatarImage.backgroundColor = UIColor.clear
-                    })
-                    avatarImage.loadAsync(data.userAvatarURL)
+                    let commentId = data.commentId as AnyObject
+                    avatarImage.loadAsync(data.userAvatarURL, onLoaded: { (image,data) in
+                        if let commentId = data as? Int {
+                            if self.comment?.commentId == commentId {
+                                self.avatarLabel.isHidden = true
+                                self.avatarImage.image = image
+                                self.avatarImage.backgroundColor = UIColor.clear
+                            }
+                        }
+                    },optionalData:commentId)
                 }
             }
         }

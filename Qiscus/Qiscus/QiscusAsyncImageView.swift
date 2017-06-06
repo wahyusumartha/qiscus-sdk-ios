@@ -47,7 +47,24 @@ public extension UIImageView {
             }
         }
     }
-    
+    public func loadAsync(_ url:String, onLoaded: @escaping ((UIImage,AnyObject?)->Void), optionalData:AnyObject? = nil){
+        imageForUrl(url: url, completionHandler:{(image: UIImage?, url: String) in
+            if let returnImage = image{
+                DispatchQueue.main.async {
+                    onLoaded(returnImage,optionalData)
+                }
+            }
+        })
+    }
+    public func loadAsync(fromLocalPath localPath:String, onLoaded: @escaping ((UIImage,AnyObject?)->Void), optionalData:AnyObject? = nil){
+        DispatchQueue.global().async {
+            if let image = UIImage(contentsOfFile: localPath){
+                DispatchQueue.main.async {
+                    onLoaded(image,optionalData)
+                }
+            }
+        }
+    }
     // func imageForUrl
     //  Modified from ImageLoader.swift Created by Nate Lyman on 7/5/14.
     //              git: https://github.com/natelyman/SwiftImageLoader
