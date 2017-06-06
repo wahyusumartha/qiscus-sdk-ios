@@ -1612,12 +1612,12 @@ open class QiscusCommentClient: NSObject {
     }
     
     // MARK: - Create New Room
-    open func createNewRoom(withUsers users:[String], optionalData:String? = nil, withMessage:String? = nil){ // 
+    open func createNewRoom(withUsers users:[String], roomName:String, optionalData:String? = nil, withMessage:String? = nil){ //
         func newGroupRoom(){
             let loadURL = QiscusConfig.CREATE_NEW_ROOM
             
             var parameters:[String : AnyObject] =  [
-                "name" : QiscusUIConfiguration.sharedInstance.copyright.chatTitle as AnyObject,
+                "name" : roomName as AnyObject,
                 "participants" : users as AnyObject,
                 "token"  : qiscus.config.USER_TOKEN as AnyObject
             ]
