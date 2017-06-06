@@ -577,8 +577,6 @@ import CocoaMQTT
         }
         
         Qiscus.sharedInstance.isPushed = true
-        QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
-        QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         
         let chatVC = QiscusChatVC()
         //chatVC.reset()
@@ -591,7 +589,9 @@ import CocoaMQTT
         chatVC.message = withMessage
         chatVC.newRoom = true
         chatVC.archived = readOnly
-        
+        chatVC.users = users
+        chatVC.navTitle = title
+        chatVC.navSubtitle = subtitle
         return chatVC
     }
     @objc public class func createChat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil){

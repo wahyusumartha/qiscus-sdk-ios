@@ -703,7 +703,7 @@ extension QiscusChatVC {
     // MARK: - Load DataSource on firstTime
     func loadData(){
         if newRoom && (self.users != nil){
-            dataPresenter.loadComments(inNewGroupChat: users!, optionalData: self.optionalData, withMessage: self.message)
+            dataPresenter.loadComments(inNewGroupChat: users!, roomName: navTitle, optionalData: self.optionalData, withMessage: self.message)
         }else{
             if loadWithUser && users != nil{
                 if users!.count == 1 {

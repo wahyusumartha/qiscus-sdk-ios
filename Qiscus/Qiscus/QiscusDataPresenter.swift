@@ -92,8 +92,8 @@ import Photos
             }
         }
     }
-    func loadComments(inNewGroupChat users:[String], optionalData:String? = nil, withMessage:String? = nil){
-        commentClient.createNewRoom(withUsers: users, optionalData: optionalData, withMessage: withMessage)
+    func loadComments(inNewGroupChat users:[String], roomName:String, optionalData:String? = nil, withMessage:String? = nil){
+        commentClient.createNewRoom(withUsers: users, roomName: roomName, optionalData: optionalData, withMessage: withMessage)
     }
     public func loadMore(inRoom room:QiscusRoom, fromComment commentId:Int){
         Qiscus.logicThread.async {
