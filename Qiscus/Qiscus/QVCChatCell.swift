@@ -14,6 +14,16 @@ import SwiftyJSON
 // MARK: - ChatCell Delegate
 extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate, ChatCellPostbackDelegate{
     // MARK: ChatCellPostbackDelegate
+    func didTapAccountLinking(withData data: JSON) {
+        Qiscus.uiThread.async {
+            let webView = ChatPreviewDocVC()
+            webView.accountLinking = true
+            webView.accountData = data
+            
+            self.navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+            self.navigationController?.pushViewController(webView, animated: true)
+        }
+    }
     func didTapPostbackButton(withData data: JSON) {
         Qiscus.logicThread.async {
             if Qiscus.sharedInstance.connected{

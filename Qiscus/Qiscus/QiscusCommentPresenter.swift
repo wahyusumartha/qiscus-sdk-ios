@@ -17,6 +17,7 @@ public enum QiscusCommentPresenterType:Int {
     case document
     case file
     case postback
+    case accountLinking
 }
 @objc public class QiscusCommentPresenter: NSObject {
     // commentAttribute
@@ -153,8 +154,12 @@ public enum QiscusCommentPresenterType:Int {
             position = "Right"
         }
         switch comment.commentType {
-        case .postback:
-            commentPresenter.commentType = .postback
+        case .postback, .account:
+            if comment.commentType == .postback {
+                commentPresenter.commentType = .postback
+            }else{
+                commentPresenter.commentType = .accountLinking
+            }
             commentPresenter.cellIdentifier = "cellPostback\(position)"
             commentPresenter.showLink = false
             
@@ -397,9 +402,15 @@ public enum QiscusCommentPresenterType:Int {
         
         size = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
         if postback && buttonPayload != nil{
-            let payload = JSON(parseJSON: buttonPayload!).arrayValue
-            let heightAdd = CGFloat(35 * payload.count)
-            size.height += heightAdd
+            
+            let payload = JSON(parseJSON: buttonPayload!)
+            
+            if let buttonsPayload = payload.array {
+                let heightAdd = CGFloat(35 * buttonsPayload.count)
+                size.height += heightAdd
+            }else{
+                size.height += 35
+            }
         }
         
         return size

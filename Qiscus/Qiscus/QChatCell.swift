@@ -55,6 +55,9 @@ class QChatCell: UICollectionViewCell {
                     preview.url = url
                     preview.roomName = room.roomName
                     
+                    let backButton = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+                    chatView.navigationItem.backBarButtonItem = backButton
+                    
                     chatView.navigationController?.pushViewController(preview, animated: true)
                 }else{
                     if let url = URL(string: data.remoteURL!){

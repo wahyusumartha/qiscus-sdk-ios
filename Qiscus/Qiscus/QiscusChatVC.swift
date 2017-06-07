@@ -276,7 +276,7 @@ public class QiscusChatVC: UIViewController{
         self.emptyChatImage.tintColor = self.topColor
         
         if let navController = self.navigationController {
-            self.isBeforeTranslucent = navController.navigationBar.isTranslucent
+            //self.isBeforeTranslucent = navController.navigationBar.isTranslucent
             self.navigationController?.navigationBar.isTranslucent = false
             self.defaultNavBarVisibility = self.navigationController!.isNavigationBarHidden
         }
@@ -338,15 +338,15 @@ public class QiscusChatVC: UIViewController{
         self.isPresence = false
         dataPresenter.delegate = nil
         
-        if self.defaultBack{
-            if self.navigationController != nil {
-                self.navigationController?.navigationBar.isTranslucent = self.isBeforeTranslucent
-                self.navigationController?.setNavigationBarHidden(self.defaultNavBarVisibility, animated: false)
-                
-            }
-            self.navigationItem.setHidesBackButton(self.defaultBackButtonVisibility, animated: false)
-            self.navigationItem.leftBarButtonItems = self.defaultLeftButton
-        }
+//        if self.defaultBack{
+//            if self.navigationController != nil {
+//                //self.navigationController?.navigationBar.isTranslucent = self.isBeforeTranslucent
+//                self.navigationController?.setNavigationBarHidden(self.defaultNavBarVisibility, animated: false)
+//                
+//            }
+//            //self.navigationItem.setHidesBackButton(self.defaultBackButtonVisibility, animated: false)
+//            //self.navigationItem.leftBarButtonItems = self.defaultLeftButton
+//        }
         
         super.viewWillDisappear(animated)
         

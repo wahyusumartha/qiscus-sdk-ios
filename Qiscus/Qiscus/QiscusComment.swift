@@ -8,6 +8,7 @@
 import UIKit
 import RealmSwift
 import Alamofire
+import SwiftyJSON
 
 public enum QiscusCommentType:Int {
     case text
@@ -356,7 +357,13 @@ public class QiscusComment: NSObject {
             if self.commentIsFile{
                 type = QiscusCommentType.attachment
             }else if self.commentButton != ""{
-                type = QiscusCommentType.postback
+                let json = JSON(parseJSON: self.commentButton)
+                print("isi comment button: \(self.commentButton)")
+                if let _ = json["redirect_url"].string {
+                    type = .account
+                }else{
+                    type = QiscusCommentType.postback
+                }
             }
             return type
         }

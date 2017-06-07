@@ -178,7 +178,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let comment = self.comments[indexPath.section][indexPath.row]
         var size = comment.cellSize
-        if comment.commentType == .text || comment.commentType == .postback{
+        if comment.commentType == .text || comment.commentType == .postback || comment.commentType == .accountLinking{
             size.height += 15
             if comment.showLink {
                 size.height += 75

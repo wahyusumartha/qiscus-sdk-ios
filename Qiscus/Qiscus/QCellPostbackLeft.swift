@@ -11,6 +11,7 @@ import SwiftyJSON
 
 protocol ChatCellPostbackDelegate {
     func didTapPostbackButton(withData data: JSON)
+    func didTapAccountLinking(withData data: JSON)
 }
 class QCellPostbackLeft: QChatCell {
     let maxWidth:CGFloat = QiscusUIConfiguration.chatTextMaxWidth
@@ -91,30 +92,43 @@ class QCellPostbackLeft: QChatCell {
         }
         
         
-        
-        var i = 0
-        let buttonsPayload = JSON(parseJSON: data.comment!.commentButton).arrayValue
-        //var yPos = CGFloat(5)
-        self.buttonsViewHeight.constant = CGFloat(buttonsPayload.count * 35)
-        self.buttonsView.backgroundColor = UIColor.yellow
-        self.layoutIfNeeded()
-        for buttonsData in buttonsPayload{
+        if data.commentType == .postback {
+            var i = 0
+            let buttonsPayload = JSON(parseJSON: data.comment!.commentButton).arrayValue
+            //var yPos = CGFloat(5)
+            self.buttonsViewHeight.constant = CGFloat(buttonsPayload.count * 35)
+            self.layoutIfNeeded()
+            for buttonsData in buttonsPayload{
+                let button = UIButton(frame: CGRect(x: 0, y: 0, width: self.buttonWidth, height: 32))
+                button.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.7)
+                button.setTitle(buttonsData["label"].stringValue, for: .normal)
+                button.setTitleColor(.black, for: .normal)
+                button.tag = i
+                button.addTarget(self, action:#selector(self.postback(sender:)), for: .touchUpInside)
+                
+                self.buttonsView.addArrangedSubview(button)
+                
+                i += 1
+                //yPos += CGFloat(35)
+            }
+        }else{
+            let dataPayload = JSON(parseJSON: data.comment!.commentButton)
+            print("account linking data payload: \(dataPayload)")
             
+            let paramData = dataPayload["params"]
+            
+            self.buttonsViewHeight.constant = CGFloat(35)
+            self.layoutIfNeeded()
             
             let button = UIButton(frame: CGRect(x: 0, y: 0, width: self.buttonWidth, height: 32))
             button.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.7)
-            button.setTitle(buttonsData["label"].stringValue, for: .normal)
+            button.setTitle(paramData["button_text"].stringValue, for: .normal)
             button.setTitleColor(.black, for: .normal)
-            button.tag = i
-            button.addTarget(self, action:#selector(self.postback(sender:)), for: .touchUpInside)
-            
+            button.tag = 2222
+            button.addTarget(self, action:#selector(self.accountLinking(sender:)), for: .touchUpInside)
             
             self.buttonsView.addArrangedSubview(button)
-            
-            i += 1
-            //yPos += CGFloat(35)
         }
-        
     }
     
     func postback(sender:UIButton){
@@ -123,5 +137,10 @@ class QCellPostbackLeft: QChatCell {
             let data = allData[sender.tag]
             self.postbackDelegate?.didTapPostbackButton(withData: data)
         }
+    }
+    
+    func accountLinking(sender:UIButton){
+        let data = JSON(parseJSON: self.data.comment!.commentButton)
+        self.postbackDelegate?.didTapAccountLinking(withData: data)
     }
 }

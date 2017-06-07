@@ -894,6 +894,8 @@ extension Qiscus:CocoaMQTTDelegate{
                     if json["type"].string == "buttons" {
                         comment.commentText = json["payload"]["text"].stringValue
                         comment.commentButton = "\(json["payload"]["buttons"])"
+                    }else if json["type"].string == "account_linking" {
+                        comment.commentButton = "\(json["payload"])"
                     }
                     
                     if let room = QiscusRoom.room(withLastTopicId: notifTopicId){

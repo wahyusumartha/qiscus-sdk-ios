@@ -1080,9 +1080,12 @@ open class QiscusCommentClient: NSObject {
                                     comment.commentSenderEmail = email
                                     comment.commentTopicId = topicId
                                     comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue)
+                                    
                                     if newComment["type"].string == "buttons" {
                                         comment.commentText = newComment["payload"]["text"].stringValue
                                         comment.commentButton = newComment["payload"]["buttons"].stringValue
+                                    }else if newComment["type"].string == "account_linking" {
+                                        comment.commentButton = "\(newComment["payload"])"
                                     }
                                     comment.updateCommentStatus(.sent)
                                     
@@ -1171,7 +1174,10 @@ open class QiscusCommentClient: NSObject {
                                         if newComment["type"].string == "buttons" {
                                             comment.commentText = newComment["payload"]["text"].stringValue
                                             comment.commentButton = newComment["payload"]["buttons"].stringValue
+                                        }else if newComment["type"].string == "account_linking" {
+                                            comment.commentButton = "\(newComment["payload"])"
                                         }
+
                                         comment.updateCommentStatus(.sent)
                                         
                                         if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: roomId){
@@ -1275,7 +1281,10 @@ open class QiscusCommentClient: NSObject {
                             if newComment["type"].string == "buttons" {
                                 comment.commentText = newComment["payload"]["text"].stringValue
                                 comment.commentButton = newComment["payload"]["buttons"].stringValue
+                            }else if newComment["type"].string == "account_linking" {
+                                comment.commentButton = "\(newComment["payload"])"
                             }
+
                             comment.updateCommentStatus(.sent)
 
                             if let user = QiscusUser.getUserWithEmail(email) {
@@ -1355,7 +1364,10 @@ open class QiscusCommentClient: NSObject {
                                 if payload["type"].string == "buttons" {
                                     comment.commentText = payload["payload"]["text"].stringValue
                                     comment.commentButton = "\(payload["payload"]["buttons"].arrayValue)"
+                                }else if payload["type"].string == "account_linking" {
+                                    comment.commentButton = "\(payload["payload"])"
                                 }
+
                                 comment.updateCommentStatus(.sent)
                                 if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
                                     participant.updateLastReadCommentId(commentId: comment.commentId)
@@ -1505,7 +1517,10 @@ open class QiscusCommentClient: NSObject {
                             if payload["type"].string == "buttons" {
                                 comment.commentText = payload["payload"]["text"].stringValue
                                 comment.commentButton = payload["payload"]["buttons"].stringValue
+                            }else if payload["type"].string == "account_linking" {
+                                comment.commentButton = "\(payload["payload"])"
                             }
+
                             comment.updateCommentStatus(.sent)
                             if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
                                 participant.updateLastReadCommentId(commentId: comment.commentId)
@@ -1661,6 +1676,8 @@ open class QiscusCommentClient: NSObject {
                             if payload["type"].string == "buttons" {
                                 comment.commentText = payload["payload"]["text"].stringValue
                                 comment.commentButton = payload["payload"]["buttons"].stringValue
+                            }else if payload["type"].string == "account_linking" {
+                                comment.commentButton = "\(payload["payload"])"
                             }
                             comment.updateCommentStatus(.sent)
                             if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
@@ -1849,6 +1866,8 @@ open class QiscusCommentClient: NSObject {
                                             if payload["type"].string == "buttons" {
                                                 comment.commentText = payload["payload"]["text"].stringValue
                                                 comment.commentButton = payload["payload"]["buttons"].stringValue
+                                            }else if payload["type"].string == "account_linking" {
+                                                comment.commentButton = "\(payload["payload"])"
                                             }
                                         }
                                     }
@@ -2129,7 +2148,10 @@ open class QiscusCommentClient: NSObject {
                         if payload["type"].string == "buttons" {
                             comment.commentText = payload["payload"]["text"].stringValue
                             comment.commentButton = payload["payload"]["buttons"].stringValue
+                        }else if payload["type"].string == "account_linking" {
+                            comment.commentButton = "\(payload["payload"])"
                         }
+
                         comment.updateCommentStatus(.sent)
                         
                         if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){

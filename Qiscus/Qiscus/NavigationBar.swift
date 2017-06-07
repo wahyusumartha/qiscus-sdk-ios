@@ -12,38 +12,38 @@ extension UINavigationItem {
 
     public func setTitleWithSubtitle(title:String, subtitle : String){
         
-        let titleWidth = QiscusHelper.screenWidth() - 160
+        let titleWidth = QiscusHelper.screenWidth() - 120
         
-        let titleLabel = UILabel(frame:CGRect(x: 0, y: 0, width: 0, height: 0))
+        let titleLabel = UILabel(frame:CGRect(x: 0, y: 0, width: titleWidth, height: 0))
         titleLabel.backgroundColor = UIColor.clear
         titleLabel.textColor = UIColor.white
         titleLabel.font = UIFont.boldSystemFont(ofSize: 16)
         titleLabel.text = title
-        titleLabel.textAlignment = .left
+        titleLabel.textAlignment = .center
         titleLabel.tag = 502
         titleLabel.sizeToFit()
         
-        let subTitleLabel = UILabel(frame:CGRect(x: 0, y: 18, width: 0, height: 0))
+        let subTitleLabel = UILabel(frame:CGRect(x: 0, y: 18, width: titleWidth, height: 0))
         subTitleLabel.backgroundColor = UIColor.clear
         subTitleLabel.textColor = UIColor.white
         subTitleLabel.font = UIFont.systemFont(ofSize: 11)
         subTitleLabel.text = subtitle
         subTitleLabel.tag = 402
-        subTitleLabel.textAlignment = .left
+        subTitleLabel.textAlignment = .center
         subTitleLabel.sizeToFit()
 
         let titleView = UIView(frame: CGRect(x: 0, y: 0, width: titleWidth, height: 30))
         
-        if titleLabel.frame.width > titleWidth {
-            var adjustment = titleLabel.frame
-            adjustment.size.width = titleWidth
-            titleLabel.frame = adjustment
-        }
-        if subTitleLabel.frame.width > titleWidth {
-            var adjustment = subTitleLabel.frame
-            adjustment.size.width = titleWidth
-            subTitleLabel.frame = adjustment
-        }
+        //if titleLabel.frame.width > titleWidth {
+            var adjustmentTitle = titleLabel.frame
+            adjustmentTitle.size.width = titleWidth
+            titleLabel.frame = adjustmentTitle
+        //}
+        //if subTitleLabel.frame.width > titleWidth {
+            var adjustmentSubtitle = subTitleLabel.frame
+            adjustmentSubtitle.size.width = titleWidth
+            subTitleLabel.frame = adjustmentSubtitle
+        //}
         
         titleView.addSubview(titleLabel)
         titleView.addSubview(subTitleLabel)

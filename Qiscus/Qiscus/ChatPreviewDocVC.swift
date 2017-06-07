@@ -8,6 +8,7 @@
 
 import UIKit
 import WebKit
+import SwiftyJSON
 
 open class ChatPreviewDocVC: UIViewController, UIWebViewDelegate, WKNavigationDelegate {
     
@@ -16,6 +17,11 @@ open class ChatPreviewDocVC: UIViewController, UIWebViewDelegate, WKNavigationDe
     var fileName: String = ""
     var progressView = UIProgressView(progressViewStyle: UIProgressViewStyle.bar)
     var roomName:String = ""
+    
+    var accountLinking = false
+    var accountData:JSON?
+    var accountLinkURL:String = ""
+    var accountRedirectURL:String = ""
     
     deinit{
         self.webView.removeObserver(self, forKeyPath: "estimatedProgress")
@@ -30,14 +36,18 @@ open class ChatPreviewDocVC: UIViewController, UIWebViewDelegate, WKNavigationDe
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        
-        self.navigationItem.setTitleWithSubtitle(title: self.roomName, subtitle: self.fileName)
+        self.navigationController?.navigationBar.barStyle = UIBarStyle.black
+        self.navigationController?.navigationBar.isTranslucent = false
         self.navigationController?.navigationBar.tintColor = UIColor.white
-        
-        let backButton = self.backButton(self, action: #selector(ChatPreviewDocVC.goBack(_:)))
-        self.navigationItem.setHidesBackButton(true, animated: false)
-        self.navigationItem.leftBarButtonItem = backButton
-        
+        if !accountLinking {
+            self.navigationItem.setTitleWithSubtitle(title: self.roomName, subtitle: self.fileName)
+        }else{
+            if let data = accountData {
+                self.title = data["params"]["view_title"].stringValue
+                self.accountLinkURL = data["url"].stringValue
+                self.accountRedirectURL = data["redirect_url"].stringValue
+            }
+        }
         self.webView.translatesAutoresizingMaskIntoConstraints = false
         
         self.view.addSubview(webView)
@@ -56,9 +66,17 @@ open class ChatPreviewDocVC: UIViewController, UIWebViewDelegate, WKNavigationDe
         view.addConstraints(constraints)
         view.layoutIfNeeded()
         
-        self.webView.backgroundColor = UIColor.red
-        let openURL = URL(string:  self.url.replacingOccurrences(of: " ", with: "%20"))
-        self.webView.load(URLRequest(url: openURL!))
+        //self.webView.backgroundColor = UIColor.red
+        
+        if !self.accountLinking{
+            if let openURL = URL(string:  self.url.replacingOccurrences(of: " ", with: "%20")){
+                self.webView.load(URLRequest(url: openURL))
+            }
+        }else{
+            if let openURL = URL(string:  self.accountLinkURL.replacingOccurrences(of: " ", with: "%20")) {
+                self.webView.load(URLRequest(url: openURL))
+            }
+        }
     }
     
     override open func viewWillDisappear(_ animated: Bool) {
@@ -97,6 +115,15 @@ open class ChatPreviewDocVC: UIViewController, UIWebViewDelegate, WKNavigationDe
     }
     open func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
          decisionHandler(WKNavigationActionPolicy.allow)
+        if self.accountLinking {
+            if let urlToLoad = webView.url {
+                let urlString = urlToLoad.absoluteString
+                print("url to load: \(urlString)")
+                if urlString == self.accountRedirectURL.replacingOccurrences(of: " ", with: "%20") {
+                    let _ = self.navigationController?.popViewController(animated: true)
+                }
+            }
+        }
     }
     
     open func webViewDidFinishLoad(_ webView: UIWebView) {
