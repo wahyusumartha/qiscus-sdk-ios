@@ -112,9 +112,7 @@ class QCellPostbackLeft: QChatCell {
                 //yPos += CGFloat(35)
             }
         }else{
-            let dataPayload = JSON(parseJSON: data.comment!.commentButton)
-            print("account linking data payload: \(dataPayload)")
-            
+            let dataPayload = JSON(parseJSON: data.comment!.commentButton)            
             let paramData = dataPayload["params"]
             
             self.buttonsViewHeight.constant = CGFloat(35)

@@ -118,7 +118,6 @@ open class ChatPreviewDocVC: UIViewController, UIWebViewDelegate, WKNavigationDe
         if self.accountLinking {
             if let urlToLoad = webView.url {
                 let urlString = urlToLoad.absoluteString
-                print("url to load: \(urlString)")
                 if urlString == self.accountRedirectURL.replacingOccurrences(of: " ", with: "%20") {
                     let _ = self.navigationController?.popViewController(animated: true)
                 }

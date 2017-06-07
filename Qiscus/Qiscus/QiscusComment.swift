@@ -358,7 +358,6 @@ public class QiscusComment: NSObject {
                 type = QiscusCommentType.attachment
             }else if self.commentButton != ""{
                 let json = JSON(parseJSON: self.commentButton)
-                print("isi comment button: \(self.commentButton)")
                 if let _ = json["redirect_url"].string {
                     type = .account
                 }else{
