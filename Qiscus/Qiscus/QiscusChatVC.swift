@@ -55,6 +55,7 @@ public class QiscusChatVC: UIViewController{
     var commentClient = QiscusCommentClient.sharedInstance
     let dataPresenter = QiscusDataPresenter.shared
     var archived:Bool = QiscusUIConfiguration.sharedInstance.readOnly
+    public var defaultBack:Bool = true
     
     // MARK: - Data Properties
     var room:QiscusRoom?{
@@ -336,13 +337,17 @@ public class QiscusChatVC: UIViewController{
     override open func viewWillDisappear(_ animated: Bool) {
         self.isPresence = false
         dataPresenter.delegate = nil
-        if self.navigationController != nil {
-            self.navigationController?.navigationBar.isTranslucent = self.isBeforeTranslucent
-            self.navigationController?.setNavigationBarHidden(self.defaultNavBarVisibility, animated: false)
-            
+        
+        if self.defaultBack{
+            if self.navigationController != nil {
+                self.navigationController?.navigationBar.isTranslucent = self.isBeforeTranslucent
+                self.navigationController?.setNavigationBarHidden(self.defaultNavBarVisibility, animated: false)
+                
+            }
+            self.navigationItem.setHidesBackButton(self.defaultBackButtonVisibility, animated: false)
+            self.navigationItem.leftBarButtonItems = self.defaultLeftButton
         }
-        self.navigationItem.setHidesBackButton(self.defaultBackButtonVisibility, animated: false)
-        self.navigationItem.leftBarButtonItems = self.defaultLeftButton
+        
         super.viewWillDisappear(animated)
         
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
@@ -357,8 +362,9 @@ public class QiscusChatVC: UIViewController{
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
-        
+        if self.defaultBack {
+            self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
+        }
         if self.navigationItem.leftBarButtonItems != nil {
             self.defaultLeftButton = self.navigationItem.leftBarButtonItems
         }else{
@@ -371,10 +377,12 @@ public class QiscusChatVC: UIViewController{
         }
         self.navigationController?.setNavigationBarHidden(false , animated: false)
         
-        let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
+        if self.defaultBack {
+            let backButton = QiscusChatVC.backButton(self, action: #selector(QiscusChatVC.goBack))
 
-        self.navigationItem.setHidesBackButton(true, animated: false)
-        self.navigationItem.leftBarButtonItems = [backButton]
+            self.navigationItem.setHidesBackButton(true, animated: false)
+            self.navigationItem.leftBarButtonItems = [backButton]
+        }
         if self.room != nil {
             self.loadTitle()
         }
