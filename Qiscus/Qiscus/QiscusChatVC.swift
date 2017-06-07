@@ -357,6 +357,7 @@ public class QiscusChatVC: UIViewController{
             self.unsubscribeTypingRealtime(onRoom: room!)
         }
         self.roomSynced = false
+        self.view.endEditing(true)
         self.dismissLoading()
     }
     override open func viewWillAppear(_ animated: Bool) {
