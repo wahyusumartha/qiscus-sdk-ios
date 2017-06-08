@@ -1105,9 +1105,6 @@ open class QiscusCommentClient: NSObject {
                                     }
                                 }
                             }
-                            if !silent {
-                                QiscusDataPresenter.shared.loadComments(inRoom: room.roomId, checkSync: false)
-                            }
                         }else if error != JSON.null{
                             Qiscus.printLog(text: "error sync message: \(error)")
                             if !silent {

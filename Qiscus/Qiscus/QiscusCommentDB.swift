@@ -251,7 +251,7 @@ public class QiscusCommentDB: Object {
     }
     open class func lastSyncId(topicId:Int, unsyncCommentId:Int)->Int?{ //
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let searchQuery = NSPredicate(format: "commentTopicId == \(topicId) AND (commentStatusRaw != \(QiscusCommentStatus.sending.rawValue) OR commentStatusRaw == \(QiscusCommentStatus.failed.rawValue)) AND commentId < \(unsyncCommentId)")
+        let searchQuery = NSPredicate(format: "commentTopicId == \(topicId) AND (commentStatusRaw != \(QiscusCommentStatus.sending.rawValue) AND commentStatusRaw != \(QiscusCommentStatus.failed.rawValue)) AND commentId < \(unsyncCommentId)")
         let commentData = realm.objects(QiscusCommentDB.self).filter(searchQuery).sorted(byKeyPath: "commentCreatedAt", ascending: true)
         
         if commentData.count > 0{

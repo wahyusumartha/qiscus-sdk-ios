@@ -159,7 +159,13 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                                 self.comments[lastComment.commentIndexPath!.section][lastComment.commentIndexPath!.row] = lastComment
                                 self.comments[indexPath.section].insert(presenter, at: indexPath.row)
                                 Qiscus.uiThread.async {
-                                    self.collectionView.reloadData()
+                                    self.collectionView.performBatchUpdates({ 
+                                        self.collectionView.insertItems(at: [indexPath])
+                                    }, completion: { (success) in
+                                        if success {
+                                            self.collectionView.reloadItems(at: [lastComment.commentIndexPath!])
+                                        }
+                                    })
                                     if self.isLastRowVisible || presenter.userEmail == QiscusMe.sharedInstance.email {
                                         self.scrollToBottom(true)
                                     }
@@ -174,7 +180,15 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                                 
                                 self.comments.insert(newGroup, at: indexPath.section)
                                 Qiscus.uiThread.async {
-                                    self.collectionView.reloadData()
+                                    self.collectionView.performBatchUpdates({
+                                        let indexSet = IndexSet(integer: indexPath.section)
+                                        self.collectionView.insertSections(indexSet)
+                                    }, completion: { (success) in
+                                        if success {
+                                            //self.collectionView.reloadSections(IndexSet(integer: indexPath.section))
+                                        }
+                                    })
+                                    
                                     if self.isLastRowVisible || presenter.userEmail == QiscusMe.sharedInstance.email {
                                         self.scrollToBottom(true)
                                     }
