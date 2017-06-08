@@ -1101,12 +1101,14 @@ open class QiscusCommentClient: NSObject {
                                         user.updateUserAvatarURL(newComment["user_avatar_url"].stringValue)
                                         user.updateUserFullName(newComment["username"].stringValue)
                                     }
-                                    if triggerDelegate && saved {
-                                        if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                                            let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                                            chatView.dataPresenter(gotNewData: presenter, inRoom: room, realtime: true)
+                                    Qiscus.logicThread.async {
+                                        if triggerDelegate && saved {
+                                            if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                                                let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
+                                                chatView.dataPresenter(gotNewData: presenter, inRoom: room, realtime: true)
+                                            }
+                                            
                                         }
-                                        
                                     }
                                 }
                             }
