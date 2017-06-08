@@ -32,28 +32,42 @@ class QChatFooterLeft: UICollectionReusableView {
                     avatarLabel.text = String(data.userFullName.characters.first!).uppercased()
                     if QiscusHelper.isFileExist(inLocalPath: data.userAvatarLocalPath){
                         let commentId = data.commentId as AnyObject
-                        avatarImage.loadAsync(fromLocalPath: data.userAvatarLocalPath, onLoaded: { (image, data) in
-                            if let commentId = data as? Int {
-                                if self.comment?.commentId == commentId {
-                                    self.avatarLabel.isHidden = true
-                                    self.avatarImage.image = image
-                                    self.avatarImage.backgroundColor = UIColor.clear
-                                    self.comment?.userAvatar = image
+                        if let cachedImage = UIImage.cachedImage(withPath: data.userAvatarLocalPath){
+                            self.avatarLabel.isHidden = true
+                            self.avatarImage.image = cachedImage
+                            self.avatarImage.backgroundColor = UIColor.clear
+                            self.comment?.userAvatar = cachedImage
+                        }else{
+                            avatarImage.loadAsync(fromLocalPath: data.userAvatarLocalPath, onLoaded: { (image, data) in
+                                if let commentId = data as? Int {
+                                    if self.comment?.commentId == commentId {
+                                        self.avatarLabel.isHidden = true
+                                        self.avatarImage.image = image
+                                        self.avatarImage.backgroundColor = UIColor.clear
+                                        self.comment?.userAvatar = image
+                                    }
                                 }
-                            }
-                        },optionalData:commentId)
+                            },optionalData:commentId)
+                        }
                     }else{
                         let commentId = data.commentId as AnyObject
-                        avatarImage.loadAsync(data.userAvatarURL, onLoaded: { (image,data) in
-                            if let commentId = data as? Int {
-                                if self.comment?.commentId == commentId {
-                                    self.avatarLabel.isHidden = true
-                                    self.avatarImage.image = image
-                                    self.avatarImage.backgroundColor = UIColor.clear
-                                    self.comment?.userAvatar = image
+                        if let cachedImage = UIImage.cachedImage(withPath: data.userAvatarLocalPath){
+                            self.avatarLabel.isHidden = true
+                            self.avatarImage.image = cachedImage
+                            self.avatarImage.backgroundColor = UIColor.clear
+                            self.comment?.userAvatar = cachedImage
+                        }else{
+                            avatarImage.loadAsync(data.userAvatarURL, onLoaded: { (image,data) in
+                                if let commentId = data as? Int {
+                                    if self.comment?.commentId == commentId {
+                                        self.avatarLabel.isHidden = true
+                                        self.avatarImage.image = image
+                                        self.avatarImage.backgroundColor = UIColor.clear
+                                        self.comment?.userAvatar = image
+                                    }
                                 }
-                            }
-                        },optionalData:commentId)
+                            },optionalData:commentId)
+                        }
                     }
                 }
             }

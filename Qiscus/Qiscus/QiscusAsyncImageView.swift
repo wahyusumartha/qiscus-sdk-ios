@@ -58,8 +58,15 @@ public extension UIImageView {
     }
     public func loadAsync(fromLocalPath localPath:String, onLoaded: @escaping ((UIImage,AnyObject?)->Void), optionalData:AnyObject? = nil){
         DispatchQueue.global().async {
-            if let image = UIImage(contentsOfFile: localPath){
+            if let cachedImage = cache.object(forKey: localPath as NSString) {
                 DispatchQueue.main.async {
+                    onLoaded(cachedImage,optionalData)
+                }
+            }else if let image = UIImage(contentsOfFile: localPath){
+                DispatchQueue.main.async {
+                    if cache.object(forKey: localPath as NSString) == nil {
+                        cache.setObject(image, forKey: localPath as NSString)
+                    }
                     onLoaded(image,optionalData)
                 }
             }
@@ -70,7 +77,7 @@ public extension UIImageView {
     //              git: https://github.com/natelyman/SwiftImageLoader
     //              Copyright (c) 2014 NateLyman.com. All rights reserved.
     //
-    func imageForUrl(url urlString: String, header: [String : String] = [String : String](), useCache:Bool = false, completionHandler:@escaping (_ image: UIImage?, _ url: String) -> ()) {
+    func imageForUrl(url urlString: String, header: [String : String] = [String : String](), useCache:Bool = true, completionHandler:@escaping (_ image: UIImage?, _ url: String) -> ()) {
         
         DispatchQueue.global().async(execute: {()in
             
@@ -101,7 +108,9 @@ public extension UIImageView {
                         if let data = data {
                             if let image = UIImage(data: data) {
                                 if useCache{
-                                    cache.setObject(image, forKey: urlString as NSString)
+                                    if cache.object(forKey: urlString as NSString) == nil {
+                                        cache.setObject(image, forKey: urlString as NSString)
+                                    }
                                 }else{
                                     cache.removeObject(forKey: urlString as NSString)
                                 }
@@ -131,6 +140,9 @@ public extension UIImage {
     }
     public class func clearCachedImageForURL(_ urlString:String){
         cache.removeObject(forKey: urlString as NSString)
+    }
+    public class func cachedImage(withPath path:String)->UIImage?{
+        return cache.object(forKey: path as NSString)
     }
     public class func resizeImage(_ image: UIImage, toFillOnImage: UIImage) -> UIImage {
         
