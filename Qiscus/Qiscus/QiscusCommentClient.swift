@@ -413,7 +413,9 @@ open class QiscusCommentClient: NSObject {
                 self.postComment(commentPresenter, roomId: roomId, linkData: linkData, payload: payload, type: type)
             }
             if let room = QiscusRoom.room(withLastTopicId: topicId) {
-                self.delegate?.qiscusService(gotNewMessage: commentPresenter, inRoom: room, realtime: true)
+                if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                    chatView.dataPresenter(gotNewData: commentPresenter, inRoom: room, realtime: true)
+                }
             }
             
             if QiscusCommentClient.sharedInstance.roomDelegate != nil{
@@ -912,7 +914,9 @@ open class QiscusCommentClient: NSObject {
             presenter.uploadData = imageData
             
             if let room = QiscusRoom.room(withLastTopicId: topicId) {
-                self.delegate?.qiscusService(gotNewMessage: presenter, inRoom: room, realtime: true)
+                if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                    chatView.dataPresenter(gotNewData: presenter, inRoom: room, realtime: true)
+                }
             }
             
             let headers = QiscusConfig.sharedInstance.requestHeader
@@ -1098,10 +1102,11 @@ open class QiscusCommentClient: NSObject {
                                         user.updateUserFullName(newComment["username"].stringValue)
                                     }
                                     if triggerDelegate && saved {
-                                        if let delegate = service.delegate {
+                                        if let chatView = Qiscus.shared.chatViews[room.roomId] {
                                             let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                                            delegate.qiscusService(gotNewMessage: presenter, inRoom: room, realtime: false)
+                                            chatView.dataPresenter(gotNewData: presenter, inRoom: room, realtime: true)
                                         }
+                                        
                                     }
                                 }
                             }
@@ -1123,6 +1128,7 @@ open class QiscusCommentClient: NSObject {
     }
 
     open func syncChat(fromComment commentId:Int, backgroundFetch:Bool = false, trigger:Bool = false) {
+        
         Qiscus.apiThread.async {
             let loadURL = QiscusConfig.SYNC_URL
             let parameters:[String: AnyObject] =  [
@@ -1177,6 +1183,18 @@ open class QiscusCommentClient: NSObject {
 
                                         comment.updateCommentStatus(.sent)
                                         
+                                        if saved{
+                                            if let chatView = Qiscus.shared.chatViews[roomId] {
+                                                let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
+                                                chatView.dataPresenter(gotNewData: presenter, inRoom: chatView.room!, realtime: true)
+                                            }
+                                            let service = QiscusCommentClient.shared
+                                            if let roomDelegate = service.roomDelegate {
+                                                Qiscus.uiThread.async {
+                                                    roomDelegate.gotNewComment(comment)
+                                                }
+                                            }
+                                        }
                                         if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: roomId){
                                             participant.updateLastReadCommentId(commentId: comment.commentId)
                                         }
@@ -1193,23 +1211,6 @@ open class QiscusCommentClient: NSObject {
                                             if userChanged {
                                                 if let chatView = Qiscus.shared.chatViews[roomId] {
                                                     chatView.dataPresenter(didChangeUser: QiscusUser.copyUser(user: user), onUserWithEmail: email)
-                                                }
-                                            }
-                                        }
-                                        
-                                        if saved{
-                                            if trigger {
-                                                if let room = QiscusRoom.room(withId: roomId){
-                                                    if let chatView = Qiscus.shared.chatViews[roomId] {
-                                                        let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                                                        chatView.dataPresenter(gotNewData: presenter, inRoom: room, realtime: false)
-                                                    }
-                                                }
-                                            }
-                                            let service = QiscusCommentClient.shared
-                                            if let roomDelegate = service.roomDelegate {
-                                                Qiscus.uiThread.async {
-                                                    roomDelegate.gotNewComment(comment)
                                                 }
                                             }
                                         }

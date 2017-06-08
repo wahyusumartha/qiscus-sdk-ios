@@ -11,85 +11,85 @@ import UIKit
 // MARK: - QiscusDataPresenterDelegate
 extension QiscusChatVC: QiscusDataPresenterDelegate{
     public func dataPresenter(didFinishSnyc hasNewData: Bool) {
-        if hasNewData && !self.checkingData{
-            Qiscus.logicThread.async {
-                self.checkingData = true
-                if self.room != nil {
-                    var lastCommentId = 0
-                    if self.comments.count > 0 {
-                        let lastComment = self.comments.last!.last!
-                        for groupData in self.comments.reversed(){
-                            var found = false
-                            for data in groupData.reversed(){
-                                if data.commentStatus != .failed && data.commentStatus != .sending{
-                                    found = true
-                                    lastCommentId = data.commentId
-                                    break
-                                }
-                            }
-                            if found {
-                                break
-                            }
-                        }
-                        let newComments = QiscusComment.grouppedComment(inTopicId: self.room!.roomLastCommentTopicId, fromCommentId: lastCommentId, limit: 0, after: true)
-                        if newComments.count > 0 {
-                            let commentPresenters = QiscusDataPresenter.getPresenters(fromComments: newComments)
-                            let firstNewComment = commentPresenters.first!.first!
-                            var mergeDateGroup = false
-                            var mergeUserGroup = false
-                            if firstNewComment.commentDate == lastComment.commentDate {
-                                mergeDateGroup = true
-                                if firstNewComment.userEmail == lastComment.userEmail{
-                                    mergeUserGroup = true
-                                }
-                            }
-                            
-                            var i = 0
-                            for groupNewComment in commentPresenters{
-                                if mergeDateGroup && i == 0{
-                                    if mergeUserGroup{
-                                        for new in groupNewComment {
-                                            let section = self.comments.count - 1
-                                            let row = self.comments[section].count - 1
-                                            let previous = self.comments.last!.last!
-                                            if previous.cellPos == .single{
-                                                previous.cellPos = .first
-                                            }else{
-                                                previous.cellPos = .middle
-                                            }
-                                            previous.balloonImage = previous.getBalloonImage()
-                                            self.comments[section][row] = previous
-                                            
-                                            new.cellPos = .last
-                                            new.balloonImage = new.getBalloonImage()
-                                            self.comments[self.comments.count - 1].append(new)
-                                        }
-                                    }else {
-                                        self.comments.append(groupNewComment)
-                                    }
-                                } else {
-                                    self.comments.append(groupNewComment)
-                                }
-                                i += 1
-                            }
-                            Qiscus.uiThread.sync {
-                                self.collectionView.reloadData()
-                                if self.isLastRowVisible {
-                                    self.scrollToBottom()
-                                }
-                            }
-                            let lastNewMessageId = commentPresenters.last!.last!.commentId
-                            Qiscus.logicThread.async {
-                                QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: lastNewMessageId, roomId: self.room!.roomId, status: .read, withCompletion: {_ in })
-                            }
-                        }
-                    }else{
-                        self.loadData()
-                    }
-                }
-                self.checkingData = false
-            }
-        }
+//        if hasNewData && !self.checkingData{
+//            Qiscus.logicThread.async {
+//                self.checkingData = true
+//                if self.room != nil {
+//                    var lastCommentId = 0
+//                    if self.comments.count > 0 {
+//                        let lastComment = self.comments.last!.last!
+//                        for groupData in self.comments.reversed(){
+//                            var found = false
+//                            for data in groupData.reversed(){
+//                                if data.commentStatus != .failed && data.commentStatus != .sending{
+//                                    found = true
+//                                    lastCommentId = data.commentId
+//                                    break
+//                                }
+//                            }
+//                            if found {
+//                                break
+//                            }
+//                        }
+//                        let newComments = QiscusComment.grouppedComment(inTopicId: self.room!.roomLastCommentTopicId, fromCommentId: lastCommentId, limit: 0, after: true)
+//                        if newComments.count > 0 {
+//                            let commentPresenters = QiscusDataPresenter.getPresenters(fromComments: newComments)
+//                            let firstNewComment = commentPresenters.first!.first!
+//                            var mergeDateGroup = false
+//                            var mergeUserGroup = false
+//                            if firstNewComment.commentDate == lastComment.commentDate {
+//                                mergeDateGroup = true
+//                                if firstNewComment.userEmail == lastComment.userEmail{
+//                                    mergeUserGroup = true
+//                                }
+//                            }
+//                            
+//                            var i = 0
+//                            for groupNewComment in commentPresenters{
+//                                if mergeDateGroup && i == 0{
+//                                    if mergeUserGroup{
+//                                        for new in groupNewComment {
+//                                            let section = self.comments.count - 1
+//                                            let row = self.comments[section].count - 1
+//                                            let previous = self.comments.last!.last!
+//                                            if previous.cellPos == .single{
+//                                                previous.cellPos = .first
+//                                            }else{
+//                                                previous.cellPos = .middle
+//                                            }
+//                                            previous.balloonImage = previous.getBalloonImage()
+//                                            self.comments[section][row] = previous
+//                                            
+//                                            new.cellPos = .last
+//                                            new.balloonImage = new.getBalloonImage()
+//                                            self.comments[self.comments.count - 1].append(new)
+//                                        }
+//                                    }else {
+//                                        self.comments.append(groupNewComment)
+//                                    }
+//                                } else {
+//                                    self.comments.append(groupNewComment)
+//                                }
+//                                i += 1
+//                            }
+//                            Qiscus.uiThread.sync {
+//                                self.collectionView.reloadData()
+//                                if self.isLastRowVisible {
+//                                    self.scrollToBottom()
+//                                }
+//                            }
+//                            let lastNewMessageId = commentPresenters.last!.last!.commentId
+//                            Qiscus.logicThread.async {
+//                                QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: lastNewMessageId, roomId: self.room!.roomId, status: .read, withCompletion: {_ in })
+//                            }
+//                        }
+//                    }else{
+//                        self.loadData()
+//                    }
+//                }
+//                self.checkingData = false
+//            }
+//        }
     }
     public func dataPresenter(gotNewData presenter: QiscusCommentPresenter, inRoom: QiscusRoom, realtime: Bool) {
         var when = DispatchTime.now()
@@ -97,117 +97,118 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
             when = DispatchTime.now() + DispatchTimeInterval.milliseconds(1000)
         }
         Qiscus.logicThread.asyncAfter(deadline: when, execute: {
-            if realtime{
+            //if realtime{
                 
-                var isExist = false
+//                var isExist = false
                 // check on View
-                for groupComment in self.comments.reversed() {
-                    for message in groupComment.reversed(){
-                        if message.commentUniqueid == presenter.commentUniqueid {
-                            isExist = true
-                            break
-                        }
-                    }
-                    if isExist {
-                        break
-                    }
-                }
+//                for groupComment in self.comments.reversed() {
+//                    for message in groupComment.reversed(){
+//                        if message.commentUniqueid == presenter.commentUniqueid {
+//                            isExist = true
+//                            break
+//                        }
+//                    }
+//                    if isExist {
+//                        break
+//                    }
+//                }
                 // check on db
                 
-                if !isExist {
-                    var indexPath = IndexPath()
-                    if self.comments.count == 0 {
-                        indexPath = IndexPath(row: 0, section: 0)
-                        var newGroup = [QiscusCommentPresenter]()
-                        presenter.cellPos = .single
+                //if !isExist {
+            var indexPath = IndexPath()
+            if self.comments.count == 0 {
+                indexPath = IndexPath(row: 0, section: 0)
+                var newGroup = [QiscusCommentPresenter]()
+                presenter.cellPos = .single
+                presenter.balloonImage = presenter.getBalloonImage()
+                presenter.commentIndexPath = IndexPath(row: 0, section: 0)
+                newGroup.append(presenter)
+                self.comments.append(newGroup)
+                Qiscus.uiThread.async {
+                    self.welcomeView.isHidden = true
+                    self.collectionView.reloadData()
+                    if self.isLastRowVisible || presenter.userEmail == QiscusMe.sharedInstance.email {
+                        self.scrollToBottom(true)
+                    }
+                }
+                if presenter.toUpload {
+                    self.dataPresenter.uploadData(fromPresenter: presenter)
+                }
+            }
+            else{
+                let lastComment = self.comments.last!.last!
+                
+                if lastComment.commentIndexPath == nil {
+                    let lastSection = self.comments.count - 1
+                    let lastRow = self.comments[lastSection].count - 1
+                    lastComment.commentIndexPath = IndexPath(row: lastRow, section: lastSection)
+                }
+                //if lastComment.createdAt < presenter.createdAt {
+                    if lastComment.userEmail == presenter.userEmail && lastComment.commentDate == presenter.commentDate{
+                        indexPath = IndexPath(row: self.comments[self.comments.count - 1].count , section: self.comments.count - 1)
+                        presenter.cellPos = .last
                         presenter.balloonImage = presenter.getBalloonImage()
-                        presenter.commentIndexPath = IndexPath(row: 0, section: 0)
-                        newGroup.append(presenter)
-                        self.comments.append(newGroup)
+                        presenter.commentIndexPath = indexPath
+                        if lastComment.commentIndexPath?.row == 0 {
+                            lastComment.cellPos = .first
+                        }else{
+                            lastComment.cellPos = .middle
+                        }
+                        lastComment.balloonImage = lastComment.getBalloonImage()
+                        
+                        self.comments[lastComment.commentIndexPath!.section][lastComment.commentIndexPath!.row] = lastComment
+                        self.comments[indexPath.section].insert(presenter, at: indexPath.row)
                         Qiscus.uiThread.async {
-                            self.welcomeView.isHidden = true
-                            self.collectionView.reloadData()
+                            self.collectionView.performBatchUpdates({ 
+                                self.collectionView.insertItems(at: [indexPath])
+                            }, completion: { (success) in
+                                if success {
+                                    self.collectionView.reloadItems(at: [lastComment.commentIndexPath!])
+                                }
+                            })
                             if self.isLastRowVisible || presenter.userEmail == QiscusMe.sharedInstance.email {
                                 self.scrollToBottom(true)
                             }
                         }
-                        if presenter.toUpload {
-                            self.dataPresenter.uploadData(fromPresenter: presenter)
-                        }
                     }
                     else{
-                        let lastComment = self.comments.last!.last!
+                        indexPath = IndexPath(row: 0, section: self.comments.count)
+                        var newGroup = [QiscusCommentPresenter]()
+                        presenter.cellPos = .single
+                        presenter.balloonImage = presenter.getBalloonImage()
+                        presenter.commentIndexPath = indexPath
+                        newGroup.append(presenter)
                         
-                        if lastComment.commentIndexPath == nil {
-                            let lastSection = self.comments.count - 1
-                            let lastRow = self.comments[lastSection].count - 1
-                            lastComment.commentIndexPath = IndexPath(row: lastRow, section: lastSection)
-                        }
-                        if lastComment.createdAt < presenter.createdAt {
-                            if lastComment.userEmail == presenter.userEmail && lastComment.commentDate == presenter.commentDate{
-                                indexPath = IndexPath(row: self.comments[self.comments.count - 1].count , section: self.comments.count - 1)
-                                presenter.cellPos = .last
-                                presenter.balloonImage = presenter.getBalloonImage()
-                                presenter.commentIndexPath = indexPath
-                                if lastComment.commentIndexPath?.row == 0 {
-                                    lastComment.cellPos = .first
-                                }else{
-                                    lastComment.cellPos = .middle
+                        self.comments.insert(newGroup, at: indexPath.section)
+                        Qiscus.uiThread.async {
+                            self.collectionView.performBatchUpdates({
+                                let indexSet = IndexSet(integer: indexPath.section)
+                                self.collectionView.insertSections(indexSet)
+                            }, completion: { (success) in
+                                if success {
+                                    //self.collectionView.reloadSections(IndexSet(integer: indexPath.section))
                                 }
-                                lastComment.balloonImage = lastComment.getBalloonImage()
-                                
-                                self.comments[lastComment.commentIndexPath!.section][lastComment.commentIndexPath!.row] = lastComment
-                                self.comments[indexPath.section].insert(presenter, at: indexPath.row)
-                                Qiscus.uiThread.async {
-                                    self.collectionView.performBatchUpdates({ 
-                                        self.collectionView.insertItems(at: [indexPath])
-                                    }, completion: { (success) in
-                                        if success {
-                                            self.collectionView.reloadItems(at: [lastComment.commentIndexPath!])
-                                        }
-                                    })
-                                    if self.isLastRowVisible || presenter.userEmail == QiscusMe.sharedInstance.email {
-                                        self.scrollToBottom(true)
-                                    }
-                                }
-                            }else{
-                                indexPath = IndexPath(row: 0, section: self.comments.count)
-                                var newGroup = [QiscusCommentPresenter]()
-                                presenter.cellPos = .single
-                                presenter.balloonImage = presenter.getBalloonImage()
-                                presenter.commentIndexPath = indexPath
-                                newGroup.append(presenter)
-                                
-                                self.comments.insert(newGroup, at: indexPath.section)
-                                Qiscus.uiThread.async {
-                                    self.collectionView.performBatchUpdates({
-                                        let indexSet = IndexSet(integer: indexPath.section)
-                                        self.collectionView.insertSections(indexSet)
-                                    }, completion: { (success) in
-                                        if success {
-                                            //self.collectionView.reloadSections(IndexSet(integer: indexPath.section))
-                                        }
-                                    })
-                                    
-                                    if self.isLastRowVisible || presenter.userEmail == QiscusMe.sharedInstance.email {
-                                        self.scrollToBottom(true)
-                                    }
-                                }
-                            }
-                            if presenter.toUpload {
-                                self.dataPresenter.uploadData(fromPresenter: presenter)
-                            }
-                        }else{
+                            })
                             
+                            if self.isLastRowVisible || presenter.userEmail == QiscusMe.sharedInstance.email {
+                                self.scrollToBottom(true)
+                            }
                         }
                     }
-                    if presenter.commentId > 0 {
-                        Qiscus.logicThread.async {
-                            QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: presenter.commentId, roomId: inRoom.roomId, status: .read, withCompletion: {_ in })
-                        }
+                    if presenter.toUpload {
+                        self.dataPresenter.uploadData(fromPresenter: presenter)
                     }
+                //}else{
+                    
+                //}
+            }
+            if presenter.commentId > 0 {
+                Qiscus.logicThread.async {
+                    QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: presenter.commentId, roomId: inRoom.roomId, status: .read, withCompletion: {_ in })
                 }
             }
+                //}
+            //}
         })
     }
     public func syncRoom(){
