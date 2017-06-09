@@ -197,7 +197,7 @@ public class QiscusCommentDB: Object {
     // MARK: - Comment in room / topic
     public class func lastComment(inTopicId topicId:Int? = nil)->QiscusComment?{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        var query = "(commentStatusRaw != \(QiscusCommentStatus.sending.rawValue) OR commentStatusRaw == \(QiscusCommentStatus.failed.rawValue))"
+        var query = "(commentStatusRaw != \(QiscusCommentStatus.sending.rawValue) AND commentStatusRaw != \(QiscusCommentStatus.failed.rawValue))"
         if topicId != nil {
             query = "\(query) AND commentTopicId == \(topicId!)"
         }

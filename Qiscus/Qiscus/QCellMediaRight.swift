@@ -155,7 +155,7 @@ class QCellMediaRight: QChatCell {
     
     open func downloadMedia(_ sender: ChatFileButton){
         sender.isHidden = true
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             let service = QiscusCommentClient.sharedInstance
             service.downloadMedia(data: self.data)
         }

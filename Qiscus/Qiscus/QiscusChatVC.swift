@@ -236,7 +236,7 @@ public class QiscusChatVC: UIViewController{
         super.viewDidLoad()
         if self.comments.count == 0{
             self.showLoading("Load data ...")
-            Qiscus.logicThread.async {
+            DispatchQueue.global().async {
                 self.loadData()
             }
         }
@@ -275,7 +275,7 @@ public class QiscusChatVC: UIViewController{
         self.collectionView.dataSource = self
         self.emptyChatImage.tintColor = self.topColor
         
-        if let navController = self.navigationController {
+        if let _ = self.navigationController {
             //self.isBeforeTranslucent = navController.navigationBar.isTranslucent
             self.navigationController?.navigationBar.isTranslucent = false
             self.defaultNavBarVisibility = self.navigationController!.isNavigationBarHidden
@@ -291,7 +291,7 @@ public class QiscusChatVC: UIViewController{
         
         self.inputBarBottomMargin.constant = 0
         self.view.layoutIfNeeded()
-        self.view.endEditing(true)
+        //self.view.endEditing(true)
         
         self.emptyChatImage.image = Qiscus.image(named: "empty_messages")?.withRenderingMode(.alwaysTemplate)
         self.emptyChatImage.tintColor = self.bottomColor
@@ -338,31 +338,27 @@ public class QiscusChatVC: UIViewController{
         self.isPresence = false
         dataPresenter.delegate = nil
         
-//        if self.defaultBack{
-//            if self.navigationController != nil {
-//                //self.navigationController?.navigationBar.isTranslucent = self.isBeforeTranslucent
-//                self.navigationController?.setNavigationBarHidden(self.defaultNavBarVisibility, animated: false)
-//                
-//            }
-//            //self.navigationItem.setHidesBackButton(self.defaultBackButtonVisibility, animated: false)
-//            //self.navigationItem.leftBarButtonItems = self.defaultLeftButton
-//        }
-        
         super.viewWillDisappear(animated)
-        
+        view.endEditing(true)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
-        self.view.endEditing(true)
+        view.endEditing(true)
         if self.room != nil{
             self.unsubscribeTypingRealtime(onRoom: room!)
         }
         self.roomSynced = false
-        self.view.endEditing(true)
+        
         self.dismissLoading()
+    }
+    override open func viewDidDisappear(_ animated: Bool) {
+        self.scrollToBottom()
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+        self.isPresence = true
+        if self.comments.count > 0 {
+            self.collectionView.reloadData()
+        }
         if self.defaultBack {
             self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
         }
@@ -397,14 +393,16 @@ public class QiscusChatVC: UIViewController{
         self.dataPresenter.delegate = self
         
         if self.comments.count > 0 {
-            Qiscus.logicThread.async {
+            DispatchQueue.global().async {
                 self.syncRoom()
             }
         }
-        self.view.endEditing(true)
+        
         let center: NotificationCenter = NotificationCenter.default
         center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         center.addObserver(self, selector: #selector(QiscusChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
+        
+        view.endEditing(true)
         center.addObserver(self, selector: #selector(QiscusChatVC.appDidEnterBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
     }
     override public func viewDidAppear(_ animated: Bool) {
@@ -546,16 +544,11 @@ public class QiscusChatVC: UIViewController{
         let keyboardHeight: CGFloat = keyboardSize.height
         let animateDuration = info[UIKeyboardAnimationDurationUserInfoKey] as! Double
         self.inputBarBottomMargin.constant = 0 - keyboardHeight
+        let goToRow = self.lastVisibleRow
         UIView.animate(withDuration: animateDuration, delay: 0, options: UIViewAnimationOptions(), animations: {
             self.view.layoutIfNeeded()
-            if self.isLastRowVisible {
-                let delay = 0.1 * Double(NSEC_PER_SEC)
-                let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
-                DispatchQueue.main.asyncAfter(deadline: time, execute: {
-                    if self.comments.count > 0 {
-                        self.scrollToBottom()
-                    }
-                })
+            if goToRow != nil {
+                self.scrollToIndexPath(goToRow!, position: .bottom, animated: true, delayed:  false)
             }
         }, completion: nil)
     }
@@ -567,6 +560,7 @@ public class QiscusChatVC: UIViewController{
     }
     func goBack() {
         self.isPresence = false
+        view.endEditing(true)
         if self.backAction != nil{
             self.backAction!()
         }else{
@@ -576,7 +570,8 @@ public class QiscusChatVC: UIViewController{
     
     // MARK: - Button Action
     func appDidEnterBackground(){
-        self.view.endEditing(true)
+        self.isPresence = false
+        view.endEditing(true)
         self.dismissLoading()
     }
     open func resendMessage(){

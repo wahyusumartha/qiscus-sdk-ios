@@ -21,11 +21,7 @@ import CocoaMQTT
     static let showDebugPrint = true
     
     // MARK: - Thread
-    static let realtimeThread = DispatchQueue.global()
-    static let logThread = DispatchQueue.global()
-    static let apiThread = DispatchQueue.global()
     static let uiThread = DispatchQueue.main
-    static let logicThread = DispatchQueue.global()
     
     static var qiscusDeviceToken: String = ""
     static var dbConfiguration = Realm.Configuration.defaultConfiguration
@@ -43,7 +39,6 @@ import CocoaMQTT
     var realtimeConnected = false
     var syncing = false
     var syncTimer: Timer?
-    public var isRealtime:Bool = false
     
     @objc public var styleConfiguration = QiscusUIConfiguration.sharedInstance
     @objc public var connected:Bool = false
@@ -531,10 +526,16 @@ import CocoaMQTT
         if !Qiscus.sharedInstance.styleConfiguration.rewriteChatFont {
             Qiscus.sharedInstance.styleConfiguration.chatFont = UIFont.preferredFont(forTextStyle: UIFontTextStyle.body)
         }
+        if let chatView = self.topViewController() as? QiscusChatVC {
+            chatView.isPresence = true
+            Qiscus.uiThread.async {
+                chatView.scrollToBottom()
+            }
+        }
     }
     class func printLog(text:String){
         if Qiscus.showDebugPrint{
-            Qiscus.logThread.async{
+            DispatchQueue.global().async{
                 print("[Qiscus]: \(text)")
             }
         }
@@ -778,7 +779,7 @@ import CocoaMQTT
     }
     class func publishUserStatus(offline:Bool = false){
         if Qiscus.isLoggedIn{
-            Qiscus.realtimeThread.async {
+            DispatchQueue.global().async {
                 var message: String = "1";
                 
                 let channel = "u/\(QiscusMe.sharedInstance.email)/s"
@@ -794,7 +795,7 @@ import CocoaMQTT
                         }
                         
                         let when = DispatchTime.now() + 30
-                        Qiscus.realtimeThread.asyncAfter(deadline: when) {
+                        DispatchQueue.global().asyncAfter(deadline: when) {
                             Qiscus.publishUserStatus()
                         }
                     }
@@ -847,7 +848,6 @@ extension Qiscus:CocoaMQTTDelegate{
             self.syncTimer?.invalidate()
             self.syncTimer = nil
         }
-        Qiscus.shared.isRealtime = true
     }
     public func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck){
         
@@ -859,7 +859,7 @@ extension Qiscus:CocoaMQTTDelegate{
         
     }
     public func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16 ){
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             if let messageData = message.string {
                 let channelArr = message.topic.characters.split(separator: "/")
                 let lastChannelPart = String(channelArr.last!)
@@ -877,13 +877,11 @@ extension Qiscus:CocoaMQTTDelegate{
                     var saved = false
                     let uniqueId = json["unique_temp_id"].stringValue
                     
-                    if let dbComment = QiscusComment.comment(withId: commentId, andUniqueId: uniqueId){
+                    if let dbComment = QiscusComment.comment(withUniqueId: uniqueId){
                         comment = dbComment
                     }else{
-                        //if QiscusRoom.room(withId: roomId) != nil {
-                            comment = QiscusComment.newComment(withId: commentId, andUniqueId: uniqueId)
-                            saved = true
-                        //}
+                        comment = QiscusComment.newComment(withId: commentId, andUniqueId: uniqueId)
+                        saved = true
                     }
                     comment.commentText = json["message"].stringValue
                     comment.commentSenderEmail = email
@@ -901,19 +899,14 @@ extension Qiscus:CocoaMQTTDelegate{
                     }
                     
                     if saved {
-                        if let chatView = Qiscus.shared.chatViews[roomId] {
-                            let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                            chatView.dataPresenter(gotNewData: presenter, inRoom: chatView.room!, realtime: true)
+                        DispatchQueue.global().sync {
+                            if let chatView = Qiscus.shared.chatViews[roomId] {
+                                let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
+                                chatView.dataPresenter(gotNewData: presenter, inRoom: chatView.room!, realtime: true)
+                            }
                         }
-                        //                                if !Qiscus.shared.syncing{
-                        //                                    if let delegate = service.delegate {
-                        //                                        let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                        //                                        delegate.qiscusService(gotNewMessage: presenter, inRoom: room, realtime: true)
-                        //                                    }
-                        //                                }
                     }
                     if let room = QiscusRoom.room(withLastTopicId: notifTopicId){
-                        
                         let dataCount = QiscusComment.getComments(inTopicId: notifTopicId).count
                         if  dataCount > 0 && QiscusComment.comment(withId: commentBeforeId) == nil {
                             if let syncId = QiscusComment.getLastSyncCommentId(notifTopicId, unsyncCommentId: commentId){
@@ -980,7 +973,7 @@ extension Qiscus:CocoaMQTTDelegate{
                         }
                     }
                     QiscusCommentClient.sharedInstance.publishMessageStatus(onComment: commentId, roomId: roomId, status: .delivered, withCompletion: {
-                        if let thisComment = QiscusComment.comment(withId: commentId) {
+                        if let thisComment = QiscusComment.comment(withUniqueId: uniqueId) {
                             thisComment.updateCommentStatus(.read, email: thisComment.commentSenderEmail)
                         }
                     })
@@ -1023,10 +1016,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     let commentId = Int(String(messageArr[0]))!
                     let commentUniqueId:String = String(messageArr[1])
                     let userEmail = String(channelArr[3])
-                    if let comment = QiscusComment.comment(withId: commentId){
-                        comment.updateCommentStatus(.delivered, email: userEmail)
-                    }
-                    else if let comment = QiscusComment.comment(withUniqueId: commentUniqueId){
+                    if let comment = QiscusComment.comment(withUniqueId: commentUniqueId){
                         comment.updateCommentStatus(.delivered, email: userEmail)
                     }
                     break
@@ -1035,10 +1025,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     let commentId = Int(String(messageArr[0]))!
                     let commentUniqueId:String = String(messageArr[1])
                     let userEmail = String(channelArr[3])
-                    if let comment = QiscusComment.comment(withId: commentId){
-                        comment.updateCommentStatus(.read, email: userEmail)
-                    }
-                    else if let comment = QiscusComment.comment(withUniqueId: commentUniqueId){
+                    if let comment = QiscusComment.comment(withUniqueId: commentUniqueId){
                         comment.updateCommentStatus(.read, email: userEmail)
                     }
                     break
@@ -1086,7 +1073,6 @@ extension Qiscus:CocoaMQTTDelegate{
         
     }
     public func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?){
-        Qiscus.shared.isRealtime = false
         if Qiscus.isLoggedIn {
             if self.syncTimer == nil {
                 self.syncTimer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.sync), userInfo: nil, repeats: true)
@@ -1094,12 +1080,25 @@ extension Qiscus:CocoaMQTTDelegate{
         }
     }
     @objc public func sync(){
-        if !Qiscus.shared.isRealtime {
-            self.backgroundCheck()
-        }
+        self.backgroundCheck()
     }
     public class func sync(){
         Qiscus.sharedInstance.backgroundCheck()
+    }
+    
+    func topViewController(controller: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
+        if let navigationController = controller as? UINavigationController {
+            return topViewController(controller: navigationController.visibleViewController)
+        }
+        if let tabController = controller as? UITabBarController {
+            if let selected = tabController.selectedViewController {
+                return topViewController(controller: selected)
+            }
+        }
+        if let presented = controller?.presentedViewController {
+            return topViewController(controller: presented)
+        }
+        return controller
     }
 }
 

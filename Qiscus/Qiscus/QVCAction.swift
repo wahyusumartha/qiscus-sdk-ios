@@ -96,7 +96,7 @@ extension QiscusChatVC {
         }
     }
     func startTypingIndicator(withUser user:String){
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             self.typingIndicatorUser = user
             self.isTypingOn = true
             let typingText = "\(user) is typing ..."
@@ -121,7 +121,7 @@ extension QiscusChatVC {
             self.remoteTypingTimer?.invalidate()
             self.remoteTypingTimer = nil
         }
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             self.loadSubtitle()
         }
     }
@@ -134,7 +134,7 @@ extension QiscusChatVC {
         self.backAction = action
     }
     func publishRead(){
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             if self.isPresence{
                 if self.comments.count > 0 {
                     let lastComment = self.comments.last!.last!.comment!
@@ -194,7 +194,7 @@ extension QiscusChatVC {
     }
     
     func loadTitle(){
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             var roomTitle = ""
             if self.navTitle != ""{
                 roomTitle = self.navTitle
@@ -210,7 +210,7 @@ extension QiscusChatVC {
         }
     }
     func loadSubtitle(){
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             var roomSubtitle = self.navSubtitle
             if roomSubtitle == "" {
                 if let targetRoom = self.room {
@@ -353,7 +353,7 @@ extension QiscusChatVC {
     }
     
     func sendMessage(){
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             if Qiscus.sharedInstance.connected{
                 if !self.isRecording {
                     let value = self.inputText.value.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
@@ -395,7 +395,7 @@ extension QiscusChatVC {
         }
     }
     func uploadImage(){
-        self.view.endEditing(true)
+        view.endEditing(true)
         if Qiscus.sharedInstance.connected{
             let photoPermissions = PHPhotoLibrary.authorizationStatus()
             
@@ -423,7 +423,7 @@ extension QiscusChatVC {
         }
     }
     func uploadFromCamera(){
-        self.view.endEditing(true)
+        view.endEditing(true)
         if Qiscus.sharedInstance.connected{
             if AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo) ==  AVAuthorizationStatus.authorized
             {

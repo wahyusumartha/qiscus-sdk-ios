@@ -284,7 +284,7 @@ public class QiscusRoom: NSObject {
 
     // MARK: - Download Room Avatar
     public func updateAvatar(image:UIImage){
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             let time = Double(Date().timeIntervalSince1970)
             let timeToken = UInt64(time * 10000)
             let fileExt = QiscusFile.getExtension(fromURL: self.roomAvatarURL)
@@ -321,7 +321,7 @@ public class QiscusRoom: NSObject {
     }
     
     public func downloadThumbAvatar(){
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             if self.roomAvatarURL != ""{
                 let url = self.roomAvatarURL
                 let checkURL = "\(self.roomAvatarURL):room:\(self.roomId)"

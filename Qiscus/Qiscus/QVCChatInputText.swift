@@ -12,7 +12,7 @@ extension QiscusChatVC: ChatInputTextDelegate {
     // MARK: - ChatInputTextDelegate Delegate
     open func chatInputTextDidChange(chatInput input: ChatInputText, height: CGFloat) {
         let currentHeight = self.minInputHeight.constant
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             if currentHeight != height {
                 Qiscus.uiThread.async {
                     self.minInputHeight.constant = height
@@ -37,7 +37,7 @@ extension QiscusChatVC: ChatInputTextDelegate {
         }
     }
     open func valueChanged(value:String){
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             self.linkToPreview = ""
 //            if value == "" {
 //                self.linkToPreview = ""
@@ -53,7 +53,7 @@ extension QiscusChatVC: ChatInputTextDelegate {
         }
     }
     open func chatInputDidEndEditing(chatInput input: ChatInputText) {
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             self.sendStopTyping()
         }
     }

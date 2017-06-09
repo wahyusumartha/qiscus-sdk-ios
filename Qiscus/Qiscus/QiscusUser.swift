@@ -309,7 +309,7 @@ open class QiscusUser: Object {
                 realm.add(self)
             }
             let thisUser = QiscusUser.copyUser(user: self)
-            Qiscus.logicThread.async {
+            DispatchQueue.global().async {
                 thisUser.downloadAvatar()
             }
             let userEmail = self.userEmail
@@ -323,7 +323,7 @@ open class QiscusUser: Object {
                 try! realm.write {
                     user.userAvatarURL = self.userAvatarURL
                 }
-                Qiscus.logicThread.async {
+                DispatchQueue.global().async {
                     self.downloadAvatar()
                 }
             }

@@ -38,7 +38,7 @@ import Photos
     }
     
     func loadComments(inRoom roomId:Int, withMessage:String? = nil, checkSync:Bool = true){
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             if let room = QiscusRoomDB.roomDB(withId: roomId){
                 let topicId = room.roomLastCommentTopicId
                 if QiscusComment.getComments(inTopicId: topicId).count >= 10 {
@@ -66,7 +66,7 @@ import Photos
         }
     }
     func loadComments(inRoomWithUsers user:String, optionalData:String? = nil, withMessage:String? = nil, distinctId:String = ""){
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             if let room = QiscusRoom.room(withDistinctId: distinctId, andUserEmail: user){
                 let topicId = room.roomLastCommentTopicId
                 if QiscusComment.getComments(inTopicId: topicId).count >= 10 {
@@ -96,7 +96,7 @@ import Photos
         commentClient.createNewRoom(withUsers: users, roomName: roomName, optionalData: optionalData, withMessage: withMessage)
     }
     public func loadMore(inRoom room:QiscusRoom, fromComment commentId:Int){
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             let comments = QiscusComment.grouppedComment(inTopicId: room.roomLastCommentTopicId, fromCommentId: commentId, limit: 20)
             if comments.count > 0 {
                 if let chatView = Qiscus.shared.chatViews[room.roomId] {
@@ -141,7 +141,7 @@ import Photos
     }
     
     class func getLinkData(withData data:QiscusCommentPresenter){
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             QiscusCommentClient.sharedInstance.getLinkMetadata(url: data.linkURL, synchronous: false, withCompletion: { linkData in
                 data.linkTitle = linkData.linkTitle
                 data.linkDescription = linkData.linkDescription
@@ -192,7 +192,7 @@ import Photos
                     data.linkImage = Qiscus.image(named: "link")
                     data.showLink = false
                     data.cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText)
-                    Qiscus.logicThread.async {
+                    DispatchQueue.global().async {
                         if let comment = QiscusComment.comment(withUniqueId: data.commentUniqueid){
                             comment.showLink = false
                             comment.commentCellHeight = data.cellSize.height
@@ -213,7 +213,7 @@ import Photos
                 let allRange = (data.commentText as NSString).range(of: data.commentText)
                 attributedText.addAttributes(data.textAttribute, range: allRange)
                 data.cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText)
-                Qiscus.logicThread.async {
+                DispatchQueue.global().async {
                     if let comment = QiscusComment.comment(withUniqueId: data.commentUniqueid){
                         comment.showLink = false
                         comment.commentCellHeight = data.cellSize.height
@@ -232,7 +232,7 @@ import Photos
         if linkData != nil{
             linkData!.saveLink()
         }
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             self.commentClient.postMessage(message: message, topicId: topicId, linkData: linkData, indexPath: indexPath)
         }
     }
@@ -267,12 +267,12 @@ import Photos
         }
     }
     public func uploadData(fromPresenter presenter:QiscusCommentPresenter){
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             self.commentClient.uploadMediaData(withData: presenter)
         }
     }
     public func newMediaMessage(_ topicId: Int,image:UIImage?,imageName:String,imagePath:URL? = nil, imageNSData:Data? = nil, roomId:Int? = nil, thumbImageRef:UIImage? = nil, videoFile:Bool = true, audioFile:Bool = false){
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             var imageData:Data = Data()
             if imageNSData != nil {
                 imageData = imageNSData!
@@ -396,7 +396,7 @@ import Photos
 // MARK: QiscusServiceDelegate
 extension QiscusDataPresenter: QiscusServiceDelegate{
     func qiscusService(didFinishLoadRoom inRoom: QiscusRoom, withMessage message: String?) {
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             let comments = QiscusComment.grouppedComment(inTopicId: inRoom.roomLastCommentTopicId, limit:20)
             let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
             if let chatView = Qiscus.shared.chatViews[inRoom.roomId] {
@@ -422,7 +422,7 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
     }
     func qiscusService(didFinishLoadMore inRoom: QiscusRoom, dataCount: Int, from commentId:Int) {
         if let chatView = Qiscus.shared.chatViews[inRoom.roomId]{
-            Qiscus.logicThread.async {
+            DispatchQueue.global().async {
                 var newData = [[QiscusCommentPresenter]]()
                 let topicId = inRoom.roomLastCommentTopicId
                 if dataCount > 0 {
@@ -460,7 +460,7 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
         }
     }
     func qiscusService(didFailLoadMore inRoom: QiscusRoom) {
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             if let chatView = Qiscus.shared.chatViews[inRoom.roomId]{
                 chatView.dataPresenter(didFailLoadMore: inRoom)
             }

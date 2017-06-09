@@ -25,7 +25,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate, ChatCellPostbac
         }
     }
     func didTapPostbackButton(withData data: JSON) {
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             if Qiscus.sharedInstance.connected{
                 var indexPath = IndexPath(row: 0, section: 0)
                 let text = data["label"].stringValue
@@ -204,7 +204,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate, ChatCellPostbac
         audioTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(audioTimerFired(_:)), userInfo: nil, repeats: true)
     }
     func didChangeData(onCell cell: QCellAudio, withData data: QiscusCommentPresenter) {
-        Qiscus.logicThread.async {
+        DispatchQueue.global().async {
             if let indexPath = data.commentIndexPath{
                 if indexPath.section < self.comments.count {
                     if indexPath.row < self.comments[indexPath.section].count{
