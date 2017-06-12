@@ -371,6 +371,7 @@ public class QiscusChatVC: UIViewController{
         self.isPresence = true
         if self.comments.count > 0 {
             self.collectionView.reloadData()
+            self.scrollToBottom()
         }
         if self.defaultBack {
             self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
