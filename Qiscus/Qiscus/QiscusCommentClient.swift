@@ -1151,7 +1151,7 @@ open class QiscusCommentClient: NSObject {
                         if comments.count > 0 {
                             if state == .active{
                                 DispatchQueue.global().async {
-                                    for newComment in comments {
+                                    for newComment in comments.reversed() {
                                         let topicId = newComment["topic_id"].intValue
                                         let roomId = newComment["room_id"].intValue
                                         let id = newComment["id"].intValue
@@ -2127,7 +2127,7 @@ open class QiscusCommentClient: NSObject {
                         self.delegate?.qiscusService(didChangeRoom: room, onRoomWithId: room.roomId)
                     }
                     var gotNewComment = false
-                    for payload in commentData{
+                    for payload in commentData.reversed(){
                         let id = payload["id"].intValue
                         let uId = payload["unique_temp_id"].stringValue
                         let email = payload["email"].stringValue
