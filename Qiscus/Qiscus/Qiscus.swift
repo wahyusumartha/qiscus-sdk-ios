@@ -139,12 +139,7 @@ import CocoaMQTT
     // need Documentation
     func backgroundCheck(){
         if Qiscus.isLoggedIn{
-            if let lastComment = QiscusComment.getLastComment(){
-                QiscusCommentClient.shared.syncChat(fromComment: lastComment.commentId, backgroundFetch: true)
-            }else{
-                let lastId = QiscusMe.sharedInstance.lastCommentId
-                QiscusCommentClient.shared.syncChat(fromComment: lastId, backgroundFetch: true)
-            }
+            QiscusCommentClient.shared.syncChat(backgroundFetch: true)
         }
     }
     func checkChat(){
@@ -501,7 +496,6 @@ import CocoaMQTT
                 if Qiscus.isLoggedIn {
                     Qiscus.sharedInstance.RealtimeConnect()
                 }
-                QiscusCommentClient.shared.sync()
             }
         }
         Qiscus.sharedInstance.reachability?.whenUnreachable = { reachability in
@@ -761,12 +755,8 @@ import CocoaMQTT
         if let vendorIdentifier = UIDevice.current.identifierForVendor {
             deviceID = vendorIdentifier.uuidString
         }
-        if let lastComment = QiscusComment.getLastComment(){
-            QiscusCommentClient.shared.syncChat(fromComment: lastComment.commentId)
-        }else{
-            let lastId = QiscusMe.sharedInstance.lastCommentId
-            QiscusCommentClient.shared.syncChat(fromComment: lastId)
-        }
+        QiscusCommentClient.shared.syncChat()
+        
         let clientID = "iosMQTT-\(appName)-\(deviceID)-\(QiscusMe.sharedInstance.id)"
         let mqtt = CocoaMQTT(clientID: clientID, host: "mqtt.qiscus.com", port: 1883)
         mqtt.username = ""
@@ -883,6 +873,7 @@ extension Qiscus:CocoaMQTTDelegate{
                         comment = QiscusComment.newComment(withId: commentId, andUniqueId: uniqueId)
                         saved = true
                     }
+                    QiscusMe.updateLastCommentId(commentId: commentId)
                     comment.commentText = json["message"].stringValue
                     comment.commentSenderEmail = email
                     comment.showLink = !(json["disable_link_preview"].boolValue)

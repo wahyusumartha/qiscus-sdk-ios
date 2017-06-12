@@ -111,7 +111,12 @@ open class QiscusMe: NSObject {
         QiscusMe.sharedInstance.userData.set(json["last_comment_id"].intValue, forKey: "qiscus_lastComment_id")
         return QiscusMe.sharedInstance
     }
-    
+    public class func updateLastCommentId(commentId:Int){
+        if QiscusMe.sharedInstance.lastCommentId < commentId {
+            QiscusMe.sharedInstance.lastCommentId = commentId
+            QiscusMe.sharedInstance.userData.set(commentId, forKey: "qiscus_lastComment_id")
+        }
+    }
     open class func clear(){
         QiscusMe.sharedInstance.id = 0
         QiscusMe.sharedInstance.email = ""

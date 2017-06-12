@@ -1076,7 +1076,7 @@ open class QiscusCommentClient: NSObject {
                                         saved = true
                                     }
                                     let email = newComment["email"].stringValue
-                                    
+                                    QiscusMe.updateLastCommentId(commentId: id)
                                     comment.commentBeforeId = newComment["comment_before_id"].intValue
                                     comment.commentSenderEmail = email
                                     comment.commentTopicId = topicId
@@ -1126,11 +1126,11 @@ open class QiscusCommentClient: NSObject {
         }
     }
 
-    open func syncChat(fromComment commentId:Int, backgroundFetch:Bool = false, trigger:Bool = false) {
+    open func syncChat(backgroundFetch:Bool = false, trigger:Bool = false) {
         DispatchQueue.global().async {
             let loadURL = QiscusConfig.SYNC_URL
             let parameters:[String: AnyObject] =  [
-                "last_received_comment_id"  : commentId as AnyObject,
+                "last_received_comment_id"  : QiscusMe.sharedInstance.lastCommentId as AnyObject,
                 "token" : qiscus.config.USER_TOKEN as AnyObject,
             ]
             Qiscus.printLog(text: "sync chat parameters: \n\(parameters)")
@@ -1147,72 +1147,70 @@ open class QiscusCommentClient: NSObject {
                     if results != JSON.null{
                         let comments = json["results"]["comments"].arrayValue
                         if comments.count > 0 {
-                            if state == .active{
-                                DispatchQueue.global().async {
-                                    for newComment in comments.reversed() {
-                                        let topicId = newComment["topic_id"].intValue
-                                        let roomId = newComment["room_id"].intValue
-                                        let id = newComment["id"].intValue
-                                        let uId = newComment["unique_temp_id"].stringValue
-                                        var saved = false
-                                        var comment = QiscusComment()
-                                        
-                                        if let dbComment = QiscusComment.comment(withUniqueId: uId) {
-                                            comment = dbComment
-                                        }else{
-                                            comment = QiscusComment.newComment(withId: id, andUniqueId: uId)
-                                            comment.commentText = newComment["message"].stringValue
-                                            comment.showLink = !(newComment["disable_link_preview"].boolValue)
-                                            saved = true
-                                        }
-                                        
-                                        let email = newComment["email"].stringValue
-                                        
-                                        comment.commentBeforeId = newComment["comment_before_id"].intValue
-                                        comment.commentSenderEmail = email
-                                        comment.commentTopicId = topicId
-                                        comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue)
-                                        
-                                        if newComment["type"].string == "buttons" {
-                                            comment.commentText = newComment["payload"]["text"].stringValue
-                                            comment.commentButton = newComment["payload"]["buttons"].stringValue
-                                        }else if newComment["type"].string == "account_linking" {
-                                            comment.commentButton = "\(newComment["payload"])"
-                                        }
+                            DispatchQueue.global().async {
+                                for newComment in comments.reversed() {
+                                    let topicId = newComment["topic_id"].intValue
+                                    let roomId = newComment["room_id"].intValue
+                                    let id = newComment["id"].intValue
+                                    let uId = newComment["unique_temp_id"].stringValue
+                                    var saved = false
+                                    var comment = QiscusComment()
+                                    
+                                    if let dbComment = QiscusComment.comment(withUniqueId: uId) {
+                                        comment = dbComment
+                                    }else{
+                                        comment = QiscusComment.newComment(withId: id, andUniqueId: uId)
+                                        comment.commentText = newComment["message"].stringValue
+                                        comment.showLink = !(newComment["disable_link_preview"].boolValue)
+                                        saved = true
+                                    }
+                                    
+                                    let email = newComment["email"].stringValue
+                                    QiscusMe.updateLastCommentId(commentId: id)
+                                    comment.commentBeforeId = newComment["comment_before_id"].intValue
+                                    comment.commentSenderEmail = email
+                                    comment.commentTopicId = topicId
+                                    comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue)
+                                    
+                                    if newComment["type"].string == "buttons" {
+                                        comment.commentText = newComment["payload"]["text"].stringValue
+                                        comment.commentButton = newComment["payload"]["buttons"].stringValue
+                                    }else if newComment["type"].string == "account_linking" {
+                                        comment.commentButton = "\(newComment["payload"])"
+                                    }
 
-                                        comment.updateCommentStatus(.sent)
-                                        
-                                        if saved{
+                                    comment.updateCommentStatus(.sent)
+                                    
+                                    if saved{
+                                        if let chatView = Qiscus.shared.chatViews[roomId] {
+                                            let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
+                                            if let room = QiscusRoom.room(withId: roomId){
+                                                chatView.dataPresenter(gotNewData: presenter, inRoom: room, realtime: true)
+                                            }
+                                        }
+                                        let service = QiscusCommentClient.shared
+                                        if let roomDelegate = service.roomDelegate {
+                                            Qiscus.uiThread.async {
+                                                roomDelegate.gotNewComment(comment)
+                                            }
+                                        }
+                                    }
+                                    if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: roomId){
+                                        participant.updateLastReadCommentId(commentId: comment.commentId)
+                                    }
+                                    
+                                    if let user = QiscusUser.getUserWithEmail(email) {
+                                        var userChanged = false
+                                        if user.userAvatarURL != newComment["user_avatar_url"].stringValue{
+                                            user.updateUserAvatarURL(newComment["user_avatar_url"].stringValue)
+                                        }
+                                        if user.userFullName != newComment["username"].stringValue{
+                                            userChanged = true
+                                            user.updateUserFullName(newComment["username"].stringValue)
+                                        }
+                                        if userChanged {
                                             if let chatView = Qiscus.shared.chatViews[roomId] {
-                                                let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                                                if let room = QiscusRoom.room(withId: roomId){
-                                                    chatView.dataPresenter(gotNewData: presenter, inRoom: room, realtime: true)
-                                                }
-                                            }
-                                            let service = QiscusCommentClient.shared
-                                            if let roomDelegate = service.roomDelegate {
-                                                Qiscus.uiThread.async {
-                                                    roomDelegate.gotNewComment(comment)
-                                                }
-                                            }
-                                        }
-                                        if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: roomId){
-                                            participant.updateLastReadCommentId(commentId: comment.commentId)
-                                        }
-                                        
-                                        if let user = QiscusUser.getUserWithEmail(email) {
-                                            var userChanged = false
-                                            if user.userAvatarURL != newComment["user_avatar_url"].stringValue{
-                                                user.updateUserAvatarURL(newComment["user_avatar_url"].stringValue)
-                                            }
-                                            if user.userFullName != newComment["username"].stringValue{
-                                                userChanged = true
-                                                user.updateUserFullName(newComment["username"].stringValue)
-                                            }
-                                            if userChanged {
-                                                if let chatView = Qiscus.shared.chatViews[roomId] {
-                                                    chatView.dataPresenter(didChangeUser: QiscusUser.copyUser(user: user), onUserWithEmail: email)
-                                                }
+                                                chatView.dataPresenter(didChangeUser: QiscusUser.copyUser(user: user), onUserWithEmail: email)
                                             }
                                         }
                                     }
@@ -1268,7 +1266,7 @@ open class QiscusCommentClient: NSObject {
                             }
                             
                             let email = newComment["email"].stringValue
-                            
+                            QiscusMe.updateLastCommentId(commentId: id)
                             comment.commentBeforeId = newComment["comment_before_id"].intValue
                             comment.commentSenderEmail = email
                             comment.commentTopicId = topicId
@@ -1352,6 +1350,7 @@ open class QiscusCommentClient: NSObject {
                                     comment.showLink = !(payload["disable_link_preview"].boolValue)
                                 }
                                 comment.commentId = id
+                                QiscusMe.updateLastCommentId(commentId: id)
                                 comment.commentBeforeId = payload["comment_before_id"].intValue
                                 comment.commentSenderEmail = email
                                 comment.commentTopicId = topicId
@@ -1504,6 +1503,7 @@ open class QiscusCommentClient: NSObject {
                                 comment.commentText = payload["message"].stringValue
                                 comment.showLink = !(payload["disable_link_preview"].boolValue)
                             }
+                            QiscusMe.updateLastCommentId(commentId: id)
                             comment.commentId = id
                             comment.commentBeforeId = payload["comment_before_id"].intValue
                             comment.commentSenderEmail = email
@@ -1663,6 +1663,7 @@ open class QiscusCommentClient: NSObject {
                                 comment.commentText = payload["message"].stringValue
                                 comment.showLink = !(payload["disable_link_preview"].boolValue)
                             }
+                            QiscusMe.updateLastCommentId(commentId: id)
                             comment.commentId = id
                             comment.commentBeforeId = payload["comment_before_id"].intValue
                             comment.commentSenderEmail = email
@@ -1850,20 +1851,20 @@ open class QiscusCommentClient: NSObject {
                                             comment = old
                                         }else{
                                             comment = QiscusComment.newComment(withId: id, andUniqueId: uid)
-                                            
-                                            comment.commentId = id
-                                            comment.commentBeforeId = payload["comment_before_id"].intValue
-                                            comment.commentText = payload["message"].stringValue
-                                            comment.showLink = !(payload["disable_link_preview"].boolValue)
-                                            comment.commentSenderEmail = email
-                                            comment.commentTopicId = topicId
-                                            comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)
-                                            if payload["type"].string == "buttons" {
-                                                comment.commentText = payload["payload"]["text"].stringValue
-                                                comment.commentButton = payload["payload"]["buttons"].stringValue
-                                            }else if payload["type"].string == "account_linking" {
-                                                comment.commentButton = "\(payload["payload"])"
-                                            }
+                                        }
+                                        QiscusMe.updateLastCommentId(commentId: id)
+                                        comment.commentId = id
+                                        comment.commentBeforeId = payload["comment_before_id"].intValue
+                                        comment.commentText = payload["message"].stringValue
+                                        comment.showLink = !(payload["disable_link_preview"].boolValue)
+                                        comment.commentSenderEmail = email
+                                        comment.commentTopicId = topicId
+                                        comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)
+                                        if payload["type"].string == "buttons" {
+                                            comment.commentText = payload["payload"]["text"].stringValue
+                                            comment.commentButton = payload["payload"]["buttons"].stringValue
+                                        }else if payload["type"].string == "account_linking" {
+                                            comment.commentButton = "\(payload["payload"])"
                                         }
                                     }
                                 }
@@ -1949,38 +1950,7 @@ open class QiscusCommentClient: NSObject {
             }
         }
     }
-    // MARK: - SYNC ALL
-    open func sync(realtime:Bool = false){
-        if Qiscus.isLoggedIn {
-            if let lastComment = QiscusComment.getLastComment() {
-                let requestURL = QiscusConfig.SYNC_URL
-                
-                let parameters:[String : AnyObject] = [
-                    "token" : qiscus.config.USER_TOKEN as AnyObject,
-                    "last_received_comment_id": lastComment.commentId as AnyObject
-                ]
-                Alamofire.request(requestURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
-                    if let response = responseData.result.value {
-                        Qiscus.printLog(text: "create New room api response:\n\(response)")
-                        let json = JSON(response)
-                        let results = json["results"]
-                        let error = json["error"]
-                        
-                        if results != JSON.null {
-                            if realtime {
-                                
-                            }
-                        }
-                        else if error != JSON.null{
-                        }
-                        
-                    }else{
-                        
-                    }
-                })
-            }
-        }
-    }
+    
     // MARK: - Message Status
     open func publishMessageStatus(onComment commentId:Int, roomId:Int, status:QiscusCommentStatus, withCompletion: @escaping ()->Void){
         DispatchQueue.global().async {
@@ -2137,6 +2107,7 @@ open class QiscusCommentClient: NSObject {
                             comment.commentText = payload["message"].stringValue
                             comment.showLink = !(payload["disable_link_preview"].boolValue)
                         }
+                        QiscusMe.updateLastCommentId(commentId: id)
                         comment.commentId = id
                         comment.commentBeforeId = payload["comment_before_id"].intValue
                         comment.commentSenderEmail = email
