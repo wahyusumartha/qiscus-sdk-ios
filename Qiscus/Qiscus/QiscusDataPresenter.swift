@@ -12,7 +12,6 @@ import Photos
 
 @objc public protocol QiscusDataPresenterDelegate {
     func dataPresenter(didFinishLoad comments:[[QiscusCommentPresenter]], inRoom:QiscusRoom)
-    func dataPresenter(didFinishSnyc hasNewData:Bool)
     func dataPresenter(gotNewData presenter:QiscusCommentPresenter, inRoom:QiscusRoom, realtime:Bool)
     func dataPresenter(didChangeStatusFrom commentId: Int, toStatus: QiscusCommentStatus, topicId: Int)
     func dataPresenter(didChangeContent data:QiscusCommentPresenter, inRoom:QiscusRoom)
@@ -442,14 +441,6 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
                 }
                 chatView.dataPresenter(didFinishLoadMore: newData, inRoom: inRoom)
             }
-        }
-    }
-    func qiscusService(didFinishSync hasNewData: Bool) {
-        self.delegate?.dataPresenter(didFinishSnyc: hasNewData)
-    }
-    func qiscusService(gotNewMessage data: QiscusCommentPresenter, inRoom room: QiscusRoom, realtime: Bool) {
-        if let chatView = Qiscus.shared.chatViews[room.roomId] {
-            chatView.dataPresenter(gotNewData: data, inRoom: room, realtime: realtime)
         }
     }
     func qiscusService(didChangeContent data:QiscusCommentPresenter){

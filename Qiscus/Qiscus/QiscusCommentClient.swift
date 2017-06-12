@@ -37,8 +37,6 @@ fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
 }
 @objc public protocol QiscusServiceDelegate {
     func qiscusService(didFinishLoadRoom inRoom:QiscusRoom, withMessage message:String?)
-    func qiscusService(didFinishSync hasNewData:Bool)
-    func qiscusService(gotNewMessage data:QiscusCommentPresenter, inRoom room:QiscusRoom,realtime: Bool)
     func qiscusService(didChangeContent data:QiscusCommentPresenter)
     func qiscusService(didFinishLoadMore inRoom:QiscusRoom, dataCount:Int, from commentId:Int)
     func qiscusService(didFailLoadMore inRoom:QiscusRoom)
@@ -1218,10 +1216,6 @@ open class QiscusCommentClient: NSObject {
                                             }
                                         }
                                     }
-                                    let service = QiscusCommentClient.shared
-                                    if let delegate = service.delegate {
-                                        delegate.qiscusService(didFinishSync: true)
-                                    }
                                 }
                             }
                         }
@@ -2167,9 +2161,6 @@ open class QiscusCommentClient: NSObject {
                         if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
                             participant.updateLastReadCommentId(commentId: comment.commentId)
                         }
-                    }
-                    if gotNewComment {
-                        self.delegate?.qiscusService(didFinishSync: true)
                     }
                 }
             }
