@@ -214,20 +214,24 @@ public class QiscusChatVC: UIViewController{
     var lastVisibleRow:IndexPath?{
         get{
             let indexPaths = collectionView.indexPathsForVisibleItems
-            var lastIndexpath = indexPaths.first!
-            var i = 0
-            for indexPath in indexPaths {
-                if indexPath.section > lastIndexpath.section {
-                    lastIndexpath.section = indexPath.section
-                    lastIndexpath.row = indexPath.row
-                }else if indexPath.section == lastIndexpath.section {
-                    if indexPath.row > lastIndexpath.row {
+            if indexPaths.count > 0 {
+                var lastIndexpath = indexPaths.first!
+                var i = 0
+                for indexPath in indexPaths {
+                    if indexPath.section > lastIndexpath.section {
+                        lastIndexpath.section = indexPath.section
                         lastIndexpath.row = indexPath.row
+                    }else if indexPath.section == lastIndexpath.section {
+                        if indexPath.row > lastIndexpath.row {
+                            lastIndexpath.row = indexPath.row
+                        }
                     }
+                    i += 1
                 }
-                i += 1
+                return lastIndexpath
+            }else{
+                return nil
             }
-            return lastIndexpath
         }
     }
     var UTIs:[String]{
