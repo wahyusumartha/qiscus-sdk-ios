@@ -1013,7 +1013,6 @@ extension Qiscus:CocoaMQTTDelegate{
                     break
                 case "r":
                     let messageArr = messageData.characters.split(separator: ":")
-                    let commentId = Int(String(messageArr[0]))!
                     let commentUniqueId:String = String(messageArr[1])
                     let userEmail = String(channelArr[3])
                     if let comment = QiscusComment.comment(withUniqueId: commentUniqueId){
