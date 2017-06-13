@@ -2089,7 +2089,6 @@ open class QiscusCommentClient: NSObject {
                         }
                         self.delegate?.qiscusService(didChangeRoom: room, onRoomWithId: room.roomId)
                     }
-                    var gotNewComment = false
                     for payload in commentData.reversed(){
                         let id = payload["id"].intValue
                         let uId = payload["unique_temp_id"].stringValue
@@ -2101,7 +2100,6 @@ open class QiscusCommentClient: NSObject {
                             comment = old
                         }else{
                             comment = QiscusComment.newComment(withId: id, andUniqueId: uId)
-                            gotNewComment = true
                             isSaved = true
                             comment.commentText = payload["message"].stringValue
                             comment.showLink = !(payload["disable_link_preview"].boolValue)
@@ -2118,8 +2116,8 @@ open class QiscusCommentClient: NSObject {
                         }else if payload["type"].string == "account_linking" {
                             comment.commentButton = "\(payload["payload"])"
                         }
-
                         comment.updateCommentStatus(.sent)
+                        
                         if isSaved {
                             DispatchQueue.global().sync{
                                 if let chatView = Qiscus.shared.chatViews[room.roomId] {
