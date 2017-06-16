@@ -662,14 +662,14 @@ extension QiscusChatVC {
     }
     
     // MARK: - Load More Control
-    func loadMore(){
+    func loadMore(localOnly:Bool = false){
         if self.room != nil {
             if Qiscus.shared.connected{
                 var firstCommentId = Int(0)
                 if self.comments.count > 0 {
                     firstCommentId = self.comments.first!.first!.commentBeforeId
                 }
-                dataPresenter.loadMore(inRoom: self.room!, fromComment: firstCommentId)
+                dataPresenter.loadMore(inRoom: self.room!, fromComment: firstCommentId, localOnly:localOnly)
             }else{
                 self.showNoConnectionToast()
                 self.loadMoreControl.endRefreshing()

@@ -110,8 +110,8 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                     }
                     else{
                         DispatchQueue.main.async {
-                            self.comments[indexPath.section].insert(presenter, at: indexPath.row)
-                            self.collectionView.reloadData()
+                            self.comments = [[QiscusCommentPresenter]]()
+                            self.loadData()
                         }
                     }
                 }else{
@@ -134,9 +134,9 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                             })
                         }
                     }else{
-                        DispatchQueue.main.async {
-                            self.comments.insert(newGroup, at: section + 1)
-                            self.collectionView.reloadData()
+                        DispatchQueue.main.sync {
+                            self.comments = [[QiscusCommentPresenter]]()
+                            self.loadData()
                         }
                     }
                 }
@@ -197,6 +197,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate{
             roomDelegate.didFinishLoadRoom(onRoom: inRoom)
         }
+        
         self.dismissLoading()
     }
     public func dataPresenter(didFinishLoadMore comments: [[QiscusCommentPresenter]], inRoom: QiscusRoom) {

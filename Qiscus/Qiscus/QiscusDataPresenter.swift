@@ -93,7 +93,7 @@ import Photos
     func loadComments(inNewGroupChat users:[String], roomName:String, optionalData:String? = nil, withMessage:String? = nil){
         commentClient.createNewRoom(withUsers: users, roomName: roomName, optionalData: optionalData, withMessage: withMessage)
     }
-    public func loadMore(inRoom room:QiscusRoom, fromComment commentId:Int){
+    public func loadMore(inRoom room:QiscusRoom, fromComment commentId:Int, localOnly:Bool = false){
         DispatchQueue.global().async {
             let comments = QiscusComment.grouppedComment(inTopicId: room.roomLastCommentTopicId, fromCommentId: commentId, limit: 20)
             if comments.count > 0 {
@@ -101,7 +101,7 @@ import Photos
                     let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
                     chatView.dataPresenter(didFinishLoadMore: presenters, inRoom: room)
                 }
-            }else{
+            }else if !localOnly{
                 self.commentClient.loadMore(room: room, fromComment: commentId)
             }
         }
