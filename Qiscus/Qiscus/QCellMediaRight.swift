@@ -60,14 +60,17 @@ class QCellMediaRight: QChatCell {
         
         if QiscusHelper.isFileExist(inLocalPath: data.localThumbURL!){
             imageDisplay.loadAsync(fromLocalPath: data.localThumbURL!, onLoaded: { (image, _) in
+                self.imageDisplay.image = image
                 self.data.displayImage = image
             })
         }else if QiscusHelper.isFileExist(inLocalPath: data.localMiniThumbURL!){
             imageDisplay.loadAsync(fromLocalPath: data.localMiniThumbURL!, onLoaded: { (image, _) in
+                self.imageDisplay.image = image
                 self.data.displayImage = image
             })
         }else{
             imageDisplay.loadAsync(data.remoteThumbURL!, onLoaded: { (image, _) in
+                self.imageDisplay.image = image
                 self.data.displayImage = image
             })
         }
