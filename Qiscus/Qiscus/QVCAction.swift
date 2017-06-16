@@ -662,7 +662,12 @@ extension QiscusChatVC {
     }
     
     // MARK: - Load More Control
-    func loadMore(localOnly:Bool = false){
+    func loadMore(){
+        if self.room != nil {
+            loadMoreData(localOnly: false)
+        }
+    }
+    func loadMoreData(localOnly:Bool){
         if self.room != nil {
             if Qiscus.shared.connected{
                 var firstCommentId = Int(0)
