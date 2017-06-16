@@ -382,7 +382,6 @@ extension QiscusChatVC {
                         ]
                         payloadJson = JSON(dictionaryLiteral: payloadArray)
                         type = "reply"
-                        print("payload saved : \(payloadJson!)")
                         self.replyData = nil
                     }
                     if let chatRoom = self.room {
@@ -655,6 +654,7 @@ extension QiscusChatVC {
         if let chatRoom = self.room{
             if Qiscus.sharedInstance.connected{
                 self.dataPresenter.newMediaMessage(chatRoom.roomLastCommentTopicId, image: image, imageName: imageName, imagePath: imagePath, imageNSData: imageNSData, videoFile: videoFile, audioFile:audioFile)
+                
             }else{
                 self.showNoConnectionToast()
             }

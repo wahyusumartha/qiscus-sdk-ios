@@ -283,7 +283,6 @@ public enum QiscusReplyType:Int{
                 var text = replyData["replied_comment_message"].stringValue
                 let replyType = commentPresenter.replyType(message: text)
                 
-                print("reply data: \(replyData)")
                 var username = replyData["replied_comment_sender_username"].stringValue
                 let repliedEmail = replyData["replied_comment_sender_email"].stringValue
                 if repliedEmail == QiscusMe.sharedInstance.email {

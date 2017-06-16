@@ -410,7 +410,6 @@ open class QiscusCommentClient: NSObject {
                     ("text", message),
                     ("replied_comment_id", payload!["replied_comment_id"].intValue)
                     ])
-                print("payload request: \(payloadRequest!)")
             }
             let commentPresenter = QiscusCommentPresenter.getPresenter(forComment: comment)
             commentPresenter.commentIndexPath = indexPath

@@ -117,7 +117,6 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     public func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
         let comment = self.comments[indexPath.section][indexPath.row]
         var show = false
-        print("action desc: \(action.description)")
         switch action.description {
         case "copy:":
             if comment.commentType == .text{
