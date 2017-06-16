@@ -394,7 +394,7 @@ open class QiscusCommentClient: NSObject {
         }
     }
     // MARK: - Comment Methode
-    open func postMessage(message: String, topicId: Int, roomId:Int? = nil, linkData:QiscusLinkData? = nil, indexPath:IndexPath? = nil, payload:JSON? = nil, payloadString:String? = nil, type:String? = nil){ //
+    open func postMessage(message: String, topicId: Int, roomId:Int? = nil, linkData:QiscusLinkData? = nil, indexPath:IndexPath? = nil, payload:JSON? = nil, type:String? = nil){ //
         DispatchQueue.global().async {
             var showLink = false
             if linkData != nil{
@@ -404,11 +404,13 @@ open class QiscusCommentClient: NSObject {
             var payloadRequest:JSON? = payload
             let comment = QiscusComment.newComment(withMessage: message, inTopicId: topicId, showLink: showLink)
             if type == "reply" {
-                comment.commentButton = payloadString!
+                comment.commentButton = "\(payload!)"
                 comment.commentType = .reply
-                let payloadData = JSON(parseJSON: payloadString!)
-                let stringData = "{\"text\": \"\(message)\",\"replied_comment_id\": \(payloadData["replied_comment_id"])}"
-                payloadRequest = JSON(parseJSON: stringData)
+                payloadRequest = JSON(dictionaryLiteral: [
+                    ("text", message),
+                    ("replied_comment_id", payload!["replied_comment_id"].intValue)
+                    ])
+                print("payload request: \(payloadRequest!)")
             }
             let commentPresenter = QiscusCommentPresenter.getPresenter(forComment: comment)
             commentPresenter.commentIndexPath = indexPath

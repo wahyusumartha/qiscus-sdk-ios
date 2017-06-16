@@ -29,11 +29,11 @@ public class QiscusCommentDB: Object {
     public dynamic var commentFontName:String = ""
     public dynamic var commentTypeRaw:Int = QiscusCommentType.text.rawValue
     public dynamic var commentButton:String = ""
-    public dynamic var dummyVariableV4:Bool = true
+    public dynamic var dummyVariableV5:Bool = true
     
     // MARK: - Primary Key
     override open class func primaryKey() -> String {
-        return "localId"
+        return "commentUniqueId"
     }
     public class var lastId:Int{
         get{

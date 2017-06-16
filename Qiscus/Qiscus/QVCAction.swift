@@ -9,6 +9,7 @@
 import UIKit
 import Photos
 import MobileCoreServices
+import SwiftyJSON
 
 extension QiscusChatVC {
     @objc public func showLoading(_ text:String = "Loading"){
@@ -369,15 +370,23 @@ extension QiscusChatVC {
                             indexPath.row = 0
                         }
                     }
-                    var payload:String? = nil
                     var type:String? = nil
+                    var payloadJson:JSON? = nil
                     if let reply = self.replyData {
-                        payload = "{\"replied_comment_sender_email\" : \"\(reply.userEmail)\",\"replied_comment_id\" : \(reply.commentId),\"text\" : \"\(value)\",\"replied_comment_message\" : \"\(reply.commentText)\",\"replied_comment_sender_username\" : \"\(reply.userFullName)\"}"
+                        let payloadArray: [(String,Any)] = [
+                            ("replied_comment_sender_email",reply.userEmail),
+                            ("replied_comment_id", reply.commentId),
+                            ("text", value),
+                            ("replied_comment_message", reply.commentText),
+                            ("replied_comment_sender_username", reply.userFullName)
+                        ]
+                        payloadJson = JSON(dictionaryLiteral: payloadArray)
                         type = "reply"
+                        print("payload saved : \(payloadJson!)")
                         self.replyData = nil
                     }
                     if let chatRoom = self.room {
-                        self.commentClient.postMessage(message: value, topicId: chatRoom.roomLastCommentTopicId, linkData: self.linkData, indexPath: indexPath, payloadString: payload, type: type)
+                        self.commentClient.postMessage(message: value, topicId: chatRoom.roomLastCommentTopicId, linkData: self.linkData, indexPath: indexPath, payload: payloadJson, type: type)
                     }
                     self.inputText.clearValue()
                     //self.showLink = false
