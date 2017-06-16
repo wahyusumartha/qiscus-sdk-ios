@@ -103,14 +103,19 @@ open class ChatInputText: UITextView, UITextViewDelegate {
         textView.becomeFirstResponder()
     }
     open func textViewDidEndEditing(_ textView: UITextView) {
-        
         if value == "" {
             textView.text = self.placeholder
             textView.textColor = self.placeHolderColor
             if let chatView = self.chatInputDelegate as? QiscusChatVC {
-                chatView.sendButton.isEnabled = false
-                chatView.sendButton.isHidden = true
-                chatView.recordButton.isHidden = false
+                if chatView.replyData == nil {
+                    chatView.sendButton.isEnabled = false
+                    chatView.sendButton.isHidden = true
+                    chatView.recordButton.isHidden = false
+                }else{
+                    chatView.sendButton.isEnabled = false
+                    chatView.sendButton.isHidden = false
+                    chatView.recordButton.isHidden = true
+                }
             }
         }
         textView.resignFirstResponder()

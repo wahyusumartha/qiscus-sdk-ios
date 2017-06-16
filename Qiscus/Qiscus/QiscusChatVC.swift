@@ -35,6 +35,7 @@ public class QiscusChatVC: UIViewController{
     @IBOutlet weak var linkDescription: UITextView!
     @IBOutlet weak var linkImage: UIImageView!
     @IBOutlet weak var linkTitle: UILabel!
+    @IBOutlet weak var linkCancelButton: UIButton!
     @IBOutlet weak var recordBackground: UIView!
     @IBOutlet weak var recordButton: UIButton!
     @IBOutlet weak var cancelRecordButton: UIButton!
@@ -46,6 +47,7 @@ public class QiscusChatVC: UIViewController{
     @IBOutlet weak var collectionViewBottomConstrain: NSLayoutConstraint!
     @IBOutlet weak var linkPreviewTopMargin: NSLayoutConstraint!
     @IBOutlet weak var recordViewLeading: NSLayoutConstraint!
+    @IBOutlet weak var linkImageWidth: NSLayoutConstraint!
     
     var isPresence:Bool = false
     var titleLabel = UILabel()
@@ -55,6 +57,72 @@ public class QiscusChatVC: UIViewController{
     var commentClient = QiscusCommentClient.sharedInstance
     let dataPresenter = QiscusDataPresenter.shared
     var archived:Bool = QiscusUIConfiguration.sharedInstance.readOnly
+    
+    var replyData:QiscusCommentPresenter? = nil {
+        didSet{
+            if replyData == nil {
+                Qiscus.uiThread.async {
+                    self.linkPreviewTopMargin.constant = 0
+                    UIView.animate(withDuration: 0.65, animations: {
+                        self.view.layoutIfNeeded()
+                    }, completion: {(_) in
+                        if self.inputText.value == "" {
+                            self.sendButton.isEnabled = false
+                            self.sendButton.isHidden = true
+                            self.recordButton.isHidden = false
+                            self.linkImage.image = nil
+                        }
+                    })
+                }
+            }else{
+                Qiscus.uiThread.async {
+
+                    if self.replyData!.commentType == .text || self.replyData!.commentType == .reply {
+                        self.linkDescription.text = self.replyData!.commentText
+                        self.linkImageWidth.constant = 0
+                    }else{
+                        if self.replyData!.commentType == .video || self.replyData!.commentType == .image {
+                            if QiscusHelper.isFileExist(inLocalPath: self.replyData!.localThumbURL!){
+                                self.linkImage.loadAsync(fromLocalPath: self.replyData!.localThumbURL!, onLoaded: { (image, _) in
+                                    self.linkImage.image = image
+                                })
+                            }else if QiscusHelper.isFileExist(inLocalPath: self.replyData!.localMiniThumbURL!){
+                               self.linkImage.loadAsync(fromLocalPath: self.replyData!.localMiniThumbURL!, onLoaded: { (image, _) in
+                                    self.linkImage.image = image
+                                })
+                            }else{
+                                self.linkImage.loadAsync(self.replyData!.remoteThumbURL!, onLoaded: { (image, _) in
+                                    self.linkImage.image = image
+                                })
+                            }
+                            self.linkImageWidth.constant = 55
+                        }else{
+                        
+                        }
+                        self.linkDescription.text = self.replyData!.fileName
+                    }
+                    
+                    self.linkTitle.text = self.replyData!.userFullName
+                    self.linkPreviewTopMargin.constant = -65
+                    UIView.animate(withDuration: 0.35, animations: {
+                        self.view.layoutIfNeeded()
+                        if let goToRow = self.lastVisibleRow {
+                            self.scrollToIndexPath(goToRow, position: .bottom, animated: true, delayed: false)
+                        }
+                    }, completion: { (_) in
+                        if self.inputText.value == "" {
+                            self.sendButton.isEnabled = false
+                        }else{
+                            self.sendButton.isEnabled = true
+                        }
+                        self.sendButton.isHidden = false
+                        self.recordButton.isHidden = true
+                    })
+                }
+            }
+        }
+    }
+    
     public var defaultBack:Bool = true
     
     // MARK: - Data Properties
@@ -262,7 +330,8 @@ public class QiscusChatVC: UIViewController{
         layout?.sectionFootersPinToVisibleBounds = true
         let resendMenuItem: UIMenuItem = UIMenuItem(title: "Resend", action: #selector(QChatCell.resend))
         let deleteMenuItem: UIMenuItem = UIMenuItem(title: "Delete", action: #selector(QChatCell.deleteComment))
-        let menuItems:[UIMenuItem] = [resendMenuItem,deleteMenuItem]
+        let replyMenuItem: UIMenuItem = UIMenuItem(title: "Reply", action: #selector(QChatCell.reply))
+        let menuItems:[UIMenuItem] = [resendMenuItem,deleteMenuItem,replyMenuItem]
         UIMenuController.shared.menuItems = menuItems
         
         self.loadMoreControl.addTarget(self, action: #selector(QiscusChatVC.loadMore), for: UIControlEvents.valueChanged)
@@ -286,6 +355,8 @@ public class QiscusChatVC: UIViewController{
         linkPreviewContainer.layer.shadowColor = UIColor.black.cgColor
         linkPreviewContainer.layer.shadowOpacity = 0.6
         linkPreviewContainer.layer.shadowOffset = CGSize(width: -5, height: 0)
+        linkCancelButton.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonColor
+        linkCancelButton.setImage(Qiscus.image(named: "ar_cancel")?.withRenderingMode(.alwaysTemplate), for: .normal)
         roomAvatar.contentMode = .scaleAspectFill
         inputText.font = Qiscus.style.chatFont
         self.collectionView.delegate = self
@@ -400,6 +471,7 @@ public class QiscusChatVC: UIViewController{
         }
         if self.room != nil {
             self.loadTitle()
+            self.subscribeRealtime(onRoom: self.room!)
         }
         if #available(iOS 10.0, *) {
             let center = UNUserNotificationCenter.current()
@@ -561,6 +633,7 @@ public class QiscusChatVC: UIViewController{
         
         let keyboardHeight: CGFloat = keyboardSize.height
         let animateDuration = info[UIKeyboardAnimationDurationUserInfoKey] as! Double
+        
         self.inputBarBottomMargin.constant = 0 - keyboardHeight
         let goToRow = self.lastVisibleRow
         UIView.animate(withDuration: animateDuration, delay: 0, options: UIViewAnimationOptions(), animations: {
@@ -601,8 +674,12 @@ public class QiscusChatVC: UIViewController{
     }
     
     @IBAction func hideLinkPreview(_ sender: UIButton) {
-        permanentlyDisableLink = true
-        showLink = false
+        if replyData != nil {
+            replyData = nil
+        }else{
+            permanentlyDisableLink = true
+            showLink = false
+        }
     }
     
     @IBAction func showAttcahMenu(_ sender: UIButton) {

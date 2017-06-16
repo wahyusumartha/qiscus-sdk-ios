@@ -15,6 +15,7 @@ public enum QiscusCommentType:Int {
     case attachment
     case postback
     case account
+    case reply
 }
 @objc public enum QiscusCommentStatus:Int{
     case sending
@@ -26,7 +27,6 @@ public enum QiscusCommentType:Int {
 
 public class QiscusComment: NSObject {
     // MARK: - Variable
-    // MARK: Dynamic Variable
     public var localId:Int = 0
     public var commentId:Int = 0 {
         didSet{
@@ -271,7 +271,20 @@ public class QiscusComment: NSObject {
             }
         }
     }
-    
+    public var commentType: QiscusCommentType = QiscusCommentType.text {
+        didSet{
+            if !self.copyProcess {
+                if let savedComment = QiscusCommentDB.commentDB(withLocalId: self.localId){
+                    if savedComment.commentTypeRaw != self.commentType.rawValue{
+                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        try! realm.write {
+                            savedComment.commentTypeRaw = self.commentType.rawValue
+                        }
+                    }
+                }
+            }
+        }
+    }
     // MARK: - Process Flag
     public var copyProcess:Bool = false
     
@@ -325,7 +338,8 @@ public class QiscusComment: NSObject {
         get {
             if commentStatusRaw == QiscusCommentStatus.failed.rawValue || commentStatusRaw == QiscusCommentStatus.sending.rawValue{
                 return QiscusCommentStatus(rawValue: commentStatusRaw)!
-            }else{
+            }
+            else{
                 var minReadId = Int(0)
                 var minDeliveredId = Int(0)
                 
@@ -351,22 +365,7 @@ public class QiscusComment: NSObject {
             }
         }
     }
-    open var commentType: QiscusCommentType {
-        get {
-            var type = QiscusCommentType.text
-            if self.commentIsFile{
-                type = QiscusCommentType.attachment
-            }else if self.commentButton != ""{
-                let json = JSON(parseJSON: self.commentButton)
-                if let _ = json["redirect_url"].string {
-                    type = .account
-                }else{
-                    type = QiscusCommentType.postback
-                }
-            }
-            return type
-        }
-    }
+    
     open var commentDate: String {
         get {
             let date = Date(timeIntervalSince1970: commentCreatedAt)
@@ -428,6 +427,7 @@ public class QiscusComment: NSObject {
         }
     }
     
+    
     // MARK: - new comment
     public class func newComment(withId commentId:Int, andUniqueId uniqueId:String)->QiscusComment{
         let commentDB = QiscusCommentDB.new(commentWithId: commentId, andUniqueId: uniqueId)
@@ -451,6 +451,12 @@ public class QiscusComment: NSObject {
         comment.commentStatusRaw = QiscusCommentStatus.sending.rawValue
         comment.commentIsSynced = false
         comment.showLink = showLink
+        
+        if comment.commentIsFile{
+            comment.commentType = QiscusCommentType.attachment
+        }else {
+            comment.commentType = QiscusCommentType.text
+        }
         
         return comment
     }

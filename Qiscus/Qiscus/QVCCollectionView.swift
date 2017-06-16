@@ -117,23 +117,42 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     public func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
         let comment = self.comments[indexPath.section][indexPath.row]
         var show = false
-        if action == #selector(UIResponderStandardEditActions.copy(_:)) && comment.commentType == .text{
-            show = true
-        }else if action == #selector(QChatCell.resend) && comment.commentStatus == .failed && Qiscus.sharedInstance.connected {
+        print("action desc: \(action.description)")
+        switch action.description {
+        case "copy:":
             if comment.commentType == .text{
                 show = true
-            }else{
-                if let commentData = comment.comment{
-                    if let file = QiscusFile.file(forComment: commentData){
-                        if file.isUploaded || file.isOnlyLocalFileExist{
-                            show = true
+            }
+            break
+        case "resend":
+            if comment.commentStatus == .failed && Qiscus.sharedInstance.connected {
+                if comment.commentType == .text{
+                    show = true
+                }else{
+                    if let commentData = comment.comment{
+                        if let file = QiscusFile.file(forComment: commentData){
+                            if file.isUploaded || file.isOnlyLocalFileExist{
+                                show = true
+                            }
                         }
                     }
                 }
             }
-        }else if action == #selector(QChatCell.deleteComment) && comment.commentStatus == .failed {
-            show = true
+            break
+        case "deleteComment":
+            if comment.commentStatus == .failed  {
+                show = true
+            }
+            break
+        case "reply":
+            if comment.commentType != .postback && comment.commentType != .accountLinking && comment.commentStatus != .failed && Qiscus.sharedInstance.connected{
+                show = true
+            }
+            break
+        default:
+            break
         }
+    
         return show
     }
     public func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
@@ -178,9 +197,9 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let comment = self.comments[indexPath.section][indexPath.row]
         var size = comment.cellSize
-        if comment.commentType == .text || comment.commentType == .postback || comment.commentType == .accountLinking{
+        if comment.commentType == .text || comment.commentType == .postback || comment.commentType == .accountLinking || comment.commentType == .reply{
             size.height += 15
-            if comment.showLink {
+            if comment.showLink || comment.commentType == .reply{
                 size.height += 75
             }
         }

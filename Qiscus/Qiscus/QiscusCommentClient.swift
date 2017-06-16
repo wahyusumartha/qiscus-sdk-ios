@@ -394,21 +394,27 @@ open class QiscusCommentClient: NSObject {
         }
     }
     // MARK: - Comment Methode
-    open func postMessage(message: String, topicId: Int, roomId:Int? = nil, linkData:QiscusLinkData? = nil, indexPath:IndexPath? = nil, payload:JSON? = nil, type:String? = nil){ //
+    open func postMessage(message: String, topicId: Int, roomId:Int? = nil, linkData:QiscusLinkData? = nil, indexPath:IndexPath? = nil, payload:JSON? = nil, payloadString:String? = nil, type:String? = nil){ //
         DispatchQueue.global().async {
             var showLink = false
             if linkData != nil{
                 showLink = true
                 QiscusLinkData.copyLink(link: linkData!).saveLink()
             }
-            
+            var payloadRequest:JSON? = payload
             let comment = QiscusComment.newComment(withMessage: message, inTopicId: topicId, showLink: showLink)
-        
+            if type == "reply" {
+                comment.commentButton = payloadString!
+                comment.commentType = .reply
+                let payloadData = JSON(parseJSON: payloadString!)
+                let stringData = "{\"text\": \"\(message)\",\"replied_comment_id\": \(payloadData["replied_comment_id"])}"
+                payloadRequest = JSON(parseJSON: stringData)
+            }
             let commentPresenter = QiscusCommentPresenter.getPresenter(forComment: comment)
             commentPresenter.commentIndexPath = indexPath
-        
+            
             DispatchQueue.global().async {
-                self.postComment(commentPresenter, roomId: roomId, linkData: linkData, payload: payload, type: type)
+                self.postComment(commentPresenter, roomId: roomId, linkData: linkData, payload: payloadRequest, type: type)
             }
             if let room = QiscusRoom.room(withLastTopicId: topicId) {
                 if let chatView = Qiscus.shared.chatViews[room.roomId] {
@@ -442,9 +448,11 @@ open class QiscusCommentClient: NSObject {
             parameters["type"] = type! as AnyObject
             parameters["payload"] = "\(payload!)" as AnyObject
         }
+        
         if roomId != nil {
             parameters["room_id"] = roomId as AnyObject?
         }
+        
         DispatchQueue.global().async {
             Alamofire.request(QiscusConfig.postCommentURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {response in
                 if let comment = data.comment {
@@ -1084,10 +1092,22 @@ open class QiscusCommentClient: NSObject {
                                     
                                     if newComment["type"].string == "buttons" {
                                         comment.commentText = newComment["payload"]["text"].stringValue
-                                        comment.commentButton = newComment["payload"]["buttons"].stringValue
+                                        comment.commentButton = "\(newComment["payload"]["buttons"])"
+                                        comment.commentType = .postback
                                     }else if newComment["type"].string == "account_linking" {
                                         comment.commentButton = "\(newComment["payload"])"
+                                        comment.commentType = .account
+                                    }else if newComment["type"].string == "reply" {
+                                        if comment.commentButton == "" {
+                                            comment.commentButton = "\(newComment["payload"])"
+                                        }
+                                        comment.commentType = .reply
+                                    }else if comment.commentIsFile {
+                                        comment.commentType = .attachment
+                                    }else{
+                                        comment.commentType = .text
                                     }
+                                    
                                     comment.updateCommentStatus(.sent)
                                     
                                     if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
@@ -1173,9 +1193,20 @@ open class QiscusCommentClient: NSObject {
                                     
                                     if newComment["type"].string == "buttons" {
                                         comment.commentText = newComment["payload"]["text"].stringValue
-                                        comment.commentButton = newComment["payload"]["buttons"].stringValue
+                                        comment.commentButton = "\(newComment["payload"]["buttons"])"
+                                        comment.commentType = .postback
                                     }else if newComment["type"].string == "account_linking" {
                                         comment.commentButton = "\(newComment["payload"])"
+                                        comment.commentType = .account
+                                    }else if newComment["type"].string == "reply" {
+                                        if comment.commentButton == "" {
+                                            comment.commentButton = "\(newComment["payload"])"
+                                        }
+                                        comment.commentType = .reply
+                                    }else if comment.commentIsFile {
+                                        comment.commentType = .attachment
+                                    }else{
+                                        comment.commentType = .text
                                     }
 
                                     comment.updateCommentStatus(.sent)
@@ -1272,9 +1303,20 @@ open class QiscusCommentClient: NSObject {
                             comment.commentCreatedAt = Double(newComment["unix_timestamp"].doubleValue)
                             if newComment["type"].string == "buttons" {
                                 comment.commentText = newComment["payload"]["text"].stringValue
-                                comment.commentButton = newComment["payload"]["buttons"].stringValue
+                                comment.commentButton = "\(newComment["payload"]["buttons"])"
+                                comment.commentType = .postback
                             }else if newComment["type"].string == "account_linking" {
                                 comment.commentButton = "\(newComment["payload"])"
+                                comment.commentType = .account
+                            }else if newComment["type"].string == "reply" {
+                                if comment.commentButton == "" {
+                                    comment.commentButton = "\(newComment["payload"])"
+                                }
+                                comment.commentType = .reply
+                            }else if comment.commentIsFile {
+                                comment.commentType = .attachment
+                            }else{
+                                comment.commentType = .text
                             }
 
                             comment.updateCommentStatus(.sent)
@@ -1354,11 +1396,23 @@ open class QiscusCommentClient: NSObject {
                                 comment.commentSenderEmail = email
                                 comment.commentTopicId = topicId
                                 comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)
+                                
                                 if payload["type"].string == "buttons" {
                                     comment.commentText = payload["payload"]["text"].stringValue
-                                    comment.commentButton = "\(payload["payload"]["buttons"].arrayValue)"
+                                    comment.commentButton = "\(payload["payload"]["buttons"])"
+                                    comment.commentType = .postback
                                 }else if payload["type"].string == "account_linking" {
                                     comment.commentButton = "\(payload["payload"])"
+                                    comment.commentType = .account
+                                }else if payload["type"].string == "reply" {
+                                    if comment.commentButton == "" {
+                                        comment.commentButton = "\(payload["payload"])"
+                                    }
+                                    comment.commentType = .reply
+                                }else if comment.commentIsFile {
+                                    comment.commentType = .attachment
+                                }else{
+                                    comment.commentType = .text
                                 }
 
                                 comment.updateCommentStatus(.sent)
@@ -1508,11 +1562,23 @@ open class QiscusCommentClient: NSObject {
                             comment.commentSenderEmail = email
                             comment.commentTopicId = topicId
                             comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)
+                            
                             if payload["type"].string == "buttons" {
                                 comment.commentText = payload["payload"]["text"].stringValue
-                                comment.commentButton = payload["payload"]["buttons"].stringValue
+                                comment.commentButton = "\(payload["payload"]["buttons"])"
+                                comment.commentType = .postback
                             }else if payload["type"].string == "account_linking" {
                                 comment.commentButton = "\(payload["payload"])"
+                                comment.commentType = .account
+                            }else if payload["type"].string == "reply" {
+                                if comment.commentButton == "" {
+                                    comment.commentButton = "\(payload["payload"])"
+                                }
+                                comment.commentType = .reply
+                            }else if comment.commentIsFile {
+                                comment.commentType = .attachment
+                            }else{
+                                comment.commentType = .text
                             }
 
                             comment.updateCommentStatus(.sent)
@@ -1670,9 +1736,20 @@ open class QiscusCommentClient: NSObject {
                             comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)
                             if payload["type"].string == "buttons" {
                                 comment.commentText = payload["payload"]["text"].stringValue
-                                comment.commentButton = payload["payload"]["buttons"].stringValue
+                                comment.commentButton = "\(payload["payload"]["buttons"])"
+                                comment.commentType = .postback
                             }else if payload["type"].string == "account_linking" {
                                 comment.commentButton = "\(payload["payload"])"
+                                comment.commentType = .account
+                            }else if payload["type"].string == "reply" {
+                                if comment.commentButton == "" {
+                                    comment.commentButton = "\(payload["payload"])"
+                                }
+                                comment.commentType = .reply
+                            }else if comment.commentIsFile {
+                                comment.commentType = .attachment
+                            }else{
+                                comment.commentType = .text
                             }
                             comment.updateCommentStatus(.sent)
                             if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
@@ -1861,9 +1938,20 @@ open class QiscusCommentClient: NSObject {
                                         comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)
                                         if payload["type"].string == "buttons" {
                                             comment.commentText = payload["payload"]["text"].stringValue
-                                            comment.commentButton = payload["payload"]["buttons"].stringValue
+                                            comment.commentButton = "\(payload["payload"]["buttons"])"
+                                            comment.commentType = .postback
                                         }else if payload["type"].string == "account_linking" {
                                             comment.commentButton = "\(payload["payload"])"
+                                            comment.commentType = .account
+                                        }else if payload["type"].string == "reply" {
+                                            if comment.commentButton == "" {
+                                                comment.commentButton = "\(payload["payload"])"
+                                            }
+                                            comment.commentType = .reply
+                                        }else if comment.commentIsFile {
+                                            comment.commentType = .attachment
+                                        }else{
+                                            comment.commentType = .text
                                         }
                                     }
                                 }
@@ -2112,9 +2200,20 @@ open class QiscusCommentClient: NSObject {
                         comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)
                         if payload["type"].string == "buttons" {
                             comment.commentText = payload["payload"]["text"].stringValue
-                            comment.commentButton = payload["payload"]["buttons"].stringValue
+                            comment.commentButton = "\(payload["payload"]["buttons"])"
+                            comment.commentType = .postback
                         }else if payload["type"].string == "account_linking" {
                             comment.commentButton = "\(payload["payload"])"
+                            comment.commentType = .account
+                        }else if payload["type"].string == "reply" {
+                            if comment.commentButton == "" {
+                                comment.commentButton = "\(payload["payload"])"
+                            }
+                            comment.commentType = .reply
+                        }else if comment.commentIsFile {
+                            comment.commentType = .attachment
+                        }else{
+                            comment.commentType = .text
                         }
                         comment.updateCommentStatus(.sent)
                         

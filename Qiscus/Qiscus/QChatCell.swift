@@ -35,6 +35,14 @@ class QChatCell: UICollectionViewCell {
     open func resend(){
         QiscusDataPresenter.shared.resend(DataPresenter: self.data)
     }
+    open func reply(){
+        print("Reply message")
+        if let comment = self.data.comment {
+            if let chatView = Qiscus.shared.chatViews[comment.roomId] {
+                chatView.replyData = self.data
+            }
+        }
+    }
     open func deleteComment(){
         if let comment = self.data.comment {
             if let chatView = Qiscus.shared.chatViews[comment.roomId]{

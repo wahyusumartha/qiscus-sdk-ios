@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SwiftyJSON
 
 class QCellTextRight: QChatCell {
     let maxWidth:CGFloat = QiscusUIConfiguration.chatTextMaxWidth
@@ -27,6 +28,7 @@ class QCellTextRight: QChatCell {
     @IBOutlet weak var statusTrailing: NSLayoutConstraint!
     @IBOutlet weak var textViewHeight: NSLayoutConstraint!
     @IBOutlet weak var textViewWidth: NSLayoutConstraint!
+    @IBOutlet weak var linkImageWidth: NSLayoutConstraint!
 
     @IBOutlet weak var LinkContainer: UIView!
     @IBOutlet weak var linkDescription: UITextView!
@@ -84,7 +86,40 @@ class QCellTextRight: QChatCell {
                 if !self.data.linkSaved{
                     QiscusDataPresenter.getLinkData(withData: self.data)
                 }
+            }else if self.data.commentType == .reply{
+                let replyData = JSON(parseJSON: self.data.comment!.commentButton)
+                let text = replyData["replied_comment_message"].stringValue
+                let replyType = self.data.replyType(message: text)
+                
+                self.linkTitle.text = self.data.linkTitle
+                self.linkDescription.text = self.data.linkDescription
+                
+                if replyType == .image || replyType == .video {
+                    self.linkImageWidth.constant = 55
+                    self.linkImage.isHidden = false
+                    
+                    self.linkImage.loadAsync(self.data.linkImageURL!)
+                }else{
+                    self.linkImageWidth.constant = 0
+                    self.linkImage.isHidden = true
+                    
+                    self.layoutIfNeeded()
+                }
+                //self.linkImage.image = self.data.linkImage
+                self.LinkContainer.isHidden = false
+                self.balloonHeight.constant = 83
+                self.textTopMargin.constant = 73
+                self.linkHeight.constant = 65
+                textWidth = self.maxWidth
+            }else{
+                self.linkTitle.text = ""
+                self.linkDescription.text = ""
+                self.linkImage.image = Qiscus.image(named: "link")
+                self.LinkContainer.isHidden = true
+                self.balloonHeight.constant = 10
+                self.textTopMargin.constant = 0
             }
+            
             self.textViewHeight.constant = textSize.height
             self.textViewWidth.constant = textWidth
             self.userNameLabel.textAlignment = .right
@@ -174,6 +209,40 @@ class QCellTextRight: QChatCell {
             }
             if let urlToOpen = URL(string: urlToCheck){
                 UIApplication.shared.openURL(urlToOpen)
+            }
+        }else if data.commentType == .reply {
+            DispatchQueue.global().sync {
+                let replyData = JSON(parseJSON: self.data.comment!.commentButton)
+                let commentId = replyData["replied_comment_id"].intValue
+                var found = false
+                if let comment = data.comment {
+                    if let chatView = Qiscus.shared.chatViews[comment.roomId]{
+                        
+                        var indexPath = IndexPath(item: 0, section: 0)
+                        var section = 0
+                        for commentGroup in chatView.comments{
+                            var row = 0
+                            for comment in commentGroup {
+                                if comment.commentId == commentId {
+                                    found = true
+                                    indexPath = IndexPath(item: row, section: section)
+                                    break
+                                }
+                                row += 1
+                            }
+                            if found {
+                                break
+                            }else{
+                                section += 1
+                            }
+                        }
+                        if found {
+                            DispatchQueue.main.async {
+                                chatView.scrollToIndexPath(indexPath, position: .top, animated: true, delayed: false)
+                            }
+                        }
+                    }
+                }
             }
         }
     }

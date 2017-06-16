@@ -18,6 +18,15 @@ public enum QiscusCommentPresenterType:Int {
     case file
     case postback
     case accountLinking
+    case reply
+}
+public enum QiscusReplyType:Int{
+    case text
+    case image
+    case video
+    case audio
+    case document
+    case other
 }
 @objc public class QiscusCommentPresenter: NSObject {
     // commentAttribute
@@ -126,6 +135,63 @@ public enum QiscusCommentPresenterType:Int {
             ]
         }
     }
+    // string checker
+    fileprivate func isAttachment(text:String) -> Bool {
+        var check:Bool = false
+        if(text.hasPrefix("[file]")){
+            check = true
+        }
+        return check
+    }
+    private func getAttachmentURL(message: String) -> String {
+        let component1 = message.components(separatedBy: "[file]")
+        let component2 = component1.last!.components(separatedBy: "[/file]")
+        let mediaUrlString = component2.first?.trimmingCharacters(in: CharacterSet.whitespaces)
+        return mediaUrlString!
+    }
+    public func replyType(message:String)->QiscusReplyType{
+        if self.isAttachment(text: message){
+            let url = getAttachmentURL(message: message)
+            
+            switch self.fileExtension(fromURL: url) {
+            case "jpg","jpg_","png","png_","gif","gif_":
+                return .image
+            case "m4a","m4a_","aac","aac_","mp3","mp3_":
+                return .audio
+            case "mov","mov_","mp4","mp4_":
+                return .video
+            case "pdf","pdf_","doc","docx","ppt","pptx","xls","xlsx","txt":
+                return .document
+            default:
+                return .other
+            }
+        }else{
+            return .text
+        }
+    }
+    fileprivate func fileName(text:String) ->String{
+        let url = getAttachmentURL(message: text)
+        var fileName:String? = ""
+
+        let remoteURL = url.replacingOccurrences(of: " ", with: "%20")
+        let  mediaURL = URL(string: remoteURL)!
+        fileName = mediaURL.lastPathComponent.replacingOccurrences(of: "%20", with: "_")
+        
+        return fileName!
+    }
+    private func fileExtension(fromURL url:String) -> String{
+        var ext = ""
+        if url.range(of: ".") != nil{
+            let fileNameArr = url.characters.split(separator: ".")
+            ext = String(fileNameArr.last!).lowercased()
+            if ext.contains("?"){
+                let newArr = ext.characters.split(separator: "?")
+                ext = String(newArr.first!).lowercased()
+            }
+        }
+        return ext
+    }
+    
     class func getPresenter(forComment comment:QiscusComment)->QiscusCommentPresenter{
         let commentPresenter = QiscusCommentPresenter()
         commentPresenter.fromPresenter = true
@@ -191,16 +257,72 @@ public enum QiscusCommentPresenterType:Int {
                 comment.commentFontSize = fontSize
             }
             break
-        case .text:
-            commentPresenter.commentType = .text
+        case .text, .reply:
+            var isReply = false
+            if comment.commentType == .text {
+                commentPresenter.commentType = .text
+                //commentPresenter.showLink = comment.showLink
+                commentPresenter.showLink = false
+            }else{
+                let replyData = JSON(parseJSON: comment.commentButton)
+                commentPresenter.commentType = .reply
+                commentPresenter.showLink = false
+                commentPresenter.commentText = replyData["text"].stringValue
+                isReply = true
+            }
             commentPresenter.cellIdentifier = "cellText\(position)"
-            commentPresenter.showLink = comment.showLink
+            
             
             var attributedText = NSMutableAttributedString(string: commentPresenter.commentText)
             
             let allRange = (commentPresenter.commentText as NSString).range(of: commentPresenter.commentText)
             attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
             
+            if isReply {
+                let replyData = JSON(parseJSON: comment.commentButton)
+                var text = replyData["replied_comment_message"].stringValue
+                let replyType = commentPresenter.replyType(message: text)
+                
+                print("reply data: \(replyData)")
+                var username = replyData["replied_comment_sender_username"].stringValue
+                let repliedEmail = replyData["replied_comment_sender_email"].stringValue
+                if repliedEmail == QiscusMe.sharedInstance.email {
+                    username = "You"
+                }
+                
+                switch replyType {
+                case .text:
+                    break
+                case .image, .video:
+                    let filename = commentPresenter.fileName(text: text)
+                    let url = commentPresenter.getAttachmentURL(message: text)
+                    text = filename
+                    var thumbURL = url.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
+                    let thumbUrlArr = thumbURL.characters.split(separator: ".")
+                    
+                    var newThumbURL = ""
+                    var i = 0
+                    for thumbComponent in thumbUrlArr{
+                        if i == 0{
+                            newThumbURL += String(thumbComponent)
+                        }else if i < (thumbUrlArr.count - 1){
+                            newThumbURL += ".\(String(thumbComponent))"
+                        }else{
+                            newThumbURL += ".png"
+                        }
+                        i += 1
+                    }
+                    thumbURL = newThumbURL
+                    commentPresenter.linkImageURL = thumbURL
+                    break
+                default:
+                    let filename = commentPresenter.fileName(text: text)
+                    text = filename
+                    break
+                }
+                commentPresenter.linkTitle = username
+                commentPresenter.linkDescription = text
+            }
 //            if comment.showLink {
 //                if let url = comment.commentLink{
 //                    commentPresenter.linkTitle = "Load data ..."
@@ -255,7 +377,7 @@ public enum QiscusCommentPresenterType:Int {
 //                }
 //            }
             //else{
-                commentPresenter.showLink = false
+                //commentPresenter.showLink = false
                 comment.showLink = false
                 attributedText = NSMutableAttributedString(string: commentPresenter.commentText)
                 attributedText.addAttributes(commentPresenter.textAttribute, range: allRange)
@@ -275,6 +397,7 @@ public enum QiscusCommentPresenterType:Int {
             }else{
                 Qiscus.uiThread.sync {
                     let cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText)
+                    
                     commentPresenter.cellSize = cellSize
                     comment.commentCellHeight = cellSize.height
                     comment.commentCellWidth = cellSize.width
@@ -300,6 +423,7 @@ public enum QiscusCommentPresenterType:Int {
             commentPresenter.remoteURL = file.fileURL
             commentPresenter.uploadMimeType = file.fileMimeType
             commentPresenter.fileType = file.fileExtension
+            commentPresenter.fileName = file.fileName
             
             switch file.fileType {
             case .media:

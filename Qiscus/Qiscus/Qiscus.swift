@@ -122,6 +122,7 @@ import CocoaMQTT
         Qiscus.shared.mqtt?.disconnect()
         Qiscus.unRegisterPN()
         QiscusMe.clear()
+        Qiscus.dbConfiguration.deleteRealmIfMigrationNeeded = true
         Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         try! realm.write {
@@ -130,7 +131,16 @@ import CocoaMQTT
         Qiscus.deleteAllFiles()
         Qiscus.shared.chatViews = [Int:QiscusChatVC]()
     }
-    
+    @objc public class func clearData(){
+        Qiscus.dbConfiguration.deleteRealmIfMigrationNeeded = true
+        Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        try! realm.write {
+            realm.deleteAll()
+        }
+        Qiscus.deleteAllFiles()
+        Qiscus.shared.chatViews = [Int:QiscusChatVC]()
+    }
     @objc public class func unRegisterPN(){
         if Qiscus.isLoggedIn {
             QiscusCommentClient.sharedInstance.unRegisterDevice()
@@ -140,6 +150,9 @@ import CocoaMQTT
     func backgroundCheck(){
         if Qiscus.isLoggedIn{
             QiscusCommentClient.shared.syncChat(backgroundFetch: true)
+            if let realtime = self.mqtt {
+                realtime.connect()
+            }
         }
     }
     func checkChat(){
@@ -676,12 +689,8 @@ import CocoaMQTT
     
     @objc public class func didReceive(RemoteNotification userInfo:[AnyHashable : Any], completionHandler: @escaping (UIBackgroundFetchResult) -> Void = {_ in}){
         completionHandler(.newData)
-        let state = UIApplication.shared.applicationState
-        if Qiscus.isLoggedIn && state != .active{
-            if userInfo["qiscus_room_id"] != nil{
-                let roomId = userInfo["qiscus_room_id"] as! Int
-                Qiscus.notificationAction(roomId: roomId)
-            }
+        if Qiscus.isLoggedIn{
+            Qiscus.sync()
         }
     }
     @objc public class func notificationAction(roomId: Int){
@@ -885,8 +894,19 @@ extension Qiscus:CocoaMQTTDelegate{
                     if json["type"].string == "buttons" {
                         comment.commentText = json["payload"]["text"].stringValue
                         comment.commentButton = "\(json["payload"]["buttons"])"
+                        comment.commentType = .postback
                     }else if json["type"].string == "account_linking" {
                         comment.commentButton = "\(json["payload"])"
+                        comment.commentType = .account
+                    }else if json["type"].string == "reply" {
+                        if comment.commentButton == "" {
+                            comment.commentButton = "\(json["payload"])"
+                        }
+                        comment.commentType = .reply
+                    }else if comment.commentIsFile {
+                        comment.commentType = .attachment
+                    }else{
+                        comment.commentType = .text
                     }
                     
                     if saved {
@@ -1008,6 +1028,10 @@ extension Qiscus:CocoaMQTTDelegate{
                     let userEmail = String(channelArr[3])
                     if let comment = QiscusComment.comment(withUniqueId: commentUniqueId){
                         comment.updateCommentStatus(.delivered, email: userEmail)
+                        let roomId = comment.roomId
+                        if let chatView = Qiscus.shared.chatViews[roomId] {
+                            chatView.dataPresenter(didChangeStatusFrom: comment.commentId, toStatus: .delivered, topicId: comment.commentTopicId)
+                        }
                     }
                     break
                 case "r":
@@ -1016,6 +1040,10 @@ extension Qiscus:CocoaMQTTDelegate{
                     let userEmail = String(channelArr[3])
                     if let comment = QiscusComment.comment(withUniqueId: commentUniqueId){
                         comment.updateCommentStatus(.read, email: userEmail)
+                        let roomId = comment.roomId
+                        if let chatView = Qiscus.shared.chatViews[roomId] {
+                            chatView.dataPresenter(didChangeStatusFrom: comment.commentId, toStatus: .read, topicId: comment.commentTopicId)
+                        }
                     }
                     break
                 case "s":

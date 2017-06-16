@@ -242,6 +242,7 @@ import Photos
             }
         }
     }
+    
     func resend(DataPresenter data:QiscusCommentPresenter){
         data.commentStatus = .sending
         if let room = QiscusRoom.room(withLastTopicId: data.topicId){

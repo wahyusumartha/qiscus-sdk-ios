@@ -323,7 +323,7 @@ extension QiscusChatVC {
     func scrollToIndexPath(_ indexPath:IndexPath, position: UICollectionViewScrollPosition, animated:Bool, delayed:Bool = true){
         
         if !delayed {
-            self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
+            self.collectionView.scrollToItem(at: indexPath, at: position, animated: false)
         }else{
             let delay = 0.1 * Double(NSEC_PER_SEC)
             let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
@@ -369,11 +369,18 @@ extension QiscusChatVC {
                             indexPath.row = 0
                         }
                     }
+                    var payload:String? = nil
+                    var type:String? = nil
+                    if let reply = self.replyData {
+                        payload = "{\"replied_comment_sender_email\" : \"\(reply.userEmail)\",\"replied_comment_id\" : \(reply.commentId),\"text\" : \"\(value)\",\"replied_comment_message\" : \"\(reply.commentText)\",\"replied_comment_sender_username\" : \"\(reply.userFullName)\"}"
+                        type = "reply"
+                        self.replyData = nil
+                    }
                     if let chatRoom = self.room {
-                        self.commentClient.postMessage(message: value, topicId: chatRoom.roomLastCommentTopicId, linkData: self.linkData, indexPath: indexPath)
+                        self.commentClient.postMessage(message: value, topicId: chatRoom.roomLastCommentTopicId, linkData: self.linkData, indexPath: indexPath, payloadString: payload, type: type)
                     }
                     self.inputText.clearValue()
-                    self.showLink = false
+                    //self.showLink = false
                     Qiscus.uiThread.async {
                         self.inputText.text = ""
                         self.minInputHeight.constant = 32

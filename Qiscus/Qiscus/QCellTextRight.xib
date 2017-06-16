@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12118" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16F73" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12086"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -59,14 +59,14 @@
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                     </view>
                                     <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" text="LinkDescription - Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do " selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="t4i-7J-fFf">
-                                        <rect key="frame" x="65" y="10" width="119" height="50"/>
+                                        <rect key="frame" x="10" y="10" width="174" height="50"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="11"/>
                                         <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                     </textView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Link Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TMz-qe-Y12">
-                                        <rect key="frame" x="70" y="0.0" width="114" height="20"/>
+                                        <rect key="frame" x="15" y="0.0" width="169" height="20"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="20" id="jGK-pU-MbH"/>
@@ -76,11 +76,11 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="FL3-Hk-QI4">
-                                        <rect key="frame" x="10" y="5" width="55" height="55"/>
+                                        <rect key="frame" x="10" y="5" width="0.0" height="55"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="55" id="SUd-S4-M7N"/>
-                                            <constraint firstAttribute="width" constant="55" id="ymS-mJ-fNy"/>
+                                            <constraint firstAttribute="width" id="ymS-mJ-fNy"/>
                                         </constraints>
                                     </imageView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="l3f-9V-DlW">
@@ -100,7 +100,7 @@
                                     <constraint firstItem="l3f-9V-DlW" firstAttribute="leading" secondItem="m03-O3-a0L" secondAttribute="leading" constant="3" id="DXi-bT-EIS"/>
                                     <constraint firstAttribute="bottom" secondItem="t4i-7J-fFf" secondAttribute="bottom" constant="5" id="GNr-Gh-gEK"/>
                                     <constraint firstItem="ViG-vC-dpS" firstAttribute="width" secondItem="m03-O3-a0L" secondAttribute="width" id="IuQ-Ie-xod"/>
-                                    <constraint firstItem="TMz-qe-Y12" firstAttribute="leading" secondItem="m03-O3-a0L" secondAttribute="leading" constant="70" id="PgD-yF-WdC"/>
+                                    <constraint firstItem="TMz-qe-Y12" firstAttribute="leading" secondItem="FL3-Hk-QI4" secondAttribute="trailing" constant="5" id="KAQ-BM-2oj"/>
                                     <constraint firstItem="t4i-7J-fFf" firstAttribute="leading" secondItem="TMz-qe-Y12" secondAttribute="leading" constant="-5" id="WJQ-1K-Wxi"/>
                                     <constraint firstItem="ViG-vC-dpS" firstAttribute="centerY" secondItem="m03-O3-a0L" secondAttribute="centerY" id="Wtx-ek-v9H"/>
                                     <constraint firstItem="ViG-vC-dpS" firstAttribute="height" secondItem="m03-O3-a0L" secondAttribute="height" id="c2p-dp-HFH"/>
@@ -165,6 +165,7 @@
                 <outlet property="linkDescription" destination="t4i-7J-fFf" id="s5Q-mz-SCm"/>
                 <outlet property="linkHeight" destination="5dK-9D-Q6t" id="9Xq-U9-J5X"/>
                 <outlet property="linkImage" destination="FL3-Hk-QI4" id="Ga8-HU-Tfa"/>
+                <outlet property="linkImageWidth" destination="ymS-mJ-fNy" id="amn-2m-xeV"/>
                 <outlet property="linkTitle" destination="TMz-qe-Y12" id="h0X-OR-ZIH"/>
                 <outlet property="rightMargin" destination="TFS-zU-FQJ" id="21H-4S-WqE"/>
                 <outlet property="statusImage" destination="357-PI-l7m" id="8mB-f6-Dhi"/>

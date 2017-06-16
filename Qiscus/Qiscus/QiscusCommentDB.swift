@@ -27,6 +27,7 @@ public class QiscusCommentDB: Object {
     public dynamic var commentLinkPreviewed:String = ""
     public dynamic var commentFontSize:CGFloat = 0
     public dynamic var commentFontName:String = ""
+    public dynamic var commentTypeRaw:Int = QiscusCommentType.text.rawValue
     public dynamic var commentButton:String = ""
     public dynamic var dummyVariableV3:Bool = true
     
@@ -66,6 +67,7 @@ public class QiscusCommentDB: Object {
         newComment.commentIsSynced = self.commentIsSynced
         newComment.commentCellHeight = self.commentCellHeight
         newComment.commentCellWidth = self.commentCellWidth
+        newComment.commentType = QiscusCommentType(rawValue: self.commentTypeRaw)!
         newComment.showLink = self.showLink
         newComment.commentLinkPreviewed = self.commentLinkPreviewed
         newComment.copyProcess = false

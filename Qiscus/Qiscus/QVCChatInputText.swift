@@ -38,7 +38,7 @@ extension QiscusChatVC: ChatInputTextDelegate {
     }
     open func valueChanged(value:String){
         DispatchQueue.global().async {
-            self.linkToPreview = ""
+//            self.linkToPreview = ""
 //            if value == "" {
 //                self.linkToPreview = ""
 //            }else{

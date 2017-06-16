@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12120" systemVersion="16F73" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16F73" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -41,14 +41,14 @@
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                     </view>
                                     <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" editable="NO" text="LinkDescription - Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do " selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BLF-d9-QlT">
-                                        <rect key="frame" x="65" y="10" width="119" height="50"/>
+                                        <rect key="frame" x="10" y="10" width="174" height="50"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="11"/>
                                         <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                     </textView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Link Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="g0t-Cr-6BU">
-                                        <rect key="frame" x="70" y="0.0" width="114" height="20"/>
+                                        <rect key="frame" x="15" y="0.0" width="169" height="20"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="20" id="DmB-9q-Rwy"/>
@@ -58,11 +58,11 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="0VS-wK-2ak">
-                                        <rect key="frame" x="10" y="4.5" width="55" height="55"/>
+                                        <rect key="frame" x="10" y="4.5" width="0.0" height="55"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="55" id="Qop-ns-wZc"/>
-                                            <constraint firstAttribute="width" constant="55" id="fgT-Un-bUN"/>
+                                            <constraint firstAttribute="width" id="fgT-Un-bUN"/>
                                         </constraints>
                                     </imageView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dD0-S5-oND">
@@ -78,7 +78,6 @@
                                 <constraints>
                                     <constraint firstItem="dD0-S5-oND" firstAttribute="centerY" secondItem="0db-y1-yFM" secondAttribute="centerY" id="4TD-ob-e3B"/>
                                     <constraint firstAttribute="width" constant="192" id="6ew-ww-7oJ"/>
-                                    <constraint firstItem="g0t-Cr-6BU" firstAttribute="leading" secondItem="0db-y1-yFM" secondAttribute="leading" constant="70" id="89p-Yh-PaN"/>
                                     <constraint firstItem="0VS-wK-2ak" firstAttribute="leading" secondItem="0db-y1-yFM" secondAttribute="leading" constant="10" id="Bvu-QU-NMK"/>
                                     <constraint firstItem="BLF-d9-QlT" firstAttribute="top" secondItem="g0t-Cr-6BU" secondAttribute="bottom" constant="-10" id="IGL-JA-r3V"/>
                                     <constraint firstItem="WLP-sw-vSk" firstAttribute="centerX" secondItem="0db-y1-yFM" secondAttribute="centerX" id="K1s-jj-wjj"/>
@@ -91,6 +90,7 @@
                                     <constraint firstItem="dD0-S5-oND" firstAttribute="leading" secondItem="0db-y1-yFM" secondAttribute="leading" constant="3" id="VUu-pH-We0"/>
                                     <constraint firstAttribute="height" constant="65" id="a1e-R0-emZ"/>
                                     <constraint firstItem="0VS-wK-2ak" firstAttribute="centerY" secondItem="0db-y1-yFM" secondAttribute="centerY" id="ftB-Uq-Fcb"/>
+                                    <constraint firstItem="g0t-Cr-6BU" firstAttribute="leading" secondItem="0VS-wK-2ak" secondAttribute="trailing" constant="5" id="k3J-6m-I6i"/>
                                     <constraint firstAttribute="trailing" secondItem="g0t-Cr-6BU" secondAttribute="trailing" constant="8" id="u8a-Nb-MGX"/>
                                     <constraint firstItem="BLF-d9-QlT" firstAttribute="trailing" secondItem="g0t-Cr-6BU" secondAttribute="trailing" id="umm-uc-56R"/>
                                 </constraints>
@@ -156,6 +156,7 @@
                 <outlet property="linkDescription" destination="BLF-d9-QlT" id="F7E-yV-RX1"/>
                 <outlet property="linkHeight" destination="a1e-R0-emZ" id="7Uc-BO-C06"/>
                 <outlet property="linkImage" destination="0VS-wK-2ak" id="C4R-i7-vSW"/>
+                <outlet property="linkImageWidth" destination="fgT-Un-bUN" id="S9V-rJ-szr"/>
                 <outlet property="linkTitle" destination="g0t-Cr-6BU" id="GEt-ki-Kfr"/>
                 <outlet property="textLeading" destination="JhE-xJ-LFV" id="GyR-qf-4cG"/>
                 <outlet property="textTopMargin" destination="b51-YQ-fbx" id="0fK-sM-Izl"/>

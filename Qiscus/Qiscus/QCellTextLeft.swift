@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SwiftyJSON
 
 class QCellTextLeft: QChatCell, UITextViewDelegate {
     let maxWidth:CGFloat = QiscusUIConfiguration.chatTextMaxWidth
@@ -30,6 +31,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
     @IBOutlet weak var linkDescription: UITextView!
     @IBOutlet weak var linkTitle: UILabel!
     @IBOutlet weak var linkImage: UIImageView!
+    @IBOutlet weak var linkImageWidth: NSLayoutConstraint!
     
     @IBOutlet weak var linkHeight: NSLayoutConstraint!
     @IBOutlet weak var textTopMargin: NSLayoutConstraint!
@@ -65,7 +67,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
                 textWidth = self.minWidth
             }
             
-            if self.data.showLink{
+            if self.data.showLink {
                 self.linkTitle.text = self.data.linkTitle
                 self.linkDescription.text = self.data.linkDescription
                 self.linkImage.image = self.data.linkImage
@@ -78,6 +80,31 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
                 if !self.data.linkSaved{
                     QiscusDataPresenter.getLinkData(withData: self.data)
                 }
+            }else if self.data.commentType == .reply{
+                let replyData = JSON(parseJSON: self.data.comment!.commentButton)
+                let text = replyData["replied_comment_message"].stringValue
+                let replyType = self.data.replyType(message: text)
+                
+                self.linkTitle.text = self.data.linkTitle
+                self.linkDescription.text = self.data.linkDescription
+                
+                if replyType == .image || replyType == .video {
+                    self.linkImageWidth.constant = 55
+                    self.linkImage.isHidden = false
+                    
+                    self.linkImage.loadAsync(self.data.linkImageURL!)
+                }else{
+                    self.linkImageWidth.constant = 0
+                    self.linkImage.isHidden = true
+                    
+                    self.layoutIfNeeded()
+                }
+                //self.linkImage.image = self.data.linkImage
+                self.LinkContainer.isHidden = false
+                self.ballonHeight.constant = 83
+                self.textTopMargin.constant = 73
+                self.linkHeight.constant = 65
+                textWidth = self.maxWidth
             }else{
                 self.linkTitle.text = ""
                 self.linkDescription.text = ""
@@ -139,6 +166,41 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
                 }
                 if let urlToOpen = URL(string: urlToCheck){
                     UIApplication.shared.openURL(urlToOpen)
+                }
+            }
+        }
+        else if data.commentType == .reply {
+            DispatchQueue.global().sync {
+                let replyData = JSON(parseJSON: self.data.comment!.commentButton)
+                let commentId = replyData["replied_comment_id"].intValue
+                var found = false
+                if let comment = data.comment {
+                    if let chatView = Qiscus.shared.chatViews[comment.roomId]{
+                        
+                        var indexPath = IndexPath(item: 0, section: 0)
+                        var section = 0
+                        for commentGroup in chatView.comments{
+                            var row = 0
+                            for comment in commentGroup {
+                                if comment.commentId == commentId {
+                                    found = true
+                                    indexPath = IndexPath(item: row, section: section)
+                                    break
+                                }
+                                row += 1
+                            }
+                            if found {
+                                break
+                            }else{
+                                section += 1
+                            }
+                        }
+                        if found {
+                            DispatchQueue.main.async {
+                                chatView.scrollToIndexPath(indexPath, position: .top, animated: true, delayed: false)
+                            }
+                        }
+                    }
                 }
             }
         }

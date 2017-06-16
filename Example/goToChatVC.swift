@@ -53,6 +53,9 @@ class goToChatVC: UIViewController {
             }
         }
     }
+    @IBAction func ClearData(_ sender: Any) {
+        Qiscus.clearData()
+    }
     
     @IBAction func logOut(_ sender: UIButton) {
         Qiscus.clear()
