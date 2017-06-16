@@ -9,7 +9,6 @@
 import UIKit
 import Photos
 
-
 @objc public protocol QiscusDataPresenterDelegate {
     func dataPresenter(didFinishLoad comments:[[QiscusCommentPresenter]], inRoom:QiscusRoom)
     func dataPresenter(gotNewData presenter:QiscusCommentPresenter, inRoom:QiscusRoom, realtime:Bool)
@@ -282,7 +281,6 @@ import Photos
             let imageNameArr = imageName.characters.split(separator: ".")
             let imageExt:String = String(imageNameArr.last!).lowercased()
             let comment = QiscusComment.newComment(withMessage: "", inTopicId: topicId)
-            
             if image != nil {
                 if !videoFile{
                     var thumbImage = UIImage()
@@ -337,7 +335,8 @@ import Photos
                             imageMimeType = "image/gif"
                         }
                     }
-                }else{
+                }
+                else{
                     if let mime:String = QiscusFileHelper.mimeTypes["\(imageExt)"] {
                         imageMimeType = mime
                         Qiscus.printLog(text: "mime: \(mime)")
@@ -363,7 +362,7 @@ import Photos
                 commentFile.fileLocalPath = QiscusFile.saveFile(imageData, fileName: fileName)
             }
             comment.commentText = "[file]\(fileName) [/file]"
-            
+            comment.commentType = .attachment
             
             commentFile.fileTopicId = topicId
             commentFile.isUploading = true
@@ -384,7 +383,7 @@ import Photos
             presenter.localURL = commentFile.fileLocalPath
             presenter.localThumbURL = commentFile.fileThumbPath
             presenter.displayImage = UIImage(data: thumbData)
-            
+        
             if let room = QiscusRoom.room(withLastTopicId: topicId){
                 if let chatView = Qiscus.shared.chatViews[room.roomId] {
                     chatView.dataPresenter(gotNewData: presenter, inRoom: room, realtime:true)
