@@ -45,17 +45,17 @@ import Photos
                         if let syncId = QiscusComment.getLastSyncCommentId(topicId, unsyncCommentId: unsyncCommentId){
                             QiscusCommentClient.shared.syncMessage(inRoom: room.room(), fromComment: syncId)
                         }
-                    }else{
-                        let comments = QiscusComment.grouppedComment(inTopicId: topicId, limit: 20)
-                        let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
-                        let chatRoom = room.room()
-                        if let chatView = Qiscus.shared.chatViews[chatRoom.roomId] {
-                            chatView.dataPresenter(didFinishLoad: presenters, inRoom: chatRoom)
-                        }
-                        if let message = withMessage {
-                            self.commentClient.postMessage(message: message, topicId: topicId)
-                        }
                     }
+                    let comments = QiscusComment.grouppedComment(inTopicId: topicId, limit: 20)
+                    let presenters = QiscusDataPresenter.getPresenters(fromComments: comments)
+                    let chatRoom = room.room()
+                    if let chatView = Qiscus.shared.chatViews[chatRoom.roomId] {
+                        chatView.dataPresenter(didFinishLoad: presenters, inRoom: chatRoom)
+                    }
+                    if let message = withMessage {
+                        self.commentClient.postMessage(message: message, topicId: topicId)
+                    }
+                    
                 }else{
                     self.commentClient.getRoom(withID: roomId, withMessage: withMessage)
                 }
