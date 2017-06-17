@@ -312,15 +312,11 @@ extension QiscusChatVC {
         self.titleAction()
     }
     func scrollToBottom(_ animated:Bool = false){
-        DispatchQueue.global(qos:.background).sync {
-            if self.comments.count > 0 {
-                Qiscus.uiThread.sync {
-                    let section = self.numberOfSections(in: self.collectionView) - 1
-                    let row = self.collectionView(self.collectionView, numberOfItemsInSection: section) - 1
-                    let lastIndexPath = IndexPath(row: row, section: section)
-                    self.collectionView.scrollToItem(at: lastIndexPath, at: .bottom, animated: animated)
-                }
-            }
+        if self.comments.count > 0 {
+            let section = self.numberOfSections(in: self.collectionView) - 1
+            let row = self.collectionView(self.collectionView, numberOfItemsInSection: section) - 1
+            let lastIndexPath = IndexPath(row: row, section: section)
+            self.collectionView.scrollToItem(at: lastIndexPath, at: .bottom, animated: animated)
         }
     }
     func scrollToIndexPath(_ indexPath:IndexPath, position: UICollectionViewScrollPosition, animated:Bool, delayed:Bool = true){
