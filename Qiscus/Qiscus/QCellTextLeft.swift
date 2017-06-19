@@ -42,7 +42,6 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         super.awakeFromNib()
         textView.contentInset = UIEdgeInsets.zero
         textView.delegate = self
-        textView.isUserInteractionEnabled = true
         
         LinkContainer.isHidden = true
         LinkContainer.layer.cornerRadius = 4
