@@ -465,9 +465,12 @@ open class QiscusCommentClient: NSObject {
                             
                             if success == true {
                                 let commentJSON = json["results"]["comment"]
+                                let roomId = commentJSON["room_id"].intValue
                                 data.commentId = commentJSON["id"].intValue
+                                data.createdAt = commentJSON["unix_timestamp"].doubleValue
                                 comment.commentId = commentJSON["id"].intValue
                                 comment.commentBeforeId = commentJSON["comment_before_id"].intValue
+                                comment.commentCreatedAt = commentJSON["unix_timestamp"].doubleValue
                                 
                                 if comment.commentStatus == .failed || comment.commentStatusRaw < QiscusCommentStatus.sent.rawValue{
                                     comment.commentStatusRaw = QiscusCommentStatus.sent.rawValue
@@ -476,9 +479,10 @@ open class QiscusCommentClient: NSObject {
                                 if file != nil {
                                     file!.fileCommentId = comment.commentId
                                 }
-                                
-                                Qiscus.uiThread.async {
-                                    self.delegate?.qiscusService(didChangeContent: data)
+                                if let chatView = Qiscus.shared.chatViews[roomId] {
+                                    if let room = chatView.room {
+                                        chatView.dataPresenter(didChangeContent: data, inRoom: room)
+                                    }
                                 }
                             }else{
                                 comment.commentStatusRaw = QiscusCommentStatus.failed.rawValue
