@@ -150,9 +150,7 @@ import CocoaMQTT
     func backgroundCheck(){
         if Qiscus.isLoggedIn{
             QiscusCommentClient.shared.syncChat(backgroundFetch: true)
-            if let realtime = self.mqtt {
-                realtime.connect()
-            }
+            Qiscus.mqttConnect()
         }
     }
     func checkChat(){
