@@ -28,7 +28,7 @@ open class QChatCellHelper: NSObject {
         
         let comment = comments[indexPath.section][indexPath.row]
         
-        if comments[(indexPath as NSIndexPath).section].count == 1 {
+        if comments[indexPath.section].count == 1 {
             cellPos = .single
         }else{
             if indexPath.row == 0 {
