@@ -10,12 +10,16 @@ import UIKit
 
 class QChatTextView: UITextView {
 
-    /*
-    // Only override draw() if you perform custom drawing.
-    // An empty implementation adversely affects performance during animation.
-    override func draw(_ rect: CGRect) {
-        // Drawing code
+    override func becomeFirstResponder() -> Bool {
+        return false
     }
-    */
 
+    override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if !isEditable {
+            if let gesture = gestureRecognizer as? UILongPressGestureRecognizer, gesture.minimumPressDuration == 0.5 {
+                return false
+            }
+        }
+        return true
+    }
 }
