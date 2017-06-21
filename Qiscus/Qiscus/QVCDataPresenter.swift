@@ -154,14 +154,14 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
         }
     }
     
-    public func syncRoom(){
-        if !self.roomSynced {
-            if let roomToSync = self.room {
-                self.roomSynced = true
-                QiscusCommentClient.shared.syncRoom(withID: roomToSync.roomId)
-            }
-        }
-    }
+//    public func syncRoom(){
+//        if !self.roomSynced {
+//            if let roomToSync = self.room {
+//                self.roomSynced = true
+//                QiscusCommentClient.shared.syncRoom(withID: roomToSync.roomId)
+//            }
+//        }
+//    }
     public func dataPresenter(didFinishLoad comments: [[QiscusCommentPresenter]], inRoom: QiscusRoom) {
         self.firstLoad = false
         self.room = inRoom

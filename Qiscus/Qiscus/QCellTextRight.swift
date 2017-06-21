@@ -217,7 +217,6 @@ class QCellTextRight: QChatCell {
                 var found = false
                 if let comment = data.comment {
                     if let chatView = Qiscus.shared.chatViews[comment.roomId]{
-                        
                         var indexPath = IndexPath(item: 0, section: 0)
                         var section = 0
                         for commentGroup in chatView.comments{

@@ -482,10 +482,8 @@ public class QiscusChatVC: UIViewController{
         }
         self.dataPresenter.delegate = self
         
-        if self.comments.count > 0 {
-            DispatchQueue.global().async {
-                self.syncRoom()
-            }
+        if Qiscus.shared.connected && self.room != nil{
+            QiscusCommentClient.shared.syncRoom(withID: self.room!.roomId)
         }
         
         let center: NotificationCenter = NotificationCenter.default
