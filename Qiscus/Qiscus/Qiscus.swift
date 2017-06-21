@@ -149,8 +149,10 @@ import CocoaMQTT
     // need Documentation
     func backgroundCheck(){
         if Qiscus.isLoggedIn{
-            QiscusCommentClient.shared.syncChat(backgroundFetch: true)
-            Qiscus.mqttConnect()
+            if Qiscus.shared.mqtt?.connState != CocoaMQTTConnState.connected {
+                QiscusCommentClient.shared.syncChat(backgroundFetch: true)
+                Qiscus.mqttConnect()
+            }
         }
     }
     func checkChat(){
@@ -533,11 +535,14 @@ import CocoaMQTT
         }
         if let chatView = self.topViewController() as? QiscusChatVC {
             chatView.isPresence = true
+            QiscusDataPresenter.shared.delegate = chatView
 //            Qiscus.uiThread.async {
 //                chatView.scrollToBottom()
 //            }
         }
         Qiscus.sync()
+        QiscusCommentClient.shared.delegate = QiscusDataPresenter.shared
+        
     }
     class func printLog(text:String){
         if Qiscus.showDebugPrint{
