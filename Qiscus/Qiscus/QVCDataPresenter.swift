@@ -11,7 +11,7 @@ import UIKit
 // MARK: - QiscusDataPresenterDelegate
 extension QiscusChatVC: QiscusDataPresenterDelegate{
     public func dataPresenter(gotNewData presenter: QiscusCommentPresenter, inRoom: QiscusRoom, realtime: Bool) {
-        DispatchQueue.global().sync {
+        DispatchQueue.global().async {
             var indexPath = IndexPath()
             if self.comments.count == 0 {
                 indexPath = IndexPath(row: 0, section: 0)

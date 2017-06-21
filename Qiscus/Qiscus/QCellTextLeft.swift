@@ -15,7 +15,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
     
     @IBOutlet weak var userNameLabel: UILabel!
     @IBOutlet weak var balloonView: UIImageView!
-    @IBOutlet weak var textView: UITextView!
+    @IBOutlet weak var textView: QChatTextView!
     @IBOutlet weak var dateLabel: UILabel!
     
     @IBOutlet weak var balloonTopMargin: NSLayoutConstraint!
@@ -169,11 +169,11 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
             }
         }
         else if data.commentType == .reply {
-            DispatchQueue.global().sync {
+            DispatchQueue.global().async {
                 let replyData = JSON(parseJSON: self.data.comment!.commentButton)
                 let commentId = replyData["replied_comment_id"].intValue
                 var found = false
-                if let comment = data.comment {
+                if let comment = self.data.comment {
                     if let chatView = Qiscus.shared.chatViews[comment.roomId]{
                         
                         var indexPath = IndexPath(item: 0, section: 0)

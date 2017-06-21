@@ -113,7 +113,7 @@
                                     <constraint firstItem="t4i-7J-fFf" firstAttribute="trailing" secondItem="TMz-qe-Y12" secondAttribute="trailing" id="yjh-Vg-qNL"/>
                                 </constraints>
                             </view>
-                            <textView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" scrollEnabled="NO" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" editable="NO" text="Halooo ...." textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="Y5e-NR-8ZE">
+                            <textView clipsSubviews="YES" contentMode="scaleToFill" scrollEnabled="NO" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" editable="NO" text="Halooo ...." textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="Y5e-NR-8ZE" customClass="QChatTextView" customModule="Qiscus" customModuleProvider="target">
                                 <rect key="frame" x="172" y="0.0" width="190" height="40"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="190" id="GXm-ZJ-mYm"/>
@@ -122,7 +122,7 @@
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
-                                <dataDetectorType key="dataDetectorTypes" phoneNumber="YES" link="YES" address="YES" calendarEvent="YES"/>
+                                <dataDetectorType key="dataDetectorTypes" phoneNumber="YES" link="YES"/>
                             </textView>
                         </subviews>
                         <constraints>
