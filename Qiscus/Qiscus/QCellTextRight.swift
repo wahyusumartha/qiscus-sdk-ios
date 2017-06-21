@@ -212,11 +212,11 @@ class QCellTextRight: QChatCell {
                 UIApplication.shared.openURL(urlToOpen)
             }
         }else if data.commentType == .reply {
-            DispatchQueue.global().sync {
+            DispatchQueue.global().async {
                 let replyData = JSON(parseJSON: self.data.comment!.commentButton)
                 let commentId = replyData["replied_comment_id"].intValue
                 var found = false
-                if let comment = data.comment {
+                if let comment = self.data.comment {
                     if let chatView = Qiscus.shared.chatViews[comment.roomId]{
                         
                         var indexPath = IndexPath(item: 0, section: 0)

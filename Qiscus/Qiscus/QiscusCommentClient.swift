@@ -917,18 +917,21 @@ open class QiscusCommentClient: NSObject {
             
             comment.commentFileId = commentFile.fileId
             
-            let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-            presenter.isUploading = true
-            presenter.uploadProgress = CGFloat(0)
-            presenter.fileName = fileName
-            presenter.toUpload = true
-            presenter.uploadData = imageData
-            
-            if let room = QiscusRoom.room(withLastTopicId: topicId) {
-                if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                    chatView.dataPresenter(gotNewData: presenter, inRoom: room, realtime: true)
+            DispatchQueue.global(qos: .background).async {
+                let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
+                presenter.isUploading = true
+                presenter.uploadProgress = CGFloat(0)
+                presenter.fileName = fileName
+                presenter.toUpload = true
+                presenter.uploadData = imageData
+                
+                if let room = QiscusRoom.room(withLastTopicId: topicId) {
+                    if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                        chatView.dataPresenter(gotNewData: presenter, inRoom: room, realtime: true)
+                    }
                 }
             }
+            
             
             let headers = QiscusConfig.sharedInstance.requestHeader
             
@@ -959,16 +962,18 @@ open class QiscusCommentClient: NSObject {
                                     commentFile.uploaded = true
                                     commentFile.uploadProgress = 1
                                     
-                                    let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                                    presenter.isUploaded = true
-                                    presenter.isUploading = false
-                                    presenter.uploadProgress = CGFloat(1)
-                                    presenter.remoteURL = url
-                                    
-                                    Qiscus.uiThread.async {
-                                        self.delegate?.qiscusService(didChangeContent: presenter)
+                                    DispatchQueue.global(qos: .background).async {
+                                        let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
+                                        presenter.isUploaded = true
+                                        presenter.isUploading = false
+                                        presenter.uploadProgress = CGFloat(1)
+                                        presenter.remoteURL = url
+                                        
+                                        Qiscus.uiThread.async {
+                                            self.delegate?.qiscusService(didChangeContent: presenter)
+                                        }
+                                        self.postComment(presenter)
                                     }
-                                    self.postComment(presenter)
                                 }
                                 else if json["results"].count > 0 {
                                     let data = json["results"]
@@ -984,16 +989,19 @@ open class QiscusCommentClient: NSObject {
                                             commentFile.uploaded = true
                                             commentFile.uploadProgress = 1
                                             
-                                            let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                                            presenter.isUploaded = true
-                                            presenter.isUploading = false
-                                            presenter.uploadProgress = CGFloat(1)
-                                            presenter.remoteURL = url
-                                            
-                                            Qiscus.uiThread.async {
-                                                self.delegate?.qiscusService(didChangeContent: presenter)
+                                            DispatchQueue.global(qos: .background).async {
+                                                let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
+                                                presenter.isUploaded = true
+                                                presenter.isUploading = false
+                                                presenter.uploadProgress = CGFloat(1)
+                                                presenter.remoteURL = url
+                                                
+                                                Qiscus.uiThread.async {
+                                                    self.delegate?.qiscusService(didChangeContent: presenter)
+                                                }
+                                                self.postComment(presenter)
                                             }
-                                            self.postComment(presenter)
+                                            
                                         }
                                     }
                                 }
@@ -1123,7 +1131,7 @@ open class QiscusCommentClient: NSObject {
                                         user.updateUserAvatarURL(newComment["user_avatar_url"].stringValue)
                                         user.updateUserFullName(newComment["username"].stringValue)
                                     }
-                                    DispatchQueue.global().sync {
+                                    DispatchQueue.global().async {
                                         if triggerDelegate && saved {
                                             if let chatView = Qiscus.shared.chatViews[room.roomId] {
                                                 let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
@@ -2223,7 +2231,7 @@ open class QiscusCommentClient: NSObject {
                         comment.updateCommentStatus(.sent)
                         
                         if isSaved {
-                            DispatchQueue.global().sync{
+                            DispatchQueue.global().async{
                                 if let chatView = Qiscus.shared.chatViews[room.roomId] {
                                     let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
                                     chatView.dataPresenter(gotNewData: presenter, inRoom: room, realtime: true)

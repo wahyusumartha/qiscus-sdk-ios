@@ -908,7 +908,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     }
                     
                     if saved {
-                        DispatchQueue.global().sync {
+                        DispatchQueue.global().async {
                             if let chatView = Qiscus.shared.chatViews[roomId] {
                                 let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
                                 chatView.dataPresenter(gotNewData: presenter, inRoom: chatView.room!, realtime: true)
