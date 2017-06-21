@@ -866,7 +866,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     let json = JSON.parse(messageData)
                     let commentBeforeId = json["comment_before_id"].intValue
                     
-                    if QiscusComment.comment(withId: commentBeforeId) != nil{
+                    if QiscusComment.comment(withId: commentBeforeId) != nil {
                         let notifTopicId = json["topic_id"].intValue
                         let roomId = json["room_id"].intValue
                         let commentId = json["id"].intValue
