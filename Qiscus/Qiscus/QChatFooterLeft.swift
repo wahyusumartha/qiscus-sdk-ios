@@ -16,8 +16,6 @@ class QChatFooterLeft: UICollectionReusableView {
     public var comment:QiscusCommentPresenter?{
         didSet{
             if let data = comment {
-                
-                
                 if let avatar = data.userAvatar {
                     avatarLabel.isHidden = true
                     avatarImage.image = avatar
@@ -29,7 +27,9 @@ class QChatFooterLeft: UICollectionReusableView {
                     let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
                     let colorIndex = data.userFullName.characters.count % bgColor.count
                     avatarImage.backgroundColor = bgColor[colorIndex]
-                    avatarLabel.text = String(data.userFullName.characters.first!).uppercased()
+                    if let fullName = data.userFullName.characters.first{
+                        avatarLabel.text = String(fullName).uppercased()
+                    }
                     if QiscusHelper.isFileExist(inLocalPath: data.userAvatarLocalPath){
                         let commentId = data.commentId as AnyObject
                         if let cachedImage = UIImage.cachedImage(withPath: data.userAvatarLocalPath){

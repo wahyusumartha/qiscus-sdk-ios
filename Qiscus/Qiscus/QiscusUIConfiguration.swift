@@ -24,6 +24,7 @@ open class QiscusUIConfiguration: NSObject {
             }
         }
     }
+    
     public var rewriteChatFont = false
     
     

@@ -394,6 +394,28 @@ import CocoaMQTT
     /**
      No Documentation
      */
+//    @objc public class func chatView(withRoomUniqueId uniqueId:Int, readOnly:Bool = false, title:String = "", avatarUrl:String, subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
+//        Qiscus.checkDatabaseMigration()
+//        if !Qiscus.sharedInstance.connected {
+//            Qiscus.setupReachability()
+//        }
+//        
+//        var chatVC = QiscusChatVC()
+//        
+//        if let chatView = Qiscus.shared.chatViews[roomId] {
+//            chatVC = chatView
+//        }else{
+//            chatVC.roomId = roomId
+//        }
+//        chatVC.navTitle = title
+//        chatVC.navSubtitle = subtitle
+//        chatVC.archived = readOnly
+//        chatVC.message = withMessage
+//        chatVC.backAction = nil
+//        Qiscus.shared.chatViews[roomId] = chatVC
+//        
+//        return chatVC
+//    }
     @objc public class func chatView(withRoomId roomId:Int, readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
@@ -908,6 +930,8 @@ extension Qiscus:CocoaMQTTDelegate{
                                 comment.commentButton = "\(json["payload"])"
                             }
                             comment.commentType = .reply
+                        }else if json["type"].string == "system_event"{
+                            comment.commentType = .system
                         }else if comment.commentIsFile {
                             comment.commentType = .attachment
                         }else{

@@ -1115,6 +1115,8 @@ open class QiscusCommentClient: NSObject {
                                             comment.commentButton = "\(newComment["payload"])"
                                         }
                                         comment.commentType = .reply
+                                    }else if newComment["type"].string == "system_event"{
+                                        comment.commentType = .system
                                     }else if comment.commentIsFile {
                                         comment.commentType = .attachment
                                     }else{
@@ -1216,6 +1218,8 @@ open class QiscusCommentClient: NSObject {
                                             comment.commentButton = "\(newComment["payload"])"
                                         }
                                         comment.commentType = .reply
+                                    }else if newComment["type"].string == "system_event"{
+                                        comment.commentType = .system
                                     }else if comment.commentIsFile {
                                         comment.commentType = .attachment
                                     }else{
@@ -1326,6 +1330,8 @@ open class QiscusCommentClient: NSObject {
                                     comment.commentButton = "\(newComment["payload"])"
                                 }
                                 comment.commentType = .reply
+                            }else if newComment["type"].string == "system_event"{
+                                comment.commentType = .system
                             }else if comment.commentIsFile {
                                 comment.commentType = .attachment
                             }else{
@@ -1422,6 +1428,8 @@ open class QiscusCommentClient: NSObject {
                                         comment.commentButton = "\(payload["payload"])"
                                     }
                                     comment.commentType = .reply
+                                }else if payload["type"].string == "system_event"{
+                                    comment.commentType = .system
                                 }else if comment.commentIsFile {
                                     comment.commentType = .attachment
                                 }else{
@@ -1588,6 +1596,8 @@ open class QiscusCommentClient: NSObject {
                                     comment.commentButton = "\(payload["payload"])"
                                 }
                                 comment.commentType = .reply
+                            }else if payload["type"].string == "system_event"{
+                                comment.commentType = .system
                             }else if comment.commentIsFile {
                                 comment.commentType = .attachment
                             }else{
@@ -1759,6 +1769,8 @@ open class QiscusCommentClient: NSObject {
                                     comment.commentButton = "\(payload["payload"])"
                                 }
                                 comment.commentType = .reply
+                            }else if payload["type"].string == "system_event"{
+                                comment.commentType = .system
                             }else if comment.commentIsFile {
                                 comment.commentType = .attachment
                             }else{
@@ -1961,6 +1973,8 @@ open class QiscusCommentClient: NSObject {
                                                 comment.commentButton = "\(payload["payload"])"
                                             }
                                             comment.commentType = .reply
+                                        }else if payload["type"].string == "system_event"{
+                                            comment.commentType = .system
                                         }else if comment.commentIsFile {
                                             comment.commentType = .attachment
                                         }else{

@@ -23,6 +23,12 @@ open class QiscusColorConfiguration: NSObject {
     /// Your right baloon color, using UIColor class, Default value : UIColor(red: 165/255.0, green: 226/255.0, blue: 221/255.0, alpha: 1.0)
     open var rightBaloonColor = UIColor(red: 165/255.0, green: 226/255.0, blue: 221/255.0, alpha: 1)
     
+    /// Your right baloon color, using UIColor class, Default value : UIColor(red: 165/255.0, green: 226/255.0, blue: 221/255.0, alpha: 1.0)
+    open var systemBalloonColor = UIColor(red: 0, green: 150/255, blue: 136/255, alpha: 1)
+    
+    /// Your right baloon color, using UIColor class, Default value : UIColor(red: 165/255.0, green: 226/255.0, blue: 221/255.0, alpha: 1.0)
+    open var systemBalloonTextColor = UIColor.white
+    
     /// Your left baloon text color, using UIColor class, Default value : UIColor.whiteColor()
     open var leftBaloonTextColor = UIColor.white
     

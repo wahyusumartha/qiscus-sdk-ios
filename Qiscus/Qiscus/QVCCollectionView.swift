@@ -144,7 +144,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             }
             break
         case "reply":
-            if comment.commentType != .postback && comment.commentType != .accountLinking && comment.commentStatus != .failed && Qiscus.sharedInstance.connected{
+            if comment.commentType != .postback && comment.commentType != .accountLinking && comment.commentStatus != .failed && comment.commentType != .system && Qiscus.sharedInstance.connected{
                 show = true
             }
             break
@@ -202,7 +202,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                 size.height += 75
             }
         }
-        if comment.cellPos == .single || comment.cellPos == .first{
+        if (comment.cellPos == .single || comment.cellPos == .first) && comment.commentType != .system{
             size.height += 20
         }
         size.width = collectionView.bounds.size.width

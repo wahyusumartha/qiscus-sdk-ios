@@ -16,6 +16,7 @@ public enum QiscusCommentType:Int {
     case postback
     case account
     case reply
+    case system
 }
 @objc public enum QiscusCommentStatus:Int{
     case sending

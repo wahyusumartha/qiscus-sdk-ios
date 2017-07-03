@@ -19,6 +19,7 @@ public enum QiscusCommentPresenterType:Int {
     case postback
     case accountLinking
     case reply
+    case system
 }
 public enum QiscusReplyType:Int{
     case text
@@ -123,6 +124,21 @@ public enum QiscusReplyType:Int{
             ]
         }
     }
+    var systemTextAttribute:[String:Any] {
+        get{
+            let style = NSMutableParagraphStyle()
+            style.alignment = NSTextAlignment.center
+            let fontSize = Qiscus.style.chatFont.pointSize
+            let systemFont = Qiscus.style.chatFont.withSize(fontSize - 4.0)
+            let foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.systemBalloonTextColor
+            
+            return [
+                NSForegroundColorAttributeName: foregroundColorAttributeName,
+                NSFontAttributeName: systemFont,
+                NSParagraphStyleAttributeName: style 
+            ]
+        }
+    }
     var textAttribute:[String: Any]{
         get{
             var foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
@@ -214,12 +230,45 @@ public enum QiscusReplyType:Int{
             commentPresenter.userAvatarLocalPath = user.userAvatarLocalPath
             commentPresenter.userAvatarURL = user.userAvatarURL
         }
-        
+        if comment.commentType == .system {
+            commentPresenter.userIsOwn = true
+        }
         var position:String = "Left"
         if comment.isOwnMessage{
             position = "Right"
         }
         switch comment.commentType {
+        case .system :
+            commentPresenter.cellIdentifier = "cellSystem"
+            commentPresenter.commentType = .system
+            let attributedText = NSMutableAttributedString(string: commentPresenter.commentText)
+            
+            let allRange = (commentPresenter.commentText as NSString).range(of: commentPresenter.commentText)
+            attributedText.addAttributes(commentPresenter.systemTextAttribute, range: allRange)
+            
+            commentPresenter.commentAttributedText = attributedText
+            
+            let fontSize = Qiscus.shared.styleConfiguration.chatFont.pointSize
+            let fontName = Qiscus.shared.styleConfiguration.chatFont.fontName
+            
+            var needCalculate = false
+            if fontName != comment.commentFontName || fontSize != comment.commentFontSize{
+                needCalculate = true
+            }
+            
+            if comment.cellSize != nil && !needCalculate{
+                commentPresenter.cellSize = comment.cellSize!
+            }else{
+                Qiscus.uiThread.sync {
+                    let cellSize = QiscusCommentPresenter.calculateTextSize(attributedText: attributedText, postback: false, buttonPayload: comment.commentButton)
+                    commentPresenter.cellSize = cellSize
+                    comment.commentCellHeight = cellSize.height
+                    comment.commentCellWidth = cellSize.width
+                }
+                comment.commentFontName = fontName
+                comment.commentFontSize = fontSize
+            }
+            break
         case .postback, .account:
             if comment.commentType == .postback {
                 commentPresenter.commentType = .postback
