@@ -239,7 +239,37 @@ class ViewController: UIViewController {
 }
 ```
 
+### Getting or Create Room instance with unique id
 
+
+When you already know your chat room id, you can easily go to that room. Just call
+
+Swift 3.0:
+
+`Qiscus.chatView(withRoomUniqueId: uniqueId)`
+
+
+For example in your ViewController :
+
+Swift 3.0
+
+```
+import UIKit
+import Qiscus
+
+class ViewController: UIViewController {
+
+.....
+
+  func goToChat(){
+          let roomId = Int(targetField.text!)
+          let view = iscus.chatView(withRoomUniqueId: uniqueId)
+          self.navigationController?.pushViewController(view, animated: true)
+  }
+
+.....
+}
+```
 
 ### Inviting users to an existing Room
 
