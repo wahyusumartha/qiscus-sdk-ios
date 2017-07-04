@@ -734,6 +734,8 @@ extension QiscusChatVC {
                 }else{
                     self.dismissLoading()
                 }
+            }else if uniqueId != ""{
+                dataPresenter.loadComments(inRoomWithUniqueId: uniqueId, withMessage: message, title: roomTitle, avatarURL: avatarURL)
             }else if roomId != nil{
                 dataPresenter.loadComments(inRoom: roomId!, withMessage: message)
             }

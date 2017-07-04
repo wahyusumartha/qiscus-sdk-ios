@@ -82,6 +82,9 @@ open class QiscusConfig: NSObject {
     open class var ROOM_REQUEST_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/get_or_create_room_with_target"
     }
+    open class var ROOM_UNIQUEID_URL:String{
+        return "\(QiscusConfig.sharedInstance.BASE_URL)/get_or_create_room_with_unique_id"
+    }
     open class var LINK_METADATA_URL:String{
         let config = QiscusConfig.sharedInstance
         //return "\(config.BASE_URL)/topic/\(topicId)/comment/\(commentId)/token/\(config.USER_TOKEN)"

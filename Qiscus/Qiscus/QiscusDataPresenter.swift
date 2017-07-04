@@ -90,6 +90,11 @@ import Photos
             }
         }
     }
+    func loadComments(inRoomWithUniqueId uniqueId:String, withMessage:String? = nil, title:String, avatarURL:String){
+        DispatchQueue.global().async {
+            self.commentClient.getListComment(withRoomUniqueId: uniqueId, title: title, avatarURL: avatarURL, withMessage: withMessage)
+        }
+    }
     func loadComments(inNewGroupChat users:[String], roomName:String, optionalData:String? = nil, withMessage:String? = nil){
         commentClient.createNewRoom(withUsers: users, roomName: roomName, optionalData: optionalData, withMessage: withMessage)
     }

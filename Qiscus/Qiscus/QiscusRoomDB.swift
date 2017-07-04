@@ -13,6 +13,7 @@ class QiscusRoomDB: Object {
     
     public dynamic var localId:Int = 0
     public dynamic var roomId:Int = 0
+    public dynamic var roomUniqueId:String = ""
     public dynamic var roomName:String = ""
     public dynamic var roomAvatarURL:String = ""
     public dynamic var roomAvatarLocalPath:String = ""
@@ -22,6 +23,7 @@ class QiscusRoomDB: Object {
     public dynamic var user:String = ""
     public dynamic var isGroup:Bool = false
     public dynamic var hasLoadMore:Bool = true
+    
     
     // MARK: - Primary Key
     override public class func primaryKey() -> String {
@@ -59,6 +61,17 @@ class QiscusRoomDB: Object {
         
         if(data.count > 0){
             return data.first
+        }else{
+            return nil
+        }
+    }
+    public class func roomDB(withUniqueId roomUniqueId:String)->QiscusRoomDB?{
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let searchQuery:NSPredicate = NSPredicate(format: "roomUniqueId == '\(roomUniqueId)'")
+        let data = realm.objects(QiscusRoomDB.self).filter(searchQuery)
+        
+        if data.count > 0 {
+            return data.first!
         }else{
             return nil
         }
@@ -101,6 +114,7 @@ class QiscusRoomDB: Object {
         room.distinctId = self.distinctId
         room.user = self.user
         room.isGroup = self.isGroup
+        room.roomUniqueId = self.roomUniqueId
         room.copyProcess = false
         return room
     }

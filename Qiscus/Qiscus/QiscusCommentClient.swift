@@ -1708,7 +1708,171 @@ open class QiscusCommentClient: NSObject {
             }
         }
     }
-    
+    open func getListComment(withRoomUniqueId uniqueId:String, title:String, avatarURL:String, withMessage:String? = nil){ //
+        func listComment(){
+            let loadURL = QiscusConfig.ROOM_UNIQUEID_URL
+            
+            var parameters:[String : AnyObject] =  [
+                "token"  : qiscus.config.USER_TOKEN as AnyObject,
+                "unique_id" : uniqueId as AnyObject
+            ]
+            if title != ""{
+                parameters["name"] = title as AnyObject
+            }
+            if avatarURL != ""{
+                parameters["avatar_url"] = avatarURL as AnyObject
+            }
+            Qiscus.printLog(text: "get or create room with uniqueId parameters: \(parameters)")
+            Alamofire.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                if let response = responseData.result.value {
+                    Qiscus.printLog(text: "get or create room with uniqueId response:\n\(response)")
+                    let json = JSON(response)
+                    let results = json["results"]
+                    let error = json["error"]
+                    
+                    if results != JSON.null{
+                        Qiscus.printLog(text: "getListComment with user response: \(responseData)")
+                        let roomData = results["room"]
+                        let room = QiscusRoom.room(fromJSON: roomData)
+                        let commentData = results["comments"].arrayValue
+                        let topicId = roomData["last_topic_id"].intValue
+                        
+                        
+                        for payload in commentData{
+                            let id = payload["id"].intValue
+                            let uId = payload["unique_temp_id"].stringValue
+                            let email = payload["email"].stringValue
+                            
+                            var comment = QiscusComment()
+                            if let old = QiscusComment.comment(withUniqueId: uId) {
+                                comment = old
+                            }else{
+                                comment = QiscusComment.newComment(withId: id, andUniqueId: uId)
+                                comment.commentText = payload["message"].stringValue
+                                comment.showLink = !(payload["disable_link_preview"].boolValue)
+                            }
+                            QiscusMe.updateLastCommentId(commentId: id)
+                            comment.commentId = id
+                            comment.commentBeforeId = payload["comment_before_id"].intValue
+                            comment.commentSenderEmail = email
+                            comment.commentTopicId = topicId
+                            comment.commentCreatedAt = Double(payload["unix_timestamp"].doubleValue)
+                            
+                            if payload["type"].string == "buttons" {
+                                comment.commentText = payload["payload"]["text"].stringValue
+                                comment.commentButton = "\(payload["payload"]["buttons"])"
+                                comment.commentType = .postback
+                            }else if payload["type"].string == "account_linking" {
+                                comment.commentButton = "\(payload["payload"])"
+                                comment.commentType = .account
+                            }else if payload["type"].string == "reply" {
+                                if comment.commentButton == "" {
+                                    comment.commentButton = "\(payload["payload"])"
+                                }
+                                comment.commentType = .reply
+                            }else if payload["type"].string == "system_event"{
+                                comment.commentType = .system
+                            }else if comment.commentIsFile {
+                                comment.commentType = .attachment
+                            }else{
+                                comment.commentType = .text
+                            }
+                            
+                            comment.updateCommentStatus(.sent)
+                            if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: room.roomId){
+                                participant.updateLastReadCommentId(commentId: comment.commentId)
+                            }
+                        }
+                        
+                        if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                            roomDelegate.didFinishLoadRoom(onRoom: room)
+                        }
+                        
+                        if let participants = roomData["participants"].array {
+                            var participantArray = [String]()
+                            for participant in participants {
+                                let userEmail = participant["email"].stringValue
+                                let userFullName = participant["username"].stringValue
+                                let userAvatarURL = participant["avatar_url"].stringValue
+                                
+                                if let member = QiscusUser.getUserWithEmail(userEmail){
+                                    if member.userFullName != userFullName {
+                                        member.updateUserFullName(userFullName)
+                                        let user = QiscusUser.copyUser(user: member)
+                                        user.userFullName = userFullName
+                                        if let chatView = Qiscus.shared.chatViews[room.roomId] {
+                                            chatView.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
+                                        }
+                                    }
+                                    if member.userAvatarURL != userAvatarURL {
+                                        member.updateUserAvatarURL(userAvatarURL)
+                                    }
+                                }else{
+                                    let user = QiscusUser()
+                                    user.userEmail = userEmail
+                                    user.userFullName = userFullName
+                                    user.userAvatarURL = userAvatarURL
+                                    let _ = user.saveUser()
+                                }
+                                if QiscusParticipant.getParticipant(withEmail: userEmail, roomId: room.roomId) == nil {
+                                    QiscusParticipant.addParticipant(userEmail, roomId: room.roomId)
+                                }
+                                participantArray.append(userEmail)
+                            }
+                            
+                            let roomMembers = QiscusParticipant.getParticipant(onRoomId: room.roomId)
+                            for member in roomMembers {
+                                if !participantArray.contains(member.participantEmail) {
+                                    member.remove()
+                                }
+                            }
+                            self.delegate?.qiscusService(didChangeRoom: room, onRoomWithId: room.roomId)
+                        }
+                        
+                        
+                        self.commentDelegate?.finishedLoadFromAPI(topicId)
+                        self.delegate?.qiscusService(didFinishLoadRoom: room, withMessage: withMessage)
+                    }else if error != JSON.null{
+                        Qiscus.printLog(text: "error getListComment: \(error)")
+                        var errorMessage = "Failed to load room data"
+                        if let errorData = json["detailed_messages"].array {
+                            if let message = errorData[0].string {
+                                errorMessage = message
+                            }
+                        }else if let errorData = json["message"].string {
+                            errorMessage = errorData
+                            if errorMessage.contains("not found"){
+                                errorMessage = "Fail to load room, user not found"
+                            }
+                            
+                        }
+                        self.delegate?.qiscusService(didFailLoadRoom: errorMessage)
+                        if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                            roomDelegate.didFailLoadRoom(withError: errorMessage)
+                        }
+                    }else{
+                        let errorMessage = "Failed to load room data"
+                        self.delegate?.qiscusService(didFailLoadRoom: errorMessage)
+                        if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                            roomDelegate.didFailLoadRoom(withError: errorMessage)
+                        }
+                    }
+                }else{
+                    self.delegate?.qiscusService(didFailLoadRoom: "Failed to load room data")
+                    if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
+                        roomDelegate.didFailLoadRoom(withError: "fail to create or get chat room")
+                    }
+                }
+            })
+        }
+        if Qiscus.isLoggedIn {
+            listComment()
+        }else{
+            reconnect {
+                listComment()
+            }
+        }
+    }
     // MARK: - Create New Room
     open func createNewRoom(withUsers users:[String], roomName:String, optionalData:String? = nil, withMessage:String? = nil){ //
         func newGroupRoom(){

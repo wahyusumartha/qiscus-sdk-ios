@@ -40,6 +40,18 @@ public class QiscusRoom: NSObject {
             }
         }
     }
+    public var roomUniqueId:String = ""{
+        didSet{
+            if !self.copyProcess {
+                if let roomDB = QiscusRoomDB.roomDB(withLocalId: self.localId){
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    try! realm.write {
+                        roomDB.roomUniqueId = self.roomUniqueId
+                    }
+                }
+            }
+        }
+    }
     public var roomAvatarURL:String = ""{
         didSet{
             if !self.copyProcess {
@@ -207,6 +219,13 @@ public class QiscusRoom: NSObject {
     }
     
     // MARK: - Getter Methode
+    public class func room(withUniqueId roomUniqueId:String)->QiscusRoom?{
+        if let roomDB = QiscusRoomDB.roomDB(withUniqueId: roomUniqueId){
+            return roomDB.room()
+        }else{
+            return nil
+        }
+    }
     public class func room(withId roomId:Int)->QiscusRoom?{ //
         if let roomDB = QiscusRoomDB.roomDB(withId: roomId){
             return roomDB.room()
@@ -261,7 +280,9 @@ public class QiscusRoom: NSObject {
             if let roomAvatar = json["avatar_url"].string {
                 room.roomAvatarURL = roomAvatar
             }
-            
+            if let roomUniqueId = json["unique_id"].string {
+                room.roomUniqueId = roomUniqueId
+            }
         }
         return room
     }

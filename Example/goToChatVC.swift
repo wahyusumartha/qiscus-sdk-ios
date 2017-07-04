@@ -30,25 +30,36 @@ class goToChatVC: UIViewController {
 
     @IBAction func goToChat(_ sender: UIButton) {
         if targetField.text! != "" {
-            let emailData = targetField.text!.characters.split(separator: ",")
-            if emailData.count > 1 {
-                var emails = [String]()
-                for email in emailData{
-                    emails.append(String(email).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines))
-                }
-                Qiscus.createChat(withUsers:emails, target:self, title:"New Group Chat", subtitle: "Always new chat")
-            }else if let roomId = Int(targetField.text!){
-                let view = Qiscus.chatView(withRoomId: roomId)
-                self.navigationController?.pushViewController(view, animated: true)
-                view.titleAction = {
-                    print("title clicked")
+            if targetField.text!.contains("@") {
+                let emailData = targetField.text!.characters.split(separator: ",")
+                if emailData.count > 1 {
+                    var emails = [String]()
+                    for email in emailData{
+                        emails.append(String(email).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines))
+                    }
+                    Qiscus.createChat(withUsers:emails, target:self, title:"New Group Chat", subtitle: "Always new chat")
+                }else{
+                    let email = targetField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let view = Qiscus.chatView(withUsers: [email])
+                    self.navigationController?.pushViewController(view, animated: true)
+                    view.titleAction = {
+                        print("title clicked")
+                    }
                 }
             }else{
-                let email = targetField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
-                let view = Qiscus.chatView(withUsers: [email])
-                self.navigationController?.pushViewController(view, animated: true)
-                view.titleAction = {
-                    print("title clicked")
+                if let roomId = Int(targetField.text!){
+                    let view = Qiscus.chatView(withRoomId: roomId)
+                    self.navigationController?.pushViewController(view, animated: true)
+                    view.titleAction = {
+                        print("title clicked")
+                    }
+                }else{
+                    let uniqueId = targetField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let view = Qiscus.chatView(withRoomUniqueId: uniqueId)
+                    self.navigationController?.pushViewController(view, animated: true)
+                    view.titleAction = {
+                        print("title clicked")
+                    }
                 }
             }
         }

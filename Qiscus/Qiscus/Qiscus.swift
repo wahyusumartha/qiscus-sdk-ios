@@ -394,28 +394,32 @@ import CocoaMQTT
     /**
      No Documentation
      */
-//    @objc public class func chatView(withRoomUniqueId uniqueId:Int, readOnly:Bool = false, title:String = "", avatarUrl:String, subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
-//        Qiscus.checkDatabaseMigration()
-//        if !Qiscus.sharedInstance.connected {
-//            Qiscus.setupReachability()
-//        }
-//        
-//        var chatVC = QiscusChatVC()
-//        
-//        if let chatView = Qiscus.shared.chatViews[roomId] {
-//            chatVC = chatView
-//        }else{
-//            chatVC.roomId = roomId
-//        }
-//        chatVC.navTitle = title
-//        chatVC.navSubtitle = subtitle
-//        chatVC.archived = readOnly
-//        chatVC.message = withMessage
-//        chatVC.backAction = nil
-//        Qiscus.shared.chatViews[roomId] = chatVC
-//        
-//        return chatVC
-//    }
+    @objc public class func chatView(withRoomUniqueId uniqueId:String, readOnly:Bool = false, title:String = "", avatarUrl:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
+        
+        if let room = QiscusRoom.room(withUniqueId: uniqueId){
+            return Qiscus.chatView(withRoomId: room.roomId, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
+        }else{
+            Qiscus.checkDatabaseMigration()
+            if !Qiscus.sharedInstance.connected {
+                Qiscus.setupReachability()
+            }
+            Qiscus.sharedInstance.isPushed = true
+            
+            let chatVC = QiscusChatVC()
+            
+            chatVC.message = withMessage
+            chatVC.uniqueId = uniqueId
+            chatVC.avatarURL = avatarUrl
+            chatVC.roomTitle = title
+            
+            if chatVC.isPresence {
+                chatVC.goBack()
+            }
+            chatVC.backAction = nil
+            chatVC.archived = readOnly
+            return chatVC
+        }
+    }
     @objc public class func chatView(withRoomId roomId:Int, readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
         Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {

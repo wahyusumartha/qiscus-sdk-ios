@@ -162,6 +162,9 @@ public class QiscusChatVC: UIViewController{
     var optionalData:String?
     var message:String?
     var newRoom = false
+    var uniqueId = ""
+    var avatarURL = ""
+    var roomTitle = ""
     
     var topColor = Qiscus.shared.styleConfiguration.color.topColor
     var bottomColor = Qiscus.shared.styleConfiguration.color.bottomColor
