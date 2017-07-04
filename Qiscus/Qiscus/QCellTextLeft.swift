@@ -15,7 +15,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
     
     @IBOutlet weak var userNameLabel: UILabel!
     @IBOutlet weak var balloonView: UIImageView!
-    @IBOutlet weak var textView: QChatTextView!
+    @IBOutlet weak var textView: UITextView!
     @IBOutlet weak var dateLabel: UILabel!
     
     @IBOutlet weak var balloonTopMargin: NSLayoutConstraint!
