@@ -1097,7 +1097,7 @@ open class QiscusCommentClient: NSObject {
                                         saved = true
                                     }
                                     let email = newComment["email"].stringValue
-                                    QiscusMe.updateLastCommentId(commentId: id)
+                                    
                                     comment.commentBeforeId = newComment["comment_before_id"].intValue
                                     comment.commentSenderEmail = email
                                     comment.commentTopicId = topicId
@@ -1313,7 +1313,6 @@ open class QiscusCommentClient: NSObject {
                             }
                             
                             let email = newComment["email"].stringValue
-                            QiscusMe.updateLastCommentId(commentId: id)
                             comment.commentBeforeId = newComment["comment_before_id"].intValue
                             comment.commentSenderEmail = email
                             comment.commentTopicId = topicId
@@ -1410,7 +1409,6 @@ open class QiscusCommentClient: NSObject {
                                     comment.showLink = !(payload["disable_link_preview"].boolValue)
                                 }
                                 comment.commentId = id
-                                QiscusMe.updateLastCommentId(commentId: id)
                                 comment.commentBeforeId = payload["comment_before_id"].intValue
                                 comment.commentSenderEmail = email
                                 comment.commentTopicId = topicId
@@ -1577,7 +1575,6 @@ open class QiscusCommentClient: NSObject {
                                 comment.commentText = payload["message"].stringValue
                                 comment.showLink = !(payload["disable_link_preview"].boolValue)
                             }
-                            QiscusMe.updateLastCommentId(commentId: id)
                             comment.commentId = id
                             comment.commentBeforeId = payload["comment_before_id"].intValue
                             comment.commentSenderEmail = email
@@ -1751,7 +1748,6 @@ open class QiscusCommentClient: NSObject {
                                 comment.commentText = payload["message"].stringValue
                                 comment.showLink = !(payload["disable_link_preview"].boolValue)
                             }
-                            QiscusMe.updateLastCommentId(commentId: id)
                             comment.commentId = id
                             comment.commentBeforeId = payload["comment_before_id"].intValue
                             comment.commentSenderEmail = email
@@ -1915,7 +1911,6 @@ open class QiscusCommentClient: NSObject {
                                 comment.commentText = payload["message"].stringValue
                                 comment.showLink = !(payload["disable_link_preview"].boolValue)
                             }
-                            QiscusMe.updateLastCommentId(commentId: id)
                             comment.commentId = id
                             comment.commentBeforeId = payload["comment_before_id"].intValue
                             comment.commentSenderEmail = email
@@ -2117,7 +2112,6 @@ open class QiscusCommentClient: NSObject {
                                         }else{
                                             comment = QiscusComment.newComment(withId: id, andUniqueId: uid)
                                         }
-                                        QiscusMe.updateLastCommentId(commentId: id)
                                         comment.commentId = id
                                         comment.commentBeforeId = payload["comment_before_id"].intValue
                                         comment.commentText = payload["message"].stringValue
