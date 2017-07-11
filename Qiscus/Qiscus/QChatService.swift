@@ -98,14 +98,13 @@ public class QChatService:NSObject {
                         for newComment in comments.reversed() {
                             let roomId = newComment["room_id"].intValue
                             let id = newComment["id"].intValue
-                            let uId = newComment["unique_temp_id"].stringValue
                             
                             if id > QiscusMe.sharedInstance.lastCommentId {
-                                if let room = QiscusRoom.room(withId: roomId) {
-                                
+                                if let room = QRoom.room(withId: roomId) {
+                                    room.saveNewComment(fromJSON: newComment)
                                 }
+                                QiscusMe.updateLastCommentId(commentId: id)
                             }
-                            
                         }
                     }
                 }else if error != JSON.null{

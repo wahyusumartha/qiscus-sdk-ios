@@ -21,6 +21,8 @@ public protocol QRoomDelegate {
     func room(didChangeGroupComment section:Int)
     func room(didChangeComment section:Int, row:Int)
     func room(didFinishSync room:QRoom)
+    func room(gotNewGroupComment onIndex:Int)
+    func room(gotNewCommentOn groupIndex:Int, withCommentIndex index:Int)
 }
 public class QRoom:Object {
     public dynamic var id:Int = 0
@@ -49,13 +51,7 @@ public class QRoom:Object {
         return "id"
     }
     
-    var service:QRoomService?{
-        didSet{
-            if service != nil {
-                self.service?.delegate = self
-            }
-        }
-    }
+    var service:QRoomService?
     
     // MARK: - Class method
     public class func room(withId id:Int) -> QRoom? {
@@ -267,146 +263,6 @@ public class QRoom:Object {
         }
         if let oldComment = QComment.comment(withUniqueId: commentUniqueId) {
             // it should be on realm
-            oldComment.id = commentId
-            oldComment.text = commentText
-            oldComment.senderName = commentSenderName
-            oldComment.createdAt = commentCreatedAt
-            oldComment.beforeId = commentBeforeId
-        }else{
-            let newComment = QComment()
-            newComment.uniqueId = commentUniqueId
-            newComment.id = commentId
-            newComment.text = commentText
-            newComment.senderName = commentSenderName
-            newComment.createdAt = commentCreatedAt
-            newComment.beforeId = commentBeforeId
-            newComment.senderEmail = senderEmail
-            
-            let commentType = json["type"].stringValue
-            
-            switch commentType {
-            case "buttons":
-                newComment.text = json["payload"]["text"].stringValue
-                newComment.data = "\(json["payload"]["buttons"])"
-                newComment.typeRaw = QCommentType.postback.rawValue
-                break
-            case "account_linking":
-                newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.account.rawValue
-                break
-            case "reply":
-                newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.account.rawValue
-                break
-            case "system_event":
-                newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.system.rawValue
-                break
-            default:
-                if newComment.text.hasPrefix("[file]"){
-                    var type = QiscusFileType.file
-                    let fileURL = QFile.getURL(fromString: newComment.text)
-                    if newComment.file == nil {
-                        let file = QFile()
-                        file.id = newComment.uniqueId
-                        file.url = fileURL
-                        file.senderEmail = newComment.senderEmail
-                        try! realm.write {
-                            realm.add(file)
-                        }
-                        type = file.type
-                    }else{
-                        try! realm.write {
-                            newComment.file!.url = QFile.getURL(fromString: newComment.text)
-                        }
-                        type = newComment.file!.type
-                    }
-                    switch type {
-                    case .image:
-                        newComment.typeRaw = QCommentType.image.rawValue
-                        break
-                    case .video:
-                        newComment.typeRaw = QCommentType.video.rawValue
-                        break
-                    case .audio:
-                        newComment.typeRaw = QCommentType.audio.rawValue
-                        break
-                    default:
-                        newComment.typeRaw = QCommentType.file.rawValue
-                        break
-                    }
-                }else{
-                    newComment.typeRaw = QCommentType.text.rawValue
-                }
-                break
-            }
-            if self.comments.count == 0 {
-                let commentGroup = QCommentGroup()
-                commentGroup.senderEmail = newComment.senderEmail
-                commentGroup.senderName = newComment.senderName
-                commentGroup.createdAt = newComment.createdAt
-                commentGroup.id = "\(self.id):::\(newComment.date):::\(newComment.senderEmail)"
-                commentGroup.comments.append(newComment)
-                try! realm.write {
-                    self.comments.append(commentGroup)
-                }
-            }else{
-                if let commentGroup = QCommentGroup.commentGroup(onRoomWithId: self.id, senderEmail: newComment.senderEmail, date: newComment.date){
-                    try! realm.write {
-                        commentGroup.createdAt = newComment.createdAt
-                        commentGroup.senderName = newComment.senderName
-                        commentGroup.comments.insert(newComment, at: 0)
-                    }
-                }else{
-                    let commentGroup = QCommentGroup()
-                    commentGroup.senderEmail = newComment.senderEmail
-                    commentGroup.senderName = newComment.senderName
-                    commentGroup.createdAt = newComment.createdAt
-                    commentGroup.id = "\(self.id):::\(newComment.date):::\(newComment.senderEmail)"
-                    commentGroup.comments.append(newComment)
-                    try! realm.write {
-                        self.comments.insert(commentGroup, at: 0)
-                    }
-                }
-                
-            }
-        }
-        // TODO: - check for update last read/delivered on participant
-        if let participant = QParticipant.participant(inRoomWithId: self.id, andEmail: senderEmail) {
-            if participant.lastReadCommentId < commentId {
-                try! realm.write {
-                    participant.lastReadCommentId = commentId
-                    participant.lastDeliveredCommentId = commentId
-                }
-            }else if participant.lastDeliveredCommentId < commentId{
-                try! realm.write {
-                    participant.lastDeliveredCommentId = commentId
-                }
-            }
-        }
-    }
-    public func saveOldComment(fromJSON json:JSON){
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let commentId = json["id"].intValue
-        let commentUniqueId = json["unique_temp_id"].stringValue
-        let commentText = json["message"].stringValue
-        let commentSenderName = json["username"].stringValue
-        let commentCreatedAt = json["unix_timestamp"].doubleValue
-        let commentBeforeId = json["comment_before_id"].intValue
-        let senderEmail = json["email"].stringValue
-        
-        //Check sender
-        if QUser.user(withEmail: senderEmail) == nil{
-            let user = QUser()
-            user.email = senderEmail
-            user.avatarURL = json["user_avatar_url"].stringValue
-            user.fullname = commentSenderName
-            try! realm.write {
-                realm.add(user)
-            }
-        }
-        if let oldComment = QComment.comment(withUniqueId: commentUniqueId) {
-            // it should be on realm
             try! realm.write {
                 oldComment.id = commentId
                 oldComment.text = commentText
@@ -509,12 +365,188 @@ public class QRoom:Object {
                 try! realm.write {
                     self.comments.append(commentGroup)
                 }
+                self.delegate?.room(gotNewGroupComment: 0)
+            }else{
+                if let commentGroup = QCommentGroup.commentGroup(onRoomWithId: self.id, senderEmail: newComment.senderEmail, date: newComment.date){
+                    try! realm.write {
+                        commentGroup.comments.append(newComment)
+                    }
+                    var section = self.comments.count - 1
+                    let row = commentGroup.comments.count - 1
+                    for commentGroupCheck in self.comments.reversed() {
+                        if commentGroup.id == commentGroupCheck.id {
+                            self.delegate?.room(gotNewCommentOn: section, withCommentIndex: row)
+                            break
+                        }
+                        section -= 1
+                    }
+                }else{
+                    let commentGroup = QCommentGroup()
+                    commentGroup.senderEmail = newComment.senderEmail
+                    commentGroup.senderName = newComment.senderName
+                    commentGroup.createdAt = newComment.createdAt
+                    commentGroup.id = "\(self.id):::\(newComment.date):::\(newComment.senderEmail)"
+                    commentGroup.comments.append(newComment)
+                    try! realm.write {
+                        self.comments.append(commentGroup)
+                    }
+                    self.delegate?.room(gotNewGroupComment: self.comments.count - 1)
+                }
+                
+            }
+        }
+        // TODO: - check for update last read/delivered on participant
+        if let participant = QParticipant.participant(inRoomWithId: self.id, andEmail: senderEmail) {
+            if participant.lastReadCommentId < commentId {
+                try! realm.write {
+                    participant.lastReadCommentId = commentId
+                    participant.lastDeliveredCommentId = commentId
+                }
+            }else if participant.lastDeliveredCommentId < commentId{
+                try! realm.write {
+                    participant.lastDeliveredCommentId = commentId
+                }
+            }
+        }
+    }
+    public func saveOldComment(fromJSON json:JSON){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let commentId = json["id"].intValue
+        let commentUniqueId = json["unique_temp_id"].stringValue
+        let commentText = json["message"].stringValue
+        let commentSenderName = json["username"].stringValue
+        let commentCreatedAt = json["unix_timestamp"].doubleValue
+        let commentBeforeId = json["comment_before_id"].intValue
+        let senderEmail = json["email"].stringValue
+        
+        //Check sender
+        if QUser.user(withEmail: senderEmail) == nil{
+            let user = QUser()
+            user.email = senderEmail
+            user.avatarURL = json["user_avatar_url"].stringValue
+            user.fullname = commentSenderName
+            try! realm.write {
+                realm.add(user)
+            }
+        }
+        if let oldComment = QComment.comment(withUniqueId: commentUniqueId) {
+            try! realm.write {
+                oldComment.id = commentId
+                oldComment.text = commentText
+                oldComment.senderName = commentSenderName
+                oldComment.createdAt = commentCreatedAt
+                oldComment.beforeId = commentBeforeId
+            }
+            if oldComment.statusRaw < QCommentStatus.sent.rawValue{
+                try! realm.write {
+                    oldComment.statusRaw = QCommentStatus.sent.rawValue
+                }
+                var section = 0
+                for commentGroup in self.comments{
+                    var row = 0
+                    for commentTarget in commentGroup.comments{
+                        if commentTarget.uniqueId == oldComment.uniqueId{
+                            self.delegate?.room(didChangeComment: section, row: row)
+                            break
+                        }
+                        row += 1
+                    }
+                    section += 1
+                }
+            }
+        }else{
+            let newComment = QComment()
+            newComment.uniqueId = commentUniqueId
+            newComment.id = commentId
+            newComment.text = commentText
+            newComment.senderName = commentSenderName
+            newComment.createdAt = commentCreatedAt
+            newComment.beforeId = commentBeforeId
+            newComment.senderEmail = senderEmail
+            
+            let commentType = json["type"].stringValue
+            
+            switch commentType {
+            case "buttons":
+                newComment.text = json["payload"]["text"].stringValue
+                newComment.data = "\(json["payload"]["buttons"])"
+                newComment.typeRaw = QCommentType.postback.rawValue
+                break
+            case "account_linking":
+                newComment.data = "\(json["payload"])"
+                newComment.typeRaw = QCommentType.account.rawValue
+                break
+            case "reply":
+                newComment.data = "\(json["payload"])"
+                newComment.typeRaw = QCommentType.account.rawValue
+                break
+            case "system_event":
+                newComment.data = "\(json["payload"])"
+                newComment.typeRaw = QCommentType.system.rawValue
+                break
+            default:
+                if newComment.text.hasPrefix("[file]"){
+                    var type = QiscusFileType.file
+                    let fileURL = QFile.getURL(fromString: newComment.text)
+                    if newComment.file == nil {
+                        let file = QFile()
+                        file.id = newComment.uniqueId
+                        file.url = fileURL
+                        file.senderEmail = newComment.senderEmail
+                        try! realm.write {
+                            realm.add(file)
+                        }
+                        type = file.type
+                    }else{
+                        try! realm.write {
+                            newComment.file!.url = QFile.getURL(fromString: newComment.text)
+                        }
+                        type = newComment.file!.type
+                    }
+                    switch type {
+                    case .image:
+                        newComment.typeRaw = QCommentType.image.rawValue
+                        break
+                    case .video:
+                        newComment.typeRaw = QCommentType.video.rawValue
+                        break
+                    case .audio:
+                        newComment.typeRaw = QCommentType.audio.rawValue
+                        break
+                    default:
+                        newComment.typeRaw = QCommentType.file.rawValue
+                        break
+                    }
+                }else{
+                    newComment.typeRaw = QCommentType.text.rawValue
+                }
+                break
+            }
+            if self.comments.count == 0 {
+                let commentGroup = QCommentGroup()
+                commentGroup.senderEmail = newComment.senderEmail
+                commentGroup.senderName = newComment.senderName
+                commentGroup.createdAt = newComment.createdAt
+                commentGroup.id = "\(self.id):::\(newComment.date):::\(newComment.senderEmail)"
+                commentGroup.comments.append(newComment)
+                try! realm.write {
+                    self.comments.append(commentGroup)
+                }
+                self.delegate?.room(gotNewGroupComment: 0)
             }else{
                 if let commentGroup = QCommentGroup.commentGroup(onRoomWithId: self.id, senderEmail: newComment.senderEmail, date: newComment.date){
                     try! realm.write {
                         commentGroup.createdAt = newComment.createdAt
                         commentGroup.senderName = newComment.senderName
                         commentGroup.comments.insert(newComment, at: 0)
+                    }
+                    var section = 0
+                    for commentGroupCheck in self.comments {
+                        if commentGroup.id == commentGroupCheck.id {
+                            self.delegate?.room(gotNewCommentOn: section, withCommentIndex: 0)
+                            break
+                        }
+                        section += 1
                     }
                 }else{
                     let commentGroup = QCommentGroup()
@@ -526,6 +558,7 @@ public class QRoom:Object {
                     try! realm.write {
                         self.comments.insert(commentGroup, at: 0)
                     }
+                    self.delegate?.room(gotNewGroupComment: 0)
                 }
                 
             }
@@ -549,11 +582,5 @@ public class QRoom:Object {
         self.service = QRoomService()
         self.service?.sync(onRoom: self)
     }
-    // MARK: - room service delegate
-    public func roomService(didFailSync json: JSON) {
-        
-    }
-    public func roomService(didFinishSync json: JSON) {
-        self.delegate?.room(didFinishSync: self)
-    }
+    
 }
