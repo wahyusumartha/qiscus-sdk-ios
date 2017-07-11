@@ -68,6 +68,16 @@ public class QRoom:Object {
         }
         return room
     }
+    public class func room(withUser user:String) -> QRoom? {
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        var room:QRoom? = nil
+        let data =  realm.objects(QRoom.self).filter("singleUser == \(user)")
+        
+        if data.count > 0{
+            room = data.first!
+        }
+        return room
+    }
     public class func addRoom(fromJSON json:JSON)->QRoom{
         let room = QRoom()
         if let id = json["id"].int {
@@ -123,6 +133,13 @@ public class QRoom:Object {
                     try! realm.write {
                         savedUser!.fullname = participantJSON["username"].stringValue
                         savedUser!.avatarURL = participantJSON["avatar_url"].stringValue
+                    }
+                }
+                if room.type == .single {
+                    if participantEmail != QiscusMe.sharedInstance.email {
+                        try! realm.write {
+                            room.singleUser = participantEmail
+                        }
                     }
                 }
                 //then save participants
