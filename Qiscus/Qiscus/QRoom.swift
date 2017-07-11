@@ -579,8 +579,15 @@ public class QRoom:Object {
     }
     
     public func sync(){
-        self.service = QRoomService()
+        if self.service == nil {
+            self.service = QRoomService()
+        }
         self.service?.sync(onRoom: self)
     }
-    
+    public func loadMore(){
+        if self.service == nil {
+            self.service = QRoomService()
+        }
+        self.service?.loadMore(onRoom: self)
+    }
 }
