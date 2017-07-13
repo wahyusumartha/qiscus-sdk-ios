@@ -175,4 +175,58 @@ public class QRoomService:NSObject{
             })
         }
     }
+    public func postComment(onRoom room:QRoom, comment:QComment){
+        var parameters:[String: AnyObject] = [String: AnyObject]()
+        
+        parameters = [
+            "comment"  : comment.text as AnyObject,
+            "room_id"   : room.id as AnyObject,
+            "topic_id" : room.id as AnyObject,
+            "unique_temp_id" : comment.uniqueId as AnyObject,
+            "disable_link_preview" : true as AnyObject,
+            "token" : Qiscus.shared.config.USER_TOKEN as AnyObject
+        ]
+        
+        if comment.type == .reply && comment.data != ""{
+            parameters["type"] = "reply" as AnyObject
+            parameters["payload"] = "\(comment.data)" as AnyObject
+        }
+
+        Alamofire.request(QiscusConfig.postCommentURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {response in
+            switch response.result {
+            case .success:
+                if let result = response.result.value {
+                    let json = JSON(result)
+                    let success = (json["status"].intValue == 200)
+                    
+                    if success == true {
+                        let commentJSON = json["results"]["comment"]
+                        let commentId = commentJSON["id"].intValue
+                        let commentBeforeId = commentJSON["comment_before_id"].intValue
+                        
+                        // TODO: - later we use it to move sent comment to last position in the room
+                        // let commentCreatedAt = commentJSON["unix_timestamp"].doubleValue
+                        
+                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        try! realm.write {
+                            comment.id = commentId
+                            comment.beforeId = commentBeforeId
+                        }
+                        if comment.statusRaw == QCommentStatus.sending.rawValue {
+                            room.updateCommentStatus(inComment: comment, status: .sent)
+                        }
+                    }else{
+                        room.updateCommentStatus(inComment: comment, status: .failed)
+                    }
+                }else{
+                    room.updateCommentStatus(inComment: comment, status: .failed)
+                }
+                break
+            case .failure(let error):
+                room.updateCommentStatus(inComment: comment, status: .failed)
+                Qiscus.printLog(text: "fail to post comment with error: \(error)")
+                break
+            }
+        })
+    }
 }

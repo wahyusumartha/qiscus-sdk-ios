@@ -20,6 +20,7 @@ public protocol QRoomDelegate {
     func room(didChangeParticipant room:QRoom)
     func room(didChangeGroupComment section:Int)
     func room(didChangeComment section:Int, row:Int)
+    
     func room(didFinishSync room:QRoom)
     func room(gotNewGroupComment onIndex:Int)
     func room(gotNewCommentOn groupIndex:Int, withCommentIndex index:Int)
@@ -620,6 +621,33 @@ public class QRoom:Object {
     }
     
     // MARK: - Updater method
+    public func updateCommentStatus(inComment comment:QComment, status:QCommentStatus){
+        if self.comments.count > 0 {
+            var section = 0
+            for commentGroup in self.comments {
+                var row = 0
+                var found = false
+                for commentTarget in commentGroup.comments{
+                    if commentTarget.uniqueId == comment.uniqueId {
+                        found = true
+                        if commentTarget.statusRaw != status.rawValue{
+                            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            try! realm.write {
+                                commentTarget.statusRaw = status.rawValue
+                            }
+                            self.delegate?.room(didChangeComment: section, row: row)
+                        }
+                        break
+                    }
+                    row += 1
+                }
+                if found {
+                    break
+                }
+                section += 1
+            }
+        }
+    }
     public func update(name:String? = nil, avatarURL:String? = nil, data:String? = nil){
         if self.service == nil {
             self.service = QRoomService()
@@ -631,5 +659,13 @@ public class QRoom:Object {
             self.service = QRoomService()
         }
         self.service?.publisComentStatus(onRoom: self, status: status)
+    }
+    
+    //
+    public func post(comment:QComment){
+        if self.service == nil {
+            self.service = QRoomService()
+        }
+        self.service?.postComment(onRoom: self, comment: comment)
     }
 }
