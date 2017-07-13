@@ -913,7 +913,7 @@ extension Qiscus:CocoaMQTTDelegate{
                             comment = QiscusComment.newComment(withId: commentId, andUniqueId: uniqueId)
                             saved = true
                         }
-                        QiscusMe.updateLastCommentId(commentId: commentId)
+                        //QiscusMe.updateLastCommentId(commentId: commentId)
                         comment.commentText = json["message"].stringValue
                         comment.commentSenderEmail = email
                         comment.showLink = !(json["disable_link_preview"].boolValue)
@@ -921,7 +921,7 @@ extension Qiscus:CocoaMQTTDelegate{
                         comment.commentBeforeId = commentBeforeId
                         comment.commentTopicId = notifTopicId
                         comment.commentStatusRaw = QiscusCommentStatus.sent.rawValue
-                        
+                        Qiscus.sync()
                         if json["type"].string == "buttons" {
                             comment.commentText = json["payload"]["text"].stringValue
                             comment.commentButton = "\(json["payload"]["buttons"])"
