@@ -23,6 +23,7 @@ public protocol QRoomDelegate {
     func room(didFinishSync room:QRoom)
     func room(gotNewGroupComment onIndex:Int)
     func room(gotNewCommentOn groupIndex:Int, withCommentIndex index:Int)
+    func room(didFailUpdate error:String)
 }
 public class QRoom:Object {
     public dynamic var id:Int = 0
@@ -616,5 +617,19 @@ public class QRoom:Object {
             self.service = QRoomService()
         }
         self.service?.loadMore(onRoom: self)
+    }
+    
+    // MARK: - Updater method
+    public func update(name:String? = nil, avatarURL:String? = nil, data:String? = nil){
+        if self.service == nil {
+            self.service = QRoomService()
+        }
+        self.service?.updateRoom(onRoom: self, roomName: name, roomAvatarURL: avatarURL, roomOptions: data)
+    }
+    public func publishCommentStatus(withStatus status:QCommentStatus){
+        if self.service == nil {
+            self.service = QRoomService()
+        }
+        self.service?.publisComentStatus(onRoom: self, status: status)
     }
 }
