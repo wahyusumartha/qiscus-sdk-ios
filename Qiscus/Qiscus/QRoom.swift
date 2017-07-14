@@ -53,7 +53,7 @@ public class QRoom:Object {
         return "id"
     }
     
-    var service:QRoomService?
+    //public var service:QRoomService?
     
     // MARK: - Class method
     public class func room(withId id:Int) -> QRoom? {
@@ -608,16 +608,12 @@ public class QRoom:Object {
     }
     
     public func sync(){
-        if self.service == nil {
-            self.service = QRoomService()
-        }
-        self.service?.sync(onRoom: self)
+        let service = QRoomService()
+        service.sync(onRoom: self)
     }
     public func loadMore(){
-        if self.service == nil {
-            self.service = QRoomService()
-        }
-        self.service?.loadMore(onRoom: self)
+        let service = QRoomService()
+        service.loadMore(onRoom: self)
     }
     
     // MARK: - Updater method
@@ -649,23 +645,17 @@ public class QRoom:Object {
         }
     }
     public func update(name:String? = nil, avatarURL:String? = nil, data:String? = nil){
-        if self.service == nil {
-            self.service = QRoomService()
-        }
-        self.service?.updateRoom(onRoom: self, roomName: name, roomAvatarURL: avatarURL, roomOptions: data)
+        let service = QRoomService()
+        service.updateRoom(onRoom: self, roomName: name, roomAvatarURL: avatarURL, roomOptions: data)
     }
     public func publishCommentStatus(withStatus status:QCommentStatus){
-        if self.service == nil {
-            self.service = QRoomService()
-        }
-        self.service?.publisComentStatus(onRoom: self, status: status)
+        let service = QRoomService()
+        service.publisComentStatus(onRoom: self, status: status)
     }
     
     //
     public func post(comment:QComment){
-        if self.service == nil {
-            self.service = QRoomService()
-        }
-        self.service?.postComment(onRoom: self, comment: comment)
+        let service = QRoomService()
+        service.postComment(onRoom: self, comment: comment)
     }
 }
