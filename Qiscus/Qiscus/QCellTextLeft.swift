@@ -153,14 +153,34 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
             if repliedEmail == QiscusMe.sharedInstance.email {
                 username = "You"
             }
-            var linkImageURL = ""
             switch replyType {
-                case .text:
-                    break
-                case .image, .video:
-                    let filename = self.comment!.fileName(text: text)
-                    let url = self.comment!.getAttachmentURL(message: text)
-                    text = filename
+            case .text:
+                self.linkImageWidth.constant = 0
+                self.linkImage.isHidden = true
+                break
+            case .image, .video:
+                self.linkImage.image = Qiscus.image(named: "link")
+                let filename = self.comment!.fileName(text: text)
+                let url = self.comment!.getAttachmentURL(message: text)
+                
+                self.linkImageWidth.constant = 55
+                self.linkImage.isHidden = false
+                
+                if let file = QFile.file(withURL: url){
+                    if QiscusHelper.isFileExist(inLocalPath: file.localThumbPath){
+                        self.linkImage.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
+                            self.linkImage.image = image
+                        })
+                    }else if QiscusHelper.isFileExist(inLocalPath: file.localMiniThumbPath){
+                        self.linkImage.loadAsync(fromLocalPath: data.localMiniThumbURL!, onLoaded: { (image, _) in
+                            self.linkImage.image = image
+                        })
+                    }else{
+                        self.linkImage.loadAsync(file.thumbURL, onLoaded: { (image, _) in
+                            self.linkImage.image = image
+                        })
+                    }
+                }else{
                     var thumbURL = url.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
                     let thumbUrlArr = thumbURL.characters.split(separator: ".")
                     
@@ -177,30 +197,25 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
                         i += 1
                     }
                     thumbURL = newThumbURL
-                    linkImageURL = thumbURL
-                    break
-                default:
-                    let filename = self.comment!.fileName(text: text)
-                    text = filename
-                    break
+                    self.linkImage.loadAsync(thumbURL, onLoaded: { (image, _) in
+                        self.linkImage.image = image
+                    })
+                }
+                text = filename
+                
+                break
+            default:
+                let filename = self.comment!.fileName(text: text)
+                text = filename
+                self.linkImageWidth.constant = 0
+                self.linkImage.isHidden = true
+                break
             }
             
             
             self.linkTitle.text = username
             self.linkDescription.text = text
             
-            if replyType == .image || replyType == .video {
-                self.linkImageWidth.constant = 55
-                self.linkImage.isHidden = false
-                
-                self.linkImage.loadAsync(linkImageURL)
-            }else{
-                self.linkImageWidth.constant = 0
-                self.linkImage.isHidden = true
-                
-                self.layoutIfNeeded()
-            }
-            //self.linkImage.image = self.data.linkImage
             self.LinkContainer.isHidden = false
             self.ballonHeight.constant = 83
             self.textTopMargin.constant = 73

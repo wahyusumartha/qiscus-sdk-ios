@@ -89,7 +89,7 @@ class QCellTextRight: QChatCell {
 //        }else
         
         if self.comment?.type == .reply{
-            let replyData = JSON(parseJSON: self.data.comment!.commentButton)
+            let replyData = JSON(parseJSON: self.comment!.data)
             var text = replyData["replied_comment_message"].stringValue
             let replyType = self.comment!.replyType(message: text)
             
@@ -98,35 +98,62 @@ class QCellTextRight: QChatCell {
             if repliedEmail == QiscusMe.sharedInstance.email {
                 username = "You"
             }
-            var linkImageURL = ""
             switch replyType {
             case .text:
+                self.linkImageWidth.constant = 0
+                self.linkImage.isHidden = true
                 break
             case .image, .video:
+                self.linkImage.image = Qiscus.image(named: "link")
                 let filename = self.comment!.fileName(text: text)
                 let url = self.comment!.getAttachmentURL(message: text)
-                text = filename
-                var thumbURL = url.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
-                let thumbUrlArr = thumbURL.characters.split(separator: ".")
                 
-                var newThumbURL = ""
-                var i = 0
-                for thumbComponent in thumbUrlArr{
-                    if i == 0{
-                        newThumbURL += String(thumbComponent)
-                    }else if i < (thumbUrlArr.count - 1){
-                        newThumbURL += ".\(String(thumbComponent))"
+                self.linkImageWidth.constant = 55
+                self.linkImage.isHidden = false
+                
+                if let file = QFile.file(withURL: url){
+                    if QiscusHelper.isFileExist(inLocalPath: file.localThumbPath){
+                        self.linkImage.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
+                            self.linkImage.image = image
+                        })
+                    }else if QiscusHelper.isFileExist(inLocalPath: file.localMiniThumbPath){
+                        self.linkImage.loadAsync(fromLocalPath: data.localMiniThumbURL!, onLoaded: { (image, _) in
+                            self.linkImage.image = image
+                        })
                     }else{
-                        newThumbURL += ".png"
+                        self.linkImage.loadAsync(file.thumbURL, onLoaded: { (image, _) in
+                            self.linkImage.image = image
+                        })
                     }
-                    i += 1
+                }else{
+                    var thumbURL = url.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
+                    let thumbUrlArr = thumbURL.characters.split(separator: ".")
+                    
+                    var newThumbURL = ""
+                    var i = 0
+                    for thumbComponent in thumbUrlArr{
+                        if i == 0{
+                            newThumbURL += String(thumbComponent)
+                        }else if i < (thumbUrlArr.count - 1){
+                            newThumbURL += ".\(String(thumbComponent))"
+                        }else{
+                            newThumbURL += ".png"
+                        }
+                        i += 1
+                    }
+                    thumbURL = newThumbURL
+                    self.linkImage.loadAsync(thumbURL, onLoaded: { (image, _) in
+                        self.linkImage.image = image
+                    })
                 }
-                thumbURL = newThumbURL
-                linkImageURL = thumbURL
+                text = filename
+                
                 break
             default:
                 let filename = self.comment!.fileName(text: text)
                 text = filename
+                self.linkImageWidth.constant = 0
+                self.linkImage.isHidden = true
                 break
             }
             
@@ -134,17 +161,6 @@ class QCellTextRight: QChatCell {
             self.linkTitle.text = username
             self.linkDescription.text = text
             
-            if replyType == .image || replyType == .video {
-                self.linkImageWidth.constant = 55
-                self.linkImage.isHidden = false
-                
-                self.linkImage.loadAsync(linkImageURL)
-            }else{
-                self.linkImageWidth.constant = 0
-                self.linkImage.isHidden = true
-                
-                self.layoutIfNeeded()
-            }
             //self.linkImage.image = self.data.linkImage
             self.LinkContainer.isHidden = false
             self.balloonHeight.constant = 83
@@ -190,19 +206,6 @@ class QCellTextRight: QChatCell {
             self.balloonTopMargin.constant = 0
             self.cellHeight.constant = 0
         }
-        
-        // last cell
-//        if self.data.cellPos == .last || self.data.cellPos == .single{
-//            self.rightMargin.constant = -8
-//            self.textTrailing.constant = -23
-//            self.statusTrailing.constant = -20
-//            self.balloonWidth.constant = 31
-//        }else{
-//            self.textTrailing.constant = -8
-//            self.rightMargin.constant = -23
-//            self.statusTrailing.constant = -5
-//            self.balloonWidth.constant = 16
-//        }
         
         // comment status render
         self.updateStatus(toStatus: self.comment!.status)

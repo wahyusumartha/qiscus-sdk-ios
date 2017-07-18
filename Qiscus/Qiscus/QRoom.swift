@@ -341,7 +341,8 @@ public class QRoom:Object {
                 break
             case "reply":
                 newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.account.rawValue
+                newComment.typeRaw = QCommentType.reply.rawValue
+                newComment.text = json["payload"]["text"].stringValue
                 break
             case "system_event":
                 newComment.data = "\(json["payload"])"
@@ -523,7 +524,8 @@ public class QRoom:Object {
                 break
             case "reply":
                 newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.account.rawValue
+                newComment.typeRaw = QCommentType.reply.rawValue
+                newComment.text = json["payload"]["text"].stringValue
                 break
             case "system_event":
                 newComment.data = "\(json["payload"])"

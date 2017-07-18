@@ -44,7 +44,9 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             postbackCell.postbackDelegate = self
             cell = postbackCell
         }
-        
+        if comment.type == .reply {
+            print("comment identifier: \(comment.cellIdentifier)")
+        }
         return cell
     }
     public func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {

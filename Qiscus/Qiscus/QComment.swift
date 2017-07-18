@@ -207,7 +207,7 @@ public class QComment:Object {
     public func getAttachmentURL(message: String) -> String {
         let component1 = message.components(separatedBy: "[file]")
         let component2 = component1.last!.components(separatedBy: "[/file]")
-        let mediaUrlString = component2.first?.trimmingCharacters(in: CharacterSet.whitespaces)
+        let mediaUrlString = component2.first?.trimmingCharacters(in: CharacterSet.whitespaces).replacingOccurrences(of: " ", with: "%20")
         return mediaUrlString!
     }
     public func fileName(text:String) ->String{

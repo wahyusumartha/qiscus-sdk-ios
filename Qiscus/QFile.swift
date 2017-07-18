@@ -104,7 +104,16 @@ public class QFile:Object{
     override open class func primaryKey() -> String {
         return "id"
     }
-    
+    public class func file(withURL url:String) -> QFile?{
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        var file:QFile? = nil
+        let data =  realm.objects(QFile.self).filter("url == '\(url)'")
+        
+        if data.count > 0{
+            file = data.first!
+        }
+        return file
+    }
     public class func getURL(fromString text:String) -> String{
         let component1 = text.components(separatedBy: "[file]")
         let component2 = component1.last!.components(separatedBy: "[/file]")
