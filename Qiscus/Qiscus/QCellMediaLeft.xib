@@ -31,24 +31,24 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="yQe-QN-D5C">
-                                <rect key="frame" x="42" y="0.0" width="200" height="185"/>
+                                <rect key="frame" x="27" y="0.0" width="200" height="185"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="200" id="l0U-Bd-XlV"/>
                                     <constraint firstAttribute="height" constant="185" id="m22-nU-3Kh"/>
                                 </constraints>
                             </imageView>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="bfz-My-DvO">
-                                <rect key="frame" x="60" y="3" width="179" height="179"/>
+                                <rect key="frame" x="45" y="3" width="179" height="179"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="179" id="nCj-zL-BXO"/>
                                     <constraint firstAttribute="height" constant="179" id="qyr-AO-rgZ"/>
                                 </constraints>
                             </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="movie_frame" translatesAutoresizingMaskIntoConstraints="NO" id="7cS-OQ-yzc">
-                                <rect key="frame" x="60" y="3" width="179" height="179"/>
+                                <rect key="frame" x="45" y="3" width="179" height="179"/>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3Re-5v-4D2" customClass="ChatFileButton" customModule="Qiscus" customModuleProvider="target">
-                                <rect key="frame" x="130" y="73" width="40" height="40"/>
+                                <rect key="frame" x="115" y="73" width="40" height="40"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="40" id="CKH-z1-fmS"/>
                                     <constraint firstAttribute="width" constant="40" id="ije-P0-1Fy"/>
@@ -56,10 +56,10 @@
                                 <state key="normal" image="ic_download_chat"/>
                             </button>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="que-Ur-bgB">
-                                <rect key="frame" x="130" y="73" width="40" height="40"/>
+                                <rect key="frame" x="115" y="73" width="40" height="40"/>
                             </imageView>
                             <view clipsSubviews="YES" alpha="0.55000001192092896" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="CkW-On-HD8">
-                                <rect key="frame" x="130" y="73" width="40" height="40"/>
+                                <rect key="frame" x="115" y="73" width="40" height="40"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8DV-2u-lPS" userLabel="progressView">
                                         <rect key="frame" x="0.0" y="0.0" width="40" height="40"/>
@@ -77,13 +77,13 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="100%" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fNU-Nw-5Ig">
-                                <rect key="frame" x="130" y="73" width="40" height="40"/>
+                                <rect key="frame" x="115" y="73" width="40" height="40"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sending Failed" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3pk-jc-0cz">
-                                <rect key="frame" x="156" y="161" width="75" height="21"/>
+                                <rect key="frame" x="141" y="161" width="75" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="75" id="1qA-RF-p2d"/>
                                     <constraint firstAttribute="height" constant="21" id="crM-xw-OsK"/>
@@ -112,7 +112,7 @@
                             <constraint firstItem="CkW-On-HD8" firstAttribute="height" secondItem="3Re-5v-4D2" secondAttribute="height" id="Uwz-Ca-K9X"/>
                             <constraint firstItem="fNU-Nw-5Ig" firstAttribute="centerX" secondItem="3Re-5v-4D2" secondAttribute="centerX" id="XLQ-QL-6iU"/>
                             <constraint firstItem="3pk-jc-0cz" firstAttribute="trailing" secondItem="bfz-My-DvO" secondAttribute="trailing" constant="-8" id="YZK-bU-aO7"/>
-                            <constraint firstItem="yQe-QN-D5C" firstAttribute="leading" secondItem="jZy-ur-EFQ" secondAttribute="leading" constant="42" id="dew-gf-Kpi"/>
+                            <constraint firstItem="yQe-QN-D5C" firstAttribute="leading" secondItem="jZy-ur-EFQ" secondAttribute="leading" constant="27" id="dew-gf-Kpi"/>
                             <constraint firstItem="3Re-5v-4D2" firstAttribute="centerY" secondItem="bfz-My-DvO" secondAttribute="centerY" id="elU-qx-dMK"/>
                             <constraint firstItem="que-Ur-bgB" firstAttribute="width" secondItem="3Re-5v-4D2" secondAttribute="width" id="j5N-jk-bMs"/>
                             <constraint firstItem="fNU-Nw-5Ig" firstAttribute="centerY" secondItem="3Re-5v-4D2" secondAttribute="centerY" id="juC-4G-0hz"/>
@@ -137,12 +137,10 @@
             <size key="customSize" width="286" height="203"/>
             <connections>
                 <outlet property="balloonView" destination="yQe-QN-D5C" id="hPf-3u-bnu"/>
-                <outlet property="balloonWidth" destination="l0U-Bd-XlV" id="m22-lT-rXQ"/>
                 <outlet property="cellHeight" destination="9Vp-xY-eQa" id="KOf-pe-wBJ"/>
                 <outlet property="dateLabel" destination="3pk-jc-0cz" id="Pp2-iE-WYO"/>
                 <outlet property="downloadButton" destination="3Re-5v-4D2" id="df4-d1-Mch"/>
                 <outlet property="imageDisplay" destination="bfz-My-DvO" id="xO2-UH-cr8"/>
-                <outlet property="leftMargin" destination="dew-gf-Kpi" id="h3i-cl-qMt"/>
                 <outlet property="progressContainer" destination="CkW-On-HD8" id="JdJ-Jz-CVa"/>
                 <outlet property="progressHeight" destination="JeC-nu-sWd" id="pZK-Oa-1uO"/>
                 <outlet property="progressLabel" destination="fNU-Nw-5Ig" id="SPf-sZ-3wT"/>

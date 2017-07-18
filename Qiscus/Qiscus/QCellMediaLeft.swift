@@ -23,10 +23,8 @@ class QCellMediaLeft: QChatCell {
     @IBOutlet weak var balloonView: UIImageView!
     
     @IBOutlet weak var progressHeight: NSLayoutConstraint!
-    @IBOutlet weak var leftMargin: NSLayoutConstraint!
     @IBOutlet weak var topMargin: NSLayoutConstraint!
     @IBOutlet weak var cellHeight: NSLayoutConstraint!
-    @IBOutlet weak var balloonWidth: NSLayoutConstraint!
     
     let defaultDateLeftMargin:CGFloat = -10
     var tapRecognizer: UITapGestureRecognizer?
@@ -54,76 +52,74 @@ class QCellMediaLeft: QChatCell {
         imageDisplay.layer.cornerRadius = 10
     }
     
-    open override func setupCell(){
+    public override func commentChanged() {
+        balloonView.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor
+        self.balloonView.image = self.getBallon()
         progressContainer.isHidden = true
         progressView.isHidden = true
-        if QiscusHelper.isFileExist(inLocalPath: data.localThumbURL!){
-            imageDisplay.loadAsync(fromLocalPath: data.localThumbURL!, onLoaded: { (image, _) in
+        
+        if let file = self.comment!.file {
+            if let image = self.comment!.displayImage {
                 self.imageDisplay.image = image
-                self.data.displayImage = image
-            })
-        }else if QiscusHelper.isFileExist(inLocalPath: data.localMiniThumbURL!){
-            imageDisplay.loadAsync(fromLocalPath: data.localMiniThumbURL!, onLoaded: { (image, _) in
-                self.imageDisplay.image = image
-                self.data.displayImage = image
-            })
-        }else{
-            imageDisplay.loadAsync(data.remoteThumbURL!, onLoaded: { (image, _) in
-                self.imageDisplay.image = image
-                self.data.displayImage = image
-            })
-        }
-        balloonView.image = data.balloonImage
-        
-        balloonView.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor
-        
-        // cleartap recognizer
-        if self.tapRecognizer != nil{
-            imageDisplay.removeGestureRecognizer(self.tapRecognizer!)
-            tapRecognizer = nil
-        }
-        
-        // if this is first cell
-        if data.cellPos == .first || data.cellPos == .single{
-            userNameLabel.text = data.userFullName
-            userNameLabel.isHidden = false
-            topMargin.constant = 20
-            cellHeight.constant = 20
-        }else{
-            userNameLabel.text = ""
-            userNameLabel.isHidden = true
-            topMargin.constant = 0
-            cellHeight.constant = 0
-        }
-        
-        // if this is last cell
-        if data.cellPos == .last || data.cellPos == .single{
-            balloonWidth.constant = 200
-            leftMargin.constant = 35
-        }else{
-            leftMargin.constant = 50
-            balloonWidth.constant = 185
-        }
-        
-        if data.commentType == .video || data.fileType == "gif"{
-            if data.fileType == "gif" {
-                self.videoPlay.image = Qiscus.image(named: "ic_gif")
-                self.videoFrame.isHidden = true
+            }
+            else if QiscusHelper.isFileExist(inLocalPath: file.localThumbPath){
+                imageDisplay.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
+                    self.imageDisplay.image = image
+                    self.comment!.displayImage = image
+                })
+            }else if QiscusHelper.isFileExist(inLocalPath: file.localMiniThumbPath){
+                imageDisplay.loadAsync(fromLocalPath: data.localMiniThumbURL!, onLoaded: { (image, _) in
+                    self.imageDisplay.image = image
+                    self.comment!.displayImage = image
+                })
             }else{
+                imageDisplay.loadAsync(file.thumbURL, onLoaded: { (image, _) in
+                    self.imageDisplay.image = image
+                    self.comment!.displayImage = image
+                })
+            }
+            if self.tapRecognizer != nil{
+                imageDisplay.removeGestureRecognizer(self.tapRecognizer!)
+                tapRecognizer = nil
+            }
+            if self.comment!.cellPos == .first || self.comment!.cellPos == .single{
+                if let sender = self.comment?.sender {
+                    self.userNameLabel.text = sender.fullname.capitalized
+                }else{
+                    self.userNameLabel.text = self.comment?.senderName.capitalized
+                }
+                self.userNameLabel.isHidden = false
+                self.topMargin.constant = 20
+                self.cellHeight.constant = 20
+            }else{
+                self.userNameLabel.text = ""
+                self.userNameLabel.isHidden = true
+                self.topMargin.constant = 0
+                self.cellHeight.constant = 0
+            }
+            
+            if self.comment!.type == .video {
                 self.videoPlay.image = Qiscus.image(named: "play_button")
                 self.videoFrame.isHidden = false
+                self.videoPlay.isHidden = false
+            }else if file.ext == "gif"{
+                self.videoPlay.image = Qiscus.image(named: "ic_gif")
+                self.videoFrame.isHidden = true
+                self.videoPlay.isHidden = false
+            }else{
+                self.videoPlay.isHidden = true
+                self.videoFrame.isHidden = true
             }
-            self.videoPlay.isHidden = false
-        }else{
-            self.videoPlay.isHidden = true
-            self.videoFrame.isHidden = true
+            
+            dateLabel.text = self.comment!.time.lowercased()
+            progressLabel.isHidden = true
+            dateLabel.textColor = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
+            
+            self.downloadButton.removeTarget(nil, action: nil, for: .allEvents)
         }
+    }
+    open override func setupCell(){
         
-        dateLabel.text = data.commentTime.lowercased()
-        progressLabel.isHidden = true
-        dateLabel.textColor = UIColor.white
-        
-        self.downloadButton.removeTarget(nil, action: nil, for: .allEvents)
         
         if !data.localFileExist {
             self.videoPlay.isHidden = true

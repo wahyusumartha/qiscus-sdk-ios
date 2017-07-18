@@ -74,7 +74,8 @@ public class QiscusChatVC: UIViewController{
                         }
                     })
                 }
-            }else{
+            }
+            else{
                 Qiscus.uiThread.async {
 
                     if self.replyData!.commentType == .text || self.replyData!.commentType == .reply {
@@ -126,7 +127,8 @@ public class QiscusChatVC: UIViewController{
     public var defaultBack:Bool = true
     
     // MARK: - Data Properties
-    var room:QiscusRoom?{
+    
+    var room:QiscusRoom?{ // will be removed
         didSet{
             if oldValue == nil{
                 if let chatRoom = room{
@@ -149,22 +151,45 @@ public class QiscusChatVC: UIViewController{
             }
         }
     }
-    var hasMoreComment = true
-    var comments = [[QiscusCommentPresenter]]()
+    var hasMoreComment = true // rmove
+    var comments = [[QiscusCommentPresenter]]() // remove
     var loadMoreControl = UIRefreshControl()
     
-    // MARK: - External data configuration
-    var topicId:Int?
+    // MARK: -  Data load configuration
+    var chatRoom:QRoom?{
+        didSet{
+            if oldValue == nil && self.chatRoom != nil {
+                self.collectionView.reloadData()
+                if Qiscus.shared.connected {
+                    self.chatRoom?.sync()
+                    self.chatService.sync()
+                }
+                self.chatRoom!.delegate = self
+            }
+        }
+    }
+    var chatMessage:String?
+    var chatRoomId:Int?
+    var chatUser:String?
+    var chatTitle:String?
+    var chatSubtitle:String?
+    var chatNewRoomUsers:[String]?
+    var chatDistinctId:String?
+    var chatData:String?
+    var chatService = QChatService()
+    var collectionWidth:CGFloat = 0
     
-    var users:[String]?
-    var roomId:Int?
-    var distincId:String = ""
-    var optionalData:String?
-    var message:String?
-    var newRoom = false
-    var uniqueId = ""
-    var avatarURL = ""
-    var roomTitle = ""
+    var topicId:Int? // will be removed
+    
+    var users:[String]? // will be removed
+    var roomId:Int? // will be removed
+    var distincId:String = "" // will be removed
+    var optionalData:String? // will be removed
+    var message:String? // will be removed
+    var newRoom = false // will be removed
+    var uniqueId = "" // will be removed
+    var avatarURL = "" // will be removed
+    var roomTitle = "" // will be removed
     
     var topColor = Qiscus.shared.styleConfiguration.color.topColor
     var bottomColor = Qiscus.shared.styleConfiguration.color.bottomColor
@@ -174,7 +199,7 @@ public class QiscusChatVC: UIViewController{
     var galleryItems:[QiscusGalleryItem] = [QiscusGalleryItem]()
     
     var imagePreview:GalleryViewController?
-    var loadWithUser:Bool = false
+    var loadWithUser:Bool = false // will be removed
     
     //MARK: - external action
     @objc public var unlockAction:(()->Void) = {}
@@ -190,8 +215,8 @@ public class QiscusChatVC: UIViewController{
     var typingIndicatorUser:String = ""
     var isTypingOn:Bool = false
     var linkData:QiscusLinkData?
-    var roomName:String?
-    var roomAvatar = UIImageView()
+    var roomName:String? // will be removed
+    var roomAvatar = UIImageView() // will be removed
     var isSelfTyping = false
     var firstLoad = true
     
@@ -322,15 +347,36 @@ public class QiscusChatVC: UIViewController{
     // MARK: - UI Lifecycle
     override open func viewDidLoad() {
         super.viewDidLoad()
-        if self.comments.count == 0{
+        self.chatService.delegate = self
+        if self.chatRoom == nil {
             self.showLoading("Load data ...")
-            DispatchQueue.global().async {
-                self.loadData()
-            }
+            self.loadData()
         }
+        
+        self.collectionView.register(UINib(nibName: "QChatHeaderCell",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "cellHeader")
+        self.collectionView.register(UINib(nibName: "QChatFooterLeft",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: "cellFooterLeft")
+        self.collectionView.register(UINib(nibName: "QChatFooterRight",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: "cellFooterRight")
+        self.collectionView.register(UINib(nibName: "QCellSystem",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellSystem")
+        self.collectionView.register(UINib(nibName: "QCellTextLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellTextLeft")
+        self.collectionView.register(UINib(nibName: "QCellPostbackLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellPostbackLeft")
+        self.collectionView.register(UINib(nibName: "QCellTextRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellTextRight")
+        self.collectionView.register(UINib(nibName: "QCellMediaLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellMediaLeft")
+        self.collectionView.register(UINib(nibName: "QCellMediaRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellMediaRight")
+        self.collectionView.register(UINib(nibName: "QCellAudioLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellAudioLeft")
+        self.collectionView.register(UINib(nibName: "QCellAudioRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellAudioRight")
+        self.collectionView.register(UINib(nibName: "QCellFileLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellFileLeft")
+        self.collectionView.register(UINib(nibName: "QCellFileRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellFileRight")
+//        if self.comments.count == 0{
+//            self.showLoading("Load data ...")
+//            DispatchQueue.global().async {
+//                self.loadData()
+//            }
+//        }
+        //self.automaticallyAdjustsScrollViewInsets = false
         let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout
         layout?.sectionHeadersPinToVisibleBounds = true
         layout?.sectionFootersPinToVisibleBounds = true
+                
         let resendMenuItem: UIMenuItem = UIMenuItem(title: "Resend", action: #selector(QChatCell.resend))
         let deleteMenuItem: UIMenuItem = UIMenuItem(title: "Delete", action: #selector(QChatCell.deleteComment))
         let replyMenuItem: UIMenuItem = UIMenuItem(title: "Reply", action: #selector(QChatCell.reply))
@@ -447,6 +493,7 @@ public class QiscusChatVC: UIViewController{
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.isPresence = true
+        
         if self.comments.count > 0 {
             self.collectionView.reloadData()
             self.scrollToBottom()
@@ -578,19 +625,7 @@ public class QiscusChatVC: UIViewController{
         self.unlockButton.setBackgroundImage(unlockImage, for: UIControlState())
         self.unlockButton.tintColor = QiscusColorConfiguration.sharedInstance.lockViewTintColor
         
-        self.collectionView.register(UINib(nibName: "QChatHeaderCell",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "cellHeader")
-        self.collectionView.register(UINib(nibName: "QChatFooterLeft",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: "cellFooterLeft")
-        self.collectionView.register(UINib(nibName: "QChatFooterRight",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: "cellFooterRight")
-        self.collectionView.register(UINib(nibName: "QCellSystem",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellSystem")
-        self.collectionView.register(UINib(nibName: "QCellTextLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellTextLeft")
-        self.collectionView.register(UINib(nibName: "QCellPostbackLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellPostbackLeft")
-        self.collectionView.register(UINib(nibName: "QCellTextRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellTextRight")
-        self.collectionView.register(UINib(nibName: "QCellMediaLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellMediaLeft")
-        self.collectionView.register(UINib(nibName: "QCellMediaRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellMediaRight")
-        self.collectionView.register(UINib(nibName: "QCellAudioLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellAudioLeft")
-        self.collectionView.register(UINib(nibName: "QCellAudioRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellAudioRight")
-        self.collectionView.register(UINib(nibName: "QCellFileLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellFileLeft")
-        self.collectionView.register(UINib(nibName: "QCellFileRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellFileRight")
+        
         
         
         if inputText.value == "" {
@@ -690,5 +725,61 @@ public class QiscusChatVC: UIViewController{
     override public func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         collectionView.collectionViewLayout.invalidateLayout()
+    }
+}
+
+extension QiscusChatVC:QChatServiceDelegate{
+    public func chatService(didFinishLoadRoom inRoom: QRoom, withMessage message: String?) {
+        self.chatRoom = inRoom
+        self.chatRoom?.delegate = self
+        self.dismissLoading()
+    }
+    public func chatService(didFailLoadRoom error: String) {
+        
+    }
+}
+extension QiscusChatVC:QRoomDelegate{
+    public func room(didChangeName room: QRoom) {
+        
+    }
+    public func room(didFinishSync room: QRoom) {
+        
+    }
+    public func room(didChangeAvatar room: QRoom) {
+        
+    }
+    public func room(didFailUpdate error: String) {
+        
+    }
+    
+    public func room(didChangeParticipant room: QRoom) {
+        
+    }
+    public func room(didChangeGroupComment section: Int) {
+        
+    }
+    public func room(didChangeComment section: Int, row: Int) {
+        
+    }
+    public func room(gotNewGroupComment onIndex: Int) {
+        let indexSet = IndexSet(integer: onIndex)
+        self.collectionView.performBatchUpdates({ 
+            self.collectionView.insertSections(indexSet)
+        }) { (success) in
+            if success {
+                let indexPath = IndexPath(item: 0, section: onIndex)
+                self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+            }
+        }
+    }
+    public func room(gotNewCommentOn groupIndex: Int, withCommentIndex index: Int) {
+        let indexPath = IndexPath(item: index, section: groupIndex)
+        self.collectionView.performBatchUpdates({
+            self.collectionView.insertItems(at: [indexPath])
+        }) { (success) in
+            if success {
+                self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+            }
+        }
     }
 }

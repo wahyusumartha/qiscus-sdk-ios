@@ -431,12 +431,12 @@ import CocoaMQTT
         if let chatView = Qiscus.shared.chatViews[roomId] {
             chatVC = chatView
         }else{
-            chatVC.roomId = roomId
+            chatVC.chatRoomId = roomId
         }
-        chatVC.navTitle = title
-        chatVC.navSubtitle = subtitle
+        chatVC.chatTitle = title
+        chatVC.chatSubtitle = subtitle
         chatVC.archived = readOnly
-        chatVC.message = withMessage
+        chatVC.chatMessage = withMessage
         chatVC.backAction = nil
         Qiscus.shared.chatViews[roomId] = chatVC
         
@@ -895,8 +895,23 @@ extension Qiscus:CocoaMQTTDelegate{
                 switch lastChannelPart {
                 case "c":
                     let json = JSON.parse(messageData)
-                    let commentBeforeId = json["comment_before_id"].intValue
-                    
+                    //let commentData = json["comment_before_id"].intValue
+                    let roomId = json["room_id"].intValue
+                    let commentId = json["id"].intValue
+                    if let room = QRoom.room(withId: roomId) {
+                        if commentId > QiscusMe.sharedInstance.lastCommentId {
+                            let service = QChatService()
+                            service.sync()
+                        }else{
+                            let uniqueId = json["unique_temp_id"].stringValue
+                            if let comment = QComment.comment(withUniqueId: uniqueId){
+                                if comment.status != .delivered && comment.status != .read {
+                                    room.updateCommentStatus(inComment: comment, status: .delivered)
+                                }
+                            }
+                        }
+                    }
+                    /*
                     if QiscusComment.comment(withId: commentBeforeId) != nil {
                         let notifTopicId = json["topic_id"].intValue
                         let roomId = json["room_id"].intValue
@@ -1026,6 +1041,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     }else{
                         Qiscus.sync()
                     }
+                    */
                     break
                 case "t":
                     let topicId:Int = Int(String(channelArr[2]))!

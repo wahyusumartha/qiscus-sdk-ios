@@ -19,9 +19,9 @@ import RealmSwift
 public class QFile:Object{
     public dynamic var id:String = ""
     public dynamic var url:String = ""
-    public dynamic var thumbURL:String = ""
     public dynamic var localPath:String = ""
     public dynamic var localThumbPath:String = ""
+    public dynamic var localMiniThumbPath:String = ""
     public dynamic var roomId:Int = 0
     public dynamic var mimeType:String = ""
     public dynamic var senderEmail:String = ""
@@ -30,6 +30,27 @@ public class QFile:Object{
     var downloadProgress:Double = 0
     
     // MARK: - Getter Variable
+    public var thumbURL:String{
+        get{
+            var thumbURL = self.url.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
+            let thumbUrlArr = thumbURL.characters.split(separator: ".")
+            
+            var newThumbURL = ""
+            var i = 0
+            for thumbComponent in thumbUrlArr{
+                if i == 0{
+                    newThumbURL += String(thumbComponent)
+                }else if i < (thumbUrlArr.count - 1){
+                    newThumbURL += ".\(String(thumbComponent))"
+                }else{
+                    newThumbURL += ".png"
+                }
+                i += 1
+            }
+            thumbURL = newThumbURL
+            return thumbURL
+        }
+    }
     public var sender:QUser? {
         get{
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)

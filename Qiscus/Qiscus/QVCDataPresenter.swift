@@ -327,7 +327,7 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                         self.comments[indexPath.section][indexPath.row] = data
                         Qiscus.uiThread.async {
                             if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
-                                cell.updateStatus(toStatus: data.commentStatus)
+                                //--cell.updateStatus(toStatus: data.commentStatus)
                             }
                         }
                     }

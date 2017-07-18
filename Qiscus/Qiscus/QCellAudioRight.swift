@@ -147,7 +147,7 @@ class QCellAudioRight: QCellAudio {
             self.progressHeight.constant = data.uploadProgress * 30
             dateLabel.text = "\(uploading) \(QChatCellHelper.getFormattedStringFromInt(uploadProgres)) %"
         }
-        updateStatus(toStatus: data.commentStatus)
+        // updateStatus(toStatus: data.commentStatus)
     }
     func playButtonTapped(_ sender: UIButton) {
         self.isPlaying = true
@@ -182,14 +182,26 @@ class QCellAudioRight: QCellAudio {
         self.audioCellDelegate?.didEndSeekTimeSlider(sender, onCell: self)
     }
 
-    open override func updateStatus(toStatus status:QiscusCommentStatus){
+    open override func updateStatus(toStatus status:QCommentStatus){
         dateLabel.textColor = UIColor.white
         statusImage.isHidden = false
         statusImage.tintColor = UIColor.white
         statusImage.isHidden = false
         statusImage.tintColor = UIColor.white
         
-        if status == QiscusCommentStatus.sending {
+        switch status {
+        case .sending:
+            break
+        case .sent:
+            break
+        case .delivered:
+            break
+        case .read:
+            break
+        case .failed:
+            break
+        }
+        if status == .sending {
             dateLabel.text = QiscusTextConfiguration.sharedInstance.sendingText
             statusImage.image = Qiscus.image(named: "ic_info_time")?.withRenderingMode(.alwaysTemplate)
         }else if status == .sent {

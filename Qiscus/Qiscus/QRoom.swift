@@ -291,7 +291,6 @@ public class QRoom:Object {
             }
         }
         if let oldComment = QComment.comment(withUniqueId: commentUniqueId) {
-            // it should be on realm
             try! realm.write {
                 oldComment.id = commentId
                 oldComment.text = commentText
@@ -325,6 +324,8 @@ public class QRoom:Object {
             newComment.createdAt = commentCreatedAt
             newComment.beforeId = commentBeforeId
             newComment.senderEmail = senderEmail
+            newComment.cellPosRaw = QCellPosition.single.rawValue
+            newComment.statusRaw = QCommentStatus.sent.rawValue
             
             let commentType = json["type"].stringValue
             
@@ -389,32 +390,45 @@ public class QRoom:Object {
                 commentGroup.senderEmail = newComment.senderEmail
                 commentGroup.senderName = newComment.senderName
                 commentGroup.createdAt = newComment.createdAt
-                commentGroup.id = "\(self.id):::\(newComment.date):::\(newComment.senderEmail)"
+                commentGroup.id = "\(self.id):::\(newComment.senderEmail):::\(newComment.uniqueId)"
                 commentGroup.comments.append(newComment)
                 try! realm.write {
                     self.comments.append(commentGroup)
                 }
                 self.delegate?.room(gotNewGroupComment: 0)
+                
             }else{
-                if let commentGroup = QCommentGroup.commentGroup(onRoomWithId: self.id, senderEmail: newComment.senderEmail, date: newComment.date){
+                let lastComment = self.comments.last!
+                if lastComment.date == newComment.date && lastComment.senderEmail == newComment.senderEmail{
+                    newComment.cellPosRaw = QCellPosition.last.rawValue
                     try! realm.write {
-                        commentGroup.comments.append(newComment)
+                        lastComment.comments.append(newComment)
                     }
-                    var section = self.comments.count - 1
-                    let row = commentGroup.comments.count - 1
-                    for commentGroupCheck in self.comments.reversed() {
-                        if commentGroup.id == commentGroupCheck.id {
-                            self.delegate?.room(gotNewCommentOn: section, withCommentIndex: row)
-                            break
+                    self.delegate?.room(gotNewCommentOn: self.comments.count - 1, withCommentIndex: lastComment.comments.count - 1)
+                    var i = 0
+                    let section = lastComment.comments.count - 1
+                    for comment in lastComment.comments {
+                        var position = QCellPosition.first
+                        if i == lastComment.comments.count - 1 {
+                            position = .last
                         }
-                        section -= 1
+                        else if i > 0 {
+                            position = .middle
+                        }
+                        if comment.cellPos != position {
+                            try! realm.write {
+                                comment.cellPosRaw = position.rawValue
+                            }
+                            self.delegate?.room(didChangeComment: section, row: i)
+                        }
+                        i += 1
                     }
                 }else{
                     let commentGroup = QCommentGroup()
                     commentGroup.senderEmail = newComment.senderEmail
                     commentGroup.senderName = newComment.senderName
                     commentGroup.createdAt = newComment.createdAt
-                    commentGroup.id = "\(self.id):::\(newComment.date):::\(newComment.senderEmail)"
+                    commentGroup.id = "\(self.id):::\(newComment.senderEmail):::\(newComment.uniqueId)"
                     commentGroup.comments.append(newComment)
                     try! realm.write {
                         self.comments.append(commentGroup)
@@ -492,6 +506,8 @@ public class QRoom:Object {
             newComment.createdAt = commentCreatedAt
             newComment.beforeId = commentBeforeId
             newComment.senderEmail = senderEmail
+            newComment.cellPosRaw = QCellPosition.single.rawValue
+            newComment.statusRaw = QCommentStatus.sent.rawValue
             
             let commentType = json["type"].stringValue
             
@@ -556,33 +572,45 @@ public class QRoom:Object {
                 commentGroup.senderEmail = newComment.senderEmail
                 commentGroup.senderName = newComment.senderName
                 commentGroup.createdAt = newComment.createdAt
-                commentGroup.id = "\(self.id):::\(newComment.date):::\(newComment.senderEmail)"
+                commentGroup.id = "\(self.id):::\(newComment.senderEmail):::\(newComment.uniqueId)"
                 commentGroup.comments.append(newComment)
                 try! realm.write {
                     self.comments.append(commentGroup)
                 }
                 self.delegate?.room(gotNewGroupComment: 0)
             }else{
-                if let commentGroup = QCommentGroup.commentGroup(onRoomWithId: self.id, senderEmail: newComment.senderEmail, date: newComment.date){
+                let firstCommentGroup = self.comments.first!
+                if firstCommentGroup.date == newComment.date && firstCommentGroup.senderEmail == newComment.senderEmail{
+                    newComment.cellPosRaw = QCellPosition.first.rawValue
                     try! realm.write {
-                        commentGroup.createdAt = newComment.createdAt
-                        commentGroup.senderName = newComment.senderName
-                        commentGroup.comments.insert(newComment, at: 0)
+                        firstCommentGroup.createdAt = newComment.createdAt
+                        firstCommentGroup.senderName = newComment.senderName
+                        firstCommentGroup.comments.insert(newComment, at: 0)
                     }
-                    var section = 0
-                    for commentGroupCheck in self.comments {
-                        if commentGroup.id == commentGroupCheck.id {
-                            self.delegate?.room(gotNewCommentOn: section, withCommentIndex: 0)
-                            break
+                    self.delegate?.room(gotNewCommentOn: 0, withCommentIndex: 0)
+                    var i = 0
+                    for comment in firstCommentGroup.comments {
+                        var position = QCellPosition.first
+                        if i == firstCommentGroup.comments.count - 1 {
+                            position = .last
                         }
-                        section += 1
+                        else if i > 0 {
+                            position = .middle
+                        }
+                        if comment.cellPos != position {
+                            try! realm.write {
+                                comment.cellPosRaw = position.rawValue
+                            }
+                            self.delegate?.room(didChangeComment: 0, row: i)
+                        }
+                        i += 1
                     }
                 }else{
                     let commentGroup = QCommentGroup()
                     commentGroup.senderEmail = newComment.senderEmail
                     commentGroup.senderName = newComment.senderName
                     commentGroup.createdAt = newComment.createdAt
-                    commentGroup.id = "\(self.id):::\(newComment.date):::\(newComment.senderEmail)"
+                    commentGroup.id = "\(self.id):::\(newComment.senderEmail):::\(newComment.uniqueId)"
                     commentGroup.comments.append(newComment)
                     try! realm.write {
                         self.comments.insert(commentGroup, at: 0)

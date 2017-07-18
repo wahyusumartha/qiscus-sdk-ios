@@ -725,6 +725,13 @@ extension QiscusChatVC {
     }
     // MARK: - Load DataSource on firstTime
     func loadData(){
+        if self.chatRoomId != nil {
+            self.chatService.room(withId: self.chatRoomId!, withMessage: self.chatMessage)
+        }else if self.chatUser != nil {
+            self.chatService.room(withUser: self.chatUser!, distincId: self.chatDistinctId, optionalData: self.chatData, withMessage: self.chatMessage)
+        }
+        
+        /*
         if newRoom && (self.users != nil){
             dataPresenter.loadComments(inNewGroupChat: users!, roomName: navTitle, optionalData: self.optionalData, withMessage: self.message)
         }else{
@@ -740,6 +747,7 @@ extension QiscusChatVC {
                 dataPresenter.loadComments(inRoom: roomId!, withMessage: message)
             }
         }
+ */
     }
     
 }

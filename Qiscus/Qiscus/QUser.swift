@@ -16,9 +16,15 @@ public class QUser:Object {
     public dynamic var fullname:String = ""
     public dynamic var lastSeen:Double = 0
     
+    public dynamic var avatar:UIImage?
+    
     // MARK: - Primary Key
     override open class func primaryKey() -> String {
         return "email"
+    }
+    // MARK: - Unstored properties
+    override public static func ignoredProperties() -> [String] {
+        return ["avatar"]
     }
     public class func user(withEmail email:String) -> QUser? {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)

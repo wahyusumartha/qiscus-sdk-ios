@@ -74,16 +74,16 @@ class QCellFileRight: QChatCell {
             
             dateLabel.text = "\(uploading) \(QChatCellHelper.getFormattedStringFromInt(uploadProgres)) %"
         }
-        updateStatus(toStatus: data.commentStatus)
+        //updateStatus(toStatus: data.commentStatus)
     }
-    open override func updateStatus(toStatus status:QiscusCommentStatus){
+    open override func updateStatus(toStatus status:QCommentStatus){
         dateLabel.textColor = UIColor.white
         statusImage.isHidden = false
         statusImage.tintColor = UIColor.white
         statusImage.isHidden = false
         statusImage.tintColor = UIColor.white
         
-        if status == QiscusCommentStatus.sending {
+        if status == .sending {
             dateLabel.text = QiscusTextConfiguration.sharedInstance.sendingText
             statusImage.image = Qiscus.image(named: "ic_info_time")?.withRenderingMode(.alwaysTemplate)
         }else if status == .sent {

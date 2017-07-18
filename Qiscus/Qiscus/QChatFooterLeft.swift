@@ -13,63 +13,52 @@ class QChatFooterLeft: UICollectionReusableView {
     @IBOutlet weak var avatarLabel: UILabel!
     @IBOutlet weak var avatarImage: UIImageView!
     
-    public var comment:QiscusCommentPresenter?{
+    public var sender:QUser?{
         didSet{
-            if let data = comment {
-                if let avatar = data.userAvatar {
+            if let user = self.sender {
+                if let avatar = user.avatar {
                     avatarLabel.isHidden = true
                     avatarImage.image = avatar
                     avatarImage.backgroundColor = UIColor.clear
                 }else{
                     avatarImage.image = nil
                     avatarLabel.isHidden = false
-                    avatarImage.backgroundColor = UIColor.clear
                     let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
-                    let colorIndex = data.userFullName.characters.count % bgColor.count
+                    let colorIndex = user.fullname.characters.count % bgColor.count
                     avatarImage.backgroundColor = bgColor[colorIndex]
-                    if let fullName = data.userFullName.characters.first{
+                    
+                    if let fullName = user.fullname.characters.first{
                         avatarLabel.text = String(fullName).uppercased()
                     }
-                    if QiscusHelper.isFileExist(inLocalPath: data.userAvatarLocalPath){
-                        let commentId = data.commentId as AnyObject
-                        if let cachedImage = UIImage.cachedImage(withPath: data.userAvatarLocalPath){
+                    if QiscusHelper.isFileExist(inLocalPath: user.avatarLocalPath){
+                        if let cachedImage = UIImage.cachedImage(withPath: user.avatarLocalPath){
                             self.avatarLabel.isHidden = true
                             self.avatarImage.image = cachedImage
                             self.avatarImage.backgroundColor = UIColor.clear
-                            self.comment?.userAvatar = cachedImage
+                            user.avatar = cachedImage
                         }else{
-                            avatarImage.loadAsync(fromLocalPath: data.userAvatarLocalPath, onLoaded: { (image, data) in
-                                if let commentId = data as? Int {
-                                    if self.comment?.commentId == commentId {
-                                        self.avatarLabel.isHidden = true
-                                        self.avatarImage.image = image
-                                        self.avatarImage.backgroundColor = UIColor.clear
-                                        self.comment?.userAvatar = image
-                                    }
-                                }
-                            },optionalData:commentId)
+                            avatarImage.loadAsync(fromLocalPath: user.avatarLocalPath, onLoaded: { (image, _) in
+                                user.avatar = image
+                            })
                         }
                     }else{
-                        let commentId = data.commentId as AnyObject
-                        if let cachedImage = UIImage.cachedImage(withPath: data.userAvatarLocalPath){
+                        if let cachedImage = UIImage.cachedImage(withPath: user.avatarURL){
                             self.avatarLabel.isHidden = true
                             self.avatarImage.image = cachedImage
                             self.avatarImage.backgroundColor = UIColor.clear
-                            self.comment?.userAvatar = cachedImage
+                            user.avatar = cachedImage
                         }else{
-                            avatarImage.loadAsync(data.userAvatarURL, onLoaded: { (image,data) in
-                                if let commentId = data as? Int {
-                                    if self.comment?.commentId == commentId {
-                                        self.avatarLabel.isHidden = true
-                                        self.avatarImage.image = image
-                                        self.avatarImage.backgroundColor = UIColor.clear
-                                        self.comment?.userAvatar = image
-                                    }
-                                }
-                            },optionalData:commentId)
+                            avatarImage.loadAsync(user.avatarURL, onLoaded: { (image,_) in
+                                user.avatar = image
+                            })
                         }
                     }
                 }
+            }else{
+                avatarImage.image = nil
+                avatarLabel.isHidden = false
+                avatarLabel.text = "_"
+                avatarImage.backgroundColor = UIColor.black
             }
         }
     }

@@ -15,12 +15,34 @@ import UIKit
 class QChatCell: UICollectionViewCell {
     var chatCellDelegate:ChatCellDelegate?
     var delegate: ChatCellDelegate?
-    var data: QiscusCommentPresenter = QiscusCommentPresenter(){
+    var data: QiscusCommentPresenter = QiscusCommentPresenter(){ // will be removed
         didSet{
             self.dataChanged(oldValue: oldValue, new: data)
         }
     }
-    
+    var comment:QComment?{
+        didSet{
+            if comment != nil {
+                self.commentChanged()
+            }
+        }
+    }
+    var linkTextAttributes:[String: Any]{
+        get{
+            var foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor
+            var underlineColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor
+            if self.comment?.senderEmail == QiscusMe.sharedInstance.email{
+                foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor
+                underlineColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor
+            }
+            return [
+                NSForegroundColorAttributeName: foregroundColorAttributeName,
+                NSUnderlineColorAttributeName: underlineColorAttributeName,
+                NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue,
+                NSFontAttributeName: Qiscus.style.chatFont
+            ]
+        }
+    }
     func setupCell(){
         // implementation will be overrided on child class
     }
@@ -29,7 +51,7 @@ class QChatCell: UICollectionViewCell {
         self.delegate = delegate
     }
 
-    func updateStatus(toStatus status:QiscusCommentStatus){
+    func updateStatus(toStatus status:QCommentStatus){
         // implementation will be overrided on child class
     }
     open func resend(){
@@ -92,5 +114,38 @@ class QChatCell: UICollectionViewCell {
     }
     public func dataChanged(oldValue: QiscusCommentPresenter, new: QiscusCommentPresenter){
         
+    }
+    public func commentChanged(){
+        print("comment changed")
+    }
+
+    public func getBallon()->UIImage?{
+        var imageName = ""
+        var edgeInset = UIEdgeInsetsMake(13, 13, 13, 28)
+        
+        switch self.comment!.cellPos {
+        case .single, .last:
+            if self.comment?.senderEmail == QiscusMe.sharedInstance.email {
+                imageName = "text_balloon_last_r"
+            }else{
+                edgeInset = UIEdgeInsetsMake(13, 28, 13, 13)
+                imageName = "text_balloon_last_l"
+            }
+            break
+        default:
+            if self.comment?.senderEmail == QiscusMe.sharedInstance.email {
+                imageName = "text_balloon_right"
+            }else{
+                edgeInset = UIEdgeInsetsMake(13, 28, 13, 13)
+                imageName = "text_balloon_left"
+            }
+            break
+        }
+
+        
+        return Qiscus.image(named:imageName)?.resizableImage(withCapInsets: edgeInset, resizingMode: .stretch).withRenderingMode(.alwaysTemplate)
+    }
+    public func cellWidthChanged(){
+    
     }
 }

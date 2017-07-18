@@ -31,24 +31,24 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="fzH-bz-B75">
-                                <rect key="frame" x="126" y="0.0" width="200" height="185"/>
+                                <rect key="frame" x="134" y="0.0" width="200" height="185"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="200" id="0eu-0i-RI8"/>
                                     <constraint firstAttribute="height" constant="185" id="3LX-tj-55n"/>
                                 </constraints>
                             </imageView>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Km2-gP-wdW">
-                                <rect key="frame" x="129" y="3" width="179" height="179"/>
+                                <rect key="frame" x="137" y="3" width="179" height="179"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="179" id="Ptt-Dc-rtQ"/>
                                     <constraint firstAttribute="width" constant="179" id="fS6-j1-HKB"/>
                                 </constraints>
                             </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="movie_frame" translatesAutoresizingMaskIntoConstraints="NO" id="zch-0E-YLf">
-                                <rect key="frame" x="129" y="3" width="179" height="179"/>
+                                <rect key="frame" x="137" y="3" width="179" height="179"/>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ZEi-7i-IVN" customClass="ChatFileButton" customModule="Qiscus" customModuleProvider="target">
-                                <rect key="frame" x="199" y="73" width="40" height="40"/>
+                                <rect key="frame" x="207" y="73" width="40" height="40"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="40" id="Cfy-no-SWZ"/>
                                     <constraint firstAttribute="width" constant="40" id="KXe-GL-SS7"/>
@@ -56,10 +56,10 @@
                                 <state key="normal" image="ic_download_chat"/>
                             </button>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Fdl-wE-vVk">
-                                <rect key="frame" x="199" y="73" width="40" height="40"/>
+                                <rect key="frame" x="207" y="73" width="40" height="40"/>
                             </imageView>
                             <view clipsSubviews="YES" alpha="0.55000001192092896" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nAE-GU-M7b">
-                                <rect key="frame" x="199" y="73" width="40" height="40"/>
+                                <rect key="frame" x="207" y="73" width="40" height="40"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="a27-Is-ESA" userLabel="progressView">
                                         <rect key="frame" x="0.0" y="0.0" width="40" height="40"/>
@@ -77,13 +77,13 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="100%" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4pl-iQ-IyF">
-                                <rect key="frame" x="199" y="73" width="40" height="40"/>
+                                <rect key="frame" x="207" y="73" width="40" height="40"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sending Failed" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Fgs-DA-NjD">
-                                <rect key="frame" x="208" y="161" width="75" height="21"/>
+                                <rect key="frame" x="216" y="161" width="75" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="75" id="cz4-fX-E2R"/>
                                     <constraint firstAttribute="height" constant="21" id="fg2-lt-Pga"/>
@@ -95,7 +95,7 @@
                                 <size key="shadowOffset" width="0.5" height="-0.5"/>
                             </label>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_info_time" translatesAutoresizingMaskIntoConstraints="NO" id="lm1-Lm-oHm">
-                                <rect key="frame" x="285" y="164" width="15" height="15"/>
+                                <rect key="frame" x="293" y="164" width="15" height="15"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="15" id="6wd-Tp-COL"/>
                                     <constraint firstAttribute="height" constant="15" id="Tpr-0k-mrE"/>
@@ -120,7 +120,7 @@
                             <constraint firstItem="Km2-gP-wdW" firstAttribute="leading" secondItem="fzH-bz-B75" secondAttribute="leading" constant="3" id="W4S-3F-c7T"/>
                             <constraint firstItem="Km2-gP-wdW" firstAttribute="centerY" secondItem="fzH-bz-B75" secondAttribute="centerY" id="WRx-On-oT1"/>
                             <constraint firstItem="Fdl-wE-vVk" firstAttribute="width" secondItem="ZEi-7i-IVN" secondAttribute="width" id="Xng-ZE-Gbn"/>
-                            <constraint firstAttribute="trailing" secondItem="fzH-bz-B75" secondAttribute="trailing" constant="8" id="Zlv-kC-3Tl"/>
+                            <constraint firstAttribute="trailing" secondItem="fzH-bz-B75" secondAttribute="trailing" id="Zlv-kC-3Tl"/>
                             <constraint firstItem="Fdl-wE-vVk" firstAttribute="centerX" secondItem="ZEi-7i-IVN" secondAttribute="centerX" id="b5i-k2-BPc"/>
                             <constraint firstItem="ZEi-7i-IVN" firstAttribute="centerX" secondItem="Km2-gP-wdW" secondAttribute="centerX" id="bQT-AN-Dbt"/>
                             <constraint firstItem="nAE-GU-M7b" firstAttribute="height" secondItem="ZEi-7i-IVN" secondAttribute="height" id="cfU-Qg-xaY"/>
@@ -146,7 +146,6 @@
             <size key="customSize" width="334" height="216"/>
             <connections>
                 <outlet property="balloonView" destination="fzH-bz-B75" id="OJ3-wI-DJO"/>
-                <outlet property="balloonWidth" destination="0eu-0i-RI8" id="Pc5-iV-Bjw"/>
                 <outlet property="cellHeight" destination="6qK-JP-ANr" id="lAB-4r-Tol"/>
                 <outlet property="dateLabel" destination="Fgs-DA-NjD" id="bi4-Y4-0mN"/>
                 <outlet property="downloadButton" destination="ZEi-7i-IVN" id="GBU-W3-wmZ"/>
@@ -155,7 +154,6 @@
                 <outlet property="progressHeight" destination="pRr-VQ-DCe" id="5we-rP-d5j"/>
                 <outlet property="progressLabel" destination="4pl-iQ-IyF" id="deD-Gu-mam"/>
                 <outlet property="progressView" destination="a27-Is-ESA" id="AH7-QL-E8x"/>
-                <outlet property="rightMargin" destination="Zlv-kC-3Tl" id="Nre-ON-Xhj"/>
                 <outlet property="statusImage" destination="lm1-Lm-oHm" id="G8V-WH-oWi"/>
                 <outlet property="topMargin" destination="DmS-gU-XsS" id="dr2-te-mHf"/>
                 <outlet property="userNameLabel" destination="pai-Qk-cex" id="J5U-nJ-TZv"/>

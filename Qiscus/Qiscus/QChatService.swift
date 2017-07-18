@@ -231,7 +231,9 @@ public class QChatService:NSObject {
                             let id = newComment["id"].intValue
                             
                             if id > QiscusMe.sharedInstance.lastCommentId {
-                                if let room = QRoom.room(withId: roomId) {
+                                if let room = Qiscus.shared.chatViews[roomId]?.chatRoom {
+                                    room.saveNewComment(fromJSON: newComment)
+                                }else if let room = QRoom.room(withId: roomId){
                                     room.saveNewComment(fromJSON: newComment)
                                 }
                                 QiscusMe.updateLastCommentId(commentId: id)

@@ -12,66 +12,64 @@ import UIKit
 extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
     // MARK: CollectionView Data source
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return self.comments[section].count
+        if let room = self.chatRoom {
+            return room.comments[section].comments.count
+        }else{
+            return 0
+        }
     }
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
-        Qiscus.uiThread.async {
-            if self.comments.count > 0 {
+        if let room = self.chatRoom {
+            if room.comments.count > 0 {
                 self.welcomeView.isHidden = true
             }else{
                 self.welcomeView.isHidden = false
             }
+            return room.comments.count
+        }else{
+            return 0
         }
-        return self.comments.count
     }
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let data = self.comments[indexPath.section][indexPath.row]
-
-        if data.commentIndexPath != indexPath {
-            data.commentIndexPath = indexPath
-            data.balloonImage = data.getBalloonImage()
-            self.comments[indexPath.section][indexPath.row] = data
-        }
-        if data.balloonImage == nil {
-            data.balloonImage = data.getBalloonImage()
-        }
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: data.cellIdentifier, for: indexPath) as! QChatCell
-        cell.prepare(withData: data, andDelegate: self)
-        cell.setupCell()
+        
+        let comment = self.chatRoom!.comments[indexPath.section].comments[indexPath.item]
+        
+        var cell = collectionView.dequeueReusableCell(withReuseIdentifier: comment.cellIdentifier, for: indexPath) as! QChatCell
+        cell.comment = comment
         
         if let audioCell = cell as? QCellAudio{
             audioCell.audioCellDelegate = self
-            return audioCell
+            cell = audioCell
         }else if let postbackCell = cell as? QCellPostbackLeft{
             postbackCell.postbackDelegate = self
-            return postbackCell
-        }else{
-            return cell
+            cell = postbackCell
         }
+        
+        return cell
     }
     public func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        let comment = self.comments[indexPath.section].first!
+        let commentGroup = self.chatRoom!.comments[indexPath.section]
         
         if kind == UICollectionElementKindSectionFooter{
-            if comment.userIsOwn{
+            if commentGroup.senderEmail == QiscusMe.sharedInstance.email{
                 let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterRight", for: indexPath) as! QChatFooterRight
                 return footerCell
             }else{
                 let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterLeft", for: indexPath) as! QChatFooterLeft
-                footerCell.comment = comment
+                footerCell.sender = commentGroup.sender
                 return footerCell
             }
         }else{
             let headerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellHeader", for: indexPath) as! QChatHeaderCell
         
-            headerCell.dateString = comment.commentDate
+            headerCell.dateString = commentGroup.date
             return headerCell
         }
     }
     
     // MARK: CollectionView delegate
     public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        
+        /*
         if let targetCell = cell as? QChatCell{
             if !targetCell.data.userIsOwn && targetCell.data.commentStatus != .read{
                 publishRead()
@@ -90,10 +88,11 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                 isLastRowVisible = true
             }
         }
+        */
     }
     public func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        /*
         if indexPath.section == (comments.count - 1){
-            
             if indexPath.row == comments[indexPath.section].count - 1{
                 let visibleIndexPath = collectionView.indexPathsForVisibleItems
                 if visibleIndexPath.count > 0{
@@ -110,41 +109,41 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                 }
             }
         }
+        */
     }
     public func collectionView(_ collectionView: UICollectionView, shouldShowMenuForItemAt indexPath: IndexPath) -> Bool {
         return true
     }
     public func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
-        let comment = self.comments[indexPath.section][indexPath.row]
+        let comment = self.chatRoom?.comments[indexPath.section].comments[indexPath.row]
         var show = false
         switch action.description {
         case "copy:":
-            if comment.commentType == .text{
+            if comment?.type == .text{
                 show = true
             }
             break
         case "resend":
-            if comment.commentStatus == .failed && Qiscus.sharedInstance.connected {
-                if comment.commentType == .text{
+            if comment?.status == .failed && Qiscus.sharedInstance.connected {
+                if comment?.type == .text{
                     show = true
-                }else{
-                    if let commentData = comment.comment{
-                        if let file = QiscusFile.file(forComment: commentData){
-                            if file.isUploaded || file.isOnlyLocalFileExist{
-                                show = true
-                            }
-                        }
-                    }
                 }
+//                else{
+//                    if let file = QiscusFile.file(forComment: commentData){
+//                        if file.isUploaded || file.isOnlyLocalFileExist{
+//                            show = true
+//                        }
+//                    }
+//                }
             }
             break
         case "deleteComment":
-            if comment.commentStatus == .failed  {
+            if comment?.status == .failed  {
                 show = true
             }
             break
         case "reply":
-            if comment.commentType != .postback && comment.commentType != .accountLinking && comment.commentStatus != .failed && comment.commentType != .system && Qiscus.sharedInstance.connected{
+            if comment?.type != .postback && comment?.type != .account && comment?.status != .failed && comment?.type != .system && Qiscus.sharedInstance.connected{
                 show = true
             }
             break
@@ -165,9 +164,9 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         var height = CGFloat(0)
         if section > 0 {
-            let firstComment = self.comments[section][0]
-            let firstCommentBefore = self.comments[section - 1][0]
-            if firstComment.commentDate != firstCommentBefore.commentDate{
+            let commentGroup = self.chatRoom?.comments[section]
+            let commentGroupBefore = self.chatRoom?.comments[section - 1]
+            if commentGroup!.date != commentGroupBefore!.date{
                 height = 35
             }
         }else{
@@ -178,34 +177,41 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
         var height = CGFloat(0)
         var width = CGFloat(0)
-        let firstComment = self.comments[section][0]
-        if !firstComment.userIsOwn{
+        let commentGroup = self.chatRoom?.comments[section]
+        if commentGroup?.senderEmail != QiscusMe.sharedInstance.email{
             height = 44
             width = 44
         }
         return CGSize(width: width, height: height)
     }
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        let firstComment = self.comments[section][0]
-        if firstComment.userIsOwn{
-            return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        }else{
+        let commentGroup = self.chatRoom?.comments[section]
+        if commentGroup?.senderEmail != QiscusMe.sharedInstance.email{
             return UIEdgeInsets(top: 0, left: 0, bottom: -44, right: 0)
+        }else{
+            return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         }
     }
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let comment = self.comments[indexPath.section][indexPath.row]
-        var size = comment.cellSize
-        if comment.commentType == .text || comment.commentType == .postback || comment.commentType == .accountLinking || comment.commentType == .reply{
-            size.height += 15
-            if comment.showLink || comment.commentType == .reply{
+        let comment = self.chatRoom!.comments[indexPath.section].comments[indexPath.row]
+        var size = comment.textSize
+        size.width = QiscusHelper.screenWidth() - 16
+        
+        if comment.type == .video || comment.type == .image {
+            size.height = 190
+        }else{
+            size.height += 20
+        }
+        
+        if comment.type == .text || comment.type == .postback || comment.type == .account || comment.type == .reply{
+            if comment.type == .reply{
                 size.height += 75
             }
         }
-        if (comment.cellPos == .single || comment.cellPos == .first) && comment.commentType != .system{
+        if (comment.type != .system && indexPath.row == 0) {
             size.height += 20
         }
-        size.width = collectionView.bounds.size.width
         return size
     }
+    
 }
