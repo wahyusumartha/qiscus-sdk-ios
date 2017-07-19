@@ -53,7 +53,7 @@ class QCellMediaRight: QChatCell {
         imageDisplay.layer.cornerRadius = 10
     }
     public override func commentChanged() {
-        balloonView.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor
+        balloonView.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonColor
         self.balloonView.image = self.getBallon()
         progressContainer.isHidden = true
         progressView.isHidden = true
@@ -113,7 +113,7 @@ class QCellMediaRight: QChatCell {
             
             dateLabel.text = self.comment!.time.lowercased()
             progressLabel.isHidden = true
-            dateLabel.textColor = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
+            dateLabel.textColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
             
             self.downloadButton.removeTarget(nil, action: nil, for: .allEvents)
             
@@ -167,11 +167,9 @@ class QCellMediaRight: QChatCell {
     }
     
     open override func updateStatus(toStatus status:QCommentStatus){
-        dateLabel.textColor = UIColor.white
+        dateLabel.textColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
         statusImage.isHidden = false
-        statusImage.tintColor = UIColor.white
-        statusImage.isHidden = false
-        statusImage.tintColor = UIColor.white
+        statusImage.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
         
         if status == .sending {
             if self.data.isUploading{
