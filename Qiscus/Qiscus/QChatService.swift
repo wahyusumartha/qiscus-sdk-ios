@@ -34,7 +34,8 @@ public class QChatService:NSObject {
         if Qiscus.isLoggedIn{
             if let room = QRoom.room(withUser: user){
                 self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
-            }else{
+            }
+            else{
                 let loadURL = QiscusConfig.ROOM_REQUEST_URL
                 
                 var parameters:[String : AnyObject] =  [
@@ -95,6 +96,7 @@ public class QChatService:NSObject {
     public func room(withUniqueId uniqueId:String, title:String, avatarURL:String, withMessage:String? = nil){ //
         
         if Qiscus.isLoggedIn{
+            
             if let room = QRoom.room(withUniqueId: uniqueId){
                 self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
             }else{
@@ -160,7 +162,8 @@ public class QChatService:NSObject {
         if Qiscus.isLoggedIn {
             if let room = QRoom.room(withId: roomId){
                 self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
-            }else{
+            }
+            else{
                 let loadURL = QiscusConfig.ROOM_REQUEST_ID_URL
                 let parameters:[String : AnyObject] =  [
                     "id" : roomId as AnyObject,
@@ -231,9 +234,7 @@ public class QChatService:NSObject {
                             let id = newComment["id"].intValue
                             
                             if id > QiscusMe.sharedInstance.lastCommentId {
-                                if let room = Qiscus.shared.chatViews[roomId]?.chatRoom {
-                                    room.saveNewComment(fromJSON: newComment)
-                                }else if let room = QRoom.room(withId: roomId){
+                                if let room = QRoom.room(withId: roomId){
                                     room.saveNewComment(fromJSON: newComment)
                                 }
                                 QiscusMe.updateLastCommentId(commentId: id)

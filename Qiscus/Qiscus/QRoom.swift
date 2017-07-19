@@ -58,25 +58,44 @@ public class QRoom:Object {
     // MARK: - Class method
     public class func room(withId id:Int) -> QRoom? {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        return realm.object(ofType: QRoom.self, forPrimaryKey: id)
+        var room:QRoom? = nil
+        room = realm.object(ofType: QRoom.self, forPrimaryKey: id)
+        if room != nil {
+            if let cachedRoom = Qiscus.chatRooms[room!.id] {
+                room = cachedRoom
+            }else{
+                Qiscus.chatRooms[room!.id] = room!
+            }
+        }
+        return room
     }
     public class func room(withUniqueId uniqueId:String) -> QRoom? {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         var room:QRoom? = nil
-        let data =  realm.objects(QRoom.self).filter("uniqueId == \(uniqueId)")
+        let data =  realm.objects(QRoom.self).filter("uniqueId == '\(uniqueId)'")
         
         if data.count > 0{
             room = data.first!
+            if let cachedRoom = Qiscus.chatRooms[room!.id] {
+                room = cachedRoom
+            }else{
+                Qiscus.chatRooms[room!.id] = room!
+            }
         }
         return room
     }
     public class func room(withUser user:String) -> QRoom? {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         var room:QRoom? = nil
-        let data =  realm.objects(QRoom.self).filter("singleUser == \(user)")
+        let data =  realm.objects(QRoom.self).filter("singleUser == '\(user)'")
         
         if data.count > 0{
             room = data.first!
+            if let cachedRoom = Qiscus.chatRooms[room!.id] {
+                room = cachedRoom
+            }else{
+                Qiscus.chatRooms[room!.id] = room!
+            }
         }
         return room
     }
@@ -164,8 +183,10 @@ public class QRoom:Object {
             }
             
         }
+        Qiscus.chatRooms[room.id] = room
         return room
     }
+    
     public func syncRoomData(withJSON json:JSON){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         if let option = json["options"].string {

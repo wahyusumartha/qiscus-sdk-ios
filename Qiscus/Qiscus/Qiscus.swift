@@ -25,7 +25,7 @@ import CocoaMQTT
     
     static var qiscusDeviceToken: String = ""
     static var dbConfiguration = Realm.Configuration.defaultConfiguration
-    
+    static var chatRooms = [Int : QRoom]()
     static var qiscusDownload:[String] = [String]()
     
     var config = QiscusConfig.sharedInstance
@@ -369,8 +369,8 @@ import CocoaMQTT
      */
     @objc public class func chatView(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String = "", withMessage:String? = nil)->QiscusChatVC{
         
-        if let room = QiscusRoom.room(withDistinctId: distinctId, andUserEmail: users.first!) {
-            return Qiscus.chatView(withRoomId: room.roomId, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
+        if let room = QRoom.room(withUser: users.first!) {
+            return Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
         }else{
             Qiscus.checkDatabaseMigration()
             if !Qiscus.sharedInstance.connected {
@@ -380,14 +380,15 @@ import CocoaMQTT
             
             let chatVC = QiscusChatVC()
             
-            chatVC.message = withMessage
-            chatVC.users = users
-            chatVC.loadWithUser = true
+            chatVC.chatUser = users.first!
+            chatVC.chatTitle = title
+            chatVC.chatSubtitle = subtitle
+            chatVC.archived = readOnly
+            chatVC.chatMessage = withMessage
+            chatVC.backAction = nil
             if chatVC.isPresence {
                 chatVC.goBack()
             }
-            chatVC.backAction = nil
-            chatVC.archived = readOnly
             return chatVC
         }
     }
