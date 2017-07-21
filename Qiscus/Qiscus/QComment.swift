@@ -42,6 +42,7 @@ public enum QReplyType:Int{
 public class QComment:Object {
     public dynamic var uniqueId: String = ""
     public dynamic var id:Int = 0
+    public dynamic var roomId:Int = 0
     public dynamic var beforeId:Int = 0
     public dynamic var text:String = ""
     public dynamic var createdAt: Double = 0
@@ -52,8 +53,20 @@ public class QComment:Object {
     public dynamic var data:String = ""
     public dynamic var cellPosRaw:Int = 0
     
-    //MARK : - Ignored Parameters
-    public dynamic var displayImage:UIImage?
+    // MARK : - Ignored Parameters
+    var displayImage:UIImage?
+    
+    // audio variable
+    public dynamic var durationLabel = ""
+    public dynamic var currentTimeSlider = Float(0)
+    public dynamic var seekTimeLabel = "00:00"
+    public dynamic var audioIsPlaying = false
+    // file variable
+    public dynamic var isDownloading = false
+    public dynamic var isUploading = false
+    public dynamic var progress = CGFloat(0)
+    
+    
     override public static func ignoredProperties() -> [String] {
         return ["displayImage"]
     }
@@ -138,6 +151,7 @@ public class QComment:Object {
         textView.attributedText = attributedText
         
         var size = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
+        
         if self.type == .postback && self.data != ""{
             
             let payload = JSON(parseJSON: self.data)
@@ -148,6 +162,8 @@ public class QComment:Object {
             }else{
                 size.height += 35
             }
+        }else if self.type == .account && self.data != ""{
+            size.height += 35
         }
         
         return size
@@ -250,6 +266,36 @@ public class QComment:Object {
             }
         }else{
             return .text
+        }
+    }
+    internal func updateCurrentTimeSlider(value:Float){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        try! realm.write {
+            self.currentTimeSlider = value
+        }
+    }
+    internal func updateDurationLabel(text:String){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        try! realm.write {
+            self.durationLabel = text
+        }
+    }
+    internal func updateIsDownloading(downloading:Bool){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        try! realm.write {
+            self.isDownloading = downloading
+        }
+    }
+    internal func updateAudioIsPlaying(playing:Bool){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        try! realm.write {
+            self.audioIsPlaying = playing
+        }
+    }
+    internal func updateSeekTimeLabel(text:String){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        try! realm.write {
+            self.seekTimeLabel = text
         }
     }
 }

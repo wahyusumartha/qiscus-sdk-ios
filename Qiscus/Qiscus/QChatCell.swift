@@ -7,10 +7,14 @@
 //
 
 import UIKit
+import SwiftyJSON
 
-@objc protocol ChatCellDelegate {
+protocol ChatCellDelegate {
     func didChangeSize(onCell cell:QChatCell)
-    @objc optional func didTapCell(withData data:QiscusCommentPresenter)
+    func didTapCell(withData data:QiscusCommentPresenter)
+    func didTouchLink(onCell cell:QChatCell)
+    func didTapPostbackButton(withData data: JSON)
+    func didTapAccountLinking(withData data: JSON)
 }
 class QChatCell: UICollectionViewCell {
     var chatCellDelegate:ChatCellDelegate?
@@ -106,7 +110,7 @@ class QChatCell: UICollectionViewCell {
             }
         }
     }
-    open func downloadingMedia(withPercentage percentage:Int){
+    public func downloadingMedia(){
         // implementation will be overrided on child class
     }
     func clearContext(){
@@ -146,6 +150,12 @@ class QChatCell: UICollectionViewCell {
         return Qiscus.image(named:imageName)?.resizableImage(withCapInsets: edgeInset, resizingMode: .stretch).withRenderingMode(.alwaysTemplate)
     }
     public func cellWidthChanged(){
+    
+    }
+    public func downloadFinished(){
+    
+    }
+    public func positionChanged(){
     
     }
 }

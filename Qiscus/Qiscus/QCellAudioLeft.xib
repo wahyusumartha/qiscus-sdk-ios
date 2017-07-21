@@ -31,14 +31,14 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="3uQ-Hc-w5c">
-                                <rect key="frame" x="42" y="0.0" width="215" height="80"/>
+                                <rect key="frame" x="27" y="0.0" width="215" height="80"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="215" id="DG4-d9-fUS"/>
                                     <constraint firstAttribute="height" constant="80" id="b9j-q7-Reb"/>
                                 </constraints>
                             </imageView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="jRl-G6-Vld">
-                                <rect key="frame" x="61" y="4" width="192" height="53"/>
+                                <rect key="frame" x="46" y="4" width="192" height="53"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Sv9-W4-bfb">
                                         <rect key="frame" x="8" y="8" width="30" height="30"/>
@@ -126,7 +126,7 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sending Failed" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="D74-R1-h26">
-                                <rect key="frame" x="152" y="57" width="95" height="21"/>
+                                <rect key="frame" x="137" y="57" width="95" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="21" id="Kad-Fo-nn0"/>
                                     <constraint firstAttribute="width" constant="95" id="oyZ-cF-k0w"/>
@@ -138,7 +138,7 @@
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="3uQ-Hc-w5c" firstAttribute="leading" secondItem="XfR-Eh-fej" secondAttribute="leading" constant="42" id="7hA-UV-b25"/>
+                            <constraint firstItem="3uQ-Hc-w5c" firstAttribute="leading" secondItem="XfR-Eh-fej" secondAttribute="leading" constant="27" id="7hA-UV-b25"/>
                             <constraint firstItem="D74-R1-h26" firstAttribute="trailing" secondItem="jRl-G6-Vld" secondAttribute="trailing" constant="-6" id="DoS-Dx-pyg"/>
                             <constraint firstItem="jRl-G6-Vld" firstAttribute="bottom" secondItem="3uQ-Hc-w5c" secondAttribute="bottom" constant="-23" id="FKU-ff-TCY"/>
                             <constraint firstItem="3uQ-Hc-w5c" firstAttribute="top" secondItem="XfR-Eh-fej" secondAttribute="top" id="VJb-VX-ybQ"/>
@@ -162,13 +162,11 @@
             <connections>
                 <outlet property="balloonTopMargin" destination="VJb-VX-ybQ" id="qVX-w4-PRB"/>
                 <outlet property="balloonView" destination="3uQ-Hc-w5c" id="4NM-Xl-Lhp"/>
-                <outlet property="balloonWidth" destination="DG4-d9-fUS" id="w8P-ds-Eeq"/>
                 <outlet property="cellHeight" destination="Wen-lD-fNq" id="aFf-LN-Rng"/>
                 <outlet property="currentTimeSlider" destination="dqp-bW-PzJ" id="Y5d-bQ-COm"/>
                 <outlet property="dateLabel" destination="D74-R1-h26" id="VoW-Fq-5Eo"/>
                 <outlet property="durationLabel" destination="J1H-b8-wc2" id="ujU-aA-VjI"/>
                 <outlet property="fileContainer" destination="jRl-G6-Vld" id="aVC-RQ-L7V"/>
-                <outlet property="leftMargin" destination="7hA-UV-b25" id="Mqb-b6-pXN"/>
                 <outlet property="playButton" destination="Sv9-W4-bfb" id="a65-V3-vN7"/>
                 <outlet property="progressContainer" destination="DAb-XG-bqz" id="Ssg-IG-FYf"/>
                 <outlet property="progressHeight" destination="S89-CX-Ut1" id="qQa-aV-kBa"/>

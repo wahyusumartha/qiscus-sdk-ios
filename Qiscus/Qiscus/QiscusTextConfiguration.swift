@@ -66,6 +66,8 @@ open class QiscusTextConfiguration: NSObject {
     
     /// Your text if it is the process of uploading file, Default value : "Uploading"
     open var uploadingText = "uploading"
+    /// Your text if it is the process of uploading file, Default value : "Uploading"
+    open var downloadingText = "downloading"
     
     /// Your text if it is the process of uploading image, Default value : "Sending"
     open var sendingText = "sending"

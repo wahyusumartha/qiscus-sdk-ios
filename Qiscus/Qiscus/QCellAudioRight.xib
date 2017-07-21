@@ -31,14 +31,14 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="VsU-mr-Kf5">
-                                <rect key="frame" x="78" y="0.0" width="215" height="80"/>
+                                <rect key="frame" x="86" y="0.0" width="215" height="80"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="215" id="hrd-lm-74R"/>
                                     <constraint firstAttribute="height" constant="80" id="m4V-sv-xHL"/>
                                 </constraints>
                             </imageView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8pz-zP-p59">
-                                <rect key="frame" x="82" y="4" width="192" height="53"/>
+                                <rect key="frame" x="90" y="4" width="192" height="53"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Wxb-hf-kmw">
                                         <rect key="frame" x="8" y="8" width="30" height="30"/>
@@ -126,7 +126,7 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sending Failed" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qB2-Vx-P7Y">
-                                <rect key="frame" x="162" y="57" width="95" height="21"/>
+                                <rect key="frame" x="170" y="57" width="95" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="95" id="rQO-xF-uGq"/>
                                     <constraint firstAttribute="height" constant="21" id="wG7-xC-2GV"/>
@@ -136,7 +136,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_info_time" translatesAutoresizingMaskIntoConstraints="NO" id="RTa-W9-y03">
-                                <rect key="frame" x="259" y="60" width="15" height="15"/>
+                                <rect key="frame" x="267" y="60" width="15" height="15"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="15" id="Zi9-7K-c8K"/>
                                     <constraint firstAttribute="width" constant="15" id="dHw-RD-PkA"/>
@@ -156,7 +156,7 @@
                             <constraint firstItem="VsU-mr-Kf5" firstAttribute="top" secondItem="qua-Vv-zva" secondAttribute="top" id="ihc-DD-UCV"/>
                             <constraint firstItem="RTa-W9-y03" firstAttribute="trailing" secondItem="8pz-zP-p59" secondAttribute="trailing" id="lUM-mo-jSb"/>
                             <constraint firstItem="I18-5m-acy" firstAttribute="top" secondItem="qua-Vv-zva" secondAttribute="top" id="ppL-NH-UJq"/>
-                            <constraint firstAttribute="trailing" secondItem="VsU-mr-Kf5" secondAttribute="trailing" constant="8" id="u7J-cX-2ny"/>
+                            <constraint firstAttribute="trailing" secondItem="VsU-mr-Kf5" secondAttribute="trailing" id="u7J-cX-2ny"/>
                         </constraints>
                     </view>
                 </subviews>

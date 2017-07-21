@@ -62,53 +62,8 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         LinkContainer.isHidden = true
     }
     func openLink(){
-        if data.showLink{
-            if data.linkURL != ""{
-                let url = data.linkURL
-                var urlToCheck = url.lowercased()
-                if !urlToCheck.contains("http"){
-                    urlToCheck = "http://\(url.lowercased())"
-                }
-                if let urlToOpen = URL(string: urlToCheck){
-                    UIApplication.shared.openURL(urlToOpen)
-                }
-            }
-        }
-        else if data.commentType == .reply {
-            DispatchQueue.global().async {
-                let replyData = JSON(parseJSON: self.data.comment!.commentButton)
-                let commentId = replyData["replied_comment_id"].intValue
-                var found = false
-                if let comment = self.data.comment {
-                    if let chatView = Qiscus.shared.chatViews[comment.roomId]{
-                        
-                        var indexPath = IndexPath(item: 0, section: 0)
-                        var section = 0
-                        for commentGroup in chatView.comments{
-                            var row = 0
-                            for comment in commentGroup {
-                                if comment.commentId == commentId {
-                                    found = true
-                                    indexPath = IndexPath(item: row, section: section)
-                                    break
-                                }
-                                row += 1
-                            }
-                            if found {
-                                break
-                            }else{
-                                section += 1
-                            }
-                        }
-                        if found {
-                            DispatchQueue.main.async {
-                                chatView.scrollToIndexPath(indexPath, position: .top, animated: true, delayed: false)
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        print("open link")
+        self.delegate?.didTouchLink(onCell: self)
     }
     
     func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange) -> Bool {

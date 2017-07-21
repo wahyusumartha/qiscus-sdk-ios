@@ -9,16 +9,11 @@
 import UIKit
 import SwiftyJSON
 
-protocol ChatCellPostbackDelegate {
-    func didTapPostbackButton(withData data: JSON)
-    func didTapAccountLinking(withData data: JSON)
-}
 class QCellPostbackLeft: QChatCell {
     let maxWidth:CGFloat = QiscusUIConfiguration.chatTextMaxWidth
     let minWidth:CGFloat = QiscusUIConfiguration.chatTextMaxWidth
     let buttonWidth:CGFloat = QiscusUIConfiguration.chatTextMaxWidth + 10
     
-    var postbackDelegate:ChatCellPostbackDelegate?
     
     @IBOutlet weak var userNameLabel: UILabel!
     @IBOutlet weak var balloonView: UIImageView!
@@ -41,13 +36,12 @@ class QCellPostbackLeft: QChatCell {
         super.awakeFromNib()
         textView.contentInset = UIEdgeInsets.zero
     }
-    open override func setupCell() {
-        textView.attributedText = data.commentAttributedText
-        textView.linkTextAttributes = data.linkTextAttributes
-        balloonView.image = data.balloonImage
-        
-        let textSize = data.cellSize
-        var textWidth = data.cellSize.width
+    public override func commentChanged() {
+        self.textView.attributedText = self.comment?.attributedText
+        self.textView.linkTextAttributes = self.linkTextAttributes
+        balloonView.image = getBallon()
+        let textSize = self.comment!.textSize
+        var textWidth = textSize.width
         
         if textWidth > minWidth {
             textWidth = textSize.width
@@ -64,12 +58,16 @@ class QCellPostbackLeft: QChatCell {
         
         userNameLabel.textAlignment = .left
         
-        dateLabel.text = data.commentTime.lowercased()
+        dateLabel.text = self.comment!.time.lowercased()
         balloonView.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor
         dateLabel.textColor = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
         
-        if data.cellPos == .first || data.cellPos == .single{
-            userNameLabel.text = data.userFullName
+        if self.comment!.cellPos == .first || self.comment!.cellPos == .single{
+            if let sender = self.comment?.sender {
+                self.userNameLabel.text = sender.fullname
+            }else{
+                self.userNameLabel.text = self.comment?.senderName
+            }
             userNameLabel.isHidden = false
             balloonTopMargin.constant = 20
             cellHeight.constant = 20
@@ -79,23 +77,9 @@ class QCellPostbackLeft: QChatCell {
             balloonTopMargin.constant = 0
             cellHeight.constant = 0
         }
-        
-        // last cell
-        if data.cellPos == .last || data.cellPos == .single{
-            leftMargin.constant = 35
-            textLeading.constant = 23
-            balloonWidth.constant = 31
-        }else{
-            textLeading.constant = 8
-            leftMargin.constant = 50
-            balloonWidth.constant = 16
-        }
-        
-        
-        if data.commentType == .postback {
+        if self.comment!.type == .postback {
             var i = 0
-            let buttonsPayload = JSON(parseJSON: data.comment!.commentButton).arrayValue
-            //var yPos = CGFloat(5)
+            let buttonsPayload = JSON(parseJSON: self.comment!.data).arrayValue
             self.buttonsViewHeight.constant = CGFloat(buttonsPayload.count * 35)
             self.layoutIfNeeded()
             for buttonsData in buttonsPayload{
@@ -105,14 +89,11 @@ class QCellPostbackLeft: QChatCell {
                 button.setTitleColor(.black, for: .normal)
                 button.tag = i
                 button.addTarget(self, action:#selector(self.postback(sender:)), for: .touchUpInside)
-                
                 self.buttonsView.addArrangedSubview(button)
-                
                 i += 1
-                //yPos += CGFloat(35)
             }
         }else{
-            let dataPayload = JSON(parseJSON: data.comment!.commentButton)            
+            let dataPayload = JSON(parseJSON: self.comment!.data)
             let paramData = dataPayload["params"]
             
             self.buttonsViewHeight.constant = CGFloat(35)
@@ -128,17 +109,20 @@ class QCellPostbackLeft: QChatCell {
             self.buttonsView.addArrangedSubview(button)
         }
     }
+    open override func setupCell() {
+       
+    }
     
     func postback(sender:UIButton){
-        let allData = JSON(parseJSON: self.data.comment!.commentButton).arrayValue
+        let allData = JSON(parseJSON: self.comment!.data).arrayValue
         if allData.count > sender.tag {
             let data = allData[sender.tag]
-            self.postbackDelegate?.didTapPostbackButton(withData: data)
+            self.delegate?.didTapPostbackButton(withData: data)
         }
     }
     
     func accountLinking(sender:UIButton){
-        let data = JSON(parseJSON: self.data.comment!.commentButton)
-        self.postbackDelegate?.didTapAccountLinking(withData: data)
+        let data = JSON(parseJSON: self.comment!.data)
+        self.delegate?.didTapAccountLinking(withData: data)
     }
 }

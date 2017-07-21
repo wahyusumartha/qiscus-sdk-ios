@@ -62,10 +62,10 @@
                                 <rect key="frame" x="115" y="73" width="40" height="40"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8DV-2u-lPS" userLabel="progressView">
-                                        <rect key="frame" x="0.0" y="0.0" width="40" height="40"/>
+                                        <rect key="frame" x="0.0" y="40" width="40" height="0.0"/>
                                         <color key="backgroundColor" red="0.14316189230000001" green="0.78178174079999996" blue="0.53946288170000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="40" id="JeC-nu-sWd"/>
+                                            <constraint firstAttribute="height" id="JeC-nu-sWd"/>
                                         </constraints>
                                     </view>
                                 </subviews>

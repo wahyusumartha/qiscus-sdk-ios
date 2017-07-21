@@ -114,11 +114,17 @@ public class QFile:Object{
         }
         return file
     }
+    
     public class func getURL(fromString text:String) -> String{
         let component1 = text.components(separatedBy: "[file]")
         let component2 = component1.last!.components(separatedBy: "[/file]")
         let mediaUrlString = component2.first?.trimmingCharacters(in: CharacterSet.whitespaces)
         return mediaUrlString!.replacingOccurrences(of: " ", with: "%20")
     }
-    
+    internal func updateLocalPath(path:String){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        try! realm.write {
+            self.localPath = localPath
+        }
+    }
 }

@@ -36,16 +36,11 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         
         var cell = collectionView.dequeueReusableCell(withReuseIdentifier: comment.cellIdentifier, for: indexPath) as! QChatCell
         cell.comment = comment
+        cell.delegate = self
         
         if let audioCell = cell as? QCellAudio{
             audioCell.audioCellDelegate = self
             cell = audioCell
-        }else if let postbackCell = cell as? QCellPostbackLeft{
-            postbackCell.postbackDelegate = self
-            cell = postbackCell
-        }
-        if comment.type == .reply {
-            print("comment identifier: \(comment.cellIdentifier)")
         }
         return cell
     }
@@ -71,6 +66,12 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     
     // MARK: CollectionView delegate
     public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        
+        if let selectedIndex = self.selectedCellIndex {
+            if indexPath.section == selectedIndex.section && indexPath.item == selectedIndex.item{
+                cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.35)
+            }
+        }
         /*
         if let targetCell = cell as? QChatCell{
             if !targetCell.data.userIsOwn && targetCell.data.commentStatus != .read{
@@ -93,6 +94,13 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         */
     }
     public func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if let selIndex = self.selectedCellIndex {
+            if selIndex.section == indexPath.section && selIndex.item == indexPath.item{
+                cell.backgroundColor = UIColor.clear
+                self.selectedCellIndex = nil
+            }
+        }
+        
         /*
         if indexPath.section == (comments.count - 1){
             if indexPath.row == comments[indexPath.section].count - 1{
@@ -181,8 +189,11 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         var width = CGFloat(0)
         let commentGroup = self.chatRoom?.comments[section]
         if commentGroup?.senderEmail != QiscusMe.sharedInstance.email{
-            height = 44
-            width = 44
+            let firstComment = commentGroup?.comments.first!
+            if firstComment?.type != .system {
+                height = 44
+                width = 44
+            }
         }
         return CGSize(width: width, height: height)
     }
@@ -199,17 +210,27 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         var size = comment.textSize
         size.width = QiscusHelper.screenWidth() - 16
         
-        if comment.type == .video || comment.type == .image {
+        switch comment.type {
+        case .video, .image:
             size.height = 190
-        }else{
+            break
+        case .audio:
+            size.height = 83
+            break
+        case .reply:
+            size.height += 88
+            break
+        case .system:
+            size.height += 40
+            break
+        case .text:
+            size.height += 15
+            break
+        default:
             size.height += 20
+            break
         }
         
-        if comment.type == .text || comment.type == .postback || comment.type == .account || comment.type == .reply{
-            if comment.type == .reply{
-                size.height += 75
-            }
-        }
         if (comment.type != .system && indexPath.row == 0) {
             size.height += 20
         }

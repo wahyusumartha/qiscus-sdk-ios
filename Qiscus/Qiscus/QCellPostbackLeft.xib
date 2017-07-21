@@ -31,10 +31,10 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="72O-5x-QSl">
-                                <rect key="frame" x="42" y="0.0" width="221" height="50"/>
+                                <rect key="frame" x="27" y="0.0" width="221" height="50"/>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="00:00" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fFB-0D-apw">
-                                <rect key="frame" x="183" y="29" width="75" height="21"/>
+                                <rect key="frame" x="168" y="29" width="75" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="21" id="UOi-o1-S7p"/>
                                     <constraint firstAttribute="width" constant="75" id="WVz-C9-J8Y"/>
@@ -55,7 +55,7 @@
                                 <dataDetectorType key="dataDetectorTypes" phoneNumber="YES" link="YES" address="YES" calendarEvent="YES"/>
                             </textView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="1" translatesAutoresizingMaskIntoConstraints="NO" id="7pL-aj-pYi">
-                                <rect key="frame" x="42" y="50" width="221" height="0.0"/>
+                                <rect key="frame" x="42" y="50" width="206" height="0.0"/>
                                 <color key="backgroundColor" red="0.92455440759999996" green="0.43101489539999999" blue="0.44916653629999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" id="vX1-lG-QfZ"/>
@@ -71,9 +71,9 @@
                             <constraint firstItem="fFB-0D-apw" firstAttribute="trailing" secondItem="72O-5x-QSl" secondAttribute="trailing" constant="-5" id="JK9-LF-qV3"/>
                             <constraint firstItem="fFB-0D-apw" firstAttribute="bottom" secondItem="7pL-aj-pYi" secondAttribute="top" id="K9J-f9-Cfn"/>
                             <constraint firstAttribute="height" secondItem="72O-5x-QSl" secondAttribute="height" id="XJJ-Mo-nvi"/>
-                            <constraint firstItem="72O-5x-QSl" firstAttribute="leading" secondItem="e1C-nF-XhG" secondAttribute="leading" constant="42" id="Xza-ww-iMK"/>
+                            <constraint firstItem="72O-5x-QSl" firstAttribute="leading" secondItem="e1C-nF-XhG" secondAttribute="leading" constant="27" id="Xza-ww-iMK"/>
                             <constraint firstItem="72O-5x-QSl" firstAttribute="width" secondItem="wmx-Cd-4mN" secondAttribute="width" constant="31" id="aN6-GV-DZd"/>
-                            <constraint firstItem="wmx-Cd-4mN" firstAttribute="leading" secondItem="72O-5x-QSl" secondAttribute="leading" constant="8" id="aQ4-6Y-r3Q"/>
+                            <constraint firstItem="wmx-Cd-4mN" firstAttribute="leading" secondItem="72O-5x-QSl" secondAttribute="leading" constant="23" id="aQ4-6Y-r3Q"/>
                             <constraint firstItem="7pL-aj-pYi" firstAttribute="leading" secondItem="wmx-Cd-4mN" secondAttribute="leading" constant="-8" id="c02-dL-7oF"/>
                             <constraint firstItem="7pL-aj-pYi" firstAttribute="bottom" secondItem="wmx-Cd-4mN" secondAttribute="bottom" constant="10" id="f54-2w-c8H"/>
                             <constraint firstItem="ZPh-Wf-ltO" firstAttribute="top" secondItem="e1C-nF-XhG" secondAttribute="top" id="jUW-Jr-s3d"/>

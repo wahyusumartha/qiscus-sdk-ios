@@ -24,13 +24,16 @@ class QCellSystem: QChatCell {
         self.containerView.layer.cornerRadius = 14
         self.containerView.backgroundColor = Qiscus.style.color.systemBalloonColor
     }
-    public override func dataChanged(oldValue: QiscusCommentPresenter, new: QiscusCommentPresenter) {
-        Qiscus.uiThread.async {
-            self.textView.attributedText = self.data.commentAttributedText
-            self.textView.linkTextAttributes = self.data.linkTextAttributes
+    public override func commentChanged() {
+        if self.comment!.text == "" {
+            self.containerView.isHidden = true
+        }else{
+            self.containerView.isHidden = false
+            self.textView.attributedText = self.comment!.attributedText
+            self.textView.linkTextAttributes = self.linkTextAttributes
             
-            let textSize = self.data.cellSize
-            var textWidth = self.data.cellSize.width
+            let textSize = self.comment!.textSize
+            var textWidth = textSize.width
             
             if textWidth > self.minWidth {
                 textWidth = textSize.width
@@ -40,8 +43,8 @@ class QCellSystem: QChatCell {
             
             self.textWidth.constant = textWidth
             self.textHeight.constant = textSize.height
-            print("system height: \(textSize.height)")
             self.textView.layoutIfNeeded()
         }
     }
+    
 }

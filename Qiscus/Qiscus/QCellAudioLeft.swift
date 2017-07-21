@@ -25,8 +25,6 @@ class QCellAudioLeft: QCellAudio {
     
     @IBOutlet weak var cellHeight: NSLayoutConstraint!
     @IBOutlet weak var balloonTopMargin: NSLayoutConstraint!
-    @IBOutlet weak var leftMargin: NSLayoutConstraint!
-    @IBOutlet weak var balloonWidth: NSLayoutConstraint!
     @IBOutlet weak var progressHeight: NSLayoutConstraint!
     
     let defaultDateLeftMargin:CGFloat = -10
@@ -74,89 +72,104 @@ class QCellAudioLeft: QCellAudio {
         progressContainer.clipsToBounds = true
         fileContainer.layer.cornerRadius = 10
     }
-    open override func setupCell(){
+    public override func commentChanged() {
         self.progressHeight.constant = 0
         self.progressContainer.isHidden = true
-        self.currentTimeSlider.setValue(data.currentTimeSlider, animated: true)
-        self.durationLabel.text = data.durationLabel
+        self.currentTimeSlider.setValue(self.comment!.currentTimeSlider, animated: true)
+        self.durationLabel.text = self.comment!.durationLabel
         
-        userNameLabel.text = data.userFullName
-        userNameLabel.isHidden = true
-        balloonTopMargin.constant = 0
-        cellHeight.constant = 0
-        
-        if data.cellPos == .first || data.cellPos == .single{
+        if self.comment!.cellPos == .first || self.comment!.cellPos == .single{
+            if let sender = self.comment?.sender {
+                self.userNameLabel.text = sender.fullname
+            }else{
+                self.userNameLabel.text = self.comment?.senderName
+            }
             userNameLabel.isHidden = false
             balloonTopMargin.constant = 20
             cellHeight.constant = 20
+        }else{
+            userNameLabel.text = ""
+            userNameLabel.isHidden = true
+            balloonTopMargin.constant = 0
+            cellHeight.constant = 0
         }
-        self.seekTimeLabel.text = data.seekTimeLabel
+        self.seekTimeLabel.text = self.comment!.seekTimeLabel
         if self.tapRecognizer != nil{
             self.fileContainer.removeGestureRecognizer(self.tapRecognizer!)
             self.tapRecognizer = nil
         }
-        balloonView.image = data.balloonImage
-        if data.cellPos == .single || data.cellPos == .last{
-            balloonWidth.constant = 215
-        }
-        
-        dateLabel.text = data.commentTime.lowercased()
-        if data.cellPos == .single || data.cellPos == .last {
-            leftMargin.constant = 35
-        }else{
-            leftMargin.constant = 50
-        }
-        
         balloonView.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor
         dateLabel.textColor = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
-        
-        if data.audioFileExist{
-            self.filePath = data.localURL!
-            self.isPlaying = data.audioIsPlaying
-            let audioURL = URL(fileURLWithPath: data.localURL!)
-            let audioAsset = AVURLAsset(url: audioURL)
-            audioAsset.loadValuesAsynchronously(forKeys: ["duration"], completionHandler: {
-                var error: NSError? = nil
-                let status = audioAsset.statusOfValue(forKey: "duration", error: &error)
-                switch status {
-                case .loaded:
-                    let duration = Double(CMTimeGetSeconds(audioAsset.duration))
-                    self.currentTimeSlider.maximumValue = Float(duration)
-                    if let durationString = self.timeFormatter?.string(from: duration) {
-                        self.data.durationLabel = durationString
-                        self.audioCellDelegate?.didChangeData(onCell: self, withData: self.data)
-                        self.durationLabel.text = durationString
-                    }
-                    break
-                default:
-                    break
+        self.balloonView.image = getBallon()
+        self.dateLabel.text = self.comment!.time.lowercased()
+        self.isPlaying = self.comment!.audioIsPlaying
+        self.filePath = ""
+        if let file = self.comment!.file{
+            if file.localPath != "" {
+                if QiscusHelper.isFileExist(inLocalPath: file.localPath){
+                    self.filePath = file.localPath
+                    self.isPlaying = self.comment!.audioIsPlaying
+                    let audioURL = URL(fileURLWithPath: file.localPath)
+                    let audioAsset = AVURLAsset(url: audioURL)
+                    audioAsset.loadValuesAsynchronously(forKeys: ["duration"], completionHandler: {
+                        var error: NSError? = nil
+                        let status = audioAsset.statusOfValue(forKey: "duration", error: &error)
+                        switch status {
+                        case .loaded:
+                            let duration = Double(CMTimeGetSeconds(audioAsset.duration))
+                            DispatchQueue.main.async {
+                                self.currentTimeSlider.maximumValue = Float(duration)
+                                if let durationString = self.timeFormatter?.string(from: duration) {
+                                
+                                    self.comment!.updateDurationLabel(text: durationString)
+                                    self.durationLabel.text = durationString
+                                }
+                            }
+                            break
+                        default:
+                            break
+                        }
+                    })
+                }else{
+                    file.updateLocalPath(path: "")
                 }
-            })
-        }else{
-            self.filePath = ""
+            }
         }
-        if data.isUploading{
+        if self.comment!.isUploading || self.comment!.isDownloading{
             let uploadProgres = Int(data.uploadProgress * 100)
             let uploading = QiscusTextConfiguration.sharedInstance.uploadingText
+            let downloading = QiscusTextConfiguration.sharedInstance.downloadingText
             
-            self.progressImageView.image = Qiscus.image(named: "audio_upload")
             self.progressContainer.isHidden = false
             self.progressHeight.constant = data.uploadProgress * 30
-            dateLabel.text = "\(uploading) \(QChatCellHelper.getFormattedStringFromInt(uploadProgres)) %"
+            
+            if self.comment!.isDownloading{
+                self.progressImageView.image = Qiscus.image(named: "audio_download")
+                dateLabel.text = "\(downloading) \(QChatCellHelper.getFormattedStringFromInt(uploadProgres)) %"
+            }else{
+                self.progressImageView.image = Qiscus.image(named: "audio_upload")
+                dateLabel.text = "\(uploading) \(QChatCellHelper.getFormattedStringFromInt(uploadProgres)) %"
+            }
         }
+    }
+    open override func setupCell(){
+    
     }
     @IBAction func playButtonTapped(_ sender: UIButton) {
         self.isPlaying = true
-        self.data.audioIsPlaying = true
-        self.audioCellDelegate?.didChangeData(onCell: self, withData: self.data)
+        self.comment?.updateAudioIsPlaying(playing: true)
+        self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "audioIsPlaying")
         self.audioCellDelegate?.didTapPlayButton(sender, onCell: self)
     }
     
     @IBAction func pauseButtonTapped(_ sender: UIButton) {
         self.isPlaying = false
-        self.data.audioIsPlaying = false
-        self.audioCellDelegate?.didChangeData(onCell: self, withData: self.data)
-        self.audioCellDelegate?.didTapPauseButton(sender, onCell: self)
+        self.isPlaying = false
+        DispatchQueue.main.async {
+            self.comment?.updateAudioIsPlaying(playing: false)
+            self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "audioIsPlaying")
+            self.audioCellDelegate?.didTapPauseButton(sender, onCell: self)
+        }
     }
     
     @IBAction func downloadButtonTapped(_ sender: UIButton) {
@@ -164,39 +177,88 @@ class QCellAudioLeft: QCellAudio {
     }
     
     @IBAction func sliderValueChanged(_ sender: UISlider) {
-        if let seekTimeString = timeFormatter?.string(from: Double(sender.value)){
-            self.data.seekTimeLabel = seekTimeString
-            self.data.currentTimeSlider = self.currentTimeSlider.value
-            self.audioCellDelegate?.didChangeData(onCell: self, withData: self.data)
-            self.seekTimeLabel.text = seekTimeString
+        DispatchQueue.main.async {
+            if let seekTimeString = self.timeFormatter?.string(from: Double(sender.value)){
+                self.comment?.updateCurrentTimeSlider(value: self.currentTimeSlider.value)
+                self.comment?.updateSeekTimeLabel(text: seekTimeString)
+                
+                self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "seekTimeLabel")
+                self.seekTimeLabel.text = seekTimeString
+            }
+            self.audioCellDelegate?.didStartSeekTimeSlider(sender, onCell: self)
+            
         }
-        
-        self.audioCellDelegate?.didStartSeekTimeSlider(sender, onCell: self)
     }
     @IBAction func sliderTouchUpInside(_ sender: UISlider) {
-        self.data.currentTimeSlider = self.currentTimeSlider.value
-        self.audioCellDelegate?.didChangeData(onCell: self, withData: self.data)
+        self.comment!.currentTimeSlider = self.currentTimeSlider.value
+        self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "currentTimeSlider")
         self.audioCellDelegate?.didEndSeekTimeSlider(sender, onCell: self)
     }
-    open override func downloadingMedia(withPercentage percentage: Int) {
-        if percentage > 0 {
-            progressContainer.isHidden = false
-            progressHeight.constant = CGFloat(percentage/100) * 30
-            dateLabel.text = "Downloading \(QChatCellHelper.getFormattedStringFromInt(percentage)) %"
-            progressContainer.layoutIfNeeded()
-        }
+    public override func downloadingMedia() {
+        self.progressContainer.isHidden = false
+        self.progressHeight.constant = self.comment!.progress * 30
+        let percentage = Int(self.comment!.progress * 100)
+        self.dateLabel.text = "Downloading \(QChatCellHelper.getFormattedStringFromInt(percentage)) %"
+        UIView.animate(withDuration: 0.65, animations: {
+            self.progressView.layoutIfNeeded()
+        })
     }
     open override func displayAudioDownloading() {
         self.isDownloading = true
-        self.data.isDownloading = true
-        self.audioCellDelegate?.didChangeData(onCell: self, withData: self.data)
-        self.playButton.removeTarget(nil, action: nil, for: .allEvents)
+        DispatchQueue.main.async {
+            self.comment?.updateIsDownloading(downloading: true)
+            self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "isDownloading")
+            self.playButton.removeTarget(nil, action: nil, for: .allEvents)
+        }
     }
     open override func updateAudioDisplay(withTimeInterval timeInterval:TimeInterval) {
-        self.isPlaying = data.audioIsPlaying
-        self.data.currentTimeSlider = Float(timeInterval)
-        self.audioCellDelegate?.didChangeData(onCell: self, withData: self.data)
-        self.currentTimeSlider.setValue(Float(timeInterval), animated: true)
-        self.seekTimeLabel.text = self.timeFormatter?.string(from: timeInterval)
+        self.isPlaying = self.comment!.audioIsPlaying
+        DispatchQueue.main.async {
+            self.comment?.updateCurrentTimeSlider(value: Float(timeInterval))
+            self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "currentTimeSlider")
+            self.currentTimeSlider.setValue(Float(timeInterval), animated: true)
+            
+            self.seekTimeLabel.text = self.timeFormatter?.string(from: timeInterval)
+            
+            if Float(timeInterval) == Float(0) {
+                self.comment?.updateCurrentTimeSlider(value: Float(timeInterval))
+                self.comment?.updateAudioIsPlaying(playing: false)
+                self.isPlaying = false
+            }
+        }
+    }
+    public override func downloadFinished() {
+        if let file = self.comment!.file{
+            if file.localPath != "" {
+                if QiscusHelper.isFileExist(inLocalPath: file.localPath){
+                    self.filePath = file.localPath
+                    self.isPlaying = self.comment!.audioIsPlaying
+                    let audioURL = URL(fileURLWithPath: file.localPath)
+                    let audioAsset = AVURLAsset(url: audioURL)
+                    audioAsset.loadValuesAsynchronously(forKeys: ["duration"], completionHandler: {
+                        var error: NSError? = nil
+                        let status = audioAsset.statusOfValue(forKey: "duration", error: &error)
+                        switch status {
+                        case .loaded:
+                            let duration = Double(CMTimeGetSeconds(audioAsset.duration))
+                            DispatchQueue.main.async {
+                                self.currentTimeSlider.maximumValue = Float(duration)
+                                if let durationString = self.timeFormatter?.string(from: duration) {
+                                    
+                                    self.comment!.updateDurationLabel(text: durationString)
+                                    self.durationLabel.text = durationString
+                                }
+                            }
+                            break
+                        default:
+                            break
+                        }
+                    })
+                }else{
+                    file.updateLocalPath(path: "")
+                }
+            }
+            self.dateLabel.text = self.comment!.time.lowercased()
+        }
     }
 }

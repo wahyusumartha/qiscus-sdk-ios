@@ -12,7 +12,7 @@ import AVFoundation
 import SwiftyJSON
 
 // MARK: - ChatCell Delegate
-extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate, ChatCellPostbackDelegate{
+extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
     // MARK: ChatCellPostbackDelegate
     func didTapAccountLinking(withData data: JSON) {
         Qiscus.uiThread.async {
@@ -52,7 +52,47 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate, ChatCellPostbac
             }
         }
     }
-    
+    func didTouchLink(onCell cell: QChatCell) {
+        if let comment = cell.comment {
+            if comment.type == .reply{
+                let replyData = JSON(parseJSON: comment.data)
+                let commentId = replyData["replied_comment_id"].intValue
+                var found = false
+                var indexPath:IndexPath? = nil
+                var section = 0
+                for commentGroup in self.chatRoom!.comments{
+                    var row = 0
+                    for commentTarget in commentGroup.comments {
+                        if commentTarget.id == commentId {
+                            found = true
+                            indexPath = IndexPath(item: row, section: section)
+                            break
+                        }
+                                row += 1
+                    }
+                    if found {
+                        break
+                    }else{
+                        section += 1
+                    }
+                }
+                if found {
+                    if let selectIndex = self.selectedCellIndex {
+                        if let selectedCell = self.collectionView.cellForItem(at: selectIndex){
+                            selectedCell.backgroundColor = UIColor.clear
+                        }
+                    }
+                    if let selectedCell = self.collectionView.cellForItem(at: indexPath!){
+                        selectedCell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.35)
+                    }
+                    self.selectedCellIndex = indexPath
+                    
+                    self.collectionView.scrollToItem(at: indexPath!, at: .top, animated: true)
+                    
+                }
+            }
+        }
+    }
     // MARK: ChatCellDelegate
     func didChangeSize(onCell cell:QChatCell){
         if let indexPath = cell.data.commentIndexPath {
@@ -136,48 +176,55 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate, ChatCellPostbac
     
     // MARK: ChatCellAudioDelegate
     func didTapPlayButton(_ button: UIButton, onCell cell: QCellAudio) {
-        let path = cell.data.localURL!
-        if let url = URL(string: path) {
-            if audioPlayer != nil {
-                if audioPlayer!.isPlaying {
-                    if let activeCell = activeAudioCell{
-                        activeCell.data.audioIsPlaying = false
-                        self.didChangeData(onCell: activeCell, withData: activeCell.data)
+        if let file = cell.comment?.file {
+            if let url = URL(string: file.localPath) {
+                if audioPlayer != nil {
+                    if audioPlayer!.isPlaying {
+                        if let activeCell = activeAudioCell{
+                            DispatchQueue.main.async {
+                                if let targetCell = activeCell as? QCellAudioRight{
+                                    targetCell.isPlaying = false
+                                }
+                                if let targetCell = activeCell as? QCellAudioLeft{
+                                    targetCell.isPlaying = false
+                                }
+                                activeCell.comment!.updateAudioIsPlaying(playing: false)
+                                self.didChangeData(onCell: activeCell, withData: activeCell.comment!, dataTypeChanged: "isPlaying")
+                            }
+                        }
+                        audioPlayer?.stop()
+                        stopTimer()
+                        updateAudioDisplay()
                     }
-                    audioPlayer?.stop()
-                    stopTimer()
-                    updateAudioDisplay()
                 }
-            }
-            
-            activeAudioCell = cell
-            
-            do {
-                audioPlayer = try AVAudioPlayer(contentsOf: url)
-            }
-            catch let error as NSError {
-                Qiscus.printLog(text: error.localizedDescription)
-            }
-            
-            audioPlayer?.delegate = self
-            audioPlayer?.currentTime = Double(cell.data.currentTimeSlider)
-            
-            do {
-                try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
-                //Qiscus.printLog(text: "AVAudioSession Category Playback OK")
+                activeAudioCell = cell
                 do {
-                    try AVAudioSession.sharedInstance().setActive(true)
-                    //Qiscus.printLog(text: "AVAudioSession is Active")
-                    audioPlayer?.prepareToPlay()
-                    audioPlayer?.play()
-                    
-                    audioTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(audioTimerFired(_:)), userInfo: nil, repeats: true)
-                    
+                    audioPlayer = try AVAudioPlayer(contentsOf: url)
+                }
+                catch let error as NSError {
+                    Qiscus.printLog(text: error.localizedDescription)
+                }
+                
+                audioPlayer?.delegate = self
+                audioPlayer?.currentTime = Double(cell.comment!.currentTimeSlider)
+                
+                do {
+                    try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
+                    //Qiscus.printLog(text: "AVAudioSession Category Playback OK")
+                    do {
+                        try AVAudioSession.sharedInstance().setActive(true)
+                        //Qiscus.printLog(text: "AVAudioSession is Active")
+                        audioPlayer?.prepareToPlay()
+                        audioPlayer?.play()
+                        
+                        audioTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(audioTimerFired(_:)), userInfo: nil, repeats: true)
+                        
+                    } catch _ as NSError {
+                        Qiscus.printLog(text: "Audio player error")
+                    }
                 } catch _ as NSError {
                     Qiscus.printLog(text: "Audio player error")
                 }
-            } catch _ as NSError {
-                Qiscus.printLog(text: "Audio player error")
             }
         }
     }
@@ -188,7 +235,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate, ChatCellPostbac
     }
     func didTapDownloadButton(_ button: UIButton, onCell cell: QCellAudio){
         cell.displayAudioDownloading()
-        self.commentClient.downloadMedia(data: cell.data, isAudioFile: true)
+        self.chatRoom!.downloadMedia(onComment: cell.comment!, isAudioFile: true)
     }
     func didStartSeekTimeSlider(_ slider: UISlider, onCell cell: QCellAudio){
         if audioTimer != nil {
@@ -197,22 +244,31 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate, ChatCellPostbac
     }
     func didEndSeekTimeSlider(_ slider: UISlider, onCell cell: QCellAudio){
         audioPlayer?.stop()
-        let currentTime = cell.data.currentTimeSlider
+        
+        let currentTime = cell.comment!.currentTimeSlider
         audioPlayer?.currentTime = Double(currentTime)
         audioPlayer?.prepareToPlay()
         audioPlayer?.play()
         audioTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(audioTimerFired(_:)), userInfo: nil, repeats: true)
-    }
-    func didChangeData(onCell cell: QCellAudio, withData data: QiscusCommentPresenter) {
-        DispatchQueue.global().async {
-            if let indexPath = data.commentIndexPath{
-                if indexPath.section < self.comments.count {
-                    if indexPath.row < self.comments[indexPath.section].count{
-                        self.comments[indexPath.section][indexPath.row] = data
-                    }
-                }
-            }
+        
+        cell.comment?.updateAudioIsPlaying(playing: false)
+        if let targetCell = cell as? QCellAudioLeft{
+            targetCell.isPlaying = false
         }
+        if let targetCell = cell as? QCellAudioRight{
+            targetCell.isPlaying = false
+        }
+    }
+    func didChangeData(onCell cell:QCellAudio , withData comment:QComment, dataTypeChanged:String){
+//        DispatchQueue.global().async {
+//            if let indexPath = data.commentIndexPath{
+//                if indexPath.section < self.comments.count {
+//                    if indexPath.row < self.comments[indexPath.section].count{
+//                        self.comments[indexPath.section][indexPath.row] = data
+//                    }
+//                }
+//            }
+//        }
     }
 }
 

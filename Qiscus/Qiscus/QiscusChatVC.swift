@@ -12,7 +12,8 @@ import Photos
 import ImageViewer
 import SwiftyJSON
 import UserNotifications
-
+//
+import RealmSwift
 public class QiscusChatVC: UIViewController{
     
     // MARK: - IBOutlet Properties
@@ -57,6 +58,8 @@ public class QiscusChatVC: UIViewController{
     var commentClient = QiscusCommentClient.sharedInstance
     let dataPresenter = QiscusDataPresenter.shared
     var archived:Bool = QiscusUIConfiguration.sharedInstance.readOnly
+    
+    var selectedCellIndex:IndexPath? = nil
     
     var replyData:QiscusCommentPresenter? = nil {
         didSet{
@@ -758,8 +761,39 @@ extension QiscusChatVC:QRoomDelegate{
     public func room(didChangeGroupComment section: Int) {
         
     }
-    public func room(didChangeComment section: Int, row: Int) {
+    public func room(didChangeComment section: Int, row: Int, action: String) {
+        let indexPath = IndexPath(item: row, section: section)
+        let comment = self.chatRoom!.comments[section].comments[row]
         
+        func defaultChange(){
+            self.collectionView.reloadItems(at: [indexPath])
+        }
+        switch action {
+        case "downloadProgress":
+            switch comment.type {
+            case .image, .video, .audio:
+                if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
+                    cell.downloadingMedia()
+                }
+                break
+            default:
+                defaultChange()
+                break
+            }
+        case "downloadFinish":
+            switch comment.type {
+            case .image, .video, .audio:
+                if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
+                    cell.downloadFinished()
+                }
+            default:
+                defaultChange()
+                break
+            }
+            break
+        default:
+            defaultChange()
+        }
     }
     public func room(gotNewGroupComment onIndex: Int) {
         let indexSet = IndexSet(integer: onIndex)

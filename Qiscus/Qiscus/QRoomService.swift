@@ -11,6 +11,7 @@ import SwiftyJSON
 import Alamofire
 import AlamofireImage
 import RealmSwift
+import AVFoundation
 
 public class QRoomService:NSObject{    
     public func sync(onRoom room:QRoom){
@@ -228,5 +229,154 @@ public class QRoomService:NSObject{
                 break
             }
         })
+    }
+    public func downloadMedia(inRoom room: QRoom, comment:QComment, thumbImageRef:UIImage? = nil, isAudioFile:Bool = false){
+        var section = room.comments.count - 1
+        var indexPath = IndexPath(item: room.comments[section].comments.count - 1, section: section)
+        for commentGroup in room.comments.reversed() {
+            if commentGroup.date == comment.date && commentGroup.senderEmail == comment.senderEmail{
+                var row = commentGroup.comments.count - 1
+                for commentTarget in commentGroup.comments.reversed(){
+                    if commentTarget.uniqueId == comment.uniqueId{
+                        indexPath.section = section
+                        indexPath.item = row
+                        break
+                    }
+                    row -= 1
+                }
+            }
+            section -= 1
+        }
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        if let file = comment.file {
+            
+            try! realm.write {
+                comment.isDownloading = true
+                comment.progress = 0
+            }
+            room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadProgress")
+            
+            let fileURL = file.url.replacingOccurrences(of: " ", with: "%20")
+            Alamofire.request(fileURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil).responseData(completionHandler: { response in
+                Qiscus.printLog(text: "download result: \(response)")
+                if let imageData = response.data {
+                    if !isAudioFile{
+                        if let image = UIImage(data: imageData) {
+                            var thumbImage = UIImage()
+                            if !(file.ext == "gif" || file.ext == "gif_"){
+                                thumbImage = QiscusFile.createThumbImage(image, fillImageSize: thumbImageRef)
+                            }
+                            
+                            let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
+                            let directoryPath = "\(documentsPath)/Qiscus"
+                            if !FileManager.default.fileExists(atPath: directoryPath){
+                                do {
+                                    try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
+                                } catch let error as NSError {
+                                    Qiscus.printLog(text: error.localizedDescription);
+                                }
+                            }
+                            
+                            let fileName = "\(file.filename.replacingOccurrences(of: " ", with: "%20").replacingOccurrences(of: "%20", with: "_"))"
+                            let path = "\(documentsPath)/Qiscus/\(fileName)"
+                            let thumbPath = "\(documentsPath)/Qiscus/thumb_\(fileName)"
+                            
+                            if (file.ext == "png" || file.ext == "png_") {
+                                try? UIImagePNGRepresentation(image)!.write(to: URL(fileURLWithPath: path), options: [.atomic])
+                                try? UIImagePNGRepresentation(thumbImage)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+                            } else if(file.ext == "jpg" || file.ext == "jpg_"){
+                                try? UIImageJPEGRepresentation(image, 1.0)!.write(to: URL(fileURLWithPath: path), options: [.atomic])
+                                try? UIImageJPEGRepresentation(thumbImage, 1.0)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+                            } else if(file.ext == "gif" || file.ext == "gif_"){
+                                try? imageData.write(to: URL(fileURLWithPath: path), options: [.atomic])
+                                try? imageData.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+                                thumbImage = image
+                            }
+                            try! realm.write {
+                                file.localPath = path
+                                file.localThumbPath = thumbPath
+                                comment.progress = 1
+                                comment.isDownloading = false
+                                comment.progress = 1
+                            }
+                            
+                            comment.displayImage = thumbImage
+                            room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
+                            
+                        }else{
+                            let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
+                            let directoryPath = "\(documentsPath)/Qiscus"
+                            if !FileManager.default.fileExists(atPath: directoryPath){
+                                do {
+                                    try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
+                                } catch let error as NSError {
+                                    Qiscus.printLog(text: error.localizedDescription);
+                                }
+                            }
+                            let path = "\(documentsPath)/Qiscus/\(file.filename)"
+                            let thumbPath = "\(documentsPath)/Qiscus/thumb_\(file.id).png"
+                            
+                            try? imageData.write(to: URL(fileURLWithPath: path), options: [.atomic])
+                            
+                            let assetMedia = AVURLAsset(url: URL(fileURLWithPath: "\(path)"))
+                            let thumbGenerator = AVAssetImageGenerator(asset: assetMedia)
+                            thumbGenerator.appliesPreferredTrackTransform = true
+                            
+                            let thumbTime = CMTimeMakeWithSeconds(0, 30)
+                            let maxSize = CGSize(width: QiscusHelper.screenWidth(), height: QiscusHelper.screenWidth())
+                            thumbGenerator.maximumSize = maxSize
+                            var thumbImage:UIImage?
+                            do{
+                                let thumbRef = try thumbGenerator.copyCGImage(at: thumbTime, actualTime: nil)
+                                thumbImage = UIImage(cgImage: thumbRef)
+                                
+                                let thumbData = UIImagePNGRepresentation(thumbImage!)
+                                try? thumbData!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+                            }catch{
+                                Qiscus.printLog(text: "error creating thumb image")
+                            }
+                            
+                            try! realm.write {
+                                comment.progress = 1
+                                comment.isDownloading = false
+                                file.localPath = path
+                                file.localThumbPath = thumbPath
+                            }
+                            room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
+                        }
+                    }
+                    else{
+                        let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
+                        let directoryPath = "\(documentsPath)/Qiscus"
+                        if !FileManager.default.fileExists(atPath: directoryPath){
+                            do {
+                                try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
+                            } catch let error as NSError {
+                                Qiscus.printLog(text: error.localizedDescription);
+                            }
+                        }
+                        let path = "\(documentsPath)/Qiscus/\(file.filename)"
+                        try! imageData.write(to: URL(fileURLWithPath: path), options: [.atomic])
+                        
+                        
+                        try! realm.write {
+                            comment.progress = 1
+                            comment.isDownloading = false
+                            file.localPath = path
+                        }
+                        
+                        room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
+                    }
+                }
+            }).downloadProgress(closure: { progressData in
+                let progress = CGFloat(progressData.fractionCompleted)
+                try! realm.write {
+                    comment.progress = progress
+                    comment.isDownloading = true
+                }
+                room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadProgress")
+            })
+            
+        }
     }
 }

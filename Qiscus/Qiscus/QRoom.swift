@@ -19,7 +19,7 @@ public protocol QRoomDelegate {
     func room(didChangeAvatar room:QRoom)
     func room(didChangeParticipant room:QRoom)
     func room(didChangeGroupComment section:Int)
-    func room(didChangeComment section:Int, row:Int)
+    func room(didChangeComment section:Int, row:Int, action:String)
     
     func room(didFinishSync room:QRoom)
     func room(gotNewGroupComment onIndex:Int)
@@ -56,6 +56,23 @@ public class QRoom:Object {
     //public var service:QRoomService?
     
     // MARK: - Class method
+    public func resetRoomComment(){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let data =  realm.objects(QComment.self).filter("roomId == \(self.id)")
+        
+        for comment in data {
+            try! realm.write {
+                comment.durationLabel = ""
+                comment.currentTimeSlider = Float(0)
+                comment.seekTimeLabel = "00:00"
+                comment.audioIsPlaying = false
+                // file variable
+                comment.isDownloading = false
+                comment.isUploading = false
+                comment.progress = 0
+            }
+        }
+    }
     public class func room(withId id:Int) -> QRoom? {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         var room:QRoom? = nil
@@ -64,6 +81,7 @@ public class QRoom:Object {
             if let cachedRoom = Qiscus.chatRooms[room!.id] {
                 room = cachedRoom
             }else{
+                room!.resetRoomComment()
                 Qiscus.chatRooms[room!.id] = room!
             }
         }
@@ -79,6 +97,7 @@ public class QRoom:Object {
             if let cachedRoom = Qiscus.chatRooms[room!.id] {
                 room = cachedRoom
             }else{
+                room!.resetRoomComment()
                 Qiscus.chatRooms[room!.id] = room!
             }
         }
@@ -94,6 +113,7 @@ public class QRoom:Object {
             if let cachedRoom = Qiscus.chatRooms[room!.id] {
                 room = cachedRoom
             }else{
+                room!.resetRoomComment()
                 Qiscus.chatRooms[room!.id] = room!
             }
         }
@@ -328,7 +348,7 @@ public class QRoom:Object {
                     var row = 0
                     for commentTarget in commentGroup.comments{
                         if commentTarget.uniqueId == oldComment.uniqueId{
-                            self.delegate?.room(didChangeComment: section, row: row)
+                            self.delegate?.room(didChangeComment: section, row: row, action: "status")
                             break
                         }
                         row += 1
@@ -340,6 +360,7 @@ public class QRoom:Object {
             let newComment = QComment()
             newComment.uniqueId = commentUniqueId
             newComment.id = commentId
+            newComment.roomId = self.id
             newComment.text = commentText
             newComment.senderName = commentSenderName
             newComment.createdAt = commentCreatedAt
@@ -441,7 +462,7 @@ public class QRoom:Object {
                             try! realm.write {
                                 comment.cellPosRaw = position.rawValue
                             }
-                            self.delegate?.room(didChangeComment: section, row: i)
+                            self.delegate?.room(didChangeComment: section, row: i, action: "position")
                         }
                         i += 1
                     }
@@ -511,7 +532,7 @@ public class QRoom:Object {
                     var row = 0
                     for commentTarget in commentGroup.comments{
                         if commentTarget.uniqueId == oldComment.uniqueId{
-                            self.delegate?.room(didChangeComment: section, row: row)
+                            self.delegate?.room(didChangeComment: section, row: row, action: "status")
                             break
                         }
                         row += 1
@@ -523,6 +544,7 @@ public class QRoom:Object {
             let newComment = QComment()
             newComment.uniqueId = commentUniqueId
             newComment.id = commentId
+            newComment.roomId = self.id
             newComment.text = commentText
             newComment.senderName = commentSenderName
             newComment.createdAt = commentCreatedAt
@@ -624,7 +646,7 @@ public class QRoom:Object {
                             try! realm.write {
                                 comment.cellPosRaw = position.rawValue
                             }
-                            self.delegate?.room(didChangeComment: 0, row: i)
+                            self.delegate?.room(didChangeComment: 0, row: i, action: "position")
                         }
                         i += 1
                     }
@@ -682,7 +704,7 @@ public class QRoom:Object {
                             try! realm.write {
                                 commentTarget.statusRaw = status.rawValue
                             }
-                            self.delegate?.room(didChangeComment: section, row: row)
+                            self.delegate?.room(didChangeComment: section, row: row, action: "status")
                         }
                         break
                     }
@@ -708,5 +730,9 @@ public class QRoom:Object {
     public func post(comment:QComment){
         let service = QRoomService()
         service.postComment(onRoom: self, comment: comment)
+    }
+    public func downloadMedia(onComment comment:QComment, thumbImageRef: UIImage? = nil, isAudioFile: Bool = false){
+        let service = QRoomService()
+        service.downloadMedia(inRoom: self, comment: comment, thumbImageRef: thumbImageRef, isAudioFile: isAudioFile)
     }
 }

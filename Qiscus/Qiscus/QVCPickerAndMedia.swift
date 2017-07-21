@@ -183,7 +183,7 @@ extension QiscusChatVC:AVAudioPlayerDelegate{
             try AVAudioSession.sharedInstance().setActive(false)
             if let activeCell = activeAudioCell {
                 activeCell.data.audioIsPlaying = false
-                self.didChangeData(onCell: activeCell, withData: activeCell.data)
+                self.didChangeData(onCell: activeCell, withData: activeCell.comment!, dataTypeChanged: "isPlaying")
             }
             stopTimer()
             updateAudioDisplay()
@@ -193,7 +193,7 @@ extension QiscusChatVC:AVAudioPlayerDelegate{
     public func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
         if let activeCell = activeAudioCell as? QCellAudioLeft{
             activeCell.data.audioIsPlaying = false
-            self.didChangeData(onCell: activeCell, withData: activeCell.data)
+            self.didChangeData(onCell: activeCell, withData: activeCell.comment!, dataTypeChanged: "isPlaying")
         }
         stopTimer()
         updateAudioDisplay()
