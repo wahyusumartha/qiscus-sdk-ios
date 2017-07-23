@@ -159,6 +159,7 @@ class QCellMediaRight: QChatCell {
     }
     
     open override func updateStatus(toStatus status:QCommentStatus){
+        dateLabel.text = self.comment!.time.lowercased()
         dateLabel.textColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
         statusImage.isHidden = false
         statusImage.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
@@ -238,7 +239,54 @@ class QCellMediaRight: QChatCell {
             delegate?.didTapCell(withData: data)
         }
     }
-    
+    public override func uploadingMedia() {
+        self.downloadButton.isHidden = true
+        self.progressLabel.text = "\(Int(self.comment!.progress * 100)) %"
+        self.progressLabel.isHidden = false
+        self.progressContainer.isHidden = false
+        self.progressView.isHidden = false
+        
+        let newHeight = self.comment!.progress * maxProgressHeight
+        self.progressHeight.constant = newHeight
+        UIView.animate(withDuration: 0.65, animations: {
+            self.progressView.layoutIfNeeded()
+        })
+    }
+    public override func uploadFinished(){
+        if let file = self.comment!.file {
+            if QiscusHelper.isFileExist(inLocalPath: file.localThumbPath){
+                imageDisplay.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
+                    self.imageDisplay.image = image
+                    self.comment!.displayImage = image
+                })
+            }else if QiscusHelper.isFileExist(inLocalPath: file.localMiniThumbPath){
+                imageDisplay.loadAsync(fromLocalPath: data.localMiniThumbURL!, onLoaded: { (image, _) in
+                    self.imageDisplay.image = image
+                    self.comment!.displayImage = image
+                })
+            }else{
+                imageDisplay.loadAsync(file.thumbURL, onLoaded: { (image, _) in
+                    self.imageDisplay.image = image
+                    self.comment!.displayImage = image
+                })
+            }
+            self.progressView.isHidden = true
+            self.progressContainer.isHidden = true
+            self.progressLabel.isHidden = true
+            if self.comment!.type == .video {
+                self.videoPlay.image = Qiscus.image(named: "play_button")
+                self.videoFrame.isHidden = false
+                self.videoPlay.isHidden = false
+            }else if file.ext == "gif"{
+                self.videoPlay.image = Qiscus.image(named: "ic_gif")
+                self.videoFrame.isHidden = true
+                self.videoPlay.isHidden = false
+            }else{
+                self.videoPlay.isHidden = true
+                self.videoFrame.isHidden = true
+            }
+        }
+    }
     func setupImageView(){
         
     }

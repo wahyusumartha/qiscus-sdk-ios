@@ -205,9 +205,6 @@ public class QRoomService:NSObject{
                         let commentId = commentJSON["id"].intValue
                         let commentBeforeId = commentJSON["comment_before_id"].intValue
                         
-                        // TODO: - later we use it to move sent comment to last position in the room
-                        // let commentCreatedAt = commentJSON["unix_timestamp"].doubleValue
-                        
                         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                         try! realm.write {
                             comment.id = commentId
@@ -231,22 +228,7 @@ public class QRoomService:NSObject{
         })
     }
     public func downloadMedia(inRoom room: QRoom, comment:QComment, thumbImageRef:UIImage? = nil, isAudioFile:Bool = false){
-        var section = room.comments.count - 1
-        var indexPath = IndexPath(item: room.comments[section].comments.count - 1, section: section)
-        for commentGroup in room.comments.reversed() {
-            if commentGroup.date == comment.date && commentGroup.senderEmail == comment.senderEmail{
-                var row = commentGroup.comments.count - 1
-                for commentTarget in commentGroup.comments.reversed(){
-                    if commentTarget.uniqueId == comment.uniqueId{
-                        indexPath.section = section
-                        indexPath.item = row
-                        break
-                    }
-                    row -= 1
-                }
-            }
-            section -= 1
-        }
+        let indexPath = room.getIndexPath(ofComment: comment)
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         if let file = comment.file {
             
@@ -376,7 +358,96 @@ public class QRoomService:NSObject{
                 }
                 room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadProgress")
             })
-            
+        }
+    }
+    public func uploadCommentFile(inRoom room:QRoom, comment:QComment, onSuccess:  @escaping (QRoom, QComment)->Void, onError:  @escaping (QRoom,QComment,String)->Void){
+        if let file = comment.file {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            do {
+                //print("file.localPath: \(file.localPath)")
+                let data = try Data(contentsOf: URL(string: "file://\(file.localPath)")!)
+                let headers = QiscusConfig.sharedInstance.requestHeader
+                let indexPath = room.getIndexPath(ofComment: comment)
+                var urlUpload = URLRequest(url: URL(string: QiscusConfig.UPLOAD_URL)!)
+                if headers.count > 0 {
+                    for (key,value) in headers {
+                        urlUpload.setValue(value, forHTTPHeaderField: key)
+                    }
+                }
+                urlUpload.httpMethod = "POST"
+                let filename = file.filename
+                let mimeType = file.mimeType
+                Alamofire.upload(multipartFormData: {formData in
+                    formData.append(data, withName: "file", fileName: filename, mimeType: mimeType)
+                }, with: urlUpload, encodingCompletion: {
+                    encodingResult in
+                    switch encodingResult{
+                    case .success(let upload, _, _):
+                        upload.responseJSON(completionHandler: {response in
+                            Qiscus.printLog(text: "success upload: \(response)")
+                            if let jsonData = response.result.value {
+                                let json = JSON(jsonData)
+                                if let url = json["url"].string {
+                                    try! realm.write {
+                                        comment.text = "[file]\(url) [/file]"
+                                        file.url = url
+                                        comment.isUploading = false
+                                        comment.progress = 1
+                                    }
+                                    room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadFinish")
+                                }
+                                else if json["results"].count > 0 {
+                                    let jsonData = json["results"]
+                                    if jsonData["file"].count > 0 {
+                                        let fileData = jsonData["file"]
+                                        if let url = fileData["url"].string {
+                                            try! realm.write {
+                                                comment.text = "[file]\(url) [/file]"
+                                                file.url = url
+                                                comment.isUploading = false
+                                                comment.progress = 1
+                                            }
+                                            room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadFinish")
+                                        }
+                                    }
+                                }
+                                onSuccess(room,comment)
+                            }else{
+                                try! realm.write {
+                                    comment.isUploading = false
+                                    comment.progress = 0
+                                    comment.statusRaw = QCommentStatus.failed.rawValue
+                                }
+                                onError(room,comment,"Fail to upload file, no readable response")
+                            }
+                        })
+                        upload.uploadProgress(closure: {uploadProgress in
+                            let progress = CGFloat(uploadProgress.fractionCompleted)
+                            try! realm.write {
+                                comment.isUploading = true
+                                comment.progress = progress
+                            }
+                            room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadProgress")
+                        })
+                        break
+                    case .failure(let error):
+                        try! realm.write {
+                            comment.isUploading = false
+                            comment.progress = 0
+                            comment.statusRaw = QCommentStatus.failed.rawValue
+                        }
+                        onError(room,comment,"Fail to upload file, \(error)")
+                        break
+                    }
+                })
+            } catch {
+                try! realm.write {
+                    comment.isUploading = false
+                    comment.progress = 0
+                    comment.statusRaw = QCommentStatus.failed.rawValue
+                }
+                onError(room, comment, "Local file not found")
+            }
         }
     }
 }

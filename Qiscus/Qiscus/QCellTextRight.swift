@@ -197,6 +197,7 @@ class QCellTextRight: QChatCell {
         
         // first cell
         if self.comment?.cellPos == .first || self.comment?.cellPos == .single{
+            self.userNameLabel.text = "You"
             self.userNameLabel.isHidden = false
             self.balloonTopMargin.constant = 20
             self.cellHeight.constant = 20
@@ -320,7 +321,7 @@ class QCellTextRight: QChatCell {
     open override func setupCell(){
         
     }
-    open override func updateStatus(toStatus status:QCommentStatus){
+    public override func updateStatus(toStatus status:QCommentStatus){
         switch status {
         case .sending:
             dateLabel.textColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor

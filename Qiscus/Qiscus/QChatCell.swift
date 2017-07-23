@@ -62,10 +62,9 @@ class QChatCell: UICollectionViewCell {
         QiscusDataPresenter.shared.resend(DataPresenter: self.data)
     }
     open func reply(){
-        if let comment = self.data.comment {
-            if let chatView = Qiscus.shared.chatViews[comment.roomId] {
-                chatView.replyData = self.data
-            }
+        print("reply room: \(self.comment!.roomId)")
+        if let chatView = Qiscus.shared.chatViews[self.comment!.roomId]{
+            chatView.replyData = self.comment!
         }
     }
     open func deleteComment(){
@@ -110,9 +109,7 @@ class QChatCell: UICollectionViewCell {
             }
         }
     }
-    public func downloadingMedia(){
-        // implementation will be overrided on child class
-    }
+    
     func clearContext(){
         
     }
@@ -149,11 +146,21 @@ class QChatCell: UICollectionViewCell {
         
         return Qiscus.image(named:imageName)?.resizableImage(withCapInsets: edgeInset, resizingMode: .stretch).withRenderingMode(.alwaysTemplate)
     }
+    
     public func cellWidthChanged(){
     
     }
+    public func downloadingMedia(){
+        // implementation will be overrided on child class
+    }
     public func downloadFinished(){
     
+    }
+    public func uploadingMedia(){
+    
+    }
+    public func uploadFinished(){
+        
     }
     public func positionChanged(){
     

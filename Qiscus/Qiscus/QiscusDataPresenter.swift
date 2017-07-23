@@ -323,7 +323,6 @@ import Photos
                         if imageNSData == nil{
                             let asset = PHAsset.fetchAssets(withALAssetURLs: [imagePath!], options: nil)
                             if let phAsset = asset.firstObject {
-                                
                                 let option = PHImageRequestOptions()
                                 option.isSynchronous = true
                                 option.isNetworkAccessAllowed = true
@@ -348,7 +347,8 @@ import Photos
                     }
                     thumbData = UIImagePNGRepresentation(image!)!
                 }
-            }else{
+            }
+            else{
                 if let mime:String = QiscusFileHelper.mimeTypes["\(imageExt)"] {
                     imageMimeType = mime
                     Qiscus.printLog(text: "mime: \(mime)")

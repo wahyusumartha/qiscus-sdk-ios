@@ -196,11 +196,12 @@ class QCellAudioRight: QCellAudio {
     }
 
     open override func updateStatus(toStatus status:QCommentStatus){
-        dateLabel.textColor = UIColor.white
+        dateLabel.textColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
+        dateLabel.text = self.comment!.time.lowercased()
         statusImage.isHidden = false
-        statusImage.tintColor = UIColor.white
+        statusImage.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
         statusImage.isHidden = false
-        statusImage.tintColor = UIColor.white
+        statusImage.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
         
         switch status {
         case .sending:
@@ -232,10 +233,21 @@ class QCellAudioRight: QCellAudio {
         }
     }
     public override func downloadingMedia() {
+        self.progressImageView.image = Qiscus.image(named: "audio_download")
         self.progressContainer.isHidden = false
         self.progressHeight.constant = self.comment!.progress * 30
         let percentage = Int(self.comment!.progress * 100)
         self.dateLabel.text = "Downloading \(QChatCellHelper.getFormattedStringFromInt(percentage)) %"
+        UIView.animate(withDuration: 0.65, animations: {
+            self.progressView.layoutIfNeeded()
+        })
+    }
+    public override func uploadingMedia() {
+        self.progressImageView.image = Qiscus.image(named: "audio_upload")
+        self.progressContainer.isHidden = false
+        self.progressHeight.constant = self.comment!.progress * 30
+        let percentage = Int(self.comment!.progress * 100)
+        self.dateLabel.text = "Uploading \(QChatCellHelper.getFormattedStringFromInt(percentage)) %"
         UIView.animate(withDuration: 0.65, animations: {
             self.progressView.layoutIfNeeded()
         })
@@ -262,6 +274,39 @@ class QCellAudioRight: QCellAudio {
                 self.comment?.updateAudioIsPlaying(playing: false)
                 self.isPlaying = false
             }
+        }
+    }
+    public override func uploadFinished() {
+        if let file = self.comment!.file{
+            if file.localPath != "" {
+                if QiscusHelper.isFileExist(inLocalPath: file.localPath){
+                    self.filePath = file.localPath
+                    self.isPlaying = self.comment!.audioIsPlaying
+                    let audioURL = URL(fileURLWithPath: file.localPath)
+                    let audioAsset = AVURLAsset(url: audioURL)
+                    audioAsset.loadValuesAsynchronously(forKeys: ["duration"], completionHandler: {
+                        var error: NSError? = nil
+                        let status = audioAsset.statusOfValue(forKey: "duration", error: &error)
+                        switch status {
+                        case .loaded:
+                            let duration = Double(CMTimeGetSeconds(audioAsset.duration))
+                            DispatchQueue.main.async {
+                                self.currentTimeSlider.maximumValue = Float(duration)
+                                if let durationString = self.timeFormatter?.string(from: duration) {
+                                    self.comment!.updateDurationLabel(text: durationString)
+                                    self.durationLabel.text = durationString
+                                }
+                            }
+                            break
+                        default:
+                            break
+                        }
+                    })
+                }else{
+                    file.updateLocalPath(path: "")
+                }
+            }
+            self.dateLabel.text = self.comment!.time.lowercased()
         }
     }
     public override func downloadFinished() {

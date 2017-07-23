@@ -61,7 +61,7 @@ public class QiscusChatVC: UIViewController{
     
     var selectedCellIndex:IndexPath? = nil
     
-    var replyData:QiscusCommentPresenter? = nil {
+    var replyData:QComment? = nil {
         didSet{
             if replyData == nil {
                 Qiscus.uiThread.async {
@@ -80,34 +80,41 @@ public class QiscusChatVC: UIViewController{
             }
             else{
                 Qiscus.uiThread.async {
-
-                    if self.replyData!.commentType == .text || self.replyData!.commentType == .reply {
-                        self.linkDescription.text = self.replyData!.commentText
+                    if self.replyData!.type == .text || self.replyData!.type == .reply {
+                        self.linkDescription.text = self.replyData!.text
                         self.linkImageWidth.constant = 0
                     }else{
-                        if self.replyData!.commentType == .video || self.replyData!.commentType == .image {
-                            if QiscusHelper.isFileExist(inLocalPath: self.replyData!.localThumbURL!){
-                                self.linkImage.loadAsync(fromLocalPath: self.replyData!.localThumbURL!, onLoaded: { (image, _) in
-                                    self.linkImage.image = image
-                                })
-                            }else if QiscusHelper.isFileExist(inLocalPath: self.replyData!.localMiniThumbURL!){
-                               self.linkImage.loadAsync(fromLocalPath: self.replyData!.localMiniThumbURL!, onLoaded: { (image, _) in
-                                    self.linkImage.image = image
-                                })
+                        if let file = self.replyData!.file {
+                            if self.replyData!.type == .video || self.replyData!.type == .image {
+                                if QiscusHelper.isFileExist(inLocalPath: file.localThumbPath){
+                                    self.linkImage.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
+                                        self.linkImage.image = image
+                                    })
+                                }
+                                else if QiscusHelper.isFileExist(inLocalPath: file.localMiniThumbPath){
+                                    self.linkImage.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
+                                        self.linkImage.image = image
+                                    })
+                                }
+                                else{
+                                    self.linkImage.loadAsync(file.thumbURL, onLoaded: { (image, _) in
+                                        self.linkImage.image = image
+                                    })
+                                }
+                                self.linkImageWidth.constant = 55
                             }else{
-                                self.linkImage.loadAsync(self.replyData!.remoteThumbURL!, onLoaded: { (image, _) in
-                                    self.linkImage.image = image
-                                })
+                            
                             }
-                            self.linkImageWidth.constant = 55
-                        }else{
-                        
+                            self.linkDescription.text = file.filename
                         }
-                        self.linkDescription.text = self.replyData!.fileName
                     }
-                    
-                    self.linkTitle.text = self.replyData!.userFullName
+                    if let user = self.replyData!.sender {
+                        self.linkTitle.text = user.fullname
+                    }else{
+                        self.linkTitle.text = self.replyData!.senderName
+                    }
                     self.linkPreviewTopMargin.constant = -65
+                    
                     UIView.animate(withDuration: 0.35, animations: {
                         self.view.layoutIfNeeded()
                         if let goToRow = self.lastVisibleRow {
@@ -736,6 +743,7 @@ extension QiscusChatVC:QChatServiceDelegate{
         self.chatRoom = inRoom
         self.chatRoom?.delegate = self
         self.dismissLoading()
+        Qiscus.shared.chatViews[inRoom.id] = self
     }
     public func chatService(didFailLoadRoom error: String) {
         
@@ -769,6 +777,18 @@ extension QiscusChatVC:QRoomDelegate{
             self.collectionView.reloadItems(at: [indexPath])
         }
         switch action {
+        case "uploadProgress":
+            switch comment.type {
+            case .image, .video, .audio:
+                if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
+                    cell.uploadingMedia()
+                }
+                break
+            default:
+                defaultChange()
+                break
+            }
+            break
         case "downloadProgress":
             switch comment.type {
             case .image, .video, .audio:
@@ -780,6 +800,18 @@ extension QiscusChatVC:QRoomDelegate{
                 defaultChange()
                 break
             }
+            break
+        case "uploadFinish":
+            switch comment.type {
+            case .image, .video, .audio:
+                if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
+                    cell.uploadFinished()
+                }
+            default:
+                defaultChange()
+                break
+            }
+            break
         case "downloadFinish":
             switch comment.type {
             case .image, .video, .audio:
@@ -791,6 +823,16 @@ extension QiscusChatVC:QRoomDelegate{
                 break
             }
             break
+        case "status":
+            if comment.senderEmail == QiscusMe.sharedInstance.email {
+                let delay = 0.5 * Double(NSEC_PER_SEC)
+                let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
+                DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                    if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
+                        cell.updateStatus(toStatus: comment.status)
+                    }
+                })
+            }
         default:
             defaultChange()
         }

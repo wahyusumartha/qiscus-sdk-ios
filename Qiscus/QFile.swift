@@ -32,7 +32,7 @@ public class QFile:Object{
     // MARK: - Getter Variable
     public var thumbURL:String{
         get{
-            var thumbURL = self.url.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
+            var thumbURL = self.url.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/").replacingOccurrences(of: " ", with: "%20")
             let thumbUrlArr = thumbURL.characters.split(separator: ".")
             
             var newThumbURL = ""
@@ -114,7 +114,45 @@ public class QFile:Object{
         }
         return file
     }
-    
+    public class func createThumbImage(_ image:UIImage, fillImageSize:UIImage? = nil)->UIImage{
+        let inputImage = image
+        
+        if fillImageSize == nil{
+            var smallPart:CGFloat = inputImage.size.height
+            
+            if(inputImage.size.width > inputImage.size.height){
+                smallPart = inputImage.size.width
+            }
+            let ratio:CGFloat = CGFloat(396.0/smallPart)
+            let newSize = CGSize(width: (inputImage.size.width * ratio),height: (inputImage.size.height * ratio))
+            
+            UIGraphicsBeginImageContext(newSize)
+            inputImage.draw(in: CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height))
+            let newImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            
+            return newImage!
+        }else{
+            let newImage = UIImage.resizeImage(inputImage, toFillOnImage: fillImageSize!)
+            return newImage
+        }
+    }
+    public class func saveFile(_ fileData: Data, fileName: String) -> String {
+        let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
+        let directoryPath = "\(documentsPath)/Qiscus"
+        if !FileManager.default.fileExists(atPath: directoryPath){
+            do {
+                try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
+            } catch let error as NSError {
+                Qiscus.printLog(text: error.localizedDescription);
+            }
+        }
+        let path = "\(documentsPath)/Qiscus/\(fileName)"
+        
+        try? fileData.write(to: URL(fileURLWithPath: path), options: [.atomic])
+        
+        return path
+    }
     public class func getURL(fromString text:String) -> String{
         let component1 = text.components(separatedBy: "[file]")
         let component2 = component1.last!.components(separatedBy: "[/file]")

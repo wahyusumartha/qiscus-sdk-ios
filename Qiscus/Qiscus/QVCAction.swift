@@ -356,58 +356,45 @@ extension QiscusChatVC {
     }
     
     func sendMessage(){
-        DispatchQueue.global().async {
-            if Qiscus.sharedInstance.connected{
-                if !self.isRecording {
-                    let value = self.inputText.value.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-                    var indexPath = IndexPath(row: 0, section: 0)
-                    
-                    if self.comments.count > 0 {
-                        let lastComment = self.comments.last!.last!
-                        if lastComment.userEmail == QiscusMe.sharedInstance.email && lastComment.isToday {
-                            indexPath.section = self.comments.count - 1
-                            indexPath.row = self.comments[indexPath.section].count
-                        }else{
-                            indexPath.section = self.comments.count
-                            indexPath.row = 0
-                        }
+        if Qiscus.shared.connected{
+            if !self.isRecording {
+                let value = self.inputText.value.trimmingCharacters(in: .whitespacesAndNewlines)
+                var type:QCommentType = .text
+                var payload:JSON? = nil
+                if let reply = self.replyData {
+                    var senderName = reply.senderName
+                    if let user = reply.sender{
+                        senderName = user.fullname
                     }
-                    var type:String? = nil
-                    var payloadJson:JSON? = nil
-                    if let reply = self.replyData {
-                        let payloadArray: [(String,Any)] = [
-                            ("replied_comment_sender_email",reply.userEmail),
-                            ("replied_comment_id", reply.commentId),
-                            ("text", value),
-                            ("replied_comment_message", reply.commentText),
-                            ("replied_comment_sender_username", reply.userFullName)
-                        ]
-                        payloadJson = JSON(dictionaryLiteral: payloadArray)
-                        type = "reply"
-                        self.replyData = nil
-                    }
-                    if let chatRoom = self.room {
-                        self.commentClient.postMessage(message: value, topicId: chatRoom.roomLastCommentTopicId, linkData: self.linkData, indexPath: indexPath, payload: payloadJson, type: type)
-                    }
-                    self.inputText.clearValue()
-                    //self.showLink = false
-                    Qiscus.uiThread.async {
-                        self.inputText.text = ""
-                        self.minInputHeight.constant = 32
-                        self.sendButton.isEnabled = false
-                        self.inputText.layoutIfNeeded()
-                    }
-                }else{
-                    
-                    self.finishRecording()
+                    let payloadArray: [(String,Any)] = [
+                        ("replied_comment_sender_email",reply.senderEmail),
+                        ("replied_comment_id", reply.id),
+                        ("text", value),
+                        ("replied_comment_message", reply.text),
+                        ("replied_comment_sender_username", senderName)
+                    ]
+                    payload = JSON(dictionaryLiteral: payloadArray)
+                    type = .reply
+                    self.replyData = nil
+                }
+                let comment = chatRoom!.newComment(text: value, payload: payload, type: type)
+                chatRoom?.post(comment: comment)
+                
+                self.inputText.clearValue()
+                
+                DispatchQueue.main.async {
+                    self.inputText.text = ""
+                    self.minInputHeight.constant = 32
+                    self.sendButton.isEnabled = false
+                    self.inputText.layoutIfNeeded()
                 }
             }else{
-                Qiscus.uiThread.async {
-                    self.showNoConnectionToast()
-                    if self.isRecording {
-                        self.cancelRecordVoice()
-                    }
-                }
+                self.finishRecording()
+            }
+        }else{
+            self.showNoConnectionToast()
+            if self.isRecording {
+                self.cancelRecordVoice()
             }
         }
     }
@@ -627,7 +614,14 @@ extension QiscusChatVC {
             fileContent = try! Data(contentsOf: audioURL)
             
             let fileName = audioURL.lastPathComponent
-            self.continueImageUpload(imageName: fileName, imageNSData: fileContent, audioFile: true)
+            
+            let newComment = self.chatRoom!.newFileComment(type: .audio, filename: fileName, data: fileContent!)
+            
+            self.chatRoom!.upload(comment: newComment, onSuccess: { (roomResult, commentResult) in
+                self.chatRoom!.post(comment: commentResult)
+            }, onError: { (roomResult, commentResult, error) in
+                print("Error: \(error)")
+            })
         }
     }
     func cancelRecordVoice(){
@@ -650,6 +644,19 @@ extension QiscusChatVC {
         }
     }
     
+    func postFile(filename:String, data:Data? = nil, type:QiscusFileType, thumbImage:UIImage? = nil){
+        if Qiscus.sharedInstance.connected {
+            let newComment = self.chatRoom!.newFileComment(type: type, filename: filename, data: data, thumbImage: thumbImage)
+            
+            self.chatRoom!.upload(comment: newComment, onSuccess: { (roomResult, commentResult) in
+                self.chatRoom!.post(comment: commentResult)
+            }, onError: { (roomResult, commentResult, error) in
+                print("Error: \(error)")
+            })
+        }else{
+            self.showNoConnectionToast()
+        }
+    }
     
     // MARK: - Upload Action
     func continueImageUpload(_ image:UIImage? = nil,imageName:String,imagePath:URL? = nil, imageNSData:Data? = nil, videoFile:Bool = false, audioFile:Bool = false){
