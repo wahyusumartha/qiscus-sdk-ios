@@ -97,24 +97,18 @@ extension QiscusChatVC {
         }
     }
     func startTypingIndicator(withUser user:String){
-        DispatchQueue.global().async {
-            self.typingIndicatorUser = user
-            self.isTypingOn = true
-            let typingText = "\(user) is typing ..."
-            Qiscus.uiThread.async {
-                self.subtitleLabel.text = typingText
-            }
-            if self.remoteTypingTimer != nil {
-                if self.remoteTypingTimer!.isValid {
-                    self.remoteTypingTimer?.invalidate()
-                    //self.remoteTypingTimer = nil
-                }
-            }
-            Qiscus.uiThread.sync {
-                self.remoteTypingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.stopTypingIndicator), userInfo: nil, repeats: false)
+        self.typingIndicatorUser = user
+        self.isTypingOn = true
+        let typingText = "\(user) is typing ..."
+        self.subtitleLabel.text = typingText
+        if self.remoteTypingTimer != nil {
+            if self.remoteTypingTimer!.isValid {
+                self.remoteTypingTimer?.invalidate()
             }
         }
+        //self.remoteTypingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.stopTypingIndicator), userInfo: nil, repeats: false)
     }
+    
     func stopTypingIndicator(){
         self.typingIndicatorUser = ""
         self.isTypingOn = false
@@ -122,9 +116,7 @@ extension QiscusChatVC {
             self.remoteTypingTimer?.invalidate()
             self.remoteTypingTimer = nil
         }
-        DispatchQueue.global().async {
-            self.loadSubtitle()
-        }
+        self.loadSubtitle()
     }
     
     func showNoConnectionToast(){
@@ -162,19 +154,17 @@ extension QiscusChatVC {
     }
     
     
-    func subscribeRealtime(onRoom room:QiscusRoom?){
-        if room != nil {
-            let typingChannel:String = "r/\(room!.roomId)/\(room!.roomLastCommentTopicId)/+/t"
-            let readChannel:String = "r/\(room!.roomId)/\(room!.roomLastCommentTopicId)/+/r"
-            let deliveryChannel:String = "r/\(room!.roomId)/\(room!.roomLastCommentTopicId)/+/d"
+    func subscribeRealtime(){
+            let typingChannel:String = "r/\(self.chatRoom!.id)/\(self.chatRoom!.id)/+/t"
+            let readChannel:String = "r/\(self.chatRoom!.id)/\(self.chatRoom!.id)/+/r"
+            let deliveryChannel:String = "r/\(self.chatRoom!.id)/\(self.chatRoom!.id)/+/d"
             Qiscus.shared.mqtt?.subscribe(typingChannel, qos: .qos1)
             Qiscus.shared.mqtt?.subscribe(readChannel, qos: .qos1)
             Qiscus.shared.mqtt?.subscribe(deliveryChannel, qos: .qos1)
-            for participant in room!.participants {
-                let userChannel = "u/\(participant.participantEmail)/s"
+            for participant in self.chatRoom!.participants {
+                let userChannel = "u/\(participant.email)/s"
                 Qiscus.shared.mqtt?.subscribe(userChannel, qos: .qos1)
             }
-        }
     }
     func unsubscribeTypingRealtime(onRoom room:QiscusRoom?){
         if room != nil {

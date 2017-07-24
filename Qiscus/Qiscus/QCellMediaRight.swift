@@ -131,7 +131,7 @@ class QCellMediaRight: QChatCell {
             }else{
                 file.updateLocalPath(path: "")
                 self.downloadButton.isHidden = true
-                tapRecognizer = UITapGestureRecognizer(target:self,action:#selector(QCellMediaLeft.didTapImage))
+                tapRecognizer = UITapGestureRecognizer(target:self,action:#selector(self.didTapImage))
                 imageDisplay.addGestureRecognizer(tapRecognizer!)
                 if self.comment!.isUploading{
                     self.progressContainer.isHidden = false
@@ -232,11 +232,13 @@ class QCellMediaRight: QChatCell {
                 self.videoPlay.isHidden = true
                 self.videoFrame.isHidden = true
             }
+            self.tapRecognizer = UITapGestureRecognizer(target:self,action:#selector(self.didTapImage))
+            self.imageDisplay.addGestureRecognizer(tapRecognizer!)
         }
     }
     func didTapImage(){
-        if data.localFileExist && !data.isUploading && !data.isDownloading{
-            delegate?.didTapCell(withData: data)
+        if !self.comment!.isUploading && !self.comment!.isDownloading {
+            delegate?.didTapCell(withData: self.comment!)
         }
     }
     public override func uploadingMedia() {
@@ -285,6 +287,8 @@ class QCellMediaRight: QChatCell {
                 self.videoPlay.isHidden = true
                 self.videoFrame.isHidden = true
             }
+            self.tapRecognizer = UITapGestureRecognizer(target:self,action:#selector(self.didTapImage))
+            self.imageDisplay.addGestureRecognizer(tapRecognizer!)
         }
     }
     func setupImageView(){

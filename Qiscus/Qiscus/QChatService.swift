@@ -15,7 +15,7 @@ import SwiftyJSON
     func chatService(didFailLoadRoom error:String)
 }
 public class QChatService:NSObject {
-    var delegate:QChatServiceDelegate?
+    public var delegate:QChatServiceDelegate?
     
     
     // MARK: - reconnect

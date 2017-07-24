@@ -11,7 +11,7 @@ import SwiftyJSON
 
 protocol ChatCellDelegate {
     func didChangeSize(onCell cell:QChatCell)
-    func didTapCell(withData data:QiscusCommentPresenter)
+    func didTapCell(withData data:QComment)
     func didTouchLink(onCell cell:QChatCell)
     func didTapPostbackButton(withData data: JSON)
     func didTapAccountLinking(withData data: JSON)

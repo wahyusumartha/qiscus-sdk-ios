@@ -26,6 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if !Qiscus.isLoggedIn{
             goToLoginView()
         }else{
+            Qiscus.connect()
             goToChatNavigationView()
         }
         

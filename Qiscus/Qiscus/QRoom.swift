@@ -27,6 +27,8 @@ public protocol QRoomDelegate {
     func room(gotNewGroupComment onIndex:Int)
     func room(gotNewCommentOn groupIndex:Int, withCommentIndex index:Int)
     func room(didFailUpdate error:String)
+    
+    func room(userDidTyping userEmail:String)
 }
 public class QRoom:Object {
     public dynamic var id:Int = 0
@@ -38,6 +40,7 @@ public class QRoom:Object {
     public dynamic var distinctId:String = ""
     public dynamic var typeRaw:Int = QRoomType.single.rawValue
     public dynamic var singleUser:String = ""
+    public dynamic var typingUser:String = ""
     
     public let comments = List<QCommentGroup>()
     public let participants = List<QParticipant>()
@@ -62,6 +65,9 @@ public class QRoom:Object {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let data =  realm.objects(QComment.self).filter("roomId == \(self.id)")
         
+        try! realm.write {
+            self.typingUser = ""
+        }
         for comment in data {
             try! realm.write {
                 comment.durationLabel = ""
@@ -889,5 +895,15 @@ public class QRoom:Object {
             section -= 1
         }
         return indexPath
+    }
+    public func updateUserTyping(userEmail: String){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        if userEmail != self.typingUser {
+            try! realm.write {
+                self.typingUser = userEmail
+            }
+            self.delegate?.room(userDidTyping: userEmail)
+        }
+        
     }
 }

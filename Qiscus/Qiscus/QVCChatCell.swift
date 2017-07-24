@@ -103,53 +103,56 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
             }
         }
     }
-    func didTapCell(withData data:QiscusCommentPresenter){
-        if data.commentType == .image || data.commentType == .video{
+    func didTapCell(withData data:QComment){
+        if (data.type == .image || data.type == .video) && data.file != nil{
             self.galleryItems = [QiscusGalleryItem]()
+            let currentFile = data.file!
             var totalIndex = 0
             var currentIndex = 0
-            for dataGroup in self.comments {
-                for targetData in dataGroup{
-                    if targetData.commentType == .image || targetData.commentType == .video {
-                        if targetData.localFileExist{
-                            if data.localURL == targetData.localURL{
-                                currentIndex = totalIndex
-                            }
-                            if targetData.commentType == .image{
-                                let urlString = "file://\(targetData.localURL!)"
-                                if let url = URL(string: urlString) {
-                                    if let imageData = try? Data(contentsOf: url) {
-                                        if targetData.fileType == "gif"{
-                                            if let image = UIImage.gif(data: imageData){
-                                                let item = QiscusGalleryItem()
-                                                item.image = image
-                                                item.isVideo = false
-                                                self.galleryItems.append(item)
-                                                totalIndex += 1
-                                            }
-                                        }else{
-                                            if let image = UIImage(data: imageData) {
-                                                let item = QiscusGalleryItem()
-                                                item.image = image
-                                                item.isVideo = false
-                                                self.galleryItems.append(item)
-                                                totalIndex += 1
-                                            }
-                                        }
-                                    }
+            for dataGroup in self.chatRoom!.comments {
+                for targetData in dataGroup.comments{
+                    if targetData.type == .image || targetData.type == .video {
+                        if let file = targetData.file {
+                            if QiscusHelper.isFileExist(inLocalPath: file.localPath){
+                                if file.localPath == currentFile.localPath {
+                                    currentIndex = totalIndex
                                 }
-                            }else if targetData.commentType == .video{
-                                let urlString = "file://\(targetData.localURL!)"
-                                let urlThumb = "file://\(targetData.localThumbURL!)"
-                                if let url = URL(string: urlThumb) {
-                                    if let data = try? Data(contentsOf: url) {
-                                        if let image = UIImage(data: data){
-                                            let item = QiscusGalleryItem()
-                                            item.image = image
-                                            item.isVideo = true
-                                            item.url = urlString
-                                            self.galleryItems.append(item)
-                                            totalIndex += 1
+                                let urlString = "file://\(file.localPath)"
+                                if let url = URL(string: urlString){
+                                    if let imageData = try? Data(contentsOf: url) {
+                                        if file.type == .image {
+                                            if file.ext == "gif"{
+                                                if let image = UIImage.gif(data: imageData){
+                                                    let item = QiscusGalleryItem()
+                                                    item.image = image
+                                                    item.isVideo = false
+                                                    self.galleryItems.append(item)
+                                                    totalIndex += 1
+                                                }
+                                            }else{
+                                                if let image = UIImage(data: imageData) {
+                                                    let item = QiscusGalleryItem()
+                                                    item.image = image
+                                                    item.isVideo = false
+                                                    self.galleryItems.append(item)
+                                                    totalIndex += 1
+                                                }
+                                            }
+                                        }else if file.type == .video{
+                                            let urlString = "file://\(file.localPath)"
+                                            let urlThumb = "file://\(file.localThumbPath)"
+                                            if let url = URL(string: urlThumb) {
+                                                if let data = try? Data(contentsOf: url) {
+                                                    if let image = UIImage(data: data){
+                                                        let item = QiscusGalleryItem()
+                                                        item.image = image
+                                                        item.isVideo = true
+                                                        item.url = urlString
+                                                        self.galleryItems.append(item)
+                                                        totalIndex += 1
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }

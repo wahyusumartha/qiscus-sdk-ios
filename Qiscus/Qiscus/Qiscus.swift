@@ -172,7 +172,9 @@ import CocoaMQTT
             Qiscus.mqttConnect()
         }
     }
-    
+    public class func connect(){
+        Qiscus.shared.RealtimeConnect()
+    }
     @objc public class func setup(withAppId appId:String, userEmail:String, userKey:String, username:String, avatarURL:String? = nil, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true){
         Qiscus.checkDatabaseMigration()
         var requestProtocol = "https"
@@ -214,6 +216,7 @@ import CocoaMQTT
                 }
             }
         }
+        Qiscus.sharedInstance.RealtimeConnect()
     }
     @objc public class func setup(withURL baseUrl:String, userEmail:String, id:Int, username:String, userKey:String, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true, realTimeKey:String){
         Qiscus.checkDatabaseMigration()
@@ -853,7 +856,7 @@ import CocoaMQTT
 extension Qiscus:CocoaMQTTDelegate{
     public func mqtt(_ mqtt: CocoaMQTT, didConnect host: String, port: Int){
         let state = UIApplication.shared.applicationState
-        
+        Qiscus.checkDatabaseMigration()
         let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
         mqtt.subscribe(commentChannel, qos: .qos2)
         if state == .active {
@@ -917,6 +920,17 @@ extension Qiscus:CocoaMQTTDelegate{
                     let topicId:Int = Int(String(channelArr[2]))!
                     let userEmail:String = String(channelArr[3])
                     if userEmail != QiscusMe.sharedInstance.email {
+                        if let room = QRoom.room(withId: topicId){
+                            if room.typingUser == userEmail {
+                                if messageData == "0" {
+                                    room.updateUserTyping(userEmail: "")
+                                }
+                            }else{
+                                if messageData == "1" {
+                                    room.updateUserTyping(userEmail: userEmail)
+                                }
+                            }
+                        }
                         if let room = QiscusRoom.room(withLastTopicId: topicId){
                             if let chatView = Qiscus.shared.chatViews[room.roomId] {
                                 switch messageData {

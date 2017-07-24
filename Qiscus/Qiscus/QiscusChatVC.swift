@@ -160,7 +160,7 @@ public class QiscusChatVC: UIViewController{
                     }else{
                         self.roomAvatar.loadAsync(chatRoom.roomAvatarURL, placeholderImage: image)
                     }
-                    self.subscribeRealtime(onRoom: chatRoom)
+                    //self.subscribeRealtime(onRoom: chatRoom)
                 }
             }
         }
@@ -526,10 +526,7 @@ public class QiscusChatVC: UIViewController{
             self.navigationItem.setHidesBackButton(true, animated: false)
             self.navigationItem.leftBarButtonItems = [backButton]
         }
-        if self.room != nil {
-            self.loadTitle()
-            self.subscribeRealtime(onRoom: self.room!)
-        }
+        
         if #available(iOS 10.0, *) {
             let center = UNUserNotificationCenter.current()
             center.removeAllDeliveredNotifications() // To remove all delivered notifications
@@ -756,9 +753,15 @@ extension QiscusChatVC:QChatServiceDelegate{
         }
         let delay = 0.5 * Double(NSEC_PER_SEC)
         let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
+        let section = self.chatRoom!.comments.count - 1
+        let row = self.chatRoom!.comments[section].comments.count - 1
+        let indexPath = IndexPath(item: row, section: section)
         DispatchQueue.main.asyncAfter(deadline: time, execute: {
             self.dismissLoading()
+            
+            self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
         })
+        self.subscribeRealtime()
         Qiscus.shared.chatViews[inRoom.id] = self
     }
     public func chatService(didFailLoadRoom error: String) {
@@ -886,6 +889,15 @@ extension QiscusChatVC:QRoomDelegate{
         }) { (success) in
             if success {
                 self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+            }
+        }
+    }
+    public func room(userDidTyping userEmail: String) {
+        if userEmail == "" {
+            self.stopTypingIndicator()
+        }else{
+            if let user = QUser.user(withEmail: userEmail) {
+                self.startTypingIndicator(withUser: user.fullname)
             }
         }
     }
