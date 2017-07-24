@@ -29,6 +29,37 @@ class QCellFileLeft: QChatCell {
         fileIcon.image = Qiscus.image(named: "ic_file")?.withRenderingMode(.alwaysTemplate)
         fileIcon.contentMode = .scaleAspectFit
     }
+    public override func commentChanged() {
+        userNameLabel.text = "You"
+        userNameLabel.isHidden = true
+        topMargin.constant = 0
+        cellHeight.constant = 0
+        balloonView.image = getBallon()
+        
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QChatCell.showFile))
+        fileContainer.addGestureRecognizer(tapRecognizer)
+        
+        if self.comment!.cellPos == .first || self.comment!.cellPos == .single{
+            userNameLabel.isHidden = false
+            topMargin.constant = 20
+            cellHeight.constant = 20
+        }
+        
+        if let file = self.comment!.file {
+            fileNameLabel.text = file.filename
+            if file.ext == "pdf" || file.ext == "pdf_" || file.ext == "doc" || file.ext == "docx" || file.ext == "ppt" || file.ext == "pptx" || file.ext == "xls" || file.ext == "xlsx" || file.ext == "txt" {
+                fileTypeLabel.text = "\(file.ext.uppercased()) File"
+            }else{
+                fileTypeLabel.text = "Unknown File"
+            }
+        }
+        
+        dateLabel.text = self.comment!.time.lowercased()
+        
+        balloonView.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor
+        dateLabel.textColor = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
+        fileIcon.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor
+    }
     open override func setupCell(){
         userNameLabel.text = data.userFullName
         userNameLabel.isHidden = true

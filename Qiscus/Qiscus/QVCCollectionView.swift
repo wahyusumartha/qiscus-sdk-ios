@@ -217,6 +217,9 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         case .audio:
             size.height = 83
             break
+        case .file:
+            size.height = 67
+            break
         case .reply:
             size.height += 88
             break

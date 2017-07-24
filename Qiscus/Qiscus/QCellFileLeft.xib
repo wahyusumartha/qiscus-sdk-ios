@@ -31,14 +31,14 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="2SQ-Oz-3ET">
-                                <rect key="frame" x="42" y="0.0" width="215" height="63"/>
+                                <rect key="frame" x="27" y="0.0" width="215" height="63"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="63" id="DFF-cP-zhm"/>
                                     <constraint firstAttribute="width" constant="215" id="k3z-97-DPb"/>
                                 </constraints>
                             </imageView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ol0-Nk-Dfg">
-                                <rect key="frame" x="61" y="4" width="192" height="36"/>
+                                <rect key="frame" x="46" y="4" width="192" height="36"/>
                                 <subviews>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_file" translatesAutoresizingMaskIntoConstraints="NO" id="DaJ-8u-p7t">
                                         <rect key="frame" x="8" y="8" width="20" height="20"/>
@@ -68,7 +68,7 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="PDF File" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="V6o-yi-Nha">
-                                <rect key="frame" x="65" y="40" width="100" height="21"/>
+                                <rect key="frame" x="50" y="40" width="100" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="21" id="dtt-9H-jqH"/>
                                     <constraint firstAttribute="width" constant="100" id="fhX-Nl-tot"/>
@@ -79,7 +79,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sending Failed" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Bqw-TZ-8x1">
-                                <rect key="frame" x="154" y="40" width="95" height="21"/>
+                                <rect key="frame" x="139" y="40" width="95" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="21" id="b1c-Uw-yT7"/>
                                     <constraint firstAttribute="width" constant="95" id="dAh-Sh-Mpe"/>
@@ -99,7 +99,7 @@
                             <constraint firstItem="Bqw-TZ-8x1" firstAttribute="trailing" secondItem="ol0-Nk-Dfg" secondAttribute="trailing" constant="-4" id="d3Z-wP-cjK"/>
                             <constraint firstItem="2SQ-Oz-3ET" firstAttribute="top" secondItem="vz5-aS-SGD" secondAttribute="top" id="eBd-xF-8XP"/>
                             <constraint firstItem="ol0-Nk-Dfg" firstAttribute="top" secondItem="2SQ-Oz-3ET" secondAttribute="top" constant="4" id="f7q-KZ-Ba1"/>
-                            <constraint firstItem="2SQ-Oz-3ET" firstAttribute="leading" secondItem="vz5-aS-SGD" secondAttribute="leading" constant="42" id="i45-7X-DiY"/>
+                            <constraint firstItem="2SQ-Oz-3ET" firstAttribute="leading" secondItem="vz5-aS-SGD" secondAttribute="leading" constant="27" id="i45-7X-DiY"/>
                             <constraint firstItem="V6o-yi-Nha" firstAttribute="bottom" secondItem="2SQ-Oz-3ET" secondAttribute="bottom" constant="-2" id="srq-9R-ahy"/>
                             <constraint firstItem="ol0-Nk-Dfg" firstAttribute="trailing" secondItem="2SQ-Oz-3ET" secondAttribute="trailing" constant="-4" id="v9N-ia-yc4"/>
                             <constraint firstItem="Ir0-Fi-naf" firstAttribute="top" secondItem="vz5-aS-SGD" secondAttribute="top" id="x0P-MI-Bhw"/>
