@@ -53,6 +53,10 @@ public class QiscusChatVC: UIViewController{
     var isPresence:Bool = false
     var titleLabel = UILabel()
     var subtitleLabel = UILabel()
+    var roomAvatarImage:UIImage?
+    var roomAvatar = UIImageView()
+    var roomAvatarLabel = UILabel()
+    
     var isBeforeTranslucent = false
     // MARK: - shared Properties
     var commentClient = QiscusCommentClient.sharedInstance
@@ -226,7 +230,7 @@ public class QiscusChatVC: UIViewController{
     var isTypingOn:Bool = false
     var linkData:QiscusLinkData?
     var roomName:String? // will be removed
-    var roomAvatar = UIImageView() // will be removed
+    
     var isSelfTyping = false
     var firstLoad = true
     
@@ -578,39 +582,48 @@ public class QiscusChatVC: UIViewController{
         titleLabel.backgroundColor = UIColor.clear
         titleLabel.textColor = UIColor.white
         titleLabel.font = UIFont.boldSystemFont(ofSize: UIFont.systemFontSize)
-        titleLabel.text = self.navTitle
+        titleLabel.text = self.chatTitle
         titleLabel.textAlignment = .left
         
         subtitleLabel = UILabel(frame:CGRect(x: 40, y: 25, width: titleWidth, height: 13))
         subtitleLabel.backgroundColor = UIColor.clear
         subtitleLabel.textColor = UIColor.white
         subtitleLabel.font = UIFont.systemFont(ofSize: 11)
-        subtitleLabel.text = self.navSubtitle
+        subtitleLabel.text = self.chatSubtitle
         subtitleLabel.textAlignment = .left
+        
+        self.roomAvatarLabel = UILabel(frame:CGRect(x: 0,y: 6,width: 32,height: 32))
+        self.roomAvatarLabel.font = UIFont.boldSystemFont(ofSize: 25)
+        self.roomAvatarLabel.textColor = UIColor.white
+        self.roomAvatarLabel.backgroundColor = UIColor.clear
+        self.roomAvatarLabel.text = "Q"
+        self.roomAvatarLabel.textAlignment = .center
         
         self.roomAvatar = UIImageView()
         self.roomAvatar.contentMode = .scaleAspectFill
         self.roomAvatar.backgroundColor = UIColor.white
         
-        let image = Qiscus.image(named: "room_avatar")
-        
-        
-        if let chatRoom = self.room{
-            if let avatar = chatRoom.avatarImage {
-                self.roomAvatar.image = avatar
-            }else{
-                self.roomAvatar.loadAsync(chatRoom.roomAvatarURL, placeholderImage: image)
-            }
-        }
+        let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
         
         self.roomAvatar.frame = CGRect(x: 0,y: 6,width: 32,height: 32)
         self.roomAvatar.layer.cornerRadius = 16
         self.roomAvatar.clipsToBounds = true
+        self.roomAvatar.backgroundColor = bgColor[0]
+        
+        if self.chatTitle != nil {
+            let roomTitle = self.chatTitle!.trimmingCharacters(in: .whitespacesAndNewlines)
+            if roomTitle != "" {
+                self.roomAvatarLabel.text = String(roomTitle.characters.first!).uppercased()
+                let colorIndex = roomTitle.characters.count % bgColor.count
+                self.roomAvatar.backgroundColor = bgColor[colorIndex]
+            }
+        }
         
         let titleView = UIView(frame: CGRect(x: 0, y: 0, width: titleWidth + 40, height: 44))
         titleView.addSubview(self.titleLabel)
         titleView.addSubview(self.subtitleLabel)
         titleView.addSubview(self.roomAvatar)
+        titleView.addSubview(self.roomAvatarLabel)
         
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QiscusChatVC.goToTitleAction))
         titleView.addGestureRecognizer(tapRecognizer)
@@ -743,15 +756,24 @@ extension QiscusChatVC:QChatServiceDelegate{
         self.chatRoom = inRoom
         self.chatRoom?.delegate = self
         self.dismissLoading()
+        if self.chatTitle == nil || self.chatTitle == ""{
+            self.loadTitle()
+        }
+        if self.chatSubtitle == nil || self.chatSubtitle == "" {
+            self.loadSubtitle()
+        }
         Qiscus.shared.chatViews[inRoom.id] = self
     }
     public func chatService(didFailLoadRoom error: String) {
-        
+        self.dismissLoading()
+        QToasterSwift.toast(target: self, text: error, backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
     }
 }
 extension QiscusChatVC:QRoomDelegate{
     public func room(didChangeName room: QRoom) {
-        
+        if self.chatTitle == nil {
+            self.loadTitle()
+        }
     }
     public func room(didFinishSync room: QRoom) {
         
@@ -762,9 +784,17 @@ extension QiscusChatVC:QRoomDelegate{
     public func room(didFailUpdate error: String) {
         
     }
-    
+    public func room(didChangeUser room: QRoom, user: QUser) {
+        if self.chatRoom!.type == .single {
+            if user.email != QiscusMe.sharedInstance.email{
+                self.loadSubtitle()
+            }
+        }
+    }
     public func room(didChangeParticipant room: QRoom) {
-        
+        if self.chatRoom?.type == .group && (self.chatSubtitle == "" || self.chatSubtitle == nil){
+            self.loadSubtitle()
+        }
     }
     public func room(didChangeGroupComment section: Int) {
         

@@ -73,7 +73,6 @@ public class QChatService:NSObject {
                             }
                             self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
                         }else if error != JSON.null{
-                            Qiscus.printLog(text: "error getListComment: \(error)")
                             self.delegate?.chatService(didFailLoadRoom: "\(error)")
                         }else{
                             let error = "Failed to load room data"

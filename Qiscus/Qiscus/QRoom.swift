@@ -22,6 +22,7 @@ public protocol QRoomDelegate {
     func room(didChangeGroupComment section:Int)
     func room(didChangeComment section:Int, row:Int, action:String)
     
+    func room(didChangeUser room:QRoom, user:QUser)
     func room(didFinishSync room:QRoom)
     func room(gotNewGroupComment onIndex:Int)
     func room(gotNewCommentOn groupIndex:Int, withCommentIndex index:Int)
@@ -419,15 +420,25 @@ public class QRoom:Object {
             commentText = json["payload"]["text"].stringValue
         }
         //Check sender
-        if QUser.user(withEmail: senderEmail) == nil{
+        //Check sender
+        if let user = QUser.user(withEmail: senderEmail){
+            if user.lastSeen < commentCreatedAt {
+                try! realm.write {
+                    user.lastSeen = commentCreatedAt
+                }
+                self.delegate?.room(didChangeUser: self, user: user)
+            }
+        }else{
             let user = QUser()
             user.email = senderEmail
             user.avatarURL = json["user_avatar_url"].stringValue
             user.fullname = commentSenderName
+            user.lastSeen = commentCreatedAt
             try! realm.write {
                 realm.add(user)
             }
         }
+        
         if let oldComment = QComment.comment(withUniqueId: commentUniqueId) {
             try! realm.write {
                 oldComment.id = commentId
@@ -551,11 +562,19 @@ public class QRoom:Object {
             commentText = json["payload"]["text"].stringValue
         }
         //Check sender
-        if QUser.user(withEmail: senderEmail) == nil{
+        if let user = QUser.user(withEmail: senderEmail){
+            if user.lastSeen < commentCreatedAt {
+                try! realm.write {
+                    user.lastSeen = commentCreatedAt
+                }
+                self.delegate?.room(didChangeUser: self, user: user)
+            }
+        }else{
             let user = QUser()
             user.email = senderEmail
             user.avatarURL = json["user_avatar_url"].stringValue
             user.fullname = commentSenderName
+            user.lastSeen = commentCreatedAt
             try! realm.write {
                 realm.add(user)
             }

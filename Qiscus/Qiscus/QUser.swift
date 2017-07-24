@@ -18,6 +18,48 @@ public class QUser:Object {
     
     public dynamic var avatar:UIImage?
     
+    public var lastSeenString:String{
+        get{
+            var result = ""
+            
+            let date = Date(timeIntervalSince1970: self.lastSeen)
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "d MMMM yyyy"
+            let dateString = dateFormatter.string(from: date)
+            
+            let timeFormatter = DateFormatter()
+            timeFormatter.dateFormat = "h:mm a"
+            let timeString = timeFormatter.string(from: date)
+            
+            let now = Date()
+            
+            let secondDiff = now.offsetFromInSecond(date: date)
+            let minuteDiff = Int(secondDiff/60)
+            let hourDiff = Int(minuteDiff/60)
+            
+            if minuteDiff < 2 {
+                result = "online"
+            }
+            else if minuteDiff < 60 {
+                result = "\(Int(secondDiff/60)) minute ago"
+            }else if hourDiff == 1{
+                result = "an hour ago"
+            }else if hourDiff < 6 {
+                result = "\(hourDiff) hours ago"
+            }
+            else if date.isToday{
+                result = "today at \(timeString)"
+            }
+            else if date.isYesterday{
+                result = "yesterday at \(timeString)"
+            }
+            else{
+                result = "\(dateString) at \(timeString)"
+            }
+            
+            return result
+        }
+    }
     // MARK: - Primary Key
     override open class func primaryKey() -> String {
         return "email"

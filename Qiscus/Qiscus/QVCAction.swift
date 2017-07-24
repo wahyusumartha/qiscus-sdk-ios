@@ -199,64 +199,75 @@ extension QiscusChatVC {
     }
     
     func loadTitle(){
-        DispatchQueue.global().async {
-            var roomTitle = ""
-            if self.navTitle != ""{
-                roomTitle = self.navTitle
-            }else{
-                if self.room != nil{
-                    roomTitle = self.room!.roomName
+        DispatchQueue.main.async {
+            if self.chatTitle == nil || self.chatTitle == "" {
+                if let room = self.chatRoom {
+                    self.titleLabel.text = room.name
+                    if self.roomAvatarImage == nil {
+                        let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
+                        self.roomAvatarLabel.text = String(room.name.characters.first!).uppercased()
+                        let colorIndex = room.name.characters.count % bgColor.count
+                        self.roomAvatar.backgroundColor = bgColor[colorIndex]
+                        if QiscusHelper.isFileExist(inLocalPath: room.avatarLocalPath){
+                            self.roomAvatar.loadAsync(fromLocalPath: room.avatarLocalPath, onLoaded: { (image, _) in
+                                self.roomAvatarImage = image
+                                self.roomAvatar.image = image
+                            })
+                        }else{
+                            self.roomAvatar.loadAsync(room.avatarURL, onLoaded: { (image, _) in
+                                self.roomAvatarImage = image
+                                self.roomAvatar.image = image
+                                self.roomAvatar.backgroundColor = UIColor.clear
+                                self.roomAvatarLabel.isHidden = true
+                            })
+                        }
+                    }
+                    
                 }
             }
-            Qiscus.uiThread.async {
-                self.titleLabel.text = roomTitle
-            }
-            self.loadSubtitle()
         }
     }
     func loadSubtitle(){
-        DispatchQueue.global().async {
-            var roomSubtitle = self.navSubtitle
-            if roomSubtitle == "" {
-                if let targetRoom = self.room {
-                    if targetRoom.roomType == .group {
-                        if targetRoom.participants.count > 0{
-                            for participant in targetRoom.participants {
-                                if participant.participantEmail != QiscusConfig.sharedInstance.USER_EMAIL{
-                                    if let user = QiscusUser.getUserWithEmail(participant.participantEmail){
-                                        if roomSubtitle == "" {
-                                            roomSubtitle = "You, \(user.userFullName)"
-                                        }else{
-                                            roomSubtitle += ", \(user.userFullName)"
-                                        }
-                                    }
+        DispatchQueue.main.async {
+            if self.chatSubtitle == nil || self.chatSubtitle == ""{
+                if let room = self.chatRoom {
+                    var subtitleString = "You"
+                    if room.type == .group{
+                        for participant in room.participants{
+                            if participant.email != QiscusMe.sharedInstance.email {
+                                if let user = participant.user {
+                                    subtitleString += ", \(user.fullname)"
                                 }
                             }
                         }
                     }else{
-                        if targetRoom.participants.count > 0 {
-                            for participant in targetRoom.participants {
-                                if participant.participantEmail != QiscusConfig.sharedInstance.USER_EMAIL{
-                                    if let user = QiscusUser.getUserWithEmail(participant.participantEmail){
-                                        if user.isOnline {
-                                            roomSubtitle = "is online"
-                                        }else if user.userLastSeen == Double(0){
-                                            roomSubtitle = "is offline"
+                        if room.participants.count > 0 {
+                            for participant in room.participants {
+                                if participant.email != QiscusMe.sharedInstance.email{
+                                    if let user = participant.user{
+                                        print("user : \(user)")
+                                        if user.lastSeen == Double(0){
+                                            subtitleString = "is offline"
                                         }else{
-                                            roomSubtitle = "last seen: \(user.lastSeenString)"
+                                            if user.lastSeenString == "online" {
+                                                subtitleString = "is online"
+                                            }else{
+                                                subtitleString = "last seen: \(user.lastSeenString)"
+                                            }
                                         }
                                     }
                                     break
                                 }
                             }
                         }else{
-                            roomSubtitle = "not available"
+                            subtitleString = "not available"
                         }
                     }
+                    if subtitleString != "not available" {
+                        let _ = Timer.scheduledTimer(timeInterval: 60.0, target: self, selector: #selector(self.loadSubtitle), userInfo: nil, repeats: true)
+                    }
+                    self.subtitleLabel.text = subtitleString
                 }
-            }
-            Qiscus.uiThread.async {
-                self.subtitleLabel.text = roomSubtitle
             }
         }
     }
@@ -737,24 +748,6 @@ extension QiscusChatVC {
         }else if self.chatUser != nil {
             self.chatService.room(withUser: self.chatUser!, distincId: self.chatDistinctId, optionalData: self.chatData, withMessage: self.chatMessage)
         }
-        
-        /*
-        if newRoom && (self.users != nil){
-            dataPresenter.loadComments(inNewGroupChat: users!, roomName: navTitle, optionalData: self.optionalData, withMessage: self.message)
-        }else{
-            if loadWithUser && users != nil{
-                if users!.count == 1 {
-                    dataPresenter.loadComments(inRoomWithUsers: users![0], optionalData: optionalData, withMessage: message, distinctId: distincId)
-                }else{
-                    self.dismissLoading()
-                }
-            }else if uniqueId != ""{
-                dataPresenter.loadComments(inRoomWithUniqueId: uniqueId, withMessage: message, title: roomTitle, avatarURL: avatarURL)
-            }else if roomId != nil{
-                dataPresenter.loadComments(inRoom: roomId!, withMessage: message)
-            }
-        }
- */
     }
     
 }
