@@ -896,6 +896,7 @@ extension Qiscus:CocoaMQTTDelegate{
             if let messageData = message.string {
                 let channelArr = message.topic.characters.split(separator: "/")
                 let lastChannelPart = String(channelArr.last!)
+                print("got message on channel \(message.topic): \(message.string)")
                 switch lastChannelPart {
                 case "c":
                     let json = JSON.parse(messageData)
@@ -920,37 +921,15 @@ extension Qiscus:CocoaMQTTDelegate{
                     let topicId:Int = Int(String(channelArr[2]))!
                     let userEmail:String = String(channelArr[3])
                     if userEmail != QiscusMe.sharedInstance.email {
-                        if let room = QRoom.room(withId: topicId){
-                            if room.typingUser == userEmail {
-                                if messageData == "0" {
-                                    room.updateUserTyping(userEmail: "")
-                                }
-                            }else{
-                                if messageData == "1" {
-                                    room.updateUserTyping(userEmail: userEmail)
-                                }
-                            }
-                        }
-                        if let room = QiscusRoom.room(withLastTopicId: topicId){
-                            if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                                switch messageData {
-                                case "1":
-                                    if let user = QiscusUser.getUserWithEmail(userEmail) {
-                                        user.updateLastSeen()
-                                        user.updateStatus(isOnline: true)
-                                        
-                                        let userFullName = user.userFullName
-                                        
-                                       chatView.startTypingIndicator(withUser: userFullName)
+                        DispatchQueue.main.async {
+                            if let room = QRoom.room(withId: topicId){
+                                if room.typingUser == userEmail {
+                                    if messageData == "0" {
+                                        room.updateUserTyping(userEmail: "")
                                     }
-                                    
-                                    break
-                                default:
-                                    if let user = QiscusUser.getUserWithEmail(userEmail) {
-                                        let userFullName = user.userFullName
-                                        if chatView.isTypingOn && (chatView.typingIndicatorUser == userFullName){
-                                            chatView.stopTypingIndicator()
-                                        }
+                                }else{
+                                    if messageData == "1" {
+                                        room.updateUserTyping(userEmail: userEmail)
                                     }
                                 }
                             }

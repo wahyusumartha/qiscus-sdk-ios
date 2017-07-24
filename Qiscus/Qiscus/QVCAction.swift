@@ -155,16 +155,18 @@ extension QiscusChatVC {
     
     
     func subscribeRealtime(){
-            let typingChannel:String = "r/\(self.chatRoom!.id)/\(self.chatRoom!.id)/+/t"
-            let readChannel:String = "r/\(self.chatRoom!.id)/\(self.chatRoom!.id)/+/r"
-            let deliveryChannel:String = "r/\(self.chatRoom!.id)/\(self.chatRoom!.id)/+/d"
+        if let room = self.chatRoom {
+            let typingChannel:String = "r/\(room.id)/\(room.id)/+/t"
+            let readChannel:String = "r/\(room.id)/\(room.id)/+/r"
+            let deliveryChannel:String = "r/\(room.id)/\(room.id)/+/d"
             Qiscus.shared.mqtt?.subscribe(typingChannel, qos: .qos1)
             Qiscus.shared.mqtt?.subscribe(readChannel, qos: .qos1)
             Qiscus.shared.mqtt?.subscribe(deliveryChannel, qos: .qos1)
-            for participant in self.chatRoom!.participants {
+            for participant in room.participants {
                 let userChannel = "u/\(participant.email)/s"
                 Qiscus.shared.mqtt?.subscribe(userChannel, qos: .qos1)
             }
+        }
     }
     func unsubscribeTypingRealtime(onRoom room:QiscusRoom?){
         if room != nil {
