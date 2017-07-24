@@ -363,7 +363,6 @@ public class QiscusChatVC: UIViewController{
         super.viewDidLoad()
         self.chatService.delegate = self
         if self.chatRoom == nil {
-            self.showLoading("Load data ...")
             self.loadData()
         }
         
@@ -380,13 +379,7 @@ public class QiscusChatVC: UIViewController{
         self.collectionView.register(UINib(nibName: "QCellAudioRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellAudioRight")
         self.collectionView.register(UINib(nibName: "QCellFileLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellFileLeft")
         self.collectionView.register(UINib(nibName: "QCellFileRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellFileRight")
-//        if self.comments.count == 0{
-//            self.showLoading("Load data ...")
-//            DispatchQueue.global().async {
-//                self.loadData()
-//            }
-//        }
-        //self.automaticallyAdjustsScrollViewInsets = false
+
         let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout
         layout?.sectionHeadersPinToVisibleBounds = true
         layout?.sectionFootersPinToVisibleBounds = true
@@ -755,17 +748,25 @@ extension QiscusChatVC:QChatServiceDelegate{
     public func chatService(didFinishLoadRoom inRoom: QRoom, withMessage message: String?) {
         self.chatRoom = inRoom
         self.chatRoom?.delegate = self
-        self.dismissLoading()
         if self.chatTitle == nil || self.chatTitle == ""{
             self.loadTitle()
         }
         if self.chatSubtitle == nil || self.chatSubtitle == "" {
             self.loadSubtitle()
         }
+        let delay = 0.5 * Double(NSEC_PER_SEC)
+        let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
+        DispatchQueue.main.asyncAfter(deadline: time, execute: {
+            self.dismissLoading()
+        })
         Qiscus.shared.chatViews[inRoom.id] = self
     }
     public func chatService(didFailLoadRoom error: String) {
-        self.dismissLoading()
+        let delay = 0.5 * Double(NSEC_PER_SEC)
+        let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
+        DispatchQueue.main.asyncAfter(deadline: time, execute: {
+            self.dismissLoading()
+        })
         QToasterSwift.toast(target: self, text: error, backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
     }
 }

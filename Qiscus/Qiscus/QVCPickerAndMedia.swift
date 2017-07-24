@@ -171,51 +171,90 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
         let coordinator = NSFileCoordinator()
         coordinator.coordinate(readingItemAt: url, options: NSFileCoordinator.ReadingOptions.forUploading, error: nil) { (dataURL) in
             do{
-                let data:Data = try Data(contentsOf: dataURL, options: NSData.ReadingOptions.mappedIfSafe)
+                var data:Data = try Data(contentsOf: dataURL, options: NSData.ReadingOptions.mappedIfSafe)
                 var fileName = dataURL.lastPathComponent.replacingOccurrences(of: "%20", with: "_")
                 fileName = fileName.replacingOccurrences(of: " ", with: "_")
                 
+                var popupText = QiscusTextConfiguration.sharedInstance.confirmationImageUploadText
+                var fileType = QiscusFileType.image
+                var thumb:UIImage? = nil
                 let fileNameArr = (fileName as String).characters.split(separator: ".")
                 let ext = String(fileNameArr.last!).lowercased()
+                let okText = QiscusTextConfiguration.sharedInstance.alertOkText
+                let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
                 
-                // get file extension
-                let isGifImage:Bool = (ext == "gif" || ext == "gif_")
-                let isJPEGImage:Bool = (ext == "jpg" || ext == "jpg_")
-                let isPNGImage:Bool = (ext == "png" || ext == "png_")
-                
-                if isGifImage || isPNGImage || isJPEGImage{
-                    var imagePath:URL?
-                    let image = UIImage(data: data)
-                    if isGifImage{
-                        imagePath = dataURL
+                let gif = (ext == "gif" || ext == "gif_")
+                let jpeg = (ext == "jpg" || ext == "jpg_")
+                let png = (ext == "png" || ext == "png_")
+                let video = (ext == "mp4" || ext == "mp4_" || ext == "mov" || ext == "mov_")
+                if jpeg{
+                    let image = UIImage(data: data)!
+                    let imageSize = image.size
+                    var bigPart = CGFloat(0)
+                    if(imageSize.width > imageSize.height){
+                        bigPart = imageSize.width
+                    }else{
+                        bigPart = imageSize.height
                     }
-                    self.dismissLoading()
-                    let text = QiscusTextConfiguration.sharedInstance.confirmationImageUploadText
-                    let okText = QiscusTextConfiguration.sharedInstance.alertOkText
-                    let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
-                    QPopUpView.showAlert(withTarget: self, image: image, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
-                                         doneAction: {
-                                            self.continueImageUpload(image, imageName: fileName, imagePath: imagePath, imageNSData: data)
-                                            
-                    },
-                                         cancelAction: {}
-                    )
+                    
+                    var compressVal = CGFloat(1)
+                    if(bigPart > 2000){
+                        compressVal = 2000 / bigPart
+                    }
+                    data = UIImageJPEGRepresentation(image, compressVal)!
+                    thumb = UIImage(data: data)
+                }else if png{
+                    let image = UIImage(data: data)!
+                    thumb = image
+                    data = UIImagePNGRepresentation(image)!
+                }else if gif{
+                    let image = UIImage(data: data)!
+                    thumb = image
+                    let asset = PHAsset.fetchAssets(withALAssetURLs: [dataURL], options: nil)
+                    if let phAsset = asset.firstObject {
+                        let option = PHImageRequestOptions()
+                        option.isSynchronous = true
+                        option.isNetworkAccessAllowed = true
+                        PHImageManager.default().requestImageData(for: phAsset, options: option) {
+                            (gifData, dataURI, orientation, info) -> Void in
+                            data = gifData!
+                        }
+                    }
+                }else if video {
+                    fileType = .video
+                    
+                    let assetMedia = AVURLAsset(url: dataURL)
+                    let thumbGenerator = AVAssetImageGenerator(asset: assetMedia)
+                    thumbGenerator.appliesPreferredTrackTransform = true
+                    
+                    let thumbTime = CMTimeMakeWithSeconds(0, 30)
+                    let maxSize = CGSize(width: QiscusHelper.screenWidth(), height: QiscusHelper.screenWidth())
+                    thumbGenerator.maximumSize = maxSize
+                    
+                    do{
+                        let thumbRef = try thumbGenerator.copyCGImage(at: thumbTime, actualTime: nil)
+                        thumb = UIImage(cgImage: thumbRef)
+                        popupText = "Are you sure to send this video?"
+                    }catch{
+                        Qiscus.printLog(text: "error creating thumb image")
+                    }
                 }else{
-                    self.dismissLoading()
                     let textFirst = QiscusTextConfiguration.sharedInstance.confirmationFileUploadText
                     let textMiddle = "\(fileName as String)"
                     let textLast = QiscusTextConfiguration.sharedInstance.questionMark
-                    let text = "\(textFirst) \(textMiddle) \(textLast)"
-                    let okText = QiscusTextConfiguration.sharedInstance.alertOkText
-                    let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
-                    QPopUpView.showAlert(withTarget: self, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
-                                         doneAction: {
-                                            self.continueImageUpload(imageName: fileName, imagePath: dataURL, imageNSData: data)
-                    },
-                                         cancelAction: {
-                    }
-                    )
+                    popupText = "\(textFirst) \(textMiddle) \(textLast)"
+                    fileType = QiscusFileType.file
                 }
+                self.dismissLoading()
+                QPopUpView.showAlert(withTarget: self, image: thumb, message:popupText, isVideoImage: video,
+                                     doneAction: {
+                                        self.postFile(filename: fileName, data: data, type: fileType, thumbImage: thumb)
+                },
+                                     cancelAction: {
+                                        Qiscus.printLog(text: "cancel upload")
+                }
+                )
+                
             }catch _{
                 self.dismissLoading()
             }

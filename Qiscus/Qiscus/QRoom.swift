@@ -818,6 +818,8 @@ public class QRoom:Object {
             file.localPath = QFile.saveFile(data!, fileName: fileName)
             break
         default:
+            file.localPath = QFile.saveFile(data!, fileName: fileName)
+            comment.typeRaw = QCommentType.file.rawValue
             break
         }
         

@@ -743,6 +743,7 @@ extension QiscusChatVC {
     }
     // MARK: - Load DataSource on firstTime
     func loadData(){
+        self.showLoading("Load data ...")
         if self.chatRoomId != nil {
             self.chatService.room(withId: self.chatRoomId!, withMessage: self.chatMessage)
         }else if self.chatUser != nil {
