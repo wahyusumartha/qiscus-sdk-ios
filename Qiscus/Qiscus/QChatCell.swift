@@ -76,23 +76,21 @@ class QChatCell: UICollectionViewCell {
         
     }
     open func showFile(){
-        if let room = QiscusRoom.room(withLastTopicId: data.topicId) {
-            if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                if data.isUploaded && (data.commentType == .document){
-                    let url = data.remoteURL!
-                    let fileName = data.fileName
+        if let chatView = Qiscus.shared.chatViews[self.comment!.roomId] {
+            if let file = self.comment!.file {
+                if file.ext == "pdf" || file.ext == "pdf_" || file.ext == "doc" || file.ext == "docx" || file.ext == "ppt" || file.ext == "pptx" || file.ext == "xls" || file.ext == "xlsx" || file.ext == "txt" {
+                    let url = file.url
+                    let filename = file.filename
                     
                     let preview = ChatPreviewDocVC()
-                    preview.fileName = fileName
+                    preview.fileName = filename
                     preview.url = url
-                    preview.roomName = room.roomName
-                    
+                    preview.roomName = chatView.chatRoom!.name
                     let backButton = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
                     chatView.navigationItem.backBarButtonItem = backButton
-                    
                     chatView.navigationController?.pushViewController(preview, animated: true)
                 }else{
-                    if let url = URL(string: data.remoteURL!){
+                    if let url = URL(string: file.url){
                         if #available(iOS 10.0, *) {
                             UIApplication.shared.open(url, completionHandler: { success in
                                 if !success {
