@@ -264,7 +264,16 @@ extension QiscusChatVC {
                         }
                     }
                     if subtitleString != "not available" {
-                        let _ = Timer.scheduledTimer(timeInterval: 60.0, target: self, selector: #selector(self.loadSubtitle), userInfo: nil, repeats: true)
+                        if subtitleString == "online" || subtitleString.contains("minute") || subtitleString.contains("hours") {
+                            var delay = 60.0 * Double(NSEC_PER_SEC)
+                            if subtitleString.contains("hours"){
+                                delay = 3600.0 * Double(NSEC_PER_SEC)
+                            }
+                            let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
+                            DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                                self.loadSubtitle()
+                            })
+                        }
                     }
                     self.subtitleLabel.text = subtitleString
                 }
