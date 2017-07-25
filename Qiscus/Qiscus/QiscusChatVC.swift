@@ -915,6 +915,6 @@ extension QiscusChatVC:QRoomDelegate{
     }
     public func room(didDeleteGroupComment section: Int) {
         let indexSet = IndexSet(integer: section)
-        self.collectionView.deleteSections(IndexSet)
+        self.collectionView.deleteSections(indexSet)
     }
 }
