@@ -106,8 +106,10 @@ public class QRoom:Object {
                 Qiscus.chatRooms[room!.id] = room!
                 Qiscus.sharedInstance.RealtimeConnect()
             }
-            if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                roomDelegate.didFinishLoadRoom(onRoom: room!)
+            DispatchQueue.main.async {
+                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                    roomDelegate.didFinishLoadRoom(onRoom: room!)
+                }
             }
         }
         return room
@@ -126,8 +128,10 @@ public class QRoom:Object {
                 Qiscus.chatRooms[room!.id] = room!
                 Qiscus.sharedInstance.RealtimeConnect()
             }
-            if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                roomDelegate.didFinishLoadRoom(onRoom: room!)
+            DispatchQueue.main.async {
+                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                    roomDelegate.didFinishLoadRoom(onRoom: room!)
+                }
             }
         }
         return room
@@ -146,8 +150,10 @@ public class QRoom:Object {
                 Qiscus.chatRooms[room!.id] = room!
                 Qiscus.sharedInstance.RealtimeConnect()
             }
-            if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                roomDelegate.didFinishLoadRoom(onRoom: room!)
+            DispatchQueue.main.async {
+                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                    roomDelegate.didFinishLoadRoom(onRoom: room!)
+                }
             }
         }
         return room
@@ -239,8 +245,10 @@ public class QRoom:Object {
         }
         Qiscus.chatRooms[room.id] = room
         Qiscus.sharedInstance.RealtimeConnect()
-        if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-            roomDelegate.didFinishLoadRoom(onRoom: room)
+        DispatchQueue.main.async {
+            if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                roomDelegate.didFinishLoadRoom(onRoom: room)
+            }
         }
         return room
     }
@@ -364,8 +372,10 @@ public class QRoom:Object {
             }
             if !onTop {
                 self.delegate?.room(gotNewGroupComment: 0)
-                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                    roomDelegate.gotNewComment(newComment)
+                DispatchQueue.main.async {
+                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                        roomDelegate.gotNewComment(newComment)
+                    }
                 }
             }
         }else if onTop{
@@ -412,8 +422,10 @@ public class QRoom:Object {
                     lastComment.comments.append(newComment)
                 }
                 self.delegate?.room(gotNewCommentOn: self.comments.count - 1, withCommentIndex: lastComment.comments.count - 1)
-                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                    roomDelegate.gotNewComment(newComment)
+                DispatchQueue.main.async {
+                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                        roomDelegate.gotNewComment(newComment)
+                    }
                 }
                 var i = 0
                 let section = self.comments.count - 1
@@ -444,8 +456,10 @@ public class QRoom:Object {
                     self.comments.append(commentGroup)
                 }
                 self.delegate?.room(gotNewGroupComment: self.comments.count - 1)
-                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                    roomDelegate.gotNewComment(newComment)
+                DispatchQueue.main.async {
+                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                        roomDelegate.gotNewComment(newComment)
+                    }
                 }
             }
         }

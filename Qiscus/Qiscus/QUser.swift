@@ -11,6 +11,7 @@ import RealmSwift
 
 public class QUser:Object {
     public dynamic var email:String = ""
+    public dynamic var id:Int = 0
     public dynamic var avatarURL:String = ""
     public dynamic var avatarLocalPath:String = ""
     public dynamic var fullname:String = ""

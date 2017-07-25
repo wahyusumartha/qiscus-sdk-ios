@@ -74,20 +74,26 @@ public class QChatService:NSObject {
                             self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
                         }else if error != JSON.null{
                             self.delegate?.chatService(didFailLoadRoom: "\(error)")
-                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                                roomDelegate.didFailLoadRoom(withError: "\(error)")
+                            DispatchQueue.main.async {
+                                if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
+                                    roomDelegate.didFailLoadRoom(withError: "\(error)")
+                                }
                             }
                         }else{
                             let error = "Failed to load room data"
-                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                                roomDelegate.didFailLoadRoom(withError: "\(error)")
+                            DispatchQueue.main.async {
+                                if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
+                                    roomDelegate.didFailLoadRoom(withError: "\(error)")
+                                }
                             }
                             Qiscus.printLog(text: error)
                         }
                     }else{
                         let error = "Failed to load room data"
-                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                            roomDelegate.didFailLoadRoom(withError: "\(error)")
+                        DispatchQueue.main.async {
+                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
+                                roomDelegate.didFailLoadRoom(withError: "\(error)")
+                            }
                         }
                         Qiscus.printLog(text: error)
                     }
@@ -143,15 +149,19 @@ public class QChatService:NSObject {
                         }else if error != JSON.null{
                             self.delegate?.chatService(didFailLoadRoom: "\(error)")
                             Qiscus.printLog(text: "\(error)")
-                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                                roomDelegate.didFailLoadRoom(withError: "\(error)")
+                            DispatchQueue.main.async {
+                                if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
+                                    roomDelegate.didFailLoadRoom(withError: "\(error)")
+                                }
                             }
                         }else{
                             let error = "Failed to load room data"
                             self.delegate?.chatService(didFailLoadRoom: "\(error)")
                             Qiscus.printLog(text: error)
-                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                                roomDelegate.didFailLoadRoom(withError: "\(error)")
+                            DispatchQueue.main.async {
+                                if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
+                                    roomDelegate.didFailLoadRoom(withError: "\(error)")
+                                }
                             }
                         }
                         
@@ -159,8 +169,10 @@ public class QChatService:NSObject {
                         let error = "Failed to load room data"
                         self.delegate?.chatService(didFailLoadRoom: "\(error)")
                         Qiscus.printLog(text: error)
-                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                            roomDelegate.didFailLoadRoom(withError: "\(error)")
+                        DispatchQueue.main.async {
+                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
+                                roomDelegate.didFailLoadRoom(withError: "\(error)")
+                            }
                         }
                     }
                 })
@@ -207,23 +219,29 @@ public class QChatService:NSObject {
                         }else if error != JSON.null{
                             self.delegate?.chatService(didFailLoadRoom: "\(error)")
                             Qiscus.printLog(text: "\(error)")
-                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                                roomDelegate.didFailLoadRoom(withError: "\(error)")
+                            DispatchQueue.main.async {
+                                if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
+                                    roomDelegate.didFailLoadRoom(withError: "\(error)")
+                                }
                             }
                         }else{
                             let error = "Failed to load room data"
                             self.delegate?.chatService(didFailLoadRoom: "\(error)")
                             Qiscus.printLog(text: "\(error)")
-                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                                roomDelegate.didFailLoadRoom(withError: "\(error)")
+                            DispatchQueue.main.async {
+                                if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
+                                    roomDelegate.didFailLoadRoom(withError: "\(error)")
+                                }
                             }
                         }
                     }else{
                         let error = "Failed to load room data"
                         self.delegate?.chatService(didFailLoadRoom: "\(error)")
                         Qiscus.printLog(text: error)
-                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                            roomDelegate.didFailLoadRoom(withError: "\(error)")
+                        DispatchQueue.main.async {
+                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
+                                roomDelegate.didFailLoadRoom(withError: "\(error)")
+                            }
                         }
                     }
                 })
@@ -315,23 +333,29 @@ public class QChatService:NSObject {
                     }else if error != JSON.null{
                         self.delegate?.chatService(didFailLoadRoom: "\(error)")
                         Qiscus.printLog(text: "\(error)")
-                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                            roomDelegate.didFailLoadRoom(withError: "\(error)")
+                        DispatchQueue.main.async {
+                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
+                                roomDelegate.didFailLoadRoom(withError: "\(error)")
+                            }
                         }
                     }else{
                         let error = "Failed to load room data"
                         self.delegate?.chatService(didFailLoadRoom: "\(error)")
                         Qiscus.printLog(text: "\(error)")
-                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                            roomDelegate.didFailLoadRoom(withError: "\(error)")
+                        DispatchQueue.main.async {
+                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
+                                roomDelegate.didFailLoadRoom(withError: "\(error)")
+                            }
                         }
                     }
                 }else{
                     let error = "Failed to load room data"
                     self.delegate?.chatService(didFailLoadRoom: "\(error)")
                     Qiscus.printLog(text: "\(error)")
-                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                        roomDelegate.didFailLoadRoom(withError: "\(error)")
+                    DispatchQueue.main.async {
+                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
+                            roomDelegate.didFailLoadRoom(withError: "\(error)")
+                        }
                     }
                 }
             })
