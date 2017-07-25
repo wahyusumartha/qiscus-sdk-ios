@@ -213,6 +213,7 @@ public class QRoomService:NSObject{
                         if comment.statusRaw == QCommentStatus.sending.rawValue {
                             room.updateCommentStatus(inComment: comment, status: .sent)
                         }
+                        self.sync(onRoom: room)
                     }else{
                         room.updateCommentStatus(inComment: comment, status: .failed)
                     }

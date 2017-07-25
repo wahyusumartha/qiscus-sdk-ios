@@ -72,4 +72,17 @@ public class QUser:Object {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         return realm.object(ofType: QUser.self, forPrimaryKey: email)
     }
+    public class func all() -> [QUser]{
+        var allUser = [QUser]()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        
+        let data = realm.objects(QUser.self)
+        
+        if data.count > 0 {
+            for user in data{
+                allUser.append(user)
+            }
+        }
+        return allUser
+    }
 }

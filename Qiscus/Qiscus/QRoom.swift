@@ -101,16 +101,7 @@ public class QRoom:Object {
             }else{
                 room!.resetRoomComment()
                 Qiscus.chatRooms[room!.id] = room!
-                let typingChannel:String = "r/\(room!.id)/\(room!.id)/+/t"
-                let readChannel:String = "r/\(room!.id)/\(room!.id)/+/r"
-                let deliveryChannel:String = "r/\(room!.id)/\(room!.id)/+/d"
-                Qiscus.shared.mqtt?.subscribe(typingChannel, qos: .qos1)
-                Qiscus.shared.mqtt?.subscribe(readChannel, qos: .qos1)
-                Qiscus.shared.mqtt?.subscribe(deliveryChannel, qos: .qos1)
-                for participant in room!.participants {
-                    let userChannel = "u/\(participant.email)/s"
-                    Qiscus.shared.mqtt?.subscribe(userChannel, qos: .qos1)
-                }
+                Qiscus.sharedInstance.RealtimeConnect()
             }
         }
         return room
@@ -127,16 +118,7 @@ public class QRoom:Object {
             }else{
                 room!.resetRoomComment()
                 Qiscus.chatRooms[room!.id] = room!
-                let typingChannel:String = "r/\(room!.id)/\(room!.id)/+/t"
-                let readChannel:String = "r/\(room!.id)/\(room!.id)/+/r"
-                let deliveryChannel:String = "r/\(room!.id)/\(room!.id)/+/d"
-                Qiscus.shared.mqtt?.subscribe(typingChannel, qos: .qos1)
-                Qiscus.shared.mqtt?.subscribe(readChannel, qos: .qos1)
-                Qiscus.shared.mqtt?.subscribe(deliveryChannel, qos: .qos1)
-                for participant in room!.participants {
-                    let userChannel = "u/\(participant.email)/s"
-                    Qiscus.shared.mqtt?.subscribe(userChannel, qos: .qos1)
-                }
+                Qiscus.sharedInstance.RealtimeConnect()
             }
         }
         return room
@@ -153,7 +135,7 @@ public class QRoom:Object {
             }else{
                 room!.resetRoomComment()
                 Qiscus.chatRooms[room!.id] = room!
-                
+                Qiscus.sharedInstance.RealtimeConnect()
             }
         }
         return room
@@ -243,16 +225,7 @@ public class QRoom:Object {
             
         }
         Qiscus.chatRooms[room.id] = room
-        let typingChannel:String = "r/\(room.id)/\(room.id)/+/t"
-        let readChannel:String = "r/\(room.id)/\(room.id)/+/r"
-        let deliveryChannel:String = "r/\(room.id)/\(room.id)/+/d"
-        Qiscus.shared.mqtt?.subscribe(typingChannel, qos: .qos1)
-        Qiscus.shared.mqtt?.subscribe(readChannel, qos: .qos1)
-        Qiscus.shared.mqtt?.subscribe(deliveryChannel, qos: .qos1)
-        for participant in room.participants {
-            let userChannel = "u/\(participant.email)/s"
-            Qiscus.shared.mqtt?.subscribe(userChannel, qos: .qos1)
-        }
+        Qiscus.sharedInstance.RealtimeConnect()
         return room
     }
     
@@ -946,5 +919,18 @@ public class QRoom:Object {
             self.delegate?.room(userDidTyping: userEmail)
         }
         
+    }
+    public class func all() -> [QRoom]{
+        var allRoom = [QRoom]()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        
+        let data = realm.objects(QRoom.self)
+        
+        if data.count > 0 {
+            for room in data{
+                allRoom.append(room)
+            }
+        }
+        return allRoom
     }
 }

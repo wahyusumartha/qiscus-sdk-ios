@@ -760,10 +760,10 @@ extension QiscusChatVC:QChatServiceDelegate{
         let indexPath = IndexPath(item: row, section: section)
         DispatchQueue.main.asyncAfter(deadline: time, execute: {
             self.dismissLoading()
-            
             self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
+            self.subscribeRealtime()
         })
-        self.subscribeRealtime()
+        
         Qiscus.shared.chatViews[inRoom.id] = self
     }
     public func chatService(didFailLoadRoom error: String) {
