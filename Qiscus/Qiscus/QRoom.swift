@@ -208,6 +208,7 @@ public class QRoom:Object {
                 if QParticipant.participant(inRoomWithId: room.id, andEmail: participantEmail) == nil{
                     let newParticipant = QParticipant()
                     newParticipant.localId = "\(room.id)_\(participantEmail)"
+                    newParticipant.roomId = room.id
                     newParticipant.email = participantEmail
                     try! realm.write {
                         room.participants.append(newParticipant)
@@ -311,6 +312,7 @@ public class QRoom:Object {
             if QParticipant.participant(inRoomWithId: self.id, andEmail: participantEmail) == nil{
                 let newParticipant = QParticipant()
                 newParticipant.localId = "\(self.id)_\(participantEmail)"
+                newParticipant.roomId = self.id
                 newParticipant.email = participantEmail
                 try! realm.write {
                     self.participants.append(newParticipant)

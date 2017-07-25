@@ -85,4 +85,18 @@ public class QUser:Object {
         }
         return allUser
     }
+    public func updateLastSeen(lastSeen:Double){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        if lastSeen < self.lastSeen {
+            try! realm.write {
+                self.lastSeen = lastSeen
+            }
+            let participants = QParticipant.all(withEmail: self.email)
+            for participant in participants {
+                if let room = QRoom.room(withId: participant.roomId) {
+                    room.delegate?.room(didChangeUser: room, user: self)
+                }
+            }
+        }
+    }
 }

@@ -897,11 +897,9 @@ extension Qiscus:CocoaMQTTDelegate{
             if let messageData = message.string {
                 let channelArr = message.topic.characters.split(separator: "/")
                 let lastChannelPart = String(channelArr.last!)
-                print("got message on channel \(message.topic): \(message.string)")
                 switch lastChannelPart {
                 case "c":
                     let json = JSON.parse(messageData)
-                    //let commentData = json["comment_before_id"].intValue
                     let roomId = json["room_id"].intValue
                     let commentId = json["id"].intValue
                     if let room = QRoom.room(withId: roomId) {
@@ -938,49 +936,33 @@ extension Qiscus:CocoaMQTTDelegate{
                     }
                     break
                 case "d":
+                    let roomId = Int(String(channelArr[2]))!
                     let messageArr = messageData.characters.split(separator: ":")
-                    let commentUniqueId:String = String(messageArr[1])
+                    let commentId = Int(String(messageArr[0]))!
                     let userEmail = String(channelArr[3])
-                    if let comment = QiscusComment.comment(withUniqueId: commentUniqueId){
-                        comment.updateCommentStatus(.delivered, email: userEmail)
-                        let roomId = comment.roomId
-                        if let chatView = Qiscus.shared.chatViews[roomId] {
-                            chatView.dataPresenter(didChangeStatusFrom: comment.commentId, toStatus: .delivered, topicId: comment.commentTopicId)
-                        }
+                    
+                    if let participant = QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail){
+                        participant.updateLastDeliveredId(commentId: commentId)
                     }
+                    
                     break
                 case "r":
+                    let roomId:Int = Int(String(channelArr[2]))!
                     let messageArr = messageData.characters.split(separator: ":")
-                    let commentUniqueId:String = String(messageArr[1])
+                    let commentId = Int(String(messageArr[0]))!
                     let userEmail = String(channelArr[3])
-                    if let comment = QiscusComment.comment(withUniqueId: commentUniqueId){
-                        comment.updateCommentStatus(.read, email: userEmail)
-                        let roomId = comment.roomId
-                        if let chatView = Qiscus.shared.chatViews[roomId] {
-                            chatView.dataPresenter(didChangeStatusFrom: comment.commentId, toStatus: .read, topicId: comment.commentTopicId)
-                        }
+                    if let participant = QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail){
+                        participant.updateLastReadId(commentId: commentId)
                     }
                     break
                 case "s":
                     let messageArr = messageData.characters.split(separator: ":")
                     let online = Int(String(messageArr[0]))
                     let userEmail = String(channelArr[1])
-                    if online == 1 {
-                        if userEmail != QiscusMe.sharedInstance.email{
-                            if let user = QiscusUser.getUserWithEmail(userEmail){
-                                if let timeToken = Double(String(messageArr[1])){
-                                    user.updateStatus(isOnline: true)
-                                    user.updateLastSeen(Double(timeToken)/1000)
-                                }
-                            }
-                        }
-                    }else{
-                        if userEmail != QiscusMe.sharedInstance.email{
-                            if let user = QiscusUser.getUserWithEmail(userEmail){
-                                if let timeToken = Double(String(messageArr[1])){
-                                    user.updateLastSeen(Double(timeToken)/1000)
-                                    user.updateStatus(isOnline: false)
-                                }
+                    if userEmail != QiscusMe.sharedInstance.email{
+                        if let user = QUser.user(withEmail: userEmail){
+                            if let timeToken = Double(String(messageArr[1])){
+                                user.updateLastSeen(lastSeen: Double(timeToken)/1000)
                             }
                         }
                     }

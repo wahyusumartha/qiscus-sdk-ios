@@ -190,6 +190,8 @@ public class QiscusChatVC: UIViewController{
     var chatNewRoomUsers:[String] = [String]()
     var chatDistinctId:String?
     var chatData:String?
+    var chatRoomUniqueId:String?
+    var chatAvatarURL = ""
     var chatService = QChatService()
     var collectionWidth:CGFloat = 0
     
@@ -763,7 +765,11 @@ extension QiscusChatVC:QChatServiceDelegate{
             self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
             self.subscribeRealtime()
         })
-        
+        if self.chatMessage != nil || self.chatMessage != "" {
+            let newMessage = self.chatRoom!.newComment(text: self.chatMessage!)
+            self.chatRoom!.post(comment: newMessage)
+            self.chatMessage = nil
+        }
         Qiscus.shared.chatViews[inRoom.id] = self
     }
     public func chatService(didFailLoadRoom error: String) {
