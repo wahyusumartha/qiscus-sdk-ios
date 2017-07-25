@@ -400,9 +400,8 @@ import CocoaMQTT
      No Documentation
      */
     @objc public class func chatView(withRoomUniqueId uniqueId:String, readOnly:Bool = false, title:String = "", avatarUrl:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
-        
-        if let room = QiscusRoom.room(withUniqueId: uniqueId){
-            return Qiscus.chatView(withRoomId: room.roomId, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
+        if let room = QRoom.room(withUniqueId: uniqueId){
+            return Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
         }else{
             Qiscus.checkDatabaseMigration()
             if !Qiscus.sharedInstance.connected {
@@ -412,10 +411,10 @@ import CocoaMQTT
             
             let chatVC = QiscusChatVC()
             
-            chatVC.message = withMessage
-            chatVC.uniqueId = uniqueId
-            chatVC.avatarURL = avatarUrl
-            chatVC.roomTitle = title
+            chatVC.chatMessage = withMessage
+            chatVC.chatRoomUniqueId = uniqueId
+            chatVC.chatAvatarURL = avatarUrl
+            chatVC.chatTitle = title
             
             if chatVC.isPresence {
                 chatVC.goBack()
