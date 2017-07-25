@@ -173,7 +173,6 @@ public class QiscusChatVC: UIViewController{
     var chatRoom:QRoom?{
         didSet{
             if oldValue == nil && self.chatRoom != nil {
-                self.collectionView.reloadData()
                 if Qiscus.shared.connected {
                     self.chatRoom?.sync()
                     self.chatService.sync()
