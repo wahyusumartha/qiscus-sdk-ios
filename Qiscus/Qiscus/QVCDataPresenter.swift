@@ -326,9 +326,9 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                     if indexPath.row < self.comments[indexPath.section].count{
                         self.comments[indexPath.section][indexPath.row] = data
                         Qiscus.uiThread.async {
-                            if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
+                            //if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
                                 //--cell.updateStatus(toStatus: data.commentStatus)
-                            }
+                            //}
                         }
                     }
                 }
@@ -412,10 +412,10 @@ extension QiscusChatVC: QiscusDataPresenterDelegate{
                             
                             if data.isDownloading {
                                 Qiscus.uiThread.async {
-                                    let percentage = Int(data.downloadProgress * 100)
-                                    if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
+                                    //let percentage = Int(data.downloadProgress * 100)
+                                    //if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
                                         //cell.downloadingMedia(withPercentage: percentage)
-                                    }
+                                    //}
                                 }
                             }else{
                                 Qiscus.uiThread.async {

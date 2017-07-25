@@ -956,7 +956,6 @@ extension Qiscus:CocoaMQTTDelegate{
                     break
                 case "s":
                     let messageArr = messageData.characters.split(separator: ":")
-                    let online = Int(String(messageArr[0]))
                     let userEmail = String(channelArr[1])
                     if userEmail != QiscusMe.sharedInstance.email{
                         if let user = QUser.user(withEmail: userEmail){

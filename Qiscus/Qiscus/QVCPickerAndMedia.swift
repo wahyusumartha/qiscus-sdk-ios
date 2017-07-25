@@ -180,8 +180,6 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                 var thumb:UIImage? = nil
                 let fileNameArr = (fileName as String).characters.split(separator: ".")
                 let ext = String(fileNameArr.last!).lowercased()
-                let okText = QiscusTextConfiguration.sharedInstance.alertOkText
-                let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
                 
                 let gif = (ext == "gif" || ext == "gif_")
                 let jpeg = (ext == "jpg" || ext == "jpg_")
