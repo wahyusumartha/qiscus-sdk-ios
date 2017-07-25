@@ -244,7 +244,6 @@ extension QiscusChatVC {
                             for participant in room.participants {
                                 if participant.email != QiscusMe.sharedInstance.email{
                                     if let user = participant.user{
-                                        print("user : \(user)")
                                         if user.lastSeen == Double(0){
                                             subtitleString = "is offline"
                                         }else{
