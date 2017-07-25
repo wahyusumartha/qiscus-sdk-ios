@@ -71,10 +71,19 @@ public class QRoom:Object {
             return comments
         }
     }
+    public var lastComment:QComment?{
+        get{
+            if self.comments.count > 0 {
+                return self.comments.last!.comments.last!
+            }else{
+                return nil
+            }
+        }
+    }
     //public var service:QRoomService?
     
     // MARK: - Class method
-    public func resetRoomComment(){
+    private func resetRoomComment(){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let data =  realm.objects(QComment.self).filter("roomId == \(self.id)")
         
