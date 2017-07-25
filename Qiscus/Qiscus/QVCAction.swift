@@ -69,24 +69,24 @@ extension QiscusChatVC {
         self.present(actionSheetController, animated: true, completion: nil)
     }
     func getLinkPreview(url:String){
-        var urlToCheck = url.lowercased()
-        if !urlToCheck.contains("http"){
-            urlToCheck = "http://\(url.lowercased())"
-        }
-        commentClient.getLinkMetadata(url: urlToCheck, withCompletion: {linkData in
-            Qiscus.uiThread.async {
-                self.linkImage.loadAsync(linkData.linkImageURL, placeholderImage: Qiscus.image(named: "link"))
-                self.linkDescription.text = linkData.linkDescription
-                self.linkTitle.text = linkData.linkTitle
-                self.linkData = linkData
-                self.linkPreviewTopMargin.constant = -65
-                UIView.animate(withDuration: 0.65, animations: {
-                    self.view.layoutIfNeeded()
-                }, completion: nil)
-            }
-        }, withFailCompletion: {
-            self.showLink = false
-        })
+//        var urlToCheck = url.lowercased()
+//        if !urlToCheck.contains("http"){
+//            urlToCheck = "http://\(url.lowercased())"
+//        }
+//        commentClient.getLinkMetadata(url: urlToCheck, withCompletion: {linkData in
+//            Qiscus.uiThread.async {
+//                self.linkImage.loadAsync(linkData.linkImageURL, placeholderImage: Qiscus.image(named: "link"))
+//                self.linkDescription.text = linkData.linkDescription
+//                self.linkTitle.text = linkData.linkTitle
+//                self.linkData = linkData
+//                self.linkPreviewTopMargin.constant = -65
+//                UIView.animate(withDuration: 0.65, animations: {
+//                    self.view.layoutIfNeeded()
+//                }, completion: nil)
+//            }
+//        }, withFailCompletion: {
+//            self.showLink = false
+//        })
     }
     func hideLinkContainer(){
         Qiscus.uiThread.async {
@@ -127,6 +127,7 @@ extension QiscusChatVC {
         self.backAction = action
     }
     func publishRead(){
+        /*
         DispatchQueue.global().async {
             if self.isPresence{
                 if self.comments.count > 0 {
@@ -144,6 +145,7 @@ extension QiscusChatVC {
                 }
             }
         }
+         */
     }
     func setTitle(title:String = "", withSubtitle:String? = nil){
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
@@ -675,38 +677,13 @@ extension QiscusChatVC {
         }
     }
     
-    // MARK: - Upload Action
-    func continueImageUpload(_ image:UIImage? = nil,imageName:String,imagePath:URL? = nil, imageNSData:Data? = nil, videoFile:Bool = false, audioFile:Bool = false){
-        if let chatRoom = self.room{
-            if Qiscus.sharedInstance.connected{
-                self.dataPresenter.newMediaMessage(chatRoom.roomLastCommentTopicId, image: image, imageName: imageName, imagePath: imagePath, imageNSData: imageNSData, videoFile: videoFile, audioFile:audioFile)
-                
-            }else{
-                self.showNoConnectionToast()
-            }
-        }
-    }
-    
     // MARK: - Load More Control
     func loadMore(){
         if let room = self.chatRoom {
             room.loadMore()
         }
     }
-    func loadMoreData(localOnly:Bool){
-        if self.room != nil {
-            if Qiscus.shared.connected{
-                var firstCommentId = Int(0)
-                if self.comments.count > 0 {
-                    firstCommentId = self.comments.first!.first!.commentBeforeId
-                }
-                dataPresenter.loadMore(inRoom: self.room!, fromComment: firstCommentId, localOnly:localOnly)
-            }else{
-                self.showNoConnectionToast()
-                self.loadMoreControl.endRefreshing()
-            }
-        }
-    }
+    
     
     // MARK: - Back Button
     class func backButton(_ target: UIViewController, action: Selector) -> UIBarButtonItem{

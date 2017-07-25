@@ -333,9 +333,9 @@ public class QiscusRoom: NSObject {
                 
                 self.roomAvatarLocalPath = path
                 
-                if let chatView = Qiscus.shared.chatViews[self.roomId]{
-                    chatView.dataPresenter(didChangeRoom: self, onRoomWithId: self.roomId)
-                }
+//                if let chatView = Qiscus.shared.chatViews[self.roomId]{
+//                    chatView.dataPresenter(didChangeRoom: self, onRoomWithId: self.roomId)
+//                }
                 
             }
         }
@@ -380,9 +380,9 @@ public class QiscusRoom: NSObject {
                                         
                                         self.roomAvatarLocalPath = path
                                         
-                                        if let chatView = Qiscus.shared.chatViews[self.roomId] {
-                                            chatView.dataPresenter(didChangeRoom: self, onRoomWithId: self.roomId)
-                                        }
+//                                        if let chatView = Qiscus.shared.chatViews[self.roomId] {
+//                                            chatView.dataPresenter(didChangeRoom: self, onRoomWithId: self.roomId)
+//                                        }
                                         var i = 0
                                         var index:Int?
                                         for downloadURL in Qiscus.qiscusDownload{

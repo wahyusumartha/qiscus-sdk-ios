@@ -10,9 +10,9 @@ import UIKit
 import SwiftyJSON
 
 @objc public protocol QiscusRoomDelegate {
-    func gotNewComment(_ comments:QiscusComment)
-    func didFinishLoadRoom(onRoom room: QiscusRoom)
+    func gotNewComment(_ comments:QComment)
+    func didFinishLoadRoom(onRoom room: QRoom)
     func didFailLoadRoom(withError error:String)
-    func didFinishUpdateRoom(onRoom room:QiscusRoom)
+    func didFinishUpdateRoom(onRoom room:QRoom)
     func didFailUpdateRoom(withError error:String)
 }

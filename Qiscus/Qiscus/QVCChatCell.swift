@@ -41,8 +41,9 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                         indexPath.row = 0
                     }
                 }
-                if let chatRoom = self.room {
-                    self.commentClient.postMessage(message: text, topicId: chatRoom.roomLastCommentTopicId, linkData: self.linkData, indexPath: indexPath, payload: payload, type: type)
+                if let room = self.chatRoom {
+                    let newComment = room.newComment(text: text)
+                    room.post(comment: newComment, type: type, payload: payload)
                 }
                 self.scrollToBottom()
             }else{

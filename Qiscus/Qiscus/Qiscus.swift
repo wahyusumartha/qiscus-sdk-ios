@@ -565,13 +565,13 @@ import CocoaMQTT
         }
         if let chatView = self.topViewController() as? QiscusChatVC {
             chatView.isPresence = true
-            QiscusDataPresenter.shared.delegate = chatView
+//            QiscusDataPresenter.shared.delegate = chatView
 //            Qiscus.uiThread.async {
 //                chatView.scrollToBottom()
 //            }
         }
         Qiscus.sync()
-        QiscusCommentClient.shared.delegate = QiscusDataPresenter.shared
+//        QiscusCommentClient.shared.delegate = QiscusDataPresenter.shared
         
     }
     class func printLog(text:String){
@@ -667,7 +667,10 @@ import CocoaMQTT
     
     // MARK: - Update Room Methode
     @objc public class func updateRoom(withRoomId roomId:Int, roomName:String? = nil, roomAvatarURL:String? = nil, roomAvatar:UIImage? = nil, roomOptions:String? = nil){
-        Qiscus.commentService.updateRoom(withRoomId: roomId, roomName: roomName, roomAvatarURL: roomAvatarURL, roomOptions: roomOptions)
+//        Qiscus.commentService.updateRoom(withRoomId: roomId, roomName: roomName, roomAvatarURL: roomAvatarURL, roomOptions: roomOptions)
+        if let room = QRoom.room(withId: roomId) {
+            room.update(name: roomName, avatarURL: roomAvatarURL, data: roomOptions)
+        }
     }
     
     // MARK: - Push Notification Setup
@@ -797,7 +800,9 @@ import CocoaMQTT
         if let vendorIdentifier = UIDevice.current.identifierForVendor {
             deviceID = vendorIdentifier.uuidString
         }
-        QiscusCommentClient.shared.syncChat()
+        
+        let service = QChatService()
+        service.sync()
         
         let clientID = "iosMQTT-\(appName)-\(deviceID)-\(QiscusMe.sharedInstance.id)"
         let mqtt = CocoaMQTT(clientID: clientID, host: "mqtt.qiscus.com", port: 1883)

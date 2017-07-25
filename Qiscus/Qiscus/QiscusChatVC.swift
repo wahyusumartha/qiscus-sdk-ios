@@ -538,11 +538,7 @@ public class QiscusChatVC: UIViewController{
         }else{
             UIApplication.shared.cancelAllLocalNotifications()
         }
-        self.dataPresenter.delegate = self
         
-        if Qiscus.shared.connected && self.room != nil{
-            QiscusCommentClient.shared.syncRoom(withID: self.room!.roomId)
-        }
         
         let center: NotificationCenter = NotificationCenter.default
         center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)

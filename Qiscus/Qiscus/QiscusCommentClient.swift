@@ -65,117 +65,6 @@ open class QiscusCommentClient: NSObject {
     open var linkRequest: Alamofire.Request?
     
     
-    open func getLinkMetadata(url:String, synchronous:Bool = true, withCompletion: @escaping (QiscusLinkData)->Void, withFailCompletion: @escaping ()->Void){
-        DispatchQueue.global().async {
-            if self.linkRequest != nil && synchronous{
-                self.linkRequest?.cancel()
-            }
-            let parameters:[String: AnyObject] =  [
-                "url" : url as AnyObject
-            ]
-            Qiscus.printLog(text: "getLinkMetadata for url: \(url)")
-            if synchronous{
-                self.linkRequest = Alamofire.request(QiscusConfig.LINK_METADATA_URL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
-                    Qiscus.printLog(text: "getLinkMetadata response: \n\(responseData)")
-                    if let response = responseData.result.value {
-                        let json = JSON(response)
-                        var title = ""
-                        var description = ""
-                        var imageURL = ""
-                        var linkURL = ""
-                        
-                        if json["results"]["metadata"].exists(){
-                            let metadata = json["results"]["metadata"]
-                            if let desc = metadata["description"].string{
-                                description = desc
-                            }
-                            if let metaTitle = metadata["title"].string{
-                                title = metaTitle
-                            }
-                            if let image = metadata["image"].string{
-                                imageURL = image
-                            }
-                            if let url = json["results"]["url"].string{
-                                linkURL = url
-                            }
-                        }
-                        if title != ""{
-                            let linkData = QiscusLinkData()
-                            linkData.linkURL = linkURL
-                            if description != "" {
-                                linkData.linkDescription = description
-                            }else{
-                                linkData.linkDescription = "No description available for this site"
-                            }
-                            linkData.linkTitle = title
-                            linkData.linkImageURL = imageURL
-                            Qiscus.uiThread.async {
-                                withCompletion(linkData)
-                            }
-                        }else{
-                            Qiscus.uiThread.async {
-                                withFailCompletion()
-                            }
-                        }
-                    }else{
-                        Qiscus.uiThread.async {
-                            withFailCompletion()
-                        }
-                    }
-                    self.linkRequest = nil
-                })
-            }else{
-                Alamofire.request(QiscusConfig.LINK_METADATA_URL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
-                    Qiscus.printLog(text: "getLinkMetadata response: \n\(responseData)")
-                    if let response = responseData.result.value {
-                        let json = JSON(response)
-                        var title = ""
-                        var description = ""
-                        var imageURL = ""
-                        var linkURL = ""
-                        
-                        if json["results"]["metadata"].exists(){
-                            let metadata = json["results"]["metadata"]
-                            if let desc = metadata["description"].string{
-                                description = desc
-                            }
-                            if let metaTitle = metadata["title"].string{
-                                title = metaTitle
-                            }
-                            if let image = metadata["image"].string{
-                                imageURL = image
-                            }
-                            if let url = json["results"]["url"].string{
-                                linkURL = url
-                            }
-                        }
-                        if title != ""{
-                            let linkData = QiscusLinkData()
-                            linkData.linkURL = linkURL
-                            if description != "" {
-                                linkData.linkDescription = description
-                            }else{
-                                linkData.linkDescription = "No description available for this site"
-                            }
-                            linkData.linkTitle = title
-                            linkData.linkImageURL = imageURL
-                            Qiscus.uiThread.async {
-                                withCompletion(linkData)
-                            }
-                        }else{
-                            Qiscus.uiThread.async {
-                                withFailCompletion()
-                            }
-                        }
-                    }else{
-                        Qiscus.uiThread.async {
-                            withFailCompletion()
-                        }
-                    }
-                })
-            }
-        }
-    }
     // MARK: - Login or register
     open func loginOrRegister(_ email:String = "", password:String = "", username:String? = nil, avatarURL:String? = nil, onSuccess:(()->Void)? = nil){
         
@@ -417,17 +306,9 @@ open class QiscusCommentClient: NSObject {
             DispatchQueue.global().async {
                 self.postComment(commentPresenter, roomId: roomId, linkData: linkData, payload: payloadRequest, type: type)
             }
-            if let room = QiscusRoom.room(withLastTopicId: topicId) {
-                if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                    chatView.dataPresenter(gotNewData: commentPresenter, inRoom: room, realtime: true)
-                }
-            }
             
-            if QiscusCommentClient.sharedInstance.roomDelegate != nil{
-                Qiscus.uiThread.async {
-                    QiscusCommentClient.sharedInstance.roomDelegate?.gotNewComment(comment)
-                }
-            }
+            
+
         }
     }
     open func postComment(_ data:QiscusCommentPresenter, file:QiscusFile? = nil, roomId:Int? = nil, linkData:QiscusLinkData? = nil, payload:JSON? = nil, type:String? = nil){ //
@@ -465,7 +346,6 @@ open class QiscusCommentClient: NSObject {
                             
                             if success == true {
                                 let commentJSON = json["results"]["comment"]
-                                let roomId = commentJSON["room_id"].intValue
                                 data.commentId = commentJSON["id"].intValue
                                 data.createdAt = commentJSON["unix_timestamp"].doubleValue
                                 comment.commentId = commentJSON["id"].intValue
@@ -479,11 +359,7 @@ open class QiscusCommentClient: NSObject {
                                 if file != nil {
                                     file!.fileCommentId = comment.commentId
                                 }
-                                if let chatView = Qiscus.shared.chatViews[roomId] {
-                                    if let room = chatView.room {
-                                        chatView.dataPresenter(didChangeContent: data, inRoom: room)
-                                    }
-                                }
+
                             }else{
                                 comment.commentStatusRaw = QiscusCommentStatus.failed.rawValue
                                 data.commentStatus = .failed
@@ -924,12 +800,7 @@ open class QiscusCommentClient: NSObject {
                 presenter.fileName = fileName
                 presenter.toUpload = true
                 presenter.uploadData = imageData
-                
-                if let room = QiscusRoom.room(withLastTopicId: topicId) {
-                    if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                        chatView.dataPresenter(gotNewData: presenter, inRoom: room, realtime: true)
-                    }
-                }
+
             }
             
             
@@ -1084,7 +955,6 @@ open class QiscusCommentClient: NSObject {
                             let comments = json["results"]["comments"].arrayValue
                             if comments.count > 0 {
                                 for newComment in comments {
-                                    var saved = false
                                     let id = newComment["id"].intValue
                                     let uniqueId = newComment["unique_temp_id"].stringValue
                                     var comment = QiscusComment()
@@ -1094,7 +964,6 @@ open class QiscusCommentClient: NSObject {
                                         comment = QiscusComment.newComment(withId: id, andUniqueId: uniqueId)
                                         comment.commentText = newComment["message"].stringValue
                                         comment.showLink = !(newComment["disable_link_preview"].boolValue)
-                                        saved = true
                                     }
                                     let email = newComment["email"].stringValue
                                     
@@ -1133,28 +1002,14 @@ open class QiscusCommentClient: NSObject {
                                         user.updateUserAvatarURL(newComment["user_avatar_url"].stringValue)
                                         user.updateUserFullName(newComment["username"].stringValue)
                                     }
-                                    DispatchQueue.global().async {
-                                        if triggerDelegate && saved {
-                                            if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                                                let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                                                chatView.dataPresenter(gotNewData: presenter, inRoom: room, realtime: true)
-                                            }
-                                            
-                                        }
-                                    }
+
                                 }
                             }
                         }else if error != JSON.null{
                             Qiscus.printLog(text: "error sync message: \(error)")
-                            if !silent {
-                                QiscusDataPresenter.shared.loadComments(inRoom: room.roomId, checkSync: false)
-                            }
                         }
                     }else{
                         Qiscus.printLog(text: "error sync message")
-                        if !silent {
-                            QiscusDataPresenter.shared.loadComments(inRoom: room.roomId, checkSync: false)
-                        }
                     }
                 })
             }
@@ -1188,7 +1043,6 @@ open class QiscusCommentClient: NSObject {
                                     let roomId = newComment["room_id"].intValue
                                     let id = newComment["id"].intValue
                                     let uId = newComment["unique_temp_id"].stringValue
-                                    var saved = false
                                     var comment = QiscusComment()
                                     
                                     if let dbComment = QiscusComment.comment(withUniqueId: uId) {
@@ -1197,7 +1051,6 @@ open class QiscusCommentClient: NSObject {
                                         comment = QiscusComment.newComment(withId: id, andUniqueId: uId)
                                         comment.commentText = newComment["message"].stringValue
                                         comment.showLink = !(newComment["disable_link_preview"].boolValue)
-                                        saved = true
                                     }
                                     
                                     let email = newComment["email"].stringValue
@@ -1228,38 +1081,17 @@ open class QiscusCommentClient: NSObject {
                                     }
 
                                     comment.updateCommentStatus(.sent)
-                                    
-                                    if saved{
-                                        if let chatView = Qiscus.shared.chatViews[roomId] {
-                                            let presenter = QiscusCommentPresenter.getPresenter(forComment: comment)
-                                            if let room = QiscusRoom.room(withId: roomId){
-                                                chatView.dataPresenter(gotNewData: presenter, inRoom: room, realtime: true)
-                                            }
-                                        }
-//                                        let service = QiscusCommentClient.shared
-//                                        if let roomDelegate = service.roomDelegate {
-//                                            Qiscus.uiThread.async {
-//                                                roomDelegate.gotNewComment(comment)
-//                                            }
-//                                        }
-                                    }
+
                                     if let participant = QiscusParticipant.getParticipant(withEmail: email, roomId: roomId){
                                         participant.updateLastReadCommentId(commentId: comment.commentId)
                                     }
                                     
                                     if let user = QiscusUser.getUserWithEmail(email) {
-                                        var userChanged = false
                                         if user.userAvatarURL != newComment["user_avatar_url"].stringValue{
                                             user.updateUserAvatarURL(newComment["user_avatar_url"].stringValue)
                                         }
                                         if user.userFullName != newComment["username"].stringValue{
-                                            userChanged = true
                                             user.updateUserFullName(newComment["username"].stringValue)
-                                        }
-                                        if userChanged {
-                                            if let chatView = Qiscus.shared.chatViews[roomId] {
-                                                chatView.dataPresenter(didChangeUser: QiscusUser.copyUser(user: user), onUserWithEmail: email)
-                                            }
                                         }
                                     }
                                 }
@@ -1341,21 +1173,13 @@ open class QiscusCommentClient: NSObject {
                             comment.updateCommentStatus(.sent)
 
                             if let user = QiscusUser.getUserWithEmail(email) {
-                                var userChanged = false
                                 if user.userAvatarURL != newComment["user_avatar_url"].stringValue{
                                     user.updateUserAvatarURL(newComment["user_avatar_url"].stringValue)
                                 }
                                 if user.userFullName != newComment["username"].stringValue{
-                                    userChanged = true
                                     user.updateUserFullName(newComment["username"].stringValue)
                                 }
-                                if userChanged {
-                                    if let room = QiscusRoom.room(withLastTopicId: topicId){
-                                        if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                                            chatView.dataPresenter(didChangeUser: QiscusUser.copyUser(user: user), onUserWithEmail: email)
-                                        }
-                                    }
-                                }
+
                             }
                         }
                     }
@@ -1440,9 +1264,7 @@ open class QiscusCommentClient: NSObject {
                                     participant.updateLastReadCommentId(commentId: comment.commentId)
                                 }
                             }
-                            if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
-                                roomDelegate.didFinishLoadRoom(onRoom: room)
-                            }
+
                             
                             QiscusUIConfiguration.sharedInstance.topicId = topicId
                             chatView.topicId = topicId
@@ -1455,12 +1277,7 @@ open class QiscusCommentClient: NSObject {
                                     let userAvatarURL = participant["avatar_url"].stringValue
                                     
                                     if let member = QiscusUser.getUserWithEmail(userEmail){
-                                        if member.userFullName != userFullName {
-                                            member.updateUserFullName(userFullName)
-                                            let user = QiscusUser.copyUser(user: member)
-                                            user.userFullName = userFullName
-                                            chatView.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
-                                        }
+
                                         if member.userAvatarURL != userAvatarURL {
                                             member.updateUserAvatarURL(userAvatarURL)
                                         }
@@ -1608,10 +1425,6 @@ open class QiscusCommentClient: NSObject {
                             }
                         }
                         
-                        if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
-                            roomDelegate.didFinishLoadRoom(onRoom: room)
-                        }
-                        
                         if users.count == 1 {
                             room.user = users.first!
                         }
@@ -1633,9 +1446,6 @@ open class QiscusCommentClient: NSObject {
                                         member.updateUserFullName(userFullName)
                                         let user = QiscusUser.copyUser(user: member)
                                         user.userFullName = userFullName
-                                        if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                                            chatView.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
-                                        }
                                     }
                                     if member.userAvatarURL != userAvatarURL {
                                         member.updateUserAvatarURL(userAvatarURL)
@@ -1781,9 +1591,6 @@ open class QiscusCommentClient: NSObject {
                             }
                         }
                         
-                        if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
-                            roomDelegate.didFinishLoadRoom(onRoom: room)
-                        }
                         
                         if let participants = roomData["participants"].array {
                             var participantArray = [String]()
@@ -1797,9 +1604,6 @@ open class QiscusCommentClient: NSObject {
                                         member.updateUserFullName(userFullName)
                                         let user = QiscusUser.copyUser(user: member)
                                         user.userFullName = userFullName
-                                        if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                                            chatView.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
-                                        }
                                     }
                                     if member.userAvatarURL != userAvatarURL {
                                         member.updateUserAvatarURL(userAvatarURL)
@@ -1943,10 +1747,6 @@ open class QiscusCommentClient: NSObject {
                             
                         }
                         
-                        if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
-                            roomDelegate.didFinishLoadRoom(onRoom: room)
-                        }
-                        
                         if users.count == 1 {
                             room.user = users.first!
                         }
@@ -1966,9 +1766,6 @@ open class QiscusCommentClient: NSObject {
                                         member.updateUserFullName(userFullName)
                                         let user = QiscusUser.copyUser(user: member)
                                         user.userFullName = userFullName
-                                        if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                                            chatView.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
-                                        }
                                     }
                                     if member.userAvatarURL != userAvatarURL {
                                         member.updateUserAvatarURL(userAvatarURL)
@@ -2098,9 +1895,7 @@ open class QiscusCommentClient: NSObject {
                                 
                                 let topicId = room.roomLastCommentTopicId
                                 
-                                if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
-                                    roomDelegate.didFinishUpdateRoom(onRoom: room)
-                                }
+
                                 let comments = json["results"]["comments"].arrayValue
                                 if comments.count > 0 {
                                     for payload in comments {
@@ -2152,11 +1947,7 @@ open class QiscusCommentClient: NSObject {
                                         if let member = QiscusUser.getUserWithEmail(userEmail){
                                             if member.userFullName != userFullName {
                                                 member.updateUserFullName(userFullName)
-                                                let user = QiscusUser.copyUser(user: member)
-                                                user.userFullName = userFullName
-                                                if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                                                    chatView.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
-                                                }
+
                                             }
                                             if member.userAvatarURL != userAvatarURL {
                                                 member.updateUserAvatarURL(userAvatarURL)
@@ -2181,10 +1972,6 @@ open class QiscusCommentClient: NSObject {
                                         }
                                     }
                                     self.delegate?.qiscusService(didChangeRoom: room, onRoomWithId: room.roomId)
-                                }
-
-                                if let roomDelegate = QiscusCommentClient.sharedInstance.roomDelegate {
-                                    roomDelegate.didFinishUpdateRoom(onRoom: room)
                                 }
                             }
                         }else if error != JSON.null{
@@ -2263,9 +2050,7 @@ open class QiscusCommentClient: NSObject {
                                         member.updateUserFullName(userFullName)
                                         let user = QiscusUser.copyUser(user: member)
                                         user.userFullName = userFullName
-                                        if let chatView = Qiscus.shared.chatViews[roomId] {
-                                            chatView.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
-                                        }
+
                                     }
                                     if member.userAvatarURL != userAvatarURL {
                                         member.updateUserAvatarURL(userAvatarURL)
@@ -2335,9 +2120,7 @@ open class QiscusCommentClient: NSObject {
                                     member.updateUserFullName(userFullName)
                                     let user = QiscusUser.copyUser(user: member)
                                     user.userFullName = userFullName
-                                    if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                                        chatView.dataPresenter(didChangeUser: user, onUserWithEmail: userEmail)
-                                    }
+
                                 }
                                 if member.userAvatarURL != userAvatarURL {
                                     member.updateUserAvatarURL(userAvatarURL)

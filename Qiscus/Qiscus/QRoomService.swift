@@ -181,7 +181,7 @@ public class QRoomService:NSObject{
             })
         }
     }
-    public func postComment(onRoom room:QRoom, comment:QComment){
+    public func postComment(onRoom room:QRoom, comment:QComment, type:String? = nil, payload:JSON? = nil){
         var parameters:[String: AnyObject] = [String: AnyObject]()
         
         parameters = [
@@ -197,7 +197,12 @@ public class QRoomService:NSObject{
             parameters["type"] = "reply" as AnyObject
             parameters["payload"] = "\(comment.data)" as AnyObject
         }
-
+        
+        if type != nil && payload != nil {
+            parameters["type"] = type as AnyObject
+            parameters["payload"] = "\(payload!)" as AnyObject
+        }
+        
         Alamofire.request(QiscusConfig.postCommentURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {response in
             switch response.result {
             case .success:

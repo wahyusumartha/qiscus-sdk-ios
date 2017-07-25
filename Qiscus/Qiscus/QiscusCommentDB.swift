@@ -347,12 +347,10 @@ public class QiscusCommentDB: Object {
         
         if(self.commentStatusRaw < status.rawValue) ||
            self.commentStatusRaw == QiscusCommentStatus.failed.rawValue{
-            var changeStatus = false
             if status != QiscusCommentStatus.read && status != QiscusCommentStatus.delivered{
                 try! realm.write {
                     self.commentStatusRaw = status.rawValue
                 }
-                changeStatus = true
             }else{
                 if email != nil{
                     if let room = QiscusRoom.room(withLastTopicId: self.commentTopicId){
@@ -361,25 +359,15 @@ public class QiscusCommentDB: Object {
                                 let oldMinReadId = QiscusParticipant.getMinReadCommentId(onRoom: room.roomId)
                                 participant.updateLastReadCommentId(commentId: self.commentId)
                                 if  QiscusParticipant.getMinReadCommentId(onRoom: room.roomId) != oldMinReadId{
-                                    changeStatus = true
                                 }
                             }else{
                                 let oldMinDeliveredId = QiscusParticipant.getMinDeliveredCommentId(onRoom: room.roomId)
                                 participant.updateLastDeliveredCommentId(commentId: self.commentId)
                                 if  QiscusParticipant.getMinDeliveredCommentId(onRoom: room.roomId) != oldMinDeliveredId{
-                                    changeStatus = true
                                 }
                             }
                             
                         }
-                    }
-                }
-            }
-            if changeStatus {
-                if let room = QiscusRoom.room(withLastTopicId: self.commentTopicId){
-                    if let chatView = Qiscus.shared.chatViews[room.roomId] {
-                        let copyComment = self.comment()
-                        chatView.dataPresenter(didChangeStatusFrom: copyComment.commentId, toStatus: status, topicId: copyComment.commentTopicId)
                     }
                 }
             }

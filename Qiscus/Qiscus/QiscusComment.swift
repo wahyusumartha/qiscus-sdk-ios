@@ -321,11 +321,7 @@ public class QiscusComment: NSObject {
             return false
         }
     }
-    open var roomId:Int{
-        get{
-            return commentRoom.roomId
-        }
-    }
+    open var roomId:Int = 0
     open var commentRoom:QiscusRoom{
         get{
             var room = QiscusRoom()
