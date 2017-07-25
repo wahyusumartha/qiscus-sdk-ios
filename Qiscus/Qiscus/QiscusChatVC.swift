@@ -752,7 +752,7 @@ extension QiscusChatVC:QChatServiceDelegate{
             self.loadSubtitle()
         }
         let delay = 0.5 * Double(NSEC_PER_SEC)
-        let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
+        let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
         let section = self.chatRoom!.comments.count - 1
         let row = self.chatRoom!.comments[section].comments.count - 1
         let indexPath = IndexPath(item: row, section: section)
@@ -770,7 +770,7 @@ extension QiscusChatVC:QChatServiceDelegate{
     }
     public func chatService(didFailLoadRoom error: String) {
         let delay = 0.5 * Double(NSEC_PER_SEC)
-        let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
+        let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
         DispatchQueue.main.asyncAfter(deadline: time, execute: {
             self.dismissLoading()
         })
@@ -864,7 +864,7 @@ extension QiscusChatVC:QRoomDelegate{
         case "status":
             if comment.senderEmail == QiscusMe.sharedInstance.email {
                 let delay = 0.5 * Double(NSEC_PER_SEC)
-                let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
+                let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
                 DispatchQueue.main.asyncAfter(deadline: time, execute: {
                     if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
                         cell.updateStatus(toStatus: comment.status)

@@ -159,7 +159,7 @@ extension QiscusChatVC {
     func subscribeRealtime(){
         if let room = self.chatRoom {
             let delay = 3 * Double(NSEC_PER_SEC)
-            let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
+            let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
             
             DispatchQueue.main.asyncAfter(deadline: time, execute: {
                 let typingChannel:String = "r/\(room.id)/\(room.id)/+/t"
@@ -267,7 +267,7 @@ extension QiscusChatVC {
                             if subtitleString.contains("hours"){
                                 delay = 3600.0 * Double(NSEC_PER_SEC)
                             }
-                            let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
+                            let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
                             DispatchQueue.main.asyncAfter(deadline: time, execute: {
                                 self.loadSubtitle()
                             })
@@ -347,7 +347,7 @@ extension QiscusChatVC {
             self.collectionView.scrollToItem(at: indexPath, at: position, animated: false)
         }else{
             let delay = 0.1 * Double(NSEC_PER_SEC)
-            let time = DispatchTime.now() + Double(Int(delay)) / Double(NSEC_PER_SEC)
+            let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
             DispatchQueue.main.asyncAfter(deadline: time, execute: {
                 if self.comments.count > 0 {
                     self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
