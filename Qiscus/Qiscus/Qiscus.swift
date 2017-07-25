@@ -906,15 +906,17 @@ extension Qiscus:CocoaMQTTDelegate{
                     let json = JSON.parse(messageData)
                     let roomId = json["room_id"].intValue
                     let commentId = json["id"].intValue
-                    if let room = QRoom.room(withId: roomId) {
-                        if commentId > QiscusMe.sharedInstance.lastCommentId {
-                            let service = QChatService()
-                            service.sync()
-                        }else{
-                            let uniqueId = json["unique_temp_id"].stringValue
-                            if let comment = QComment.comment(withUniqueId: uniqueId){
-                                if comment.status != .delivered && comment.status != .read {
-                                    room.updateCommentStatus(inComment: comment, status: .delivered)
+                    DispatchQueue.main.async {
+                        if let room = QRoom.room(withId: roomId) {
+                            if commentId > QiscusMe.sharedInstance.lastCommentId {
+                                let service = QChatService()
+                                service.sync()
+                            }else{
+                                let uniqueId = json["unique_temp_id"].stringValue
+                                if let comment = QComment.comment(withUniqueId: uniqueId){
+                                    if comment.status != .delivered && comment.status != .read {
+                                        room.updateCommentStatus(inComment: comment, status: .delivered)
+                                    }
                                 }
                             }
                         }
@@ -944,9 +946,10 @@ extension Qiscus:CocoaMQTTDelegate{
                     let messageArr = messageData.characters.split(separator: ":")
                     let commentId = Int(String(messageArr[0]))!
                     let userEmail = String(channelArr[3])
-                    
-                    if let participant = QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail){
-                        participant.updateLastDeliveredId(commentId: commentId)
+                    DispatchQueue.main.async {
+                        if let participant = QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail){
+                            participant.updateLastDeliveredId(commentId: commentId)
+                        }
                     }
                     
                     break
@@ -955,17 +958,21 @@ extension Qiscus:CocoaMQTTDelegate{
                     let messageArr = messageData.characters.split(separator: ":")
                     let commentId = Int(String(messageArr[0]))!
                     let userEmail = String(channelArr[3])
-                    if let participant = QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail){
-                        participant.updateLastReadId(commentId: commentId)
+                    DispatchQueue.main.async {
+                        if let participant = QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail){
+                            participant.updateLastReadId(commentId: commentId)
+                        }
                     }
                     break
                 case "s":
                     let messageArr = messageData.characters.split(separator: ":")
                     let userEmail = String(channelArr[1])
                     if userEmail != QiscusMe.sharedInstance.email{
-                        if let user = QUser.user(withEmail: userEmail){
-                            if let timeToken = Double(String(messageArr[1])){
-                                user.updateLastSeen(lastSeen: Double(timeToken)/1000)
+                        DispatchQueue.main.async {
+                            if let user = QUser.user(withEmail: userEmail){
+                                if let timeToken = Double(String(messageArr[1])){
+                                    user.updateLastSeen(lastSeen: Double(timeToken)/1000)
+                                }
                             }
                         }
                     }
