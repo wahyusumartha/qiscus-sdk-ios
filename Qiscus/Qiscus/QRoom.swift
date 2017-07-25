@@ -21,6 +21,8 @@ public protocol QRoomDelegate {
     func room(didChangeParticipant room:QRoom)
     func room(didChangeGroupComment section:Int)
     func room(didChangeComment section:Int, row:Int, action:String)
+    func room(didDeleteComment section:Int, row:Int)
+    func room(didDeleteGroupComment section:Int)
     
     func room(didChangeUser room:QRoom, user:QUser)
     func room(didFinishSync room:QRoom)
@@ -934,5 +936,21 @@ public class QRoom:Object {
             }
         }
         return allRoom
+    }
+    public func deleteComment(comment:QComment){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let commentIndex = self.getIndexPath(ofComment: comment)
+        if self.comments[commentIndex.section].comments.count > 1{
+            try! realm.write {
+                realm.delete(self.comments[commentIndex.section].comments[commentIndex.item])
+            }
+            self.delegate?.room(didDeleteComment: commentIndex.section, row: commentIndex.item)
+        }else{
+            try! realm.write {
+                realm.delete(self.comments[commentIndex.section].comments[commentIndex.item])
+                realm.delete(self.comments[commentIndex.section])
+            }
+            self.delegate?.room(didDeleteGroupComment: commentIndex.section)
+        }
     }
 }

@@ -909,4 +909,12 @@ extension QiscusChatVC:QRoomDelegate{
             }
         }
     }
+    public func room(didDeleteComment section: Int, row: Int) {
+        let indexPath = IndexPath(item: row, section: section)
+        self.collectionView.deleteItems(at: [indexPath])
+    }
+    public func room(didDeleteGroupComment section: Int) {
+        let indexSet = IndexSet(integer: section)
+        self.collectionView.deleteSections(IndexSet)
+    }
 }

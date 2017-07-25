@@ -59,21 +59,19 @@ class QChatCell: UICollectionViewCell {
         // implementation will be overrided on child class
     }
     open func resend(){
-        QiscusDataPresenter.shared.resend(DataPresenter: self.data)
+        if let room = QRoom.room(withId: self.comment!.roomId) {
+            room.post(comment: self.comment!)
+        }
     }
     open func reply(){
-        print("reply room: \(self.comment!.roomId)")
         if let chatView = Qiscus.shared.chatViews[self.comment!.roomId]{
             chatView.replyData = self.comment!
         }
     }
     open func deleteComment(){
-        if let comment = self.data.comment {
-            if let chatView = Qiscus.shared.chatViews[comment.roomId]{
-                chatView.dataPresenter(dataDeleted: self.data)
-            }
+        if let room = QRoom.room(withId: self.comment!.roomId){
+            room.deleteComment(comment: self.comment!)
         }
-        
     }
     open func showFile(){
         if let chatView = Qiscus.shared.chatViews[self.comment!.roomId] {
