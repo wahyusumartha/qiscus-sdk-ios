@@ -179,6 +179,26 @@ class QCellMediaRight: QChatCell {
             statusImage.tintColor = UIColor.green
             statusImage.image = Qiscus.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)
         }else if status == .failed {
+            self.progressView.isHidden = true
+            self.progressContainer.isHidden = true
+            self.progressLabel.isHidden = true
+            
+            if self.comment!.type == .video {
+                self.videoPlay.image = Qiscus.image(named: "play_button")
+                self.videoFrame.isHidden = false
+                self.videoPlay.isHidden = false
+            }else{
+                self.videoPlay.isHidden = true
+                self.videoFrame.isHidden = true
+                if let file = self.comment!.file {
+                    if file.ext == "gif" || file.ext == "gif_" {
+                        self.videoPlay.image = Qiscus.image(named: "ic_gif")
+                        self.videoPlay.isHidden = false
+                    }
+                }
+            }
+            self.tapRecognizer = UITapGestureRecognizer(target:self,action:#selector(self.didTapImage))
+            self.imageDisplay.addGestureRecognizer(tapRecognizer!)
             dateLabel.text = QiscusTextConfiguration.sharedInstance.failedText
             dateLabel.textColor = QiscusColorConfiguration.sharedInstance.failToSendColor
             statusImage.image = Qiscus.image(named: "ic_warning")?.withRenderingMode(.alwaysTemplate)
