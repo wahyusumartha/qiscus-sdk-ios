@@ -419,6 +419,7 @@ public class QRoomService:NSObject{
                                     comment.progress = 0
                                     comment.statusRaw = QCommentStatus.failed.rawValue
                                 }
+                                room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
                                 onError(room,comment,"Fail to upload file, no readable response")
                             }
                         })
@@ -437,6 +438,7 @@ public class QRoomService:NSObject{
                             comment.progress = 0
                             comment.statusRaw = QCommentStatus.failed.rawValue
                         }
+                        room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
                         onError(room,comment,"Fail to upload file, \(error)")
                         break
                     }
