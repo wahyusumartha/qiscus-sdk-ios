@@ -756,10 +756,11 @@ extension QiscusChatVC:QChatServiceDelegate{
         let section = self.chatRoom!.comments.count - 1
         let row = self.chatRoom!.comments[section].comments.count - 1
         let indexPath = IndexPath(item: row, section: section)
+        self.collectionView.reloadData()
         DispatchQueue.main.asyncAfter(deadline: time, execute: {
-            self.dismissLoading()
             self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
             self.subscribeRealtime()
+            self.dismissLoading()
         })
         if self.chatMessage != nil && self.chatMessage != "" {
             let newMessage = self.chatRoom!.newComment(text: self.chatMessage!)
@@ -919,7 +920,7 @@ extension QiscusChatVC:QRoomDelegate{
         let indexSet = IndexSet(integer: section)
         self.collectionView.deleteSections(indexSet)
     }
-    public func room(didFinishLoadRoom inRoom: QRoom, success: Bool, gotNewComment: Bool) {
+    public func room(didFinishLoadMore inRoom: QRoom, success: Bool, gotNewComment: Bool) {
         self.loadMoreControl.endRefreshing()
         if success && gotNewComment {
             self.collectionView.reloadData()
