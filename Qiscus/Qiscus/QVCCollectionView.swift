@@ -164,10 +164,10 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         return show
     }
     public func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
-        let textComment = self.comments[indexPath.section][indexPath.row]
+        let textComment = self.chatRoom!.comments[indexPath.section].comments[indexPath.row]
         
-        if action == #selector(UIResponderStandardEditActions.copy(_:)) && textComment.commentType == .text{
-            UIPasteboard.general.string = textComment.commentText
+        if action == #selector(UIResponderStandardEditActions.copy(_:)) && textComment.type == .text{
+            UIPasteboard.general.string = textComment.text
         }
     }
     // MARK: CollectionView delegateFlowLayout
