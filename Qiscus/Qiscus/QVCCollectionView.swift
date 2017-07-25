@@ -37,7 +37,6 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         var cell = collectionView.dequeueReusableCell(withReuseIdentifier: comment.cellIdentifier, for: indexPath) as! QChatCell
         cell.comment = comment
         cell.delegate = self
-        
         if let audioCell = cell as? QCellAudio{
             audioCell.audioCellDelegate = self
             cell = audioCell
@@ -137,6 +136,12 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             if comment?.status == .failed && Qiscus.sharedInstance.connected {
                 if comment?.type == .text{
                     show = true
+                }else if comment!.type == .video || comment!.type == .image || comment!.type == .audio || comment!.type == .file {
+                    if let file = comment!.file {
+                        if QiscusHelper.isFileExist(inLocalPath: file.localPath){
+                            show = true
+                        }
+                    }
                 }
 //                else{
 //                    if let file = QiscusFile.file(forComment: commentData){

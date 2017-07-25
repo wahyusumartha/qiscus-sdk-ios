@@ -60,7 +60,25 @@ class QChatCell: UICollectionViewCell {
     }
     open func resend(){
         if let room = QRoom.room(withId: self.comment!.roomId) {
-            room.post(comment: self.comment!)
+            if self.comment!.type == .text {
+                room.updateCommentStatus(inComment: self.comment!, status: .sending)
+                room.post(comment: self.comment!)
+            }else{
+                if let file = self.comment!.file {
+                    if file.url.contains("http") {
+                        room.updateCommentStatus(inComment: self.comment!, status: .sending)
+                        room.post(comment: self.comment!)
+                    }else{
+                        if QiscusHelper.isFileExist(inLocalPath: file.localPath) {
+                            room.upload(comment: self.comment!, onSuccess: { (roomTarget, commentTarget) in
+                                roomTarget.post(comment: commentTarget)
+                            }, onError: { (_, _, error) in
+                                print("error reupload file")
+                            })
+                        }
+                    }
+                }
+            }
         }
     }
     open func reply(){

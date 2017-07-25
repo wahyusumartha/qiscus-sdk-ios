@@ -31,6 +31,7 @@ public protocol QRoomDelegate {
     func room(didFailUpdate error:String)
     
     func room(userDidTyping userEmail:String)
+    func room(didFinishLoadRoom inRoom:QRoom, success:Bool, gotNewComment:Bool)
 }
 public class QRoom:Object {
     public dynamic var id:Int = 0
@@ -349,7 +350,9 @@ public class QRoom:Object {
             try! realm.write {
                 self.comments.append(commentGroup)
             }
-            self.delegate?.room(gotNewGroupComment: 0)
+            if !onTop {
+                self.delegate?.room(gotNewGroupComment: 0)
+            }
         }else if onTop{
             let firstCommentGroup = self.comments.first!
             if firstCommentGroup.date == newComment.date && firstCommentGroup.senderEmail == newComment.senderEmail{
@@ -359,7 +362,6 @@ public class QRoom:Object {
                     firstCommentGroup.senderName = newComment.senderName
                     firstCommentGroup.comments.insert(newComment, at: 0)
                 }
-                self.delegate?.room(gotNewCommentOn: 0, withCommentIndex: 0)
                 var i = 0
                 for comment in firstCommentGroup.comments {
                     var position = QCellPosition.first
@@ -373,7 +375,6 @@ public class QRoom:Object {
                         try! realm.write {
                             comment.cellPosRaw = position.rawValue
                         }
-                        self.delegate?.room(didChangeComment: 0, row: i, action: "position")
                     }
                     i += 1
                 }
@@ -387,7 +388,6 @@ public class QRoom:Object {
                 try! realm.write {
                     self.comments.insert(commentGroup, at: 0)
                 }
-                self.delegate?.room(gotNewGroupComment: 0)
             }
         }else{
             let lastComment = self.comments.last!
@@ -888,6 +888,7 @@ public class QRoom:Object {
         service.postComment(onRoom: self, comment: comment)
     }
     public func upload(comment:QComment, onSuccess:  @escaping (QRoom, QComment)->Void, onError:  @escaping (QRoom,QComment,String)->Void){
+        self.updateCommentStatus(inComment: comment, status: .sending)
         let service = QRoomService()
         service.uploadCommentFile(inRoom: self, comment: comment, onSuccess: onSuccess, onError: onError)
     }

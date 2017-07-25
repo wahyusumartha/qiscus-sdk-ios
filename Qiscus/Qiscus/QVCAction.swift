@@ -689,8 +689,8 @@ extension QiscusChatVC {
     
     // MARK: - Load More Control
     func loadMore(){
-        if self.room != nil {
-            loadMoreData(localOnly: false)
+        if let room = self.chatRoom {
+            room.loadMore()
         }
     }
     func loadMoreData(localOnly:Bool){

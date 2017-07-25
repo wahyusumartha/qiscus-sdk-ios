@@ -1162,6 +1162,7 @@ open class QiscusCommentClient: NSObject {
     }
 
     open func syncChat(backgroundFetch:Bool = false, trigger:Bool = false) {
+        Qiscus.checkDatabaseMigration()
         DispatchQueue.global().async {
             let loadURL = QiscusConfig.SYNC_URL
             let parameters:[String: AnyObject] =  [

@@ -128,6 +128,7 @@ class QCellMediaLeft: QChatCell {
                     self.progressHeight.constant = newHeight
                     self.progressView.layoutIfNeeded()
                 }else{
+                    self.videoPlay.isHidden = true
                     self.downloadButton.comment = self.comment!
                     self.downloadButton.addTarget(self, action: #selector(QCellMediaLeft.downloadMedia(_:)), for: .touchUpInside)
                     self.downloadButton.isHidden = false

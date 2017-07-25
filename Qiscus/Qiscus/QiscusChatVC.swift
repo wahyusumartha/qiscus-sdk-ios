@@ -881,6 +881,9 @@ extension QiscusChatVC:QRoomDelegate{
     }
     public func room(gotNewGroupComment onIndex: Int) {
         let indexSet = IndexSet(integer: onIndex)
+        if onIndex == 0 && self.chatRoom!.comments.count > 1{
+            self.loadMoreControl.endRefreshing()
+        }
         self.collectionView.performBatchUpdates({ 
             self.collectionView.insertSections(indexSet)
         }) { (success) in
@@ -892,6 +895,9 @@ extension QiscusChatVC:QRoomDelegate{
     }
     public func room(gotNewCommentOn groupIndex: Int, withCommentIndex index: Int) {
         let indexPath = IndexPath(item: index, section: groupIndex)
+        if index == 0 && groupIndex == 0 {
+            self.loadMoreControl.endRefreshing()
+        }
         self.collectionView.performBatchUpdates({
             self.collectionView.insertItems(at: [indexPath])
         }) { (success) in
@@ -916,5 +922,11 @@ extension QiscusChatVC:QRoomDelegate{
     public func room(didDeleteGroupComment section: Int) {
         let indexSet = IndexSet(integer: section)
         self.collectionView.deleteSections(indexSet)
+    }
+    public func room(didFinishLoadRoom inRoom: QRoom, success: Bool, gotNewComment: Bool) {
+        self.loadMoreControl.endRefreshing()
+        if success && gotNewComment {
+            self.collectionView.reloadData()
+        }
     }
 }
