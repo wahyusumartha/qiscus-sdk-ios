@@ -64,16 +64,16 @@ public class QRoomService:NSObject{
                         for newComment in comments {
                             room.saveOldComment(fromJSON: newComment)
                         }
-                        room.delegate?.room(didFinishLoadRoom: room, success: true, gotNewComment: true)
+                        room.delegate?.room(didFinishLoadMore: room, success: true, gotNewComment: true)
                     }else{
-                        room.delegate?.room(didFinishLoadRoom: room, success: true, gotNewComment: false)
+                        room.delegate?.room(didFinishLoadMore: room, success: true, gotNewComment: false)
                     }
                 }else if error != JSON.null{
-                    room.delegate?.room(didFinishLoadRoom: room, success: false, gotNewComment: false)
+                    room.delegate?.room(didFinishLoadMore: room, success: false, gotNewComment: false)
                     Qiscus.printLog(text: "error loadMore: \(error)")
                 }
             }else{
-                room.delegate?.room(didFinishLoadRoom: room, success: false, gotNewComment: false)
+                room.delegate?.room(didFinishLoadMore: room, success: false, gotNewComment: false)
                 Qiscus.printLog(text: "fail to LoadMore Data")
             }
         })

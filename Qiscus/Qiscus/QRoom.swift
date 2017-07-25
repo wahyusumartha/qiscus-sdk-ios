@@ -31,7 +31,7 @@ public protocol QRoomDelegate {
     func room(didFailUpdate error:String)
     
     func room(userDidTyping userEmail:String)
-    func room(didFinishLoadRoom inRoom:QRoom, success:Bool, gotNewComment:Bool)
+    func room(didFinishLoadMore inRoom:QRoom, success:Bool, gotNewComment:Bool)
 }
 public class QRoom:Object {
     public dynamic var id:Int = 0
