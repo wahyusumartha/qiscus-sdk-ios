@@ -65,7 +65,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     
     // MARK: CollectionView delegate
     public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        
+        let comment = self.chatRoom!.comments[indexPath.section].comments[indexPath.row]
         if let selectedIndex = self.selectedCellIndex {
             if indexPath.section == selectedIndex.section && indexPath.item == selectedIndex.item{
                 cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.35)
@@ -85,12 +85,16 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                 }
             }
         }
-        if indexPath.section == (comments.count - 1){
-            if indexPath.row == comments[indexPath.section].count - 1{
+         */
+        if let participant = self.chatRoom?.participant(withEmail: QiscusMe.sharedInstance.email){
+            participant.updateLastReadId(commentId: comment.id)
+        }
+        if indexPath.section == (self.chatRoom!.comments.count - 1){
+            if indexPath.row == self.chatRoom!.comments[indexPath.section].comments.count - 1{
                 isLastRowVisible = true
             }
         }
-        */
+        
     }
     public func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if let selIndex = self.selectedCellIndex {
@@ -100,9 +104,9 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             }
         }
         
-        /*
-        if indexPath.section == (comments.count - 1){
-            if indexPath.row == comments[indexPath.section].count - 1{
+        
+        if indexPath.section == (self.chatRoom!.comments.count - 1){
+            if indexPath.row == self.chatRoom!.comments[indexPath.section].comments.count - 1{
                 let visibleIndexPath = collectionView.indexPathsForVisibleItems
                 if visibleIndexPath.count > 0{
                     var visible = false
@@ -118,7 +122,6 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                 }
             }
         }
-        */
     }
     public func collectionView(_ collectionView: UICollectionView, shouldShowMenuForItemAt indexPath: IndexPath) -> Bool {
         return true
