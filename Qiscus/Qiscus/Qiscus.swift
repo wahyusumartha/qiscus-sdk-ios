@@ -442,7 +442,6 @@ import CocoaMQTT
         chatVC.archived = readOnly
         chatVC.chatMessage = withMessage
         chatVC.backAction = nil
-        Qiscus.shared.chatViews[roomId] = chatVC
         
         return chatVC
     }
