@@ -53,6 +53,13 @@ public class QRoom:Object {
     public let participants = List<QParticipant>()
     
     public var delegate:QRoomDelegate?
+    var typingTimer:Timer?
+    
+    
+    // MARK: - Unstored properties
+    override public static func ignoredProperties() -> [String] {
+        return ["typingTimer"]
+    }
     
     // MARK: - Getter variable
     public var type:QRoomType {
@@ -982,8 +989,16 @@ public class QRoom:Object {
                 self.typingUser = userEmail
             }
             self.delegate?.room(userDidTyping: userEmail)
+            if userEmail != "" {
+                if self.typingTimer != nil {
+                    self.typingTimer!.invalidate()
+                }
+                self.typingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.clearUserTyping), userInfo: nil, repeats: false)
+            }
         }
-        
+    }
+    public func clearUserTyping(){
+        self.updateUserTyping(userEmail: "")
     }
     public func deleteComment(comment:QComment){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)

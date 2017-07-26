@@ -788,7 +788,7 @@ extension QiscusChatVC:QRoomDelegate{
     }
     public func room(didChangeUser room: QRoom, user: QUser) {
         if self.chatRoom!.type == .single {
-            if user.email != QiscusMe.sharedInstance.email{
+            if user.email != QiscusMe.sharedInstance.email && self.chatRoom!.typingUser == ""{
                 self.loadSubtitle()
             }
         }

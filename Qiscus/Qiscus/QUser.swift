@@ -88,15 +88,12 @@ public class QUser:Object {
     }
     public func updateLastSeen(lastSeen:Double){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        if lastSeen < self.lastSeen {
+        if lastSeen > self.lastSeen {
             try! realm.write {
                 self.lastSeen = lastSeen
             }
-            let participants = QParticipant.all(withEmail: self.email)
-            for participant in participants {
-                if let room = QRoom.room(withId: participant.roomId) {
-                    room.delegate?.room(didChangeUser: room, user: self)
-                }
+            if let room = QRoom.room(withUser: self.email) {
+                room.delegate?.room(didChangeUser: room, user: self)
             }
         }
     }

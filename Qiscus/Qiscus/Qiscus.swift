@@ -936,6 +936,9 @@ extension Qiscus:CocoaMQTTDelegate{
                                         room.updateUserTyping(userEmail: userEmail)
                                     }
                                 }
+                                if let user = QUser.user(withEmail: userEmail) {
+                                    user.updateLastSeen(lastSeen: Double(Date().timeIntervalSince1970))
+                                }
                             }
                         }
                     }
