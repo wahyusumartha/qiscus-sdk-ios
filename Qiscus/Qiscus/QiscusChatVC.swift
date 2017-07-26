@@ -499,7 +499,7 @@ public class QiscusChatVC: UIViewController{
         }else{
             self.defaultLeftButton = nil
         }
-        self.unreadIndicator.isHidden = true
+        
         if let navController = self.navigationController {
             self.isBeforeTranslucent = navController.navigationBar.isTranslucent
             self.navigationController?.navigationBar.isTranslucent = false
@@ -734,6 +734,7 @@ extension QiscusChatVC:QChatServiceDelegate{
         if self.chatSubtitle == nil || self.chatSubtitle == "" {
             self.loadSubtitle()
         }
+        self.unreadIndicator.isHidden = true
         if self.chatRoom!.comments.count > 0 {
             let delay = 0.5 * Double(NSEC_PER_SEC)
             let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
