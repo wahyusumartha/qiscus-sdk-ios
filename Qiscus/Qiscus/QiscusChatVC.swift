@@ -499,6 +499,7 @@ public class QiscusChatVC: UIViewController{
         }else{
             self.defaultLeftButton = nil
         }
+        self.unreadIndicator.isHidden = true
         if let navController = self.navigationController {
             self.isBeforeTranslucent = navController.navigationBar.isTranslucent
             self.navigationController?.navigationBar.isTranslucent = false
