@@ -779,7 +779,11 @@ extension QiscusChatVC:QRoomDelegate{
         }
     }
     public func room(didFinishSync room: QRoom) {
-        
+        let delay = 0.5 * Double(NSEC_PER_SEC)
+        let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
+        DispatchQueue.main.asyncAfter(deadline: time, execute: {
+            self.dismissLoading()
+        })
     }
     public func room(didChangeAvatar room: QRoom) {
         
