@@ -754,6 +754,13 @@ extension QiscusChatVC:QChatServiceDelegate{
                 self.chatRoom!.post(comment: newMessage)
                 self.chatMessage = nil
             }
+        }else{
+            let delay = 0.5 * Double(NSEC_PER_SEC)
+            let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
+            DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                self.subscribeRealtime()
+                self.dismissLoading()
+            })
         }
         Qiscus.shared.chatViews[inRoom.id] = self
     }
