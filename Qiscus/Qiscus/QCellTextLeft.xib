@@ -40,7 +40,7 @@
                                         <rect key="frame" x="0.0" y="-0.5" width="192" height="65"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                     </view>
-                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" editable="NO" text="LinkDescription - Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do " selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BLF-d9-QlT">
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" editable="NO" text="LinkDescription - Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do " selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BLF-d9-QlT">
                                         <rect key="frame" x="10" y="10" width="174" height="50"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
