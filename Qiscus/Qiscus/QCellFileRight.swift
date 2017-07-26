@@ -66,7 +66,7 @@ class QCellFileRight: QChatCell {
             
             dateLabel.text = "\(uploading) \(QChatCellHelper.getFormattedStringFromInt(uploadProgres)) %"
         }
-        
+        self.updateStatus(toStatus: self.comment!.status)
     }
     public override func uploadingMedia() {
         if self.comment!.isUploading {
@@ -79,54 +79,8 @@ class QCellFileRight: QChatCell {
     public override func uploadFinished() {
         updateStatus(toStatus: self.comment!.status)
     }
-    open override func setupCell(){
-        userNameLabel.text = data.userFullName
-        userNameLabel.isHidden = true
-        topMargin.constant = 0
-        cellHeight.constant = 0
-        
-        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QChatCell.showFile))
-        fileContainer.addGestureRecognizer(tapRecognizer)
-        
-        if data.cellPos == .first || data.cellPos == .single{
-            userNameLabel.isHidden = false
-            topMargin.constant = 20
-            cellHeight.constant = 20
-        }
-        
-        balloonView.image = data.balloonImage
-        if data.cellPos == .last || data.cellPos == .single{
-            balloonWidth.constant = 215
-        }else{
-            balloonWidth.constant = 200
-        }
-        
-        fileNameLabel.text = data.fileName
-        if data.commentType == .document{
-            fileTypeLabel.text = "\(data.fileType.uppercased()) File"
-        }else{
-            fileTypeLabel.text = "Unknown File"
-        }
-        dateLabel.text = data.commentTime.lowercased()
-        
-        if data.cellPos == .last || data.cellPos == .single {
-            rightMargin.constant = 8
-        }else{
-            rightMargin.constant = 23
-        }
-        balloonView.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonColor
-        dateLabel.textColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
-        fileIcon.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonColor
-        
-        if data.isUploading {
-            let uploadProgres = Int(data.uploadProgress * 100)
-            let uploading = QiscusTextConfiguration.sharedInstance.uploadingText
-            
-            dateLabel.text = "\(uploading) \(QChatCellHelper.getFormattedStringFromInt(uploadProgres)) %"
-        }
-        //updateStatus(toStatus: data.commentStatus)
-    }
-    open override func updateStatus(toStatus status:QCommentStatus){
+    
+    public override func updateStatus(toStatus status:QCommentStatus){
         dateLabel.text = self.comment!.time.lowercased()
         dateLabel.textColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
         statusImage.isHidden = false

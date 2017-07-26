@@ -330,19 +330,19 @@ class QCellTextRight: QChatCell {
             statusImage.image = Qiscus.image(named: "ic_info_time")?.withRenderingMode(.alwaysTemplate)
             break
         case .sent:
-            dateLabel.text = data.commentTime.lowercased()
+            dateLabel.text = self.comment!.time.lowercased()
             dateLabel.textColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
             statusImage.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
             statusImage.image = Qiscus.image(named: "ic_sending")?.withRenderingMode(.alwaysTemplate)
             break
         case .delivered:
-            dateLabel.text = data.commentTime.lowercased()
+            dateLabel.text = self.comment!.time.lowercased()
             dateLabel.textColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
             statusImage.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
             statusImage.image = Qiscus.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)
             break
         case .read:
-            dateLabel.text = data.commentTime.lowercased()
+            dateLabel.text = self.comment!.time.lowercased()
             dateLabel.textColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
             statusImage.tintColor = UIColor.green
             statusImage.image = Qiscus.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)
