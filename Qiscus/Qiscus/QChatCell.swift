@@ -179,4 +179,7 @@ class QChatCell: UICollectionViewCell {
     public func positionChanged(){
     
     }
+    public func updateUserName(){
+    
+    }
 }

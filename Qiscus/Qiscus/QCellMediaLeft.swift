@@ -222,4 +222,11 @@ class QCellMediaLeft: QChatCell {
     func setupImageView(){
         
     }
+    public override func updateUserName() {
+        if let sender = self.comment?.sender {
+            self.userNameLabel.text = sender.fullname
+        }else{
+            self.userNameLabel.text = self.comment?.senderName
+        }
+    }
 }

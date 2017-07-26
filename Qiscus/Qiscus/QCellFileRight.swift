@@ -105,4 +105,11 @@ class QCellFileRight: QChatCell {
             statusImage.tintColor = QiscusColorConfiguration.sharedInstance.failToSendColor
         }
     }
+    public override func updateUserName() {
+        if let sender = self.comment?.sender {
+            self.userNameLabel.text = sender.fullname
+        }else{
+            self.userNameLabel.text = self.comment?.senderName
+        }
+    }
 }

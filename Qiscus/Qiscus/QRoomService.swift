@@ -29,6 +29,7 @@ public class QRoomService:NSObject{
                 if results != JSON.null{
                     let roomData = results["room"]
                     room.syncRoomData(withJSON: roomData)
+                    
                 }else if error != JSON.null{
                     Qiscus.printLog(text: "error getRoom")
                     

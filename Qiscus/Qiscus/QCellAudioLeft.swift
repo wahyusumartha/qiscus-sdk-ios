@@ -261,4 +261,11 @@ class QCellAudioLeft: QCellAudio {
             self.dateLabel.text = self.comment!.time.lowercased()
         }
     }
+    public override func updateUserName() {
+        if let sender = self.comment?.sender {
+            self.userNameLabel.text = sender.fullname
+        }else{
+            self.userNameLabel.text = self.comment?.senderName
+        }
+    }
 }

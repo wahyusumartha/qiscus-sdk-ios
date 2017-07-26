@@ -490,6 +490,7 @@ public class QiscusChatVC: UIViewController{
         self.isPresence = true
         if self.chatRoom != nil {
             self.subscribeRealtime()
+            self.chatRoom!.sync()
         }
         if self.defaultBack {
             self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
@@ -773,7 +774,7 @@ extension QiscusChatVC:QChatServiceDelegate{
 }
 extension QiscusChatVC:QRoomDelegate{
     public func room(didChangeName room: QRoom) {
-        if self.chatTitle == nil {
+        if self.chatTitle == nil || self.chatTitle == ""{
             self.loadTitle()
         }
     }
@@ -799,7 +800,9 @@ extension QiscusChatVC:QRoomDelegate{
         }
     }
     public func room(didChangeGroupComment section: Int) {
-        
+        if let firstCell = self.collectionView.cellForItem(at: IndexPath(item: 0, section: section)) as? QChatCell {
+            firstCell.updateUserName()
+        }
     }
     public func room(didChangeComment section: Int, row: Int, action: String) {
         let indexPath = IndexPath(item: row, section: section)

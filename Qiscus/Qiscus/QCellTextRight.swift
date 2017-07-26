@@ -97,6 +97,10 @@ class QCellTextRight: QChatCell {
             let repliedEmail = replyData["replied_comment_sender_email"].stringValue
             if repliedEmail == QiscusMe.sharedInstance.email {
                 username = "You"
+            }else{
+                if let user = QUser.user(withEmail: repliedEmail){
+                    username = user.fullname
+                }
             }
             switch replyType {
             case .text:
@@ -356,7 +360,6 @@ class QCellTextRight: QChatCell {
         }
     }
     override func clearContext() {
-
         LinkContainer.isHidden = true
         textView.text = ""
         textView.font = UIFont.systemFont(ofSize: 14)
@@ -364,5 +367,12 @@ class QCellTextRight: QChatCell {
     func openLink(){
         print("open link")
         self.delegate?.didTouchLink(onCell: self)
+    }
+    public override func updateUserName() {
+        if let sender = self.comment?.sender {
+            self.userNameLabel.text = sender.fullname
+        }else{
+            self.userNameLabel.text = self.comment?.senderName
+        }
     }
 }

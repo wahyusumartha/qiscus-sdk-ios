@@ -106,4 +106,11 @@ class QCellFileLeft: QChatCell {
             dateLabel.text = "\(uploading) \(QChatCellHelper.getFormattedStringFromInt(uploadProgres)) %"
         }
     }
+    public override func updateUserName() {
+        if let sender = self.comment?.sender {
+            self.userNameLabel.text = sender.fullname
+        }else{
+            self.userNameLabel.text = self.comment?.senderName
+        }
+    }
 }
