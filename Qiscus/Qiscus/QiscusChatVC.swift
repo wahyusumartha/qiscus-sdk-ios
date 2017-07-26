@@ -769,7 +769,7 @@ extension QiscusChatVC:QChatServiceDelegate{
         Qiscus.shared.chatViews[inRoom.id] = self
     }
     public func chatService(didFailLoadRoom error: String) {
-        let delay = 0.5 * Double(NSEC_PER_SEC)
+        let delay = 1.5 * Double(NSEC_PER_SEC)
         let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
         DispatchQueue.main.asyncAfter(deadline: time, execute: {
             self.dismissLoading()
