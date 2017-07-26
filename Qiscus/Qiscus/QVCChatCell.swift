@@ -25,31 +25,29 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
         }
     }
     func didTapPostbackButton(withData data: JSON) {
-        DispatchQueue.global().async {
-            if Qiscus.sharedInstance.connected{
-                var indexPath = IndexPath(row: 0, section: 0)
-                let text = data["label"].stringValue
-                let payload = data["payload"]
-                let type = "button_postback_response"
-                if self.comments.count > 0 {
-                    let lastComment = self.comments.last!.last!
-                    if lastComment.userEmail == QiscusMe.sharedInstance.email && lastComment.isToday {
-                        indexPath.section = self.comments.count - 1
-                        indexPath.row = self.comments[indexPath.section].count
-                    }else{
-                        indexPath.section = self.comments.count
-                        indexPath.row = 0
-                    }
+        if Qiscus.sharedInstance.connected{
+            var indexPath = IndexPath(row: 0, section: 0)
+            let text = data["label"].stringValue
+            let payload = data["payload"]
+            let type = "button_postback_response"
+            if self.comments.count > 0 {
+                let lastComment = self.comments.last!.last!
+                if lastComment.userEmail == QiscusMe.sharedInstance.email && lastComment.isToday {
+                    indexPath.section = self.comments.count - 1
+                    indexPath.row = self.comments[indexPath.section].count
+                }else{
+                    indexPath.section = self.comments.count
+                    indexPath.row = 0
                 }
-                if let room = self.chatRoom {
-                    let newComment = room.newComment(text: text)
-                    room.post(comment: newComment, type: type, payload: payload)
-                }
-                self.scrollToBottom()
-            }else{
-                Qiscus.uiThread.async {
-                    self.showNoConnectionToast()
-                }
+            }
+            if let room = self.chatRoom {
+                let newComment = room.newComment(text: text)
+                room.post(comment: newComment, type: type, payload: payload)
+            }
+            self.scrollToBottom()
+        }else{
+            Qiscus.uiThread.async {
+                self.showNoConnectionToast()
             }
         }
     }
