@@ -108,6 +108,7 @@ public class QRoom:Object {
         return allRoom
     }
     public class func room(withId id:Int) -> QRoom? {
+        Qiscus.checkDatabaseMigration()
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         var room:QRoom? = nil
         room = realm.object(ofType: QRoom.self, forPrimaryKey: id)
