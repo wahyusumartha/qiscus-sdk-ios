@@ -483,17 +483,13 @@ public class QiscusChatVC: UIViewController{
         self.dismissLoading()
     }
     override open func viewDidDisappear(_ animated: Bool) {
-        self.scrollToBottom()
+        //self.scrollToBottom()
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.isPresence = true
         if self.chatRoom != nil {
             self.subscribeRealtime()
-        }
-        if self.comments.count > 0 {
-            self.collectionView.reloadData()
-            self.scrollToBottom()
         }
         if self.defaultBack {
             self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
