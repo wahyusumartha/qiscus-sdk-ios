@@ -47,6 +47,11 @@ public class QParticipant:Object {
             }
         }
         self.updateLastDeliveredId(commentId: commentId)
+        if self.email == QiscusMe.sharedInstance.email {
+            if let room = QRoom.room(withId: self.roomId) {
+                room.updateLastReadId(commentId: commentId)
+            }
+        }
     }
     public class func all(withEmail email:String)->[QParticipant]{
         var participants = [QParticipant]()

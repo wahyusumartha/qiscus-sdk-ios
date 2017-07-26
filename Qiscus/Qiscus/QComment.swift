@@ -211,8 +211,22 @@ public class QComment:Object {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         return realm.object(ofType: QComment.self, forPrimaryKey: uniqueId)
     }
-    
-    
+    public class func comment(withId id:Int)->QComment?{
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let data =  realm.objects(QComment.self).filter("id == \(id) && id != 0")
+        
+        if data.count > 0 {
+            return data.first!
+        }else{
+            return nil
+        }
+    }
+    internal class func countComments(afterId id:Int, roomId:Int)->Int{
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let data =  realm.objects(QComment.self).filter("id > \(id) AND roomId = \(roomId)").sorted(byKeyPath: "createdAt", ascending: true)
+        
+        return data.count
+    }
     fileprivate func isAttachment(text:String) -> Bool {
         var check:Bool = false
         if(text.hasPrefix("[file]")){

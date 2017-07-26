@@ -314,7 +314,7 @@ public class QiscusChatVC: UIViewController{
     var isLastRowVisible: Bool = false {
         didSet{
             bottomButton.isHidden = isLastRowVisible
-            if unreadIndexPath.count > 0 {
+            if self.chatRoom!.unreadCommentCount > 0 {
                 unreadIndicator.isHidden = isLastRowVisible
             }else{
                 unreadIndicator.isHidden = true
@@ -870,9 +870,11 @@ extension QiscusChatVC:QRoomDelegate{
         self.collectionView.performBatchUpdates({ 
             self.collectionView.insertSections(indexSet)
         }) { (success) in
-            if success {
+            if success && self.isLastRowVisible {
                 let indexPath = IndexPath(item: 0, section: onIndex)
                 self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+            }else{
+                self.chatRoom?.updateUnreadCommentCount()
             }
         }
     }
@@ -884,8 +886,10 @@ extension QiscusChatVC:QRoomDelegate{
         self.collectionView.performBatchUpdates({
             self.collectionView.insertItems(at: [indexPath])
         }) { (success) in
-            if success {
+            if success && self.isLastRowVisible{
                 self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+            }else{
+                self.chatRoom?.updateUnreadCommentCount()
             }
         }
     }
@@ -910,6 +914,19 @@ extension QiscusChatVC:QRoomDelegate{
         self.loadMoreControl.endRefreshing()
         if success && gotNewComment {
             self.collectionView.reloadData()
+        }
+    }
+    public func room(didChangeUnread lastReadCommentId:Int, unreadCount:Int) {
+        if unreadCount > 0 {
+            var unreadText = "\(unreadCount)"
+            if unreadCount > 99 {
+                unreadText = "99+"
+            }
+            self.unreadIndicator.text = unreadText
+            self.unreadIndicator.isHidden = self.isLastRowVisible
+        }else{
+            self.unreadIndicator.text = ""
+            self.unreadIndicator.isHidden = true
         }
     }
 }

@@ -32,6 +32,7 @@ public protocol QRoomDelegate {
     
     func room(userDidTyping userEmail:String)
     func room(didFinishLoadMore inRoom:QRoom, success:Bool, gotNewComment:Bool)
+    func room(didChangeUnread lastReadCommentId:Int, unreadCount:Int)
 }
 public class QRoom:Object {
     public dynamic var id:Int = 0
@@ -44,6 +45,9 @@ public class QRoom:Object {
     public dynamic var typeRaw:Int = QRoomType.single.rawValue
     public dynamic var singleUser:String = ""
     public dynamic var typingUser:String = ""
+    public dynamic var lastReadCommentId: Int = 0
+    public dynamic var unreadCommentCount:Int = 0
+    
     
     public let comments = List<QCommentGroup>()
     public let participants = List<QParticipant>()
@@ -295,6 +299,7 @@ public class QRoom:Object {
                         roomDelegate.gotNewComment(newComment)
                     }
                 }
+                self.updateUnreadCommentCount()
             }
         }else if onTop{
             let firstCommentGroup = self.comments.first!
@@ -343,6 +348,7 @@ public class QRoom:Object {
                 DispatchQueue.main.async {
                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                         roomDelegate.gotNewComment(newComment)
+                        self.updateUnreadCommentCount()
                     }
                 }
                 var i = 0
@@ -377,8 +383,10 @@ public class QRoom:Object {
                 DispatchQueue.main.async {
                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                         roomDelegate.gotNewComment(newComment)
+                        self.updateUnreadCommentCount()
                     }
                 }
+                
             }
         }
     }
@@ -993,11 +1001,30 @@ public class QRoom:Object {
             self.delegate?.room(didDeleteGroupComment: commentIndex.section)
         }
     }
-    public func participant(withEmail email:String)->QParticipant{
+    public func participant(withEmail email:String)->QParticipant?{
         if let participant = QParticipant.participant(inRoomWithId: self.id, andEmail: email){
             return participant
         }else{
             return nil
+        }
+    }
+    public func updateLastReadId(commentId:Int){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        if self.lastReadCommentId < commentId {
+            try! realm.write {
+                self.lastReadCommentId = commentId
+            }
+            self.updateUnreadCommentCount()
+        }
+    }
+    public func updateUnreadCommentCount(){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let unread = QComment.countComments(afterId: self.lastReadCommentId, roomId: self.id)
+        if self.unreadCommentCount != unread {
+            try! realm.write {
+                self.unreadCommentCount = unread
+            }
+            self.delegate?.room(didChangeUnread: self.lastReadCommentId, unreadCount: unread)
         }
     }
 }
