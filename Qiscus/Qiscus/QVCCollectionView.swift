@@ -68,7 +68,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         let comment = self.chatRoom!.comments[indexPath.section].comments[indexPath.row]
         if let selectedIndex = self.selectedCellIndex {
             if indexPath.section == selectedIndex.section && indexPath.item == selectedIndex.item{
-                cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.35)
+                cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
             }
         }
         /*

@@ -82,7 +82,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                         }
                     }
                     if let selectedCell = self.collectionView.cellForItem(at: indexPath!){
-                        selectedCell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.35)
+                        selectedCell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
                     }
                     self.selectedCellIndex = indexPath
                     
