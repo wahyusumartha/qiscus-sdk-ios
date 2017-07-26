@@ -737,21 +737,23 @@ extension QiscusChatVC:QChatServiceDelegate{
         if self.chatSubtitle == nil || self.chatSubtitle == "" {
             self.loadSubtitle()
         }
-        let delay = 0.5 * Double(NSEC_PER_SEC)
-        let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
-        let section = self.chatRoom!.comments.count - 1
-        let row = self.chatRoom!.comments[section].comments.count - 1
-        let indexPath = IndexPath(item: row, section: section)
-        self.collectionView.reloadData()
-        DispatchQueue.main.asyncAfter(deadline: time, execute: {
-            self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
-            self.subscribeRealtime()
-            self.dismissLoading()
-        })
-        if self.chatMessage != nil && self.chatMessage != "" {
-            let newMessage = self.chatRoom!.newComment(text: self.chatMessage!)
-            self.chatRoom!.post(comment: newMessage)
-            self.chatMessage = nil
+        if self.chatRoom!.comments.count > 0 {
+            let delay = 0.5 * Double(NSEC_PER_SEC)
+            let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
+            let section = self.chatRoom!.comments.count - 1
+            let row = self.chatRoom!.comments[section].comments.count - 1
+            let indexPath = IndexPath(item: row, section: section)
+            self.collectionView.reloadData()
+            DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
+                self.subscribeRealtime()
+                self.dismissLoading()
+            })
+            if self.chatMessage != nil && self.chatMessage != "" {
+                let newMessage = self.chatRoom!.newComment(text: self.chatMessage!)
+                self.chatRoom!.post(comment: newMessage)
+                self.chatMessage = nil
+            }
         }
         Qiscus.shared.chatViews[inRoom.id] = self
     }
