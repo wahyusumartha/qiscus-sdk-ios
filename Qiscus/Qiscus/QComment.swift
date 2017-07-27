@@ -282,6 +282,52 @@ public class QComment:Object {
             return .text
         }
     }
+    public func forward(toRoomWithId roomId: Int){
+        let comment = QComment()
+        let time = Double(Date().timeIntervalSince1970)
+        let timeToken = UInt64(time * 10000)
+        let uniqueID = "ios-\(timeToken)"
+        
+        comment.uniqueId = uniqueID
+        comment.roomId = roomId
+        comment.text = self.text
+        comment.createdAt = Double(Date().timeIntervalSince1970)
+        comment.senderEmail = QiscusMe.sharedInstance.email
+        comment.senderName = QiscusMe.sharedInstance.userName
+        comment.statusRaw = QCommentStatus.sending.rawValue
+        
+        print("commentType to forward : \(comment.type.rawValue)")
+        
+        if self.type == .reply {
+            comment.typeRaw = QCommentType.text.rawValue
+        }else{
+            comment.typeRaw = self.type.rawValue
+        }
+        var file:QFile? = nil
+        if let fileRef = self.file {
+            file = QFile()
+            file!.id = uniqueID
+            file!.roomId = roomId
+            file!.url = fileRef.url
+            file!.senderEmail = QiscusMe.sharedInstance.email
+            file!.localPath = fileRef.localPath
+            file!.mimeType = fileRef.mimeType
+            file!.localThumbPath = fileRef.localThumbPath
+            file!.localMiniThumbPath = fileRef.localMiniThumbPath
+        }
+        
+        if let room = QRoom.room(withId: roomId){
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            if file != nil {
+                try! realm.write {
+                    realm.add(file!)
+                }
+            }
+            room.addComment(newComment: comment)
+        }
+        let service = QRoomService()
+        service.postComment(onRoom: roomId, comment: comment)
+    }
     internal func updateCurrentTimeSlider(value:Float){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         try! realm.write {

@@ -292,7 +292,7 @@ public class QRoom:Object {
             }
         }
     }
-    private func addComment(newComment:QComment, onTop:Bool = false){
+    internal func addComment(newComment:QComment, onTop:Bool = false){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         if self.comments.count == 0 {
             let commentGroup = QCommentGroup()

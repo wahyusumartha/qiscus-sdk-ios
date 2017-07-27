@@ -86,6 +86,11 @@ class QChatCell: UICollectionViewCell {
             chatView.replyData = self.comment!
         }
     }
+    public func forward(){
+        if let chatView = Qiscus.shared.chatViews[self.comment!.roomId]{
+            chatView.forward(comment: self.comment!)
+        }
+    }
     open func deleteComment(){
         if let room = QRoom.room(withId: self.comment!.roomId){
             room.deleteComment(comment: self.comment!)
@@ -182,4 +187,5 @@ class QChatCell: UICollectionViewCell {
     public func updateUserName(){
     
     }
+    
 }

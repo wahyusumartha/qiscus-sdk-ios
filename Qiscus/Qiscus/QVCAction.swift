@@ -737,5 +737,9 @@ extension QiscusChatVC {
             self.chatService.room(withUniqueId: self.chatRoomUniqueId!, title: self.chatTitle!, avatarURL: self.chatAvatarURL, withMessage: self.chatMessage)
         }
     }
-    
+    func forward(comment:QComment){
+        if self.forwardAction != nil {
+            self.forwardAction!(comment)
+        }
+    }
 }

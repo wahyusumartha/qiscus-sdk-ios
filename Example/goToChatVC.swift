@@ -53,6 +53,12 @@ class goToChatVC: UIViewController {
                     view.titleAction = {
                         print("title clicked")
                     }
+                    view.forwardAction = {(comment) in
+                        view.navigationController?.popViewController(animated: true)
+                        comment.forward(toRoomWithId: 13006)
+                        let newView = Qiscus.chatView(withRoomId: 13006)
+                        self.navigationController?.pushViewController(newView, animated: true)
+                    }
                 }else{
                     let uniqueId = targetField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
                     let view = Qiscus.chatView(withRoomUniqueId: uniqueId)

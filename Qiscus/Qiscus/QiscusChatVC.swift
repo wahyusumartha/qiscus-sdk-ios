@@ -220,6 +220,7 @@ public class QiscusChatVC: UIViewController{
     @objc public var unlockAction:(()->Void) = {}
     @objc public var titleAction:(()->Void) = {}
     @objc public var backAction:(()->Void)? = nil
+    @objc public var forwardAction:((QComment)->Void)? = nil
     
     var audioPlayer: AVAudioPlayer?
     var audioTimer: Timer?
@@ -388,7 +389,11 @@ public class QiscusChatVC: UIViewController{
         let resendMenuItem: UIMenuItem = UIMenuItem(title: "Resend", action: #selector(QChatCell.resend))
         let deleteMenuItem: UIMenuItem = UIMenuItem(title: "Delete", action: #selector(QChatCell.deleteComment))
         let replyMenuItem: UIMenuItem = UIMenuItem(title: "Reply", action: #selector(QChatCell.reply))
-        let menuItems:[UIMenuItem] = [resendMenuItem,deleteMenuItem,replyMenuItem]
+        var menuItems:[UIMenuItem] = [resendMenuItem,deleteMenuItem,replyMenuItem]
+        if self.forwardAction != nil {
+            let forwardMenuItem: UIMenuItem = UIMenuItem(title: "Forward", action: #selector(QChatCell.forward))
+            menuItems.append(forwardMenuItem)
+        }
         UIMenuController.shared.menuItems = menuItems
         
         self.loadMoreControl.addTarget(self, action: #selector(QiscusChatVC.loadMore), for: UIControlEvents.valueChanged)
