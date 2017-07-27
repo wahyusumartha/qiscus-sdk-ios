@@ -31,7 +31,7 @@ import Photos
     
     fileprivate override init(){
         super.init()
-        commentClient.commentDelegate = self
+//        commentClient.commentDelegate = self
         commentClient.delegate = self
     }
     
@@ -56,64 +56,5 @@ extension QiscusDataPresenter: QiscusServiceDelegate{
     }
     func qiscusService(didChangeRoom room: QiscusRoom, onRoomWithId roomId: Int) {
         
-    }
-}
-extension QiscusDataPresenter: QCommentDelegate{
-    func didSuccesPostComment(_ comment:QiscusComment){
-        
-    }
-    func didFailedPostComment(_ comment:QiscusComment){
-    
-    }
-    func downloadingMedia(_ comment:QiscusComment){
-    
-    }
-    func didDownloadMedia(_ comment: QiscusComment){
-    
-    }
-    func didUploadFile(_ comment:QiscusComment){
-    
-    }
-    func uploadingFile(_ comment:QiscusComment){
-    
-    }
-    func didFailedUploadFile(_ comment:QiscusComment){
-    
-    }
-    func didSuccessPostFile(_ comment:QiscusComment){
-    
-    }
-    func didFailedPostFile(_ comment:QiscusComment){
-    
-    }
-    func finishedLoadFromAPI(_ topicId: Int){
-    
-    }
-    func gotNewComment(_ comments:[QiscusComment]){
-    
-    }
-    func didFailedLoadDataFromAPI(_ error: String){
-    
-    }
-    func didFinishLoadMore(){
-    
-    }
-    func commentDidChangeStatus(fromComment comment:QiscusComment, toStatus: QiscusCommentStatus){
-    
-    }
-    func performResendMessage(onIndexPath: IndexPath){
-    
-    }
-    func performDeleteMessage(onIndexPath:IndexPath){
-    
-    }
-    func didChangeUserStatus(withUser user:QiscusUser){
-    
-    }
-    func didChangeUserName(withUser user:QiscusUser){
-    
-    }
-    func didChangeSize(comment: QiscusComment){
-    
     }
 }

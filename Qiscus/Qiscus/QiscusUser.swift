@@ -203,14 +203,14 @@ open class QiscusUser: Object {
                 try! realm.write {
                     user.isOffline = !online
                 }
-                if let commentDelegate = QiscusCommentClient.sharedInstance.commentDelegate{
-                    if QiscusMe.sharedInstance.email != user.userEmail{
-                        let copyUser = QiscusUser.copyUser(user: user)
-                        DispatchQueue.main.async {
-                            commentDelegate.didChangeUserStatus?(withUser: copyUser)
-                        }
-                    }
-                }
+//                if let commentDelegate = QiscusCommentClient.sharedInstance.commentDelegate{
+//                    if QiscusMe.sharedInstance.email != user.userEmail{
+//                        let copyUser = QiscusUser.copyUser(user: user)
+//                        DispatchQueue.main.async {
+//                            commentDelegate.didChangeUserStatus?(withUser: copyUser)
+//                        }
+//                    }
+//                }
             }
         }
     }

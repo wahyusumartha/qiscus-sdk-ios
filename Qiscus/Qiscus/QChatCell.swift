@@ -16,7 +16,7 @@ protocol ChatCellDelegate {
     func didTapPostbackButton(withData data: JSON)
     func didTapAccountLinking(withData data: JSON)
 }
-class QChatCell: UICollectionViewCell {
+class QChatCell: UICollectionViewCell, QCommentDelegate {
     var chatCellDelegate:ChatCellDelegate?
     var delegate: ChatCellDelegate?
     var data: QiscusCommentPresenter = QiscusCommentPresenter(){ // will be removed
@@ -27,6 +27,7 @@ class QChatCell: UICollectionViewCell {
     var comment:QComment?{
         didSet{
             if comment != nil {
+                comment?.delegate = self
                 self.commentChanged()
             }
         }
@@ -187,5 +188,11 @@ class QChatCell: UICollectionViewCell {
     public func updateUserName(){
     
     }
+    // MARK: - commentDelegate
+    func comment(didChangeStatus status:QCommentStatus){
     
+    }
+    func comment(didChangePosition position:QCellPosition){
+    
+    }
 }

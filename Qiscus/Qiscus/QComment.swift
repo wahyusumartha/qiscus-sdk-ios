@@ -39,6 +39,21 @@ public enum QReplyType:Int{
     case read
     case failed
 }
+@objc public protocol QCommentDelegate {
+    func comment(didChangeStatus status:QCommentStatus)
+    func comment(didChangePosition position:QCellPosition)
+    
+    // Audio comment delegate
+    @objc optional func comment(didChangeDurationLabel label:String)
+    @objc optional func comment(didChangeCurrentTimeSlider value:Float)
+    @objc optional func comment(didChangeSeekTimeLabel label:String)
+    @objc optional func comment(didChangeAudioPlaying playing:Bool)
+    
+    // File comment delegate
+    @objc optional func comment(didDownload downloading:Bool)
+    @objc optional func comment(didUpload uploading:Bool)
+    @objc optional func comment(didChangeProgress progress:CGFloat)
+}
 public class QComment:Object {
     public dynamic var uniqueId: String = ""
     public dynamic var id:Int = 0
@@ -55,6 +70,7 @@ public class QComment:Object {
     
     // MARK : - Ignored Parameters
     var displayImage:UIImage?
+    public var delegate:QCommentDelegate?
     
     // audio variable
     public dynamic var durationLabel = ""
@@ -358,5 +374,20 @@ public class QComment:Object {
             self.seekTimeLabel = text
         }
     }
-    
+    public func updateStatus(status:QCommentStatus){
+        if self.status != status {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.statusRaw = status.rawValue
+            }
+        }
+    }
+    public func updateCellPos(cellPos: QCellPosition){
+        if self.cellPos != cellPos {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.cellPosRaw = cellPos.rawValue
+            }
+        }
+    }
 }

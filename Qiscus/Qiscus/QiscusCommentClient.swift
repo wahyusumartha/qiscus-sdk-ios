@@ -1303,7 +1303,7 @@ open class QiscusCommentClient: NSObject {
                                 self.delegate?.qiscusService(didChangeRoom: room, onRoomWithId: room.roomId)
                             }
 //                            chatView.loadTitle()
-                            self.commentDelegate?.finishedLoadFromAPI(topicId)
+//                            self.commentDelegate?.finishedLoadFromAPI(topicId)
                             self.delegate?.qiscusService(didFinishLoadRoom: room, withMessage: withMessage)
                         }
                     }else if error != JSON.null{
@@ -1473,7 +1473,7 @@ open class QiscusCommentClient: NSObject {
                         }
                         
                         
-                        self.commentDelegate?.finishedLoadFromAPI(topicId)
+//                        self.commentDelegate?.finishedLoadFromAPI(topicId)
                         self.delegate?.qiscusService(didFinishLoadRoom: room, withMessage: withMessage)
                     }else if error != JSON.null{
                         Qiscus.printLog(text: "error getListComment: \(error)")
@@ -1631,7 +1631,7 @@ open class QiscusCommentClient: NSObject {
                         }
                         
                         
-                        self.commentDelegate?.finishedLoadFromAPI(topicId)
+//                        self.commentDelegate?.finishedLoadFromAPI(topicId)
                         self.delegate?.qiscusService(didFinishLoadRoom: room, withMessage: withMessage)
                     }else if error != JSON.null{
                         Qiscus.printLog(text: "error getListComment: \(error)")
@@ -1793,7 +1793,7 @@ open class QiscusCommentClient: NSObject {
                             self.delegate?.qiscusService(didChangeRoom: room, onRoomWithId: room.roomId)
                         }
                         
-                        self.commentDelegate?.finishedLoadFromAPI(topicId)
+//                        self.commentDelegate?.finishedLoadFromAPI(topicId)
                         self.delegate?.qiscusService(didFinishLoadRoom: room, withMessage: withMessage)
                         if withMessage != nil {
                             self.postMessage(message: withMessage!, topicId: topicId)

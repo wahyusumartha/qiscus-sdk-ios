@@ -156,7 +156,6 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             }
             break
         case "forward":
-            print("commentStatus to forward = \(comment?.status.rawValue)")
             if self.forwardAction != nil && Qiscus.sharedInstance.connected && comment?.type != .postback && comment?.type != .account && comment?.status != .failed && comment?.type != .system && comment?.status != .sending {
                 show = true
             }
