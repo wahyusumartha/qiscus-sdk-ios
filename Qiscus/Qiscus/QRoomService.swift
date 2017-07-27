@@ -182,13 +182,13 @@ public class QRoomService:NSObject{
             })
         }
     }
-    public func postComment(onRoom room:QRoom, comment:QComment, type:String? = nil, payload:JSON? = nil){
+    public func postComment(onRoom roomId:Int, comment:QComment, type:String? = nil, payload:JSON? = nil){
         var parameters:[String: AnyObject] = [String: AnyObject]()
         
         parameters = [
             "comment"  : comment.text as AnyObject,
-            "room_id"   : room.id as AnyObject,
-            "topic_id" : room.id as AnyObject,
+            "room_id"   : roomId as AnyObject,
+            "topic_id" : roomId as AnyObject,
             "unique_temp_id" : comment.uniqueId as AnyObject,
             "disable_link_preview" : true as AnyObject,
             "token" : Qiscus.shared.config.USER_TOKEN as AnyObject
@@ -221,19 +221,28 @@ public class QRoomService:NSObject{
                             comment.id = commentId
                             comment.beforeId = commentBeforeId
                         }
-                        if comment.statusRaw == QCommentStatus.sending.rawValue || comment.statusRaw == QCommentStatus.failed.rawValue {
-                            room.updateCommentStatus(inComment: comment, status: .sent)
+                        if let room = QRoom.room(withId: roomId){
+                            if comment.statusRaw == QCommentStatus.sending.rawValue || comment.statusRaw == QCommentStatus.failed.rawValue {
+                                
+                                    room.updateCommentStatus(inComment: comment, status: .sent)
+                            }
+                            self.sync(onRoom: room)
                         }
-                        self.sync(onRoom: room)
                     }else{
-                        room.updateCommentStatus(inComment: comment, status: .failed)
+                        if let room = QRoom.room(withId: roomId){
+                            room.updateCommentStatus(inComment: comment, status: .failed)
+                        }
                     }
                 }else{
-                    room.updateCommentStatus(inComment: comment, status: .failed)
+                    if let room = QRoom.room(withId: roomId){
+                        room.updateCommentStatus(inComment: comment, status: .failed)
+                    }
                 }
                 break
             case .failure(let error):
-                room.updateCommentStatus(inComment: comment, status: .failed)
+                if let room = QRoom.room(withId: roomId){
+                    room.updateCommentStatus(inComment: comment, status: .failed)
+                }
                 Qiscus.printLog(text: "fail to post comment with error: \(error)")
                 break
             }
@@ -369,6 +378,38 @@ public class QRoomService:NSObject{
                     comment.isDownloading = true
                 }
                 room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadProgress")
+            })
+        }
+    }
+    public func publishStatus(inRoom roomId: Int, commentId:Int, commentStatus:QCommentStatus){
+        if commentStatus == QCommentStatus.delivered || commentStatus == QCommentStatus.read{
+            let loadURL = QiscusConfig.UPDATE_COMMENT_STATUS_URL
+            
+            var parameters:[String : AnyObject] =  [
+                "token" : qiscus.config.USER_TOKEN as AnyObject,
+                "room_id" : roomId as AnyObject,
+                ]
+            
+            if commentStatus == QCommentStatus.delivered{
+                parameters["last_comment_received_id"] = commentId as AnyObject
+            }else{
+                parameters["last_comment_read_id"] = commentId as AnyObject
+            }
+            Alamofire.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                if let response = responseData.result.value {
+                    Qiscus.printLog(text: "publish message response:\n\(response)")
+                    let json = JSON(response)
+                    let results = json["results"]
+                    let error = json["error"]
+                    
+                    if results != JSON.null{
+                        Qiscus.printLog(text: "success change comment status on \(commentId) to \(commentStatus.rawValue)")
+                    }else if error != JSON.null{
+                        Qiscus.printLog(text: "error update message status: \(error)")
+                    }
+                }else{
+                    Qiscus.printLog(text: "error update message status")
+                }
             })
         }
     }

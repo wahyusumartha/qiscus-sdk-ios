@@ -71,21 +71,11 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                 cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
             }
         }
-        /*
-        if let targetCell = cell as? QChatCell{
-            if !targetCell.data.userIsOwn && targetCell.data.commentStatus != .read{
-                publishRead()
-                var i = 0
-                for index in unreadIndexPath{
-                    if index.row == indexPath.row && index.section == indexPath.section{
-                        unreadIndexPath.remove(at: i)
-                        break
-                    }
-                    i += 1
-                }
+        if comment.status != .read && comment.status != .failed && comment.status != .sending{
+            if comment.id > self.chatRoom!.lastReadCommentId {
+                QRoom.publishStatus(roomId: self.chatRoom!.id, commentId: comment.id, status: .read)
             }
         }
-         */
         if let participant = self.chatRoom?.participant(withEmail: QiscusMe.sharedInstance.email){
             participant.updateLastReadId(commentId: comment.id)
         }

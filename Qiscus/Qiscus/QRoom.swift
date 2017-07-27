@@ -48,6 +48,9 @@ public class QRoom:Object {
     public dynamic var lastReadCommentId: Int = 0
     public dynamic var unreadCommentCount:Int = 0
     
+    // MARK: private method
+    private dynamic var lastParticipantsReadId:Int = 0
+    private dynamic var lastParticipantsDeliveredId:Int = 0
     
     public let comments = List<QCommentGroup>()
     public let participants = List<QParticipant>()
@@ -67,6 +70,7 @@ public class QRoom:Object {
             return QRoomType(rawValue: self.typeRaw)!
         }
     }
+
     public var listComment:[QComment]{
         get{
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
@@ -953,7 +957,7 @@ public class QRoom:Object {
     }
     public func post(comment:QComment, type:String? = nil, payload:JSON? = nil){
         let service = QRoomService()
-        service.postComment(onRoom: self, comment: comment)
+        service.postComment(onRoom: self.id, comment: comment)
     }
     public func upload(comment:QComment, onSuccess:  @escaping (QRoom, QComment)->Void, onError:  @escaping (QRoom,QComment,String)->Void){
         self.updateCommentStatus(inComment: comment, status: .sending)
@@ -1042,5 +1046,64 @@ public class QRoom:Object {
             }
             self.delegate?.room(didChangeUnread: self.lastReadCommentId, unreadCount: unread)
         }
+    }
+    internal func updateCommentStatus(){
+        if self.participants.count > 0 {
+            var minDeliveredId = self.participants.first!.lastDeliveredCommentId
+            var minReadId = self.participants.first!.lastReadCommentId
+            for participant in self.participants {
+                if participant.lastDeliveredCommentId < minDeliveredId {
+                    minDeliveredId = participant.lastDeliveredCommentId
+                }
+                if participant.lastReadCommentId < minReadId {
+                    minReadId = participant.lastReadCommentId
+                }
+            }
+            if self.lastParticipantsReadId < minReadId {
+                updateLastParticipantsReadId(readId: minReadId)
+            }
+            if self.lastParticipantsDeliveredId < minDeliveredId {
+                updateLastParticipantsDeliveredId(deliveredId: minDeliveredId)
+            }
+        }
+        
+    }
+    private func updateLastParticipantsReadId(readId:Int){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        var section = 0
+        for commentGroup in self.comments {
+            var item = 0
+            for comment in commentGroup.comments{
+                if comment.statusRaw < QCommentStatus.read.rawValue {
+                    try! realm.write {
+                        comment.statusRaw = QCommentStatus.read.rawValue
+                    }
+                    self.delegate?.room(didChangeComment: section, row: item, action: "status")
+                }
+                item += 1
+            }
+            section += 1
+        }
+    }
+    private func updateLastParticipantsDeliveredId(deliveredId:Int){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        var section = 0
+        for commentGroup in self.comments {
+            var item = 0
+            for comment in commentGroup.comments{
+                if comment.statusRaw < QCommentStatus.delivered.rawValue {
+                    try! realm.write {
+                        comment.statusRaw = QCommentStatus.delivered.rawValue
+                    }
+                    self.delegate?.room(didChangeComment: section, row: item, action: "status")
+                }
+                item += 1
+            }
+            section += 1
+        }
+    }
+    public class func publishStatus(roomId:Int, commentId:Int, status:QCommentStatus){
+        let service = QRoomService()
+        service.publishStatus(inRoom: roomId, commentId: commentId, commentStatus: status)
     }
 }

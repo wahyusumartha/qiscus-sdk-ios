@@ -37,13 +37,19 @@ public class QParticipant:Object {
             try! realm.write {
                 self.lastDeliveredCommentId = commentId
             }
+            if let room = QRoom.room(withId: self.roomId){
+                room.updateCommentStatus()
+            }
         }
     }
     public func updateLastReadId(commentId:Int){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         if commentId > self.lastReadCommentId {
             try! realm.write {
-                self.lastDeliveredCommentId = commentId
+                self.lastReadCommentId = commentId
+            }
+            if let room = QRoom.room(withId: self.roomId){
+                room.updateCommentStatus()
             }
         }
         self.updateLastDeliveredId(commentId: commentId)
@@ -61,5 +67,13 @@ public class QParticipant:Object {
             participants.append(participant)
         }
         return participants
+    }
+    public class func updateLastDeliveredId(forUser email:String, commentId:Int){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let data =  realm.objects(QParticipant.self).filter("email == '\(email)'")
+        
+        for participant in data {
+            participant.updateLastDeliveredId(commentId: commentId)
+        }
     }
 }

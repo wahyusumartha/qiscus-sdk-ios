@@ -919,6 +919,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                 }
                             }
                         }
+                        QRoom.publishStatus(roomId: roomId, commentId: commentId, status: .delivered)
                     }
                     break
                 case "t":
@@ -1026,5 +1027,6 @@ extension Qiscus:CocoaMQTTDelegate{
         }
         return controller
     }
+    
 }
 
