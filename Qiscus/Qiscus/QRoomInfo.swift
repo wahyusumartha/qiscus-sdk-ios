@@ -34,7 +34,7 @@ public class QRoomInfo:NSObject {
         }
         roomInfo.unreadCount = data["unread_count"].intValue
         
-        if let participans = data["participants"].array {
+        if let participants = data["participants"].array {
             for participantData in participants {
                 let participant = QParticipantInfo.participantInfo(fromJSON: participantData)
                 roomInfo.participants.append(participant)

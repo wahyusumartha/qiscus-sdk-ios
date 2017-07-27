@@ -955,6 +955,26 @@ public class QRoom:Object {
         
         return comment
     }
+    public func postTextMessage(text:String){
+        let comment = QComment()
+        let time = Double(Date().timeIntervalSince1970)
+        let timeToken = UInt64(time * 10000)
+        let uniqueID = "ios-\(timeToken)"
+        
+        comment.uniqueId = uniqueID
+        comment.id = 0
+        comment.roomId = self.id
+        comment.text = text
+        comment.createdAt = Double(Date().timeIntervalSince1970)
+        comment.senderEmail = QiscusMe.sharedInstance.email
+        comment.senderName = QiscusMe.sharedInstance.userName
+        comment.statusRaw = QCommentStatus.sending.rawValue
+        comment.typeRaw = QCommentType.text.rawValue
+        
+        self.addComment(newComment: comment)
+        
+        self.post(comment: comment)
+    }
     public func post(comment:QComment, type:String? = nil, payload:JSON? = nil){
         let service = QRoomService()
         service.postComment(onRoom: self.id, comment: comment)
