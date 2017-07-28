@@ -81,7 +81,7 @@ public class QRoomService:NSObject{
             }
         })
     }
-    public func updateRoom(onRoom room:QRoom, roomName:String? = nil, roomAvatarURL:String? = nil, roomOptions:String? = nil, onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){
+    internal func updateRoom(onRoom room:QRoom, roomName:String? = nil, roomAvatarURL:String? = nil, roomOptions:String? = nil, onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){
         if Qiscus.isLoggedIn{
             if roomName != nil || roomAvatarURL != nil || roomOptions != nil {
                 let requestURL = QiscusConfig.UPDATE_ROOM_URL
