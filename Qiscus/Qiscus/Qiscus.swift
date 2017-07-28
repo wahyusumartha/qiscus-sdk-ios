@@ -665,12 +665,12 @@ import CocoaMQTT
     }
     
     // MARK: - Update Room Methode
-    @objc public class func updateRoom(withRoomId roomId:Int, roomName:String? = nil, roomAvatarURL:String? = nil, roomAvatar:UIImage? = nil, roomOptions:String? = nil){
-//        Qiscus.commentService.updateRoom(withRoomId: roomId, roomName: roomName, roomAvatarURL: roomAvatarURL, roomOptions: roomOptions)
-        if let room = QRoom.room(withId: roomId) {
-            room.update(name: roomName, avatarURL: roomAvatarURL, data: roomOptions)
-        }
-    }
+//    @objc public class func updateRoom(withRoomId roomId:Int, roomName:String? = nil, roomAvatarURL:String? = nil, roomAvatar:UIImage? = nil, roomOptions:String? = nil){
+////        Qiscus.commentService.updateRoom(withRoomId: roomId, roomName: roomName, roomAvatarURL: roomAvatarURL, roomOptions: roomOptions)
+//        if let room = QRoom.room(withId: roomId) {
+//            room.update(name: roomName, avatarURL: roomAvatarURL, data: roomOptions)
+//        }
+//    }
     
     // MARK: - Push Notification Setup
     public func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, forType type: PKPushType) {
@@ -951,7 +951,9 @@ extension Qiscus:CocoaMQTTDelegate{
                     let userEmail = String(channelArr[3])
                     DispatchQueue.main.async {
                         if let participant = QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail){
-                            participant.updateLastDeliveredId(commentId: commentId)
+                            if userEmail != QiscusMe.sharedInstance.email {
+                                participant.updateLastDeliveredId(commentId: commentId)
+                            }
                         }
                     }
                     
@@ -963,7 +965,9 @@ extension Qiscus:CocoaMQTTDelegate{
                     let userEmail = String(channelArr[3])
                     DispatchQueue.main.async {
                         if let participant = QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail){
-                            participant.updateLastReadId(commentId: commentId)
+                            if userEmail != QiscusMe.sharedInstance.email{
+                                participant.updateLastReadId(commentId: commentId)
+                            }
                         }
                     }
                     break

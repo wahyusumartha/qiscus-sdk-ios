@@ -32,6 +32,7 @@ public class QParticipant:Object {
         return realm.object(ofType: QParticipant.self, forPrimaryKey: "\(roomId)_\(email)")
     }
     public func updateLastDeliveredId(commentId:Int){
+        print("\(self.lastDeliveredCommentId) :::  \(commentId)")
         if commentId > self.lastDeliveredCommentId {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
@@ -44,6 +45,7 @@ public class QParticipant:Object {
     }
     public func updateLastReadId(commentId:Int){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        print("\(self.lastReadCommentId) :::  \(commentId)")
         if commentId > self.lastReadCommentId {
             try! realm.write {
                 self.lastReadCommentId = commentId

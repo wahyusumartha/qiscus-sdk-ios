@@ -741,11 +741,11 @@ extension QiscusChatVC:QChatServiceDelegate{
             self.loadSubtitle()
         }
         self.unreadIndicator.isHidden = true
-        if self.chatRoom!.comments.count > 0 {
+        if self.chatRoom!.commentsGroupCount > 0 {
             let delay = 0.5 * Double(NSEC_PER_SEC)
             let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
-            let section = self.chatRoom!.comments.count - 1
-            let row = self.chatRoom!.comments[section].comments.count - 1
+            let section = self.chatRoom!.commentsGroupCount - 1
+            let row = self.chatRoom!.commentGroup(index: section)!.commentsCount - 1
             let indexPath = IndexPath(item: row, section: section)
             self.collectionView.reloadData()
             DispatchQueue.main.asyncAfter(deadline: time, execute: {
@@ -815,7 +815,8 @@ extension QiscusChatVC:QRoomDelegate{
     }
     public func room(didChangeComment section: Int, row: Int, action: String) {
         let indexPath = IndexPath(item: row, section: section)
-        let comment = self.chatRoom!.comments[section].comments[row]
+        let commentGroup = self.chatRoom!.commentGroup(index: section)!
+        let comment = commentGroup.comment(index: row)!
         
         func defaultChange(){
             self.collectionView.reloadItems(at: [indexPath])
@@ -868,15 +869,16 @@ extension QiscusChatVC:QRoomDelegate{
             }
             break
         case "status":
-            if comment.senderEmail == QiscusMe.sharedInstance.email {
-                let delay = 0.5 * Double(NSEC_PER_SEC)
-                let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
-                DispatchQueue.main.asyncAfter(deadline: time, execute: {
-                    if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
-                        cell.updateStatus(toStatus: comment.status)
-                    }
-                })
-            }
+//            if comment.senderEmail == QiscusMe.sharedInstance.email {
+//                let delay = 0.5 * Double(NSEC_PER_SEC)
+//                let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
+//                DispatchQueue.main.asyncAfter(deadline: time, execute: {
+//                    if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
+//                        cell.updateStatus(toStatus: comment.status)
+//                    }
+//                })
+//            }
+            break
         default:
             defaultChange()
         }
@@ -884,14 +886,16 @@ extension QiscusChatVC:QRoomDelegate{
     public func room(gotNewGroupComment onIndex: Int) {
         let indexSet = IndexSet(integer: onIndex)
         
-        if onIndex == 0 && self.chatRoom!.comments.count > 1{
+        if onIndex == 0 && self.chatRoom!.commentsGroupCount > 1{
             self.loadMoreControl.endRefreshing()
         }
         self.collectionView.performBatchUpdates({ 
             self.collectionView.insertSections(indexSet)
         }) { (success) in
             let indexPath = IndexPath(item: 0, section: onIndex)
-            let email = self.chatRoom!.comments[onIndex].comments[0].senderEmail
+            let commentGroup = self.chatRoom!.commentGroup(index: onIndex)!
+            let comment = commentGroup.comment(index: 0)!
+            let email = comment.senderEmail
             if (success && self.isLastRowVisible) || email == QiscusMe.sharedInstance.email {
                 self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
             }else{
@@ -901,7 +905,9 @@ extension QiscusChatVC:QRoomDelegate{
     }
     public func room(gotNewCommentOn groupIndex: Int, withCommentIndex index: Int) {
         let indexPath = IndexPath(item: index, section: groupIndex)
-        let email = self.chatRoom!.comments[groupIndex].comments[index].senderEmail
+        let commentGroup = self.chatRoom!.commentGroup(index: groupIndex)!
+        let comment = commentGroup.comment(index: index)!
+        let email = comment.senderEmail
         if index == 0 && groupIndex == 0 {
             self.loadMoreControl.endRefreshing()
         }

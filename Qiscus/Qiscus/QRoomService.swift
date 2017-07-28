@@ -47,8 +47,10 @@ public class QRoomService:NSObject{
             "topic_id" : room.id as AnyObject,
             "token" : Qiscus.shared.config.USER_TOKEN as AnyObject
         ]
-        if room.comments.count > 0 {
-            parameters["last_comment_id"] = room.comments.first!.comments.first!.id as AnyObject
+        if room.commentsGroupCount > 0 {
+            let firstGroup = room.commentGroup(index: 0)!
+            let firstComment = firstGroup.comment(index: 0)!
+            parameters["last_comment_id"] = firstComment.id as AnyObject
         }
         Qiscus.printLog(text: "request loadMore parameters: \(parameters)")
         Qiscus.printLog(text: "request loadMore url \(loadURL)")
@@ -79,7 +81,7 @@ public class QRoomService:NSObject{
             }
         })
     }
-    public func updateRoom(onRoom room:QRoom, roomName:String? = nil, roomAvatarURL:String? = nil, roomOptions:String? = nil){
+    public func updateRoom(onRoom room:QRoom, roomName:String? = nil, roomAvatarURL:String? = nil, roomOptions:String? = nil, onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){
         if Qiscus.isLoggedIn{
             if roomName != nil || roomAvatarURL != nil || roomOptions != nil {
                 let requestURL = QiscusConfig.UPDATE_ROOM_URL
@@ -128,28 +130,31 @@ public class QRoomService:NSObject{
                                         room.data = roomOptions!
                                     }
                                 }
+                                onSuccess(room)
                             }else{
-                                room.delegate?.room(didFailUpdate: "No change on room data")
+                                onError("No change on room data")
                             }
                         }else if error != JSON.null{
+                            onError("\(error)")
                             Qiscus.printLog(text: "error update chat room: \(error)")
-                            room.delegate?.room(didFailUpdate: "\(error)")
                         }
                     }else{
                         Qiscus.printLog(text: "fail to update chat room")
-                        room.delegate?.room(didFailUpdate: "fail to update chat room")
+                        onError("fail to update chat room")
                     }
                 })
             }else{
-                room.delegate?.room(didFailUpdate: "fail to update chat room")
+                onError("fail to update chat room")
             }
         }
-        room.delegate?.room(didFailUpdate: "User not logged in")
+        else{
+            onError("User not logged in")
+        }
     }
     public func publisComentStatus(onRoom room:QRoom, status:QCommentStatus){
-        if (status == QCommentStatus.delivered || status == QCommentStatus.read) && (room.comments.count > 0){
+        if (status == QCommentStatus.delivered || status == QCommentStatus.read) && (room.commentsGroupCount > 0){
             let loadURL = QiscusConfig.UPDATE_COMMENT_STATUS_URL
-            let lastCommentId = room.comments.last!.comments.last!.id
+            let lastCommentId = room.lastComment!.id
             var parameters:[String : AnyObject] =  [
                 "token" : Qiscus.shared.config.USER_TOKEN as AnyObject,
                 "room_id" : room.id as AnyObject,
@@ -222,8 +227,7 @@ public class QRoomService:NSObject{
                             comment.beforeId = commentBeforeId
                         }
                         if let room = QRoom.room(withId: roomId){
-                            if comment.statusRaw == QCommentStatus.sending.rawValue || comment.statusRaw == QCommentStatus.failed.rawValue {
-                                
+                            if comment.status == QCommentStatus.sending || comment.status == QCommentStatus.failed {
                                     room.updateCommentStatus(inComment: comment, status: .sent)
                             }
                             self.sync(onRoom: room)
@@ -249,14 +253,13 @@ public class QRoomService:NSObject{
         })
     }
     public func downloadMedia(inRoom room: QRoom, comment:QComment, thumbImageRef:UIImage? = nil, isAudioFile:Bool = false){
-        let indexPath = room.getIndexPath(ofComment: comment)
+        let indexPath = room.getIndexPath(ofComment: comment)!
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         if let file = comment.file {
             
-            try! realm.write {
-                comment.isDownloading = true
-                comment.progress = 0
-            }
+            comment.updateDownloading(downloading: true)
+            comment.updateProgress(progress: 0)
+            
             room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadProgress")
             
             let fileURL = file.url.replacingOccurrences(of: " ", with: "%20")
@@ -298,10 +301,9 @@ public class QRoomService:NSObject{
                             try! realm.write {
                                 file.localPath = path
                                 file.localThumbPath = thumbPath
-                                comment.progress = 1
-                                comment.isDownloading = false
-                                comment.progress = 1
                             }
+                            comment.updateDownloading(downloading: false)
+                            comment.updateProgress(progress: 1)
                             
                             comment.displayImage = thumbImage
                             room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
@@ -340,11 +342,11 @@ public class QRoomService:NSObject{
                             }
                             
                             try! realm.write {
-                                comment.progress = 1
-                                comment.isDownloading = false
                                 file.localPath = path
                                 file.localThumbPath = thumbPath
                             }
+                            comment.updateProgress(progress: 1)
+                            comment.updateDownloading(downloading: false)
                             room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
                         }
                     }
@@ -363,20 +365,19 @@ public class QRoomService:NSObject{
                         
                         
                         try! realm.write {
-                            comment.progress = 1
-                            comment.isDownloading = false
                             file.localPath = path
                         }
+                        comment.updateDownloading(downloading: false)
+                        comment.updateProgress(progress: 1)
                         
                         room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
                     }
                 }
             }).downloadProgress(closure: { progressData in
                 let progress = CGFloat(progressData.fractionCompleted)
-                try! realm.write {
-                    comment.progress = progress
-                    comment.isDownloading = true
-                }
+                comment.updateProgress(progress: progress)
+                comment.updateDownloading(downloading: true)
+                
                 room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadProgress")
             })
         }
@@ -420,7 +421,7 @@ public class QRoomService:NSObject{
                 //print("file.localPath: \(file.localPath)")
                 let data = try Data(contentsOf: URL(string: "file://\(file.localPath)")!)
                 let headers = QiscusConfig.sharedInstance.requestHeader
-                let indexPath = room.getIndexPath(ofComment: comment)
+                let indexPath = room.getIndexPath(ofComment: comment)!
                 var urlUpload = URLRequest(url: URL(string: QiscusConfig.UPLOAD_URL)!)
                 if headers.count > 0 {
                     for (key,value) in headers {
@@ -444,8 +445,8 @@ public class QRoomService:NSObject{
                                     try! realm.write {
                                         comment.text = "[file]\(url) [/file]"
                                         file.url = url
-                                        comment.isUploading = false
-                                        comment.progress = 1
+                                        comment.updateUploading(uploading: false)
+                                        comment.updateProgress(progress: 1)
                                     }
                                     room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadFinish")
                                 }
@@ -457,8 +458,8 @@ public class QRoomService:NSObject{
                                             try! realm.write {
                                                 comment.text = "[file]\(url) [/file]"
                                                 file.url = url
-                                                comment.isUploading = false
-                                                comment.progress = 1
+                                                comment.updateUploading(uploading: false)
+                                                comment.updateProgress(progress: 1)
                                             }
                                             room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadFinish")
                                         }
@@ -467,9 +468,9 @@ public class QRoomService:NSObject{
                                 onSuccess(room,comment)
                             }else{
                                 try! realm.write {
-                                    comment.isUploading = false
-                                    comment.progress = 0
-                                    comment.statusRaw = QCommentStatus.failed.rawValue
+                                    comment.updateUploading(uploading: false)
+                                    comment.updateProgress(progress: 0)
+                                    comment.updateStatus(status: .failed)
                                 }
                                 room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
                                 onError(room,comment,"Fail to upload file, no readable response")
@@ -478,17 +479,17 @@ public class QRoomService:NSObject{
                         upload.uploadProgress(closure: {uploadProgress in
                             let progress = CGFloat(uploadProgress.fractionCompleted)
                             try! realm.write {
-                                comment.isUploading = true
-                                comment.progress = progress
+                                comment.updateUploading(uploading: true)
+                                comment.updateProgress(progress: progress)
                             }
                             room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadProgress")
                         })
                         break
                     case .failure(let error):
                         try! realm.write {
-                            comment.isUploading = false
-                            comment.progress = 0
-                            comment.statusRaw = QCommentStatus.failed.rawValue
+                            comment.updateUploading(uploading: false)
+                            comment.updateProgress(progress: 0)
+                            comment.updateStatus(status: .failed)
                         }
                         room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
                         onError(room,comment,"Fail to upload file, \(error)")
@@ -497,9 +498,9 @@ public class QRoomService:NSObject{
                 })
             } catch {
                 try! realm.write {
-                    comment.isUploading = false
-                    comment.progress = 0
-                    comment.statusRaw = QCommentStatus.failed.rawValue
+                    comment.updateUploading(uploading: false)
+                    comment.updateProgress(progress: 0)
+                    comment.updateStatus(status: .failed)
                 }
                 onError(room, comment, "Local file not found")
             }

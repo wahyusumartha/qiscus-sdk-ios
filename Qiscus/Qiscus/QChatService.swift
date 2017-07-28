@@ -334,7 +334,58 @@ public class QChatService:NSObject {
             }
         }
     }
-    
+    public func room(withId roomId:Int, onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){
+        if Qiscus.isLoggedIn {
+            if let room = QRoom.room(withId: roomId){
+                onSuccess(room)
+            }
+            else{
+                let loadURL = QiscusConfig.ROOM_REQUEST_ID_URL
+                let parameters:[String : AnyObject] =  [
+                    "id" : roomId as AnyObject,
+                    "token"  : qiscus.config.USER_TOKEN as AnyObject
+                ]
+                Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                    if let response = responseData.result.value {
+                        let json = JSON(response)
+                        let results = json["results"]
+                        let error = json["error"]
+                        
+                        if results != JSON.null{
+                            Qiscus.printLog(text: "getListComment with id response: \(responseData)")
+                            let roomData = results["room"]
+                            let room = QRoom.addRoom(fromJSON: roomData)
+                            
+                            let commentPayload = results["comments"].arrayValue
+                            
+                            for json in commentPayload {
+                                let commentId = json["id"].intValue
+                                
+                                if commentId <= QiscusMe.sharedInstance.lastCommentId {
+                                    room.saveOldComment(fromJSON: json)
+                                }
+                            }
+                            onSuccess(room)
+                        }else if error != JSON.null{
+                            onError("\(error)")
+                            Qiscus.printLog(text: "\(error)")
+                        }else{
+                            let error = "Failed to load room data"
+                            onError(error)
+                            Qiscus.printLog(text: "\(error)")
+                        }
+                    }else{
+                        let error = "Failed to load room data"
+                        onError(error)
+                    }
+                })
+            }
+        }else{
+            self.reconnect {
+                self.room(withId: roomId, onSuccess: onSuccess, onError: onError)
+            }
+        }
+    }
     // MARK syncMethod
     public func sync(){
         let loadURL = QiscusConfig.SYNC_URL

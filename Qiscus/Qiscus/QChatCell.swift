@@ -27,7 +27,7 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
     var comment:QComment?{
         didSet{
             if comment != nil {
-                comment?.delegate = self
+                self.comment!.delegate = self
                 self.commentChanged()
             }
         }
@@ -190,9 +190,18 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
     }
     // MARK: - commentDelegate
     func comment(didChangeStatus status:QCommentStatus){
-    
+        self.updateStatus(toStatus: status)
     }
-    func comment(didChangePosition position:QCellPosition){
+    func comment(didChangePosition position:QCellPosition){}
     
-    }
+    // Audio comment delegate
+    func comment(didChangeDurationLabel label:String){}
+    func comment(didChangeCurrentTimeSlider value:Float){}
+    func comment(didChangeSeekTimeLabel label:String){}
+    func comment(didChangeAudioPlaying playing:Bool){}
+    
+    // File comment delegate
+    func comment(didDownload downloading:Bool){}
+    func comment(didUpload uploading:Bool){}
+    func comment(didChangeProgress progress:CGFloat){}
 }

@@ -55,6 +55,8 @@ public enum QReplyType:Int{
     @objc optional func comment(didChangeProgress progress:CGFloat)
 }
 public class QComment:Object {
+    static var cache = [String: QComment]()
+    
     public dynamic var uniqueId: String = ""
     public dynamic var id:Int = 0
     public dynamic var roomId:Int = 0
@@ -84,7 +86,7 @@ public class QComment:Object {
     
     
     override public static func ignoredProperties() -> [String] {
-        return ["displayImage"]
+        return ["displayImage","delegate"]
     }
     
     //MARK : - Getter variable
@@ -225,14 +227,28 @@ public class QComment:Object {
     
     public class func comment(withUniqueId uniqueId:String)->QComment?{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        return realm.object(ofType: QComment.self, forPrimaryKey: uniqueId)
+        if let comment = QComment.cache[uniqueId] {
+            return comment
+        }else{
+            if let comment =  realm.object(ofType: QComment.self, forPrimaryKey: uniqueId) {
+                QComment.cache[uniqueId] = comment
+                return QComment.cache[uniqueId]
+            }
+        }
+        return nil
     }
     public class func comment(withId id:Int)->QComment?{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let data =  realm.objects(QComment.self).filter("id == \(id) && id != 0")
         
         if data.count > 0 {
-            return data.first!
+            let commentData = data.first!
+            if let comment = QComment.cache[commentData.uniqueId] {
+                return comment
+            }else{
+                QComment.cache[commentData.uniqueId] = commentData
+                return QComment.cache[commentData.uniqueId]
+            }
         }else{
             return nil
         }
@@ -344,42 +360,20 @@ public class QComment:Object {
         let service = QRoomService()
         service.postComment(onRoom: roomId, comment: comment)
     }
-    internal func updateCurrentTimeSlider(value:Float){
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        try! realm.write {
-            self.currentTimeSlider = value
-        }
-    }
-    internal func updateDurationLabel(text:String){
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        try! realm.write {
-            self.durationLabel = text
-        }
-    }
-    internal func updateIsDownloading(downloading:Bool){
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        try! realm.write {
-            self.isDownloading = downloading
-        }
-    }
-    internal func updateAudioIsPlaying(playing:Bool){
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        try! realm.write {
-            self.audioIsPlaying = playing
-        }
-    }
-    internal func updateSeekTimeLabel(text:String){
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        try! realm.write {
-            self.seekTimeLabel = text
-        }
-    }
+    
+    
+    // MARK : updater method
     public func updateStatus(status:QCommentStatus){
         if self.status != status {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
                 self.statusRaw = status.rawValue
             }
+            let delay = 0.5 * Double(NSEC_PER_SEC)
+            let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
+            DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                self.delegate?.comment(didChangeStatus: status)
+            })
         }
     }
     public func updateCellPos(cellPos: QCellPosition){
@@ -388,6 +382,70 @@ public class QComment:Object {
             try! realm.write {
                 self.cellPosRaw = cellPos.rawValue
             }
+            self.delegate?.comment(didChangePosition: cellPos)
+        }
+    }
+    public func updateDurationLabel(label:String){
+        if self.durationLabel != label {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.durationLabel = label
+            }
+            self.delegate?.comment?(didChangeDurationLabel: label)
+        }
+    }
+    public func updateTimeSlider(value:Float){
+        if self.currentTimeSlider != value {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.currentTimeSlider = value
+            }
+            self.delegate?.comment?(didChangeCurrentTimeSlider: value)
+        }
+    }
+    public func updateSeekLabel(label:String){
+        if self.seekTimeLabel != label {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.seekTimeLabel = label
+            }
+            self.delegate?.comment?(didChangeSeekTimeLabel: label)
+        }
+    }
+    public func updatePlaying(playing:Bool){
+        if self.audioIsPlaying != playing {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.audioIsPlaying = playing
+            }
+            self.delegate?.comment?(didChangeAudioPlaying: playing)
+        }
+    }
+    public func updateUploading(uploading:Bool){
+        if self.isUploading != uploading {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.isUploading = uploading
+            }
+            self.delegate?.comment?(didUpload: uploading)
+        }
+    }
+    public func updateDownloading(downloading:Bool){
+        if self.isDownloading != downloading {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.isDownloading = downloading
+            }
+            self.delegate?.comment?(didDownload: downloading)
+        }
+    }
+    public func updateProgress(progress:CGFloat){
+        if self.progress != progress {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.progress = progress
+            }
+            self.delegate?.comment?(didChangeProgress: progress)
         }
     }
 }

@@ -120,7 +120,7 @@ class QCellAudioRight: QCellAudio {
                                 self.currentTimeSlider.maximumValue = Float(duration)
                                 if let durationString = self.timeFormatter?.string(from: duration) {
                                     
-                                    self.comment!.updateDurationLabel(text: durationString)
+                                    self.comment!.updateDurationLabel(label: durationString)
                                     self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "durationLabel")
                                     self.durationLabel.text = durationString
                                 }
@@ -158,7 +158,7 @@ class QCellAudioRight: QCellAudio {
     }
     func playButtonTapped(_ sender: UIButton) {
         self.isPlaying = true
-        self.comment?.updateAudioIsPlaying(playing: true)
+        self.comment?.updatePlaying(playing: true)
         self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "audioIsPlaying")
         self.audioCellDelegate?.didTapPlayButton(sender, onCell: self)
     }
@@ -166,7 +166,7 @@ class QCellAudioRight: QCellAudio {
     func pauseButtonTapped(_ sender: UIButton) {
         self.isPlaying = false
         DispatchQueue.main.async {
-            self.comment?.updateAudioIsPlaying(playing: false)
+            self.comment?.updatePlaying(playing: false)
             self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "audioIsPlaying")
             self.audioCellDelegate?.didTapPauseButton(sender, onCell: self)
         }
@@ -179,8 +179,8 @@ class QCellAudioRight: QCellAudio {
     @IBAction func sliderValueChanged(_ sender: UISlider) {
         DispatchQueue.main.async {
             if let seekTimeString = self.timeFormatter?.string(from: Double(sender.value)){
-                self.comment?.updateCurrentTimeSlider(value: self.currentTimeSlider.value)
-                self.comment?.updateSeekTimeLabel(text: seekTimeString)
+                self.comment?.updateTimeSlider(value: self.currentTimeSlider.value)
+                self.comment?.updateSeekLabel(label: seekTimeString)
                 
                 self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "seekTimeLabel")
                 self.seekTimeLabel.text = seekTimeString
@@ -255,7 +255,7 @@ class QCellAudioRight: QCellAudio {
     open override func displayAudioDownloading() {
         self.isDownloading = true
         DispatchQueue.main.async {
-            self.comment?.updateIsDownloading(downloading: true)
+            self.comment?.updateDownloading(downloading: true)
             self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "isDownloading")
             self.playButton.removeTarget(nil, action: nil, for: .allEvents)
         }
@@ -263,15 +263,15 @@ class QCellAudioRight: QCellAudio {
     open override func updateAudioDisplay(withTimeInterval timeInterval:TimeInterval) {
         self.isPlaying = self.comment!.audioIsPlaying
         DispatchQueue.main.async {
-            self.comment?.updateCurrentTimeSlider(value: Float(timeInterval))
+            self.comment?.updateTimeSlider(value: Float(timeInterval))
             self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "currentTimeSlider")
             self.currentTimeSlider.setValue(Float(timeInterval), animated: true)
             
             self.seekTimeLabel.text = self.timeFormatter?.string(from: timeInterval)
             
             if Float(timeInterval) == Float(0) {
-                self.comment?.updateCurrentTimeSlider(value: Float(timeInterval))
-                self.comment?.updateAudioIsPlaying(playing: false)
+                self.comment?.updateTimeSlider(value: Float(timeInterval))
+                self.comment?.updatePlaying(playing: false)
                 self.isPlaying = false
             }
         }
@@ -293,7 +293,7 @@ class QCellAudioRight: QCellAudio {
                             DispatchQueue.main.async {
                                 self.currentTimeSlider.maximumValue = Float(duration)
                                 if let durationString = self.timeFormatter?.string(from: duration) {
-                                    self.comment!.updateDurationLabel(text: durationString)
+                                    self.comment?.updateDurationLabel(label: durationString)
                                     self.durationLabel.text = durationString
                                 }
                             }
@@ -327,7 +327,7 @@ class QCellAudioRight: QCellAudio {
                                 self.currentTimeSlider.maximumValue = Float(duration)
                                 if let durationString = self.timeFormatter?.string(from: duration) {
                                     
-                                    self.comment!.updateDurationLabel(text: durationString)
+                                    self.comment!.updateDurationLabel(label: durationString)
                                     self.durationLabel.text = durationString
                                 }
                             }

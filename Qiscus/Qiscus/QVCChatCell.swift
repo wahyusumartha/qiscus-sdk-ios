@@ -56,38 +56,20 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
             if comment.type == .reply{
                 let replyData = JSON(parseJSON: comment.data)
                 let commentId = replyData["replied_comment_id"].intValue
-                var found = false
-                var indexPath:IndexPath? = nil
-                var section = 0
-                for commentGroup in self.chatRoom!.comments{
-                    var row = 0
-                    for commentTarget in commentGroup.comments {
-                        if commentTarget.id == commentId {
-                            found = true
-                            indexPath = IndexPath(item: row, section: section)
-                            break
+                if let targetComment = QComment.comment(withId: commentId){
+                    if let indexPath = self.chatRoom!.getIndexPath(ofComment: targetComment){
+                        if let selectIndex = self.selectedCellIndex {
+                            if let selectedCell = self.collectionView.cellForItem(at: selectIndex){
+                                selectedCell.backgroundColor = UIColor.clear
+                            }
                         }
-                                row += 1
-                    }
-                    if found {
-                        break
-                    }else{
-                        section += 1
-                    }
-                }
-                if found {
-                    if let selectIndex = self.selectedCellIndex {
-                        if let selectedCell = self.collectionView.cellForItem(at: selectIndex){
-                            selectedCell.backgroundColor = UIColor.clear
+                        if let selectedCell = self.collectionView.cellForItem(at: indexPath){
+                            selectedCell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
                         }
+                        self.selectedCellIndex = indexPath
+                        
+                        self.collectionView.scrollToItem(at: indexPath, at: .top, animated: true)
                     }
-                    if let selectedCell = self.collectionView.cellForItem(at: indexPath!){
-                        selectedCell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
-                    }
-                    self.selectedCellIndex = indexPath
-                    
-                    self.collectionView.scrollToItem(at: indexPath!, at: .top, animated: true)
-                    
                 }
             }
         }
@@ -108,8 +90,10 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
             let currentFile = data.file!
             var totalIndex = 0
             var currentIndex = 0
-            for dataGroup in self.chatRoom!.comments {
-                for targetData in dataGroup.comments{
+            for section in 0...(self.chatRoom!.commentsGroupCount - 1) {
+                let dataGroup = self.chatRoom!.commentGroup(index: section)!
+                for item in 0...(dataGroup.commentsCount - 1){
+                    let targetData = dataGroup.comment(index: item)!
                     if targetData.type == .image || targetData.type == .video {
                         if let file = targetData.file {
                             if QiscusHelper.isFileExist(inLocalPath: file.localPath){
@@ -160,6 +144,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                     }
                 }
             }
+            
             let closeButton = UIButton(frame: CGRect(origin: CGPoint.zero, size: CGSize(width: 20, height: 20)))
             closeButton.setImage(Qiscus.image(named: "close")?.withRenderingMode(.alwaysTemplate), for: UIControlState())
             closeButton.tintColor = UIColor.white
@@ -190,7 +175,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                                 if let targetCell = activeCell as? QCellAudioLeft{
                                     targetCell.isPlaying = false
                                 }
-                                activeCell.comment!.updateAudioIsPlaying(playing: false)
+                                activeCell.comment?.updatePlaying(playing: false)
                                 self.didChangeData(onCell: activeCell, withData: activeCell.comment!, dataTypeChanged: "isPlaying")
                             }
                         }
@@ -252,8 +237,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
         audioPlayer?.prepareToPlay()
         audioPlayer?.play()
         audioTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(audioTimerFired(_:)), userInfo: nil, repeats: true)
-        
-        cell.comment?.updateAudioIsPlaying(playing: false)
+        cell.comment?.updatePlaying(playing: false)
         if let targetCell = cell as? QCellAudioLeft{
             targetCell.isPlaying = false
         }
