@@ -17,13 +17,10 @@ protocol ChatCellDelegate {
     func didTapAccountLinking(withData data: JSON)
 }
 class QChatCell: UICollectionViewCell, QCommentDelegate {
+    
     var chatCellDelegate:ChatCellDelegate?
     var delegate: ChatCellDelegate?
-    var data: QiscusCommentPresenter = QiscusCommentPresenter(){ // will be removed
-        didSet{
-            self.dataChanged(oldValue: oldValue, new: data)
-        }
-    }
+
     var comment:QComment?{
         didSet{
             if comment != nil {
@@ -51,10 +48,7 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
     func setupCell(){
         // implementation will be overrided on child class
     }
-    func prepare(withData data:QiscusCommentPresenter, andDelegate delegate:ChatCellDelegate){
-        self.data = data
-        self.delegate = delegate
-    }
+
 
     func updateStatus(toStatus status:QCommentStatus){
         // implementation will be overrided on child class
@@ -133,9 +127,7 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
     func clearContext(){
         
     }
-    public func dataChanged(oldValue: QiscusCommentPresenter, new: QiscusCommentPresenter){
-        
-    }
+    
     public func commentChanged(){
         print("comment changed")
     }

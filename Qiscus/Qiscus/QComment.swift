@@ -90,6 +90,22 @@ public class QComment:Object {
     }
     
     //MARK : - Getter variable
+    private var linkTextAttributes:[String: Any]{
+        get{
+            var foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor
+            var underlineColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor
+            if self.senderEmail == QiscusMe.sharedInstance.email{
+                foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor
+                underlineColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor
+            }
+            return [
+                NSForegroundColorAttributeName: foregroundColorAttributeName,
+                NSUnderlineColorAttributeName: underlineColorAttributeName,
+                NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue,
+                NSFontAttributeName: Qiscus.style.chatFont
+            ]
+        }
+    }
     public var file:QFile? {
         get{
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
@@ -163,7 +179,7 @@ public class QComment:Object {
         let textView = UITextView()
         textView.font = Qiscus.style.chatFont
         textView.dataDetectorTypes = .all
-        textView.linkTextAttributes = QiscusCommentPresenter().linkTextAttributes
+        textView.linkTextAttributes = self.linkTextAttributes
         
         let maxWidth:CGFloat = QiscusUIConfiguration.chatTextMaxWidth
         textView.attributedText = attributedText

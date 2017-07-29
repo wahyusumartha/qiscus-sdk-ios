@@ -18,9 +18,5 @@ class QChatFooterRight: UICollectionReusableView {
         avatarImage.clipsToBounds = true
     }
     
-    func setup(withComent comment:QiscusComment){
-        
-    }
-    
     
 }

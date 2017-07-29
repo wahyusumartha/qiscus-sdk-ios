@@ -12,26 +12,24 @@ extension QiscusChatVC: ChatInputTextDelegate {
     // MARK: - ChatInputTextDelegate Delegate
     open func chatInputTextDidChange(chatInput input: ChatInputText, height: CGFloat) {
         let currentHeight = self.minInputHeight.constant
-        DispatchQueue.global().async {
-            if currentHeight != height {
-                Qiscus.uiThread.async {
-                    self.minInputHeight.constant = height
-                    input.layoutIfNeeded()
-                }
+        if currentHeight != height {
+            Qiscus.uiThread.async {
+                self.minInputHeight.constant = height
+                input.layoutIfNeeded()
             }
-            
-            if self.room != nil {
-                let message: String = "1";
-                let channel = "r/\(self.room!.roomId)/\(self.room!.roomLastCommentTopicId)/\(QiscusMe.sharedInstance.email)/t"
-                Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
-                if self.typingTimer != nil {
-                    if self.typingTimer!.isValid {
-                        self.typingTimer!.invalidate()
-                    }
-                    self.typingTimer = nil
-                    Qiscus.uiThread.async {
-                        self.typingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.sendStopTyping), userInfo: nil, repeats: false)
-                    }
+        }
+        
+        if let room = self.chatRoom {
+            let message: String = "1";
+            let channel = "r/\(room.id)/\(room.id)/\(QiscusMe.sharedInstance.email)/t"
+            Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
+            if self.typingTimer != nil {
+                if self.typingTimer!.isValid {
+                    self.typingTimer!.invalidate()
+                }
+                self.typingTimer = nil
+                Qiscus.uiThread.async {
+                    self.typingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.sendStopTyping), userInfo: nil, repeats: false)
                 }
             }
         }
@@ -58,9 +56,9 @@ extension QiscusChatVC: ChatInputTextDelegate {
         }
     }
     public func sendStopTyping(){
-        if self.room != nil {
+        if let room = self.chatRoom {
             let message: String = "0";
-            let channel = "r/\(self.room!.roomId)/\(self.room!.roomLastCommentTopicId)/\(QiscusMe.sharedInstance.email)/t"
+            let channel = "r/\(room.id)/\(room.id)/\(QiscusMe.sharedInstance.email)/t"
             Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
             if self.typingTimer != nil {
                 if self.typingTimer!.isValid {

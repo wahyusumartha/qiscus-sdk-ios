@@ -175,9 +175,9 @@ extension QiscusChatVC {
             })
         }
     }
-    func unsubscribeTypingRealtime(onRoom room:QiscusRoom?){
+    func unsubscribeTypingRealtime(onRoom room:QRoom?){
         if room != nil {
-            let channel = "r/\(room!.roomId)/\(room!.roomLastCommentTopicId)/+/t"
+            let channel = "r/\(room!.id)/\(room!.id)/+/t"
             Qiscus.shared.mqtt?.unsubscribe(channel)
         }
     }
@@ -341,20 +341,7 @@ extension QiscusChatVC {
             self.collectionView.scrollToItem(at: lastIndexPath, at: .bottom, animated: animated)
         }
     }
-    func scrollToIndexPath(_ indexPath:IndexPath, position: UICollectionViewScrollPosition, animated:Bool, delayed:Bool = true){
-        
-        if !delayed {
-            self.collectionView.scrollToItem(at: indexPath, at: position, animated: false)
-        }else{
-            let delay = 0.1 * Double(NSEC_PER_SEC)
-            let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
-            DispatchQueue.main.asyncAfter(deadline: time, execute: {
-                if self.comments.count > 0 {
-                    self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
-                }
-            })
-        }
-    }
+    
     func setNavigationColor(_ color:UIColor, tintColor:UIColor){
         self.topColor = color
         self.bottomColor = color

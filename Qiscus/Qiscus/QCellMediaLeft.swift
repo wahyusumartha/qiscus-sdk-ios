@@ -68,7 +68,7 @@ class QCellMediaLeft: QChatCell {
                     self.comment!.displayImage = image
                 })
             }else if QiscusHelper.isFileExist(inLocalPath: file.localMiniThumbPath){
-                imageDisplay.loadAsync(fromLocalPath: data.localMiniThumbURL!, onLoaded: { (image, _) in
+                imageDisplay.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
                     self.imageDisplay.image = image
                     self.comment!.displayImage = image
                 })
@@ -184,7 +184,7 @@ class QCellMediaLeft: QChatCell {
                     self.comment!.displayImage = image
                 })
             }else if QiscusHelper.isFileExist(inLocalPath: file.localMiniThumbPath){
-                imageDisplay.loadAsync(fromLocalPath: data.localMiniThumbURL!, onLoaded: { (image, _) in
+                imageDisplay.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
                     self.imageDisplay.image = image
                     self.comment!.displayImage = image
                 })

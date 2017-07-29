@@ -60,7 +60,6 @@ public class QiscusChatVC: UIViewController{
     var isBeforeTranslucent = false
     // MARK: - shared Properties
     var commentClient = QiscusCommentClient.sharedInstance
-    let dataPresenter = QiscusDataPresenter.shared
     var archived:Bool = QiscusUIConfiguration.sharedInstance.readOnly
     
     var selectedCellIndex:IndexPath? = nil
@@ -121,8 +120,8 @@ public class QiscusChatVC: UIViewController{
                     
                     UIView.animate(withDuration: 0.35, animations: {
                         self.view.layoutIfNeeded()
-                        if let goToRow = self.lastVisibleRow {
-                            self.scrollToIndexPath(goToRow, position: .bottom, animated: true, delayed: false)
+                        if self.lastVisibleRow != nil {
+                            self.collectionView.scrollToItem(at: self.lastVisibleRow!, at: .bottom, animated: true)
                         }
                     }, completion: { (_) in
                         if self.inputText.value == "" {
@@ -141,32 +140,7 @@ public class QiscusChatVC: UIViewController{
     public var defaultBack:Bool = true
     
     // MARK: - Data Properties
-    
-    var room:QiscusRoom?{ // will be removed
-        didSet{
-            if oldValue == nil{
-                if let chatRoom = room{
-                    let _ = self.view
-                    self.loadMoreControl.removeFromSuperview()
-                    if chatRoom.hasLoadMore {
-                        self.loadMoreControl = UIRefreshControl()
-                        self.loadMoreControl.addTarget(self, action: #selector(QiscusChatVC.loadMore), for: UIControlEvents.valueChanged)
-                        self.collectionView.addSubview(self.loadMoreControl)
-                    }
-                    self.loadTitle()
-                    let image = Qiscus.image(named: "room_avatar")
-                    if QiscusHelper.isFileExist(inLocalPath: chatRoom.roomAvatarLocalPath){
-                        self.roomAvatar.loadAsync(fromLocalPath: chatRoom.roomAvatarLocalPath)
-                    }else{
-                        self.roomAvatar.loadAsync(chatRoom.roomAvatarURL, placeholderImage: image)
-                    }
-                    //self.subscribeRealtime(onRoom: chatRoom)
-                }
-            }
-        }
-    }
     var hasMoreComment = true // rmove
-    var comments = [[QiscusCommentPresenter]]() // remove
     var loadMoreControl = UIRefreshControl()
     
     // MARK: -  Data load configuration
@@ -464,25 +438,19 @@ public class QiscusChatVC: UIViewController{
         self.cancelRecordButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
         self.bottomButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
         self.bottomButton.isHidden = true
-        if self.comments.count > 0 {
-            self.welcomeView.isHidden = true
-        }
         
         setupNavigationTitle()
         setupPage()
     }
     override open func viewWillDisappear(_ animated: Bool) {
         self.isPresence = false
-        dataPresenter.delegate = nil
         
         super.viewWillDisappear(animated)
         view.endEditing(true)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
         view.endEditing(true)
-        if self.room != nil{
-            self.unsubscribeTypingRealtime(onRoom: room!)
-        }
+        
         self.roomSynced = false
         
         self.dismissLoading()
@@ -662,7 +630,7 @@ public class QiscusChatVC: UIViewController{
         UIView.animate(withDuration: animateDuration, delay: 0, options: UIViewAnimationOptions(), animations: {
             self.view.layoutIfNeeded()
             if goToRow != nil {
-                self.scrollToIndexPath(goToRow!, position: .bottom, animated: true, delayed:  false)
+                self.collectionView.scrollToItem(at: goToRow!, at: .bottom, animated: true)
             }
         }, completion: nil)
     }
@@ -678,7 +646,7 @@ public class QiscusChatVC: UIViewController{
         UIView.animate(withDuration: animateDuration, delay: 0, options: UIViewAnimationOptions(), animations: {
             self.view.layoutIfNeeded()
             if goToRow != nil {
-                self.scrollToIndexPath(goToRow!, position: .bottom, animated: true, delayed:  false)
+                self.collectionView.scrollToItem(at: goToRow!, at: .bottom, animated: true)
             }
         }, completion: nil)
     }

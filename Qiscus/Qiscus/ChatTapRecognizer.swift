@@ -11,7 +11,6 @@ import UIKit
 open class ChatTapRecognizer: UITapGestureRecognizer {
     var fileLocalPath: String = ""
     var fileName:String = ""
-    var fileType:QFileType = .media
     var fileURL:String = ""
     var mediaIndex = 0
 }

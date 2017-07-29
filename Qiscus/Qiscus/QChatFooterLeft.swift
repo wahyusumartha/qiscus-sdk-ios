@@ -70,8 +70,4 @@ class QChatFooterLeft: UICollectionReusableView {
         avatarImage.contentMode = .scaleAspectFill
         self.isUserInteractionEnabled = false
     }
-    
-    func setup(withComent comment:QiscusCommentPresenter){
-        
-    }
 }

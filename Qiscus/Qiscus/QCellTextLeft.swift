@@ -131,7 +131,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
                             self.linkImage.image = image
                         })
                     }else if QiscusHelper.isFileExist(inLocalPath: file.localMiniThumbPath){
-                        self.linkImage.loadAsync(fromLocalPath: data.localMiniThumbURL!, onLoaded: { (image, _) in
+                        self.linkImage.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
                             self.linkImage.image = image
                         })
                     }else{

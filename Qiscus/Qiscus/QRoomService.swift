@@ -270,7 +270,7 @@ public class QRoomService:NSObject{
                         if let image = UIImage(data: imageData) {
                             var thumbImage = UIImage()
                             if !(file.ext == "gif" || file.ext == "gif_"){
-                                thumbImage = QiscusFile.createThumbImage(image, fillImageSize: thumbImageRef)
+                                thumbImage = QFile.createThumbImage(image, fillImageSize: thumbImageRef)
                             }
                             
                             let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String

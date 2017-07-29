@@ -217,7 +217,7 @@ open class QiscusLinkData: Object {
                     realm.add(self)
                 }
                 if self.linkImageThumbURL == "" {
-                    self.downloadThumbImage()
+                    //self.downloadThumbImage()
                 }
             }
         
@@ -270,55 +270,5 @@ open class QiscusLinkData: Object {
         
         return newImage!
     }
-    open func downloadThumbImage(){
-        if self.linkImageURL != ""{
-            let linkData = QiscusLinkData.copyLink(link: self)
-            let imageURL = self.linkImageURL
-            Qiscus.printLog(text: "Downloading image for link \(self.linkURL)")
-            Alamofire.request(self.linkImageURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
-                .responseData(completionHandler: { response in
-                    Qiscus.printLog(text: "download linkImage result: \(response)")
-                    if let data = response.data {
-                        if let image = UIImage(data: data) {
-                            var thumbImage = UIImage()
-                            let time = Double(Date().timeIntervalSince1970)
-                            let timeToken = UInt64(time * 10000)
-                            
-                            let fileExt = QiscusFile.getExtension(fromURL: imageURL)
-                            let fileName = "ios-link-\(timeToken).\(fileExt)"
-                            
-                            if fileExt == "jpg" || fileExt == "jpg_" || fileExt == "png" || fileExt == "png_" {
-                                thumbImage = linkData.createThumbLink(image)
-                                
-                                let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
-                                let directoryPath = "\(documentsPath)/Qiscus"
-                                if !FileManager.default.fileExists(atPath: directoryPath){
-                                    do {
-                                        try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
-                                    } catch let error as NSError {
-                                        Qiscus.printLog(text: error.localizedDescription);
-                                    }
-                                }
-                                let thumbPath = "\(directoryPath)/\(fileName)"
-                                
-                                if fileExt == "png" || fileExt == "png_" {
-                                    try? UIImagePNGRepresentation(thumbImage)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
-                                } else if fileExt == "jpg" || fileExt == "jpg_"{
-                                    try? UIImageJPEGRepresentation(thumbImage, 1.0)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
-                                }
-                                
-                                linkData.linkImageThumbURL = thumbPath
-                            }else{
-                               linkData.linkImageURL = ""
-                            }
-                        }
-                    }
-                }).downloadProgress(closure: { progressData in
-                    let progress = CGFloat(progressData.fractionCompleted)
-                    DispatchQueue.main.async(execute: {
-                        Qiscus.printLog(text: "Download link image progress: \(progress)")
-                    })
-                })
-        }
-    }
+    
 }

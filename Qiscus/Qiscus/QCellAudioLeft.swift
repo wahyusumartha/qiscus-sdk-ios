@@ -136,12 +136,12 @@ class QCellAudioLeft: QCellAudio {
             }
         }
         if self.comment!.isUploading || self.comment!.isDownloading{
-            let uploadProgres = Int(data.uploadProgress * 100)
+            let uploadProgres = Int(self.comment!.progress * 100)
             let uploading = QiscusTextConfiguration.sharedInstance.uploadingText
             let downloading = QiscusTextConfiguration.sharedInstance.downloadingText
             
             self.progressContainer.isHidden = false
-            self.progressHeight.constant = data.uploadProgress * 30
+            self.progressHeight.constant = self.comment!.progress * 30
             
             if self.comment!.isDownloading{
                 self.progressImageView.image = Qiscus.image(named: "audio_download")

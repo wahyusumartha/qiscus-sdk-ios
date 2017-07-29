@@ -26,20 +26,10 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
     }
     func didTapPostbackButton(withData data: JSON) {
         if Qiscus.sharedInstance.connected{
-            var indexPath = IndexPath(row: 0, section: 0)
             let text = data["label"].stringValue
             let payload = data["payload"]
             let type = "button_postback_response"
-            if self.comments.count > 0 {
-                let lastComment = self.comments.last!.last!
-                if lastComment.userEmail == QiscusMe.sharedInstance.email && lastComment.isToday {
-                    indexPath.section = self.comments.count - 1
-                    indexPath.row = self.comments[indexPath.section].count
-                }else{
-                    indexPath.section = self.comments.count
-                    indexPath.row = 0
-                }
-            }
+            
             if let room = self.chatRoom {
                 let newComment = room.newComment(text: text)
                 room.post(comment: newComment, type: type, payload: payload)
@@ -76,13 +66,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
     }
     // MARK: ChatCellDelegate
     func didChangeSize(onCell cell:QChatCell){
-        if let indexPath = cell.data.commentIndexPath {
-            if indexPath.section < self.comments.count{
-                if indexPath.row < self.comments[indexPath.section].count{
-                    collectionView.reloadItems(at: [indexPath])
-                }
-            }
-        }
+        
     }
     func didTapCell(withData data:QComment){
         if (data.type == .image || data.type == .video) && data.file != nil{

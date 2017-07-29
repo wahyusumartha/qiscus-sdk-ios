@@ -43,7 +43,7 @@ import CocoaMQTT
     @objc public var styleConfiguration = QiscusUIConfiguration.sharedInstance
     @objc public var connected:Bool = false
     @objc public var httpRealTime:Bool = false
-    @objc public var toastMessageAct:((_ roomId:Int, _ comment:QiscusComment)->Void)?
+    @objc public var toastMessageAct:((_ roomId:Int, _ comment:QComment)->Void)?
     
     let application = UIApplication.shared
     let appDelegate = UIApplication.shared.delegate
@@ -255,48 +255,48 @@ import CocoaMQTT
      - parameter title: **String** text to show as chat title (Optional), Default value : "".
      - parameter subtitle: **String** text to show as chat subtitle (Optional), Default value : "" (empty string).
      */
-    @objc public class func chatVC(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
-        Qiscus.checkDatabaseMigration()
-        if !Qiscus.sharedInstance.connected {
-            Qiscus.setupReachability()
-        }
-        
-        Qiscus.sharedInstance.isPushed = true
-        QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
-        QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
-        
-        var chatVC = QiscusChatVC()
-        for (_,chatRoom) in Qiscus.sharedInstance.chatViews {
-            if let room = chatRoom.room {
-                if !room.isGroup {
-                    if let user = chatRoom.users?.first {
-                        if user == users.first! {
-                            chatVC = chatRoom
-                            break
-                        }
-                    }
-                }
-            }
-        }
-        if distinctId != nil{
-            chatVC.distincId = distinctId!
-        }else{
-            chatVC.distincId = ""
-        }
-        chatVC.optionalData = optionalData
-        chatVC.message = withMessage
-        chatVC.users = users
-        chatVC.optionalData = optionalData
-        chatVC.archived = readOnly
-        
-        if chatVC.isPresence {
-            chatVC.goBack()
-        }
-        chatVC.backAction = nil
-        
-        
-        return chatVC
-    }
+//    @objc public class func chatVC(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
+//        Qiscus.checkDatabaseMigration()
+//        if !Qiscus.sharedInstance.connected {
+//            Qiscus.setupReachability()
+//        }
+//        
+//        Qiscus.sharedInstance.isPushed = true
+//        QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
+//        QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
+//        
+//        var chatVC = QiscusChatVC()
+//        for (_,chatRoom) in Qiscus.sharedInstance.chatViews {
+//            if let room = chatRoom.room {
+//                if !room.isGroup {
+//                    if let user = chatRoom.users?.first {
+//                        if user == users.first! {
+//                            chatVC = chatRoom
+//                            break
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        if distinctId != nil{
+//            chatVC.distincId = distinctId!
+//        }else{
+//            chatVC.distincId = ""
+//        }
+//        chatVC.optionalData = optionalData
+//        chatVC.message = withMessage
+//        chatVC.users = users
+//        chatVC.optionalData = optionalData
+//        chatVC.archived = readOnly
+//        
+//        if chatVC.isPresence {
+//            chatVC.goBack()
+//        }
+//        chatVC.backAction = nil
+//        
+//        
+//        return chatVC
+//    }
     
     /**
      No Documentation
