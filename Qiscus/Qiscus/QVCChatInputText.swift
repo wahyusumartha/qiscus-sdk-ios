@@ -18,20 +18,8 @@ extension QiscusChatVC: ChatInputTextDelegate {
                 input.layoutIfNeeded()
             }
         }
-        
         if let room = self.chatRoom {
-            let message: String = "1";
-            let channel = "r/\(room.id)/\(room.id)/\(QiscusMe.sharedInstance.email)/t"
-            Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
-            if self.typingTimer != nil {
-                if self.typingTimer!.isValid {
-                    self.typingTimer!.invalidate()
-                }
-                self.typingTimer = nil
-                Qiscus.uiThread.async {
-                    self.typingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.sendStopTyping), userInfo: nil, repeats: false)
-                }
-            }
+            room.publishStartTyping()
         }
     }
     open func valueChanged(value:String){
@@ -57,15 +45,7 @@ extension QiscusChatVC: ChatInputTextDelegate {
     }
     public func sendStopTyping(){
         if let room = self.chatRoom {
-            let message: String = "0";
-            let channel = "r/\(room.id)/\(room.id)/\(QiscusMe.sharedInstance.email)/t"
-            Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
-            if self.typingTimer != nil {
-                if self.typingTimer!.isValid {
-                    self.typingTimer!.invalidate()
-                }
-                self.typingTimer = nil
-            }
+            room.publishStopTyping()
         }
     }
 }

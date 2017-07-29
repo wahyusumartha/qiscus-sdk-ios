@@ -56,7 +56,8 @@ public class QRoom:Object {
     public let participants = List<QParticipant>()
     
     public var delegate:QRoomDelegate?
-    var typingTimer:Timer?
+    private var typingTimer:Timer?
+    private var selfTypingTimer:Timer?
     
     
     // MARK: - Unstored properties
@@ -1169,5 +1170,27 @@ public class QRoom:Object {
     public func update(roomName:String? = nil, roomAvatarURL:String? = nil, roomOptions:String? = nil, onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){
         let service = QRoomService()
         service.updateRoom(onRoom: self, roomName: roomName, roomAvatarURL: roomAvatarURL, roomOptions: roomOptions, onSuccess: onSuccess, onError: onError)
+    }
+    public func publishStopTyping(){
+        let message: String = "0";
+        let channel = "r/\(self.id)/\(self.id)/\(QiscusMe.sharedInstance.email)/t"
+        Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
+        if self.selfTypingTimer != nil {
+            if self.typingTimer!.isValid {
+                self.typingTimer!.invalidate()
+            }
+            self.typingTimer = nil
+        }
+    }
+    public func publishStartTyping(){
+        let message: String = "1";
+        let channel = "r/\(self.id)/\(self.id)/\(QiscusMe.sharedInstance.email)/t"
+        Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
+        if self.typingTimer != nil {
+            if self.typingTimer!.isValid {
+                self.typingTimer!.invalidate()
+            }
+        }
+        self.typingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.publishStopTyping), userInfo: nil, repeats: false)
     }
 }
