@@ -235,24 +235,13 @@ public class QRoom:Object {
             var participantString = [String]()
             for participantJSON in json["participants"].arrayValue {
                 let participantEmail = participantJSON["email"].stringValue
-                //save or update user first
-                var savedUser = QUser.user(withEmail: participantEmail)
-                if savedUser == nil {
-                    savedUser = QUser()
-                    savedUser?.email = participantEmail
-                    savedUser?.fullname = participantJSON["username"].stringValue
-                    savedUser?.avatarURL = participantJSON["avatar_url"].stringValue
-                    try! realm.write {
-                        realm.add(savedUser!, update: true)
-                    }
-                }else{
-                    try! realm.write {
-                        savedUser!.fullname = participantJSON["username"].stringValue
-                        savedUser!.avatarURL = participantJSON["avatar_url"].stringValue
-                    }
-                }
+                let fullname = participantJSON["username"].stringValue
+                let avatarURL = participantJSON["avatar_url"].stringValue
+                
+                let savedUser = QUser.saveUser(withEmail: participantEmail, fullname: fullname, avatarURL: avatarURL)
+                
                 if room.type == .single {
-                    if participantEmail != QiscusMe.sharedInstance.email {
+                    if savedUser.email != QiscusMe.sharedInstance.email {
                         try! realm.write {
                             room.singleUser = participantEmail
                         }
@@ -453,43 +442,11 @@ public class QRoom:Object {
         var participantChanged = false
         for participantJSON in json["participants"].arrayValue {
             let participantEmail = participantJSON["email"].stringValue
-            var savedUser = QUser.user(withEmail: participantEmail)
-            if savedUser == nil {
-                savedUser = QUser()
-                savedUser?.email = participantEmail
-                savedUser?.fullname = participantJSON["username"].stringValue
-                savedUser?.avatarURL = participantJSON["avatar_url"].stringValue
-                try! realm.write {
-                    realm.add(savedUser!, update: true)
-                }
-            }else{
-                let fullname = participantJSON["username"].stringValue
-                let avatarURL = participantJSON["avatar_url"].stringValue
-                if savedUser!.fullname != fullname {
-                    try! realm.write {
-                        savedUser!.fullname = fullname
-                    }
-                    participantChanged = true
-                    
-                }
-                if savedUser!.avatarURL != avatarURL {
-                    try! realm.write {
-                        savedUser!.avatarURL = avatarURL
-                        savedUser!.avatarLocalPath = ""
-                    }
-                    participantChanged = true
-                }
-                if participantChanged {
-                    var section = 0
-                    for commentGroup in self.comments {
-                        if commentGroup.senderEmail == savedUser!.email {
-                            self.delegate?.room(didChangeGroupComment: section)
-                        }
-                        section += 1
-                    }
-                }
-            }
-            if QParticipant.participant(inRoomWithId: self.id, andEmail: participantEmail) == nil{
+            let fullname = participantJSON["username"].stringValue
+            let avatarURL = participantJSON["avatar_url"].stringValue
+            let savedUser = QUser.saveUser(withEmail: participantEmail, fullname: fullname, avatarURL: avatarURL)
+            
+            if QParticipant.participant(inRoomWithId: self.id, andEmail: savedUser.email) == nil{
                 let newParticipant = QParticipant()
                 newParticipant.localId = "\(self.id)_\(participantEmail)"
                 newParticipant.roomId = self.id
@@ -529,23 +486,9 @@ public class QRoom:Object {
         if commentType == "reply" || commentType == "buttons" {
             commentText = json["payload"]["text"].stringValue
         }
-        if let user = QUser.user(withEmail: senderEmail){
-            if user.lastSeen < commentCreatedAt {
-                try! realm.write {
-                    user.lastSeen = commentCreatedAt
-                }
-                self.delegate?.room(didChangeUser: self, user: user)
-            }
-        }else{
-            let user = QUser()
-            user.email = senderEmail
-            user.avatarURL = json["user_avatar_url"].stringValue
-            user.fullname = commentSenderName
-            user.lastSeen = commentCreatedAt
-            try! realm.write {
-                realm.add(user)
-            }
-        }
+        
+        let avatarURL = json["user_avatar_url"].stringValue
+        let _ = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL, lastSeen: commentCreatedAt)
         
         if let oldComment = QComment.comment(withUniqueId: commentUniqueId) {
             try! realm.write {
@@ -680,29 +623,15 @@ public class QRoom:Object {
         if commentType == "reply" || commentType == "buttons" {
             commentText = json["payload"]["text"].stringValue
         }
-        //Check sender
-        if let user = QUser.user(withEmail: senderEmail){
-            if user.lastSeen < commentCreatedAt {
-                try! realm.write {
-                    user.lastSeen = commentCreatedAt
-                }
-                self.delegate?.room(didChangeUser: self, user: user)
-            }
-        }else{
-            let user = QUser()
-            user.email = senderEmail
-            user.avatarURL = json["user_avatar_url"].stringValue
-            user.fullname = commentSenderName
-            user.lastSeen = commentCreatedAt
-            try! realm.write {
-                realm.add(user)
-            }
-        }
+        let avatarURL = json["user_avatar_url"].stringValue
+        let user = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL, lastSeen: commentCreatedAt)
+        
         if let oldComment = QComment.comment(withUniqueId: commentUniqueId) {
             try! realm.write {
                 oldComment.id = commentId
                 oldComment.text = commentText
-                oldComment.senderName = commentSenderName
+                oldComment.senderName = user.fullname
+                oldComment.senderEmail = user.email
                 oldComment.createdAt = commentCreatedAt
                 oldComment.beforeId = commentBeforeId
             }
