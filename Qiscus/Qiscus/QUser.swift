@@ -9,6 +9,12 @@
 import Foundation
 import RealmSwift
 
+@objc public protocol QUserDelegate {
+    @objc optional func user(didChangeName fullname:String)
+    @objc optional func user(didChangeAvatar avatarURL:String)
+    @objc optional func user(didChangeLastSeen lastSeen:Double)
+}
+
 public class QUser:Object {
     static var cache = [String: QUser]()
     
@@ -20,6 +26,7 @@ public class QUser:Object {
     public dynamic var lastSeen:Double = 0
     
     public dynamic var avatar:UIImage?
+    public var delegate:QUserDelegate?
     
     public var lastSeenString:String{
         get{
@@ -72,33 +79,40 @@ public class QUser:Object {
     }
     // MARK: - Unstored properties
     override public static func ignoredProperties() -> [String] {
-        return ["avatar"]
+        return ["avatar","delegate"]
     }
     public class func saveUser(withEmail email:String, fullname:String? = nil, avatarURL:String? = nil, lastSeen:Double? = nil)->QUser{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         var user = QUser()
         if let savedUser = QUser.user(withEmail: email){
             user = savedUser
-            try! realm.write {
-                if fullname != nil {
+            if fullname != nil  && fullname! != user.fullname {
+                try! realm.write {
                     user.fullname = fullname!
                 }
-                if avatarURL != nil {
+                user.delegate?.user?(didChangeName: fullname!)
+            }
+            if avatarURL != nil && avatarURL! != user.avatarURL{
+                try! realm.write {
                     user.avatarURL = avatarURL!
                 }
-                if lastSeen != nil {
+                user.delegate?.user?(didChangeAvatar: avatarURL!)
+            }
+            if lastSeen != nil && lastSeen! > user.lastSeen{
+                try! realm.write {
                     user.lastSeen = lastSeen!
                 }
+                user.delegate?.user?(didChangeLastSeen: lastSeen!)
             }
         }else{
             user.email = email
-            if fullname != nil && fullname! != user.fullname {
+            if fullname != nil {
                 user.fullname = fullname!
             }
-            if avatarURL != nil && avatarURL! != user.avatarURL{
+            if avatarURL != nil {
                 user.avatarURL = avatarURL!
             }
-            if lastSeen != nil && lastSeen! > user.lastSeen{
+            if lastSeen != nil {
                 user.lastSeen = lastSeen!
             }
             try! realm.write {
