@@ -54,7 +54,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                 return footerCell
             }else{
                 let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterLeft", for: indexPath) as! QChatFooterLeft
-                footerCell.sender = commentGroup.sender
+                footerCell.user = commentGroup.sender
                 return footerCell
             }
         }else{
@@ -137,7 +137,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                     show = true
                 }else if comment!.type == .video || comment!.type == .image || comment!.type == .audio || comment!.type == .file {
                     if let file = comment!.file {
-                        if QiscusHelper.isFileExist(inLocalPath: file.localPath){
+                        if QFileManager.isFileExist(inLocalPath: file.localPath){
                             show = true
                         }
                     }

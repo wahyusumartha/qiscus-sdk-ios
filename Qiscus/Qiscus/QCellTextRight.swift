@@ -116,11 +116,11 @@ class QCellTextRight: QChatCell {
                 self.linkImage.isHidden = false
                 
                 if let file = QFile.file(withURL: url){
-                    if QiscusHelper.isFileExist(inLocalPath: file.localThumbPath){
+                    if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
                         self.linkImage.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
                             self.linkImage.image = image
                         })
-                    }else if QiscusHelper.isFileExist(inLocalPath: file.localMiniThumbPath){
+                    }else if QFileManager.isFileExist(inLocalPath: file.localMiniThumbPath){
                         self.linkImage.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
                             self.linkImage.image = image
                         })

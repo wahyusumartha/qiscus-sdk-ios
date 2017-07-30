@@ -64,7 +64,7 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
                         room.updateCommentStatus(inComment: self.comment!, status: .sending)
                         room.post(comment: self.comment!)
                     }else{
-                        if QiscusHelper.isFileExist(inLocalPath: file.localPath) {
+                        if QFileManager.isFileExist(inLocalPath: file.localPath) {
                             room.upload(comment: self.comment!, onSuccess: { (roomTarget, commentTarget) in
                                 roomTarget.post(comment: commentTarget)
                             }, onError: { (_, _, error) in

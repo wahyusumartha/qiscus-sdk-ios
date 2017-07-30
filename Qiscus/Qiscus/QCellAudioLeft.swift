@@ -106,7 +106,7 @@ class QCellAudioLeft: QCellAudio {
         self.filePath = ""
         if let file = self.comment!.file{
             if file.localPath != "" {
-                if QiscusHelper.isFileExist(inLocalPath: file.localPath){
+                if QFileManager.isFileExist(inLocalPath: file.localPath){
                     self.filePath = file.localPath
                     self.isPlaying = self.comment!.audioIsPlaying
                     let audioURL = URL(fileURLWithPath: file.localPath)
@@ -229,7 +229,7 @@ class QCellAudioLeft: QCellAudio {
     public override func downloadFinished() {
         if let file = self.comment!.file{
             if file.localPath != "" {
-                if QiscusHelper.isFileExist(inLocalPath: file.localPath){
+                if QFileManager.isFileExist(inLocalPath: file.localPath){
                     self.filePath = file.localPath
                     self.isPlaying = self.comment!.audioIsPlaying
                     let audioURL = URL(fileURLWithPath: file.localPath)

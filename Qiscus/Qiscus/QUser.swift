@@ -11,7 +11,8 @@ import RealmSwift
 
 @objc public protocol QUserDelegate {
     @objc optional func user(didChangeName fullname:String)
-    @objc optional func user(didChangeAvatar avatarURL:String)
+    @objc optional func user(didChangeAvatarURL avatarURL:String)
+    @objc optional func user(didChangeAvatar avatar:UIImage)
     @objc optional func user(didChangeLastSeen lastSeen:Double)
 }
 
@@ -25,7 +26,13 @@ public class QUser:Object {
     public dynamic var fullname:String = ""
     public dynamic var lastSeen:Double = 0
     
-    public dynamic var avatar:UIImage?
+    public dynamic var avatar:UIImage?{
+        didSet{
+            if self.avatar != nil {
+                self.delegate?.user?(didChangeAvatar: self.avatar)
+            }
+        }
+    }
     public var delegate:QUserDelegate?
     
     public var lastSeenString:String{
@@ -165,5 +172,8 @@ public class QUser:Object {
                 room.delegate?.room(didChangeUser: room, user: self)
             }
         }
+    }
+    public func saveAvatar(withImage image:UIImage){
+        
     }
 }

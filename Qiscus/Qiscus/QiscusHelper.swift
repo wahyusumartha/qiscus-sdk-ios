@@ -41,18 +41,6 @@ open class QiscusHelper: NSObject {
             return dateFormatter.string(from: date)
         }
     }
-    
-    open class func isFileExist(inLocalPath path:String)->Bool{
-        var check:Bool = false
-        
-        let checkValidation = FileManager.default
-        
-        if (path != "" && checkValidation.fileExists(atPath:path))
-        {
-            check = true
-        }
-        return check
-    }
     open class func getFirstLinkInString(text:String)->String?{
         let pattern = "((?:http|https)://)?(?:www\\.)?([a-zA-Z0-9./]+[.][a-zA-Z0-9/]{2,3})+([a-zA-Z0-9./-]+)?((\\?)+[a-zA-Z0-9./-_&]*)*"
         do {

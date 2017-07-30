@@ -13,10 +13,11 @@ class QChatFooterLeft: UICollectionReusableView {
     @IBOutlet weak var avatarLabel: UILabel!
     @IBOutlet weak var avatarImage: UIImageView!
     
-    public var sender:QUser?{
+    public var user:QUser?{
         didSet{
-            if let user = self.sender {
-                if let avatar = user.avatar {
+            if self.user != nil{
+                self.user!.delegate = self
+                if let avatar = user!.avatar {
                     avatarLabel.isHidden = true
                     avatarImage.image = avatar
                     avatarImage.backgroundColor = UIColor.clear
@@ -24,32 +25,32 @@ class QChatFooterLeft: UICollectionReusableView {
                     avatarImage.image = nil
                     avatarLabel.isHidden = false
                     let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
-                    let colorIndex = user.fullname.characters.count % bgColor.count
+                    let colorIndex = user!.fullname.characters.count % bgColor.count
                     avatarImage.backgroundColor = bgColor[colorIndex]
                     
-                    if let fullName = user.fullname.characters.first{
+                    if let fullName = user!.fullname.characters.first{
                         avatarLabel.text = String(fullName).uppercased()
                     }
-                    if QiscusHelper.isFileExist(inLocalPath: user.avatarLocalPath){
-                        if let cachedImage = UIImage.cachedImage(withPath: user.avatarLocalPath){
+                    if QiscusHelper.isFileExist(inLocalPath: user!.avatarLocalPath){
+                        if let cachedImage = UIImage.cachedImage(withPath: user!.avatarLocalPath){
                             self.avatarLabel.isHidden = true
                             self.avatarImage.image = cachedImage
                             self.avatarImage.backgroundColor = UIColor.clear
-                            user.avatar = cachedImage
+                            user!.avatar = cachedImage
                         }else{
-                            avatarImage.loadAsync(fromLocalPath: user.avatarLocalPath, onLoaded: { (image, _) in
-                                user.avatar = image
+                            avatarImage.loadAsync(fromLocalPath: user!.avatarLocalPath, onLoaded: { (image, _) in
+                                self.user!.avatar = image
                             })
                         }
                     }else{
-                        if let cachedImage = UIImage.cachedImage(withPath: user.avatarURL){
+                        if let cachedImage = UIImage.cachedImage(withPath: user!.avatarURL){
                             self.avatarLabel.isHidden = true
                             self.avatarImage.image = cachedImage
                             self.avatarImage.backgroundColor = UIColor.clear
-                            user.avatar = cachedImage
+                            user!.avatar = cachedImage
                         }else{
-                            avatarImage.loadAsync(user.avatarURL, onLoaded: { (image,_) in
-                                user.avatar = image
+                            avatarImage.loadAsync(user!.avatarURL, onLoaded: { (image,_) in
+                                self.user!.avatar = image
                             })
                         }
                     }
@@ -63,11 +64,21 @@ class QChatFooterLeft: UICollectionReusableView {
         }
     }
     
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         avatarImage.layer.cornerRadius = 19
         avatarImage.clipsToBounds = true
         avatarImage.contentMode = .scaleAspectFill
         self.isUserInteractionEnabled = false
+    }
+}
+
+extension QChatFooterLeft:QUserDelegate{
+    func user(didChangeAvatarURL avatarURL: String) {
+        
+    }
+    func user(didChangeAvatar avatar: UIImage) {
+        
     }
 }

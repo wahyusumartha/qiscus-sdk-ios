@@ -80,7 +80,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                     let targetData = dataGroup.comment(index: item)!
                     if targetData.type == .image || targetData.type == .video {
                         if let file = targetData.file {
-                            if QiscusHelper.isFileExist(inLocalPath: file.localPath){
+                            if QFileManager.isFileExist(inLocalPath: file.localPath){
                                 if file.localPath == currentFile.localPath {
                                     currentIndex = totalIndex
                                 }

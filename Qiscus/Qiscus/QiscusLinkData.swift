@@ -142,7 +142,7 @@ open class QiscusLinkData: Object {
     open var isLocalThumbExist:Bool{
         get{
             var check:Bool = false
-            if QiscusHelper.isFileExist(inLocalPath: self.linkImageThumbURL){
+            if QFileManager.isFileExist(inLocalPath: self.linkImageThumbURL){
                 check = true
             }
             return check

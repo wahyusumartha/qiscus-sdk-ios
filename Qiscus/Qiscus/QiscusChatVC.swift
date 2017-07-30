@@ -89,12 +89,12 @@ public class QiscusChatVC: UIViewController{
                     }else{
                         if let file = self.replyData!.file {
                             if self.replyData!.type == .video || self.replyData!.type == .image {
-                                if QiscusHelper.isFileExist(inLocalPath: file.localThumbPath){
+                                if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
                                     self.linkImage.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
                                         self.linkImage.image = image
                                     })
                                 }
-                                else if QiscusHelper.isFileExist(inLocalPath: file.localMiniThumbPath){
+                                else if QFileManager.isFileExist(inLocalPath: file.localMiniThumbPath){
                                     self.linkImage.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
                                         self.linkImage.image = image
                                     })

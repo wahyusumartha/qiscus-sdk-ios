@@ -62,12 +62,12 @@ class QCellMediaRight: QChatCell {
             if let image = self.comment!.displayImage {
                 self.imageDisplay.image = image
             }
-            else if QiscusHelper.isFileExist(inLocalPath: file.localThumbPath){
+            else if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
                 imageDisplay.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
                     self.imageDisplay.image = image
                     self.comment!.displayImage = image
                 })
-            }else if QiscusHelper.isFileExist(inLocalPath: file.localMiniThumbPath){
+            }else if QFileManager.isFileExist(inLocalPath: file.localMiniThumbPath){
                 imageDisplay.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
                     self.imageDisplay.image = image
                     self.comment!.displayImage = image
@@ -113,7 +113,7 @@ class QCellMediaRight: QChatCell {
             
             self.downloadButton.removeTarget(nil, action: nil, for: .allEvents)
             
-            if !QiscusHelper.isFileExist(inLocalPath: file.localPath){
+            if !QFileManager.isFileExist(inLocalPath: file.localPath){
                 if self.comment!.isDownloading {
                     self.downloadButton.isHidden = true
                     self.progressLabel.text = "\(Int(self.comment!.progress * 100)) %"
@@ -222,12 +222,12 @@ class QCellMediaRight: QChatCell {
     }
     public override func downloadFinished() {
         if let file = self.comment!.file {
-            if QiscusHelper.isFileExist(inLocalPath: file.localThumbPath){
+            if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
                 imageDisplay.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
                     self.imageDisplay.image = image
                     self.comment!.displayImage = image
                 })
-            }else if QiscusHelper.isFileExist(inLocalPath: file.localMiniThumbPath){
+            }else if QFileManager.isFileExist(inLocalPath: file.localMiniThumbPath){
                 imageDisplay.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
                     self.imageDisplay.image = image
                     self.comment!.displayImage = image
@@ -277,12 +277,12 @@ class QCellMediaRight: QChatCell {
     }
     public override func uploadFinished(){
         if let file = self.comment!.file {
-            if QiscusHelper.isFileExist(inLocalPath: file.localThumbPath){
+            if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
                 imageDisplay.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
                     self.imageDisplay.image = image
                     self.comment!.displayImage = image
                 })
-            }else if QiscusHelper.isFileExist(inLocalPath: file.localMiniThumbPath){
+            }else if QFileManager.isFileExist(inLocalPath: file.localMiniThumbPath){
                 imageDisplay.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
                     self.imageDisplay.image = image
                     self.comment!.displayImage = image

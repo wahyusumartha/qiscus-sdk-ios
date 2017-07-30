@@ -207,7 +207,7 @@ extension QiscusChatVC {
                         self.roomAvatarLabel.text = String(room.name.characters.first!).uppercased()
                         let colorIndex = room.name.characters.count % bgColor.count
                         self.roomAvatar.backgroundColor = bgColor[colorIndex]
-                        if QiscusHelper.isFileExist(inLocalPath: room.avatarLocalPath){
+                        if QFileManager.isFileExist(inLocalPath: room.avatarLocalPath){
                             self.roomAvatar.loadAsync(fromLocalPath: room.avatarLocalPath, onLoaded: { (image, _) in
                                 self.roomAvatarImage = image
                                 self.roomAvatar.image = image
