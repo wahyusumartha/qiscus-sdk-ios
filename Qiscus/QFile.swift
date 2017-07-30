@@ -138,18 +138,7 @@ public class QFile:Object{
         }
     }
     public class func saveFile(_ fileData: Data, fileName: String) -> String {
-        let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
-        let directoryPath = "\(documentsPath)/Qiscus"
-        if !FileManager.default.fileExists(atPath: directoryPath){
-            do {
-                try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
-            } catch let error as NSError {
-                Qiscus.printLog(text: error.localizedDescription);
-            }
-        }
-        let path = "\(documentsPath)/Qiscus/\(fileName)"
-        
-        try? fileData.write(to: URL(fileURLWithPath: path), options: [.atomic])
+        let path = QFileManager.saveFile(withData: fileData, fileName: fileName, type: .comment)
         
         return path
     }
