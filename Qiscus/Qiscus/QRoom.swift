@@ -945,17 +945,23 @@ public class QRoom:Object {
     public func getIndexPath(ofComment comment:QComment)->IndexPath?{
         var section = self.comments.count - 1
         var indexPath:IndexPath? = nil
+        var found = false
         for commentGroup in self.comments.reversed() {
             if commentGroup.date == comment.date && commentGroup.senderEmail == comment.senderEmail{
-                for row in (commentGroup.commentsCount - 1)...0 {
+                for row in 0...(commentGroup.commentsCount - 1) {
                     let commentTarget = commentGroup.comment(index: row)!
                     if commentTarget.uniqueId == comment.uniqueId{
                         indexPath = IndexPath(item: row, section: section)
+                        found = true
                         break
                     }
                 }
             }
-            section -= 1
+            if found {
+                break
+            }else{
+                section -= 1
+            }
         }
         return indexPath
     }
