@@ -76,6 +76,7 @@ class QCellMediaRight: QChatCell {
                 imageDisplay.loadAsync(file.thumbURL, onLoaded: { (image, _) in
                     self.imageDisplay.image = image
                     self.comment!.displayImage = image
+                    file.saveThumbImage(withImage: image)
                 })
             }
             if self.tapRecognizer != nil{

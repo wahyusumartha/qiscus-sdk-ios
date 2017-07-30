@@ -254,7 +254,6 @@ public class QRoomService:NSObject{
     }
     public func downloadMedia(inRoom room: QRoom, comment:QComment, thumbImageRef:UIImage? = nil, isAudioFile:Bool = false){
         let indexPath = room.getIndexPath(ofComment: comment)!
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         if let file = comment.file {
             
             comment.updateDownloading(downloading: true)
@@ -273,57 +272,28 @@ public class QRoomService:NSObject{
                                 thumbImage = QFile.createThumbImage(image, fillImageSize: thumbImageRef)
                             }
                             
-                            let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
-                            let directoryPath = "\(documentsPath)/Qiscus"
-                            if !FileManager.default.fileExists(atPath: directoryPath){
-                                do {
-                                    try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
-                                } catch let error as NSError {
-                                    Qiscus.printLog(text: error.localizedDescription);
-                                }
-                            }
-                            
-                            let fileName = "\(file.filename.replacingOccurrences(of: " ", with: "%20").replacingOccurrences(of: "%20", with: "_"))"
-                            let path = "\(documentsPath)/Qiscus/\(fileName)"
-                            let thumbPath = "\(documentsPath)/Qiscus/thumb_\(fileName)"
-                            
+                            var fileData = Data()
                             if (file.ext == "png" || file.ext == "png_") {
-                                try? UIImagePNGRepresentation(image)!.write(to: URL(fileURLWithPath: path), options: [.atomic])
-                                try? UIImagePNGRepresentation(thumbImage)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+                                fileData = UIImagePNGRepresentation(image)!
+                                
                             } else if(file.ext == "jpg" || file.ext == "jpg_"){
-                                try? UIImageJPEGRepresentation(image, 1.0)!.write(to: URL(fileURLWithPath: path), options: [.atomic])
-                                try? UIImageJPEGRepresentation(thumbImage, 1.0)!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+                                fileData = UIImageJPEGRepresentation(image, 1.0)!
                             } else if(file.ext == "gif" || file.ext == "gif_"){
-                                try? imageData.write(to: URL(fileURLWithPath: path), options: [.atomic])
-                                try? imageData.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+                                fileData = imageData
                                 thumbImage = image
                             }
-                            try! realm.write {
-                                file.localPath = path
-                                file.localThumbPath = thumbPath
-                            }
+                            file.saveFile(withData: fileData)
+                            file.saveThumbImage(withImage: thumbImage)
+                            
                             comment.updateDownloading(downloading: false)
                             comment.updateProgress(progress: 1)
-                            
                             comment.displayImage = thumbImage
                             room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
                             
                         }else{
-                            let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
-                            let directoryPath = "\(documentsPath)/Qiscus"
-                            if !FileManager.default.fileExists(atPath: directoryPath){
-                                do {
-                                    try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
-                                } catch let error as NSError {
-                                    Qiscus.printLog(text: error.localizedDescription);
-                                }
-                            }
-                            let path = "\(documentsPath)/Qiscus/\(file.filename)"
-                            let thumbPath = "\(documentsPath)/Qiscus/thumb_\(file.id).png"
+                            file.saveFile(withData: imageData)
                             
-                            try? imageData.write(to: URL(fileURLWithPath: path), options: [.atomic])
-                            
-                            let assetMedia = AVURLAsset(url: URL(fileURLWithPath: "\(path)"))
+                            let assetMedia = AVURLAsset(url: URL(fileURLWithPath: "\(file.localPath)"))
                             let thumbGenerator = AVAssetImageGenerator(asset: assetMedia)
                             thumbGenerator.appliesPreferredTrackTransform = true
                             
@@ -334,39 +304,18 @@ public class QRoomService:NSObject{
                             do{
                                 let thumbRef = try thumbGenerator.copyCGImage(at: thumbTime, actualTime: nil)
                                 thumbImage = UIImage(cgImage: thumbRef)
-                                
-                                let thumbData = UIImagePNGRepresentation(thumbImage!)
-                                try? thumbData!.write(to: URL(fileURLWithPath: thumbPath), options: [.atomic])
+                                file.saveThumbImage(withImage: thumbImage!)
                             }catch{
                                 Qiscus.printLog(text: "error creating thumb image")
                             }
                             
-                            try! realm.write {
-                                file.localPath = path
-                                file.localThumbPath = thumbPath
-                            }
                             comment.updateProgress(progress: 1)
                             comment.updateDownloading(downloading: false)
                             room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
                         }
                     }
                     else{
-                        let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
-                        let directoryPath = "\(documentsPath)/Qiscus"
-                        if !FileManager.default.fileExists(atPath: directoryPath){
-                            do {
-                                try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
-                            } catch let error as NSError {
-                                Qiscus.printLog(text: error.localizedDescription);
-                            }
-                        }
-                        let path = "\(documentsPath)/Qiscus/\(file.filename)"
-                        try! imageData.write(to: URL(fileURLWithPath: path), options: [.atomic])
-                        
-                        
-                        try! realm.write {
-                            file.localPath = path
-                        }
+                        file.saveFile(withData: imageData)
                         comment.updateDownloading(downloading: false)
                         comment.updateProgress(progress: 1)
                         
@@ -445,9 +394,9 @@ public class QRoomService:NSObject{
                                     try! realm.write {
                                         comment.text = "[file]\(url) [/file]"
                                         file.url = url
-                                        comment.updateUploading(uploading: false)
-                                        comment.updateProgress(progress: 1)
                                     }
+                                    comment.updateUploading(uploading: false)
+                                    comment.updateProgress(progress: 1)
                                     room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadFinish")
                                 }
                                 else if json["results"].count > 0 {
@@ -458,50 +407,42 @@ public class QRoomService:NSObject{
                                             try! realm.write {
                                                 comment.text = "[file]\(url) [/file]"
                                                 file.url = url
-                                                comment.updateUploading(uploading: false)
-                                                comment.updateProgress(progress: 1)
                                             }
+                                            comment.updateUploading(uploading: false)
+                                            comment.updateProgress(progress: 1)
                                             room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadFinish")
                                         }
                                     }
                                 }
                                 onSuccess(room,comment)
                             }else{
-                                try! realm.write {
-                                    comment.updateUploading(uploading: false)
-                                    comment.updateProgress(progress: 0)
-                                    comment.updateStatus(status: .failed)
-                                }
+                                comment.updateUploading(uploading: false)
+                                comment.updateProgress(progress: 0)
+                                comment.updateStatus(status: .failed)
                                 room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
                                 onError(room,comment,"Fail to upload file, no readable response")
                             }
                         })
                         upload.uploadProgress(closure: {uploadProgress in
                             let progress = CGFloat(uploadProgress.fractionCompleted)
-                            try! realm.write {
-                                comment.updateUploading(uploading: true)
-                                comment.updateProgress(progress: progress)
-                            }
+                            comment.updateUploading(uploading: true)
+                            comment.updateProgress(progress: progress)
                             room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadProgress")
                         })
                         break
                     case .failure(let error):
-                        try! realm.write {
-                            comment.updateUploading(uploading: false)
-                            comment.updateProgress(progress: 0)
-                            comment.updateStatus(status: .failed)
-                        }
+                        comment.updateUploading(uploading: false)
+                        comment.updateProgress(progress: 0)
+                        comment.updateStatus(status: .failed)
                         room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
                         onError(room,comment,"Fail to upload file, \(error)")
                         break
                     }
                 })
             } catch {
-                try! realm.write {
-                    comment.updateUploading(uploading: false)
-                    comment.updateProgress(progress: 0)
-                    comment.updateStatus(status: .failed)
-                }
+                comment.updateUploading(uploading: false)
+                comment.updateProgress(progress: 0)
+                comment.updateStatus(status: .failed)
                 onError(room, comment, "Local file not found")
             }
         }

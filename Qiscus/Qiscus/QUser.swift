@@ -29,7 +29,7 @@ public class QUser:Object {
     public dynamic var avatar:UIImage?{
         didSet{
             if self.avatar != nil {
-                self.delegate?.user?(didChangeAvatar: self.avatar)
+                self.delegate?.user?(didChangeAvatar: self.avatar!)
             }
         }
     }
@@ -103,7 +103,7 @@ public class QUser:Object {
                 try! realm.write {
                     user.avatarURL = avatarURL!
                 }
-                user.delegate?.user?(didChangeAvatar: avatarURL!)
+                user.delegate?.user?(didChangeAvatarURL: avatarURL!)
             }
             if lastSeen != nil && lastSeen! > user.lastSeen{
                 try! realm.write {

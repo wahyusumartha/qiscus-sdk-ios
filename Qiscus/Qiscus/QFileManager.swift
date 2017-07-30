@@ -12,7 +12,7 @@ import Foundation
     case user
     case room
 }
-internal class QFileManager:NSObject{
+public class QFileManager:NSObject{
     private class func directoryPath(forDirectory directory:QDirectoryType)->String{
         var dir = ""
         switch directory {
@@ -25,8 +25,6 @@ internal class QFileManager:NSObject{
         case .user:
             dir = "user"
             break
-        default:
-            break
         }
         let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
         let qiscusPath = "\(documentsPath)/Qiscus"
@@ -38,9 +36,9 @@ internal class QFileManager:NSObject{
             }
         }
         let directoryPath = "\(qiscusPath)/\(dir)"
-        if !FileManager.default.fileExists(atPath: qiscusPath){
+        if !FileManager.default.fileExists(atPath: directoryPath){
             do {
-                try FileManager.default.createDirectory(atPath: qiscusPath, withIntermediateDirectories: false, attributes: nil)
+                try FileManager.default.createDirectory(atPath: directoryPath, withIntermediateDirectories: false, attributes: nil)
             } catch let error as NSError {
                 Qiscus.printLog(text: error.localizedDescription);
             }
@@ -49,7 +47,9 @@ internal class QFileManager:NSObject{
     }
     internal class func saveFile(withData fileData: Data, fileName: String, type:QDirectoryType)->String{
         let directoryPath = QFileManager.directoryPath(forDirectory: type)
-        try? fileData.write(to: URL(fileURLWithPath: directoryPath), options: [.atomic])
+        let path = "\(directoryPath)/\(fileName)"
+        try? fileData.write(to: URL(fileURLWithPath: path), options: [.atomic])
+        return path
     }
     public class func isFileExist(inLocalPath path:String)->Bool{
         var check:Bool = false

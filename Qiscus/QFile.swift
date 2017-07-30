@@ -165,4 +165,24 @@ public class QFile:Object{
             self.localPath = localPath
         }
     }
+    public func saveFile(withData data:Data){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let localPath = QFileManager.saveFile(withData: data, fileName: self.filename, type: .comment)
+        try! realm.write {
+            self.localPath = localPath
+        }
+    }
+    public func saveThumbImage(withImage image:UIImage){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        var data = Data()
+        if let imageData = UIImagePNGRepresentation(image){
+            data = imageData
+        }else{
+            data = UIImageJPEGRepresentation(image, 1)!
+        }
+        let localPath = QFileManager.saveFile(withData: data, fileName: "thumb-\(self.filename)", type: .comment)
+        try! realm.write {
+            self.localThumbPath = localPath
+        }
+    }
 }

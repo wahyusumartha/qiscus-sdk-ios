@@ -31,7 +31,7 @@ class QChatFooterLeft: UICollectionReusableView {
                     if let fullName = user!.fullname.characters.first{
                         avatarLabel.text = String(fullName).uppercased()
                     }
-                    if QiscusHelper.isFileExist(inLocalPath: user!.avatarLocalPath){
+                    if QFileManager.isFileExist(inLocalPath: user!.avatarLocalPath){
                         if let cachedImage = UIImage.cachedImage(withPath: user!.avatarLocalPath){
                             self.avatarLabel.isHidden = true
                             self.avatarImage.image = cachedImage
