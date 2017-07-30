@@ -33,10 +33,8 @@ import CocoaMQTT
     var iCloudUpload:Bool = false
     var isPushed:Bool = false
     var reachability:QReachability?
-    var mqtt:CocoaMQTT?
-    var mqttChannel = [String]()
+    internal var mqtt:CocoaMQTT?
     var notificationAction:((QiscusChatVC)->Void)? = nil
-    var realtimeConnected = false
     var syncing = false
     var syncTimer: Timer?
     

@@ -418,7 +418,6 @@ public class QChatService:NSObject {
                 }else if error != JSON.null{
                     Qiscus.printLog(text: "error sync message: \(error)")
                 }
-                Qiscus.shared.syncing = false
             }
             else{
                 Qiscus.printLog(text: "error sync message")
