@@ -10,6 +10,8 @@ import Foundation
 import RealmSwift
 
 public class QUser:Object {
+    static var cache = [String: QUser]()
+    
     public dynamic var email:String = ""
     public dynamic var id:Int = 0
     public dynamic var avatarURL:String = ""
@@ -72,9 +74,54 @@ public class QUser:Object {
     override public static func ignoredProperties() -> [String] {
         return ["avatar"]
     }
-    public class func user(withEmail email:String) -> QUser? {
+    public class func saveUser(withEmail email:String, fullname:String? = nil, avatarURL:String? = nil, lastSeen:Double? = nil)->QUser{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        return realm.object(ofType: QUser.self, forPrimaryKey: email)
+        var user = QUser()
+        if let savedUser = QUser.user(withEmail: email){
+            user = savedUser
+            try! realm.write {
+                if fullname != nil {
+                    user.fullname = fullname!
+                }
+                if avatarURL != nil {
+                    user.avatarURL = avatarURL!
+                }
+                if lastSeen != nil {
+                    user.lastSeen = lastSeen!
+                }
+            }
+        }else{
+            user.email = email
+            if fullname != nil && fullname! != user.fullname {
+                user.fullname = fullname!
+            }
+            if avatarURL != nil && avatarURL! != user.avatarURL{
+                user.avatarURL = avatarURL!
+            }
+            if lastSeen != nil && lastSeen! > user.lastSeen{
+                user.lastSeen = lastSeen!
+            }
+            try! realm.write {
+                realm.add(user)
+            }
+            
+            QUser.cache[email] = user
+        }
+        
+        return user
+    }
+    public class func user(withEmail email:String) -> QUser? {
+        if let cachedUser = QUser.cache[email] {
+            return cachedUser
+        }else{
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            if let cacheUser = realm.object(ofType: QUser.self, forPrimaryKey: email) {
+                QUser.cache[email] = cacheUser
+                return cacheUser
+            }else{
+                return nil
+            }
+        }
     }
     public class func all() -> [QUser]{
         var allUser = [QUser]()
@@ -84,7 +131,12 @@ public class QUser:Object {
         
         if data.count > 0 {
             for user in data{
-                allUser.append(user)
+                if let cachedUser = QUser.cache[user.email] {
+                    allUser.append(cachedUser)
+                }else{
+                    QUser.cache[user.email] = user
+                    allUser.append(user)
+                }
             }
         }
         return allUser
