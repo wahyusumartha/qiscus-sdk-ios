@@ -88,7 +88,7 @@ public class QUser:Object {
     override public static func ignoredProperties() -> [String] {
         return ["avatar","delegate"]
     }
-    public class func saveUser(withEmail email:String, fullname:String? = nil, avatarURL:String? = nil, lastSeen:Double? = nil)->QUser{
+    public class func saveUser(withEmail email:String, id:Int? = nil ,fullname:String? = nil, avatarURL:String? = nil, lastSeen:Double? = nil)->QUser{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         var user = QUser()
         if let savedUser = QUser.user(withEmail: email){
@@ -98,6 +98,11 @@ public class QUser:Object {
                     user.fullname = fullname!
                 }
                 user.delegate?.user?(didChangeName: fullname!)
+            }
+            if id != nil {
+                try! realm.write {
+                    user.id = id!
+                }
             }
             if avatarURL != nil && avatarURL! != user.avatarURL{
                 try! realm.write {
@@ -121,6 +126,9 @@ public class QUser:Object {
             }
             if lastSeen != nil {
                 user.lastSeen = lastSeen!
+            }
+            if id != nil {
+                user.id = id!
             }
             try! realm.write {
                 realm.add(user)
@@ -174,6 +182,23 @@ public class QUser:Object {
         }
     }
     public func saveAvatar(withImage image:UIImage){
-        
+        self.avatar = image
+        var filename = self.email.replacingOccurrences(of: ".", with: "_").replacingOccurrences(of: "@", with: "_")
+        var ext = "png"
+        var avatarData:Data? = nil
+        if let data = UIImagePNGRepresentation(image) {
+            avatarData = data
+        }else if let data = UIImageJPEGRepresentation(image, 1.0) {
+            avatarData = data
+            ext = "jpg"
+        }
+        filename = "\(filename).\(ext)"
+        if avatarData != nil {
+            let localPath = QFileManager.saveFile(withData: avatarData!, fileName: filename, type: .user)
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.avatarLocalPath = localPath
+            }
+        }
     }
 }
