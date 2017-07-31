@@ -1128,4 +1128,23 @@ public class QRoom:Object {
         }
         self.typingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.publishStopTyping), userInfo: nil, repeats: false)
     }
+    public func saveAvatar(image:UIImage){
+        var filename = "room_\(self.id)"
+        var ext = "png"
+        var avatarData:Data? = nil
+        if let data = UIImagePNGRepresentation(image) {
+            avatarData = data
+        }else if let data = UIImageJPEGRepresentation(image, 1.0) {
+            avatarData = data
+            ext = "jpg"
+        }
+        filename = "\(filename).\(ext)"
+        if avatarData != nil {
+            let localPath = QFileManager.saveFile(withData: avatarData!, fileName: filename, type: .room)
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.avatarLocalPath = localPath
+            }
+        }
+    }
 }

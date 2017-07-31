@@ -39,9 +39,7 @@ extension QiscusChatVC: ChatInputTextDelegate {
         }
     }
     open func chatInputDidEndEditing(chatInput input: ChatInputText) {
-        DispatchQueue.global().async {
-            self.sendStopTyping()
-        }
+        self.sendStopTyping()
     }
     public func sendStopTyping(){
         if let room = self.chatRoom {

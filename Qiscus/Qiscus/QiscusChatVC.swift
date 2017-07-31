@@ -759,7 +759,13 @@ extension QiscusChatVC:QRoomDelegate{
         })
     }
     public func room(didChangeAvatar room: QRoom) {
-        
+        self.roomAvatar.loadAsync(room.avatarURL, onLoaded: { (image, _) in
+            self.roomAvatarImage = image
+            self.roomAvatar.backgroundColor = UIColor.clear
+            self.roomAvatarLabel.isHidden = true
+            self.chatRoom?.saveAvatar(image: image)
+            self.roomAvatar.image = image
+        })
     }
     public func room(didFailUpdate error: String) {
         

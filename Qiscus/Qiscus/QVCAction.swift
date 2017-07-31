@@ -211,6 +211,7 @@ extension QiscusChatVC {
                             self.roomAvatar.loadAsync(fromLocalPath: room.avatarLocalPath, onLoaded: { (image, _) in
                                 self.roomAvatarImage = image
                                 self.roomAvatar.image = image
+                                self.chatRoom?.saveAvatar(image: image)
                             })
                         }else{
                             self.roomAvatar.loadAsync(room.avatarURL, onLoaded: { (image, _) in
@@ -218,6 +219,7 @@ extension QiscusChatVC {
                                 self.roomAvatar.image = image
                                 self.roomAvatar.backgroundColor = UIColor.clear
                                 self.roomAvatarLabel.isHidden = true
+                                self.chatRoom?.saveAvatar(image: image)
                             })
                         }
                     }
