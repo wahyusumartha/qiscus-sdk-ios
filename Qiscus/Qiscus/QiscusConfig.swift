@@ -13,7 +13,7 @@ open class QiscusConfig: NSObject {
     static let sharedInstance = QiscusConfig()
     
     open var commentPerLoad:Int = 10
-    open var dbSchemaVersion:UInt64 = 38
+    open var dbSchemaVersion:UInt64 = 39
     
     open var UPLOAD_URL = ""
     
