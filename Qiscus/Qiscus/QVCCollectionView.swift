@@ -12,25 +12,26 @@ import UIKit
 extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
     // MARK: CollectionView Data source
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        var itemNumber = 0
         
         if let room = self.chatRoom {
             let commentGroup = room.commentGroup(index: section)!
-            return commentGroup.commentsCount
-        }else{
-            return 0
+            itemNumber = commentGroup.commentsCount
         }
+        return itemNumber
     }
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
+        var sectionNumber = 0
+        
         if let room = self.chatRoom {
             if room.commentsGroupCount > 0 {
                 self.welcomeView.isHidden = true
             }else{
                 self.welcomeView.isHidden = false
             }
-            return room.commentsGroupCount
-        }else{
-            return 0
+            sectionNumber = room.commentsGroupCount
         }
+        return sectionNumber
     }
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let commentGroup = self.chatRoom!.commentGroup(index: indexPath.section)!
@@ -157,12 +158,12 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             }
             break
         case "reply":
-            if comment?.type != .postback && comment?.type != .account && comment?.status != .failed && comment?.type != .system && Qiscus.sharedInstance.connected{
+            if Qiscus.sharedInstance.connected && comment?.type != .postback && comment?.type != .account && comment?.status != .failed && comment?.type != .system && comment?.status != .sending && comment?.type != .card{
                 show = true
             }
             break
         case "forward":
-            if self.forwardAction != nil && Qiscus.sharedInstance.connected && comment?.type != .postback && comment?.type != .account && comment?.status != .failed && comment?.type != .system && comment?.status != .sending {
+            if self.forwardAction != nil && Qiscus.sharedInstance.connected && comment?.type != .postback && comment?.type != .account && comment?.status != .failed && comment?.type != .system && comment?.status != .sending && comment?.type != .card {
                 show = true
             }
         default:
@@ -209,7 +210,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         let commentGroup = self.chatRoom!.commentGroup(index: section)!
         if commentGroup.senderEmail != QiscusMe.sharedInstance.email{
-            return UIEdgeInsets(top: 0, left: 0, bottom: -44, right: 0)
+            return UIEdgeInsets(top: 0, left: 6, bottom: -44, right: 0)
         }else{
             return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         }
@@ -235,6 +236,9 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             break
         case .system:
             size.height += 40
+            break
+        case .card:
+            //size.height = 286
             break
         case .text:
             size.height += 15

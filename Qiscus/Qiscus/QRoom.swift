@@ -322,7 +322,7 @@ public class QRoom:Object {
             }
         }else if onTop{
             let firstCommentGroup = self.comments.first!
-            if firstCommentGroup.date == newComment.date && firstCommentGroup.senderEmail == newComment.senderEmail{
+            if firstCommentGroup.date == newComment.date && firstCommentGroup.senderEmail == newComment.senderEmail && newComment.type != .system {
                 newComment.cellPosRaw = QCellPosition.first.rawValue
                 try! realm.write {
                     firstCommentGroup.createdAt = newComment.createdAt
@@ -355,7 +355,7 @@ public class QRoom:Object {
             }
         }else{
             let lastComment = self.comments.last!
-            if lastComment.date == newComment.date && lastComment.senderEmail == newComment.senderEmail{
+            if lastComment.date == newComment.date && lastComment.senderEmail == newComment.senderEmail && newComment.type != .system{
                 newComment.cellPosRaw = QCellPosition.last.rawValue
                 lastComment.append(comment: newComment)
                 
@@ -556,6 +556,10 @@ public class QRoom:Object {
                 newComment.data = "\(json["payload"])"
                 newComment.typeRaw = QCommentType.system.rawValue
                 break
+            case "card":
+                newComment.data = "\(json["payload"])"
+                newComment.typeRaw = QCommentType.card.rawValue
+                break
             default:
                 if newComment.text.hasPrefix("[file]"){
                     var type = QiscusFileType.file
@@ -685,6 +689,10 @@ public class QRoom:Object {
             case "system_event":
                 newComment.data = "\(json["payload"])"
                 newComment.typeRaw = QCommentType.system.rawValue
+                break
+            case "card":
+                newComment.data = "\(json["payload"])"
+                newComment.typeRaw = QCommentType.card.rawValue
                 break
             default:
                 if newComment.text.hasPrefix("[file]"){

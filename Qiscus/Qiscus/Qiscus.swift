@@ -611,7 +611,7 @@ import CocoaMQTT
         Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
         
         let _ = try! Realm(configuration: Qiscus.dbConfiguration)
-        Qiscus.printLog(text:"realmURL \(Qiscus.dbConfiguration.fileURL!)")
+        //Qiscus.printLog(text:"realmURL \(Qiscus.dbConfiguration.fileURL!)")
     }
     
     // MARK: - Create NEW Chat

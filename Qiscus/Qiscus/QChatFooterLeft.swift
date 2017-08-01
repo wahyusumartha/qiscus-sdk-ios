@@ -33,14 +33,18 @@ class QChatFooterLeft: UICollectionReusableView {
                     }
                     if QFileManager.isFileExist(inLocalPath: user!.avatarLocalPath){
                         if let cachedImage = UIImage.cachedImage(withPath: sender.avatarLocalPath){
-                            self.avatarLabel.isHidden = true
-                            self.avatarImage.image = cachedImage
-                            self.avatarImage.backgroundColor = UIColor.clear
+                            if sender.email == self.user!.email {
+                                self.avatarLabel.isHidden = true
+                                self.avatarImage.image = cachedImage
+                                self.avatarImage.backgroundColor = UIColor.clear
+                            }
                         }else{
                             avatarImage.loadAsync(fromLocalPath: user!.avatarLocalPath, onLoaded: { (image, _) in
-                                self.avatarLabel.isHidden = true
-                                self.avatarImage.image = image
-                                self.avatarImage.backgroundColor = UIColor.clear
+                                if sender.email == self.user!.email {
+                                    self.avatarLabel.isHidden = true
+                                    self.avatarImage.image = image
+                                    self.avatarImage.backgroundColor = UIColor.clear
+                                }
                             })
                         }
                     }else{

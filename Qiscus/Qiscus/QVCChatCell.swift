@@ -26,15 +26,27 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
     }
     func didTapPostbackButton(withData data: JSON) {
         if Qiscus.sharedInstance.connected{
-            let text = data["label"].stringValue
+            let postbackType = data["type"]
             let payload = data["payload"]
-            let type = "button_postback_response"
-            
-            if let room = self.chatRoom {
-                let newComment = room.newComment(text: text)
-                room.post(comment: newComment, type: type, payload: payload)
+            switch postbackType {
+            case "link":
+                let urlString = payload["url"].stringValue
+                if let url = URL(string: urlString) {
+                    UIApplication.shared.openURL(url)
+                }
+                break
+            default:
+                let text = data["label"].stringValue
+                let type = "button_postback_response"
+                
+                if let room = self.chatRoom {
+                    let newComment = room.newComment(text: text)
+                    room.post(comment: newComment, type: type, payload: payload)
+                }
+                self.scrollToBottom()
+                break
             }
-            self.scrollToBottom()
+            
         }else{
             Qiscus.uiThread.async {
                 self.showNoConnectionToast()

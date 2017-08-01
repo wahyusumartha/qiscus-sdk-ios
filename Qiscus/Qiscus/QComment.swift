@@ -31,6 +31,7 @@ public enum QReplyType:Int{
     case account
     case reply
     case system
+    case card
 }
 @objc public enum QCommentStatus:Int{
     case sending
@@ -152,6 +153,8 @@ public class QComment:Object {
             switch self.type {
             case .system:
                 return "cellSystem"
+            case .card:
+                return "cellCard\(position)"
             case .postback,.account:
                 return "cellPostbackLeft"
             case .image, .video:
@@ -198,6 +201,10 @@ public class QComment:Object {
             }
         }else if self.type == .account && self.data != ""{
             size.height += 35
+        }else if self.type == .card {
+            let payload = JSON(parseJSON: self.data)
+            let buttons = payload["buttons"].arrayValue
+            size.height = CGFloat(240 + (buttons.count * 45)) + 5
         }
         
         return size

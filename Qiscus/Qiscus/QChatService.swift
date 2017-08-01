@@ -395,7 +395,6 @@ public class QChatService:NSObject {
             ]
         
         Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
-            Qiscus.printLog(text: "sync chat response: \n\(responseData)")
             if let response = responseData.result.value {
                 let json = JSON(response)
                 let results = json["results"]
