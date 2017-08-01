@@ -30,10 +30,38 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
             let payload = data["payload"]
             switch postbackType {
             case "link":
-                let urlString = payload["url"].stringValue
-                if let url = URL(string: urlString) {
-                    UIApplication.shared.openURL(url)
+                let urlString = payload["url"].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                let urlArray = urlString.components(separatedBy: "/")
+                func openInBrowser(){
+                    if let url = URL(string: urlString) {
+                        UIApplication.shared.openURL(url)
+                    }
                 }
+                
+                if urlArray.count > 2 {
+                    print("host = \(urlArray[2])")
+                    if urlArray[2].lowercased().contains("instagram.com") {
+                        print("arrayCount: \(urlArray.count)")
+                        var instagram = "instagram://app"
+                        if urlArray.count == 4 || (urlArray.count == 5 && urlArray[4] == ""){
+                            let usernameIG = urlArray[3]
+                            instagram = "instagram://user?username=\(usernameIG)"
+                        }
+                        if let instagramURL =  URL(string: instagram) {
+                            if UIApplication.shared.canOpenURL(instagramURL) {
+                                UIApplication.shared.openURL(instagramURL)
+                            }else{
+                                openInBrowser()
+                            }
+                        }
+                    }else{
+                        openInBrowser()
+                    }
+                }else{
+                    openInBrowser()
+                }
+                
+                
                 break
             default:
                 let text = data["label"].stringValue
