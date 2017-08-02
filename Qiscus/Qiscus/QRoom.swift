@@ -237,6 +237,8 @@ public class QRoom:Object {
                 let participantEmail = participantJSON["email"].stringValue
                 let fullname = participantJSON["username"].stringValue
                 let avatarURL = participantJSON["avatar_url"].stringValue
+                let lastReadId = participantJSON["last_comment_read_id"].doubleValue
+                let lastDeliveredId = participantJSON["last_comment_received_id"].doubleValue
                 
                 let savedUser = QUser.saveUser(withEmail: participantEmail, fullname: fullname, avatarURL: avatarURL)
                 
@@ -253,12 +255,15 @@ public class QRoom:Object {
                     newParticipant.localId = "\(room.id)_\(participantEmail)"
                     newParticipant.roomId = room.id
                     newParticipant.email = participantEmail
+                    newParticipant.lastReadCommentId = lastReadId
+                    newParticipant.lastDeliveredCommentId = lastDeliveredId
                     try! realm.write {
                         room.participants.append(newParticipant)
                     }
                 }
                 participantString.append(participantEmail)
             }
+            self.updateCommentStatus()
             var index = 0
             for participant in room.participants{
                 if !participantString.contains(participant.email){
@@ -445,12 +450,20 @@ public class QRoom:Object {
             let fullname = participantJSON["username"].stringValue
             let avatarURL = participantJSON["avatar_url"].stringValue
             let savedUser = QUser.saveUser(withEmail: participantEmail, fullname: fullname, avatarURL: avatarURL)
+            let lastReadId = participantJSON["last_comment_read_id"].doubleValue
+            let lastDeliveredId = participantJSON["last_comment_received_id"].doubleValue
             
-            if QParticipant.participant(inRoomWithId: self.id, andEmail: savedUser.email) == nil{
+            if let savedParticipant = QParticipant.participant(inRoomWithId: self.id, andEmail: savedUser.email){
+                savedParticipant.updateLastReadId(commentId: lastReadId)
+                savedParticipant.updateLastDeliveredId(commentId: lastDeliveredId)
+            }else {
                 let newParticipant = QParticipant()
                 newParticipant.localId = "\(self.id)_\(participantEmail)"
                 newParticipant.roomId = self.id
                 newParticipant.email = participantEmail
+                newParticipant.lastReadCommentId = lastReadId
+                newParticipant.lastDeliveredCommentId = lastDeliveredId
+                
                 try! realm.write {
                     self.participants.append(newParticipant)
                 }
@@ -458,6 +471,7 @@ public class QRoom:Object {
             }
             participantString.append(participantEmail)
         }
+        self.updateCommentStatus()
         var index = 0
         for participant in self.participants{
             if !participantString.contains(participant.email){
