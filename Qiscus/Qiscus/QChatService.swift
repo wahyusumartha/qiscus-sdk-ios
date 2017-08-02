@@ -81,6 +81,7 @@ public class QChatService:NSObject {
                             }
                         }else{
                             let error = "Failed to load room data"
+                            self.delegate?.chatService(didFailLoadRoom: "\(error)")
                             DispatchQueue.main.async {
                                 if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
                                     roomDelegate.didFailLoadRoom(withError: "\(error)")
@@ -90,6 +91,84 @@ public class QChatService:NSObject {
                         }
                     }else{
                         let error = "Failed to load room data"
+                        self.delegate?.chatService(didFailLoadRoom: "\(error)")
+                        DispatchQueue.main.async {
+                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
+                                roomDelegate.didFailLoadRoom(withError: "\(error)")
+                            }
+                        }
+                        Qiscus.printLog(text: error)
+                    }
+                })
+            }
+        }else{
+            reconnect {
+                self.room(withUser: user, distincId: distincId, optionalData: optionalData, withMessage: withMessage)
+            }
+        }
+    }
+    public func room(withUser user:String, distincId:String? = nil, optionalData:String? = nil, withMessage:String? = nil, onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){ //
+        if Qiscus.isLoggedIn{
+            if let room = QRoom.room(withUser: user){
+                onSuccess(room)
+            }
+            else{
+                let loadURL = QiscusConfig.ROOM_REQUEST_URL
+                
+                var parameters:[String : AnyObject] =  [
+                    "emails" : [user] as AnyObject,
+                    "token"  : qiscus.config.USER_TOKEN as AnyObject
+                ]
+                if distincId != nil{
+                    if distincId != "" {
+                        parameters["distinct_id"] = distincId! as AnyObject
+                    }
+                }
+                if optionalData != nil{
+                    parameters["options"] = optionalData! as AnyObject
+                }
+                Qiscus.printLog(text: "get or create room parameters: \(parameters)")
+                Alamofire.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                    if let response = responseData.result.value {
+                        Qiscus.printLog(text: "get or create room api response:\n\(response)")
+                        let json = JSON(response)
+                        let results = json["results"]
+                        let error = json["error"]
+                        
+                        if results != JSON.null{
+                            Qiscus.printLog(text: "getListComment with id response: \(responseData)")
+                            let roomData = results["room"]
+                            let room = QRoom.addRoom(fromJSON: roomData)
+                            
+                            let commentPayload = results["comments"].arrayValue
+                            
+                            for json in commentPayload {
+                                let commentId = json["id"].intValue
+                                if commentId <= QiscusMe.sharedInstance.lastCommentId {
+                                    room.saveOldComment(fromJSON: json)
+                                }
+                            }
+                            onSuccess(room)
+                        }else if error != JSON.null{
+                            onError("\(error)")
+                            DispatchQueue.main.async {
+                                if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
+                                    roomDelegate.didFailLoadRoom(withError: "\(error)")
+                                }
+                            }
+                        }else{
+                            let error = "Failed to load room data"
+                            onError("\(error)")
+                            DispatchQueue.main.async {
+                                if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
+                                    roomDelegate.didFailLoadRoom(withError: "\(error)")
+                                }
+                            }
+                            Qiscus.printLog(text: error)
+                        }
+                    }else{
+                        let error = "Failed to load room data"
+                        onError("\(error)")
                         DispatchQueue.main.async {
                             if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
                                 roomDelegate.didFailLoadRoom(withError: "\(error)")
