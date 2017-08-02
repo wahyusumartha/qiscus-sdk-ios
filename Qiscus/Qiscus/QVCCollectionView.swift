@@ -235,7 +235,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             size.height += 88
             break
         case .system:
-            size.height += 40
+            size.height += 46
             break
         case .card:
             //size.height = 286

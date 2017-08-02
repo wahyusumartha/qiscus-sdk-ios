@@ -209,6 +209,7 @@ public class QComment:Object {
         
         return size
     }
+    
     var textAttribute:[String: Any]{
         get{
             if self.type == .system {
@@ -235,6 +236,7 @@ public class QComment:Object {
             }
         }
     }
+    
     var attributedText:NSMutableAttributedString {
         get{
             let attributedText = NSMutableAttributedString(string: self.text)
