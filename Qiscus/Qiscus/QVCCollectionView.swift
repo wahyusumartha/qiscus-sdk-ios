@@ -166,6 +166,10 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             if self.forwardAction != nil && Qiscus.sharedInstance.connected && comment?.type != .postback && comment?.type != .account && comment?.status != .failed && comment?.type != .system && comment?.status != .sending && comment?.type != .card {
                 show = true
             }
+        case "info":
+            if self.infoAction != nil && Qiscus.sharedInstance.connected && comment?.type != .postback && comment?.type != .account && comment?.status != .failed && comment?.type != .system && comment?.status != .sending && comment?.type != .card && self.chatRoom!.type == .group && comment?.senderEmail == QiscusMe.sharedInstance.email{
+                show = true
+            }
         default:
             break
         }

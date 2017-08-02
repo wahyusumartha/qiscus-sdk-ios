@@ -732,4 +732,9 @@ extension QiscusChatVC {
             self.forwardAction!(comment)
         }
     }
+    func info(comment:QComment){
+        if self.infoAction != nil {
+            self.infoAction!(comment)
+        }
+    }
 }

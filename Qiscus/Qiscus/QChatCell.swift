@@ -91,6 +91,11 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
             room.deleteComment(comment: self.comment!)
         }
     }
+    open func info(){
+        if let chatView = Qiscus.shared.chatViews[self.comment!.roomId]{
+            chatView.info(comment: self.comment!)
+        }
+    }
     open func showFile(){
         if let chatView = Qiscus.shared.chatViews[self.comment!.roomId] {
             if let file = self.comment!.file {

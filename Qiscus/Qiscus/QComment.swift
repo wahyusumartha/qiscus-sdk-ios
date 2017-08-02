@@ -246,6 +246,27 @@ public class QComment:Object {
             return attributedText
         }
     }
+    public var statusInfo:QCommentInfo? {
+        get{
+            if let room = QRoom.room(withId: self.roomId) {
+                let commentInfo = QCommentInfo()
+                commentInfo.comment = self
+                commentInfo.deliveredUser = [QParticipant]()
+                commentInfo.readUser = [QParticipant]()
+                for participant in room.participants {
+                    if participant.email != QiscusMe.sharedInstance.email{
+                        if participant.lastReadCommentId >= self.id {
+                            commentInfo.readUser.append(participant)
+                        }else{
+                            commentInfo.deliveredUser.append(participant)
+                        }
+                    }
+                }
+                return commentInfo
+            }
+            return nil
+        }
+    }
     override open class func primaryKey() -> String {
         return "uniqueId"
     }

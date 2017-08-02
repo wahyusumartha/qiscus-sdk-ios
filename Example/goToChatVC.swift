@@ -59,6 +59,12 @@ class goToChatVC: UIViewController {
                         let newView = Qiscus.chatView(withRoomId: 13006)
                         self.navigationController?.pushViewController(newView, animated: true)
                     }
+                    view.infoAction = {(comment) in
+                        let statusInfo = comment.statusInfo!
+                        print("commentInfo: \(statusInfo)")
+                        print("delivered to: \(statusInfo.deliveredUser)")
+                        print("read by: \(statusInfo.readUser)")
+                    }
                 }else{
                     let uniqueId = targetField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
                     let view = Qiscus.chatView(withRoomUniqueId: uniqueId)
