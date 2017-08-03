@@ -142,11 +142,11 @@ public class QRoom:Object {
                 Qiscus.chatRooms[room!.id] = room!
                 Qiscus.sharedInstance.RealtimeConnect()
             }
-            DispatchQueue.main.async {
-                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                    roomDelegate.didFinishLoadRoom(onRoom: room!)
-                }
-            }
+//            DispatchQueue.main.async {
+//                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+//                    roomDelegate.didFinishLoadRoom(onRoom: room!)
+//                }
+//            }
         }
         return room
     }
@@ -164,11 +164,11 @@ public class QRoom:Object {
                 Qiscus.chatRooms[room!.id] = room!
                 Qiscus.sharedInstance.RealtimeConnect()
             }
-            DispatchQueue.main.async {
-                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                    roomDelegate.didFinishLoadRoom(onRoom: room!)
-                }
-            }
+//            DispatchQueue.main.async {
+//                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+//                    roomDelegate.didFinishLoadRoom(onRoom: room!)
+//                }
+//            }
         }
         return room
     }
@@ -186,11 +186,11 @@ public class QRoom:Object {
                 Qiscus.chatRooms[room!.id] = room!
                 Qiscus.sharedInstance.RealtimeConnect()
             }
-            DispatchQueue.main.async {
-                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                    roomDelegate.didFinishLoadRoom(onRoom: room!)
-                }
-            }
+//            DispatchQueue.main.async {
+//                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+//                    roomDelegate.didFinishLoadRoom(onRoom: room!)
+//                }
+//            }
         }
         return room
     }

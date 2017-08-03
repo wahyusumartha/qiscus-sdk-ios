@@ -892,6 +892,8 @@ extension QiscusChatVC:QRoomDelegate{
                     self.chatRoom?.updateUnreadCommentCount()
                 }
             }
+        }else{
+            self.collectionView.reloadData()
         }
     }
     public func room(gotNewCommentOn groupIndex: Int, withCommentIndex index: Int) {
@@ -912,6 +914,8 @@ extension QiscusChatVC:QRoomDelegate{
                     self.chatRoom?.updateUnreadCommentCount()
                 }
             }
+        }else{
+            self.collectionView.reloadData()
         }
     }
     public func room(userDidTyping userEmail: String) {

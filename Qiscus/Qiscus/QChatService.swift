@@ -34,6 +34,11 @@ public class QChatService:NSObject {
         if Qiscus.isLoggedIn{
             if let room = QRoom.room(withUser: user){
                 self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
+                DispatchQueue.main.async {
+                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                        roomDelegate.didFinishLoadRoom(onRoom: room)
+                    }
+                }
             }
             else{
                 let loadURL = QiscusConfig.ROOM_REQUEST_URL
@@ -72,6 +77,11 @@ public class QChatService:NSObject {
                                 }
                             }
                             self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
+                            DispatchQueue.main.async {
+                                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                                    roomDelegate.didFinishLoadRoom(onRoom: room)
+                                }
+                            }
                         }else if error != JSON.null{
                             self.delegate?.chatService(didFailLoadRoom: "\(error)")
                             DispatchQueue.main.async {
@@ -272,6 +282,11 @@ public class QChatService:NSObject {
             
             if let room = QRoom.room(withUniqueId: uniqueId){
                 self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
+                DispatchQueue.main.async {
+                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                        roomDelegate.didFinishLoadRoom(onRoom: room)
+                    }
+                }
             }else{
                 let loadURL = QiscusConfig.ROOM_UNIQUEID_URL
                 
@@ -307,6 +322,11 @@ public class QChatService:NSObject {
                                 }
                             }
                             self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
+                            DispatchQueue.main.async {
+                                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                                    roomDelegate.didFinishLoadRoom(onRoom: room)
+                                }
+                            }
                         }else if error != JSON.null{
                             self.delegate?.chatService(didFailLoadRoom: "\(error)")
                             Qiscus.printLog(text: "\(error)")
@@ -349,6 +369,11 @@ public class QChatService:NSObject {
         if Qiscus.isLoggedIn {
             if let room = QRoom.room(withId: roomId){
                 self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
+                DispatchQueue.main.async {
+                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                        roomDelegate.didFinishLoadRoom(onRoom: room)
+                    }
+                }
             }
             else{
                 let loadURL = QiscusConfig.ROOM_REQUEST_ID_URL
@@ -377,6 +402,11 @@ public class QChatService:NSObject {
                                 }
                             }
                             self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
+                            DispatchQueue.main.async {
+                                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                                    roomDelegate.didFinishLoadRoom(onRoom: room)
+                                }
+                            }
                         }else if error != JSON.null{
                             self.delegate?.chatService(didFailLoadRoom: "\(error)")
                             Qiscus.printLog(text: "\(error)")
@@ -540,6 +570,11 @@ public class QChatService:NSObject {
                             }
                         }
                         self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
+                        DispatchQueue.main.async {
+                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                                roomDelegate.didFinishLoadRoom(onRoom: room)
+                            }
+                        }
                     }else if error != JSON.null{
                         self.delegate?.chatService(didFailLoadRoom: "\(error)")
                         Qiscus.printLog(text: "\(error)")
