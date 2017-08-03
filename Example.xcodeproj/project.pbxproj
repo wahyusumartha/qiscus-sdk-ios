@@ -115,6 +115,7 @@
 		39FFF56B1F30335B0022CF3D /* QCellCardRight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39FFF5691F30335B0022CF3D /* QCellCardRight.swift */; };
 		39FFF56C1F30335B0022CF3D /* QCellCardRight.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39FFF56A1F30335B0022CF3D /* QCellCardRight.xib */; };
 		39FFF56E1F3196350022CF3D /* QCommentInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39FFF56D1F3196340022CF3D /* QCommentInfo.swift */; };
+		39FFF5701F32BD6E0022CF3D /* QTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39FFF56F1F32BD6E0022CF3D /* QTextView.swift */; };
 		B0846505F0ABD97C0375C737 /* Pods_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 88710D4C9FAFADF156A657F4 /* Pods_Example.framework */; };
 		DCD523BA4F0FADE6223F44A5 /* Pods_Qiscus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A4527A84D23FDA5B8B32B9C1 /* Pods_Qiscus.framework */; };
 /* End PBXBuildFile section */
@@ -253,6 +254,7 @@
 		39FFF5691F30335B0022CF3D /* QCellCardRight.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QCellCardRight.swift; path = Qiscus/QCellCardRight.swift; sourceTree = "<group>"; };
 		39FFF56A1F30335B0022CF3D /* QCellCardRight.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = QCellCardRight.xib; path = Qiscus/QCellCardRight.xib; sourceTree = "<group>"; };
 		39FFF56D1F3196340022CF3D /* QCommentInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QCommentInfo.swift; path = Qiscus/QCommentInfo.swift; sourceTree = "<group>"; };
+		39FFF56F1F32BD6E0022CF3D /* QTextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QTextView.swift; path = Qiscus/QTextView.swift; sourceTree = "<group>"; };
 		88710D4C9FAFADF156A657F4 /* Pods_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		98773C3A23586CB325C3DFE1 /* Pods-Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Example/Pods-Example.debug.xcconfig"; sourceTree = "<group>"; };
 		9CE65FBC6F02844B3B9F7A09 /* Pods-Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-Example/Pods-Example.release.xcconfig"; sourceTree = "<group>"; };
@@ -358,6 +360,7 @@
 				39FFF5691F30335B0022CF3D /* QCellCardRight.swift */,
 				39FFF56A1F30335B0022CF3D /* QCellCardRight.xib */,
 				39FFF5671F2F26810022CF3D /* QCardButton.swift */,
+				39FFF56F1F32BD6E0022CF3D /* QTextView.swift */,
 			);
 			name = Component;
 			sourceTree = "<group>";
@@ -837,6 +840,7 @@
 				39F1F7471D3B931E00FF1C8C /* QSyncNotifData.swift in Sources */,
 				39128C951D6C352900C3BEA2 /* Background.swift in Sources */,
 				39F1F7491D3B932A00FF1C8C /* Qiscus.swift in Sources */,
+				39FFF5701F32BD6E0022CF3D /* QTextView.swift in Sources */,
 				39FFF5681F2F26810022CF3D /* QCardButton.swift in Sources */,
 				399761401E2367D4004076C0 /* QChatFooterLeft.swift in Sources */,
 				39D92CE91E1BA08D00F36A1A /* QCellTextRight.swift in Sources */,

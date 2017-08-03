@@ -16,7 +16,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
     @IBOutlet weak var userNameLabel: UILabel!
     @IBOutlet weak var balloonView: UIImageView!
     @IBOutlet weak var view: UIView!
-    @IBOutlet weak var textView: UITextView!
+    @IBOutlet weak var textView: QTextView!
     @IBOutlet weak var dateLabel: UILabel!
     
     @IBOutlet weak var balloonTopMargin: NSLayoutConstraint!
@@ -71,6 +71,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
     }
 
     public override func commentChanged() {
+        self.textView.comment = self.comment
         self.textView.attributedText = self.comment?.attributedText
         self.textView.linkTextAttributes = self.linkTextAttributes
         self.balloonView.image = self.getBallon()
