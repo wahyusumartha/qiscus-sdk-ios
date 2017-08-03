@@ -237,8 +237,8 @@ public class QRoom:Object {
                 let participantEmail = participantJSON["email"].stringValue
                 let fullname = participantJSON["username"].stringValue
                 let avatarURL = participantJSON["avatar_url"].stringValue
-                let lastReadId = participantJSON["last_comment_read_id"].doubleValue
-                let lastDeliveredId = participantJSON["last_comment_received_id"].doubleValue
+                let lastReadId = participantJSON["last_comment_read_id"].intValue
+                let lastDeliveredId = participantJSON["last_comment_received_id"].intValue
                 
                 let savedUser = QUser.saveUser(withEmail: participantEmail, fullname: fullname, avatarURL: avatarURL)
                 
@@ -263,7 +263,7 @@ public class QRoom:Object {
                 }
                 participantString.append(participantEmail)
             }
-            self.updateCommentStatus()
+            room.updateCommentStatus()
             var index = 0
             for participant in room.participants{
                 if !participantString.contains(participant.email){
@@ -450,8 +450,8 @@ public class QRoom:Object {
             let fullname = participantJSON["username"].stringValue
             let avatarURL = participantJSON["avatar_url"].stringValue
             let savedUser = QUser.saveUser(withEmail: participantEmail, fullname: fullname, avatarURL: avatarURL)
-            let lastReadId = participantJSON["last_comment_read_id"].doubleValue
-            let lastDeliveredId = participantJSON["last_comment_received_id"].doubleValue
+            let lastReadId = participantJSON["last_comment_read_id"].intValue
+            let lastDeliveredId = participantJSON["last_comment_received_id"].intValue
             
             if let savedParticipant = QParticipant.participant(inRoomWithId: self.id, andEmail: savedUser.email){
                 savedParticipant.updateLastReadId(commentId: lastReadId)
