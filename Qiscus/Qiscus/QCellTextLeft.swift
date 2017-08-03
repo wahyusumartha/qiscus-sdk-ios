@@ -72,8 +72,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
 
     public override func commentChanged() {
         self.textView.comment = self.comment
-        self.textView.attributedText = self.comment?.attributedText
-        self.textView.linkTextAttributes = self.linkTextAttributes
+        
         self.balloonView.image = self.getBallon()
         
         let textSize = self.comment!.textSize
