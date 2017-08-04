@@ -51,30 +51,37 @@ public class QUser:Object {
                 let timeString = timeFormatter.string(from: date)
                 
                 let now = Date()
+                let time = Double(now.timeIntervalSince1970)
                 
-                let secondDiff = now.offsetFromInSecond(date: date)
-                let minuteDiff = Int(secondDiff/60)
-                let hourDiff = Int(minuteDiff/60)
+                if time < self.lastSeen {
+                    result = "offline"
+                }else{
+                    let secondDiff = now.offsetFromInSecond(date: date)
+                    let minuteDiff = Int(secondDiff/60)
+                    let hourDiff = Int(minuteDiff/60)
+                    
+                    if minuteDiff < 2 {
+                        result = "online"
+                    }
+                    else if minuteDiff < 60 {
+                        result = "\(Int(secondDiff/60)) minute ago"
+                    }else if hourDiff == 1{
+                        result = "an hour ago"
+                    }else if hourDiff < 6 {
+                        result = "\(hourDiff) hours ago"
+                    }
+                    else if date.isToday{
+                        result = "today at \(timeString)"
+                    }
+                    else if date.isYesterday{
+                        result = "yesterday at \(timeString)"
+                    }
+                    else{
+                        result = "\(dateString) at \(timeString)"
+                    }
+                }
                 
-                if minuteDiff < 2 {
-                    result = "online"
-                }
-                else if minuteDiff < 60 {
-                    result = "\(Int(secondDiff/60)) minute ago"
-                }else if hourDiff == 1{
-                    result = "an hour ago"
-                }else if hourDiff < 6 {
-                    result = "\(hourDiff) hours ago"
-                }
-                else if date.isToday{
-                    result = "today at \(timeString)"
-                }
-                else if date.isYesterday{
-                    result = "yesterday at \(timeString)"
-                }
-                else{
-                    result = "\(dateString) at \(timeString)"
-                }
+                
                 
                 return result
             }
@@ -172,7 +179,8 @@ public class QUser:Object {
     }
     public func updateLastSeen(lastSeen:Double){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        if lastSeen > self.lastSeen {
+        let time = Double(Date().timeIntervalSince1970)
+        if lastSeen > self.lastSeen && lastSeen <= time {
             try! realm.write {
                 self.lastSeen = lastSeen
             }
