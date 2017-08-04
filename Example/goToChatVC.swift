@@ -61,9 +61,9 @@ class goToChatVC: UIViewController {
                     }
                     view.infoAction = {(comment) in
                         let statusInfo = comment.statusInfo!
-//                        print("commentInfo: \(statusInfo)")
-//                        print("delivered to: \(statusInfo.deliveredUser)")
-//                        print("read by: \(statusInfo.readUser)")
+                        print("commentInfo: \(statusInfo)")
+                        print("delivered to: \(statusInfo.deliveredUser)")
+                        print("read by: \(statusInfo.readUser)")
                     }
                 }else{
                     let uniqueId = targetField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
