@@ -152,6 +152,13 @@ public class QiscusChatVC: UIViewController{
                     self.chatService.sync()
                 }
                 self.chatRoom!.delegate = self
+                let delay = 0.5 * Double(NSEC_PER_SEC)
+                let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
+                DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                    
+                    self.dismissLoading()
+                    self.dataLoaded = true
+                })
             }
         }
     }
