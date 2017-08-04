@@ -120,7 +120,7 @@ import CocoaMQTT
         Qiscus.shared.mqtt?.disconnect()
         Qiscus.unRegisterPN()
         QiscusMe.clear()
-        
+        Qiscus.clearData()
         Qiscus.dbConfiguration.deleteRealmIfMigrationNeeded = true
         Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
