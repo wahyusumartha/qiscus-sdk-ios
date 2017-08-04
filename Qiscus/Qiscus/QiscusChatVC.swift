@@ -144,7 +144,7 @@ public class QiscusChatVC: UIViewController{
     var loadMoreControl = UIRefreshControl()
     
     // MARK: -  Data load configuration
-    var chatRoom:QRoom?{
+    public var chatRoom:QRoom?{
         didSet{
             if oldValue == nil && self.chatRoom != nil {
                 if Qiscus.shared.connected {
