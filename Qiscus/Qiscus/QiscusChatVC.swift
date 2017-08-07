@@ -231,6 +231,7 @@ public class QiscusChatVC: UIViewController{
     var roomSynced = false
     var remoteTypingTimer:Timer?
     var typingTimer:Timer?
+    var publishStatusTimer:Timer? = nil
     var defaultBackButtonVisibility = true
     var defaultNavBarVisibility = true
     var defaultLeftButton:[UIBarButtonItem]? = nil

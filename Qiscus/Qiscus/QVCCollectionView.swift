@@ -78,7 +78,11 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         }
         if comment.status != .read && comment.status != .failed && comment.status != .sending{
             if comment.id > self.chatRoom!.lastReadCommentId {
-                QRoom.publishStatus(roomId: self.chatRoom!.id, commentId: comment.id, status: .read)
+                self.chatRoom?.updateLastReadId(commentId: comment.id)
+                if self.publishStatusTimer != nil {
+                    self.publishStatusTimer!.invalidate()
+                }
+                self.publishStatusTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(self.publishRead), userInfo: nil, repeats: false)
             }
         }
         if let participant = self.chatRoom?.participant(withEmail: QiscusMe.sharedInstance.email){
@@ -89,7 +93,13 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                 isLastRowVisible = true
             }
         }
-        
+    }
+    public func publishRead(){
+        let roomId = self.chatRoom!.id
+        let commentId = self.chatRoom!.lastReadCommentId
+        DispatchQueue.global().async(execute: {
+            QRoom.publishStatus(roomId: roomId, commentId: commentId, status: .read)
+        })
     }
     public func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         let commentGroup = self.chatRoom!.commentGroup(index: indexPath.section)!

@@ -852,6 +852,8 @@ import CocoaMQTT
                 chatView.goBack()
             }
         }
+        Qiscus.chatRooms = [Int:QRoom]()
+        Qiscus.shared.chatViews = [Int:QiscusChatVC]()
         Qiscus.publishUserStatus(offline: true)
     }
     @objc public class func setNotificationAction(onClick action:@escaping ((QiscusChatVC)->Void)){

@@ -126,27 +126,7 @@ extension QiscusChatVC {
     public func setBackButton(withAction action:@escaping (()->Void)){
         self.backAction = action
     }
-    func publishRead(){
-        /*
-        DispatchQueue.global().async {
-            if self.isPresence{
-                if self.comments.count > 0 {
-                    let lastComment = self.comments.last!.last!.comment!
-                    if let lastComentInTopic = QiscusComment.getLastSentComent(inRoom: lastComment.roomId){
-                        if let participant = QiscusParticipant.getParticipant(withEmail: QiscusConfig.sharedInstance.USER_EMAIL, roomId: lastComentInTopic.roomId){
-                            if participant.lastReadCommentId < lastComentInTopic.commentId{
-                                Qiscus.printLog(text: "publishRead onCommentId: \(lastComentInTopic.commentId)")
-                                self.commentClient.publishMessageStatus(onComment: lastComentInTopic.commentId, roomId: lastComentInTopic.roomId, status: .read, withCompletion: {
-                                    lastComentInTopic.updateCommentStatus(.read, email: QiscusConfig.sharedInstance.USER_EMAIL)
-                                })
-                            }
-                        }
-                    }
-                }
-            }
-        }
-         */
-    }
+    
     func setTitle(title:String = "", withSubtitle:String? = nil){
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
         if withSubtitle != nil {
