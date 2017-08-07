@@ -1154,4 +1154,42 @@ public class QRoom:Object {
             }
         }
     }
+    public func subscribeRealtimeStatus(){
+        var channels = [String]()
+        
+        channels.append("r/\(self.id)/\(self.id)/+/d")
+        channels.append("r/\(self.id)/\(self.id)/+/r")
+        channels.append("r/\(self.id)/\(self.id)/+/t")
+        
+        for participant in self.participants{
+            if participant.email != QiscusMe.sharedInstance.email {
+                channels.append(participant.email)
+            }
+        }
+        
+        DispatchQueue.global().async {
+            for channel in channels{
+                Qiscus.shared.mqtt?.subscribe(channel)
+            }
+        }
+    }
+    public func unsubscribeRealtimeStatus(){
+        var channels = [String]()
+        
+        channels.append("r/\(self.id)/\(self.id)/+/d")
+        channels.append("r/\(self.id)/\(self.id)/+/r")
+        channels.append("r/\(self.id)/\(self.id)/+/t")
+        
+        for participant in self.participants{
+            if participant.email != QiscusMe.sharedInstance.email {
+                channels.append(participant.email)
+            }
+        }
+        
+        DispatchQueue.global().async {
+            for channel in channels{
+                Qiscus.shared.mqtt?.unsubscribe(channel)
+            }
+        }
+    }
 }

@@ -157,29 +157,29 @@ extension QiscusChatVC {
     
     
     func subscribeRealtime(){
-        if let room = self.chatRoom {
-            let delay = 3 * Double(NSEC_PER_SEC)
-            let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
-            
-            DispatchQueue.main.asyncAfter(deadline: time, execute: {
-                let typingChannel:String = "r/\(room.id)/\(room.id)/+/t"
-                let readChannel:String = "r/\(room.id)/\(room.id)/+/r"
-                let deliveryChannel:String = "r/\(room.id)/\(room.id)/+/d"
-                Qiscus.shared.mqtt?.subscribe(typingChannel, qos: .qos1)
-                Qiscus.shared.mqtt?.subscribe(readChannel, qos: .qos1)
-                Qiscus.shared.mqtt?.subscribe(deliveryChannel, qos: .qos1)
-                for participant in room.participants {
-                    let userChannel = "u/\(participant.email)/s"
-                    Qiscus.shared.mqtt?.subscribe(userChannel, qos: .qos1)
-                }
-            })
-        }
+//        if let room = self.chatRoom {
+//            let delay = 3 * Double(NSEC_PER_SEC)
+//            let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
+//            
+//            DispatchQueue.main.asyncAfter(deadline: time, execute: {
+//                let typingChannel:String = "r/\(room.id)/\(room.id)/+/t"
+//                let readChannel:String = "r/\(room.id)/\(room.id)/+/r"
+//                let deliveryChannel:String = "r/\(room.id)/\(room.id)/+/d"
+//                Qiscus.shared.mqtt?.subscribe(typingChannel, qos: .qos1)
+//                Qiscus.shared.mqtt?.subscribe(readChannel, qos: .qos1)
+//                Qiscus.shared.mqtt?.subscribe(deliveryChannel, qos: .qos1)
+//                for participant in room.participants {
+//                    let userChannel = "u/\(participant.email)/s"
+//                    Qiscus.shared.mqtt?.subscribe(userChannel, qos: .qos1)
+//                }
+//            })
+//        }
     }
     func unsubscribeTypingRealtime(onRoom room:QRoom?){
-        if room != nil {
-            let channel = "r/\(room!.id)/\(room!.id)/+/t"
-            Qiscus.shared.mqtt?.unsubscribe(channel)
-        }
+//        if room != nil {
+//            let channel = "r/\(room!.id)/\(room!.id)/+/t"
+//            Qiscus.shared.mqtt?.unsubscribe(channel)
+//        }
     }
     func iCloudOpen(){
         if Qiscus.sharedInstance.connected{

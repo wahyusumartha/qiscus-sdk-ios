@@ -469,7 +469,9 @@ public class QiscusChatVC: UIViewController{
         view.endEditing(true)
         
         self.roomSynced = false
-        
+        if let room = self.chatRoom {
+            room.unsubscribeRealtimeStatus()
+        }
         self.dismissLoading()
     }
     override open func viewDidDisappear(_ animated: Bool) {
@@ -479,8 +481,9 @@ public class QiscusChatVC: UIViewController{
         super.viewWillAppear(animated)
         self.isPresence = true
         if self.chatRoom != nil {
-            self.subscribeRealtime()
+            //self.subscribeRealtime()
             self.chatRoom!.sync()
+            self.chatRoom!.subscribeRealtimeStatus()
         }
         if self.defaultBack {
             self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
@@ -719,6 +722,7 @@ extension QiscusChatVC:QChatServiceDelegate{
     public func chatService(didFinishLoadRoom inRoom: QRoom, withMessage message: String?) {
         self.chatRoom = inRoom
         self.chatRoom?.delegate = self
+        self.chatRoom?.subscribeRealtimeStatus()
         if self.chatTitle == nil || self.chatTitle == ""{
             self.loadTitle()
         }

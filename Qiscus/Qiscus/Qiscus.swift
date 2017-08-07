@@ -866,22 +866,22 @@ extension Qiscus:CocoaMQTTDelegate{
         let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
         mqtt.subscribe(commentChannel, qos: .qos2)
         if state == .active {
-            let rooms = QRoom.all()
-            for room in rooms{
-                let deliveryChannel = "r/\(room.id)/\(room.id)/+/d"
-                let readChannel = "r/\(room.id)/\(room.id)/+/r"
-                let typingChannel = "r/\(room.id)/\(room.id)/+/t"
-                mqtt.subscribe(deliveryChannel, qos: .qos1)
-                mqtt.subscribe(readChannel, qos: .qos1)
-                mqtt.subscribe(typingChannel, qos: .qos1)
-            }
-            let users = QUser.all()
-            for user in users{
-                if user.email != QiscusMe.sharedInstance.email{
-                    let userChannel = "u/\(user.email)/s"
-                    mqtt.subscribe(userChannel, qos: .qos1)
-                }
-            }
+//            let rooms = QRoom.all()
+//            for room in rooms{
+//                let deliveryChannel = "r/\(room.id)/\(room.id)/+/d"
+//                let readChannel = "r/\(room.id)/\(room.id)/+/r"
+//                let typingChannel = "r/\(room.id)/\(room.id)/+/t"
+//                mqtt.subscribe(deliveryChannel, qos: .qos1)
+//                mqtt.subscribe(readChannel, qos: .qos1)
+//                mqtt.subscribe(typingChannel, qos: .qos1)
+//            }
+//            let users = QUser.all()
+//            for user in users{
+//                if user.email != QiscusMe.sharedInstance.email{
+//                    let userChannel = "u/\(user.email)/s"
+//                    mqtt.subscribe(userChannel, qos: .qos1)
+//                }
+//            }
             Qiscus.shared.mqtt = mqtt
         }
         if self.syncTimer != nil {
