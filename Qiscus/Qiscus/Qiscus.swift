@@ -27,6 +27,7 @@ import CocoaMQTT
     static var dbConfiguration = Realm.Configuration.defaultConfiguration
     static var chatRooms = [Int : QRoom]()
     static var qiscusDownload:[String] = [String]()
+    internal static var publishStatustimer:Timer?
     
     var config = QiscusConfig.sharedInstance
     var commentService = QiscusCommentClient.sharedInstance
@@ -814,7 +815,10 @@ import CocoaMQTT
         mqtt.willMessage = CocoaMQTTWill(topic: "u/\(QiscusMe.sharedInstance.email)/s", message: "0")
         mqtt.keepAlive = 60
         mqtt.delegate = Qiscus.shared
-        mqtt.connect()
+        let state = UIApplication.shared.applicationState
+        if state == .active {
+            mqtt.connect()
+        }
     }
     class func publishUserStatus(offline:Bool = false){
         if Qiscus.isLoggedIn{
@@ -863,9 +867,10 @@ extension Qiscus:CocoaMQTTDelegate{
     public func mqtt(_ mqtt: CocoaMQTT, didConnect host: String, port: Int){
         let state = UIApplication.shared.applicationState
         Qiscus.checkDatabaseMigration()
-        let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
-        mqtt.subscribe(commentChannel, qos: .qos2)
+        
         if state == .active {
+            let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
+            mqtt.subscribe(commentChannel, qos: .qos2)
 //            let rooms = QRoom.all()
 //            for room in rooms{
 //                let deliveryChannel = "r/\(room.id)/\(room.id)/+/d"
@@ -922,7 +927,16 @@ extension Qiscus:CocoaMQTTDelegate{
                                 }
                             }
                         }
-                        QRoom.publishStatus(roomId: roomId, commentId: commentId, status: .delivered)
+                        if #available(iOS 10.0, *) {
+                            if Qiscus.publishStatustimer != nil {
+                                Qiscus.publishStatustimer?.invalidate()
+                            }
+                            Qiscus.publishStatustimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false, block: { (_) in
+                                QRoom.publishStatus(roomId: roomId, commentId: commentId, status: .delivered)
+                            })
+                        } else {
+                            QRoom.publishStatus(roomId: roomId, commentId: commentId, status: .delivered)
+                        }
                     }
                     break
                 case "t":

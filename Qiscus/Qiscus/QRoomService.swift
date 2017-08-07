@@ -345,22 +345,24 @@ public class QRoomService:NSObject{
             }else{
                 parameters["last_comment_read_id"] = commentId as AnyObject
             }
-            Alamofire.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
-                if let response = responseData.result.value {
-                    Qiscus.printLog(text: "publish message response:\n\(response)")
-                    let json = JSON(response)
-                    let results = json["results"]
-                    let error = json["error"]
-                    
-                    if results != JSON.null{
-                        Qiscus.printLog(text: "success change comment status on \(commentId) to \(commentStatus.rawValue)")
-                    }else if error != JSON.null{
-                        Qiscus.printLog(text: "error update message status: \(error)")
+            DispatchQueue.global().async {
+                Alamofire.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                    if let response = responseData.result.value {
+                        Qiscus.printLog(text: "publish message response:\n\(response)")
+                        let json = JSON(response)
+                        let results = json["results"]
+                        let error = json["error"]
+                        
+                        if results != JSON.null{
+                            Qiscus.printLog(text: "success change comment status on \(commentId) to \(commentStatus.rawValue)")
+                        }else if error != JSON.null{
+                            Qiscus.printLog(text: "error update message status: \(error)")
+                        }
+                    }else{
+                        Qiscus.printLog(text: "error update message status")
                     }
-                }else{
-                    Qiscus.printLog(text: "error update message status")
-                }
-            })
+                })
+            }
         }
     }
     public func uploadCommentFile(inRoom room:QRoom, comment:QComment, onSuccess:  @escaping (QRoom, QComment)->Void, onError:  @escaping (QRoom,QComment,String)->Void){
