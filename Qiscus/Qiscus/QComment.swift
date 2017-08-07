@@ -494,4 +494,88 @@ public class QComment:Object {
             self.delegate?.comment?(didChangeProgress: progress)
         }
     }
+    internal class func tempComment(fromJSON json:JSON)->QComment{
+        let temp = QComment()
+        
+        let commentId = json["id"].intValue
+        let commentUniqueId = json["unique_temp_id"].stringValue
+        var commentText = json["message"].stringValue
+        let commentSenderName = json["username"].stringValue
+        let commentCreatedAt = json["unix_timestamp"].doubleValue
+        let commentBeforeId = json["comment_before_id"].intValue
+        let senderEmail = json["email"].stringValue
+        let commentType = json["type"].stringValue
+        let roomId = json["room_id"].intValue
+        
+        if commentType == "reply" || commentType == "buttons" {
+            commentText = json["payload"]["text"].stringValue
+        }
+        
+        let avatarURL = json["user_avatar_url"].stringValue
+        
+        let _ = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL, lastSeen: commentCreatedAt)
+        
+        temp.uniqueId = commentUniqueId
+        temp.id = commentId
+        temp.roomId = roomId
+        temp.text = commentText
+        temp.senderName = commentSenderName
+        temp.createdAt = commentCreatedAt
+        temp.beforeId = commentBeforeId
+        temp.senderEmail = senderEmail
+        temp.cellPosRaw = QCellPosition.single.rawValue
+        
+        switch commentType {
+        case "buttons":
+            temp.data = "\(json["payload"]["buttons"])"
+            temp.typeRaw = QCommentType.postback.rawValue
+            break
+        case "account_linking":
+            temp.data = "\(json["payload"])"
+            temp.typeRaw = QCommentType.account.rawValue
+            break
+        case "reply":
+            temp.data = "\(json["payload"])"
+            temp.typeRaw = QCommentType.reply.rawValue
+            break
+        case "system_event":
+            temp.data = "\(json["payload"])"
+            temp.typeRaw = QCommentType.system.rawValue
+            break
+        case "card":
+            temp.data = "\(json["payload"])"
+            temp.typeRaw = QCommentType.card.rawValue
+            break
+        default:
+            if temp.text.hasPrefix("[file]"){
+                var type = QiscusFileType.file
+                let fileURL = QFile.getURL(fromString: temp.text)
+                if temp.file == nil {
+                    let file = QFile()
+                    file.id = temp.uniqueId
+                    file.url = fileURL
+                    file.senderEmail = temp.senderEmail
+                    type = file.type
+                }
+                switch type {
+                case .image:
+                    temp.typeRaw = QCommentType.image.rawValue
+                    break
+                case .video:
+                    temp.typeRaw = QCommentType.video.rawValue
+                    break
+                case .audio:
+                    temp.typeRaw = QCommentType.audio.rawValue
+                    break
+                default:
+                    temp.typeRaw = QCommentType.file.rawValue
+                    break
+                }
+            }else{
+                temp.typeRaw = QCommentType.text.rawValue
+            }
+            break
+        }
+        return temp
+    }
 }
