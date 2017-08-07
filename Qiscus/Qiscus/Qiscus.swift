@@ -909,12 +909,12 @@ extension Qiscus:CocoaMQTTDelegate{
                     let roomId = json["room_id"].intValue
                     let commentId = json["id"].intValue
                     DispatchQueue.main.async {
-                        if let room = QRoom.room(withId: roomId) {
-                            if commentId > QiscusMe.sharedInstance.lastCommentId {
-                                let service = QChatService()
-                                service.sync()
-                            }else{
-                                let uniqueId = json["unique_temp_id"].stringValue
+                        if commentId > QiscusMe.sharedInstance.lastCommentId {
+                            let service = QChatService()
+                            service.sync()
+                        }else{
+                            let uniqueId = json["unique_temp_id"].stringValue
+                            if let room = QRoom.room(withId: roomId) {
                                 if let comment = QComment.comment(withUniqueId: uniqueId){
                                     if comment.status != .delivered && comment.status != .read {
                                         room.updateCommentStatus(inComment: comment, status: .delivered)

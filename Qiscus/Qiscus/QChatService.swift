@@ -518,8 +518,15 @@ public class QChatService:NSObject {
                             if id > QiscusMe.sharedInstance.lastCommentId {
                                 if let room = QRoom.room(withId: roomId){
                                     room.saveNewComment(fromJSON: newComment)
+                                    QiscusMe.updateLastCommentId(commentId: id)
+                                }else{
+                                    DispatchQueue.main.async {
+                                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                                            let comment = QComment.tempComment(fromJSON: newComment)
+                                            roomDelegate.gotNewComment(comment)
+                                        }
+                                    }
                                 }
-                                QiscusMe.updateLastCommentId(commentId: id)
                             }
                         }
                     }
