@@ -91,6 +91,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         if indexPath.section == (self.chatRoom!.commentsGroupCount - 1){
             if indexPath.row == commentGroup.commentsCount - 1{
                 isLastRowVisible = true
+                self.dismissLoading()
             }
         }
     }
