@@ -851,10 +851,13 @@ import CocoaMQTT
         for (_,chatView) in self.chatViews {
             if chatView.isPresence {
                 chatView.goBack()
+                if let room = chatView.chatRoom {
+                    room.delegate = nil
+                }
             }
         }
-        Qiscus.chatRooms = [Int:QRoom]()
-        Qiscus.shared.chatViews = [Int:QiscusChatVC]()
+        //Qiscus.chatRooms = [Int:QRoom]()
+        //Qiscus.shared.chatViews = [Int:QiscusChatVC]()
         Qiscus.publishUserStatus(offline: true)
     }
     @objc public class func setNotificationAction(onClick action:@escaping ((QiscusChatVC)->Void)){
