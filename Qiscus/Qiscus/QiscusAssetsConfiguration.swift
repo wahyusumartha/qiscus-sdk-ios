@@ -11,6 +11,6 @@ import UIKit
 public class QiscusAssetsConfiguration: NSObject {
     static var shared = QiscusAssetsConfiguration()
     
-    public var emptyChat:UIImage? = Qiscus.image(named: "empty_messages")?.withRenderingMode(.alwaysTemplate)
+    public var emptyChat:UIImage? = Qiscus.image(named: "empty-chat")?.withRenderingMode(.alwaysTemplate)
     
 }

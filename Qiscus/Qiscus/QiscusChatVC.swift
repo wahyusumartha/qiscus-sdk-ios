@@ -435,7 +435,7 @@ public class QiscusChatVC: UIViewController{
         self.view.layoutIfNeeded()
         //self.view.endEditing(true)
         
-        self.emptyChatImage.image = Qiscus.image(named: "empty_messages")?.withRenderingMode(.alwaysTemplate)
+        self.emptyChatImage.image = QiscusAssetsConfiguration.shared.emptyChat
         self.emptyChatImage.tintColor = self.bottomColor
         
         let sendImage = Qiscus.image(named: "send")?.withRenderingMode(.alwaysTemplate)
