@@ -10,13 +10,14 @@ import Foundation
 import Alamofire
 import SwiftyJSON
 
+
 @objc public protocol QChatServiceDelegate {
     func chatService(didFinishLoadRoom inRoom:QRoom, withMessage message:String?)
     func chatService(didFailLoadRoom error:String)
 }
 public class QChatService:NSObject {
     public var delegate:QChatServiceDelegate?
-    
+    static var syncTimer:Timer? = nil
     
     // MARK: - reconnect
     private func reconnect(onSuccess:@escaping (()->Void)){
@@ -495,8 +496,8 @@ public class QChatService:NSObject {
             }
         }
     }
-    // MARK syncMethod
-    public func sync(){
+    
+    @objc private func syncProcess(){
         let loadURL = QiscusConfig.SYNC_URL
         let parameters:[String: AnyObject] =  [
             "last_received_comment_id"  : QiscusMe.sharedInstance.lastCommentId as AnyObject,
@@ -539,6 +540,14 @@ public class QChatService:NSObject {
                 
             }
         })
+    }
+    // MARK syncMethod
+    public func sync(){
+        if QChatService.syncTimer != nil {
+            QChatService.syncTimer?.invalidate()
+        }
+        QChatService.syncTimer = Timer.scheduledTimer(timeInterval: 0.4, target: self, selector: #selector(self.syncProcess), userInfo: nil, repeats: false)
+        
     }
     public func createRoom(withUsers users:[String], roomName:String, optionalData:String? = nil, withMessage:String? = nil){ //
         

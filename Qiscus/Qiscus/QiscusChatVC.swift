@@ -472,6 +472,7 @@ public class QiscusChatVC: UIViewController{
         self.roomSynced = false
         if let room = self.chatRoom {
             room.unsubscribeRealtimeStatus()
+            room.delegate = nil
         }
         self.dismissLoading()
     }
@@ -484,6 +485,7 @@ public class QiscusChatVC: UIViewController{
         if self.chatRoom != nil {
             //self.subscribeRealtime()
             self.chatRoom!.sync()
+            self.chatRoom!.delegate = nil
             self.chatRoom!.subscribeRealtimeStatus()
         }
         if self.defaultBack {

@@ -154,9 +154,10 @@ import CocoaMQTT
     func backgroundCheck(){
         if Qiscus.isLoggedIn{
             if Qiscus.shared.mqtt?.connState != CocoaMQTTConnState.connected {
+                Qiscus.mqttConnect()
+            }else{
                 let service = QChatService()
                 service.sync()
-                Qiscus.mqttConnect()
             }
         }
     }

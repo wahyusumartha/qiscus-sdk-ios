@@ -23,6 +23,9 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
 
     var comment:QComment?{
         didSet{
+            if oldValue != nil {
+                oldValue!.delegate = nil
+            }
             if comment != nil {
                 self.comment!.delegate = self
                 self.commentChanged()
@@ -184,6 +187,11 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
     }
     public func updateUserName(){
     
+    }
+    internal func unbindData(){
+        if let data = self.comment {
+            data.delegate = nil
+        }
     }
     // MARK: - commentDelegate
     func comment(didChangeStatus status:QCommentStatus){
