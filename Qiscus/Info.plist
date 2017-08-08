@@ -2,19 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>LSApplicationCategoryType</key>
-	<string></string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Photo library permission used to upload image from gallery</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Microphone permission used to send recorded audio file</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Camera permision used to upload photo and video taken by camera</string>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
@@ -33,6 +20,19 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSApplicationCategoryType</key>
+	<string></string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera permision used to upload photo and video taken by camera</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone permission used to send recorded audio file</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photo library permission used to upload image from gallery</string>
 	<key>NSPrincipalClass</key>
 	<string></string>
 </dict>
