@@ -485,8 +485,10 @@ public class QiscusChatVC: UIViewController{
         if self.chatRoom != nil {
             //self.subscribeRealtime()
             self.chatRoom!.sync()
-            self.chatRoom!.delegate = nil
+            self.chatRoom!.delegate = self
             self.chatRoom!.subscribeRealtimeStatus()
+        }else{
+            self.showLoading("Load data ...")
         }
         if self.defaultBack {
             self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
