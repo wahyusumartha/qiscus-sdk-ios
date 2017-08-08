@@ -435,7 +435,7 @@ public class QiscusChatVC: UIViewController{
         self.view.layoutIfNeeded()
         //self.view.endEditing(true)
         
-        self.emptyChatImage.image = Qiscus.image(named: "empty_messages")?.withRenderingMode(.alwaysTemplate)
+        self.emptyChatImage.image = QiscusAssetsConfiguration.shared.emptyChat
         self.emptyChatImage.tintColor = self.bottomColor
         
         let sendImage = Qiscus.image(named: "send")?.withRenderingMode(.alwaysTemplate)
@@ -472,6 +472,7 @@ public class QiscusChatVC: UIViewController{
         self.roomSynced = false
         if let room = self.chatRoom {
             room.unsubscribeRealtimeStatus()
+            room.delegate = nil
         }
         self.dismissLoading()
     }
@@ -484,7 +485,10 @@ public class QiscusChatVC: UIViewController{
         if self.chatRoom != nil {
             //self.subscribeRealtime()
             self.chatRoom!.sync()
+            self.chatRoom!.delegate = self
             self.chatRoom!.subscribeRealtimeStatus()
+        }else{
+            self.showLoading("Load data ...")
         }
         if self.defaultBack {
             self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton

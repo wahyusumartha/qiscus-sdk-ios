@@ -10,13 +10,14 @@ import Foundation
 import Alamofire
 import SwiftyJSON
 
+
 @objc public protocol QChatServiceDelegate {
     func chatService(didFinishLoadRoom inRoom:QRoom, withMessage message:String?)
     func chatService(didFailLoadRoom error:String)
 }
 public class QChatService:NSObject {
     public var delegate:QChatServiceDelegate?
-    
+    static var syncTimer:Timer? = nil
     
     // MARK: - reconnect
     private func reconnect(onSuccess:@escaping (()->Void)){
@@ -495,50 +496,60 @@ public class QChatService:NSObject {
             }
         }
     }
-    // MARK syncMethod
-    public func sync(){
-        let loadURL = QiscusConfig.SYNC_URL
-        let parameters:[String: AnyObject] =  [
-            "last_received_comment_id"  : QiscusMe.sharedInstance.lastCommentId as AnyObject,
-            "token" : qiscus.config.USER_TOKEN as AnyObject,
-            ]
-        
-        Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
-            if let response = responseData.result.value {
-                let json = JSON(response)
-                let results = json["results"]
-                let error = json["error"]
-                if results != JSON.null{
-                    let comments = json["results"]["comments"].arrayValue
-                    if comments.count > 0 {
-                        for newComment in comments.reversed() {
-                            let roomId = newComment["room_id"].intValue
-                            let id = newComment["id"].intValue
-                            
-                            if id > QiscusMe.sharedInstance.lastCommentId {
-                                if let room = QRoom.room(withId: roomId){
-                                    room.saveNewComment(fromJSON: newComment)
-                                    QiscusMe.updateLastCommentId(commentId: id)
-                                }else{
-                                    DispatchQueue.main.async {
-                                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                            let comment = QComment.tempComment(fromJSON: newComment)
-                                            roomDelegate.gotNewComment(comment)
+    
+    @objc private func syncProcess(){
+        DispatchQueue.global().async { 
+            let loadURL = QiscusConfig.SYNC_URL
+            let parameters:[String: AnyObject] =  [
+                "last_received_comment_id"  : QiscusMe.sharedInstance.lastCommentId as AnyObject,
+                "token" : qiscus.config.USER_TOKEN as AnyObject,
+                ]
+            
+            Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                if let response = responseData.result.value {
+                    let json = JSON(response)
+                    let results = json["results"]
+                    let error = json["error"]
+                    if results != JSON.null{
+                        let comments = json["results"]["comments"].arrayValue
+                        if comments.count > 0 {
+                            for newComment in comments.reversed() {
+                                let roomId = newComment["room_id"].intValue
+                                let id = newComment["id"].intValue
+                                
+                                if id > QiscusMe.sharedInstance.lastCommentId {
+                                    DispatchQueue.main.async(execute: { 
+                                        if let room = QRoom.room(withId: roomId){
+                                            room.saveNewComment(fromJSON: newComment)
+                                            QiscusMe.updateLastCommentId(commentId: id)
+                                        }else{
+                                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                                                let comment = QComment.tempComment(fromJSON: newComment)
+                                                roomDelegate.gotNewComment(comment)
+                                            }
                                         }
-                                    }
+                                    })
+                                    
                                 }
                             }
                         }
+                    }else if error != JSON.null{
+                        Qiscus.printLog(text: "error sync message: \(error)")
                     }
-                }else if error != JSON.null{
-                    Qiscus.printLog(text: "error sync message: \(error)")
                 }
-            }
-            else{
-                Qiscus.printLog(text: "error sync message")
-                
-            }
-        })
+                else{
+                    Qiscus.printLog(text: "error sync message")
+                    
+                }
+            })
+        }
+    }
+    // MARK syncMethod
+    public func sync(){
+        if QChatService.syncTimer != nil {
+            QChatService.syncTimer?.invalidate()
+        }
+        QChatService.syncTimer = Timer.scheduledTimer(timeInterval:1.0, target: self, selector: #selector(self.syncProcess), userInfo: nil, repeats: false)
     }
     public func createRoom(withUsers users:[String], roomName:String, optionalData:String? = nil, withMessage:String? = nil){ //
         

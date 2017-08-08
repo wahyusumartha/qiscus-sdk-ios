@@ -40,13 +40,21 @@ extension QiscusChatVC {
     func showAlert(alert:UIAlertController){
         self.present(alert, animated: true, completion: nil)
     }
+    func shareContact(){
+    
+    }
     func showAttachmentMenu(){
-        let actionSheetController = UIAlertController(title: "Share Files", message: "Share your photo, video, sound, or document by choosing the source", preferredStyle: .actionSheet)
+        let actionSheetController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
         let cancelActionButton = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
             print("Cancel")
         }
         actionSheetController.addAction(cancelActionButton)
+        
+//        let contactActionButton = UIAlertAction(title: "Share Contact", style: .default) { action -> Void in
+//            self.shareContact()
+//        }
+//        actionSheetController.addAction(contactActionButton)
         
         let cameraActionButton = UIAlertAction(title: "Camera", style: .default) { action -> Void in
             self.uploadFromCamera()
@@ -695,9 +703,6 @@ extension QiscusChatVC {
     }
     // MARK: - Load DataSource on firstTime
     func loadData(){
-        if self.chatRoom == nil {
-            self.showLoading("Load data ...")
-        }
         if self.chatRoomId != nil {
             self.chatService.room(withId: self.chatRoomId!, withMessage: self.chatMessage)
         }else if self.chatUser != nil {

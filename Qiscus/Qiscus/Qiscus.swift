@@ -154,9 +154,10 @@ import CocoaMQTT
     func backgroundCheck(){
         if Qiscus.isLoggedIn{
             if Qiscus.shared.mqtt?.connState != CocoaMQTTConnState.connected {
+                Qiscus.mqttConnect()
+            }else{
                 let service = QChatService()
                 service.sync()
-                Qiscus.mqttConnect()
             }
         }
     }
@@ -850,10 +851,13 @@ import CocoaMQTT
         for (_,chatView) in self.chatViews {
             if chatView.isPresence {
                 chatView.goBack()
+                if let room = chatView.chatRoom {
+                    room.delegate = nil
+                }
             }
         }
-        Qiscus.chatRooms = [Int:QRoom]()
-        Qiscus.shared.chatViews = [Int:QiscusChatVC]()
+        //Qiscus.chatRooms = [Int:QRoom]()
+        //Qiscus.shared.chatViews = [Int:QiscusChatVC]()
         Qiscus.publishUserStatus(offline: true)
     }
     @objc public class func setNotificationAction(onClick action:@escaping ((QiscusChatVC)->Void)){
