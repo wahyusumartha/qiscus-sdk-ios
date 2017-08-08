@@ -40,7 +40,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Qiscus.style.color.rightBaloonTextColor = UIColor.white
         Qiscus.style.color.rightBaloonLinkColor = UIColor.white
         Qiscus.setGradientChatNavigation(UIColor.black, bottomColor: UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1), tintColor: UIColor.white)
-        
+        Qiscus.iCloudUploadActive(true)
         window?.makeKeyAndVisible()
         
         
