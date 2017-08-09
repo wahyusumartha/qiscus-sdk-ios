@@ -78,10 +78,10 @@ extension QiscusChatVC {
             actionSheetController.addAction(iCloudActionButton)
         }
         
-        let contactActionButton = UIAlertAction(title: "Contact", style: .default) { action -> Void in
-            self.shareContact()
-        }
-        actionSheetController.addAction(contactActionButton)
+//        let contactActionButton = UIAlertAction(title: "Contact", style: .default) { action -> Void in
+//            self.shareContact()
+//        }
+//        actionSheetController.addAction(contactActionButton)
         
         self.present(actionSheetController, animated: true, completion: nil)
     }
