@@ -1,5 +1,6 @@
 # Qiscus SDK iOS
 
+
 # Quick Start
 
 ### Create a new app
@@ -11,6 +12,10 @@ You should create one application per service, regardless of the platform. For e
 All users within the same Qiscus application are able to communicate with each other, across all platforms. This means users using iOS, Android, web clients, etc. can all chat with one another. However, users in different Qiscus applications cannot talk to each other.
 
 Done! Now you can use the APP_ID into your apps and get chat functionality by implementing Qiscus into your app.
+
+
+<p align="center"><br/><img src="https://res.cloudinary.com/qiscus/image/upload/u7kjnW3rqA/ssios2.png" width="45%" /><br/></p>
+
 
 
 ### integrating SDK with an existing app
@@ -358,6 +363,13 @@ If you want full customisations, you can modify everything on the view by forkin
 # Push Notifications 
 
 Currently we recommend to use our Webhook-API to push notification from your own server to client app for simplicity and flexibility handling
+
+# Resources
+
+### Video
+
+Here's a video showing how you can set up sample app for qiscus SDK
+[<p align="center"><img src="https://res.cloudinary.com/qiscus/image/upload/2XNZ4UNnAZ/ssiosvideo.png" width="50%" /></p>](https://www.youtube.com/watch?v=LxAA6cydVOw)
 
 # Notes
 
