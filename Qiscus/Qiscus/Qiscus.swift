@@ -181,7 +181,7 @@ import CocoaMQTT
         Qiscus.shared.RealtimeConnect()
     }
     @objc public class func setup(withAppId appId:String, userEmail:String, userKey:String, username:String, avatarURL:String? = nil, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true){
-        Qiscus.checkDatabaseMigration()
+//        Qiscus.checkDatabaseMigration()
         var requestProtocol = "https"
         if !secureURl {
             requestProtocol = "http"
@@ -224,7 +224,7 @@ import CocoaMQTT
         Qiscus.sharedInstance.RealtimeConnect()
     }
     @objc public class func setup(withURL baseUrl:String, userEmail:String, id:Int, username:String, userKey:String, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true, realTimeKey:String){
-        Qiscus.checkDatabaseMigration()
+//        Qiscus.checkDatabaseMigration()
         let email = userEmail.lowercased()
         
         QiscusMe.sharedInstance.baseUrl = "\(baseUrl)/api/v2/mobile"
@@ -308,7 +308,7 @@ import CocoaMQTT
      */
     
     @objc public class func chat(withRoomId roomId:Int, target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
-        Qiscus.checkDatabaseMigration()
+//        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -341,7 +341,7 @@ import CocoaMQTT
         UIApplication.shared.keyWindow?.rootViewController?.present(navController, animated: true, completion: nil)
     }
     @objc public class func chat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
-        Qiscus.checkDatabaseMigration()
+//        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -381,7 +381,7 @@ import CocoaMQTT
         if let room = QRoom.room(withUser: users.first!) {
             return Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
         }else{
-            Qiscus.checkDatabaseMigration()
+//            Qiscus.checkDatabaseMigration()
             if !Qiscus.sharedInstance.connected {
                 Qiscus.setupReachability()
             }
@@ -408,7 +408,7 @@ import CocoaMQTT
         if let room = QRoom.room(withUniqueId: uniqueId){
             return Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
         }else{
-            Qiscus.checkDatabaseMigration()
+//            Qiscus.checkDatabaseMigration()
             if !Qiscus.sharedInstance.connected {
                 Qiscus.setupReachability()
             }
@@ -430,7 +430,7 @@ import CocoaMQTT
         }
     }
     @objc public class func chatView(withRoomId roomId:Int, readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
-        Qiscus.checkDatabaseMigration()
+//        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -561,6 +561,7 @@ import CocoaMQTT
     
     
     func applicationDidBecomeActife(){
+        Qiscus.checkDatabaseMigration()
         if Qiscus.isLoggedIn{
             Qiscus.sharedInstance.RealtimeConnect()
         }
@@ -618,7 +619,7 @@ import CocoaMQTT
     
     // MARK: - Create NEW Chat
     @objc public class func createChatView(withUsers users:[String], readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
-        Qiscus.checkDatabaseMigration()
+//        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -641,7 +642,7 @@ import CocoaMQTT
         return chatVC
     }
     @objc public class func createChat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil){
-        Qiscus.checkDatabaseMigration()
+//        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -872,7 +873,7 @@ import CocoaMQTT
 extension Qiscus:CocoaMQTTDelegate{
     public func mqtt(_ mqtt: CocoaMQTT, didConnect host: String, port: Int){
         let state = UIApplication.shared.applicationState
-        Qiscus.checkDatabaseMigration()
+//        Qiscus.checkDatabaseMigration()
         
         if state == .active {
             let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
