@@ -10,7 +10,14 @@ import UIKit
 import Photos
 import MobileCoreServices
 import SwiftyJSON
+import ContactsUI
 
+extension QiscusChatVC:CNContactPickerDelegate{
+    public func contactPicker(_ picker: CNContactPickerViewController, didSelect contact: CNContact) {
+        print("\(contact)")
+        self.contactVC.dismiss(animated: true, completion: nil)
+    }
+}
 extension QiscusChatVC {
     @objc public func showLoading(_ text:String = "Loading"){
         self.showQiscusLoading(withText: text, isBlocking: true)
@@ -41,7 +48,8 @@ extension QiscusChatVC {
         self.present(alert, animated: true, completion: nil)
     }
     func shareContact(){
-    
+        self.contactVC.delegate = self
+        self.present(self.contactVC, animated: true, completion: nil)
     }
     func showAttachmentMenu(){
         let actionSheetController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
@@ -51,10 +59,6 @@ extension QiscusChatVC {
         }
         actionSheetController.addAction(cancelActionButton)
         
-//        let contactActionButton = UIAlertAction(title: "Share Contact", style: .default) { action -> Void in
-//            self.shareContact()
-//        }
-//        actionSheetController.addAction(contactActionButton)
         
         let cameraActionButton = UIAlertAction(title: "Camera", style: .default) { action -> Void in
             self.uploadFromCamera()
@@ -73,6 +77,11 @@ extension QiscusChatVC {
             }
             actionSheetController.addAction(iCloudActionButton)
         }
+        
+        let contactActionButton = UIAlertAction(title: "Contact", style: .default) { action -> Void in
+            self.shareContact()
+        }
+        actionSheetController.addAction(contactActionButton)
         
         self.present(actionSheetController, animated: true, completion: nil)
     }
