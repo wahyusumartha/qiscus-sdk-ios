@@ -12,6 +12,7 @@ import Photos
 import ImageViewer
 import SwiftyJSON
 import UserNotifications
+import ContactsUI
 //
 import RealmSwift
 public class QiscusChatVC: UIViewController{
@@ -335,6 +336,7 @@ public class QiscusChatVC: UIViewController{
             return ["public.jpeg", "public.png","com.compuserve.gif","public.text", "public.archive", "com.microsoft.word.doc", "com.microsoft.excel.xls", "com.microsoft.powerpoint.​ppt", "com.adobe.pdf","public.mpeg-4"]
         }
     }
+    var contactVC = CNContactPickerViewController()
     
     public init() {
         super.init(nibName: "QiscusChatVC", bundle: Qiscus.bundle)

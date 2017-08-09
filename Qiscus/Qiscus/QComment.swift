@@ -32,6 +32,41 @@ public enum QReplyType:Int{
     case reply
     case system
     case card
+    case contact
+    case custom
+    
+    func name() -> String{
+        switch self {
+            case .text      : return "text"
+            case .image     : return "image"
+            case .video     : return "video"
+            case .audio     : return "audio"
+            case .file      : return "file"
+            case .postback  : return "postback"
+            case .account   : return "account"
+            case .reply     : return "reply"
+            case .system    : return "system"
+            case .card      : return "card"
+            case .contact   : return "contact"
+            case .custom    : return "custom type"
+        }
+    }
+    init(name:String) {
+        switch name {
+            case "text","button_postback_response"     : self = .text ; break
+            case "image"    : self = .image ; break
+            case "video"    : self = .video ; break
+            case "audio"    : self = .audio ; break
+            case "file"     : self = .file ; break
+            case "postback" : self = .postback ; break
+            case "account"  : self = .account ; break
+            case "reply"    : self = .reply ; break
+            case "system"   : self = .system ; break
+            case "card"     : self = .card ; break
+            case "contact"  : self = .contact ; break
+            default         : self = .custom ; break
+        }
+    }
 }
 @objc public enum QCommentStatus:Int{
     case sending
@@ -67,7 +102,7 @@ public class QComment:Object {
     public dynamic var senderEmail:String = ""
     public dynamic var senderName:String = ""
     public dynamic var statusRaw:Int = QCommentStatus.sending.rawValue
-    public dynamic var typeRaw:Int = QCommentType.text.rawValue
+    public dynamic var typeRaw:String = QCommentType.text.name()
     public dynamic var data:String = ""
     public dynamic var cellPosRaw:Int = 0
     
@@ -126,7 +161,7 @@ public class QComment:Object {
     }
     public var type:QCommentType {
         get{
-            return QCommentType(rawValue: self.typeRaw)!
+            return QCommentType(name: self.typeRaw)
         }
     }
     public var status:QCommentStatus {
@@ -163,6 +198,8 @@ public class QComment:Object {
                 return "cellAudio\(position)"
             case .file:
                 return "cellFile\(position)"
+            case .contact:
+                return "cellContact\(position)"
             default:
                 return "cellText\(position)"
             }
@@ -377,9 +414,9 @@ public class QComment:Object {
         print("commentType to forward : \(comment.type.rawValue)")
         
         if self.type == .reply {
-            comment.typeRaw = QCommentType.text.rawValue
+            comment.typeRaw = QCommentType.text.name()
         }else{
-            comment.typeRaw = self.type.rawValue
+            comment.typeRaw = self.type.name()
         }
         var file:QFile? = nil
         if let fileRef = self.file {
@@ -526,27 +563,35 @@ public class QComment:Object {
         temp.cellPosRaw = QCellPosition.single.rawValue
         
         switch commentType {
+        case "contact":
+            temp.data = "\(json["payload"]["buttons"])"
+            temp.typeRaw = QCommentType.contact.name()
+            break
         case "buttons":
             temp.data = "\(json["payload"]["buttons"])"
-            temp.typeRaw = QCommentType.postback.rawValue
+            temp.typeRaw = QCommentType.postback.name()
             break
         case "account_linking":
             temp.data = "\(json["payload"])"
-            temp.typeRaw = QCommentType.account.rawValue
+            temp.typeRaw = QCommentType.account.name()
             break
         case "reply":
             temp.data = "\(json["payload"])"
-            temp.typeRaw = QCommentType.reply.rawValue
+            temp.typeRaw = QCommentType.reply.name()
             break
         case "system_event":
             temp.data = "\(json["payload"])"
-            temp.typeRaw = QCommentType.system.rawValue
+            temp.typeRaw = QCommentType.system.name()
             break
         case "card":
             temp.data = "\(json["payload"])"
-            temp.typeRaw = QCommentType.card.rawValue
+            temp.typeRaw = QCommentType.card.name()
             break
-        default:
+        case "button_postback_response" :
+            temp.data = "\(json["payload"])"
+            temp.typeRaw = QCommentType.text.name()
+            break
+        case "text":
             if temp.text.hasPrefix("[file]"){
                 var type = QiscusFileType.file
                 let fileURL = QFile.getURL(fromString: temp.text)
@@ -559,21 +604,25 @@ public class QComment:Object {
                 }
                 switch type {
                 case .image:
-                    temp.typeRaw = QCommentType.image.rawValue
+                    temp.typeRaw = QCommentType.image.name()
                     break
                 case .video:
-                    temp.typeRaw = QCommentType.video.rawValue
+                    temp.typeRaw = QCommentType.video.name()
                     break
                 case .audio:
-                    temp.typeRaw = QCommentType.audio.rawValue
+                    temp.typeRaw = QCommentType.audio.name()
                     break
                 default:
-                    temp.typeRaw = QCommentType.file.rawValue
+                    temp.typeRaw = QCommentType.file.name()
                     break
                 }
             }else{
-                temp.typeRaw = QCommentType.text.rawValue
+                temp.typeRaw = QCommentType.text.name()
             }
+            break
+            default:
+                temp.data = "\(json["payload"])"
+                temp.typeRaw = commentType
             break
         }
         return temp

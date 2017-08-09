@@ -130,7 +130,7 @@ public class QRoom:Object {
         return allRoom
     }
     public class func room(withId id:Int) -> QRoom? {
-        Qiscus.checkDatabaseMigration()
+//        Qiscus.checkDatabaseMigration()
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         var room:QRoom? = nil
         room = realm.object(ofType: QRoom.self, forPrimaryKey: id)
@@ -541,25 +541,33 @@ public class QRoom:Object {
             switch commentType {
             case "buttons":
                 newComment.data = "\(json["payload"]["buttons"])"
-                newComment.typeRaw = QCommentType.postback.rawValue
+                newComment.typeRaw = QCommentType.postback.name()
                 break
             case "account_linking":
                 newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.account.rawValue
+                newComment.typeRaw = QCommentType.account.name()
                 break
             case "reply":
                 newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.reply.rawValue
+                newComment.typeRaw = QCommentType.reply.name()
                 break
             case "system_event":
                 newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.system.rawValue
+                newComment.typeRaw = QCommentType.system.name()
                 break
             case "card":
                 newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.card.rawValue
+                newComment.typeRaw = QCommentType.card.name()
                 break
-            default:
+            case "contact":
+                newComment.data = "\(json["payload"])"
+                newComment.typeRaw = QCommentType.contact.name()
+                break
+            case "button_postback_response" :
+                newComment.data = "\(json["payload"])"
+                newComment.typeRaw = QCommentType.text.name()
+                break
+            case "text":
                 if newComment.text.hasPrefix("[file]"){
                     var type = QiscusFileType.file
                     let fileURL = QFile.getURL(fromString: newComment.text)
@@ -580,21 +588,25 @@ public class QRoom:Object {
                     }
                     switch type {
                     case .image:
-                        newComment.typeRaw = QCommentType.image.rawValue
+                        newComment.typeRaw = QCommentType.image.name()
                         break
                     case .video:
-                        newComment.typeRaw = QCommentType.video.rawValue
+                        newComment.typeRaw = QCommentType.video.name()
                         break
                     case .audio:
-                        newComment.typeRaw = QCommentType.audio.rawValue
+                        newComment.typeRaw = QCommentType.audio.name()
                         break
                     default:
-                        newComment.typeRaw = QCommentType.file.rawValue
+                        newComment.typeRaw = QCommentType.file.name()
                         break
                     }
                 }else{
-                    newComment.typeRaw = QCommentType.text.rawValue
+                    newComment.typeRaw = QCommentType.text.name()
                 }
+                break
+                default:
+                    newComment.data = "\(json["payload"])"
+                    newComment.typeRaw = commentType
                 break
             }
             self.addComment(newComment: newComment)
@@ -675,25 +687,33 @@ public class QRoom:Object {
             switch commentType {
             case "buttons":
                 newComment.data = "\(json["payload"]["buttons"])"
-                newComment.typeRaw = QCommentType.postback.rawValue
+                newComment.typeRaw = QCommentType.postback.name()
                 break
             case "account_linking":
                 newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.account.rawValue
+                newComment.typeRaw = QCommentType.account.name()
                 break
             case "reply":
                 newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.reply.rawValue
+                newComment.typeRaw = QCommentType.reply.name()
                 break
             case "system_event":
                 newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.system.rawValue
+                newComment.typeRaw = QCommentType.system.name()
                 break
             case "card":
                 newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.card.rawValue
+                newComment.typeRaw = QCommentType.card.name()
                 break
-            default:
+            case "contact":
+                newComment.data = "\(json["payload"])"
+                newComment.typeRaw = QCommentType.contact.name()
+                break
+            case "button_postback_response" :
+                newComment.data = "\(json["payload"])"
+                newComment.typeRaw = QCommentType.text.name()
+                break
+            case "text":
                 if newComment.text.hasPrefix("[file]"){
                     var type = QiscusFileType.file
                     let fileURL = QFile.getURL(fromString: newComment.text)
@@ -714,21 +734,25 @@ public class QRoom:Object {
                     }
                     switch type {
                     case .image:
-                        newComment.typeRaw = QCommentType.image.rawValue
+                        newComment.typeRaw = QCommentType.image.name()
                         break
                     case .video:
-                        newComment.typeRaw = QCommentType.video.rawValue
+                        newComment.typeRaw = QCommentType.video.name()
                         break
                     case .audio:
-                        newComment.typeRaw = QCommentType.audio.rawValue
+                        newComment.typeRaw = QCommentType.audio.name()
                         break
                     default:
-                        newComment.typeRaw = QCommentType.file.rawValue
+                        newComment.typeRaw = QCommentType.file.name()
                         break
                     }
                 }else{
-                    newComment.typeRaw = QCommentType.text.rawValue
+                    newComment.typeRaw = QCommentType.text.name()
                 }
+                break
+            default:
+                newComment.data = "\(json["payload"])"
+                newComment.typeRaw = commentType
                 break
             }
             self.addComment(newComment: newComment, onTop: true)
@@ -833,7 +857,7 @@ public class QRoom:Object {
         
         switch type {
         case .audio:
-            comment.typeRaw = QCommentType.audio.rawValue
+            comment.typeRaw = QCommentType.audio.name()
             file.localPath = QFile.saveFile(data!, fileName: fileName)
             break
         case .image:
@@ -857,7 +881,7 @@ public class QRoom:Object {
                 file.localThumbPath = QFile.saveFile(data!, fileName: "thumb-\(fileName)")
             }
             
-            comment.typeRaw = QCommentType.image.rawValue
+            comment.typeRaw = QCommentType.image.name()
             file.localPath = QFile.saveFile(data!, fileName: fileName)
             break
         case .video:
@@ -871,12 +895,12 @@ public class QRoom:Object {
             }
             let thumbData = UIImagePNGRepresentation(thumbImage!)
             file.localThumbPath = QFile.saveFile(thumbData!, fileName: "thumb-\(fileNameOnly).png")
-            comment.typeRaw = QCommentType.video.rawValue
+            comment.typeRaw = QCommentType.video.name()
             file.localPath = QFile.saveFile(data!, fileName: fileName)
             break
         default:
             file.localPath = QFile.saveFile(data!, fileName: fileName)
-            comment.typeRaw = QCommentType.file.rawValue
+            comment.typeRaw = QCommentType.file.name()
             break
         }
         
@@ -901,7 +925,7 @@ public class QRoom:Object {
         comment.senderEmail = QiscusMe.sharedInstance.email
         comment.senderName = QiscusMe.sharedInstance.userName
         comment.statusRaw = QCommentStatus.sending.rawValue
-        comment.typeRaw = type.rawValue
+        comment.typeRaw = type.name()
         
         switch type {
         case .reply:
@@ -930,7 +954,7 @@ public class QRoom:Object {
         comment.senderEmail = QiscusMe.sharedInstance.email
         comment.senderName = QiscusMe.sharedInstance.userName
         comment.statusRaw = QCommentStatus.sending.rawValue
-        comment.typeRaw = QCommentType.text.rawValue
+        comment.typeRaw = QCommentType.text.name()
         
         self.addComment(newComment: comment)
         
@@ -938,7 +962,7 @@ public class QRoom:Object {
     }
     public func post(comment:QComment, type:String? = nil, payload:JSON? = nil){
         let service = QRoomService()
-        service.postComment(onRoom: self.id, comment: comment)
+        service.postComment(onRoom: self.id, comment: comment, type: type, payload:payload)
     }
     public func upload(comment:QComment, onSuccess:  @escaping (QRoom, QComment)->Void, onError:  @escaping (QRoom,QComment,String)->Void){
         self.updateCommentStatus(inComment: comment, status: .sending)
