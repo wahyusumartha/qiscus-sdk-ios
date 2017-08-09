@@ -1,5 +1,7 @@
 # Qiscus SDK iOS
 
+<p align="center"><br/><img src="https://res.cloudinary.com/qiscus/image/upload/zKB8jtyLZJ/ssios1.png" width="45%" /><br/></p>
+
 
 # Quick Start
 
