@@ -115,7 +115,6 @@
 		39FFF56E1F3196350022CF3D /* QCommentInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39FFF56D1F3196340022CF3D /* QCommentInfo.swift */; };
 		39FFF5701F32BD6E0022CF3D /* QTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39FFF56F1F32BD6E0022CF3D /* QTextView.swift */; };
 		B0846505F0ABD97C0375C737 /* Pods_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 88710D4C9FAFADF156A657F4 /* Pods_Example.framework */; };
-		DCD523BA4F0FADE6223F44A5 /* Pods_Qiscus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A4527A84D23FDA5B8B32B9C1 /* Pods_Qiscus.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -175,7 +174,6 @@
 		3997613F1E2367D4004076C0 /* QChatFooterLeft.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = QChatFooterLeft.xib; path = Qiscus/QChatFooterLeft.xib; sourceTree = "<group>"; };
 		399761421E2368CF004076C0 /* QChatFooterRight.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QChatFooterRight.swift; path = Qiscus/QChatFooterRight.swift; sourceTree = "<group>"; };
 		399761431E2368CF004076C0 /* QChatFooterRight.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = QChatFooterRight.xib; path = Qiscus/QChatFooterRight.xib; sourceTree = "<group>"; };
-		39991A5B4188A3501197772D /* Pods-Qiscus.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Qiscus.release.xcconfig"; path = "Pods/Target Support Files/Pods-Qiscus/Pods-Qiscus.release.xcconfig"; sourceTree = "<group>"; };
 		39AABC8A1DFA9B8E00FD3BCD /* QiscusGalleryItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusGalleryItem.swift; path = Qiscus/QiscusGalleryItem.swift; sourceTree = "<group>"; };
 		39BD59141EA591DB001AFB7C /* QSiriWaveView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QSiriWaveView.swift; path = Qiscus/QSiriWaveView.swift; sourceTree = "<group>"; };
 		39BD59161EB2F1A3001AFB7C /* Qiscus.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Qiscus.podspec; sourceTree = "<group>"; };
@@ -233,7 +231,6 @@
 		98773C3A23586CB325C3DFE1 /* Pods-Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Example/Pods-Example.debug.xcconfig"; sourceTree = "<group>"; };
 		9CE65FBC6F02844B3B9F7A09 /* Pods-Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-Example/Pods-Example.release.xcconfig"; sourceTree = "<group>"; };
 		A4527A84D23FDA5B8B32B9C1 /* Pods_Qiscus.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Qiscus.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		CA5D94BB0A6D9EF0C40F3934 /* Pods-Qiscus.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Qiscus.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Qiscus/Pods-Qiscus.debug.xcconfig"; sourceTree = "<group>"; };
 		EC54D4C4B940F9B3AB0ACC05 /* Pods_QiscusTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_QiscusTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -250,7 +247,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DCD523BA4F0FADE6223F44A5 /* Pods_Qiscus.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -451,6 +447,7 @@
 		39F1F72E1D3B929700FF1C8C /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
+				39F1F73C1D3B92F700FF1C8C /* QiscusConfig.swift */,
 				39955B7E1D65992200927ADD /* QiscusUIConfiguration.swift */,
 				392A525B1D7FA0910007300D /* QiscusColorConfiguration.swift */,
 				392A525D1D7FA1700007300D /* QiscusTextConfiguration.swift */,
@@ -466,7 +463,6 @@
 				390F446C1E53ED0A00C6B64B /* DataModel */,
 				391B05C51D3D19D200763760 /* QiscusFileHelper.swift */,
 				392A525F1D80E4660007300D /* QiscusMe.swift */,
-				39F1F73C1D3B92F700FF1C8C /* QiscusConfig.swift */,
 				39AABC8A1DFA9B8E00FD3BCD /* QiscusGalleryItem.swift */,
 				392C1A4B1E2DD3950022D019 /* QiscusLinkData.swift */,
 			);
@@ -501,8 +497,6 @@
 			children = (
 				98773C3A23586CB325C3DFE1 /* Pods-Example.debug.xcconfig */,
 				9CE65FBC6F02844B3B9F7A09 /* Pods-Example.release.xcconfig */,
-				CA5D94BB0A6D9EF0C40F3934 /* Pods-Qiscus.debug.xcconfig */,
-				39991A5B4188A3501197772D /* Pods-Qiscus.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -549,12 +543,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 39F1F7261D3B91E200FF1C8C /* Build configuration list for PBXNativeTarget "Qiscus" */;
 			buildPhases = (
-				74625135A75F8BEDD45F537C /* [CP] Check Pods Manifest.lock */,
 				39F1F70A1D3B91E200FF1C8C /* Sources */,
 				39F1F70B1D3B91E200FF1C8C /* Frameworks */,
 				39F1F70C1D3B91E200FF1C8C /* Headers */,
 				39F1F70D1D3B91E200FF1C8C /* Resources */,
-				4B8B4018C93DCE5D08EC572E /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -660,21 +652,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		4B8B4018C93DCE5D08EC572E /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Qiscus/Pods-Qiscus-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		66B708A3602CA3F385EAFCDD /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -703,21 +680,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Example/Pods-Example-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		74625135A75F8BEDD45F537C /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		C33FFFD4AC05CBFAA47D24A3 /* [CP] Copy Pods Resources */ = {
@@ -1006,7 +968,6 @@
 		};
 		39F1F7271D3B91E200FF1C8C /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CA5D94BB0A6D9EF0C40F3934 /* Pods-Qiscus.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
@@ -1048,7 +1009,6 @@
 		};
 		39F1F7281D3B91E200FF1C8C /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 39991A5B4188A3501197772D /* Pods-Qiscus.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
