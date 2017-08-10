@@ -465,7 +465,7 @@ public class QiscusChatVC: UIViewController{
     }
     override open func viewWillDisappear(_ animated: Bool) {
         self.isPresence = false
-        
+        self.dataLoaded = false
         super.viewWillDisappear(animated)
         view.endEditing(true)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
@@ -487,9 +487,14 @@ public class QiscusChatVC: UIViewController{
         self.isPresence = true
         if self.chatRoom != nil {
             //self.subscribeRealtime()
-            self.chatRoom!.sync()
+            
+            self.collectionView.reloadData()
             self.chatRoom!.delegate = self
+            self.chatService.delegate = self
+            
             self.chatRoom!.subscribeRealtimeStatus()
+            self.dataLoaded = true
+            self.chatRoom!.sync()
         }else{
             self.showLoading("Load data ...")
         }

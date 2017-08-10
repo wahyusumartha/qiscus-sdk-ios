@@ -70,15 +70,15 @@ public class QChatService:NSObject {
                             let room = QRoom.addRoom(fromJSON: roomData)
                             
                             let commentPayload = results["comments"].arrayValue
-                            
-                            for json in commentPayload {
-                                let commentId = json["id"].intValue
-                                if commentId <= QiscusMe.sharedInstance.lastCommentId {
-                                    room.saveOldComment(fromJSON: json)
-                                }
-                            }
-                            self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
                             DispatchQueue.main.async {
+                                for json in commentPayload {
+                                    let commentId = json["id"].intValue
+                                    if commentId <= QiscusMe.sharedInstance.lastCommentId {
+                                        room.saveOldComment(fromJSON: json)
+                                    }
+                                }
+                                self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
+                            
                                 if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                                     roomDelegate.didFinishLoadRoom(onRoom: room)
                                 }
@@ -227,15 +227,15 @@ public class QChatService:NSObject {
                             let room = QRoom.addRoom(fromJSON: roomData)
                             
                             let commentPayload = results["comments"].arrayValue
-                            
-                            for json in commentPayload {
-                                let commentId = json["id"].intValue
-                                if commentId <= QiscusMe.sharedInstance.lastCommentId {
-                                    room.saveOldComment(fromJSON: json)
-                                }
-                            }
-                            onSuccess(room)
                             DispatchQueue.main.async {
+                                for json in commentPayload {
+                                    let commentId = json["id"].intValue
+                                    if commentId <= QiscusMe.sharedInstance.lastCommentId {
+                                        room.saveOldComment(fromJSON: json)
+                                    }
+                                }
+                                onSuccess(room)
+                            
                                 if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
                                     roomDelegate.didFinishLoadRoom(onRoom: room)
                                 }
@@ -315,15 +315,15 @@ public class QChatService:NSObject {
                             let room = QRoom.addRoom(fromJSON: roomData)
                             
                             let commentPayload = results["comments"].arrayValue
-                            
-                            for json in commentPayload {
-                                let commentId = json["id"].intValue
-                                if commentId <= QiscusMe.sharedInstance.lastCommentId {
-                                    room.saveOldComment(fromJSON: json)
-                                }
-                            }
-                            self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
                             DispatchQueue.main.async {
+                                for json in commentPayload {
+                                    let commentId = json["id"].intValue
+                                    if commentId <= QiscusMe.sharedInstance.lastCommentId {
+                                        room.saveOldComment(fromJSON: json)
+                                    }
+                                }
+                                self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
+                            
                                 if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                                     roomDelegate.didFinishLoadRoom(onRoom: room)
                                 }
@@ -394,16 +394,16 @@ public class QChatService:NSObject {
                             let room = QRoom.addRoom(fromJSON: roomData)
                             
                             let commentPayload = results["comments"].arrayValue
-                            
-                            for json in commentPayload {
-                                let commentId = json["id"].intValue
-                                
-                                if commentId <= QiscusMe.sharedInstance.lastCommentId {
-                                    room.saveOldComment(fromJSON: json)
-                                }
-                            }
-                            self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
                             DispatchQueue.main.async {
+                                for json in commentPayload {
+                                    let commentId = json["id"].intValue
+                                    
+                                    if commentId <= QiscusMe.sharedInstance.lastCommentId {
+                                        room.saveOldComment(fromJSON: json)
+                                    }
+                                }
+                                self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
+                            
                                 if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                                     roomDelegate.didFinishLoadRoom(onRoom: room)
                                 }
@@ -580,16 +580,16 @@ public class QChatService:NSObject {
                         let room = QRoom.addRoom(fromJSON: roomData)
                         
                         let commentPayload = results["comments"].arrayValue
-                        
-                        for json in commentPayload {
-                            let commentId = json["id"].intValue
-                            
-                            if commentId <= QiscusMe.sharedInstance.lastCommentId {
-                                room.saveOldComment(fromJSON: json)
-                            }
-                        }
-                        self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
                         DispatchQueue.main.async {
+                            for json in commentPayload {
+                                let commentId = json["id"].intValue
+                                
+                                if commentId <= QiscusMe.sharedInstance.lastCommentId {
+                                    room.saveOldComment(fromJSON: json)
+                                }
+                            }
+                            self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
+                        
                             if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                                 roomDelegate.didFinishLoadRoom(onRoom: room)
                             }
