@@ -489,6 +489,7 @@ public class QiscusChatVC: UIViewController{
             //self.subscribeRealtime()
             
             self.collectionView.reloadData()
+            self.chatRoom?.updateUnreadCommentCount()
             self.chatRoom!.delegate = self
             self.chatService.delegate = self
             
