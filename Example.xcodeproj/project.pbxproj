@@ -41,6 +41,8 @@
 		392C85BA1E1F73A20059D5BD /* QCellAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 392C85B91E1F73A20059D5BD /* QCellAudio.swift */; };
 		393BFC6B1F3ADE9E00CF4CB5 /* Qiscus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39F1F70F1D3B91E200FF1C8C /* Qiscus.framework */; };
 		393BFC6C1F3ADE9E00CF4CB5 /* Qiscus.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 39F1F70F1D3B91E200FF1C8C /* Qiscus.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		393BFC721F3BE45700CF4CB5 /* QCellContactRight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393BFC701F3BE45700CF4CB5 /* QCellContactRight.swift */; };
+		393BFC731F3BE45700CF4CB5 /* QCellContactRight.xib in Resources */ = {isa = PBXBuildFile; fileRef = 393BFC711F3BE45700CF4CB5 /* QCellContactRight.xib */; };
 		395291251E28559B004BD6B4 /* goToChatVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395291211E28559B004BD6B4 /* goToChatVC.swift */; };
 		395291261E28559B004BD6B4 /* goToChatVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 395291221E28559B004BD6B4 /* goToChatVC.xib */; };
 		395291271E28559B004BD6B4 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395291231E28559B004BD6B4 /* MainView.swift */; };
@@ -178,6 +180,8 @@
 		392C85B51E1F46030059D5BD /* QCellFileRight.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QCellFileRight.swift; path = Qiscus/QCellFileRight.swift; sourceTree = "<group>"; };
 		392C85B61E1F46030059D5BD /* QCellFileRight.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = QCellFileRight.xib; path = Qiscus/QCellFileRight.xib; sourceTree = "<group>"; };
 		392C85B91E1F73A20059D5BD /* QCellAudio.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QCellAudio.swift; path = Qiscus/QCellAudio.swift; sourceTree = "<group>"; };
+		393BFC701F3BE45700CF4CB5 /* QCellContactRight.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QCellContactRight.swift; path = Qiscus/QCellContactRight.swift; sourceTree = "<group>"; };
+		393BFC711F3BE45700CF4CB5 /* QCellContactRight.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = QCellContactRight.xib; path = Qiscus/QCellContactRight.xib; sourceTree = "<group>"; };
 		395291211E28559B004BD6B4 /* goToChatVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = goToChatVC.swift; sourceTree = "<group>"; };
 		395291221E28559B004BD6B4 /* goToChatVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = goToChatVC.xib; sourceTree = "<group>"; };
 		395291231E28559B004BD6B4 /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
@@ -361,6 +365,8 @@
 				39FFF56A1F30335B0022CF3D /* QCellCardRight.xib */,
 				39FFF5671F2F26810022CF3D /* QCardButton.swift */,
 				39FFF56F1F32BD6E0022CF3D /* QTextView.swift */,
+				393BFC701F3BE45700CF4CB5 /* QCellContactRight.swift */,
+				393BFC711F3BE45700CF4CB5 /* QCellContactRight.xib */,
 			);
 			name = Component;
 			sourceTree = "<group>";
@@ -671,6 +677,7 @@
 				39D92CF21E1DD64200F36A1A /* QCellMediaRight.xib in Resources */,
 				399761451E2368CF004076C0 /* QChatFooterRight.xib in Resources */,
 				39D92CE61E1B947F00F36A1A /* QCellTextLeft.xib in Resources */,
+				393BFC731F3BE45700CF4CB5 /* QCellContactRight.xib in Resources */,
 				399418F81D73FCF900BF1B46 /* QiscusImagePreview.xib in Resources */,
 				392C85B21E1F17BE0059D5BD /* QCellFileLeft.xib in Resources */,
 				392C85B81E1F46030059D5BD /* QCellFileRight.xib in Resources */,
@@ -838,6 +845,7 @@
 				39E195F21DBDE9CC000DDF76 /* QToasterView.swift in Sources */,
 				39BD59151EA591DB001AFB7C /* QSiriWaveView.swift in Sources */,
 				398511F31D69549200C48EFF /* QiscusChatCellDelegate.swift in Sources */,
+				393BFC721F3BE45700CF4CB5 /* QCellContactRight.swift in Sources */,
 				392A525C1D7FA0910007300D /* QiscusColorConfiguration.swift in Sources */,
 				39F1F73E1D3B92F700FF1C8C /* QiscusConfig.swift in Sources */,
 				39F1F7471D3B931E00FF1C8C /* QSyncNotifData.swift in Sources */,

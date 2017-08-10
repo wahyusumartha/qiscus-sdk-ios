@@ -214,6 +214,7 @@ public class QRoomService:NSObject{
             case .success:
                 if let result = response.result.value {
                     let json = JSON(result)
+                    print("post comment result: \(json)")
                     let success = (json["status"].intValue == 200)
                     
                     if success == true {

@@ -8,8 +8,14 @@
 
 import UIKit
 
-class QCellContactRight: UICollectionViewCell {
+class QCellContactRight: QChatCell {
+    @IBOutlet weak var topMargin: NSLayoutConstraint!
 
+    @IBOutlet weak var descriptionLabel: UILabel!
+    @IBOutlet weak var contactNameLabel: UILabel!
+    @IBOutlet weak var saveButton: UIButton!
+    @IBOutlet weak var balloonView: UIImageView!
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

@@ -242,6 +242,8 @@ public class QComment:Object {
             let payload = JSON(parseJSON: self.data)
             let buttons = payload["buttons"].arrayValue
             size.height = CGFloat(240 + (buttons.count * 45)) + 5
+        }else if self.type == .contact {
+            size.height = 93
         }
         
         return size

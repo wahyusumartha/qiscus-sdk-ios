@@ -236,30 +236,14 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         size.width = QiscusHelper.screenWidth() - 16
         
         switch comment.type {
-        case .video, .image:
-            size.height = 190
-            break
-        case .audio:
-            size.height = 83
-            break
-        case .file:
-            size.height = 67
-            break
-        case .reply:
-            size.height += 88
-            break
-        case .system:
-            size.height += 46
-            break
-        case .card:
-            //size.height = 286
-            break
-        case .text:
-            size.height += 15
-            break
-        default:
-            size.height += 20
-            break
+            case .card, .contact    : break
+            case .video, .image     : size.height = 190 ; break
+            case .audio             : size.height = 83  ; break
+            case .file              : size.height = 67  ; break
+            case .reply             : size.height += 88 ; break
+            case .system            : size.height += 46 ; break
+            case .text              : size.height += 15 ; break
+            default                 : size.height += 20 ; break
         }
         
         if (comment.type != .system && indexPath.row == 0) {

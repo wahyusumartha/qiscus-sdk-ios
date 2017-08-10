@@ -926,16 +926,11 @@ public class QRoom:Object {
         comment.senderName = QiscusMe.sharedInstance.userName
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.typeRaw = type.name()
-        
-        switch type {
-        case .reply:
-            if let data = payload {
-                comment.data = "\(data)"
-            }
-            break
-         default:
-            break
+    
+        if let data = payload {
+            comment.data = "\(data)"
         }
+            
         self.addComment(newComment: comment)
         
         return comment
