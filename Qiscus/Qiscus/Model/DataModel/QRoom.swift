@@ -1057,6 +1057,16 @@ public class QRoom:Object {
             self.delegate?.room(didChangeUnread: self.lastReadCommentId, unreadCount: unread)
         }
     }
+    public func updateUnreadCommentCount(onSuccess:@escaping ()->Void){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let unread = QComment.countComments(afterId: self.lastReadCommentId, roomId: self.id)
+        if self.unreadCommentCount != unread {
+            try! realm.write {
+                self.unreadCommentCount = unread
+            }
+            onSuccess()
+        }
+    }
     internal func updateCommentStatus(){
         if self.participants.count > 0 {
             var minDeliveredId = 0

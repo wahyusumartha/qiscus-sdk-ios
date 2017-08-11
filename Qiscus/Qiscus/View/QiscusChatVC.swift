@@ -489,12 +489,26 @@ public class QiscusChatVC: UIViewController{
             //self.subscribeRealtime()
             
             self.collectionView.reloadData()
-            self.chatRoom?.updateUnreadCommentCount()
-            self.chatRoom!.delegate = self
-            self.chatService.delegate = self
+            //self.chatRoom?.updateUnreadCommentCount()
+            self.chatRoom?.updateUnreadCommentCount {
+                if self.chatRoom!.unreadCommentCount > 0 {
+                    self.isLastRowVisible = false
+                    var unreadText = "\(self.chatRoom!.unreadCommentCount)"
+                    if self.chatRoom!.unreadCommentCount > 99 {
+                        unreadText = "99+"
+                    }
+                    self.unreadIndicator.text = unreadText
+                    self.unreadIndicator.isHidden = false
+                    self.dataLoaded = true
+                    self.chatRoom!.delegate = self
+                }else{
+                    self.dataLoaded = true
+                    self.chatRoom!.delegate = self
+                }
+            }
             
+            self.chatService.delegate = self
             self.chatRoom!.subscribeRealtimeStatus()
-            self.dataLoaded = true
             self.chatRoom!.sync()
         }else{
             self.showLoading("Load data ...")
@@ -967,16 +981,18 @@ extension QiscusChatVC:QRoomDelegate{
         }
     }
     public func room(didChangeUnread lastReadCommentId:Int, unreadCount:Int) {
-        if unreadCount > 0 {
-            var unreadText = "\(unreadCount)"
-            if unreadCount > 99 {
-                unreadText = "99+"
+        //if self.dataLoaded {
+            if unreadCount > 0 {
+                var unreadText = "\(unreadCount)"
+                if unreadCount > 99 {
+                    unreadText = "99+"
+                }
+                self.unreadIndicator.text = unreadText
+                self.unreadIndicator.isHidden = self.isLastRowVisible
+            }else{
+                self.unreadIndicator.text = ""
+                self.unreadIndicator.isHidden = true
             }
-            self.unreadIndicator.text = unreadText
-            self.unreadIndicator.isHidden = self.isLastRowVisible
-        }else{
-            self.unreadIndicator.text = ""
-            self.unreadIndicator.isHidden = true
-        }
+        //}
     }
 }

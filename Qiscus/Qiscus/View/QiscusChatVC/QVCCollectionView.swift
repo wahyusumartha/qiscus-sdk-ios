@@ -76,7 +76,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                 cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
             }
         }
-        if comment.status != .read && comment.status != .failed && comment.status != .sending{
+        if comment.status != .failed && comment.status != .sending{
             if comment.id > self.chatRoom!.lastReadCommentId {
                 self.chatRoom?.updateLastReadId(commentId: comment.id)
                 if self.publishStatusTimer != nil {

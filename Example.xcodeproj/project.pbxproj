@@ -306,11 +306,11 @@
 		39955B3F1D655B6700927ADD /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
-				39F710121F3D638F00774D97 /* ChatPreviewDocVC.swift */,
+				39955B401D655C5500927ADD /* Component */,
+				39E790511E5298150011850B /* QiscusChatVC */,
 				39F70FAF1F3D5F5800774D97 /* QiscusChatVC.swift */,
 				39F70FB01F3D5F5800774D97 /* QiscusChatVC.xib */,
-				39E790511E5298150011850B /* QiscusChatVC */,
-				39955B401D655C5500927ADD /* Component */,
+				39F710121F3D638F00774D97 /* ChatPreviewDocVC.swift */,
 			);
 			name = ViewController;
 			sourceTree = "<group>";
@@ -414,12 +414,12 @@
 			children = (
 				39E195E81DBDE392000DDF76 /* Library */,
 				39955B5B1D65603C00927ADD /* Extension */,
-				39955B3F1D655B6700927ADD /* ViewController */,
-				39F1F7481D3B932A00FF1C8C /* Qiscus.swift */,
 				3920159E1D42512F005561C2 /* Helper */,
 				39F1F72F1D3B92AA00FF1C8C /* Model */,
 				39F1F72E1D3B929700FF1C8C /* Configuration */,
 				39F1F72D1D3B928D00FF1C8C /* Service */,
+				39955B3F1D655B6700927ADD /* ViewController */,
+				39F1F7481D3B932A00FF1C8C /* Qiscus.swift */,
 				39F1F7131D3B91E200FF1C8C /* Info.plist */,
 				39955B6C1D656D1700927ADD /* Media.xcassets */,
 			);
