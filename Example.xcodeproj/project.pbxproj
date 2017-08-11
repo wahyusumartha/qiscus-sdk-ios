@@ -361,12 +361,12 @@
 		39E790511E5298150011850B /* QiscusChatVC */ = {
 			isa = PBXGroup;
 			children = (
+				39F70FB31F3D5FB500774D97 /* QChatCell */,
 				39F70FB41F3D5FE000774D97 /* QVCAction.swift */,
 				39F70FB51F3D5FE000774D97 /* QVCChatCell.swift */,
 				39F70FB61F3D5FE000774D97 /* QVCChatInputText.swift */,
 				39F70FB71F3D5FE000774D97 /* QVCCollectionView.swift */,
 				39F70FB81F3D5FE000774D97 /* QVCPickerAndMedia.swift */,
-				39F70FB31F3D5FB500774D97 /* QChatCell */,
 			);
 			name = QiscusChatVC;
 			sourceTree = "<group>";

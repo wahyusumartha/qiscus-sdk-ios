@@ -30,7 +30,6 @@ class QCellFileLeft: QChatCell {
         fileIcon.contentMode = .scaleAspectFit
     }
     public override func commentChanged() {
-        userNameLabel.text = "You"
         userNameLabel.isHidden = true
         topMargin.constant = 0
         cellHeight.constant = 0
@@ -40,9 +39,15 @@ class QCellFileLeft: QChatCell {
         fileContainer.addGestureRecognizer(tapRecognizer)
         
         if self.comment!.cellPos == .first || self.comment!.cellPos == .single{
+            if let sender = self.comment?.sender {
+                self.userNameLabel.text = sender.fullname
+            }else{
+                self.userNameLabel.text = self.comment?.senderName
+            }
             userNameLabel.isHidden = false
             topMargin.constant = 20
             cellHeight.constant = 20
+            
         }
         
         if let file = self.comment!.file {
