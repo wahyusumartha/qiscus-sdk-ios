@@ -454,7 +454,10 @@ public class QComment:Object {
             try! realm.write {
                 self.statusRaw = status.rawValue
             }
-            let delay = 0.5 * Double(NSEC_PER_SEC)
+            var delay = 0.1 * Double(NSEC_PER_SEC)
+            if status == .sent {
+                delay =  1.0 * Double(NSEC_PER_SEC)
+            }
             let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
             DispatchQueue.main.asyncAfter(deadline: time, execute: {
                 self.delegate?.comment(didChangeStatus: status)

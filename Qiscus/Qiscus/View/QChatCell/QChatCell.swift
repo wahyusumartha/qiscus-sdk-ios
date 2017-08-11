@@ -23,11 +23,8 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
 
     var comment:QComment?{
         didSet{
-            if oldValue != nil {
-                oldValue!.delegate = nil
-            }
             if comment != nil {
-                self.comment!.delegate = self
+                self.comment?.delegate = self
                 self.commentChanged()
             }
         }

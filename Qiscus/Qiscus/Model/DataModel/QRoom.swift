@@ -52,7 +52,7 @@ public class QRoom:Object {
     private dynamic var lastParticipantsReadId:Int = 0
     private dynamic var lastParticipantsDeliveredId:Int = 0
     
-    internal let comments = List<QCommentGroup>()
+    private let comments = List<QCommentGroup>()
     public let participants = List<QParticipant>()
     
     public var delegate:QRoomDelegate?
@@ -650,7 +650,7 @@ public class QRoom:Object {
                 oldComment.createdAt = commentCreatedAt
                 oldComment.beforeId = commentBeforeId
             }
-            if oldComment.statusRaw < QCommentStatus.sent.rawValue{
+            if oldComment.statusRaw < QCommentStatus.sent.rawValue {
                 var status = QCommentStatus.sent
                 if oldComment.id < self.lastParticipantsReadId {
                     status = .read
@@ -783,33 +783,30 @@ public class QRoom:Object {
     // MARK: - Updater method
     public func updateCommentStatus(inComment comment:QComment, status:QCommentStatus){
         if self.comments.count > 0 {
-            var section = 0
-            for commentGroup in self.comments {
-                var found = false
-                for row in 0...(commentGroup.commentsCount - 1) {
-                    let commentTarget = commentGroup.comment(index: row)!
-                    if commentTarget.uniqueId == comment.uniqueId {
-                        found = true
-                        let rawStatus = commentTarget.statusRaw
-                        var newStatus = QCommentStatus.sent
-                        if commentTarget.id < self.lastParticipantsReadId {
-                            newStatus = .read
-                        }else if commentTarget.id < self.lastParticipantsDeliveredId{
-                            newStatus = .delivered
-                        }
-                        commentTarget.updateStatus(status: newStatus)
-                        if rawStatus != newStatus.rawValue{
-                            self.delegate?.room(didChangeComment: section, row: row, action: "status")
-                        }
-                        break
-                    }
-                }
-                
-                if found {
-                    break
-                }
-                section += 1
-            }
+//            var section = 0
+            comment.updateStatus(status: status)
+//            for commentGroup in self.comments {
+//                var found = false
+//                for row in 0...(commentGroup.commentsCount - 1) {
+//                    let commentTarget = commentGroup.comment(index: row)!
+//                    if commentTarget.uniqueId == comment.uniqueId {
+//                        found = true
+//                        let rawStatus = commentTarget.statusRaw
+//                        var newStatus = QCommentStatus.sent
+//                        if commentTarget.id < self.lastParticipantsReadId {
+//                            newStatus = .read
+//                        }else if commentTarget.id < self.lastParticipantsDeliveredId{
+//                            newStatus = .delivered
+//                        }
+//                        commentTarget.updateStatus(status: newStatus)
+//                        if rawStatus != newStatus.rawValue{
+//                            self.delegate?.room(didChangeComment: section, row: row, action: "status")
+//                        }
+//                        break
+//                    }
+//                }
+//                section += 1
+//            }
         }
     }
     
@@ -1064,8 +1061,8 @@ public class QRoom:Object {
             try! realm.write {
                 self.unreadCommentCount = unread
             }
-            onSuccess()
         }
+        onSuccess()
     }
     internal func updateCommentStatus(){
         if self.participants.count > 0 {
@@ -1098,9 +1095,9 @@ public class QRoom:Object {
     private func updateLastParticipantsReadId(readId:Int){
         var section = 0
         for commentGroup in self.comments {
-            for item in 0...(self.comments[section].commentsCount - 1){
+            for item in 0...(commentGroup.commentsCount - 1){
                 let comment = commentGroup.comment(index: item)!
-                if comment.statusRaw < QCommentStatus.read.rawValue || comment.status == .failed{
+                if (comment.statusRaw < QCommentStatus.read.rawValue && comment.status != .failed && comment.status != .sending && comment.id < readId) || comment.id == readId{
                     comment.updateStatus(status: .read)
                     self.delegate?.room(didChangeComment: section, row: item, action: "status")
                 }
@@ -1111,9 +1108,9 @@ public class QRoom:Object {
     private func updateLastParticipantsDeliveredId(deliveredId:Int){
         var section = 0
         for commentGroup in self.comments {
-            for item in 0...(self.comments[section].commentsCount - 1){
+            for item in 0...(commentGroup.commentsCount - 1){
                 let comment = commentGroup.comment(index: item)!
-                if comment.statusRaw < QCommentStatus.delivered.rawValue || comment.status == .failed{
+                if (comment.statusRaw < QCommentStatus.delivered.rawValue && comment.status != .failed && comment.status != .sending && comment.id < deliveredId) || (comment.id == deliveredId && comment.status != .read){
                     comment.updateStatus(status: .delivered)
                     self.delegate?.room(didChangeComment: section, row: item, action: "status")
                 }

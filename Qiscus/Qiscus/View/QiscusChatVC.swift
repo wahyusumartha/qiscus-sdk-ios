@@ -750,7 +750,7 @@ extension QiscusChatVC:QChatServiceDelegate{
     public func chatService(didFinishLoadRoom inRoom: QRoom, withMessage message: String?) {
         self.chatRoom = inRoom
         self.chatRoom?.delegate = self
-        self.chatRoom?.subscribeRealtimeStatus()
+        inRoom.subscribeRealtimeStatus()
         if self.chatTitle == nil || self.chatTitle == ""{
             self.loadTitle()
         }
@@ -762,7 +762,8 @@ extension QiscusChatVC:QChatServiceDelegate{
             let delay = 0.5 * Double(NSEC_PER_SEC)
             let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
             let section = self.chatRoom!.commentsGroupCount - 1
-            let row = self.chatRoom!.comments[section].commentsCount - 1
+            let group = self.chatRoom!.commentGroup(index: section)!
+            let row = group.commentsCount - 1
             let indexPath = IndexPath(item: row, section: section)
             self.collectionView.reloadData()
             DispatchQueue.main.asyncAfter(deadline: time, execute: {
@@ -842,7 +843,8 @@ extension QiscusChatVC:QRoomDelegate{
     }
     public func room(didChangeComment section: Int, row: Int, action: String) {
         let indexPath = IndexPath(item: row, section: section)
-        let comment = self.chatRoom!.comments[section].comments[row]
+        let group = self.chatRoom!.commentGroup(index: section)!
+        let comment = group.comment(index: row)!
         
         func defaultChange(){
             self.collectionView.reloadItems(at: [indexPath])
@@ -921,7 +923,8 @@ extension QiscusChatVC:QRoomDelegate{
                 self.collectionView.insertSections(indexSet)
             }) { (success) in
                 let indexPath = IndexPath(item: 0, section: onIndex)
-                let comment = self.chatRoom!.comments[onIndex].comments[0]
+                let group = self.chatRoom!.commentGroup(index: onIndex)!
+                let comment = group.comment(index: 0)!
                 let email = comment.senderEmail
                 if (success && self.isLastRowVisible) || email == QiscusMe.sharedInstance.email {
                     self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
@@ -936,7 +939,8 @@ extension QiscusChatVC:QRoomDelegate{
     public func room(gotNewCommentOn groupIndex: Int, withCommentIndex index: Int) {
         if self.dataLoaded {
             let indexPath = IndexPath(item: index, section: groupIndex)
-            let comment = self.chatRoom!.comments[groupIndex].comments[index]
+            let group = self.chatRoom!.commentGroup(index: groupIndex)!
+            let comment = group.comment(index: index)!
             let email = comment.senderEmail
             if index == 0 && groupIndex == 0 {
                 self.loadMoreControl.endRefreshing()
