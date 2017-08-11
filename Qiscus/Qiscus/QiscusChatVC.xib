@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16F73" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -71,7 +71,7 @@
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0uh-I7-GxZ">
                     <rect key="frame" x="87.5" y="228.5" width="200" height="210"/>
                     <subviews>
-                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="empty_messages" translatesAutoresizingMaskIntoConstraints="NO" id="DzU-AP-3jK">
+                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="empty-chat" translatesAutoresizingMaskIntoConstraints="NO" id="DzU-AP-3jK">
                             <rect key="frame" x="0.0" y="0.0" width="200" height="128"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="128" id="v99-1M-yjE"/>
@@ -355,7 +355,7 @@
         <image name="ar_record" width="28" height="28"/>
         <image name="bottom" width="50" height="50"/>
         <image name="chat_bg" width="1080" height="1917"/>
-        <image name="empty_messages" width="800" height="420"/>
+        <image name="empty-chat" width="300" height="394"/>
         <image name="ic_open_archived" width="40" height="40"/>
         <image name="link" width="55" height="55"/>
         <image name="send" width="28" height="28"/>
