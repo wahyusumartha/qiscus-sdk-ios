@@ -311,7 +311,7 @@
 		39955B3F1D655B6700927ADD /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
-				39E790511E5298150011850B /* Extension */,
+				39E790511E5298150011850B /* QiscusChatVC */,
 				39955B401D655C5500927ADD /* Component */,
 				39955B721D656F0A00927ADD /* QiscusChatVC.swift */,
 				39955B731D656F0A00927ADD /* QiscusChatVC.xib */,
@@ -399,7 +399,7 @@
 			name = Library;
 			sourceTree = "<group>";
 		};
-		39E790511E5298150011850B /* Extension */ = {
+		39E790511E5298150011850B /* QiscusChatVC */ = {
 			isa = PBXGroup;
 			children = (
 				390F44691E53E71400C6B64B /* QVCChatInputText.swift */,
@@ -408,7 +408,7 @@
 				391DCD141ECA9EB0007FCABD /* QVCPickerAndMedia.swift */,
 				391DCD161ECAA641007FCABD /* QVCAction.swift */,
 			);
-			name = Extension;
+			name = QiscusChatVC;
 			sourceTree = "<group>";
 		};
 		39F1F6A01D3B90E200FF1C8C = {
