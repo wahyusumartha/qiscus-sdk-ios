@@ -349,12 +349,6 @@ public class QiscusChatVC: UIViewController{
     // MARK: - UI Lifecycle
     override open func viewDidLoad() {
         super.viewDidLoad()
-        self.chatService.delegate = self
-        
-        if self.chatRoom == nil {
-            self.loadData()
-        }
-        
         self.collectionView.register(UINib(nibName: "QChatHeaderCell",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "cellHeader")
         self.collectionView.register(UINib(nibName: "QChatFooterLeft",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: "cellFooterLeft")
         self.collectionView.register(UINib(nibName: "QChatFooterRight",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: "cellFooterRight")
@@ -372,10 +366,16 @@ public class QiscusChatVC: UIViewController{
         self.collectionView.register(UINib(nibName: "QCellFileRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellFileRight")
         self.collectionView.register(UINib(nibName: "QCellContactRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellContactRight")
         
+    }
+    private func firstLoadSetup(){
+        self.chatService.delegate = self
+        self.firstLoad = false
+        
+        
         let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout
         layout?.sectionHeadersPinToVisibleBounds = true
         layout?.sectionFootersPinToVisibleBounds = true
-                
+        
         let resendMenuItem: UIMenuItem = UIMenuItem(title: "Resend", action: #selector(QChatCell.resend))
         let deleteMenuItem: UIMenuItem = UIMenuItem(title: "Delete", action: #selector(QChatCell.deleteComment))
         let replyMenuItem: UIMenuItem = UIMenuItem(title: "Reply", action: #selector(QChatCell.reply))
@@ -425,7 +425,6 @@ public class QiscusChatVC: UIViewController{
             self.navigationController?.navigationBar.isTranslucent = false
             self.defaultNavBarVisibility = self.navigationController!.isNavigationBarHidden
         }
-        self.roomSynced = false
         unreadIndexPath = [IndexPath]()
         bottomButton.isHidden = true
         
@@ -463,6 +462,7 @@ public class QiscusChatVC: UIViewController{
         setupNavigationTitle()
         setupPage()
     }
+    
     override open func viewWillDisappear(_ animated: Bool) {
         self.isPresence = false
         self.dataLoaded = false
@@ -472,7 +472,6 @@ public class QiscusChatVC: UIViewController{
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
         view.endEditing(true)
         
-        self.roomSynced = false
         if let room = self.chatRoom {
             room.unsubscribeRealtimeStatus()
             room.delegate = nil
@@ -484,12 +483,12 @@ public class QiscusChatVC: UIViewController{
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        if firstLoad {
+            self.firstLoadSetup()
+        }
         self.isPresence = true
         if self.chatRoom != nil {
-            //self.subscribeRealtime()
-            
             self.collectionView.reloadData()
-            //self.chatRoom?.updateUnreadCommentCount()
             self.chatRoom?.updateUnreadCommentCount {
                 if self.chatRoom!.unreadCommentCount > 0 {
                     self.isLastRowVisible = false
@@ -554,6 +553,9 @@ public class QiscusChatVC: UIViewController{
     }
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        if self.chatRoom == nil {
+            self.loadData()
+        }
     }
     
     // MARK: - Memory Warning
@@ -642,8 +644,6 @@ public class QiscusChatVC: UIViewController{
         let unlockImage = Qiscus.image(named: "ic_open_archived")?.withRenderingMode(.alwaysTemplate)
         self.unlockButton.setBackgroundImage(unlockImage, for: UIControlState())
         self.unlockButton.tintColor = QiscusColorConfiguration.sharedInstance.lockViewTintColor
-        
-        
         
         
         if inputText.value == "" {
@@ -762,7 +762,7 @@ extension QiscusChatVC:QChatServiceDelegate{
             let delay = 0.5 * Double(NSEC_PER_SEC)
             let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
             let section = self.chatRoom!.commentsGroupCount - 1
-            let row = self.chatRoom!.commentGroup(index: section)!.commentsCount - 1
+            let row = self.chatRoom!.comments[section].commentsCount - 1
             let indexPath = IndexPath(item: row, section: section)
             self.collectionView.reloadData()
             DispatchQueue.main.asyncAfter(deadline: time, execute: {
@@ -842,8 +842,7 @@ extension QiscusChatVC:QRoomDelegate{
     }
     public func room(didChangeComment section: Int, row: Int, action: String) {
         let indexPath = IndexPath(item: row, section: section)
-        let commentGroup = self.chatRoom!.commentGroup(index: section)!
-        let comment = commentGroup.comment(index: row)!
+        let comment = self.chatRoom!.comments[section].comments[row]
         
         func defaultChange(){
             self.collectionView.reloadItems(at: [indexPath])
@@ -922,8 +921,7 @@ extension QiscusChatVC:QRoomDelegate{
                 self.collectionView.insertSections(indexSet)
             }) { (success) in
                 let indexPath = IndexPath(item: 0, section: onIndex)
-                let commentGroup = self.chatRoom!.commentGroup(index: onIndex)!
-                let comment = commentGroup.comment(index: 0)!
+                let comment = self.chatRoom!.comments[onIndex].comments[0]
                 let email = comment.senderEmail
                 if (success && self.isLastRowVisible) || email == QiscusMe.sharedInstance.email {
                     self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
@@ -938,8 +936,7 @@ extension QiscusChatVC:QRoomDelegate{
     public func room(gotNewCommentOn groupIndex: Int, withCommentIndex index: Int) {
         if self.dataLoaded {
             let indexPath = IndexPath(item: index, section: groupIndex)
-            let commentGroup = self.chatRoom!.commentGroup(index: groupIndex)!
-            let comment = commentGroup.comment(index: index)!
+            let comment = self.chatRoom!.comments[groupIndex].comments[index]
             let email = comment.senderEmail
             if index == 0 && groupIndex == 0 {
                 self.loadMoreControl.endRefreshing()

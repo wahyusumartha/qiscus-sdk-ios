@@ -52,7 +52,7 @@ public class QRoom:Object {
     private dynamic var lastParticipantsReadId:Int = 0
     private dynamic var lastParticipantsDeliveredId:Int = 0
     
-    private let comments = List<QCommentGroup>()
+    internal let comments = List<QCommentGroup>()
     public let participants = List<QParticipant>()
     
     public var delegate:QRoomDelegate?
