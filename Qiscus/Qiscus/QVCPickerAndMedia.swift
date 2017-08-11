@@ -113,16 +113,18 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                 
                 data = UIImageJPEGRepresentation(image, compressVal)!
             }
-            let text = QiscusTextConfiguration.sharedInstance.confirmationImageUploadText
-            let okText = QiscusTextConfiguration.sharedInstance.alertOkText
-            let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
-            
-            QPopUpView.showAlert(withTarget: self, image: image, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
-            doneAction: {
-                self.postFile(filename: imageName, data: data!, type: .image)
-            },
-            cancelAction: {}
-            )
+            if data != nil {
+                let text = QiscusTextConfiguration.sharedInstance.confirmationImageUploadText
+                let okText = QiscusTextConfiguration.sharedInstance.alertOkText
+                let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
+                
+                QPopUpView.showAlert(withTarget: self, image: image, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
+                doneAction: {
+                    self.postFile(filename: imageName, data: data!, type: .image)
+                },
+                cancelAction: {}
+                )
+            }
         }else if fileType == "public.movie" {
             let mediaURL = info[UIImagePickerControllerMediaURL] as! URL
             let fileName = mediaURL.lastPathComponent
