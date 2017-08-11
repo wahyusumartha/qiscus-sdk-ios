@@ -350,10 +350,10 @@ public class QRoom:Object {
                 lastComment.append(comment: newComment)
                 
                 self.delegate?.room(gotNewCommentOn: self.comments.count - 1, withCommentIndex: lastComment.commentsCount - 1)
+                self.updateUnreadCommentCount()
                 DispatchQueue.main.async {
                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                         roomDelegate.gotNewComment(newComment)
-                        self.updateUnreadCommentCount()
                     }
                 }
                 let section = self.comments.count - 1
@@ -382,10 +382,10 @@ public class QRoom:Object {
                     self.comments.append(commentGroup)
                 }
                 self.delegate?.room(gotNewGroupComment: self.comments.count - 1)
+                self.updateUnreadCommentCount()
                 DispatchQueue.main.async {
                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                         roomDelegate.gotNewComment(newComment)
-                        self.updateUnreadCommentCount()
                     }
                 }
                 
