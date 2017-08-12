@@ -510,6 +510,7 @@ public class QiscusChatVC: UIViewController{
             self.chatRoom!.subscribeRealtimeStatus()
             self.chatRoom!.sync()
         }else{
+            self.collectionView.isHidden = true
             self.showLoading("Load data ...")
         }
         if self.defaultBack {
@@ -768,26 +769,26 @@ extension QiscusChatVC:QChatServiceDelegate{
             self.collectionView.reloadData()
             DispatchQueue.main.asyncAfter(deadline: time, execute: {
                 self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
-                self.subscribeRealtime()
                 self.dismissLoading()
                 self.dataLoaded = true
+                self.collectionView.isHidden = false
             })
-            if self.chatMessage != nil && self.chatMessage != "" {
-                let newMessage = self.chatRoom!.newComment(text: self.chatMessage!)
-                self.chatRoom!.post(comment: newMessage)
-                self.chatMessage = nil
-            }
+            
         }else{
             let delay = 0.5 * Double(NSEC_PER_SEC)
             let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
             DispatchQueue.main.asyncAfter(deadline: time, execute: {
-                self.subscribeRealtime()
                 self.dismissLoading()
                 self.dataLoaded = true
+                self.collectionView.isHidden = false
             })
         }
         Qiscus.shared.chatViews[inRoom.id] = self
-        
+        if self.chatMessage != nil && self.chatMessage != "" {
+            let newMessage = self.chatRoom!.newComment(text: self.chatMessage!)
+            self.chatRoom!.post(comment: newMessage)
+            self.chatMessage = nil
+        }
     }
     public func chatService(didFailLoadRoom error: String) {
         let delay = 1.5 * Double(NSEC_PER_SEC)
