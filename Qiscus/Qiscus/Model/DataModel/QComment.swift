@@ -452,7 +452,6 @@ public class QComment:Object {
     public func updateStatus(status:QCommentStatus){
         
         if self.status != status && (self.statusRaw < status.rawValue || self.status == .failed){
-            print("status changed: \(self.statusRaw) ::: \(status.rawValue)")
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
                 self.statusRaw = status.rawValue
