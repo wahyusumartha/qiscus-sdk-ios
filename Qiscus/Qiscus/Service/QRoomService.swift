@@ -10,7 +10,6 @@ import Foundation
 import SwiftyJSON
 import Alamofire
 import AlamofireImage
-import RealmSwift
 import AVFoundation
 
 public class QRoomService:NSObject{    
@@ -107,28 +106,18 @@ public class QRoomService:NSObject{
                         let results = json["results"]
                         let error = json["error"]
                         
-                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                         if results != JSON.null{
                             Qiscus.printLog(text: "getListComment with user response: \(responseData)")
                             let changed = json["results"]["changed"].boolValue
                             if changed {
-                                if roomName != nil && roomName != room.name {
-                                    try! realm.write {
-                                        room.name = roomName!
-                                    }
-                                    room.delegate?.room(didChangeName: room)
+                                if let name = roomName{
+                                    room.update(name: name)
                                 }
-                                if roomAvatarURL != nil && room.avatarURL != roomAvatarURL {
-                                    try! realm.write {
-                                        room.avatarURL = roomAvatarURL!
-                                        room.avatarLocalPath = ""
-                                    }
-                                    room.delegate?.room(didChangeAvatar: room)
+                                if let avatarURL = roomAvatarURL {
+                                    room.update(avatarURL: avatarURL)
                                 }
-                                if roomOptions != nil && room.data != roomOptions {
-                                    try! realm.write {
-                                        room.data = roomOptions!
-                                    }
+                                if let roomData = roomOptions {
+                                    room.update(data: roomData)
                                 }
                                 onSuccess(room)
                             }else{
@@ -169,16 +158,10 @@ public class QRoomService:NSObject{
                 if let response = responseData.result.value {
                     Qiscus.printLog(text: "publish message status result: \(response)")
                     if let participant = QParticipant.participant(inRoomWithId: room.id, andEmail: QiscusMe.sharedInstance.email) {
-                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                         if status == .delivered {
-                            try! realm.write {
-                                participant.lastDeliveredCommentId = lastCommentId
-                            }
+                            participant.updateLastDeliveredId(commentId: lastCommentId)
                         }else{
-                            try! realm.write {
-                                participant.lastReadCommentId = lastCommentId
-                                participant.lastDeliveredCommentId = lastCommentId
-                            }
+                            participant.updateLastReadId(commentId: lastCommentId)
                         }
                     }
                 }else{
@@ -222,11 +205,8 @@ public class QRoomService:NSObject{
                         let commentId = commentJSON["id"].intValue
                         let commentBeforeId = commentJSON["comment_before_id"].intValue
                         
-                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-                        try! realm.write {
-                            comment.id = commentId
-                            comment.beforeId = commentBeforeId
-                        }
+                        comment.update(commentId: commentId, beforeId: commentBeforeId)
+                        
                         if let room = QRoom.room(withId: roomId){
                             if comment.status == QCommentStatus.sending || comment.status == QCommentStatus.failed {
                                     room.updateCommentStatus(inComment: comment, status: .sent)
@@ -368,7 +348,6 @@ public class QRoomService:NSObject{
     }
     public func uploadCommentFile(inRoom room:QRoom, comment:QComment, onSuccess:  @escaping (QRoom, QComment)->Void, onError:  @escaping (QRoom,QComment,String)->Void){
         if let file = comment.file {
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             do {
                 //print("file.localPath: \(file.localPath)")
                 let data = try Data(contentsOf: URL(string: "file://\(file.localPath)")!)
@@ -394,10 +373,8 @@ public class QRoomService:NSObject{
                             if let jsonData = response.result.value {
                                 let json = JSON(jsonData)
                                 if let url = json["url"].string {
-                                    try! realm.write {
-                                        comment.text = "[file]\(url) [/file]"
-                                        file.url = url
-                                    }
+                                    file.update(fileURL: url)
+                                    comment.update(text: "[file]\(url) [/file]")
                                     comment.updateUploading(uploading: false)
                                     comment.updateProgress(progress: 1)
                                     room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadFinish")
@@ -407,10 +384,8 @@ public class QRoomService:NSObject{
                                     if jsonData["file"].count > 0 {
                                         let fileData = jsonData["file"]
                                         if let url = fileData["url"].string {
-                                            try! realm.write {
-                                                comment.text = "[file]\(url) [/file]"
-                                                file.url = url
-                                            }
+                                            file.update(fileURL: url)
+                                            comment.update(text: "[file]\(url) [/file]")
                                             comment.updateUploading(uploading: false)
                                             comment.updateProgress(progress: 1)
                                             room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadFinish")

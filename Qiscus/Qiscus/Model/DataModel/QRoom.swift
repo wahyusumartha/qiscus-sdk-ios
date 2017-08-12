@@ -296,7 +296,7 @@ public class QRoom:Object {
             commentGroup.senderEmail = newComment.senderEmail
             commentGroup.senderName = newComment.senderName
             commentGroup.createdAt = newComment.createdAt
-            commentGroup.id = "\(self.id):::\(newComment.senderEmail):::\(newComment.uniqueId)"
+            commentGroup.id = "\(newComment.uniqueId)"
             commentGroup.append(comment: newComment)
             try! realm.write {
                 self.comments.append(commentGroup)
@@ -337,7 +337,7 @@ public class QRoom:Object {
                 commentGroup.senderEmail = newComment.senderEmail
                 commentGroup.senderName = newComment.senderName
                 commentGroup.createdAt = newComment.createdAt
-                commentGroup.id = "\(self.id):::\(newComment.senderEmail):::\(newComment.uniqueId)"
+                commentGroup.id = "\(newComment.uniqueId)"
                 commentGroup.append(comment: newComment)
                 try! realm.write {
                     self.comments.insert(commentGroup, at: 0)
@@ -376,7 +376,7 @@ public class QRoom:Object {
                 commentGroup.senderEmail = newComment.senderEmail
                 commentGroup.senderName = newComment.senderName
                 commentGroup.createdAt = newComment.createdAt
-                commentGroup.id = "\(self.id):::\(newComment.senderEmail):::\(newComment.uniqueId)"
+                commentGroup.id = "\(newComment.uniqueId)"
                 commentGroup.append(comment: newComment)
                 try! realm.write {
                     self.comments.append(commentGroup)
@@ -391,6 +391,7 @@ public class QRoom:Object {
                 
             }
         }
+        QComment.cache[newComment.uniqueId] = newComment
     }
     
     // MARK: - Public Object method
@@ -497,27 +498,13 @@ public class QRoom:Object {
                 oldComment.createdAt = commentCreatedAt
                 oldComment.beforeId = commentBeforeId
             }
-            if oldComment.statusRaw < QCommentStatus.sent.rawValue{
-                var status = QCommentStatus.sent
-                if oldComment.id < self.lastParticipantsReadId {
-                    status = .read
-                }else if oldComment.id < self.lastParticipantsDeliveredId{
-                    status = .delivered
-                }
-                oldComment.updateStatus(status: status)
-                
-                var section = 0
-                for commentGroup in self.comments{
-                    for row in 0...(commentGroup.commentsCount - 1) {
-                        let commentTarget = commentGroup.comment(index: row)!
-                        if commentTarget.uniqueId == oldComment.uniqueId{
-                            self.delegate?.room(didChangeComment: section, row: row, action: "status")
-                            break
-                        }
-                    }
-                    section += 1
-                }
+            var status = QCommentStatus.sent
+            if oldComment.id < self.lastParticipantsReadId {
+                status = .read
+            }else if oldComment.id < self.lastParticipantsDeliveredId{
+                status = .delivered
             }
+            oldComment.updateStatus(status: status)
         }else{
             let newComment = QComment()
             newComment.uniqueId = commentUniqueId
@@ -905,7 +892,6 @@ public class QRoom:Object {
             realm.add(file, update: true)
         }
         self.addComment(newComment: comment)
-        
         return comment
     }
     public func newComment(text:String, payload:JSON? = nil, type:QCommentType = .text, data:Data? = nil, image:UIImage? = nil, filename:String = "", filePath:URL? = nil )->QComment{
@@ -929,7 +915,6 @@ public class QRoom:Object {
         }
             
         self.addComment(newComment: comment)
-        
         return comment
     }
     public func postTextMessage(text:String){
@@ -949,7 +934,6 @@ public class QRoom:Object {
         comment.typeRaw = QCommentType.text.name()
         
         self.addComment(newComment: comment)
-        
         self.post(comment: comment)
     }
     public func post(comment:QComment, type:String? = nil, payload:JSON? = nil){
@@ -1215,6 +1199,33 @@ public class QRoom:Object {
         DispatchQueue.global().async {
             for channel in channels{
                 Qiscus.shared.mqtt?.unsubscribe(channel)
+            }
+        }
+    }
+    internal func update(name:String){
+        if self.name != name {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.name = name
+            }
+            self.delegate?.room(didChangeName: self)
+        }
+    }
+    internal func update(avatarURL:String){
+        if self.avatarURL != avatarURL {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.avatarURL = avatarURL
+                self.avatarLocalPath = ""
+            }
+            self.delegate?.room(didChangeAvatar: self)
+        }
+    }
+    internal func update(data:String){
+        if self.data != data {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.data = data
             }
         }
     }

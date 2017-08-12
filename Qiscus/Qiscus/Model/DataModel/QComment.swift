@@ -205,6 +205,7 @@ public class QComment:Object {
             }
         }
     }
+    
     public var time: String {
         get {
             let date = Date(timeIntervalSince1970: self.createdAt)
@@ -449,18 +450,20 @@ public class QComment:Object {
     
     // MARK : updater method
     public func updateStatus(status:QCommentStatus){
-        if self.status != status {
+        
+        if self.status != status && (self.statusRaw < status.rawValue || self.status == .failed){
+            print("status changed: \(self.statusRaw) ::: \(status.rawValue)")
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
                 self.statusRaw = status.rawValue
             }
-            var delay = 0.1 * Double(NSEC_PER_SEC)
-            if status == .sent {
-                delay =  1.0 * Double(NSEC_PER_SEC)
-            }
+            let delay = 0.4 * Double(NSEC_PER_SEC)
+            
             let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
             DispatchQueue.main.asyncAfter(deadline: time, execute: {
-                self.delegate?.comment(didChangeStatus: status)
+                if let cache = QComment.cache[self.uniqueId] {
+                    cache.delegate?.comment(didChangeStatus: status)
+                }
             })
         }
     }
@@ -631,5 +634,20 @@ public class QComment:Object {
             break
         }
         return temp
+    }
+    internal func update(commentId:Int, beforeId:Int){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        try! realm.write {
+            self.id = commentId
+            self.beforeId = beforeId
+        }
+    }
+    internal func update(text:String){
+        if self.text != text {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.text = text
+            }
+        }
     }
 }

@@ -10,7 +10,6 @@ import Foundation
 import Alamofire
 import SwiftyJSON
 
-
 @objc public protocol QChatServiceDelegate {
     func chatService(didFinishLoadRoom inRoom:QRoom, withMessage message:String?)
     func chatService(didFailLoadRoom error:String)
@@ -514,14 +513,20 @@ public class QChatService:NSObject {
                         let comments = json["results"]["comments"].arrayValue
                         if comments.count > 0 {
                             for newComment in comments.reversed() {
+                                print("sync result: \(newComment)")
                                 let roomId = newComment["room_id"].intValue
                                 let id = newComment["id"].intValue
-                                
+                                let type = newComment["type"].string
                                 if id > QiscusMe.sharedInstance.lastCommentId {
                                     DispatchQueue.main.async(execute: { 
                                         if let room = QRoom.room(withId: roomId){
                                             room.saveNewComment(fromJSON: newComment)
-                                            QiscusMe.updateLastCommentId(commentId: id)
+                                            if id > QiscusMe.sharedInstance.lastCommentId{
+                                                if type == "system_event" {
+                                                    room.sync()
+                                                }
+                                                QiscusMe.updateLastCommentId(commentId: id)
+                                            }
                                         }else{
                                             if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                                                 let comment = QComment.tempComment(fromJSON: newComment)

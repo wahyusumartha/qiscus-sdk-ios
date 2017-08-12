@@ -174,4 +174,12 @@ public class QFile:Object{
             self.localThumbPath = localPath
         }
     }
+    internal func update(fileURL:String){
+        if self.url != fileURL {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.url = fileURL
+            }
+        }
+    }
 }
