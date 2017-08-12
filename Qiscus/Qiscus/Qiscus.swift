@@ -122,6 +122,14 @@ import CocoaMQTT
         Qiscus.shared.mqtt?.disconnect()
         Qiscus.unRegisterPN()
         QiscusMe.clear()
+    }
+    @objc public class func clearData(){
+        Qiscus.chatRooms = [Int : QRoom]()
+        QCommentGroup.cache = [String : QCommentGroup]()
+        QComment.cache = [String : QComment]()
+        QUser.cache = [String: QUser]()
+        Qiscus.shared.chatViews = [Int:QiscusChatVC]()
+        
         Qiscus.dbConfiguration.deleteRealmIfMigrationNeeded = true
         Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
@@ -129,19 +137,6 @@ import CocoaMQTT
             realm.deleteAll()
         }
         Qiscus.deleteAllFiles()
-        Qiscus.shared.chatViews = [Int:QiscusChatVC]()
-    }
-    @objc public class func clearData(){
-        Qiscus.chatRooms = [Int : QRoom]()
-        QCommentGroup.cache = [String : QCommentGroup]()
-        QComment.cache = [String : QComment]()
-        QUser.cache = [String: QUser]()
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        try! realm.write {
-            realm.deleteAll()
-        }
-        Qiscus.deleteAllFiles()
-        Qiscus.shared.chatViews = [Int:QiscusChatVC]()
     }
     @objc public class func unRegisterPN(){
         if Qiscus.isLoggedIn {
