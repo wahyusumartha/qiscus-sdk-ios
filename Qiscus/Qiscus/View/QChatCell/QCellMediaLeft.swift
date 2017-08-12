@@ -179,8 +179,8 @@ class QCellMediaLeft: QChatCell {
     }
     public override func downloadFinished() {
         if let file = self.comment!.file {
-            if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
-                imageDisplay.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
+            if QFileManager.isFileExist(inLocalPath: file.localPath){
+                imageDisplay.loadAsync(fromLocalPath: file.localPath, onLoaded: { (image, _) in
                     self.imageDisplay.image = image
                     self.comment!.displayImage = image
                 })

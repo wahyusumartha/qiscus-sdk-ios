@@ -23,8 +23,17 @@ public class QParticipant:Object {
     // MARK: - Getter variable
     public var user:QUser? {
         get{
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            return realm.object(ofType: QUser.self, forPrimaryKey: self.email)
+            if let cache = QUser.cache[self.email] {
+                return cache
+            }else{
+                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                if let result = realm.object(ofType: QUser.self, forPrimaryKey: self.email) {
+                    QUser.cache[self.email] = result
+                    return result
+                }else{
+                    return nil
+                }
+            }
         }
     }
     public class func participant(inRoomWithId roomId:Int, andEmail email: String)->QParticipant?{

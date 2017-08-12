@@ -32,8 +32,17 @@ public class QCommentGroup: Object{
     }
     public var sender:QUser? {
         get{
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            return realm.object(ofType: QUser.self, forPrimaryKey: self.senderEmail)
+            if let cache = QUser.cache[self.senderEmail] {
+                return cache
+            }else{
+                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                if let result = realm.object(ofType: QUser.self, forPrimaryKey: self.senderEmail) {
+                    QUser.cache[self.senderEmail] = result
+                    return result
+                }else{
+                    return nil
+                }
+            }
         }
     }
     public var date:String{
