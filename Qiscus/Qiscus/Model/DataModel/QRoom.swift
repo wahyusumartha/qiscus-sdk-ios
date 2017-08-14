@@ -1230,10 +1230,10 @@ public class QRoom:Object {
             }
         }
     }
-    internal func delete(){
+    internal class func deleteRoom(room:QRoom){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         try! realm.write {
-            self.delete()
+            realm.delete(room)
         }
     }
 }

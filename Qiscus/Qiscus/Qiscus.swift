@@ -934,7 +934,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                     
                                     if let room = QRoom.room(withId: roomId){
                                         Qiscus.chatRooms[roomId] = nil
-                                        room.delete()
+                                        QRoom.deleteRoom(room: room)
                                     }
                                 }
                             }
