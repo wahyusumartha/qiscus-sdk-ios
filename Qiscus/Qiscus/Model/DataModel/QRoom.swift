@@ -1232,6 +1232,29 @@ public class QRoom:Object {
     }
     internal class func deleteRoom(room:QRoom){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        for group in room.comments {
+            for item in 0...(group.commentsCount - 1){
+                if let comment = group.comment(index: item) {
+                    QComment.cache[comment.uniqueId] = nil
+                    try! realm.write {
+                        realm.delete(comment)
+                    }
+                }
+            }
+            QCommentGroup.cache[group.id] = nil
+            try! realm.write {
+                realm.delete(group)
+            }
+        }
+        for participant in room.participants {
+            let id = "\(room.id)_\(participant.email)"
+            if let data = QParticipant.participant(inRoomWithId: room.id, andEmail: participant.email) {
+                QParticipant.cache[id] = nil
+                try! realm.write {
+                    realm.delete(data)
+                }
+            }
+        }
         try! realm.write {
             realm.delete(room)
         }
