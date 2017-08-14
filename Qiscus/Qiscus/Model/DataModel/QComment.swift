@@ -106,6 +106,11 @@ public class QComment:Object {
     public dynamic var data:String = ""
     public dynamic var cellPosRaw:Int = 0
     
+    private dynamic var cellWidth:Float = 0
+    private dynamic var cellHeight:Float = 0
+    internal dynamic var textFontName:String = ""
+    internal dynamic var textFontSize:Float = 0
+    
     // MARK : - Ignored Parameters
     var displayImage:UIImage?
     public var delegate:QCommentDelegate?
@@ -126,6 +131,7 @@ public class QComment:Object {
     }
     
     //MARK : - Getter variable
+    
     private var linkTextAttributes:[String: Any]{
         get{
             var foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor
@@ -208,7 +214,7 @@ public class QComment:Object {
             case .file:
                 return "cellFile\(position)"
             case .contact:
-                return "cellContact\(position)"
+                return "cellContactRight"
             default:
                 return "cellText\(position)"
             }
@@ -226,37 +232,60 @@ public class QComment:Object {
         }
     }
     public var textSize:CGSize {
-        let textView = UITextView()
-        textView.font = Qiscus.style.chatFont
-        textView.dataDetectorTypes = .all
-        textView.linkTextAttributes = self.linkTextAttributes
+        var recalculate = false
         
-        let maxWidth:CGFloat = QiscusUIConfiguration.chatTextMaxWidth
-        textView.attributedText = attributedText
-        
-        var size = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
-        
-        if self.type == .postback && self.data != ""{
+        func recalculateSize()->CGSize{
+            let textView = UITextView()
+            textView.font = Qiscus.style.chatFont
+            textView.dataDetectorTypes = .all
+            textView.linkTextAttributes = self.linkTextAttributes
             
-            let payload = JSON(parseJSON: self.data)
+            let maxWidth:CGFloat = QiscusUIConfiguration.chatTextMaxWidth
+            textView.attributedText = attributedText
             
-            if let buttonsPayload = payload.array {
-                let heightAdd = CGFloat(35 * buttonsPayload.count)
-                size.height += heightAdd
-            }else{
+            var size = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
+            
+            if self.type == .postback && self.data != ""{
+                
+                let payload = JSON(parseJSON: self.data)
+                
+                if let buttonsPayload = payload.array {
+                    let heightAdd = CGFloat(35 * buttonsPayload.count)
+                    size.height += heightAdd
+                }else{
+                    size.height += 35
+                }
+            }else if self.type == .account && self.data != ""{
                 size.height += 35
+            }else if self.type == .card {
+                let payload = JSON(parseJSON: self.data)
+                let buttons = payload["buttons"].arrayValue
+                size.height = CGFloat(240 + (buttons.count * 45)) + 5
+            }else if self.type == .contact {
+                size.height = 93
             }
-        }else if self.type == .account && self.data != ""{
-            size.height += 35
-        }else if self.type == .card {
-            let payload = JSON(parseJSON: self.data)
-            let buttons = payload["buttons"].arrayValue
-            size.height = CGFloat(240 + (buttons.count * 45)) + 5
-        }else if self.type == .contact {
-            size.height = 93
+            return size
         }
-        
-        return size
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        if Float(Qiscus.style.chatFont.pointSize) != self.textFontSize || Qiscus.style.chatFont.familyName != self.textFontName{
+            recalculate = true
+            try! realm.write {
+                self.textFontSize = Float(Qiscus.style.chatFont.pointSize)
+                self.textFontName = Qiscus.style.chatFont.familyName
+            }
+        }else if self.cellWidth == 0 || self.cellHeight == 0 {
+            recalculate = true
+        }
+        if recalculate {
+            let newSize = recalculateSize()
+            try! realm.write {
+                self.cellHeight = Float(newSize.height)
+                self.cellWidth = Float(newSize.width)
+            }
+            return newSize
+        }else{
+            return CGSize(width: CGFloat(self.cellWidth), height: CGFloat(self.cellHeight))
+        }
     }
     
     var textAttribute:[String: Any]{
@@ -326,6 +355,7 @@ public class QComment:Object {
             return comment
         }else{
             if let comment =  realm.object(ofType: QComment.self, forPrimaryKey: uniqueId) {
+                let _ = comment.textSize
                 QComment.cache[uniqueId] = comment
                 return QComment.cache[uniqueId]
             }
@@ -580,7 +610,7 @@ public class QComment:Object {
         
         switch commentType {
         case "contact":
-            temp.data = "\(json["payload"]["buttons"])"
+            temp.data = "\(json["payload"])"
             temp.typeRaw = QCommentType.contact.name()
             break
         case "buttons":
