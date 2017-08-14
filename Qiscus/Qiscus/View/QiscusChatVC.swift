@@ -472,10 +472,6 @@ public class QiscusChatVC: UIViewController{
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
         view.endEditing(true)
         
-        if let room = self.chatRoom {
-            room.unsubscribeRealtimeStatus()
-            room.delegate = nil
-        }
         self.dismissLoading()
     }
     override open func viewDidDisappear(_ animated: Bool) {
@@ -708,6 +704,10 @@ public class QiscusChatVC: UIViewController{
     func goBack() {
         self.isPresence = false
         view.endEditing(true)
+        if let room = self.chatRoom {
+            room.unsubscribeRealtimeStatus()
+            room.delegate = nil
+        }
         if self.backAction != nil{
             self.backAction!()
         }else{
