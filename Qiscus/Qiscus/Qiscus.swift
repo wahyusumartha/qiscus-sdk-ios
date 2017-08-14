@@ -925,6 +925,17 @@ extension Qiscus:CocoaMQTTDelegate{
                                         let comment = QComment.tempComment(fromJSON: json)
                                         roomDelegate.gotNewComment(comment)
                                     }
+                                    if let chatView = Qiscus.shared.chatViews[roomId] {
+                                        if chatView.isPresence {
+                                            chatView.goBack()
+                                        }
+                                        Qiscus.shared.chatViews[roomId] = nil
+                                    }
+                                    
+                                    if let room = QRoom.room(withId: roomId){
+                                        Qiscus.chatRooms[roomId] = nil
+                                        room.delete()
+                                    }
                                 }
                             }
                         }else{

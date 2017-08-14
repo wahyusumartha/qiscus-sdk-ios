@@ -1230,4 +1230,10 @@ public class QRoom:Object {
             }
         }
     }
+    internal func delete(){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        try! realm.write {
+            self.delete()
+        }
+    }
 }
