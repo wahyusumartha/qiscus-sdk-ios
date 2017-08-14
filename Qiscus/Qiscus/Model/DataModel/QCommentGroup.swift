@@ -88,6 +88,9 @@ public class QCommentGroup: Object{
         }else{
             self.comments.append(comment)
         }
+        if QComment.cache[comment.uniqueId] == nil {
+            QComment.cache[comment.uniqueId] = comment
+        }
     }
     public func insert(comment:QComment, at:Int){
         if let group = QCommentGroup.commentGroup(withId: self.id){
@@ -97,6 +100,9 @@ public class QCommentGroup: Object{
             }
         }else{
             self.comments.insert(comment, at: at)
+        }
+        if QComment.cache[comment.uniqueId] == nil {
+            QComment.cache[comment.uniqueId] = comment
         }
     }
 }

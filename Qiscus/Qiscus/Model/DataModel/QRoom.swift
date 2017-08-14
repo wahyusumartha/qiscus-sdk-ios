@@ -302,6 +302,7 @@ public class QRoom:Object {
             try! realm.write {
                 self.comments.append(commentGroup)
             }
+            QCommentGroup.cache["\(newComment.uniqueId)"] = commentGroup
             if !onTop {
                 self.delegate?.room(gotNewGroupComment: 0)
                 DispatchQueue.main.async {
@@ -343,14 +344,15 @@ public class QRoom:Object {
                 try! realm.write {
                     self.comments.insert(commentGroup, at: 0)
                 }
+                QCommentGroup.cache[newComment.uniqueId] = commentGroup
             }
         }else{
-            let lastComment = self.comments.last!
+            let lastComment = self.commentGroup(index: self.commentsGroupCount - 1)!
             if lastComment.date == newComment.date && lastComment.senderEmail == newComment.senderEmail && newComment.type != .system{
                 newComment.cellPosRaw = QCellPosition.last.rawValue
                 lastComment.append(comment: newComment)
                 
-                self.delegate?.room(gotNewCommentOn: self.comments.count - 1, withCommentIndex: lastComment.commentsCount - 1)
+                self.delegate?.room(gotNewCommentOn: self.commentsGroupCount - 1, withCommentIndex: lastComment.commentsCount - 1)
                 self.updateUnreadCommentCount()
                 DispatchQueue.main.async {
                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
@@ -382,7 +384,8 @@ public class QRoom:Object {
                 try! realm.write {
                     self.comments.append(commentGroup)
                 }
-                self.delegate?.room(gotNewGroupComment: self.comments.count - 1)
+                QCommentGroup.cache[newComment.uniqueId] = commentGroup
+                self.delegate?.room(gotNewGroupComment: self.commentsGroupCount - 1)
                 self.updateUnreadCommentCount()
                 DispatchQueue.main.async {
                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
@@ -392,7 +395,6 @@ public class QRoom:Object {
                 
             }
         }
-        QComment.cache[newComment.uniqueId] = newComment
     }
     
     // MARK: - Public Object method
