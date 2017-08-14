@@ -12,5 +12,5 @@ public class QCommentInfo: NSObject {
     public var comment:QComment?
     public var deliveredUser = [QParticipant]()
     public var readUser = [QParticipant]()
-    
+    public var undeliveredUser = [QParticipant]()
 }
