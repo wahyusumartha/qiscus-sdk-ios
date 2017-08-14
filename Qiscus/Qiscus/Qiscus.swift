@@ -917,6 +917,16 @@ extension Qiscus:CocoaMQTTDelegate{
                         if commentId > QiscusMe.sharedInstance.lastCommentId {
                             let service = QChatService()
                             service.sync()
+                            let commentType = json["type"].stringValue
+                            if commentType == "system_event" {
+                                let payload = json["payload"]
+                                if payload["type"].stringValue == "remove_member" && payload["object_email"].stringValue == QiscusMe.sharedInstance.email{
+                                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                                        let comment = QComment.tempComment(fromJSON: json)
+                                        roomDelegate.gotNewComment(comment)
+                                    }
+                                }
+                            }
                         }else{
                             let uniqueId = json["unique_temp_id"].stringValue
                             if let room = QRoom.room(withId: roomId) {
