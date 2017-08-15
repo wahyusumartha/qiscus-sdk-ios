@@ -1261,4 +1261,18 @@ public class QRoom:Object {
             realm.delete(room)
         }
     }
+    public func comment(onIndexPath indexPath:IndexPath)->QComment?{
+        if self.comments.count > indexPath.section && self.comments[indexPath.section].commentsCount > indexPath.row{
+            let comment = self.comments[indexPath.section].comments[indexPath.row]
+            if let cache = QComment.cache[comment.uniqueId]{
+                return cache
+            }
+            else{
+                QComment.cache[comment.uniqueId] = comment
+                return comment
+            }
+        }else{
+            return nil
+        }
+    }
 }
