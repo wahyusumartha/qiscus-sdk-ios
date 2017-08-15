@@ -31,30 +31,19 @@ class QChatFooterLeft: UICollectionReusableView {
                     if let fullName = sender.fullname.characters.first{
                         avatarLabel.text = String(fullName).uppercased()
                     }
-                    if QFileManager.isFileExist(inLocalPath: user!.avatarLocalPath){
-                        if let cachedImage = UIImage.cachedImage(withPath: sender.avatarLocalPath){
-                            if sender.email == self.user!.email {
-                                self.avatarLabel.isHidden = true
-                                self.avatarImage.image = cachedImage
-                                self.avatarImage.backgroundColor = UIColor.clear
-                            }
-                        }else{
-                            avatarImage.loadAsync(fromLocalPath: user!.avatarLocalPath, onLoaded: { (image, _) in
-                                if sender.email == self.user!.email {
-                                    self.avatarLabel.isHidden = true
-                                    self.avatarImage.image = image
-                                    self.avatarImage.backgroundColor = UIColor.clear
-                                }
-                            })
-                        }
+                    if QFileManager.isFileExist(inLocalPath: sender.avatarLocalPath){
+                        UIImage.loadAsync(fromLocalPath: sender.avatarLocalPath, onSuccess: { image in
+                            sender.avatar = image
+                        },
+                        onError: {
+                            sender.clearLocalPath()
+                        })
                     }else{
-                        if let cachedImage = UIImage.cachedImage(withPath: sender.avatarURL){
-                            sender.saveAvatar(withImage: cachedImage)
-                        }else{
-                            avatarImage.loadAsync(user!.avatarURL, onLoaded: { (image,_) in
-                                sender.saveAvatar(withImage: image)
-                            })
-                        }
+                        UIImage.loadAsync(url: sender.avatarURL, onSuccess: { (image) in
+                            sender.saveAvatar(withImage: image)
+                        }, onError: {
+                            Qiscus.printLog(text: "can't load user avatar for user: \(sender.fullname)")
+                        })
                     }
                 }
             }else{

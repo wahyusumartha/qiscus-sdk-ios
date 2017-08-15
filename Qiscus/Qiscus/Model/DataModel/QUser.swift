@@ -175,20 +175,24 @@ public class QUser:Object {
     public func saveAvatar(withImage image:UIImage){
         self.avatar = image
         var filename = self.email.replacingOccurrences(of: ".", with: "_").replacingOccurrences(of: "@", with: "_")
-        var ext = "png"
-        var avatarData:Data? = nil
-        if let data = UIImagePNGRepresentation(image) {
-            avatarData = data
-        }else if let data = UIImageJPEGRepresentation(image, 1.0) {
-            avatarData = data
-            ext = "jpg"
-        }
-        filename = "\(filename).\(ext)"
-        if avatarData != nil {
-            let localPath = QFileManager.saveFile(withData: avatarData!, fileName: filename, type: .user)
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            try! realm.write {
-                self.avatarLocalPath = localPath
+        QiscusFileThread.async {
+            var ext = "png"
+            var avatarData:Data? = nil
+            if let data = UIImagePNGRepresentation(image) {
+                avatarData = data
+            }else if let data = UIImageJPEGRepresentation(image, 1.0) {
+                avatarData = data
+                ext = "jpg"
+            }
+            filename = "\(filename).\(ext)"
+            if avatarData != nil {
+                let localPath = QFileManager.saveFile(withData: avatarData!, fileName: filename, type: .user)
+                DispatchQueue.main.async {
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    try! realm.write {
+                        self.avatarLocalPath = localPath
+                    }
+                }
             }
         }
     }
@@ -208,6 +212,12 @@ public class QUser:Object {
             if QUser.cache[user.email] == nil {
                 QUser.cache[user.email] = user
             }
+        }
+    }
+    public func clearLocalPath(){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        try! realm.write {
+            self.avatarLocalPath = ""
         }
     }
 }

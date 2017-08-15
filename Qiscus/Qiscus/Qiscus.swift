@@ -14,6 +14,10 @@ import PushKit
 import UserNotifications
 import CocoaMQTT
 
+var QiscusFileThread = DispatchQueue(label: "com.qiscus.file", attributes: .concurrent)
+var QiscusRequestThread = DispatchQueue(label: "com.qiscus.request", attributes: .concurrent)
+var QiscusUploadThread = DispatchQueue(label: "com.qiscus.upload", attributes: .concurrent)
+
 @objc public class Qiscus: NSObject, PKPushRegistryDelegate, UNUserNotificationCenterDelegate {
     
     static let sharedInstance = Qiscus()
@@ -1070,6 +1074,12 @@ extension Qiscus:CocoaMQTTDelegate{
         }
         return controller
     }
-    
+    public class func cacheData(){
+        QRoom.cacheAll()
+        QCommentGroup.cacheAll()
+        QComment.cacheAll()
+        QUser.cacheAll()
+        QParticipant.cacheAll()
+    }
 }
 

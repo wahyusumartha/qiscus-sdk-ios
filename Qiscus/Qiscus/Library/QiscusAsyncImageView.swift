@@ -10,6 +10,7 @@ import UIKit
 import Foundation
 
 var cache = NSCache<NSString,UIImage>()
+var QAsyncThread = DispatchQueue(label: "com.Qiscus.asyncImage", attributes: .concurrent)
 open class QiscusAsyncImageView: UIImageView {
     
     
@@ -36,7 +37,7 @@ public extension UIImageView {
             returnImage = placeholderImage!
             self.image = returnImage
         }
-        DispatchQueue.global().async {
+        QAsyncThread.async {
             if let image = UIImage(contentsOfFile: localPath){
                 DispatchQueue.main.async {
                     self.image = image
@@ -57,7 +58,7 @@ public extension UIImageView {
         })
     }
     public func loadAsync(fromLocalPath localPath:String, onLoaded: @escaping ((UIImage,AnyObject?)->Void), optionalData:AnyObject? = nil){
-        DispatchQueue.global().async {
+        QAsyncThread.async {
             if let cachedImage = cache.object(forKey: localPath as NSString) {
                 DispatchQueue.main.async {
                     onLoaded(cachedImage,optionalData)
@@ -79,7 +80,7 @@ public extension UIImageView {
     //
     func imageForUrl(url urlString: String, header: [String : String] = [String : String](), useCache:Bool = true, completionHandler:@escaping (_ image: UIImage?, _ url: String) -> ()) {
         
-        DispatchQueue.global().async(execute: {()in
+        QAsyncThread.async {
             
             let image = cache.object(forKey: urlString as NSString)
             
@@ -131,7 +132,7 @@ public extension UIImageView {
                     downloadTask.resume()
                 }
             }
-        })
+        }
     }
 }
 public extension UIImage {

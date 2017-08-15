@@ -17,6 +17,7 @@ class goToChatVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        Qiscus.cacheData()
         self.navigationController?.isNavigationBarHidden = true
         let dismissRecognizer = UITapGestureRecognizer(target: self, action: #selector(goToChatVC.hideKeyboard))
         self.view.addGestureRecognizer(dismissRecognizer)

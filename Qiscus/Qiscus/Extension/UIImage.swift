@@ -8,6 +8,7 @@
 
 import UIKit
 import ImageIO
+var QiscusImageCache = NSCache<NSString,UIImage>()
 
 extension UIImage {
     func localizedImage()->UIImage{
@@ -18,6 +19,74 @@ extension UIImage {
                 return UIImage(cgImage: cgimage, scale: 1, orientation:.upMirrored )
             }else{
                 return self
+            }
+        }
+    }
+    internal class func loadAsync(fromLocalPath localPath:String, onSuccess: @escaping ((UIImage)->Void), onError: @escaping (()->Void)){
+        QiscusRequestThread.async {
+            if localPath != "" {
+                if let cachedImage = cache.object(forKey: localPath as NSString) {
+                    DispatchQueue.main.async {
+                        onSuccess(cachedImage)
+                    }
+                }else if let image = UIImage(contentsOfFile: localPath){
+                    QiscusImageCache.setObject(image, forKey: localPath as NSString)
+                    DispatchQueue.main.async {
+                        onSuccess(image)
+                    }
+                }else{
+                    DispatchQueue.main.async {
+                        onError()
+                    }
+                }
+            }else{
+                DispatchQueue.main.async {
+                    onError()
+                }
+            }
+        }
+    }
+    internal class func loadAsync(url urlString: String, header: [String : String] = [String : String](), onSuccess:@escaping (_ image: UIImage) -> (), onError:@escaping () -> ()){
+        QiscusRequestThread.async {
+            if let image = QiscusImageCache.object(forKey: urlString as NSString) {
+                DispatchQueue.main.async {
+                    onSuccess(image)
+                }
+            }else{
+                if let url = URL(string: urlString){
+                    var urlRequest = URLRequest(url: url)
+                    
+                    for (key, value) in header {
+                        urlRequest.addValue(value, forHTTPHeaderField: key)
+                    }
+                    
+                    let downloadTask = URLSession.shared.dataTask(with: urlRequest, completionHandler: {(data: Data?, response: URLResponse?, error: Error?) -> Void in
+                        
+                        if (error != nil) {
+                            DispatchQueue.main.async {
+                                onError()
+                            }
+                            Qiscus.printLog(text: "[QiscusImage] : \(String(describing: error!))")
+                            return
+                        }
+                        
+                        if let data = data {
+                            if let image = UIImage(data: data) {
+                                QiscusImageCache.setObject(image, forKey: urlString as NSString)
+                                DispatchQueue.main.async {
+                                    onSuccess(image)
+                                }
+                            }else{
+                                DispatchQueue.main.async {
+                                    onError()
+                                }
+                            }
+                            return
+                        }
+                        return ()
+                    })
+                    downloadTask.resume()
+                }
             }
         }
     }

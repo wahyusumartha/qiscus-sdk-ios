@@ -235,192 +235,244 @@ public class QRoomService:NSObject{
     public func downloadMedia(inRoom room: QRoom, comment:QComment, thumbImageRef:UIImage? = nil, isAudioFile:Bool = false){
         let indexPath = room.getIndexPath(ofComment: comment)!
         if let file = comment.file {
-            
             comment.updateDownloading(downloading: true)
             comment.updateProgress(progress: 0)
-            
             room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadProgress")
-            
             let fileURL = file.url.replacingOccurrences(of: " ", with: "%20")
-            Alamofire.request(fileURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil).responseData(completionHandler: { response in
-                Qiscus.printLog(text: "download result: \(response)")
-                if let imageData = response.data {
-                    if !isAudioFile{
-                        if let image = UIImage(data: imageData) {
-                            var thumbImage = UIImage()
-                            if !(file.ext == "gif" || file.ext == "gif_"){
-                                thumbImage = QFile.createThumbImage(image, fillImageSize: thumbImageRef)
+            let ext = file.ext
+            let localPath = file.localPath
+            
+            QiscusRequestThread.async {
+                Alamofire.request(fileURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil).responseData(completionHandler: { response in
+                    Qiscus.printLog(text: "download result: \(response)")
+                    switch response.result {
+                    case .success:
+                        if let imageData = response.data {
+                            if !isAudioFile{
+                                if let image = UIImage(data: imageData) {
+                                    var thumbImage = UIImage()
+                                    if !(ext == "gif" || ext == "gif_"){
+                                        thumbImage = QFile.createThumbImage(image, fillImageSize: thumbImageRef)
+                                    }
+                                    
+                                    var fileData = Data()
+                                    if (ext == "png" || ext == "png_") {
+                                        fileData = UIImagePNGRepresentation(image)!
+                                    } else if(ext == "jpg" || ext == "jpg_"){
+                                        fileData = UIImageJPEGRepresentation(image, 1.0)!
+                                    } else if(ext == "gif" || ext == "gif_"){
+                                        fileData = imageData
+                                        thumbImage = image
+                                    }
+                                    
+                                    DispatchQueue.main.async {
+                                        file.saveFile(withData: fileData)
+                                        file.saveThumbImage(withImage: thumbImage)
+                                        
+                                        comment.updateDownloading(downloading: false)
+                                        comment.updateProgress(progress: 1)
+                                        comment.displayImage = thumbImage
+                                        room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
+                                    }
+                                }else{
+                                    let assetMedia = AVURLAsset(url: URL(fileURLWithPath: "\(localPath)"))
+                                    let thumbGenerator = AVAssetImageGenerator(asset: assetMedia)
+                                    thumbGenerator.appliesPreferredTrackTransform = true
+                                    
+                                    let thumbTime = CMTimeMakeWithSeconds(0, 30)
+                                    let maxSize = CGSize(width: QiscusHelper.screenWidth(), height: QiscusHelper.screenWidth())
+                                    thumbGenerator.maximumSize = maxSize
+                                    var thumbImage:UIImage?
+                                    do{
+                                        let thumbRef = try thumbGenerator.copyCGImage(at: thumbTime, actualTime: nil)
+                                        thumbImage = UIImage(cgImage: thumbRef)
+                                    }catch{
+                                        Qiscus.printLog(text: "error creating thumb image")
+                                    }
+                                    
+                                    DispatchQueue.main.async {
+                                        file.saveFile(withData: imageData)
+                                        if thumbImage != nil {
+                                            file.saveThumbImage(withImage: thumbImage!)
+                                        }
+                                        comment.updateProgress(progress: 1)
+                                        comment.updateDownloading(downloading: false)
+                                        room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
+                                    }
+                                }
                             }
-                            
-                            var fileData = Data()
-                            if (file.ext == "png" || file.ext == "png_") {
-                                fileData = UIImagePNGRepresentation(image)!
-                                
-                            } else if(file.ext == "jpg" || file.ext == "jpg_"){
-                                fileData = UIImageJPEGRepresentation(image, 1.0)!
-                            } else if(file.ext == "gif" || file.ext == "gif_"){
-                                fileData = imageData
-                                thumbImage = image
+                            else{
+                                DispatchQueue.main.async {
+                                    file.saveFile(withData: imageData)
+                                    comment.updateDownloading(downloading: false)
+                                    comment.updateProgress(progress: 1)
+                                    
+                                    room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
+                                }
                             }
-                            file.saveFile(withData: fileData)
-                            file.saveThumbImage(withImage: thumbImage)
-                            
+                        }
+                        break
+                    case .failure:
+                        DispatchQueue.main.async {
                             comment.updateDownloading(downloading: false)
                             comment.updateProgress(progress: 1)
-                            comment.displayImage = thumbImage
-                            room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
-                            
-                        }else{
-                            file.saveFile(withData: imageData)
-                            
-                            let assetMedia = AVURLAsset(url: URL(fileURLWithPath: "\(file.localPath)"))
-                            let thumbGenerator = AVAssetImageGenerator(asset: assetMedia)
-                            thumbGenerator.appliesPreferredTrackTransform = true
-                            
-                            let thumbTime = CMTimeMakeWithSeconds(0, 30)
-                            let maxSize = CGSize(width: QiscusHelper.screenWidth(), height: QiscusHelper.screenWidth())
-                            thumbGenerator.maximumSize = maxSize
-                            var thumbImage:UIImage?
-                            do{
-                                let thumbRef = try thumbGenerator.copyCGImage(at: thumbTime, actualTime: nil)
-                                thumbImage = UIImage(cgImage: thumbRef)
-                                file.saveThumbImage(withImage: thumbImage!)
-                            }catch{
-                                Qiscus.printLog(text: "error creating thumb image")
-                            }
-                            
-                            comment.updateProgress(progress: 1)
-                            comment.updateDownloading(downloading: false)
                             room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
                         }
-                    }
-                    else{
-                        file.saveFile(withData: imageData)
-                        comment.updateDownloading(downloading: false)
-                        comment.updateProgress(progress: 1)
                         
-                        room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
+                        break
                     }
-                }
-            }).downloadProgress(closure: { progressData in
-                let progress = CGFloat(progressData.fractionCompleted)
-                comment.updateProgress(progress: progress)
-                comment.updateDownloading(downloading: true)
-                
-                room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadProgress")
-            })
-        }
-    }
-    public func publishStatus(inRoom roomId: Int, commentId:Int, commentStatus:QCommentStatus){
-        if commentStatus == QCommentStatus.delivered || commentStatus == QCommentStatus.read{
-            let loadURL = QiscusConfig.UPDATE_COMMENT_STATUS_URL
-            
-            var parameters:[String : AnyObject] =  [
-                "token" : qiscus.config.USER_TOKEN as AnyObject,
-                "room_id" : roomId as AnyObject,
-                ]
-            
-            if commentStatus == QCommentStatus.delivered{
-                parameters["last_comment_received_id"] = commentId as AnyObject
-            }else{
-                parameters["last_comment_read_id"] = commentId as AnyObject
-            }
-            DispatchQueue.global().async {
-                Alamofire.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
-                    if let response = responseData.result.value {
-                        Qiscus.printLog(text: "publish message response:\n\(response)")
-                        let json = JSON(response)
-                        let results = json["results"]
-                        let error = json["error"]
+                }).downloadProgress(closure: { progressData in
+                    let progress = CGFloat(progressData.fractionCompleted)
+                    
+                    DispatchQueue.main.async {
+                        comment.updateProgress(progress: progress)
+                        comment.updateDownloading(downloading: true)
                         
-                        if results != JSON.null{
-                            Qiscus.printLog(text: "success change comment status on \(commentId) to \(commentStatus.rawValue)")
-                        }else if error != JSON.null{
-                            Qiscus.printLog(text: "error update message status: \(error)")
-                        }
-                    }else{
-                        Qiscus.printLog(text: "error update message status")
+                        room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadProgress")
                     }
                 })
             }
         }
     }
+    public func publishStatus(inRoom roomId: Int, commentId:Int, commentStatus:QCommentStatus){
+        if commentStatus == QCommentStatus.delivered || commentStatus == QCommentStatus.read{
+            QiscusRequestThread.async {
+                let loadURL = QiscusConfig.UPDATE_COMMENT_STATUS_URL
+                
+                var parameters:[String : AnyObject] =  [
+                    "token" : qiscus.config.USER_TOKEN as AnyObject,
+                    "room_id" : roomId as AnyObject,
+                    ]
+                
+                if commentStatus == QCommentStatus.delivered{
+                    parameters["last_comment_received_id"] = commentId as AnyObject
+                }else{
+                    parameters["last_comment_read_id"] = commentId as AnyObject
+                }
+                DispatchQueue.global().async {
+                    Alamofire.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                        if let response = responseData.result.value {
+                            Qiscus.printLog(text: "publish message response:\n\(response)")
+                            let json = JSON(response)
+                            let results = json["results"]
+                            let error = json["error"]
+                            
+                            if results != JSON.null{
+                                Qiscus.printLog(text: "success change comment status on \(commentId) to \(commentStatus.rawValue)")
+                            }else if error != JSON.null{
+                                Qiscus.printLog(text: "error update message status: \(error)")
+                            }
+                        }else{
+                            Qiscus.printLog(text: "error update message status")
+                        }
+                    })
+                }
+            }
+        }
+    }
+    
     public func uploadCommentFile(inRoom room:QRoom, comment:QComment, onSuccess:  @escaping (QRoom, QComment)->Void, onError:  @escaping (QRoom,QComment,String)->Void){
         if let file = comment.file {
+            let localPath = file.localPath
+            let indexPath = room.getIndexPath(ofComment: comment)!
+            let filename = file.filename
+            let mimeType = file.mimeType
+            
             do {
-                //print("file.localPath: \(file.localPath)")
-                let data = try Data(contentsOf: URL(string: "file://\(file.localPath)")!)
-                let headers = QiscusConfig.sharedInstance.requestHeader
-                let indexPath = room.getIndexPath(ofComment: comment)!
-                var urlUpload = URLRequest(url: URL(string: QiscusConfig.UPLOAD_URL)!)
-                if headers.count > 0 {
-                    for (key,value) in headers {
-                        urlUpload.setValue(value, forHTTPHeaderField: key)
+                QiscusUploadThread.async {
+                    let data = try Data(contentsOf: URL(string: "file://\(localPath)")!)
+                    let headers = QiscusConfig.sharedInstance.requestHeader
+                    var urlUpload = URLRequest(url: URL(string: QiscusConfig.UPLOAD_URL)!)
+                    if headers.count > 0 {
+                        for (key,value) in headers {
+                            urlUpload.setValue(value, forHTTPHeaderField: key)
+                        }
                     }
-                }
-                urlUpload.httpMethod = "POST"
-                let filename = file.filename
-                let mimeType = file.mimeType
-                Alamofire.upload(multipartFormData: {formData in
-                    formData.append(data, withName: "file", fileName: filename, mimeType: mimeType)
-                }, with: urlUpload, encodingCompletion: {
-                    encodingResult in
-                    switch encodingResult{
-                    case .success(let upload, _, _):
-                        upload.responseJSON(completionHandler: {response in
-                            Qiscus.printLog(text: "success upload: \(response)")
-                            if let jsonData = response.result.value {
-                                let json = JSON(jsonData)
-                                if let url = json["url"].string {
-                                    file.update(fileURL: url)
-                                    comment.update(text: "[file]\(url) [/file]")
-                                    comment.updateUploading(uploading: false)
-                                    comment.updateProgress(progress: 1)
-                                    room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadFinish")
-                                }
-                                else if json["results"].count > 0 {
-                                    let jsonData = json["results"]
-                                    if jsonData["file"].count > 0 {
-                                        let fileData = jsonData["file"]
-                                        if let url = fileData["url"].string {
+                    urlUpload.httpMethod = "POST"
+                    
+                    Alamofire.upload(multipartFormData: {formData in
+                        formData.append(data, withName: "file", fileName: filename, mimeType: mimeType)
+                    }, with: urlUpload, encodingCompletion: {
+                        encodingResult in
+                        switch encodingResult{
+                        case .success(let upload, _, _):
+                            upload.responseJSON(completionHandler: {response in
+                                Qiscus.printLog(text: "success upload: \(response)")
+                                if let jsonData = response.result.value {
+                                    let json = JSON(jsonData)
+                                    if let url = json["url"].string {
+                                        DispatchQueue.main.async {
                                             file.update(fileURL: url)
                                             comment.update(text: "[file]\(url) [/file]")
                                             comment.updateUploading(uploading: false)
                                             comment.updateProgress(progress: 1)
                                             room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadFinish")
+                                            comment.updateStatus(status: .sent)
+                                            onSuccess(room,comment)
                                         }
                                     }
+                                    else if json["results"].count > 0 {
+                                        let jsonData = json["results"]
+                                        if jsonData["file"].count > 0 {
+                                            let fileData = jsonData["file"]
+                                            if let url = fileData["url"].string {
+                                                DispatchQueue.main.async {
+                                                    file.update(fileURL: url)
+                                                    comment.update(text: "[file]\(url) [/file]")
+                                                    comment.updateUploading(uploading: false)
+                                                    comment.updateProgress(progress: 1)
+                                                    room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadFinish")
+                                                    comment.updateStatus(status: .sent)
+                                                    onSuccess(room,comment)
+                                                }
+                                            }
+                                        }
+                                    }else{
+                                        DispatchQueue.main.async {
+                                            comment.updateUploading(uploading: false)
+                                            comment.updateProgress(progress: 0)
+                                            comment.updateStatus(status: .failed)
+                                            room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
+                                        }
+                                        onError(room,comment,"Fail to upload file, no readable response")
+                                    }
+                                }else{
+                                    DispatchQueue.main.async {
+                                        comment.updateUploading(uploading: false)
+                                        comment.updateProgress(progress: 0)
+                                        comment.updateStatus(status: .failed)
+                                        room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
+                                    }
+                                    onError(room,comment,"Fail to upload file, no readable response")
                                 }
-                                comment.updateStatus(status: .sent)
-                                onSuccess(room,comment)
-                            }else{
+                            })
+                            upload.uploadProgress(closure: {uploadProgress in
+                                let progress = CGFloat(uploadProgress.fractionCompleted)
+                                DispatchQueue.main.async {
+                                    comment.updateUploading(uploading: true)
+                                    comment.updateProgress(progress: progress)
+                                    room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadProgress")
+                                }
+                            })
+                            break
+                        case .failure(let error):
+                            DispatchQueue.main.async {
                                 comment.updateUploading(uploading: false)
                                 comment.updateProgress(progress: 0)
                                 comment.updateStatus(status: .failed)
                                 room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
-                                onError(room,comment,"Fail to upload file, no readable response")
                             }
-                        })
-                        upload.uploadProgress(closure: {uploadProgress in
-                            let progress = CGFloat(uploadProgress.fractionCompleted)
-                            comment.updateUploading(uploading: true)
-                            comment.updateProgress(progress: progress)
-                            room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadProgress")
-                        })
-                        break
-                    case .failure(let error):
-                        comment.updateUploading(uploading: false)
-                        comment.updateProgress(progress: 0)
-                        comment.updateStatus(status: .failed)
-                        room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
-                        onError(room,comment,"Fail to upload file, \(error)")
-                        break
-                    }
-                })
+                            onError(room,comment,"Fail to upload file, \(error)")
+                            break
+                        }
+                    })
+                }
             } catch {
-                comment.updateUploading(uploading: false)
-                comment.updateProgress(progress: 0)
-                comment.updateStatus(status: .failed)
+                DispatchQueue.main.async {
+                    comment.updateUploading(uploading: false)
+                    comment.updateProgress(progress: 0)
+                    comment.updateStatus(status: .failed)
+                }
                 onError(room, comment, "Local file not found")
             }
         }

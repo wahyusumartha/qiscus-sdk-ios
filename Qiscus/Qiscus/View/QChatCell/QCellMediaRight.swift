@@ -234,10 +234,10 @@ class QCellMediaRight: QChatCell {
                     self.comment!.displayImage = image
                 })
             }else{
-                imageDisplay.loadAsync(file.thumbURL, onLoaded: { (image, _) in
-                    self.imageDisplay.image = image
-                    self.comment!.displayImage = image
-                })
+                self.videoPlay.isHidden = true
+                self.downloadButton.comment = self.comment!
+                self.downloadButton.addTarget(self, action: #selector(QCellMediaLeft.downloadMedia(_:)), for: .touchUpInside)
+                self.downloadButton.isHidden = false
             }
             self.progressView.isHidden = true
             self.progressContainer.isHidden = true
