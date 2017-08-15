@@ -612,7 +612,6 @@ extension QiscusChatVC {
                     print("error recording")
                 }
             })
-            
         }
     }
     func prepareRecording(){
