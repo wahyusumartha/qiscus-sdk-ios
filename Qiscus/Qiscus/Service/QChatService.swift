@@ -567,12 +567,10 @@ public class QChatService:NSObject {
     }
     // MARK syncMethod
     public func sync(){
-        QiscusRequestThread.async {
-            if QChatService.syncTimer != nil {
-                QChatService.syncTimer?.invalidate()
-            }
-            QChatService.syncTimer = Timer.scheduledTimer(timeInterval:1.0, target: self, selector: #selector(self.syncProcess), userInfo: nil, repeats: false)
+        if QChatService.syncTimer != nil {
+            QChatService.syncTimer?.invalidate()
         }
+        QChatService.syncTimer = Timer.scheduledTimer(timeInterval:1.0, target: self, selector: #selector(self.syncProcess), userInfo: nil, repeats: false)
     }
     public func createRoom(withUsers users:[String], roomName:String, optionalData:String? = nil, withMessage:String? = nil){ //
         

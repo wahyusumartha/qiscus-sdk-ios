@@ -1034,14 +1034,13 @@ extension Qiscus:CocoaMQTTDelegate{
         
     }
     public func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?){
-        QiscusBackgroundThread.async {
-            if Qiscus.isLoggedIn {
-                if self.syncTimer == nil {
-                    self.syncTimer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.sync), userInfo: nil, repeats: true)
-                }
+        if Qiscus.isLoggedIn {
+            if self.syncTimer == nil {
+                self.syncTimer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.sync), userInfo: nil, repeats: true)
             }
         }
     }
+    
     @objc public func sync(){
         self.backgroundCheck()
     }
