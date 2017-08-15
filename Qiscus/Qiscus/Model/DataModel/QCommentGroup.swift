@@ -16,7 +16,7 @@ public class QCommentGroup: Object{
     public dynamic var createdAt: Double = 0
     public dynamic var senderEmail: String = ""
     public dynamic var senderName: String = ""
-    private let comments = List<QComment>()
+    internal let comments = List<QComment>()
     
     public var commentsCount:Int{
         return self.comments.count
