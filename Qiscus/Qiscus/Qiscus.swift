@@ -1064,6 +1064,7 @@ extension Qiscus:CocoaMQTTDelegate{
         return controller
     }
     public class func cacheData(){
+        Qiscus.checkDatabaseMigration()
         QRoom.cacheAll()
         QCommentGroup.cacheAll()
         QComment.cacheAll()
