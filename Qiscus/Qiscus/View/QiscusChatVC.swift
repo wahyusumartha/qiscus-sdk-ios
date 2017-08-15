@@ -846,8 +846,7 @@ extension QiscusChatVC:QRoomDelegate{
     }
     public func room(didChangeComment section: Int, row: Int, action: String) {
         let indexPath = IndexPath(item: row, section: section)
-        let group = self.chatRoom!.commentGroup(index: section)!
-        let comment = group.comment(index: row)!
+        let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
         
         func defaultChange(){
             self.collectionView.reloadItems(at: [indexPath])
@@ -926,8 +925,7 @@ extension QiscusChatVC:QRoomDelegate{
                 self.collectionView.insertSections(indexSet)
             }) { (success) in
                 let indexPath = IndexPath(item: 0, section: onIndex)
-                let group = self.chatRoom!.commentGroup(index: onIndex)!
-                let comment = group.comment(index: 0)!
+                let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
                 let email = comment.senderEmail
                 if (success && self.isLastRowVisible) || email == QiscusMe.sharedInstance.email {
                     self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
@@ -942,8 +940,7 @@ extension QiscusChatVC:QRoomDelegate{
     public func room(gotNewCommentOn groupIndex: Int, withCommentIndex index: Int) {
         if self.dataLoaded {
             let indexPath = IndexPath(item: index, section: groupIndex)
-            let group = self.chatRoom!.commentGroup(index: groupIndex)!
-            let comment = group.comment(index: index)!
+            let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
             let email = comment.senderEmail
             if index == 0 && groupIndex == 0 {
                 self.loadMoreControl.endRefreshing()
