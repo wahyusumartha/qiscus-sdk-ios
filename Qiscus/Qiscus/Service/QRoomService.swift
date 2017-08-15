@@ -378,9 +378,10 @@ public class QRoomService:NSObject{
             let filename = file.filename
             let mimeType = file.mimeType
             
+            QiscusFileThread.async {
             do {
+                let data = try Data(contentsOf: URL(string: "file://\(localPath)")!)
                 QiscusUploadThread.async {
-                    let data = try Data(contentsOf: URL(string: "file://\(localPath)")!)
                     let headers = QiscusConfig.sharedInstance.requestHeader
                     var urlUpload = URLRequest(url: URL(string: QiscusConfig.UPLOAD_URL)!)
                     if headers.count > 0 {
@@ -474,6 +475,7 @@ public class QRoomService:NSObject{
                     comment.updateStatus(status: .failed)
                 }
                 onError(room, comment, "Local file not found")
+            }
             }
         }
     }

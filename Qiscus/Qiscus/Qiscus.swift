@@ -17,6 +17,7 @@ import CocoaMQTT
 var QiscusFileThread = DispatchQueue(label: "com.qiscus.file", attributes: .concurrent)
 var QiscusRequestThread = DispatchQueue(label: "com.qiscus.request", attributes: .concurrent)
 var QiscusUploadThread = DispatchQueue(label: "com.qiscus.upload", attributes: .concurrent)
+var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attributes: .concurrent)
 
 @objc public class Qiscus: NSObject, PKPushRegistryDelegate, UNUserNotificationCenterDelegate {
     
@@ -150,11 +151,13 @@ var QiscusUploadThread = DispatchQueue(label: "com.qiscus.upload", attributes: .
     // need Documentation
     func backgroundCheck(){
         if Qiscus.isLoggedIn{
-            if Qiscus.shared.mqtt?.connState != CocoaMQTTConnState.connected {
-                Qiscus.mqttConnect()
-            }else{
-                let service = QChatService()
-                service.sync()
+            QiscusBackgroundThread.async {
+                if Qiscus.shared.mqtt?.connState != CocoaMQTTConnState.connected {
+                    Qiscus.mqttConnect()
+                }else{
+                    let service = QChatService()
+                    service.sync()
+                }
             }
         }
     }
@@ -875,22 +878,6 @@ extension Qiscus:CocoaMQTTDelegate{
         if state == .active {
             let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
             mqtt.subscribe(commentChannel, qos: .qos2)
-//            let rooms = QRoom.all()
-//            for room in rooms{
-//                let deliveryChannel = "r/\(room.id)/\(room.id)/+/d"
-//                let readChannel = "r/\(room.id)/\(room.id)/+/r"
-//                let typingChannel = "r/\(room.id)/\(room.id)/+/t"
-//                mqtt.subscribe(deliveryChannel, qos: .qos1)
-//                mqtt.subscribe(readChannel, qos: .qos1)
-//                mqtt.subscribe(typingChannel, qos: .qos1)
-//            }
-//            let users = QUser.all()
-//            for user in users{
-//                if user.email != QiscusMe.sharedInstance.email{
-//                    let userChannel = "u/\(user.email)/s"
-//                    mqtt.subscribe(userChannel, qos: .qos1)
-//                }
-//            }
             Qiscus.shared.mqtt = mqtt
         }
         if self.syncTimer != nil {
@@ -1047,9 +1034,11 @@ extension Qiscus:CocoaMQTTDelegate{
         
     }
     public func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?){
-        if Qiscus.isLoggedIn {
-            if self.syncTimer == nil {
-                self.syncTimer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.sync), userInfo: nil, repeats: true)
+        QiscusBackgroundThread.async {
+            if Qiscus.isLoggedIn {
+                if self.syncTimer == nil {
+                    self.syncTimer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.sync), userInfo: nil, repeats: true)
+                }
             }
         }
     }
