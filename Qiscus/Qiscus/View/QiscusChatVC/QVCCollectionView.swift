@@ -33,8 +33,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         return sectionNumber
     }
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let group = self.chatRoom!.commentGroup(index: indexPath.section)!
-        let comment = group.comment(index: indexPath.row)!
+        let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
         
         var cell = collectionView.dequeueReusableCell(withReuseIdentifier: comment.cellIdentifier, for: indexPath) as! QChatCell
         cell.comment = comment
@@ -67,8 +66,8 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     
     // MARK: CollectionView delegate
     public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        let group = self.chatRoom!.commentGroup(index: indexPath.section)!
-        let comment = group.comment(index: indexPath.row)!
+        let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
+        let group = self.chatRoom!.comments[indexPath.section]
         
         if let selectedIndex = self.selectedCellIndex {
             if indexPath.section == selectedIndex.section && indexPath.item == selectedIndex.item{
@@ -132,8 +131,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         return true
     }
     public func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
-        let group = self.chatRoom!.commentGroup(index: indexPath.section)!
-        let comment = group.comment(index: indexPath.item)!
+        let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
         var show = false
         switch action.description {
         case "copy:":
@@ -186,8 +184,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         return show
     }
     public func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
-        let group = self.chatRoom!.commentGroup(index: indexPath.section)!
-        let comment = group.comment(index: indexPath.item)!
+        let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
         
         if action == #selector(UIResponderStandardEditActions.copy(_:)) && comment.type == .text{
             UIPasteboard.general.string = comment.text
@@ -229,8 +226,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         }
     }
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let group = self.chatRoom!.commentGroup(index: indexPath.section)!
-        let comment = group.comment(index: indexPath.item)!
+        let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
         var size = comment.textSize
         size.width = QiscusHelper.screenWidth() - 16
         
