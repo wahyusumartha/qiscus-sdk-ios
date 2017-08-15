@@ -159,24 +159,7 @@ public class QUser:Object {
             }
         }
     }
-    public class func all() -> [QUser]{
-        var allUser = [QUser]()
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        
-        let data = realm.objects(QUser.self)
-        
-        if data.count > 0 {
-            for user in data{
-                if let cachedUser = QUser.cache[user.email] {
-                    allUser.append(cachedUser)
-                }else{
-                    QUser.cache[user.email] = user
-                    allUser.append(user)
-                }
-            }
-        }
-        return allUser
-    }
+    
     public func updateLastSeen(lastSeen:Double){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let time = Double(Date().timeIntervalSince1970)
@@ -206,6 +189,24 @@ public class QUser:Object {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
                 self.avatarLocalPath = localPath
+            }
+        }
+    }
+    public class func all() -> [QUser]{
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let data = realm.objects(QUser.self)
+        
+        if data.count > 0 {
+            return Array(data)
+        }else{
+            return [QUser]()
+        }
+    }
+    internal class func cacheAll(){
+        let users = QUser.all()
+        for user in users{
+            if QUser.cache[user.email] == nil {
+                QUser.cache[user.email] = user
             }
         }
     }

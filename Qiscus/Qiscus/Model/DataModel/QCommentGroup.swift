@@ -105,4 +105,22 @@ public class QCommentGroup: Object{
             QComment.cache[comment.uniqueId] = comment
         }
     }
+    public class func all() -> [QCommentGroup]{
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let data = realm.objects(QCommentGroup.self)
+        
+        if data.count > 0 {
+            return Array(data)
+        }else{
+            return [QCommentGroup]()
+        }
+    }
+    internal class func cacheAll(){
+        let groups = QCommentGroup.all()
+        for group in groups{
+            if QCommentGroup.cache[group.id] == nil {
+                QCommentGroup.cache[group.id] = group
+            }
+        }
+    }
 }

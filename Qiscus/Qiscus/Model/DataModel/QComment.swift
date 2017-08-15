@@ -693,4 +693,22 @@ public class QComment:Object {
             }
         }
     }
+    public class func all() -> [QComment]{
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let data = realm.objects(QComment.self)
+        
+        if data.count > 0 {
+            return Array(data)
+        }else{
+            return [QComment]()
+        }
+    }
+    internal class func cacheAll(){
+        let comments = QComment.all()
+        for comment in comments{
+            if QComment.cache[comment.uniqueId] == nil {
+                QComment.cache[comment.uniqueId] = comment
+            }
+        }
+    }
 }

@@ -105,4 +105,22 @@ public class QParticipant:Object {
             participant.updateLastDeliveredId(commentId: commentId)
         }
     }
+    public class func all() -> [QParticipant]{
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let data = realm.objects(QParticipant.self)
+        
+        if data.count > 0 {
+            return Array(data)
+        }else{
+            return [QParticipant]()
+        }
+    }
+    internal class func cacheAll(){
+        let participants = QParticipant.all()
+        for participant in participants{
+            if QParticipant.cache[participant.localId] == nil {
+                QParticipant.cache[participant.localId] = participant
+            }
+        }
+    }
 }

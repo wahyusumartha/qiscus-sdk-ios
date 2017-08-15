@@ -118,17 +118,22 @@ public class QRoom:Object {
     
     // MARK: - Class method
     public class func all() -> [QRoom]{
-        var allRoom = [QRoom]()
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        
         let data = realm.objects(QRoom.self)
         
         if data.count > 0 {
-            for room in data{
-                allRoom.append(room)
+            return Array(data)
+        }else{
+            return [QRoom]()
+        }
+    }
+    internal class func cacheAll(){
+        let rooms = QRoom.all()
+        for room in rooms{
+            if Qiscus.chatRooms[room.id] == nil {
+                Qiscus.chatRooms[room.id] = room
             }
         }
-        return allRoom
     }
     public class func room(withId id:Int) -> QRoom? {
 //        Qiscus.checkDatabaseMigration()
