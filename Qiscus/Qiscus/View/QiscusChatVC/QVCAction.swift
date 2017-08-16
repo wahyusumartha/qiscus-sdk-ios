@@ -696,7 +696,7 @@ extension QiscusChatVC {
         }
     }
     func cancelRecordVoice(){
-        self.recordViewLeading.constant = 0 - 2
+        self.recordViewLeading.constant = 8
         Qiscus.uiThread.async {
             UIView.animate(withDuration: 0.5, animations: {
                 self.inputText.isHidden = false

@@ -1190,13 +1190,16 @@ public class QRoom:Object {
         
         for participant in self.participants{
             if participant.email != QiscusMe.sharedInstance.email {
-                channels.append(participant.email)
+                channels.append("u/\(participant.email)/s")
             }
         }
         
-        DispatchQueue.global().async {
+        QiscusBackgroundThread.async {
             for channel in channels{
                 Qiscus.shared.mqtt?.subscribe(channel)
+                if !Qiscus.realtimeChannel.contains(channel){
+                    Qiscus.realtimeChannel.append(channel)
+                }
             }
         }
     }

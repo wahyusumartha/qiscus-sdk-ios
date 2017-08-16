@@ -57,6 +57,7 @@ public class QiscusChatVC: UIViewController{
     var roomAvatarImage:UIImage?
     var roomAvatar = UIImageView()
     var roomAvatarLabel = UILabel()
+    var titleView = UIView()
     
     var isBeforeTranslucent = false
     // MARK: - shared Properties
@@ -359,6 +360,127 @@ public class QiscusChatVC: UIViewController{
         let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout
         layout?.sectionHeadersPinToVisibleBounds = true
         layout?.sectionFootersPinToVisibleBounds = true
+        
+        self.loadMoreControl.addTarget(self, action: #selector(QiscusChatVC.loadMore), for: UIControlEvents.valueChanged)
+        self.collectionView.addSubview(self.loadMoreControl)
+        
+        let lightColor = self.topColor.withAlphaComponent(0.4)
+        recordBackground.backgroundColor = lightColor
+        recordBackground.layer.cornerRadius = 16
+        bottomButton.setImage(Qiscus.image(named: "bottom")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        bottomButton.layer.cornerRadius = 17.5
+        bottomButton.clipsToBounds = true
+        unreadIndicator.isHidden = true
+        unreadIndicator.layer.cornerRadius = 11.5
+        unreadIndicator.clipsToBounds = true
+        backgroundView.image = Qiscus.image(named: "chat_bg")
+        collectionView.decelerationRate = UIScrollViewDecelerationRateNormal
+        linkPreviewContainer.layer.shadowColor = UIColor.black.cgColor
+        linkPreviewContainer.layer.shadowOpacity = 0.6
+        linkPreviewContainer.layer.shadowOffset = CGSize(width: -5, height: 0)
+        linkCancelButton.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonColor
+        linkCancelButton.setImage(Qiscus.image(named: "ar_cancel")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        roomAvatar.contentMode = .scaleAspectFill
+        inputText.font = Qiscus.style.chatFont
+        self.collectionView.delegate = self
+        self.collectionView.dataSource = self
+        self.emptyChatImage.tintColor = self.topColor
+        
+        self.emptyChatImage.image = QiscusAssetsConfiguration.shared.emptyChat
+        self.emptyChatImage.tintColor = self.bottomColor
+        
+        let sendImage = Qiscus.image(named: "send")?.withRenderingMode(.alwaysTemplate)
+        let attachmentImage = Qiscus.image(named: "share_attachment")?.withRenderingMode(.alwaysTemplate)
+        let recordImage = Qiscus.image(named: "ar_record")?.withRenderingMode(.alwaysTemplate)
+        let cancelRecordImage = Qiscus.image(named: "ar_cancel")?.withRenderingMode(.alwaysTemplate)
+        
+        self.sendButton.setImage(sendImage, for: .normal)
+        self.attachButton.setImage(attachmentImage, for: .normal)
+        self.recordButton.setImage(recordImage, for: .normal)
+        self.cancelRecordButton.setImage(cancelRecordImage, for: .normal)
+        
+        self.cancelRecordButton.isHidden = true
+        
+        self.sendButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
+        self.attachButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
+        self.recordButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
+        self.cancelRecordButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
+        self.bottomButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
+        self.bottomButton.isHidden = true
+        
+        sendButton.addTarget(self, action: #selector(QiscusChatVC.sendMessage), for: .touchUpInside)
+        recordButton.addTarget(self, action: #selector(QiscusChatVC.recordVoice), for: .touchUpInside)
+        cancelRecordButton.addTarget(self, action: #selector(QiscusChatVC.cancelRecordVoice), for: .touchUpInside)
+        
+        
+        self.unlockButton.addTarget(self, action: #selector(QiscusChatVC.confirmUnlockChat), for: .touchUpInside)
+        
+        self.welcomeText.text = QiscusTextConfiguration.sharedInstance.emptyTitle
+        self.welcomeSubtitle.text = QiscusTextConfiguration.sharedInstance.emptyMessage
+        self.emptyChatImage.image = Qiscus.style.assets.emptyChat
+        self.inputText.placeholder = QiscusTextConfiguration.sharedInstance.textPlaceholder
+        self.inputText.chatInputDelegate = self
+        
+        // Keyboard stuff.
+        self.hideKeyboardWhenTappedAround()
+        
+        unreadIndexPath = [IndexPath]()
+        bottomButton.isHidden = true
+        
+        
+        if self.loadMoreControl.isRefreshing {
+            self.loadMoreControl.endRefreshing()
+        }
+        
+        self.inputBarBottomMargin.constant = 0
+        
+        self.archievedNotifView.backgroundColor = QiscusColorConfiguration.sharedInstance.lockViewBgColor
+        self.archievedNotifLabel.textColor = QiscusColorConfiguration.sharedInstance.lockViewTintColor
+        let unlockImage = Qiscus.image(named: "ic_open_archived")?.withRenderingMode(.alwaysTemplate)
+        self.unlockButton.setBackgroundImage(unlockImage, for: UIControlState())
+        self.unlockButton.tintColor = QiscusColorConfiguration.sharedInstance.lockViewTintColor
+        
+        self.view.layoutIfNeeded()
+        
+        let titleWidth = QiscusHelper.screenWidth()
+        
+        titleLabel = UILabel(frame:CGRect(x: 40, y: 7, width: titleWidth, height: 17))
+        titleLabel.backgroundColor = UIColor.clear
+        titleLabel.textColor = UIColor.white
+        titleLabel.font = UIFont.boldSystemFont(ofSize: UIFont.systemFontSize)
+        titleLabel.text = self.chatTitle
+        titleLabel.textAlignment = .left
+        
+        subtitleLabel = UILabel(frame:CGRect(x: 40, y: 25, width: titleWidth, height: 13))
+        subtitleLabel.backgroundColor = UIColor.clear
+        subtitleLabel.textColor = UIColor.white
+        subtitleLabel.font = UIFont.systemFont(ofSize: 11)
+        subtitleLabel.text = self.chatSubtitle
+        subtitleLabel.textAlignment = .left
+        
+        self.roomAvatarLabel = UILabel(frame:CGRect(x: 0,y: 6,width: 32,height: 32))
+        self.roomAvatarLabel.font = UIFont.boldSystemFont(ofSize: 25)
+        self.roomAvatarLabel.textColor = UIColor.white
+        self.roomAvatarLabel.backgroundColor = UIColor.clear
+        self.roomAvatarLabel.text = "Q"
+        self.roomAvatarLabel.textAlignment = .center
+        
+        self.roomAvatar = UIImageView()
+        self.roomAvatar.contentMode = .scaleAspectFill
+        self.roomAvatar.backgroundColor = UIColor.white
+        
+        let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
+        
+        self.roomAvatar.frame = CGRect(x: 0,y: 6,width: 32,height: 32)
+        self.roomAvatar.layer.cornerRadius = 16
+        self.roomAvatar.clipsToBounds = true
+        self.roomAvatar.backgroundColor = bgColor[0]
+        
+        self.titleView = UIView(frame: CGRect(x: 0, y: 0, width: titleWidth + 40, height: 44))
+        self.titleView.addSubview(self.titleLabel)
+        self.titleView.addSubview(self.subtitleLabel)
+        self.titleView.addSubview(self.roomAvatar)
+        self.titleView.addSubview(self.roomAvatarLabel)
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -388,77 +510,18 @@ public class QiscusChatVC: UIViewController{
         }
         UIMenuController.shared.menuItems = menuItems
         
-        self.loadMoreControl.addTarget(self, action: #selector(QiscusChatVC.loadMore), for: UIControlEvents.valueChanged)
-        self.collectionView.addSubview(self.loadMoreControl)
-        
         self.navigationController?.navigationBar.verticalGradientColor(topColor, bottomColor: bottomColor)
         self.navigationController?.navigationBar.tintColor = tintColor
-        
-        
-        let lightColor = self.topColor.withAlphaComponent(0.4)
-        recordBackground.backgroundColor = lightColor
-        recordBackground.layer.cornerRadius = 16
-        bottomButton.setImage(Qiscus.image(named: "bottom")?.withRenderingMode(.alwaysTemplate), for: .normal)
-        bottomButton.layer.cornerRadius = 17.5
-        bottomButton.clipsToBounds = true
-        unreadIndicator.isHidden = true
-        unreadIndicator.layer.cornerRadius = 11.5
-        unreadIndicator.clipsToBounds = true
-        backgroundView.image = Qiscus.image(named: "chat_bg")
-        collectionView.decelerationRate = UIScrollViewDecelerationRateNormal
-        linkPreviewContainer.layer.shadowColor = UIColor.black.cgColor
-        linkPreviewContainer.layer.shadowOpacity = 0.6
-        linkPreviewContainer.layer.shadowOffset = CGSize(width: -5, height: 0)
-        linkCancelButton.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonColor
-        linkCancelButton.setImage(Qiscus.image(named: "ar_cancel")?.withRenderingMode(.alwaysTemplate), for: .normal)
-        roomAvatar.contentMode = .scaleAspectFill
-        inputText.font = Qiscus.style.chatFont
-        self.collectionView.delegate = self
-        self.collectionView.dataSource = self
-        self.emptyChatImage.tintColor = self.topColor
         
         if let _ = self.navigationController {
             //self.isBeforeTranslucent = navController.navigationBar.isTranslucent
             self.navigationController?.navigationBar.isTranslucent = false
             self.defaultNavBarVisibility = self.navigationController!.isNavigationBarHidden
         }
-        unreadIndexPath = [IndexPath]()
-        bottomButton.isHidden = true
         
-        
-        if self.loadMoreControl.isRefreshing {
-            self.loadMoreControl.endRefreshing()
-        }
-        
-        self.inputBarBottomMargin.constant = 0
-        self.view.layoutIfNeeded()
-        //self.view.endEditing(true)
-        
-        self.emptyChatImage.image = QiscusAssetsConfiguration.shared.emptyChat
-        self.emptyChatImage.tintColor = self.bottomColor
-        
-        let sendImage = Qiscus.image(named: "send")?.withRenderingMode(.alwaysTemplate)
-        let attachmentImage = Qiscus.image(named: "share_attachment")?.withRenderingMode(.alwaysTemplate)
-        let recordImage = Qiscus.image(named: "ar_record")?.withRenderingMode(.alwaysTemplate)
-        let cancelRecordImage = Qiscus.image(named: "ar_cancel")?.withRenderingMode(.alwaysTemplate)
-        
-        self.sendButton.setImage(sendImage, for: .normal)
-        self.attachButton.setImage(attachmentImage, for: .normal)
-        self.recordButton.setImage(recordImage, for: .normal)
-        self.cancelRecordButton.setImage(cancelRecordImage, for: .normal)
-        
-        self.cancelRecordButton.isHidden = true
-        
-        self.sendButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
-        self.attachButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
-        self.recordButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
-        self.cancelRecordButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
-        self.bottomButton.tintColor = Qiscus.shared.styleConfiguration.color.topColor
-        self.bottomButton.isHidden = true
-        
+       
         setupNavigationTitle()
         setupPage()
-        
     }
     
     override open func viewWillDisappear(_ animated: Bool) {
@@ -520,7 +583,13 @@ public class QiscusChatVC: UIViewController{
             self.collectionView.isHidden = true
             self.showLoading("Load data ...")
         }
-        
+        if inputText.value == "" {
+            sendButton.isEnabled = false
+            sendButton.isHidden = true
+            recordButton.isHidden = false
+        }else{
+            sendButton.isEnabled = true
+        }
     }
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -572,40 +641,7 @@ public class QiscusChatVC: UIViewController{
             totalButton += rightButtons.count
         }
         
-        let titleWidth = QiscusHelper.screenWidth() - CGFloat(49 * totalButton) - 40
-        
-        titleLabel = UILabel(frame:CGRect(x: 40, y: 7, width: titleWidth, height: 17))
-        titleLabel.backgroundColor = UIColor.clear
-        titleLabel.textColor = UIColor.white
-        titleLabel.font = UIFont.boldSystemFont(ofSize: UIFont.systemFontSize)
-        titleLabel.text = self.chatTitle
-        titleLabel.textAlignment = .left
-        
-        subtitleLabel = UILabel(frame:CGRect(x: 40, y: 25, width: titleWidth, height: 13))
-        subtitleLabel.backgroundColor = UIColor.clear
-        subtitleLabel.textColor = UIColor.white
-        subtitleLabel.font = UIFont.systemFont(ofSize: 11)
-        subtitleLabel.text = self.chatSubtitle
-        subtitleLabel.textAlignment = .left
-        
-        self.roomAvatarLabel = UILabel(frame:CGRect(x: 0,y: 6,width: 32,height: 32))
-        self.roomAvatarLabel.font = UIFont.boldSystemFont(ofSize: 25)
-        self.roomAvatarLabel.textColor = UIColor.white
-        self.roomAvatarLabel.backgroundColor = UIColor.clear
-        self.roomAvatarLabel.text = "Q"
-        self.roomAvatarLabel.textAlignment = .center
-        
-        self.roomAvatar = UIImageView()
-        self.roomAvatar.contentMode = .scaleAspectFill
-        self.roomAvatar.backgroundColor = UIColor.white
-        
         let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
-        
-        self.roomAvatar.frame = CGRect(x: 0,y: 6,width: 32,height: 32)
-        self.roomAvatar.layer.cornerRadius = 16
-        self.roomAvatar.clipsToBounds = true
-        self.roomAvatar.backgroundColor = bgColor[0]
-        
         if self.chatTitle != nil {
             let roomTitle = self.chatTitle!.trimmingCharacters(in: .whitespacesAndNewlines)
             if roomTitle != "" {
@@ -615,14 +651,16 @@ public class QiscusChatVC: UIViewController{
             }
         }
         
-        let titleView = UIView(frame: CGRect(x: 0, y: 0, width: titleWidth + 40, height: 44))
-        titleView.addSubview(self.titleLabel)
-        titleView.addSubview(self.subtitleLabel)
-        titleView.addSubview(self.roomAvatar)
-        titleView.addSubview(self.roomAvatarLabel)
-        
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QiscusChatVC.goToTitleAction))
-        titleView.addGestureRecognizer(tapRecognizer)
+        self.titleView.addGestureRecognizer(tapRecognizer)
+        
+        let titleWidth = QiscusHelper.screenWidth() - CGFloat(49 * totalButton) - 40
+        
+        self.titleLabel.frame = CGRect(x: 40, y: 7, width: titleWidth, height: 17)
+        self.subtitleLabel.frame = CGRect(x: 40, y: 25, width: titleWidth, height: 13)
+        self.roomAvatarLabel.frame = CGRect(x: 0,y: 6,width: 32,height: 32)
+        self.roomAvatar.frame = CGRect(x: 0,y: 6,width: 32,height: 32)
+        self.titleView.frame = CGRect(x: 0, y: 0, width: titleWidth + 40, height: 44)
         
         self.navigationItem.titleView = titleView
     }
@@ -634,37 +672,6 @@ public class QiscusChatVC: UIViewController{
         }else{
             self.archievedNotifTop.constant = 65
         }
-        
-        self.collectionView.delegate = self
-        self.collectionView.dataSource = self
-        
-        self.archievedNotifView.backgroundColor = QiscusColorConfiguration.sharedInstance.lockViewBgColor
-        self.archievedNotifLabel.textColor = QiscusColorConfiguration.sharedInstance.lockViewTintColor
-        let unlockImage = Qiscus.image(named: "ic_open_archived")?.withRenderingMode(.alwaysTemplate)
-        self.unlockButton.setBackgroundImage(unlockImage, for: UIControlState())
-        self.unlockButton.tintColor = QiscusColorConfiguration.sharedInstance.lockViewTintColor
-        
-        
-        if inputText.value == "" {
-            sendButton.isEnabled = false
-        }else{
-            sendButton.isEnabled = true
-        }
-        sendButton.addTarget(self, action: #selector(QiscusChatVC.sendMessage), for: .touchUpInside)
-        recordButton.addTarget(self, action: #selector(QiscusChatVC.recordVoice), for: .touchUpInside)
-        cancelRecordButton.addTarget(self, action: #selector(QiscusChatVC.cancelRecordVoice), for: .touchUpInside)
-        
-        //welcomeView Setup
-        self.unlockButton.addTarget(self, action: #selector(QiscusChatVC.confirmUnlockChat), for: .touchUpInside)
-        
-        self.welcomeText.text = QiscusTextConfiguration.sharedInstance.emptyTitle
-        self.welcomeSubtitle.text = QiscusTextConfiguration.sharedInstance.emptyMessage
-        self.emptyChatImage.image = Qiscus.style.assets.emptyChat
-        self.inputText.placeholder = QiscusTextConfiguration.sharedInstance.textPlaceholder
-        self.inputText.chatInputDelegate = self
-        
-        // Keyboard stuff.
-        self.hideKeyboardWhenTappedAround()
     }
     
     // MARK: - Keyboard Methode
@@ -757,30 +764,48 @@ public class QiscusChatVC: UIViewController{
             self.loadSubtitle()
         }
         self.unreadIndicator.isHidden = true
-        if self.chatRoom!.commentsGroupCount > 0 {
-            let delay = 0.5 * Double(NSEC_PER_SEC)
-            let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
-            let section = self.chatRoom!.commentsGroupCount - 1
-            let group = self.chatRoom!.commentGroup(index: section)!
-            let row = group.commentsCount - 1
-            let indexPath = IndexPath(item: row, section: section)
-            self.collectionView.reloadData()
-            DispatchQueue.main.asyncAfter(deadline: time, execute: {
+        if firstLoad {
+            if self.chatRoom!.commentsGroupCount > 0 {
+                self.collectionView.reloadData()
+                let section = self.chatRoom!.commentsGroupCount - 1
+                let row = self.chatRoom!.commentGroup(index: section)!.commentsCount - 1
+                let indexPath = IndexPath(item: row, section: section)
                 self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
                 self.dismissLoading()
                 self.dataLoaded = true
                 self.collectionView.isHidden = false
-            })
-            
-        }else{
-            let delay = 0.5 * Double(NSEC_PER_SEC)
-            let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
-            DispatchQueue.main.asyncAfter(deadline: time, execute: {
+            }else{
                 self.dismissLoading()
                 self.dataLoaded = true
                 self.collectionView.isHidden = false
-            })
+            }
+        }else{
+            if self.chatRoom!.commentsGroupCount > 0 {
+                let delay = 0.5 * Double(NSEC_PER_SEC)
+                let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
+                let section = self.chatRoom!.commentsGroupCount - 1
+                let group = self.chatRoom!.commentGroup(index: section)!
+                let row = group.commentsCount - 1
+                let indexPath = IndexPath(item: row, section: section)
+                self.collectionView.reloadData()
+                DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                    self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
+                    self.dismissLoading()
+                    self.dataLoaded = true
+                    self.collectionView.isHidden = false
+                })
+                
+            }else{
+                let delay = 0.5 * Double(NSEC_PER_SEC)
+                let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
+                DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                    self.dismissLoading()
+                    self.dataLoaded = true
+                    self.collectionView.isHidden = false
+                })
+            }
         }
+        
         if self.chatMessage != nil && self.chatMessage != "" {
             let newMessage = self.chatRoom!.newComment(text: self.chatMessage!)
             self.chatRoom!.post(comment: newMessage)
@@ -794,7 +819,9 @@ extension QiscusChatVC:QChatServiceDelegate{
         self.chatRoom = inRoom
         self.chatRoom?.delegate = self
         self.loadRoomView()
-        Qiscus.shared.chatViews[inRoom.id] = self
+        if Qiscus.shared.chatViews[inRoom.id] == nil {
+            Qiscus.shared.chatViews[inRoom.id] = self
+        }
     }
     public func chatService(didFailLoadRoom error: String) {
         let delay = 1.5 * Double(NSEC_PER_SEC)
@@ -986,18 +1013,16 @@ extension QiscusChatVC:QRoomDelegate{
         }
     }
     public func room(didChangeUnread lastReadCommentId:Int, unreadCount:Int) {
-        //if self.dataLoaded {
-            if unreadCount > 0 {
-                var unreadText = "\(unreadCount)"
-                if unreadCount > 99 {
-                    unreadText = "99+"
-                }
-                self.unreadIndicator.text = unreadText
-                self.unreadIndicator.isHidden = self.isLastRowVisible
-            }else{
-                self.unreadIndicator.text = ""
-                self.unreadIndicator.isHidden = true
+        if unreadCount > 0 {
+            var unreadText = "\(unreadCount)"
+            if unreadCount > 99 {
+                unreadText = "99+"
             }
-        //}
+            self.unreadIndicator.text = unreadText
+            self.unreadIndicator.isHidden = self.isLastRowVisible
+        }else{
+            self.unreadIndicator.text = ""
+            self.unreadIndicator.isHidden = true
+        }
     }
 }

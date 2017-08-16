@@ -33,6 +33,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     static var chatRooms = [Int : QRoom]()
     static var qiscusDownload:[String] = [String]()
     internal static var publishStatustimer:Timer?
+    internal static var realtimeChannel = [String]()
     
     var config = QiscusConfig.sharedInstance
     var commentService = QiscusCommentClient.sharedInstance
@@ -53,6 +54,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     let appDelegate = UIApplication.shared.delegate
     
     public var chatViews = [Int:QiscusChatVC]()
+    
     
     @objc public class var versionNumber:String{
         get{
@@ -871,11 +873,14 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
 extension Qiscus:CocoaMQTTDelegate{
     public func mqtt(_ mqtt: CocoaMQTT, didConnect host: String, port: Int){
         let state = UIApplication.shared.applicationState
-//        Qiscus.checkDatabaseMigration()
         
         if state == .active {
             let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
             mqtt.subscribe(commentChannel, qos: .qos2)
+            
+            for channel in Qiscus.realtimeChannel{
+                mqtt.subscribe(channel)
+            }
             Qiscus.shared.mqtt = mqtt
         }
         if self.syncTimer != nil {
@@ -1026,7 +1031,16 @@ extension Qiscus:CocoaMQTTDelegate{
         Qiscus.printLog(text: "topic : \(topic) subscribed")
     }
     public func mqtt(_ mqtt: CocoaMQTT, didUnsubscribeTopic topic: String){
-        
+        if Qiscus.realtimeChannel.contains(topic){
+            var i = 0
+            for channel in Qiscus.realtimeChannel {
+                if channel == topic {
+                    Qiscus.realtimeChannel.remove(at: i)
+                    break
+                }
+                i+=1
+            }
+        }
     }
     public func mqttDidPing(_ mqtt: CocoaMQTT){
     }
