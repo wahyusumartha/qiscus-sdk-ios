@@ -155,8 +155,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
                 if Qiscus.shared.mqtt?.connState != CocoaMQTTConnState.connected {
                     Qiscus.mqttConnect()
                 }else{
-                    let service = QChatService()
-                    service.sync()
+                    QChatService.sync()
                 }
             }
         }
@@ -806,8 +805,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
             deviceID = vendorIdentifier.uuidString
         }
         
-        let service = QChatService()
-        service.sync()
+        QChatService.sync()
         
         let clientID = "iosMQTT-\(appName)-\(deviceID)-\(QiscusMe.sharedInstance.id)"
         let mqtt = CocoaMQTT(clientID: clientID, host: "mqtt.qiscus.com", port: 1883)
@@ -895,7 +893,7 @@ extension Qiscus:CocoaMQTTDelegate{
         
     }
     public func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16 ){
-        DispatchQueue.global().async {
+        QiscusBackgroundThread.async {
             if let messageData = message.string {
                 let channelArr = message.topic.characters.split(separator: "/")
                 let lastChannelPart = String(channelArr.last!)
@@ -904,14 +902,14 @@ extension Qiscus:CocoaMQTTDelegate{
                     let json = JSON.parse(messageData)
                     let roomId = json["room_id"].intValue
                     let commentId = json["id"].intValue
-                    DispatchQueue.main.async {
-                        if commentId > QiscusMe.sharedInstance.lastCommentId {
-                            let service = QChatService()
-                            service.sync()
-                            let commentType = json["type"].stringValue
-                            if commentType == "system_event" {
-                                let payload = json["payload"]
-                                if payload["type"].stringValue == "remove_member" && payload["object_email"].stringValue == QiscusMe.sharedInstance.email{
+                    print("mqtt data: \(json)")
+                    if commentId > QiscusMe.sharedInstance.lastCommentId {
+                        QChatService.sync()
+                        let commentType = json["type"].stringValue
+                        if commentType == "system_event" {
+                            let payload = json["payload"]
+                            if payload["type"].stringValue == "remove_member" && payload["object_email"].stringValue == QiscusMe.sharedInstance.email{
+                                DispatchQueue.main.async {
                                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                                         let comment = QComment.tempComment(fromJSON: json)
                                         roomDelegate.gotNewComment(comment)
@@ -925,13 +923,14 @@ extension Qiscus:CocoaMQTTDelegate{
                                     
                                     if let room = QRoom.room(withId: roomId){
                                         Qiscus.chatRooms[roomId] = nil
-                                        
                                         QRoom.deleteRoom(room: room)
                                     }
                                 }
                             }
-                        }else{
-                            let uniqueId = json["unique_temp_id"].stringValue
+                        }
+                    }else{
+                        let uniqueId = json["unique_temp_id"].stringValue
+                        DispatchQueue.main.async {
                             if let room = QRoom.room(withId: roomId) {
                                 if let comment = QComment.comment(withUniqueId: uniqueId){
                                     if comment.status != .delivered && comment.status != .read {
@@ -940,17 +939,18 @@ extension Qiscus:CocoaMQTTDelegate{
                                 }
                             }
                         }
-                        if #available(iOS 10.0, *) {
-                            if Qiscus.publishStatustimer != nil {
-                                Qiscus.publishStatustimer?.invalidate()
-                            }
-                            Qiscus.publishStatustimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false, block: { (_) in
-                                QRoom.publishStatus(roomId: roomId, commentId: commentId, status: .delivered)
-                            })
-                        } else {
-                            QRoom.publishStatus(roomId: roomId, commentId: commentId, status: .delivered)
-                        }
                     }
+                    if #available(iOS 10.0, *) {
+                        if Qiscus.publishStatustimer != nil {
+                            Qiscus.publishStatustimer?.invalidate()
+                        }
+                        Qiscus.publishStatustimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false, block: { (_) in
+                            QRoom.publishStatus(roomId: roomId, commentId: commentId, status: .delivered)
+                        })
+                    } else {
+                        QRoom.publishStatus(roomId: roomId, commentId: commentId, status: .delivered)
+                    }
+                    
                     break
                 case "t":
                     let topicId:Int = Int(String(channelArr[2]))!

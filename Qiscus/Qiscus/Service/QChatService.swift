@@ -15,6 +15,7 @@ import SwiftyJSON
     func chatService(didFailLoadRoom error:String)
 }
 public class QChatService:NSObject {
+    static var defaultService = QChatService()
     public var delegate:QChatServiceDelegate?
     static var syncTimer:Timer? = nil
     
@@ -72,6 +73,10 @@ public class QChatService:NSObject {
                                         let commentId = json["id"].intValue
                                         if commentId <= QiscusMe.sharedInstance.lastCommentId {
                                             room.saveOldComment(fromJSON: json)
+                                        }else{
+                                            QiscusBackgroundThread.async {
+                                                QChatService.sync()
+                                            }
                                         }
                                     }
                                     self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
@@ -157,6 +162,10 @@ public class QChatService:NSObject {
                                         let commentId = json["id"].intValue
                                         if commentId <= QiscusMe.sharedInstance.lastCommentId {
                                             room.saveOldComment(fromJSON: json)
+                                        }else{
+                                            QiscusBackgroundThread.async {
+                                                QChatService.sync()
+                                            }
                                         }
                                     }
                                     onSuccess(room)
@@ -235,6 +244,10 @@ public class QChatService:NSObject {
                                         let commentId = json["id"].intValue
                                         if commentId <= QiscusMe.sharedInstance.lastCommentId {
                                             room.saveOldComment(fromJSON: json)
+                                        }else{
+                                            QiscusBackgroundThread.async {
+                                                QChatService.sync()
+                                            }
                                         }
                                     }
                                     onSuccess(room)
@@ -322,6 +335,10 @@ public class QChatService:NSObject {
                                         let commentId = json["id"].intValue
                                         if commentId <= QiscusMe.sharedInstance.lastCommentId {
                                             room.saveOldComment(fromJSON: json)
+                                        }else{
+                                            QiscusBackgroundThread.async {
+                                                QChatService.sync()
+                                            }
                                         }
                                     }
                                     self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
@@ -403,6 +420,10 @@ public class QChatService:NSObject {
                                         
                                         if commentId <= QiscusMe.sharedInstance.lastCommentId {
                                             room.saveOldComment(fromJSON: json)
+                                        }else{
+                                            QiscusBackgroundThread.async {
+                                                QChatService.sync()
+                                            }
                                         }
                                     }
                                     self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
@@ -478,6 +499,10 @@ public class QChatService:NSObject {
                                         
                                         if commentId <= QiscusMe.sharedInstance.lastCommentId {
                                             room.saveOldComment(fromJSON: json)
+                                        }else{
+                                            QiscusBackgroundThread.async {
+                                                QChatService.sync()
+                                            }
                                         }
                                     }
                                     onSuccess(room)
@@ -517,20 +542,15 @@ public class QChatService:NSObject {
                 "last_received_comment_id"  : QiscusMe.sharedInstance.lastCommentId as AnyObject,
                 "token" : qiscus.config.USER_TOKEN as AnyObject,
                 ]
-            print("sync url: \(loadURL)")
-            print("parameters sync url: \(parameters)")
             Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
-                print("response data sync: \(responseData)")
                 if let response = responseData.result.value {
                     let json = JSON(response)
                     let results = json["results"]
                     let error = json["error"]
-                    print("response json sync: \(json)")
                     if results != JSON.null{
                         let comments = json["results"]["comments"].arrayValue
                         if comments.count > 0 {
                             for newComment in comments.reversed() {
-                                print("sync result: \(newComment)")
                                 let roomId = newComment["room_id"].intValue
                                 let id = newComment["id"].intValue
                                 let type = newComment["type"].string
@@ -566,16 +586,16 @@ public class QChatService:NSObject {
         }
     }
     // MARK syncMethod
-    public func sync(){
+    private func sync(){
+        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector( self.syncProcess), object: nil)
+        self.perform(#selector(self.syncProcess), with: nil, afterDelay: 1.0)
+    }
+    internal class func sync(){
         DispatchQueue.main.async {
-            if QChatService.syncTimer != nil {
-                QChatService.syncTimer?.invalidate()
-            }
-            QChatService.syncTimer = Timer.scheduledTimer(timeInterval:1.0, target: self, selector: #selector(self.syncProcess), userInfo: nil, repeats: false)
+            QChatService.defaultService.sync()
         }
     }
     public func createRoom(withUsers users:[String], roomName:String, optionalData:String? = nil, withMessage:String? = nil){ //
-        
         if Qiscus.isLoggedIn{
             QiscusRequestThread.async {
                 let loadURL = QiscusConfig.CREATE_NEW_ROOM

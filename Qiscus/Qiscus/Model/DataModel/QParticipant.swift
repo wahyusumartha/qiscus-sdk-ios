@@ -60,32 +60,36 @@ public class QParticipant:Object {
         return participant
     }
     public func updateLastDeliveredId(commentId:Int){
-        if commentId > self.lastDeliveredCommentId {
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            try! realm.write {
-                self.lastDeliveredCommentId = commentId
-            }
-            if let room = QRoom.room(withId: self.roomId){
-                room.updateCommentStatus()
-            }
-            if let cache = QParticipant.cache[self.localId] {
-                cache.delegate?.participant(didChange: cache)
+        if !self.isInvalidated {
+            if commentId > self.lastDeliveredCommentId {
+                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                try! realm.write {
+                    self.lastDeliveredCommentId = commentId
+                }
+                if let room = QRoom.room(withId: self.roomId){
+                    room.updateCommentStatus()
+                }
+                if let cache = QParticipant.cache[self.localId] {
+                    cache.delegate?.participant(didChange: cache)
+                }
             }
         }
     }
     public func updateLastReadId(commentId:Int){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        if commentId > self.lastReadCommentId {
-            try! realm.write {
-                self.lastReadCommentId = commentId
+        if !self.isInvalidated {
+            if commentId > self.lastReadCommentId {
+                try! realm.write {
+                    self.lastReadCommentId = commentId
+                }
+                if let room = QRoom.room(withId: self.roomId){
+                    room.updateCommentStatus()
+                }
             }
-            if let room = QRoom.room(withId: self.roomId){
-                room.updateCommentStatus()
+            self.updateLastDeliveredId(commentId: commentId)
+            if let cache = QParticipant.cache[self.localId] {
+                cache.delegate?.participant(didChange: cache)
             }
-        }
-        self.updateLastDeliveredId(commentId: commentId)
-        if let cache = QParticipant.cache[self.localId] {
-            cache.delegate?.participant(didChange: cache)
         }
     }
     public class func all(withEmail email:String)->[QParticipant]{

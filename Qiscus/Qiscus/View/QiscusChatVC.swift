@@ -150,13 +150,11 @@ public class QiscusChatVC: UIViewController{
             if oldValue == nil && self.chatRoom != nil {
                 if Qiscus.shared.connected {
                     self.chatRoom?.sync()
-                    self.chatService.sync()
                 }
-                self.chatRoom!.delegate = self
+                //self.chatRoom!.delegate = self
                 let delay = 0.5 * Double(NSEC_PER_SEC)
                 let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
                 DispatchQueue.main.asyncAfter(deadline: time, execute: {
-                    
                     self.dismissLoading()
                     self.dataLoaded = true
                 })
@@ -374,9 +372,6 @@ public class QiscusChatVC: UIViewController{
     }
     private func firstLoadSetup(){
         self.chatService.delegate = self
-        self.firstLoad = false
-        
-        
         
         let resendMenuItem: UIMenuItem = UIMenuItem(title: "Resend", action: #selector(QChatCell.resend))
         let deleteMenuItem: UIMenuItem = UIMenuItem(title: "Delete", action: #selector(QChatCell.deleteComment))
@@ -463,6 +458,7 @@ public class QiscusChatVC: UIViewController{
         
         setupNavigationTitle()
         setupPage()
+        
     }
     
     override open func viewWillDisappear(_ animated: Bool) {
@@ -481,36 +477,7 @@ public class QiscusChatVC: UIViewController{
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        if firstLoad {
-            self.firstLoadSetup()
-        }
-        self.isPresence = true
-        if self.chatRoom != nil {
-            self.collectionView.reloadData()
-            self.chatRoom?.updateUnreadCommentCount {
-                if self.chatRoom!.unreadCommentCount > 0 {
-                    self.isLastRowVisible = false
-                    var unreadText = "\(self.chatRoom!.unreadCommentCount)"
-                    if self.chatRoom!.unreadCommentCount > 99 {
-                        unreadText = "99+"
-                    }
-                    self.unreadIndicator.text = unreadText
-                    self.unreadIndicator.isHidden = false
-                    self.dataLoaded = true
-                    self.chatRoom!.delegate = self
-                }else{
-                    self.dataLoaded = true
-                    self.chatRoom!.delegate = self
-                }
-            }
-            
-            self.chatService.delegate = self
-            self.chatRoom!.subscribeRealtimeStatus()
-            self.chatRoom!.sync()
-        }else{
-            self.collectionView.isHidden = true
-            self.showLoading("Load data ...")
-        }
+        
         if self.defaultBack {
             self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
         }
@@ -542,19 +509,52 @@ public class QiscusChatVC: UIViewController{
             UIApplication.shared.cancelAllLocalNotifications()
         }
         
-        
         let center: NotificationCenter = NotificationCenter.default
         center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         center.addObserver(self, selector: #selector(QiscusChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
         
         view.endEditing(true)
         center.addObserver(self, selector: #selector(QiscusChatVC.appDidEnterBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
+        if firstLoad {
+            self.firstLoadSetup()
+            self.collectionView.isHidden = true
+            self.showLoading("Load data ...")
+        }
+        
     }
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if self.chatRoom == nil {
+            self.collectionView.isHidden = true
             self.loadData()
+        }else if self.firstLoad {
+            self.loadRoomView()
+        }else{
+            self.collectionView.reloadData()
+            self.chatRoom?.updateUnreadCommentCount {
+                if self.chatRoom!.unreadCommentCount > 0 {
+                    self.isLastRowVisible = false
+                    var unreadText = "\(self.chatRoom!.unreadCommentCount)"
+                    if self.chatRoom!.unreadCommentCount > 99 {
+                        unreadText = "99+"
+                    }
+                    self.unreadIndicator.text = unreadText
+                    self.unreadIndicator.isHidden = false
+                    self.dataLoaded = true
+                    self.chatRoom!.delegate = self
+                }else{
+                    self.dataLoaded = true
+                    self.chatRoom!.delegate = self
+                }
+            }
+            
+            self.chatService.delegate = self
+            self.chatRoom!.subscribeRealtimeStatus()
+            self.chatRoom!.sync()
         }
+        
+        self.isPresence = true
+        self.firstLoad = false
     }
     
     // MARK: - Memory Warning
@@ -747,13 +747,9 @@ public class QiscusChatVC: UIViewController{
         super.viewWillTransition(to: size, with: coordinator)
         collectionView.collectionViewLayout.invalidateLayout()
     }
-}
-
-extension QiscusChatVC:QChatServiceDelegate{
-    public func chatService(didFinishLoadRoom inRoom: QRoom, withMessage message: String?) {
-        self.chatRoom = inRoom
+    public func loadRoomView(){
         self.chatRoom?.delegate = self
-        inRoom.subscribeRealtimeStatus()
+        self.chatRoom!.subscribeRealtimeStatus()
         if self.chatTitle == nil || self.chatTitle == ""{
             self.loadTitle()
         }
@@ -785,12 +781,20 @@ extension QiscusChatVC:QChatServiceDelegate{
                 self.collectionView.isHidden = false
             })
         }
-        Qiscus.shared.chatViews[inRoom.id] = self
         if self.chatMessage != nil && self.chatMessage != "" {
             let newMessage = self.chatRoom!.newComment(text: self.chatMessage!)
             self.chatRoom!.post(comment: newMessage)
             self.chatMessage = nil
         }
+    }
+}
+
+extension QiscusChatVC:QChatServiceDelegate{
+    public func chatService(didFinishLoadRoom inRoom: QRoom, withMessage message: String?) {
+        self.chatRoom = inRoom
+        self.chatRoom?.delegate = self
+        self.loadRoomView()
+        Qiscus.shared.chatViews[inRoom.id] = self
     }
     public func chatService(didFailLoadRoom error: String) {
         let delay = 1.5 * Double(NSEC_PER_SEC)

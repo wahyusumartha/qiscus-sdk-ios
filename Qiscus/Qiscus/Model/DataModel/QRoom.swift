@@ -133,6 +133,11 @@ public class QRoom:Object {
             if Qiscus.chatRooms[room.id] == nil {
                 Qiscus.chatRooms[room.id] = room
             }
+            if Qiscus.shared.chatViews[room.id] ==  nil{
+                let chatView = QiscusChatVC()
+                chatView.chatRoom = Qiscus.chatRooms[room.id]
+                Qiscus.shared.chatViews[room.id] = chatView
+            }
         }
     }
     public class func room(withId id:Int) -> QRoom? {
@@ -297,6 +302,7 @@ public class QRoom:Object {
     }
     internal func addComment(newComment:QComment, onTop:Bool = false){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let _ = newComment.textSize
         if self.comments.count == 0 {
             let commentGroup = QCommentGroup()
             commentGroup.senderEmail = newComment.senderEmail
@@ -317,7 +323,8 @@ public class QRoom:Object {
                 }
                 self.updateUnreadCommentCount()
             }
-        }else if onTop{
+        }
+        else if onTop{
             let firstCommentGroup = self.comments.first!
             if firstCommentGroup.date == newComment.date && firstCommentGroup.senderEmail == newComment.senderEmail && newComment.type != .system {
                 newComment.cellPosRaw = QCellPosition.first.rawValue
@@ -356,7 +363,8 @@ public class QRoom:Object {
                 }
                 QCommentGroup.cache[newComment.uniqueId] = commentGroup
             }
-        }else{
+        }
+        else{
             let lastComment = self.comments[self.commentsGroupCount - 1]
             if lastComment.date == newComment.date && lastComment.senderEmail == newComment.senderEmail && newComment.type != .system{
                 newComment.cellPosRaw = QCellPosition.last.rawValue
@@ -409,6 +417,9 @@ public class QRoom:Object {
                 }
                 
             }
+        }
+        if let user = QUser.user(withEmail: newComment.senderEmail){
+            user.updateLastSeen(lastSeen: newComment.createdAt)
         }
     }
     
@@ -763,14 +774,16 @@ public class QRoom:Object {
             self.addComment(newComment: newComment, onTop: true)
         }
         if let participant = QParticipant.participant(inRoomWithId: self.id, andEmail: senderEmail) {
-            if participant.lastReadCommentId < commentId {
-                try! realm.write {
-                    participant.lastReadCommentId = commentId
-                    participant.lastDeliveredCommentId = commentId
-                }
-            }else if participant.lastDeliveredCommentId < commentId{
-                try! realm.write {
-                    participant.lastDeliveredCommentId = commentId
+            if !participant.isInvalidated {
+                if participant.lastReadCommentId < commentId {
+                    try! realm.write {
+                        participant.lastReadCommentId = commentId
+                        participant.lastDeliveredCommentId = commentId
+                    }
+                }else if participant.lastDeliveredCommentId < commentId{
+                    try! realm.write {
+                        participant.lastDeliveredCommentId = commentId
+                    }
                 }
             }
         }
