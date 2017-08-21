@@ -839,7 +839,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
                             Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: true)
                         }
                         
-                        let when = DispatchTime.now() + 30
+                        let when = DispatchTime.now() + 10
                         DispatchQueue.global().asyncAfter(deadline: when) {
                             Qiscus.publishUserStatus()
                         }
@@ -877,7 +877,7 @@ extension Qiscus:CocoaMQTTDelegate{
         if state == .active {
             let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
             mqtt.subscribe(commentChannel, qos: .qos2)
-            
+            Qiscus.publishUserStatus()
             for channel in Qiscus.realtimeChannel{
                 mqtt.subscribe(channel)
             }
