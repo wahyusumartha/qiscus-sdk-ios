@@ -1001,10 +1001,9 @@ public class QRoom:Object {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         if let commentIndex = self.getIndexPath(ofComment: comment) {
             let commentGroup = self.comments[commentIndex.section]
+            let commentUniqueId = comment.uniqueId
+            let commentGroupId = commentGroup.id
             
-            if QComment.cache[comment.uniqueId] != nil{
-                QComment.cache[comment.uniqueId] = nil
-            }
             if self.comments[commentIndex.section].commentsCount > 1{
                 try! realm.write {
                     realm.delete(comment)
@@ -1016,6 +1015,12 @@ public class QRoom:Object {
                     realm.delete(commentGroup)
                 }
                 self.delegate?.room(didDeleteGroupComment: commentIndex.section)
+                if QCommentGroup.cache[commentGroupId] != nil {
+                    QCommentGroup.cache[commentGroupId] = nil
+                }
+            }
+            if QComment.cache[commentUniqueId] != nil{
+                QComment.cache[commentUniqueId] = nil
             }
         }
     }

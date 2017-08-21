@@ -100,29 +100,29 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         })
     }
     public func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        let commentGroup = self.chatRoom!.commentGroup(index: indexPath.section)!
-        
-        if let selIndex = self.selectedCellIndex {
-            if selIndex.section == indexPath.section && selIndex.item == indexPath.item{
-                cell.backgroundColor = UIColor.clear
-                self.selectedCellIndex = nil
+        if let commentGroup = self.chatRoom!.commentGroup(index: indexPath.section) {
+            if let selIndex = self.selectedCellIndex {
+                if selIndex.section == indexPath.section && selIndex.item == indexPath.item{
+                    cell.backgroundColor = UIColor.clear
+                    self.selectedCellIndex = nil
+                }
             }
-        }
-        
-        if indexPath.section == (self.chatRoom!.commentsGroupCount - 1){
-            if indexPath.row == commentGroup.commentsCount - 1{
-                let visibleIndexPath = collectionView.indexPathsForVisibleItems
-                if visibleIndexPath.count > 0{
-                    var visible = false
-                    for visibleIndex in visibleIndexPath{
-                        if visibleIndex.row == indexPath.row && visibleIndex.section == indexPath.section{
-                            visible = true
-                            break
+            
+            if indexPath.section == (self.chatRoom!.commentsGroupCount - 1){
+                if indexPath.row == commentGroup.commentsCount - 1{
+                    let visibleIndexPath = collectionView.indexPathsForVisibleItems
+                    if visibleIndexPath.count > 0{
+                        var visible = false
+                        for visibleIndex in visibleIndexPath{
+                            if visibleIndex.row == indexPath.row && visibleIndex.section == indexPath.section{
+                                visible = true
+                                break
+                            }
                         }
+                        isLastRowVisible = visible
+                    }else{
+                        isLastRowVisible = true
                     }
-                    isLastRowVisible = visible
-                }else{
-                    isLastRowVisible = true
                 }
             }
         }
