@@ -254,10 +254,13 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
         
         let currentTime = cell.comment!.currentTimeSlider
         audioPlayer?.currentTime = Double(currentTime)
-        audioPlayer?.prepareToPlay()
-        audioPlayer?.play()
-        audioTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(audioTimerFired(_:)), userInfo: nil, repeats: true)
-        cell.comment?.updatePlaying(playing: false)
+//        audioPlayer?.prepareToPlay()
+//        audioPlayer?.play()
+//        audioTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(audioTimerFired(_:)), userInfo: nil, repeats: true)
+//        if let targetCell = cell as? QCellAudio {
+//            targetCell.isPlaying = false
+//        }
+//        cell.comment?.updatePlaying(playing: false)
         if let targetCell = cell as? QCellAudioLeft{
             targetCell.isPlaying = false
         }

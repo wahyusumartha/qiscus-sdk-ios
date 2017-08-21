@@ -157,13 +157,14 @@ class QCellAudioLeft: QCellAudio {
     }
     @IBAction func playButtonTapped(_ sender: UIButton) {
         self.isPlaying = true
-        self.comment?.updatePlaying(playing: true)
-        self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "audioIsPlaying")
-        self.audioCellDelegate?.didTapPlayButton(sender, onCell: self)
+        DispatchQueue.main.async {
+            self.comment?.updatePlaying(playing: true)
+            self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "audioIsPlaying")
+            self.audioCellDelegate?.didTapPlayButton(sender, onCell: self)
+        }
     }
     
     @IBAction func pauseButtonTapped(_ sender: UIButton) {
-        self.isPlaying = false
         self.isPlaying = false
         DispatchQueue.main.async {
             self.comment?.updatePlaying(playing: false)
@@ -186,13 +187,15 @@ class QCellAudioLeft: QCellAudio {
                 self.seekTimeLabel.text = seekTimeString
             }
             self.audioCellDelegate?.didStartSeekTimeSlider(sender, onCell: self)
-            
         }
     }
     @IBAction func sliderTouchUpInside(_ sender: UISlider) {
-        self.comment!.currentTimeSlider = self.currentTimeSlider.value
-        self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "currentTimeSlider")
-        self.audioCellDelegate?.didEndSeekTimeSlider(sender, onCell: self)
+        DispatchQueue.main.async {
+            self.comment!.updateTimeSlider(value: self.currentTimeSlider.value)
+            self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "currentTimeSlider")
+            self.audioCellDelegate?.didEndSeekTimeSlider(sender, onCell: self)
+        }
+        
     }
     public override func downloadingMedia() {
         self.progressContainer.isHidden = false
