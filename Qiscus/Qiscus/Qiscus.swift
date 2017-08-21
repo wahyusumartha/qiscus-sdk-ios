@@ -182,7 +182,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
         Qiscus.shared.RealtimeConnect()
     }
     @objc public class func setup(withAppId appId:String, userEmail:String, userKey:String, username:String, avatarURL:String? = nil, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true){
-//        Qiscus.checkDatabaseMigration()
+        Qiscus.checkDatabaseMigration()
         var requestProtocol = "https"
         if !secureURl {
             requestProtocol = "http"
@@ -720,7 +720,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
             Qiscus.qiscusDeviceToken = tokenString
             QiscusMe.sharedInstance.deviceToken = tokenString
             Qiscus.printLog(text: "Device token: \(tokenString)")
-            QiscusCommentClient.sharedInstance.registerDevice(withToken: tokenString)
+            QChatService.registerDevice(withToken: tokenString)
         }
     }
     @objc public class func didRegisterUserNotification(){

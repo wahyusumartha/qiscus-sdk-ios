@@ -674,4 +674,71 @@ public class QChatService:NSObject {
             }
         }
     }
+    
+    internal class func registerDevice(withToken deviceToken: String){
+        func register(){
+            let parameters:[String: AnyObject] = [
+                "token"  : qiscus.config.USER_TOKEN as AnyObject,
+                "device_token" : deviceToken as AnyObject,
+                "device_platform" : "ios" as AnyObject
+            ]
+            
+            Qiscus.printLog(text: "registerDevice url: \(QiscusConfig.SET_DEVICE_TOKEN_URL)")
+            Qiscus.printLog(text: "post parameters: \(parameters)")
+            
+            Alamofire.request(QiscusConfig.SET_DEVICE_TOKEN_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+                Qiscus.printLog(text: "registerDevice result: \(response)")
+                Qiscus.printLog(text: "registerDevice url: \(QiscusConfig.LOGIN_REGISTER)")
+                Qiscus.printLog(text: "registerDevice parameters: \(parameters)")
+                Qiscus.printLog(text: "registerDevice headers: \(QiscusConfig.sharedInstance.requestHeader)")
+                switch response.result {
+                case .success:
+                    DispatchQueue.main.async(execute: {
+                        if let result = response.result.value{
+                            let json = JSON(result)
+                            let success:Bool = (json["status"].intValue == 200)
+                            
+                            if success {
+                                let pnData = json["results"]
+                                let configured = pnData["pn_ios_configured"].boolValue
+                                if configured {
+                                    if let delegate = QiscusCommentClient.shared.configDelegate {
+                                        delegate.didRegisterQiscusPushNotification?(withDeviceToken: Qiscus.deviceToken)
+                                    }
+                                }else{
+                                    if let delegate = QiscusCommentClient.shared.configDelegate  {
+                                        delegate.failToRegisterQiscusPushNotification?(withError: "unsuccessful register deviceToken : pushNotification not configured", andDeviceToken: Qiscus.deviceToken)
+                                    }
+                                }
+                            }else{
+                                if let delegate = QiscusCommentClient.shared.configDelegate {
+                                    delegate.failToRegisterQiscusPushNotification?(withError: "unsuccessful register deviceToken", andDeviceToken: Qiscus.deviceToken)
+                                }
+                            }
+                        }else{
+                            if let delegate = QiscusCommentClient.shared.configDelegate {
+                                delegate.failToRegisterQiscusPushNotification?(withError: "unsuccessful register deviceToken", andDeviceToken: Qiscus.deviceToken)
+                            }
+                        }
+                    })
+                    break
+                case .failure(let error):
+                    DispatchQueue.main.async(execute: {
+                        if let delegate = QiscusCommentClient.shared.configDelegate {
+                            delegate.failToRegisterQiscusPushNotification?(withError: "unsuccessful register deviceToken: \(error)", andDeviceToken: Qiscus.deviceToken)
+                        }
+                    })
+                    break
+                }
+            })
+        }
+        if Qiscus.isLoggedIn {
+            register()
+        }else{
+            QChatService.defaultService.reconnect {
+                register()
+            }
+        }
+        
+    }
 }
