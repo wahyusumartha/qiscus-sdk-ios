@@ -529,6 +529,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
                 Qiscus.sharedInstance.connected = true
                 if Qiscus.isLoggedIn {
                     Qiscus.sharedInstance.RealtimeConnect()
+                    QComment.resendPendingMessage()
                 }
             }
         }
@@ -543,6 +544,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
                 Qiscus.sharedInstance.connected = true
                 if Qiscus.isLoggedIn {
                     Qiscus.sharedInstance.RealtimeConnect()
+                    QComment.resendPendingMessage()
                 }
             }
         }

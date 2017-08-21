@@ -88,21 +88,30 @@ class QCellFileRight: QChatCell {
         statusImage.isHidden = false
         statusImage.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
         
-        if status == .sending {
+        switch status {
+        case .sending, .pending:
             dateLabel.text = QiscusTextConfiguration.sharedInstance.sendingText
+            if status == .pending {
+                dateLabel.text = self.comment!.time.lowercased()
+            }
             statusImage.image = Qiscus.image(named: "ic_info_time")?.withRenderingMode(.alwaysTemplate)
-        }else if status == .sent {
+            break
+        case .sent:
             statusImage.image = Qiscus.image(named: "ic_sending")?.withRenderingMode(.alwaysTemplate)
-        }else if status == .delivered{
+            break
+        case .delivered:
             statusImage.image = Qiscus.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)
-        }else if status == .read{
+            break
+        case .read:
             statusImage.tintColor = UIColor.green
             statusImage.image = Qiscus.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)
-        }else if status == .failed {
+            break
+        case .failed:
             dateLabel.text = QiscusTextConfiguration.sharedInstance.failedText
             dateLabel.textColor = QiscusColorConfiguration.sharedInstance.failToSendColor
             statusImage.image = Qiscus.image(named: "ic_warning")?.withRenderingMode(.alwaysTemplate)
             statusImage.tintColor = QiscusColorConfiguration.sharedInstance.failToSendColor
+            break
         }
     }
     public override func updateUserName() {

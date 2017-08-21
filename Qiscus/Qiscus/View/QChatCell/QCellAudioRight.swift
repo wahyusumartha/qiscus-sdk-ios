@@ -198,7 +198,7 @@ class QCellAudioRight: QCellAudio {
         }
     }
 
-    open override func updateStatus(toStatus status:QCommentStatus){
+    public override func updateStatus(toStatus status:QCommentStatus){
         dateLabel.textColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
         dateLabel.text = self.comment!.time.lowercased()
         statusImage.isHidden = false
@@ -207,32 +207,29 @@ class QCellAudioRight: QCellAudio {
         statusImage.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
         
         switch status {
-        case .sending:
+        case .sending, .pending:
+            dateLabel.text = QiscusTextConfiguration.sharedInstance.sendingText
+            if status == .pending {
+                dateLabel.text = self.comment!.time.lowercased()
+            }
+            statusImage.image = Qiscus.image(named: "ic_info_time")?.withRenderingMode(.alwaysTemplate)
             break
         case .sent:
+            statusImage.image = Qiscus.image(named: "ic_sending")?.withRenderingMode(.alwaysTemplate)
             break
         case .delivered:
+            statusImage.image = Qiscus.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)
             break
         case .read:
-            break
-        case .failed:
-            break
-        }
-        if status == .sending {
-            dateLabel.text = QiscusTextConfiguration.sharedInstance.sendingText
-            statusImage.image = Qiscus.image(named: "ic_info_time")?.withRenderingMode(.alwaysTemplate)
-        }else if status == .sent {
-            statusImage.image = Qiscus.image(named: "ic_sending")?.withRenderingMode(.alwaysTemplate)
-        }else if status == .delivered{
-            statusImage.image = Qiscus.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)
-        }else if status == .read{
             statusImage.tintColor = UIColor.green
             statusImage.image = Qiscus.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)
-        }else if status == .failed {
+            break
+        case .failed:
             dateLabel.text = QiscusTextConfiguration.sharedInstance.failedText
             dateLabel.textColor = QiscusColorConfiguration.sharedInstance.failToSendColor
             statusImage.image = Qiscus.image(named: "ic_warning")?.withRenderingMode(.alwaysTemplate)
             statusImage.tintColor = QiscusColorConfiguration.sharedInstance.failToSendColor
+            break
         }
     }
     public override func downloadingMedia() {

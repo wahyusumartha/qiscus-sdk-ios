@@ -213,19 +213,31 @@ public class QRoomService:NSObject{
                             self.sync(onRoom: room)
                         }
                     }else{
+                        var status = QCommentStatus.failed
+                        if comment.type == .text || comment.type == .reply || comment.type == .custom {
+                            status = .pending
+                        }
                         if let room = QRoom.room(withId: roomId){
-                            room.updateCommentStatus(inComment: comment, status: .failed)
+                            room.updateCommentStatus(inComment: comment, status: status)
                         }
                     }
                 }else{
+                    var status = QCommentStatus.failed
+                    if comment.type == .text || comment.type == .reply || comment.type == .custom {
+                        status = .pending
+                    }
                     if let room = QRoom.room(withId: roomId){
-                        room.updateCommentStatus(inComment: comment, status: .failed)
+                        room.updateCommentStatus(inComment: comment, status: status)
                     }
                 }
                 break
             case .failure(let error):
+                var status = QCommentStatus.failed
+                if comment.type == .text || comment.type == .reply || comment.type == .custom {
+                    status = .pending
+                }
                 if let room = QRoom.room(withId: roomId){
-                    room.updateCommentStatus(inComment: comment, status: .failed)
+                    room.updateCommentStatus(inComment: comment, status: status)
                 }
                 Qiscus.printLog(text: "fail to post comment with error: \(error)")
                 break

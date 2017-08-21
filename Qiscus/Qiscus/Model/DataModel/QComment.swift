@@ -70,6 +70,7 @@ public enum QReplyType:Int{
 }
 @objc public enum QCommentStatus:Int{
     case sending
+    case pending
     case sent
     case delivered
     case read
@@ -494,7 +495,6 @@ public class QComment:Object {
     
     // MARK : updater method
     public func updateStatus(status:QCommentStatus){
-        
         if self.status != status && (self.statusRaw < status.rawValue || self.status == .failed){
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
@@ -708,6 +708,19 @@ public class QComment:Object {
         for comment in comments{
             if QComment.cache[comment.uniqueId] == nil {
                 QComment.cache[comment.uniqueId] = comment
+            }
+        }
+    }
+    internal class func resendPendingMessage(){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let data = realm.objects(QComment.self).filter("statusRaw == 1")
+        
+        if data.count > 0 {
+            for comment in data {
+                if let room = QRoom.room(withId: comment.roomId){
+                    room.updateCommentStatus(inComment: comment, status: .sending)
+                    room.post(comment: comment)
+                }
             }
         }
     }

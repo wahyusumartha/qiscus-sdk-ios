@@ -160,27 +160,35 @@ class QCellMediaRight: QChatCell {
         }
     }
     
-    open override func updateStatus(toStatus status:QCommentStatus){
+    public override func updateStatus(toStatus status:QCommentStatus){
         dateLabel.text = self.comment!.time.lowercased()
         dateLabel.textColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
         statusImage.isHidden = false
         statusImage.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
         
-        if status == .sending {
+        switch status {
+        case .sending, .pending:
             if self.comment!.isUploading{
                 dateLabel.text = QiscusTextConfiguration.sharedInstance.uploadingText
             }else{
                 dateLabel.text = QiscusTextConfiguration.sharedInstance.sendingText
+                if status == .pending {
+                    dateLabel.text = self.comment!.time.lowercased()
+                }
             }
             statusImage.image = Qiscus.image(named: "ic_info_time")?.withRenderingMode(.alwaysTemplate)
-        }else if status == .sent {
+            break
+        case .sent:
             statusImage.image = Qiscus.image(named: "ic_sending")?.withRenderingMode(.alwaysTemplate)
-        }else if status == .delivered{
+            break
+        case .delivered:
             statusImage.image = Qiscus.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)
-        }else if status == .read{
+            break
+        case .read:
             statusImage.tintColor = UIColor.green
             statusImage.image = Qiscus.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)
-        }else if status == .failed {
+            break
+        case .failed:
             self.progressView.isHidden = true
             self.progressContainer.isHidden = true
             self.progressLabel.isHidden = true
@@ -205,6 +213,7 @@ class QCellMediaRight: QChatCell {
             dateLabel.textColor = QiscusColorConfiguration.sharedInstance.failToSendColor
             statusImage.image = Qiscus.image(named: "ic_warning")?.withRenderingMode(.alwaysTemplate)
             statusImage.tintColor = QiscusColorConfiguration.sharedInstance.failToSendColor
+            break
         }
     }
 

@@ -428,7 +428,7 @@ extension QiscusChatVC {
     }
     
     func sendMessage(){
-        if Qiscus.shared.connected{
+        //if Qiscus.shared.connected{
             if !self.isRecording {
                 let value = self.inputText.value.trimmingCharacters(in: .whitespacesAndNewlines)
                 var type:QCommentType = .text
@@ -463,12 +463,12 @@ extension QiscusChatVC {
             }else{
                 self.finishRecording()
             }
-        }else{
-            self.showNoConnectionToast()
-            if self.isRecording {
-                self.cancelRecordVoice()
-            }
-        }
+//        }else{
+//            self.showNoConnectionToast()
+//            if self.isRecording {
+//                self.cancelRecordVoice()
+//            }
+//        }
     }
     func uploadImage(){
         view.endEditing(true)

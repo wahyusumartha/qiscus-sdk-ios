@@ -219,10 +219,13 @@ class QCellTextRight: QChatCell {
     
     public override func updateStatus(toStatus status:QCommentStatus){
         switch status {
-        case .sending:
+        case .sending, .pending:
             dateLabel.textColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
             statusImage.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
             dateLabel.text = QiscusTextConfiguration.sharedInstance.sendingText
+            if status == .pending {
+                dateLabel.text = self.comment!.time.lowercased()
+            }
             statusImage.image = Qiscus.image(named: "ic_info_time")?.withRenderingMode(.alwaysTemplate)
             break
         case .sent:
