@@ -10,10 +10,10 @@ import UIKit
 import Qiscus
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
     
     var window: UIWindow?
-    
+    var navigationController: UINavigationController?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -26,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if !Qiscus.isLoggedIn{
             goToLoginView()
         }else{
-            Qiscus.connect()
+            Qiscus.connect(delegate: self)
             goToChatNavigationView()
         }
         
@@ -74,14 +74,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didRegister notificationSettings: UIUserNotificationSettings) {
         //Qiscus.didRegisterUserNotification()
     }
-
+    func application(_ application: UIApplication, didReceive notification: UILocalNotification) {
+        Qiscus.didReceiveNotification(notification: notification)
+    }
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
         print("hellooo ...")
        Qiscus.didReceive(RemoteNotification:userInfo)
     }
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("\(error)")
+    }
     func goToChatNavigationView(){
         let chatView = goToChatVC()
-        let navigationController = UINavigationController(rootViewController: chatView)
+        self.navigationController = UINavigationController(rootViewController: chatView)
         window?.rootViewController = navigationController
     }
     
@@ -89,6 +94,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let mainView = MainView()
         let navigationController = UINavigationController(rootViewController: mainView)
         window?.rootViewController = navigationController
+    }
+    
+    func qiscusLogin(withAppId: String, userEmail: String, userKey:String, username: String){
+        Qiscus.setup(withAppId: withAppId, userEmail: userEmail, userKey: userKey, username: username,delegate: self)
+    }
+    
+    // MARK: - QiscusConfigDelegate
+    func qiscusFailToConnect(_ withMessage:String){
+        print(withMessage)
+    }
+    func qiscusConnected(){
+        self.goToChatNavigationView()
+    }
+    func qiscus(gotSilentNotification comment: QComment) {
+        Qiscus.createLocalNotification(forComment: comment)
+    }
+    func qiscus(didTapLocalNotification comment: QComment, userInfo: [AnyHashable : Any]?) {
+        let view = Qiscus.chatView(withRoomId: comment.roomId)
+        let chatView = goToChatVC()
+        self.navigationController = UINavigationController(rootViewController: chatView)
+        window?.rootViewController = navigationController
+        view.titleAction = {
+            print("title clicked")
+        }
+        view.forwardAction = {(comment) in
+            view.navigationController?.popViewController(animated: true)
+            comment.forward(toRoomWithId: 13006)
+            let newView = Qiscus.chatView(withRoomId: 13006)
+            self.navigationController?.pushViewController(newView, animated: true)
+        }
+        self.navigationController?.pushViewController(view, animated: true)
     }
 }
 

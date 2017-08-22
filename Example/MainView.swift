@@ -9,7 +9,7 @@
 import UIKit
 import Qiscus
 
-class MainView: UIViewController, QiscusConfigDelegate {
+class MainView: UIViewController {
 
     @IBOutlet weak var appIdField: UITextField!
     @IBOutlet weak var emailField: UITextField!
@@ -42,19 +42,11 @@ class MainView: UIViewController, QiscusConfigDelegate {
     */
     @IBAction func login(_ sender: UIButton) {
         self.showQiscusLoading()
-        Qiscus.setup(withAppId: appIdField.text!, userEmail: emailField.text!, userKey: userKeyField.text!, username: userNameField.text!,delegate: self)
+        appDelegate.qiscusLogin(withAppId: appIdField.text!, userEmail: emailField.text!, userKey: userKeyField.text!, username: userNameField.text!)
     }
     func hideKeyboard(){
         self.view.endEditing(true)
     }
     
-    // MARK: - QiscusConfigDelegate
-    func qiscusFailToConnect(_ withMessage:String){
-        print(withMessage)
-        self.dismissQiscusLoading()
-    }
-    func qiscusConnected(){
-        appDelegate.goToChatNavigationView()
-        self.dismissQiscusLoading()
-    }
+    
 }
