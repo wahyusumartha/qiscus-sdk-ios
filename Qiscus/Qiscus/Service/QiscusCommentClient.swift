@@ -49,7 +49,6 @@ open class QiscusCommentClient: NSObject {
     
     open var commentDelegate: QCommentDelegate?
     open var roomDelegate: QiscusRoomDelegate?
-    open var configDelegate: QiscusConfigDelegate?
     open var linkRequest: Alamofire.Request?
     
     
@@ -81,48 +80,51 @@ open class QiscusCommentClient: NSObject {
                 Qiscus.printLog(text: "post headers: \(QiscusConfig.sharedInstance.requestHeader)")
                 switch response.result {
                     case .success:
-                        DispatchQueue.main.async(execute: {
-                            if let result = response.result.value{
-                                let json = JSON(result)
-                                let success:Bool = (json["status"].intValue == 200)
-                                
-                                if success {
-                                    let userData = json["results"]["user"]
-                                    let _ = QiscusMe.saveData(fromJson: userData)
-                                    if self.configDelegate != nil {
-                                        Qiscus.setupReachability()
-                                        Qiscus.uiThread.async {
-                                            self.configDelegate!.qiscusConnected()
-                                        }
-                                        Qiscus.registerNotification()
-                                        if let successAction = onSuccess {
-                                            successAction()
-                                        }
+                        if let result = response.result.value{
+                            let json = JSON(result)
+                            let success:Bool = (json["status"].intValue == 200)
+                            
+                            if success {
+                                let userData = json["results"]["user"]
+                                let _ = QiscusMe.saveData(fromJson: userData)
+                                Qiscus.setupReachability()
+                                if let delegate = Qiscus.shared.delegate {
+                                    Qiscus.uiThread.async {
+                                        delegate.qiscus?(didConnect: true, error: nil)
+                                        delegate.qiscusConnected?()
                                     }
-                                }else{
-                                    if let delegate = self.configDelegate{
-                                        Qiscus.uiThread.async {
-                                            delegate.qiscusFailToConnect("\(json["message"].stringValue)")
-                                        }
+                                }
+                                Qiscus.registerNotification()
+                                if let successAction = onSuccess {
+                                    Qiscus.uiThread.async {
+                                        successAction()
                                     }
                                 }
                             }else{
-                                if self.configDelegate != nil {
+                                if let delegate = Qiscus.shared.delegate {
                                     Qiscus.uiThread.async {
-                                        self.configDelegate!.qiscusFailToConnect("Cant get data from qiscus server")
+                                        delegate.qiscusFailToConnect?("\(json["message"].stringValue)")
+                                        delegate.qiscus?(didConnect: false, error: "\(json["message"].stringValue)")
                                     }
                                 }
                             }
-                        })
-                    break
-                    case .failure(let error):
-                        DispatchQueue.main.async(execute: {
-                            if self.configDelegate != nil {
+                        }else{
+                            if let delegate = Qiscus.shared.delegate {
                                 Qiscus.uiThread.async {
-                                    self.configDelegate!.qiscusFailToConnect("\(error)")
+                                    let error = "Cant get data from qiscus server"
+                                    delegate.qiscusFailToConnect?(error)
+                                    delegate.qiscus?(didConnect: false, error: error)
                                 }
                             }
-                        })
+                        }
+                    break
+                    case .failure(let error):
+                        if let delegate = Qiscus.shared.delegate {
+                            Qiscus.uiThread.async {
+                                delegate.qiscusFailToConnect?("\(error)")
+                                delegate.qiscus?(didConnect: false, error: "\(error)")
+                            }
+                        }
                     break
                 }
             })
@@ -156,32 +158,30 @@ open class QiscusCommentClient: NSObject {
                                 let pnData = json["results"]
                                 let configured = pnData["pn_ios_configured"].boolValue
                                 if configured {
-                                    if let delegate = self.configDelegate {
-                                        delegate.didRegisterQiscusPushNotification?(withDeviceToken: Qiscus.deviceToken)
+                                    if let delegate = Qiscus.shared.delegate {
+                                        delegate.qiscus?(didRegisterPushNotification: true, deviceToken: deviceToken, error: nil)
                                     }
                                 }else{
-                                    if let delegate = self.configDelegate {
-                                        delegate.failToRegisterQiscusPushNotification?(withError: "unsuccessful register deviceToken : pushNotification not configured", andDeviceToken: Qiscus.deviceToken)
+                                    if let delegate = Qiscus.shared.delegate {
+                                        delegate.qiscus?(didRegisterPushNotification: false, deviceToken: deviceToken, error: "unsuccessful register deviceToken : pushNotification not configured")
                                     }
                                 }
                             }else{
-                                if let delegate = self.configDelegate {
-                                    delegate.failToRegisterQiscusPushNotification?(withError: "unsuccessful register deviceToken", andDeviceToken: Qiscus.deviceToken)
+                                if let delegate = Qiscus.shared.delegate {
+                                    delegate.qiscus?(didRegisterPushNotification: false, deviceToken: deviceToken, error: "unsuccessful register deviceToken")
                                 }
                             }
                         }else{
-                            if let delegate = self.configDelegate {
-                                delegate.failToRegisterQiscusPushNotification?(withError: "unsuccessful register deviceToken", andDeviceToken: Qiscus.deviceToken)
+                            if let delegate = Qiscus.shared.delegate {
+                                delegate.qiscus?(didRegisterPushNotification: false, deviceToken: deviceToken, error: "unsuccessful register deviceToken")
                             }
                         }
                     })
                     break
                 case .failure(let error):
-                    DispatchQueue.main.async(execute: {
-                        if let delegate = self.configDelegate {
-                            delegate.failToRegisterQiscusPushNotification?(withError: "unsuccessful register deviceToken: \(error)", andDeviceToken: Qiscus.deviceToken)
-                        }
-                    })
+                    if let delegate = Qiscus.shared.delegate{
+                        delegate.qiscus?(didRegisterPushNotification: false, deviceToken: deviceToken, error: "unsuccessful register deviceToken: \(error)")
+                    }
                     break
                 }
             })
@@ -206,7 +206,7 @@ open class QiscusCommentClient: NSObject {
         
     }
     // MARK: - Remove deviceToken
-    open func unRegisterDevice(){
+    public func unRegisterDevice(){
         if QiscusMe.sharedInstance.deviceToken != "" {
             let parameters:[String: AnyObject] = [
                 "token"  : qiscus.config.USER_TOKEN as AnyObject,
@@ -226,45 +226,40 @@ open class QiscusCommentClient: NSObject {
                                 let pnData = json["results"]
                                 let success = pnData["success"].boolValue
                                 if success {
-                                    if let delegate = self.configDelegate {
-                                        delegate.didUnregisterQiscusPushNotification?(success: true, error: nil, deviceToken: QiscusMe.sharedInstance.deviceToken)
+                                    if let delegate = Qiscus.shared.delegate{
+                                        delegate.qiscus?(didUnregisterPushNotification: true, error: nil)
                                         QiscusMe.sharedInstance.deviceToken = ""
                                     }
                                 }else{
-                                    if let delegate = self.configDelegate {
-                                        delegate.didUnregisterQiscusPushNotification?(success: false, error: "cannot unregister device", deviceToken: QiscusMe.sharedInstance.deviceToken)
+                                    if let delegate = Qiscus.shared.delegate{
+                                        delegate.qiscus?(didUnregisterPushNotification: false, error: "cannot unregister device")
                                     }
                                     DispatchQueue.global().async {
                                         self.unRegisterDevice()
                                     }
                                 }
                             }else{
-                                if let delegate = self.configDelegate {
-                                    delegate.didUnregisterQiscusPushNotification?(success: false, error: "cannot unregister device", deviceToken: QiscusMe.sharedInstance.deviceToken)
+                                if let delegate = Qiscus.shared.delegate {
+                                    delegate.qiscus?(didUnregisterPushNotification: false, error: "cannot unregister device")
                                 }
-                                DispatchQueue.global().async {
-                                    self.unRegisterDevice()
-                                }
+//                                DispatchQueue.global().async {
+//                                    self.unRegisterDevice()
+//                                }
                             }
                         }else{
-                            if let delegate = self.configDelegate {
-                                delegate.didUnregisterQiscusPushNotification?(success: false, error: "cannot unregister device", deviceToken: QiscusMe.sharedInstance.deviceToken)
+                            if let delegate = Qiscus.shared.delegate {
+                                delegate.qiscus?(didUnregisterPushNotification: false, error: "cannot unregister device")
                             }
-                            DispatchQueue.global().async {
-                                self.unRegisterDevice()
-                            }
+//                            DispatchQueue.global().async {
+//                                self.unRegisterDevice()
+//                            }
                         }
                     })
                     break
                 case .failure( _):
-                    DispatchQueue.main.async(execute: {
-                        if let delegate = self.configDelegate {
-                            delegate.didUnregisterQiscusPushNotification?(success: false, error: "cannot unregister device", deviceToken: QiscusMe.sharedInstance.deviceToken)
-                        }
-                        DispatchQueue.global().async {
-                            self.unRegisterDevice()
-                        }
-                    })
+                    if let delegate = Qiscus.shared.delegate {
+                        delegate.qiscus?(didUnregisterPushNotification: false, error: "cannot unregister device")
+                    }
                     break
                 }
             })

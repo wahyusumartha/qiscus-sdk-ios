@@ -557,10 +557,12 @@ public class QChatService:NSObject {
                                 if id > QiscusMe.sharedInstance.lastCommentId {
                                     DispatchQueue.main.async(execute: { 
                                         if let room = QRoom.room(withId: roomId){
-                                            room.saveNewComment(fromJSON: newComment)
-                                            if id > QiscusMe.sharedInstance.lastCommentId{
-                                                if type == "system_event" {
-                                                    room.sync()
+                                            if !room.isInvalidated {
+                                                room.saveNewComment(fromJSON: newComment)
+                                                if id > QiscusMe.sharedInstance.lastCommentId{
+                                                    if type == "system_event" {
+                                                        room.sync()
+                                                    }
                                                 }
                                             }
                                         }else{
@@ -702,32 +704,30 @@ public class QChatService:NSObject {
                                 let pnData = json["results"]
                                 let configured = pnData["pn_ios_configured"].boolValue
                                 if configured {
-                                    if let delegate = QiscusCommentClient.shared.configDelegate {
-                                        delegate.didRegisterQiscusPushNotification?(withDeviceToken: Qiscus.deviceToken)
+                                    if let delegate = Qiscus.shared.delegate {
+                                        delegate.qiscus?(didRegisterPushNotification: true, deviceToken: deviceToken, error: nil)
                                     }
                                 }else{
-                                    if let delegate = QiscusCommentClient.shared.configDelegate  {
-                                        delegate.failToRegisterQiscusPushNotification?(withError: "unsuccessful register deviceToken : pushNotification not configured", andDeviceToken: Qiscus.deviceToken)
+                                    if let delegate = Qiscus.shared.delegate  {
+                                        delegate.qiscus?(didRegisterPushNotification: false, deviceToken: deviceToken, error: "failed to register deviceToken : pushNotification not configured")
                                     }
                                 }
                             }else{
-                                if let delegate = QiscusCommentClient.shared.configDelegate {
-                                    delegate.failToRegisterQiscusPushNotification?(withError: "unsuccessful register deviceToken", andDeviceToken: Qiscus.deviceToken)
+                                if let delegate = Qiscus.shared.delegate {
+                                    delegate.qiscus?(didRegisterPushNotification: false, deviceToken: deviceToken, error: "unsuccessful register deviceToken")
                                 }
                             }
                         }else{
-                            if let delegate = QiscusCommentClient.shared.configDelegate {
-                                delegate.failToRegisterQiscusPushNotification?(withError: "unsuccessful register deviceToken", andDeviceToken: Qiscus.deviceToken)
+                            if let delegate = Qiscus.shared.delegate {
+                                delegate.qiscus?(didRegisterPushNotification: false, deviceToken: deviceToken, error: "unsuccessful register deviceToken")
                             }
                         }
                     })
                     break
                 case .failure(let error):
-                    DispatchQueue.main.async(execute: {
-                        if let delegate = QiscusCommentClient.shared.configDelegate {
-                            delegate.failToRegisterQiscusPushNotification?(withError: "unsuccessful register deviceToken: \(error)", andDeviceToken: Qiscus.deviceToken)
-                        }
-                    })
+                    if let delegate = Qiscus.shared.delegate {
+                        delegate.qiscus?(didRegisterPushNotification: false, deviceToken: deviceToken, error: "unsuccessful register deviceToken: \(error)")
+                    }
                     break
                 }
             })

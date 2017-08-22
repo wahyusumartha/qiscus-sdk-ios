@@ -44,6 +44,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     var notificationAction:((QiscusChatVC)->Void)? = nil
     var syncing = false
     var syncTimer: Timer?
+    var delegate:QiscusConfigDelegate?
     
     @objc public var styleConfiguration = QiscusUIConfiguration.sharedInstance
     @objc public var connected:Bool = false
@@ -178,8 +179,11 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
             Qiscus.mqttConnect()
         }
     }
-    public class func connect(){
+    public class func connect(delegate:QiscusConfigDelegate? = nil){
         Qiscus.shared.RealtimeConnect()
+        if delegate != nil {
+            Qiscus.shared.delegate = delegate
+        }
     }
     @objc public class func setup(withAppId appId:String, userEmail:String, userKey:String, username:String, avatarURL:String? = nil, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true){
         Qiscus.checkDatabaseMigration()
@@ -199,7 +203,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
             QiscusMe.sharedInstance.userData.set(avatarURL, forKey: "qiscus_param_avatar")
         }
         if delegate != nil {
-            QiscusCommentClient.sharedInstance.configDelegate = delegate
+            Qiscus.shared.delegate = delegate
         }
         var needLogin = false
         
@@ -215,10 +219,11 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
             Qiscus.clear()
             QiscusCommentClient.sharedInstance.loginOrRegister(userEmail, password: userKey, username: username, avatarURL: avatarURL)
         }else{
-            if QiscusCommentClient.sharedInstance.configDelegate != nil {
-                Qiscus.setupReachability()
+            Qiscus.setupReachability()
+            if let delegate = Qiscus.shared.delegate {
                 Qiscus.uiThread.async {
-                    QiscusCommentClient.sharedInstance.configDelegate!.qiscusConnected()
+                    delegate.qiscusConnected?()
+                    delegate.qiscus?(didConnect: true, error: nil)
                 }
             }
         }
@@ -246,10 +251,11 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
         Qiscus.sharedInstance.RealtimeConnect()
         
         if delegate != nil {
-            QiscusCommentClient.sharedInstance.configDelegate = delegate
-            Qiscus.uiThread.async {
-                QiscusCommentClient.sharedInstance.configDelegate!.qiscusConnected()
-            }
+            Qiscus.shared.delegate = delegate
+        }
+        Qiscus.uiThread.async {
+            Qiscus.shared.delegate?.qiscusConnected?()
+            Qiscus.shared.delegate?.qiscus?(didConnect: true, error: nil)
         }
     }
     
@@ -733,9 +739,22 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     
     @objc public class func didReceive(RemoteNotification userInfo:[AnyHashable : Any], completionHandler: @escaping (UIBackgroundFetchResult) -> Void = {_ in}){
         completionHandler(.newData)
-        if Qiscus.isLoggedIn{
-            Qiscus.sync()
+        print("userInfo silent:\(userInfo)")
+        
+        if userInfo["qiscus_sdk"] != nil {
+            let state = Qiscus.shared.application.applicationState
+            if state != .active {
+                QChatService.sync()
+                if let payloadData = userInfo["payload"]{
+                    let jsonPayload = JSON(arrayLiteral: payloadData)[0]
+                    let tempComment = QComment.tempComment(fromJSON: jsonPayload)
+                    Qiscus.shared.delegate?.qiscus?(gotSilentNotification: tempComment)
+                }
+            }
         }
+//        if Qiscus.isLoggedIn{
+//            Qiscus.sync()
+//        }
     }
     @objc public class func notificationAction(roomId: Int){
         if let window = UIApplication.shared.keyWindow{
@@ -767,41 +786,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
             }
         }
     }
-    @objc public class func didReceive(LocalNotification notification:UILocalNotification){
-        UIApplication.shared.cancelAllLocalNotifications()
-        if let userInfo = notification.userInfo {
-            if let roomData = userInfo["qiscus-room-id"]{
-                let roomId = roomData as! Int
-                if let window = UIApplication.shared.keyWindow{
-                    if Qiscus.sharedInstance.notificationAction != nil{
-                        let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
-                        Qiscus.sharedInstance.notificationAction!(chatVC)
-                    }else{
-                        if let currenRootView = window.rootViewController as? UINavigationController{
-                            let viewController = currenRootView.viewControllers[currenRootView.viewControllers.count - 1]
-                            if Qiscus.sharedInstance.isPushed{
-                                let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
-                                currenRootView.pushViewController(chatVC, animated: true)
-                            }else{
-                                Qiscus.chat(withRoomId: roomId, target: viewController)
-                            }
-                        }
-                        else if let currentRootView = window.rootViewController as? UITabBarController{
-                            if let navigation = currentRootView.selectedViewController as? UINavigationController{
-                                let viewController = navigation.viewControllers[navigation.viewControllers.count - 1]
-                                if Qiscus.sharedInstance.isPushed{
-                                    let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
-                                    navigation.pushViewController(chatVC, animated: true)
-                                }else{
-                                    Qiscus.chat(withRoomId: roomId, target: viewController)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    
     class func mqttConnect(chatOnly:Bool = false){
         let appName = Bundle.main.infoDictionary![kCFBundleNameKey as String] as! String
         var deviceID = "000"
@@ -822,6 +807,53 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
         let state = UIApplication.shared.applicationState
         if state == .active {
             mqtt.connect()
+        }
+    }
+    public class func createLocalNotification(forComment comment:QComment, alertTitle:String? = nil, alertBody:String? = nil, userInfo:[AnyHashable : Any]? = nil){
+        DispatchQueue.main.async {
+            let localNotification = UILocalNotification()
+            if let title = alertTitle {
+                localNotification.alertTitle = title
+            }else{
+                localNotification.alertTitle = comment.senderName
+            }
+            if let body = alertBody {
+                localNotification.alertBody = body
+            }else{
+                localNotification.alertBody = comment.text
+            }
+            var userData = [AnyHashable : Any]()
+            
+            if userInfo != nil {
+                for (key,value) in userInfo! {
+                    userData[key] = value
+                }
+            }
+            
+            let commentInfo = comment.encodeDictionary()
+            for (key,value) in commentInfo {
+                userData[key] = value
+            }
+            localNotification.userInfo = userData
+            localNotification.fireDate = Date().addingTimeInterval(0.4)
+            Qiscus.shared.application.scheduleLocalNotification(localNotification)
+        }
+    }
+    public class func didReceiveNotification(notification:UILocalNotification){
+        if notification.userInfo != nil {
+            if let comment = QComment.decodeDictionary(data: notification.userInfo!) {
+                var userData:[AnyHashable : Any]? = [AnyHashable : Any]()
+                let qiscusKey:[AnyHashable] = ["qiscus_commentdata","qiscus_uniqueId","qiscus_id","qiscus_roomId","qiscus_beforeId","qiscus_text","qiscus_createdAt","qiscus_senderEmail","qiscus_senderName","qiscus_statusRaw","qiscus_typeRaw","qiscus_data"]
+                for (key,value) in notification.userInfo! {
+                    if !qiscusKey.contains(key) {
+                        userData![key] = value
+                    }
+                }
+                if userData!.count == 0 {
+                    userData = nil
+                }
+                Qiscus.shared.delegate?.qiscus?(didTapLocalNotification: comment, userInfo: userData)
+            }
         }
     }
     class func publishUserStatus(offline:Bool = false){

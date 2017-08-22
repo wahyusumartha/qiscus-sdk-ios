@@ -582,6 +582,67 @@ public class QComment:Object {
             self.delegate?.comment?(didChangeProgress: progress)
         }
     }
+    public class func decodeDictionary(data:[AnyHashable : Any]) -> QComment? {
+        
+        if let isQiscusdata = data["qiscus_commentdata"] as? Bool{
+            if isQiscusdata {
+                let temp = QComment()
+                if let uniqueId = data["qiscus_uniqueId"] as? String{
+                    temp.uniqueId = uniqueId
+                }
+                if let id = data["qiscus_id"] as? Int {
+                    temp.id = id
+                }
+                if let roomId = data["qiscus_roomId"] as? Int {
+                    temp.roomId = roomId
+                }
+                if let beforeId = data["qiscus_beforeId"] as? Int {
+                    temp.beforeId = beforeId
+                }
+                if let text = data["qiscus_text"] as? String {
+                    temp.text = text
+                }
+                if let createdAt = data["qiscus_createdAt"] as? Double{
+                    temp.createdAt = createdAt
+                }
+                if let email = data["qiscus_senderEmail"] as? String{
+                    temp.senderEmail = email
+                }
+                if let name = data["qiscus_senderName"] as? String{
+                    temp.senderName = name
+                }
+                if let statusRaw = data["qiscus_statusRaw"] as? Int {
+                    temp.statusRaw = statusRaw
+                }
+                if let typeRaw = data["qiscus_typeRaw"] as? String {
+                    temp.typeRaw = typeRaw
+                }
+                if let payload = data["qiscus_data"] as? String {
+                    temp.data = payload
+                }
+                return temp
+            }
+        }
+        return nil
+    }
+    public func encodeDictionary()->[AnyHashable : Any]{
+        var data = [AnyHashable : Any]()
+        
+        data["qiscus_commentdata"] = true
+        data["qiscus_uniqueId"] = self.uniqueId
+        data["qiscus_id"] = self.id
+        data["qiscus_roomId"] = self.roomId
+        data["qiscus_beforeId"] = self.beforeId
+        data["qiscus_text"] = self.text
+        data["qiscus_createdAt"] = self.createdAt
+        data["qiscus_senderEmail"] = self.senderEmail
+        data["qiscus_senderName"] = self.senderName
+        data["qiscus_statusRaw"] = self.statusRaw
+        data["qiscus_typeRaw"] = self.typeRaw
+        data["qiscus_data"] = self.data
+        
+        return data
+    }
     internal class func tempComment(fromJSON json:JSON)->QComment{
         let temp = QComment()
         

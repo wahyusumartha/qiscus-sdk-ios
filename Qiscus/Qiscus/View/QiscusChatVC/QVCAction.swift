@@ -290,6 +290,33 @@ extension QiscusChatVC {
                     }
                     
                 }
+            }else{
+                self.titleLabel.text = self.chatTitle
+                let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
+                self.roomAvatarLabel.text = String(self.chatTitle!.characters.first!).uppercased()
+                let colorIndex = self.chatTitle!.characters.count % bgColor.count
+                self.roomAvatar.backgroundColor = bgColor[colorIndex]
+                if let room = self.chatRoom {
+                    if self.roomAvatarImage == nil {
+                        if QFileManager.isFileExist(inLocalPath: room.avatarLocalPath){
+                            self.roomAvatar.loadAsync(fromLocalPath: room.avatarLocalPath, onLoaded: { (image, _) in
+                                self.roomAvatarImage = image
+                                self.roomAvatar.image = image
+                                self.roomAvatarLabel.isHidden = true
+                                self.chatRoom?.saveAvatar(image: image)
+                            })
+                        }else{
+                            self.roomAvatar.loadAsync(room.avatarURL, onLoaded: { (image, _) in
+                                self.roomAvatarImage = image
+                                self.roomAvatar.image = image
+                                self.roomAvatar.backgroundColor = UIColor.clear
+                                self.roomAvatarLabel.isHidden = true
+                                self.chatRoom?.saveAvatar(image: image)
+                            })
+                        }
+                    }
+                    
+                }
             }
         }
     }
@@ -342,6 +369,8 @@ extension QiscusChatVC {
                     }
                     self.subtitleLabel.text = subtitleString
                 }
+            }else{
+                self.subtitleLabel.text = self.chatSubtitle!
             }
         }
     }
@@ -783,6 +812,7 @@ extension QiscusChatVC {
         }else if self.chatUser != nil {
             self.chatService.room(withUser: self.chatUser!, distincId: self.chatDistinctId, optionalData: self.chatData, withMessage: self.chatMessage)
         }else if self.chatNewRoomUsers.count > 0 {
+            
             self.chatService.createRoom(withUsers: self.chatNewRoomUsers, roomName: self.chatTitle!, optionalData: optionalData, withMessage: self.chatMessage)
         }else if self.chatRoomUniqueId != nil {
             self.chatService.room(withUniqueId: self.chatRoomUniqueId!, title: self.chatTitle!, avatarURL: self.chatAvatarURL, withMessage: self.chatMessage)
