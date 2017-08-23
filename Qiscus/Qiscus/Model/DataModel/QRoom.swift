@@ -100,12 +100,8 @@ public class QRoom:Object {
             var comments = [QComment]()
             let data =  realm.objects(QComment.self).filter("roomId == \(self.id)").sorted(byKeyPath: "createdAt", ascending: true)
             for comment in data {
-                if let cached = QComment.cache[comment.uniqueId] {
-                    comments.append(cached)
-                }else{
-                    QComment.cache[comment.uniqueId] = comment
-                    comments.append(comment)
-                }
+                let data = QComment.comment(withUniqueId: comment.uniqueId)!
+                comments.append(data)
             }
             return comments
         }
@@ -639,7 +635,7 @@ public class QRoom:Object {
                 break
                 default:
                     newComment.data = "\(json["payload"])"
-                    newComment.typeRaw = commentType
+                    newComment.typeRaw = json["payload"]["type"].stringValue
                 break
             }
             self.addComment(newComment: newComment)
@@ -715,8 +711,6 @@ public class QRoom:Object {
             }
             newComment.statusRaw = status.rawValue
             
-            
-            
             switch commentType {
             case "buttons":
                 newComment.data = "\(json["payload"]["buttons"])"
@@ -785,7 +779,7 @@ public class QRoom:Object {
                 break
             default:
                 newComment.data = "\(json["payload"])"
-                newComment.typeRaw = commentType
+                newComment.typeRaw = json["payload"]["type"].stringValue
                 break
             }
             self.addComment(newComment: newComment, onTop: true)
