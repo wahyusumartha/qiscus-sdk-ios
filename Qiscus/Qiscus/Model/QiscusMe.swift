@@ -33,6 +33,7 @@ open class QiscusMe: NSObject {
     open var userKey = ""
     open var baseUrl = ""
     open var lastCommentId = Int(0)
+    public var lastKnownCommentId = Int(0)
     
     open var paramEmail = ""
     open var paramPass = ""
@@ -75,6 +76,9 @@ open class QiscusMe: NSObject {
         if let lastComment = userData.value(forKey: "qiscus_lastComment_id") as? Int{
             self.lastCommentId = lastComment
         }
+        if let lastComment = userData.value(forKey: "qiscus_lastKnownComment_id") as? Int{
+            self.lastKnownCommentId = lastComment
+        }
         if let dToken = userData.value(forKey: "qiscus_device_token") as? String{
             self.deviceToken = dToken
         }
@@ -109,12 +113,23 @@ open class QiscusMe: NSObject {
         QiscusMe.sharedInstance.userData.set(json["rtKey"].stringValue, forKey: "qiscus_rt_key")
         QiscusMe.sharedInstance.userData.set(json["token"].stringValue, forKey: "qiscus_token")
         QiscusMe.sharedInstance.userData.set(json["last_comment_id"].intValue, forKey: "qiscus_lastComment_id")
+        QiscusMe.sharedInstance.userData.set(json["last_comment_id"].intValue, forKey: "qiscus_lastKnownComment_id")
         return QiscusMe.sharedInstance
     }
     public class func updateLastCommentId(commentId:Int){
         if QiscusMe.sharedInstance.lastCommentId < commentId {
             QiscusMe.sharedInstance.lastCommentId = commentId
             QiscusMe.sharedInstance.userData.set(commentId, forKey: "qiscus_lastComment_id")
+        }
+        if QiscusMe.sharedInstance.lastKnownCommentId < commentId {
+            QiscusMe.sharedInstance.lastKnownCommentId = commentId
+            QiscusMe.sharedInstance.userData.set(commentId, forKey: "qiscus_lastKnownComment_id")
+        }
+    }
+    public class func updateLastKnownCommentId(commentId:Int){
+        if QiscusMe.sharedInstance.lastKnownCommentId < commentId {
+            QiscusMe.sharedInstance.lastKnownCommentId = commentId
+            QiscusMe.sharedInstance.userData.set(commentId, forKey: "qiscus_lastKnownComment_id")
         }
     }
     open class func clear(){
@@ -133,6 +148,7 @@ open class QiscusMe: NSObject {
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_rt_key")
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_token")
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_lastComment_id")
+        QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_lastKnownComment_id")
     }
     
 }

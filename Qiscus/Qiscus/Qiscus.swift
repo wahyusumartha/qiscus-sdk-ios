@@ -956,9 +956,12 @@ extension Qiscus:CocoaMQTTDelegate{
                             let payload = json["payload"]
                             if payload["type"].stringValue == "remove_member" && payload["object_email"].stringValue == QiscusMe.sharedInstance.email{
                                 DispatchQueue.main.async {
-                                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                        let comment = QComment.tempComment(fromJSON: json)
-                                        roomDelegate.gotNewComment(comment)
+                                    if commentId > QiscusMe.sharedInstance.lastKnownCommentId{
+                                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                                            let comment = QComment.tempComment(fromJSON: json)
+                                            roomDelegate.gotNewComment(comment)
+                                        }
+                                        QiscusMe.updateLastKnownCommentId(commentId: commentId)
                                     }
                                     if let chatView = Qiscus.shared.chatViews[roomId] {
                                         if chatView.isPresence {
