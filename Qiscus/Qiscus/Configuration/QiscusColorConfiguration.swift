@@ -40,6 +40,7 @@ open class QiscusColorConfiguration: NSObject {
     
     /// Your failed text color if the message fail to send, using UIColor class, Default value : UIColor(red: 1, green: 19/255.0, blue: 0, alpha: 1)
     open var failToSendColor = UIColor(red: 1, green: 19/255.0, blue: 0, alpha: 1)
+    open var readMessageColor = UIColor.green
     
     /// Your link color of left baloon chat, using UIColor class, Default value : UIColor.whiteColor()
     open var leftBaloonLinkColor = UIColor.white
