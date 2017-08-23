@@ -157,17 +157,7 @@ public class QComment:Object {
     }
     public var sender:QUser? {
         get{
-            if let cache = QUser.cache[self.senderEmail] {
-                return cache
-            }else{
-                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-                if let result = realm.object(ofType: QUser.self, forPrimaryKey: self.senderEmail) {
-                    QUser.cache[self.senderEmail] = result
-                    return result
-                }else{
-                    return nil
-                }
-            }
+            return QUser.user(withEmail: self.senderEmail)
         }
     }
     public var cellPos:QCellPosition {
@@ -358,14 +348,16 @@ public class QComment:Object {
     public class func comment(withUniqueId uniqueId:String)->QComment?{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         if let comment = QComment.cache[uniqueId] {
-            return comment
-        }else{
-            if let comment =  realm.object(ofType: QComment.self, forPrimaryKey: uniqueId) {
-                let _ = comment.textSize
-                QComment.cache[uniqueId] = comment
-                return QComment.cache[uniqueId]
+            if !comment.isInvalidated{
+                return comment
             }
         }
+        if let comment =  realm.object(ofType: QComment.self, forPrimaryKey: uniqueId) {
+            let _ = comment.textSize
+            QComment.cache[uniqueId] = comment
+            return QComment.cache[uniqueId]
+        }
+        
         return nil
     }
     public class func comment(withId id:Int)->QComment?{
@@ -374,12 +366,7 @@ public class QComment:Object {
         
         if data.count > 0 {
             let commentData = data.first!
-            if let comment = QComment.cache[commentData.uniqueId] {
-                return comment
-            }else{
-                QComment.cache[commentData.uniqueId] = commentData
-                return QComment.cache[commentData.uniqueId]
-            }
+            return QComment.comment(withUniqueId: commentData.uniqueId)
         }else{
             return nil
         }
@@ -505,7 +492,9 @@ public class QComment:Object {
             let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
             DispatchQueue.main.asyncAfter(deadline: time, execute: {
                 if let cache = QComment.cache[self.uniqueId] {
-                    cache.delegate?.comment(didChangeStatus: status)
+                    if !cache.isInvalidated {
+                        cache.delegate?.comment(didChangeStatus: status)
+                    }
                 }
             })
         }

@@ -32,32 +32,23 @@ public class QParticipant:Object {
     // MARK: - Getter variable
     public var user:QUser? {
         get{
-            if let cache = QUser.cache[self.email] {
-                return cache
-            }else{
-                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-                if let result = realm.object(ofType: QUser.self, forPrimaryKey: self.email) {
-                    QUser.cache[self.email] = result
-                    return result
-                }else{
-                    return nil
-                }
-            }
+            return QUser.user(withEmail: self.email)
         }
     }
     public class func participant(inRoomWithId roomId:Int, andEmail email: String)->QParticipant?{
         let id = "\(roomId)_\(email)"
-        var participant:QParticipant? = nil
         if let cache = QParticipant.cache[id] {
-            participant = cache
-        }else{
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            if let data = realm.object(ofType: QParticipant.self, forPrimaryKey: id) {
-                QParticipant.cache[id] = data
-                participant = data
+            if !cache.isInvalidated {
+                return cache
             }
         }
-        return participant
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        if let data = realm.object(ofType: QParticipant.self, forPrimaryKey: id) {
+            QParticipant.cache[id] = data
+            return data
+        }
+        
+        return nil
     }
     public func updateLastDeliveredId(commentId:Int){
         if !self.isInvalidated {
@@ -70,7 +61,9 @@ public class QParticipant:Object {
                     room.updateCommentStatus()
                 }
                 if let cache = QParticipant.cache[self.localId] {
-                    cache.delegate?.participant(didChange: cache)
+                    if !cache.isInvalidated {
+                        cache.delegate?.participant(didChange: cache)
+                    }
                 }
             }
         }
@@ -88,7 +81,9 @@ public class QParticipant:Object {
             }
             self.updateLastDeliveredId(commentId: commentId)
             if let cache = QParticipant.cache[self.localId] {
-                cache.delegate?.participant(didChange: cache)
+                if !cache.isInvalidated {
+                    cache.delegate?.participant(didChange: cache)
+                }
             }
         }
     }

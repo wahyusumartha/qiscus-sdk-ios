@@ -32,17 +32,7 @@ public class QCommentGroup: Object{
     }
     public var sender:QUser? {
         get{
-            if let cache = QUser.cache[self.senderEmail] {
-                return cache
-            }else{
-                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-                if let result = realm.object(ofType: QUser.self, forPrimaryKey: self.senderEmail) {
-                    QUser.cache[self.senderEmail] = result
-                    return result
-                }else{
-                    return nil
-                }
-            }
+            return QUser.user(withEmail: self.senderEmail)
         }
     }
     public var date:String{
@@ -61,14 +51,16 @@ public class QCommentGroup: Object{
     
     public class func commentGroup(withId id:String)->QCommentGroup?{
         if let cachedData = QCommentGroup.cache[id] {
-            return cachedData
-        }else{
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            if let cacheData = realm.object(ofType: QCommentGroup.self, forPrimaryKey: id) {
-                QCommentGroup.cache[id] = cacheData
-                return cacheData
+            if !cachedData.isInvalidated{
+                return cachedData
             }
         }
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        if let cacheData = realm.object(ofType: QCommentGroup.self, forPrimaryKey: id) {
+            QCommentGroup.cache[id] = cacheData
+            return cacheData
+        }
+        
         return nil
     }
     public func comment(index:Int)->QComment?{

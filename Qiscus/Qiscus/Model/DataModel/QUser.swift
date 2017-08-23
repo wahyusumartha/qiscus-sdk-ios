@@ -147,17 +147,19 @@ public class QUser:Object {
         return user
     }
     public class func user(withEmail email:String) -> QUser? {
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         if let cachedUser = QUser.cache[email] {
-            return cachedUser
-        }else{
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            if let cacheUser = realm.object(ofType: QUser.self, forPrimaryKey: email) {
-                QUser.cache[email] = cacheUser
-                return cacheUser
-            }else{
-                return nil
+            if !cachedUser.isInvalidated {
+                return cachedUser
             }
         }
+        if let user = realm.object(ofType: QUser.self, forPrimaryKey: email) {
+            QUser.cache[email] = user
+            return user
+        }else{
+            return nil
+        }
+        
     }
     
     public func updateLastSeen(lastSeen:Double){
