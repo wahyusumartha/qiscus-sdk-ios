@@ -22,7 +22,10 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
 @objc public class Qiscus: NSObject, PKPushRegistryDelegate, UNUserNotificationCenterDelegate {
     
     static let sharedInstance = Qiscus()
-    static let qiscusVersionNumber:String = "2.4.1"
+    
+    static let qiscusVersionNumber:String = "2.5.2"
+    static let qiscusBuildNumber:String = "1"
+    
     static let showDebugPrint = true
     
     // MARK: - Thread
@@ -56,7 +59,11 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     
     public var chatViews = [Int:QiscusChatVC]()
     
-    
+    @objc public class var buildNumber:String{
+        get{
+            return Qiscus.qiscusBuildNumber
+        }
+    }
     @objc public class var versionNumber:String{
         get{
             return Qiscus.qiscusVersionNumber

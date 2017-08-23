@@ -51,7 +51,7 @@ public class QRoom:Object {
     // MARK: private method
     private dynamic var lastParticipantsReadId:Int = 0
     private dynamic var lastParticipantsDeliveredId:Int = 0
-    private dynamic var roomVersion001:Bool = true
+    private dynamic var roomVersion002:Bool = true
     
     internal let comments = List<QCommentGroup>()
     public let participants = List<QParticipant>()
