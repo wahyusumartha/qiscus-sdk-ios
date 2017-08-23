@@ -140,6 +140,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     }
     @objc public class func clearData(){
         Qiscus.chatRooms = [Int : QRoom]()
+        QParticipant.cache = [String : QParticipant]()
         QCommentGroup.cache = [String : QCommentGroup]()
         QComment.cache = [String : QComment]()
         QUser.cache = [String: QUser]()
