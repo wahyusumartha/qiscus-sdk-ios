@@ -165,8 +165,8 @@ public class QiscusChatVC: UIViewController{
     var chatMessage:String?
     var chatRoomId:Int?
     var chatUser:String?
-    var chatTitle:String?
-    var chatSubtitle:String?
+    public var chatTitle:String?
+    public var chatSubtitle:String?
     var chatNewRoomUsers:[String] = [String]()
     var chatDistinctId:String?
     var chatData:String?
