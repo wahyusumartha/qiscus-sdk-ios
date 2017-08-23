@@ -166,7 +166,11 @@ open class QiscusChatVC: UIViewController{
     var chatMessage:String?
     public var chatRoomId:Int?
     public var chatUser:String?
-    public var chatTitle:String?
+    public var chatTitle:String?{
+        didSet{
+            self.loadTitle()
+        }
+    }
     public var chatSubtitle:String?
     public var chatNewRoomUsers:[String] = [String]()
     var chatDistinctId:String?
