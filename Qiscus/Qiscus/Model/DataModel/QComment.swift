@@ -47,24 +47,24 @@ public enum QReplyType:Int{
             case .reply     : return "reply"
             case .system    : return "system"
             case .card      : return "card"
-            case .contact   : return "contact"
-            case .custom    : return "custom type"
+            case .contact   : return "contact_person"
+            case .custom    : return "custom"
         }
     }
     init(name:String) {
         switch name {
             case "text","button_postback_response"     : self = .text ; break
-            case "image"    : self = .image ; break
-            case "video"    : self = .video ; break
-            case "audio"    : self = .audio ; break
-            case "file"     : self = .file ; break
-            case "postback" : self = .postback ; break
-            case "account"  : self = .account ; break
-            case "reply"    : self = .reply ; break
-            case "system"   : self = .system ; break
-            case "card"     : self = .card ; break
-            case "contact"  : self = .contact ; break
-            default         : self = .custom ; break
+            case "image"            : self = .image ; break
+            case "video"            : self = .video ; break
+            case "audio"            : self = .audio ; break
+            case "file"             : self = .file ; break
+            case "postback"         : self = .postback ; break
+            case "account"          : self = .account ; break
+            case "reply"            : self = .reply ; break
+            case "system"           : self = .system ; break
+            case "card"             : self = .card ; break
+            case "contact_person"   : self = .contact ; break
+            default                 : self = .custom ; break
         }
     }
 }
@@ -215,7 +215,7 @@ public class QComment:Object {
             case .file:
                 return "cellFile\(position)"
             case .contact:
-                return "cellContactRight"
+                return "cellContact\(position)"
             default:
                 return "cellText\(position)"
             }
@@ -263,7 +263,7 @@ public class QComment:Object {
                 let buttons = payload["buttons"].arrayValue
                 size.height = CGFloat(240 + (buttons.count * 45)) + 5
             }else if self.type == .contact {
-                size.height = 93
+                size.height = 115
             }
             return size
         }

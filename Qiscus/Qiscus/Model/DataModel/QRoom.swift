@@ -575,7 +575,7 @@ public class QRoom:Object {
                 newComment.data = "\(json["payload"])"
                 newComment.typeRaw = QCommentType.card.name()
                 break
-            case "contact":
+            case "contact_person":
                 newComment.data = "\(json["payload"])"
                 newComment.typeRaw = QCommentType.contact.name()
                 break

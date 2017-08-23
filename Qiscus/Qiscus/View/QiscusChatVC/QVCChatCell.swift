@@ -10,6 +10,7 @@ import UIKit
 import ImageViewer
 import AVFoundation
 import SwiftyJSON
+import ContactsUI
 
 // MARK: - ChatCell Delegate
 extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
@@ -269,15 +270,26 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
         }
     }
     func didChangeData(onCell cell:QCellAudio , withData comment:QComment, dataTypeChanged:String){
-//        DispatchQueue.global().async {
-//            if let indexPath = data.commentIndexPath{
-//                if indexPath.section < self.comments.count {
-//                    if indexPath.row < self.comments[indexPath.section].count{
-//                        self.comments[indexPath.section][indexPath.row] = data
-//                    }
-//                }
-//            }
-//        }
+
     }
+    func didTapSaveContact(withData data: QComment) {
+        let payloadString = data.data
+        let payload = JSON(parseJSON: payloadString)
+        
+        let con = CNMutableContact()
+        con.givenName = payload["name"].stringValue
+        let phone = CNLabeledValue(label: CNLabelPhoneNumberMobile, value: CNPhoneNumber(stringValue: payload["value"].stringValue))
+        con.phoneNumbers.append(phone)
+        let unkvc = CNContactViewController(forUnknownContact: con)
+        unkvc.message = "Kiwari contact"
+        unkvc.contactStore = CNContactStore()
+        unkvc.delegate = self
+        unkvc.allowsActions = false
+        self.navigationController?.pushViewController(unkvc, animated: true)
+    }
+    
+}
+extension QiscusChatVC: CNContactViewControllerDelegate{
+
 }
 

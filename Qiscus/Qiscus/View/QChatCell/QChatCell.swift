@@ -15,6 +15,7 @@ protocol ChatCellDelegate {
     func didTouchLink(onCell cell:QChatCell)
     func didTapPostbackButton(withData data: JSON)
     func didTapAccountLinking(withData data: JSON)
+    func didTapSaveContact(withData data:QComment)
 }
 class QChatCell: UICollectionViewCell, QCommentDelegate {
     
