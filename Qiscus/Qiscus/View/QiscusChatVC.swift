@@ -53,12 +53,12 @@ open class QiscusChatVC: UIViewController{
     @IBOutlet public weak var collectionViewTopMargin: NSLayoutConstraint!
     
     var isPresence:Bool = false
-    var titleLabel = UILabel()
-    var subtitleLabel = UILabel()
+    public var titleLabel = UILabel()
+    public var subtitleLabel = UILabel()
     var roomAvatarImage:UIImage?
-    var roomAvatar = UIImageView()
+    public var roomAvatar = UIImageView()
     var roomAvatarLabel = UILabel()
-    var titleView = UIView()
+    public var titleView = UIView()
     
     var isBeforeTranslucent = false
     // MARK: - shared Properties
