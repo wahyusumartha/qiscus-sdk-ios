@@ -50,7 +50,7 @@ open class QiscusChatVC: UIViewController{
     @IBOutlet weak var linkPreviewTopMargin: NSLayoutConstraint!
     @IBOutlet weak var recordViewLeading: NSLayoutConstraint!
     @IBOutlet weak var linkImageWidth: NSLayoutConstraint!
-    @IBOutlet weak var collectionViewTopMargin: NSLayoutConstraint!
+    @IBOutlet public weak var collectionViewTopMargin: NSLayoutConstraint!
     
     var isPresence:Bool = false
     var titleLabel = UILabel()
@@ -522,6 +522,7 @@ open class QiscusChatVC: UIViewController{
         
        
         setupNavigationTitle()
+        
         setupPage()
     }
     
@@ -643,14 +644,7 @@ open class QiscusChatVC: UIViewController{
         }
         
         let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
-        if self.chatTitle != nil {
-            let roomTitle = self.chatTitle!.trimmingCharacters(in: .whitespacesAndNewlines)
-            if roomTitle != "" {
-                self.roomAvatarLabel.text = String(roomTitle.characters.first!).uppercased()
-                let colorIndex = roomTitle.characters.count % bgColor.count
-                self.roomAvatar.backgroundColor = bgColor[colorIndex]
-            }
-        }
+        
         
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QiscusChatVC.goToTitleAction))
         self.titleView.addGestureRecognizer(tapRecognizer)
@@ -662,7 +656,15 @@ open class QiscusChatVC: UIViewController{
         self.roomAvatarLabel.frame = CGRect(x: 0,y: 6,width: 32,height: 32)
         self.roomAvatar.frame = CGRect(x: 0,y: 6,width: 32,height: 32)
         self.titleView.frame = CGRect(x: 0, y: 0, width: titleWidth + 40, height: 44)
-        
+        if self.chatTitle != nil {
+            let roomTitle = self.chatTitle!.trimmingCharacters(in: .whitespacesAndNewlines)
+            if roomTitle != "" {
+                self.roomAvatarLabel.text = String(roomTitle.characters.first!).uppercased()
+                let colorIndex = roomTitle.characters.count % bgColor.count
+                self.roomAvatar.backgroundColor = bgColor[colorIndex]
+            }
+            self.titleLabel.text = self.chatTitle
+        }
         self.navigationItem.titleView = titleView
     }
     func setupPage(){
@@ -758,12 +760,8 @@ open class QiscusChatVC: UIViewController{
     public func loadRoomView(){
         self.chatRoom?.delegate = self
         self.chatRoom!.subscribeRealtimeStatus()
-        if self.chatTitle == nil || self.chatTitle == ""{
-            self.loadTitle()
-        }
-        if self.chatSubtitle == nil || self.chatSubtitle == "" {
-            self.loadSubtitle()
-        }
+        self.loadTitle()
+        self.loadSubtitle()
         self.unreadIndicator.isHidden = true
         if firstLoad {
             if self.chatRoom!.commentsGroupCount > 0 {

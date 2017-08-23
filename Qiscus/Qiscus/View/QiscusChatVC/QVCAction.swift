@@ -290,7 +290,8 @@ extension QiscusChatVC {
                     }
                     
                 }
-            }else{
+            }
+            else{
                 self.titleLabel.text = self.chatTitle
                 let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
                 self.roomAvatarLabel.text = String(self.chatTitle!.characters.first!).uppercased()
