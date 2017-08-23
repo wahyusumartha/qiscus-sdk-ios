@@ -221,7 +221,7 @@ class QCellAudioRight: QCellAudio {
             statusImage.image = Qiscus.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)
             break
         case .read:
-            statusImage.tintColor = UIColor.green
+            statusImage.tintColor = Qiscus.style.color.readMessageColor
             statusImage.image = Qiscus.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)
             break
         case .failed:

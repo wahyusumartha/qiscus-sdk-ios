@@ -243,7 +243,7 @@ class QCellTextRight: QChatCell {
         case .read:
             dateLabel.text = self.comment!.time.lowercased()
             dateLabel.textColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
-            statusImage.tintColor = UIColor.green
+            statusImage.tintColor = Qiscus.style.color.readMessageColor
             statusImage.image = Qiscus.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)
             break
         case . failed:
