@@ -19,6 +19,7 @@
                 <outlet property="cancelRecordButton" destination="dli-tG-IHL" id="c3p-7c-caL"/>
                 <outlet property="collectionView" destination="0Xr-3o-do9" id="NGJ-8K-b66"/>
                 <outlet property="collectionViewBottomConstrain" destination="2Zl-GO-ecr" id="162-Up-M52"/>
+                <outlet property="collectionViewTopMargin" destination="7HR-m7-5yy" id="yom-ij-tOH"/>
                 <outlet property="emptyChatImage" destination="DzU-AP-3jK" id="cbH-uS-dJw"/>
                 <outlet property="inputBar" destination="wZm-gC-isB" id="7yp-XG-Mcf"/>
                 <outlet property="inputBarBottomMargin" destination="fdy-p6-I7Q" id="Pk6-bs-FAd"/>

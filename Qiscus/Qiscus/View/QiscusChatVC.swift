@@ -15,7 +15,7 @@ import UserNotifications
 import ContactsUI
 //
 import RealmSwift
-public class QiscusChatVC: UIViewController{
+open class QiscusChatVC: UIViewController{
     
     // MARK: - IBOutlet Properties
     @IBOutlet weak var inputBar: UIView!
@@ -50,6 +50,7 @@ public class QiscusChatVC: UIViewController{
     @IBOutlet weak var linkPreviewTopMargin: NSLayoutConstraint!
     @IBOutlet weak var recordViewLeading: NSLayoutConstraint!
     @IBOutlet weak var linkImageWidth: NSLayoutConstraint!
+    @IBOutlet weak var collectionViewTopMargin: NSLayoutConstraint!
     
     var isPresence:Bool = false
     var titleLabel = UILabel()
@@ -163,14 +164,14 @@ public class QiscusChatVC: UIViewController{
         }
     }
     var chatMessage:String?
-    var chatRoomId:Int?
-    var chatUser:String?
+    public var chatRoomId:Int?
+    public var chatUser:String?
     public var chatTitle:String?
     public var chatSubtitle:String?
-    var chatNewRoomUsers:[String] = [String]()
+    public var chatNewRoomUsers:[String] = [String]()
     var chatDistinctId:String?
     var chatData:String?
-    var chatRoomUniqueId:String?
+    public var chatRoomUniqueId:String?
     var chatAvatarURL = ""
     var chatService = QChatService()
     var collectionWidth:CGFloat = 0
@@ -591,7 +592,7 @@ public class QiscusChatVC: UIViewController{
             sendButton.isEnabled = true
         }
     }
-    override public func viewDidAppear(_ animated: Bool) {
+    override open func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if self.chatRoom == nil {
             self.collectionView.isHidden = true
@@ -750,7 +751,7 @@ public class QiscusChatVC: UIViewController{
     @IBAction func showAttcahMenu(_ sender: UIButton) {
         self.showAttachmentMenu()
     }
-    override public func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+    override open func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         collectionView.collectionViewLayout.invalidateLayout()
     }
