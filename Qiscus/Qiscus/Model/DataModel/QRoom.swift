@@ -820,7 +820,27 @@ public class QRoom:Object {
         let service = QRoomService()
         service.publisComentStatus(onRoom: self, status: status)
     }
-    
+    public func newContactComment(name:String, value:String)->QComment{
+        let comment = QComment()
+        let payload = "{ \"name\": \"\(name)\", \"value\": \"\(value)\"}"
+        let time = Double(Date().timeIntervalSince1970)
+        let timeToken = UInt64(time * 10000)
+        let uniqueID = "ios-\(timeToken)"
+        
+        comment.uniqueId = uniqueID
+        comment.id = 0
+        comment.roomId = self.id
+        comment.text = "\(name) - \(value)"
+        comment.createdAt = Double(Date().timeIntervalSince1970)
+        comment.senderEmail = QiscusMe.sharedInstance.email
+        comment.senderName = QiscusMe.sharedInstance.userName
+        comment.statusRaw = QCommentStatus.sending.rawValue
+        comment.typeRaw = "contact_person"
+        comment.data = payload
+        
+        self.addComment(newComment: comment)
+        return comment
+    }
     public func newFileComment(type:QiscusFileType, filename:String = "", data:Data? = nil, thumbImage:UIImage? = nil)->QComment{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let comment = QComment()
