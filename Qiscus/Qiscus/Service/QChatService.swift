@@ -573,12 +573,6 @@ public class QChatService:NSObject {
                                                     QiscusMe.updateLastKnownCommentId(commentId: id)
                                                 }
                                             }
-                                            let chatService = QChatService()
-                                            chatService.room(withId: roomId, onSuccess: { (_) in
-                                                
-                                            }, onError: { (_) in
-                                                
-                                            })
                                         }
                                     })
                                 }
