@@ -313,12 +313,10 @@ public class QRoom:Object {
             if !onTop {
                 self.delegate?.room(gotNewGroupComment: 0)
                 DispatchQueue.main.async {
-                    if newComment.id > QiscusMe.sharedInstance.lastKnownCommentId {
-                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                            roomDelegate.gotNewComment(newComment)
-                        }
-                        QiscusMe.updateLastKnownCommentId(commentId: newComment.id)
+                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                        roomDelegate.gotNewComment(newComment)
                     }
+                    QiscusMe.updateLastKnownCommentId(commentId: newComment.id)
                 }
                 self.updateUnreadCommentCount()
             }
@@ -376,12 +374,10 @@ public class QRoom:Object {
                 self.delegate?.room(gotNewCommentOn: self.commentsGroupCount - 1, withCommentIndex: lastComment.commentsCount - 1)
                 self.updateUnreadCommentCount()
                 DispatchQueue.main.async {
-                    if newComment.id > QiscusMe.sharedInstance.lastKnownCommentId {
-                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                            roomDelegate.gotNewComment(newComment)
-                        }
-                        QiscusMe.updateLastKnownCommentId(commentId: newComment.id)
+                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                        roomDelegate.gotNewComment(newComment)
                     }
+                    QiscusMe.updateLastKnownCommentId(commentId: newComment.id)
                 }
                 var i = 0
                 let section = self.comments.count - 1
@@ -421,12 +417,10 @@ public class QRoom:Object {
                 self.delegate?.room(gotNewGroupComment: self.commentsGroupCount - 1)
                 self.updateUnreadCommentCount()
                 DispatchQueue.main.async {
-                    if newComment.id > QiscusMe.sharedInstance.lastKnownCommentId {
-                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                            roomDelegate.gotNewComment(newComment)
-                        }
-                        QiscusMe.updateLastKnownCommentId(commentId: newComment.id)
+                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                        roomDelegate.gotNewComment(newComment)
                     }
+                    QiscusMe.updateLastKnownCommentId(commentId: newComment.id)
                 }
                 
             }
