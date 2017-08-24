@@ -1187,26 +1187,42 @@ public class QRoom:Object {
         service.updateRoom(onRoom: self, roomName: roomName, roomAvatarURL: roomAvatarURL, roomOptions: roomOptions, onSuccess: onSuccess, onError: onError)
     }
     public func publishStopTyping(){
-        let message: String = "0";
-        let channel = "r/\(self.id)/\(self.id)/\(QiscusMe.sharedInstance.email)/t"
-        Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
-        if self.selfTypingTimer != nil {
-            if self.typingTimer!.isValid {
-                self.typingTimer!.invalidate()
+        let roomId = self.id
+        QiscusBackgroundThread.async {
+            let message: String = "0";
+            let channel = "r/\(roomId)/\(roomId)/\(QiscusMe.sharedInstance.email)/t"
+            //DispatchQueue.main.async {
+                Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
+            //}
+            if self.selfTypingTimer != nil {
+                if self.typingTimer!.isValid {
+                    self.typingTimer!.invalidate()
+                }
+                self.typingTimer = nil
             }
-            self.typingTimer = nil
         }
+        
     }
     public func publishStartTyping(){
-        let message: String = "1";
-        let channel = "r/\(self.id)/\(self.id)/\(QiscusMe.sharedInstance.email)/t"
-        Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
-        if self.typingTimer != nil {
-            if self.typingTimer!.isValid {
-                self.typingTimer!.invalidate()
+        let roomId = self.id
+        QiscusBackgroundThread.async {
+            let message: String = "1";
+            let channel = "r/\(roomId)/\(roomId)/\(QiscusMe.sharedInstance.email)/t"
+            //DispatchQueue.main.async {
+                Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
+            //}
+            if self.typingTimer != nil {
+                if self.typingTimer!.isValid {
+                    self.typingTimer!.invalidate()
+                }
             }
+            
+            DispatchQueue.main.async {
+                self.typingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.publishStopTyping), userInfo: nil, repeats: false)
+            }
+            
         }
-        self.typingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.publishStopTyping), userInfo: nil, repeats: false)
+        
     }
     public func saveAvatar(image:UIImage){
         var filename = "room_\(self.id)"

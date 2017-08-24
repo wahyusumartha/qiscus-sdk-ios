@@ -566,11 +566,13 @@ public class QChatService:NSObject {
                                                 }
                                             }
                                         }else{
-                                            if id > QiscusMe.sharedInstance.lastKnownCommentId {
-                                                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                                    let comment = QComment.tempComment(fromJSON: newComment)
-                                                    roomDelegate.gotNewComment(comment)
-                                                    QiscusMe.updateLastKnownCommentId(commentId: id)
+                                            QiscusBackgroundThread.async {
+                                                if id > QiscusMe.sharedInstance.lastKnownCommentId {
+                                                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                                                        let comment = QComment.tempComment(fromJSON: newComment)
+                                                        roomDelegate.gotNewComment(comment)
+                                                        QiscusMe.updateLastKnownCommentId(commentId: id)
+                                                    }
                                                 }
                                             }
                                         }
