@@ -175,24 +175,26 @@ public class QUser:Object {
         }
     }
     public func saveAvatar(withImage image:UIImage){
-        self.avatar = image
-        var filename = self.email.replacingOccurrences(of: ".", with: "_").replacingOccurrences(of: "@", with: "_")
-        QiscusFileThread.async {
-            var ext = "png"
-            var avatarData:Data? = nil
-            if let data = UIImagePNGRepresentation(image) {
-                avatarData = data
-            }else if let data = UIImageJPEGRepresentation(image, 1.0) {
-                avatarData = data
-                ext = "jpg"
-            }
-            filename = "\(filename).\(ext)"
-            if avatarData != nil {
-                let localPath = QFileManager.saveFile(withData: avatarData!, fileName: filename, type: .user)
-                DispatchQueue.main.async {
-                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-                    try! realm.write {
-                        self.avatarLocalPath = localPath
+        if !self.isInvalidated {
+            self.avatar = image
+            var filename = self.email.replacingOccurrences(of: ".", with: "_").replacingOccurrences(of: "@", with: "_")
+            QiscusFileThread.async {
+                var ext = "png"
+                var avatarData:Data? = nil
+                if let data = UIImagePNGRepresentation(image) {
+                    avatarData = data
+                }else if let data = UIImageJPEGRepresentation(image, 1.0) {
+                    avatarData = data
+                    ext = "jpg"
+                }
+                filename = "\(filename).\(ext)"
+                if avatarData != nil {
+                    let localPath = QFileManager.saveFile(withData: avatarData!, fileName: filename, type: .user)
+                    DispatchQueue.main.async {
+                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        try! realm.write {
+                            self.avatarLocalPath = localPath
+                        }
                     }
                 }
             }
