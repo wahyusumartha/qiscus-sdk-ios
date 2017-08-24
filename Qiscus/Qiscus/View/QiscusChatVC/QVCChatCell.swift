@@ -275,11 +275,18 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
     func didTapSaveContact(withData data: QComment) {
         let payloadString = data.data
         let payload = JSON(parseJSON: payloadString)
+        let contactValue = payload["value"].stringValue
         
         let con = CNMutableContact()
         con.givenName = payload["name"].stringValue
-        let phone = CNLabeledValue(label: CNLabelPhoneNumberMobile, value: CNPhoneNumber(stringValue: payload["value"].stringValue))
-        con.phoneNumbers.append(phone)
+        if contactValue.contains("@"){
+            let email = CNLabeledValue(label: CNLabelHome, value: contactValue as NSString)
+            con.emailAddresses.append(email)
+        }else{
+            let phone = CNLabeledValue(label: CNLabelPhoneNumberMobile, value: CNPhoneNumber(stringValue: contactValue))
+            con.phoneNumbers.append(phone)
+        }
+        
         let unkvc = CNContactViewController(forUnknownContact: con)
         unkvc.message = "Kiwari contact"
         unkvc.contactStore = CNContactStore()

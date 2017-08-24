@@ -13,76 +13,92 @@ import SwiftyJSON
 import ContactsUI
 
 extension QiscusChatVC:CNContactPickerDelegate{
-    public func contactPicker(_ picker: CNContactPickerViewController, didSelect contact: CNContact) {
-        var i = 0
-        var description = "-"
-        var phoneData = ""
-        if contact.phoneNumbers.count > 0 {
-            description = contact.phoneNumbers.first!.value.stringValue
-            phoneData = "[\n"
-            for phoneNumber in contact.phoneNumbers {
-                var label = ""
-                
-                if phoneNumber.label != nil {
-                    let localizedLabel = CNLabeledValue<NSString>.localizedString(forLabel: phoneNumber.label!)
-                    label = localizedLabel
-                }
-                let value = phoneNumber.value.stringValue
-                
-                let singleData = "    {\n      label: \(label)\n      value: \(value)\n    }"
-                phoneData = "\(phoneData)\(singleData)"
-                if i < contact.phoneNumbers.count - 1 {
-                    phoneData = "\(phoneData),"
-                }
-                i += 1
-            }
-            phoneData = "\(phoneData)\n  ]"
-        }else{
-            phoneData = "[]"
+//    public func contactPicker(_ picker: CNContactPickerViewController, didSelect contact: CNContact) {
+//        var i = 0
+//        var description = "-"
+//        var phoneData = ""
+//        if contact.phoneNumbers.count > 0 {
+//            description = contact.phoneNumbers.first!.value.stringValue
+//            phoneData = "[\n"
+//            for phoneNumber in contact.phoneNumbers {
+//                var label = ""
+//                
+//                if phoneNumber.label != nil {
+//                    let localizedLabel = CNLabeledValue<NSString>.localizedString(forLabel: phoneNumber.label!)
+//                    label = localizedLabel
+//                }
+//                let value = phoneNumber.value.stringValue
+//                
+//                let singleData = "    {\n      label: \(label)\n      value: \(value)\n    }"
+//                phoneData = "\(phoneData)\(singleData)"
+//                if i < contact.phoneNumbers.count - 1 {
+//                    phoneData = "\(phoneData),"
+//                }
+//                i += 1
+//            }
+//            phoneData = "\(phoneData)\n  ]"
+//        }else{
+//            phoneData = "[]"
+//        }
+//        
+//        i = 0
+//        var emailData = ""
+//        if contact.emailAddresses.count > 0 {
+//            if description == "-" {
+//                description = contact.emailAddresses.first!.value as String
+//            }
+//            emailData = "[\n"
+//            for email in contact.emailAddresses {
+//                var label = ""
+//                
+//                if email.label != nil {
+//                    let localizedLabel = CNLabeledValue<NSString>.localizedString(forLabel: email.label!)
+//                    label = localizedLabel
+//                }
+//                let value = email.value
+//                
+//                let singleData = "    {\n      label: \(label)\n      value: \(value)\n    }"
+//                emailData = "\(emailData)\(singleData)"
+//                if i < contact.emailAddresses.count - 1 {
+//                    emailData = "\(emailData),"
+//                }
+//                i += 1
+//            }
+//            emailData = "\(emailData)\n  ]"
+//        }else{
+//            emailData = "[]"
+//        }
+//        let firstname = "first_name: \(contact.givenName)"
+//        let lastname = "last_name: \(contact.familyName)"
+//        let organization = "organization: \(contact.organizationName)"
+//        let phones = "phones: \(phoneData)"
+//        let emails = "emails: \(emailData)"
+//        //print("phoneData: \(phoneData)")
+//        //print("emailData: \(emailData)")
+//        let data = "{\n  \(firstname)\n  \(lastname)\n  \(organization)\n  \(phones)\n  \(emails)\n\n}"
+//        let payload = JSON(parseJSON: data)
+//        
+//        let textMessage = "\(contact.givenName) \(contact.familyName)\n\(description)"
+//        
+//        let newComment = self.chatRoom!.newComment(text: textMessage, payload: payload, type: .contact)
+//        self.contactVC.dismiss(animated: true, completion: nil)
+//        self.chatRoom?.post(comment: newComment, type: "contact", payload: payload)
+//    }
+    public func contactPicker(_ picker: CNContactPickerViewController, didSelect contactProperty: CNContactProperty) {
+        print("masuk")
+        var value = ""
+        if let contactValue = contactProperty.value as? String {
+            value = contactValue
+        }else if let contactValue = contactProperty.value as? CNPhoneNumber {
+            value = contactValue.stringValue
         }
         
-        i = 0
-        var emailData = ""
-        if contact.emailAddresses.count > 0 {
-            if description == "-" {
-                description = contact.emailAddresses.first!.value as String
-            }
-            emailData = "[\n"
-            for email in contact.emailAddresses {
-                var label = ""
-                
-                if email.label != nil {
-                    let localizedLabel = CNLabeledValue<NSString>.localizedString(forLabel: email.label!)
-                    label = localizedLabel
-                }
-                let value = email.value
-                
-                let singleData = "    {\n      label: \(label)\n      value: \(value)\n    }"
-                emailData = "\(emailData)\(singleData)"
-                if i < contact.emailAddresses.count - 1 {
-                    emailData = "\(emailData),"
-                }
-                i += 1
-            }
-            emailData = "\(emailData)\n  ]"
-        }else{
-            emailData = "[]"
+        if value != "" {
+            let name = "\(contactProperty.contact.givenName) \(contactProperty.contact.familyName)".trimmingCharacters(in: .whitespacesAndNewlines)
+        
+            let newComment = self.chatRoom!.newContactComment(name: name, value: value)
+            self.chatRoom!.post(comment: newComment)
         }
-        let firstname = "first_name: \(contact.givenName)"
-        let lastname = "last_name: \(contact.familyName)"
-        let organization = "organization: \(contact.organizationName)"
-        let phones = "phones: \(phoneData)"
-        let emails = "emails: \(emailData)"
-        //print("phoneData: \(phoneData)")
-        //print("emailData: \(emailData)")
-        let data = "{\n  \(firstname)\n  \(lastname)\n  \(organization)\n  \(phones)\n  \(emails)\n\n}"
-        let payload = JSON(parseJSON: data)
-        
-        let textMessage = "\(contact.givenName) \(contact.familyName)\n\(description)"
-        
-        let newComment = self.chatRoom!.newComment(text: textMessage, payload: payload, type: .contact)
-        self.contactVC.dismiss(animated: true, completion: nil)
-        self.chatRoom?.post(comment: newComment, type: "contact", payload: payload)
     }
 }
 extension QiscusChatVC {
@@ -126,17 +142,19 @@ extension QiscusChatVC {
         }
         actionSheetController.addAction(cancelActionButton)
         
-        
-        let cameraActionButton = UIAlertAction(title: "Camera", style: .default) { action -> Void in
-            self.uploadFromCamera()
+        if Qiscus.shared.cameraUpload {
+            let cameraActionButton = UIAlertAction(title: "Camera", style: .default) { action -> Void in
+                self.uploadFromCamera()
+            }
+            actionSheetController.addAction(cameraActionButton)
         }
         
-        actionSheetController.addAction(cameraActionButton)
-        
-        let galeryActionButton = UIAlertAction(title: "Galery", style: .default) { action -> Void in
-            self.uploadImage()
+        if Qiscus.shared.galeryUpload {
+            let galeryActionButton = UIAlertAction(title: "Galery", style: .default) { action -> Void in
+                self.uploadImage()
+            }
+            actionSheetController.addAction(galeryActionButton)
         }
-        actionSheetController.addAction(galeryActionButton)
         
         if Qiscus.sharedInstance.iCloudUpload {
             let iCloudActionButton = UIAlertAction(title: "iCloud", style: .default) { action -> Void in
@@ -145,11 +163,12 @@ extension QiscusChatVC {
             actionSheetController.addAction(iCloudActionButton)
         }
         
-//        let contactActionButton = UIAlertAction(title: "Contact", style: .default) { action -> Void in
-//            self.shareContact()
-//        }
-//        actionSheetController.addAction(contactActionButton)
-        
+        if Qiscus.shared.contactShare {
+            let contactActionButton = UIAlertAction(title: "Contact", style: .default) { action -> Void in
+                self.shareContact()
+            }
+            actionSheetController.addAction(contactActionButton)
+        }
         self.present(actionSheetController, animated: true, completion: nil)
     }
     func getLinkPreview(url:String){
