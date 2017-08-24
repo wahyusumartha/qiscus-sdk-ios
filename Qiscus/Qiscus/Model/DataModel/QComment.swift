@@ -33,6 +33,7 @@ public enum QReplyType:Int{
     case system
     case card
     case contact
+    case location
     case custom
     
     func name() -> String{
@@ -48,6 +49,7 @@ public enum QReplyType:Int{
             case .system    : return "system"
             case .card      : return "card"
             case .contact   : return "contact_person"
+            case .location : return "location"
             case .custom    : return "custom"
         }
     }
@@ -64,6 +66,7 @@ public enum QReplyType:Int{
             case "system"           : self = .system ; break
             case "card"             : self = .card ; break
             case "contact_person"   : self = .contact ; break
+            case "location"         : self = .location; break
             default                 : self = .custom ; break
         }
     }
@@ -206,6 +209,8 @@ public class QComment:Object {
                 return "cellFile\(position)"
             case .contact:
                 return "cellContact\(position)"
+            case .location:
+                return "cellLocation\(position)"
             default:
                 return "cellText\(position)"
             }
@@ -231,7 +236,10 @@ public class QComment:Object {
             textView.dataDetectorTypes = .all
             textView.linkTextAttributes = self.linkTextAttributes
             
-            let maxWidth:CGFloat = QiscusUIConfiguration.chatTextMaxWidth
+            var maxWidth:CGFloat = QiscusUIConfiguration.chatTextMaxWidth
+            if self.type == .location {
+                maxWidth = 204
+            }
             textView.attributedText = attributedText
             
             var size = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
@@ -254,6 +262,8 @@ public class QComment:Object {
                 size.height = CGFloat(240 + (buttons.count * 45)) + 5
             }else if self.type == .contact {
                 size.height = 115
+            }else if self.type == .location {
+                size.height += 168
             }
             return size
         }
@@ -281,7 +291,22 @@ public class QComment:Object {
     
     var textAttribute:[String: Any]{
         get{
-            if self.type == .system {
+            if self.type == .location {
+                let style = NSMutableParagraphStyle()
+                style.alignment = NSTextAlignment.left
+                let systemFont = UIFont.systemFont(ofSize: 14.0)
+                var foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
+                if self.senderEmail == QiscusMe.sharedInstance.email{
+                    foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
+                }
+                
+                return [
+                    NSForegroundColorAttributeName: foregroundColorAttributeName,
+                    NSFontAttributeName: systemFont,
+                    NSParagraphStyleAttributeName: style
+                ]
+            }
+            else if self.type == .system {
                 let style = NSMutableParagraphStyle()
                 style.alignment = NSTextAlignment.center
                 let fontSize = Qiscus.style.chatFont.pointSize
@@ -308,10 +333,17 @@ public class QComment:Object {
     
     var attributedText:NSMutableAttributedString {
         get{
-            let attributedText = NSMutableAttributedString(string: self.text)
-            let allRange = (self.text as NSString).range(of: self.text)
-            attributedText.addAttributes(self.textAttribute, range: allRange)
-            
+            var attributedText = NSMutableAttributedString(string: self.text)
+            if self.type == .location {
+                let payload = JSON(parseJSON: self.data)
+                let address = payload["address"].stringValue
+                attributedText = NSMutableAttributedString(string: address)
+                let allRange = (address as NSString).range(of: address)
+                attributedText.addAttributes(self.textAttribute, range: allRange)
+            }else{
+                let allRange = (self.text as NSString).range(of: self.text)
+                attributedText.addAttributes(self.textAttribute, range: allRange)
+            }
             return attributedText
         }
     }

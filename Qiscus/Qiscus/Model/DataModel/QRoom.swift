@@ -590,6 +590,10 @@ public class QRoom:Object {
                 newComment.data = "\(json["payload"])"
                 newComment.typeRaw = QCommentType.text.name()
                 break
+            case "location":
+                newComment.data = "\(json["payload"])"
+                newComment.typeRaw = QCommentType.location.name()
+                break
             case "text":
                 if newComment.text.hasPrefix("[file]"){
                     var type = QiscusFileType.file
@@ -729,6 +733,10 @@ public class QRoom:Object {
             case "contact":
                 newComment.data = "\(json["payload"])"
                 newComment.typeRaw = QCommentType.contact.name()
+                break
+            case "location":
+                newComment.data = "\(json["payload"])"
+                newComment.typeRaw = QCommentType.location.name()
                 break
             case "button_postback_response" :
                 newComment.data = "\(json["payload"])"
