@@ -227,12 +227,11 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
         }else{
             needLogin = true
         }
-        
+        Qiscus.setupReachability()
         if needLogin {
             Qiscus.clear()
             QiscusCommentClient.sharedInstance.loginOrRegister(userEmail, password: userKey, username: username, avatarURL: avatarURL)
         }else{
-            Qiscus.setupReachability()
             if let delegate = Qiscus.shared.delegate {
                 Qiscus.uiThread.async {
                     delegate.qiscusConnected?()
@@ -584,6 +583,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     
     func applicationDidBecomeActife(){
         Qiscus.checkDatabaseMigration()
+        Qiscus.setupReachability()
         if Qiscus.isLoggedIn{
             Qiscus.sharedInstance.RealtimeConnect()
         }
@@ -592,14 +592,9 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
         }
         if let chatView = self.topViewController() as? QiscusChatVC {
             chatView.isPresence = true
-//            QiscusDataPresenter.shared.delegate = chatView
-//            Qiscus.uiThread.async {
-//                chatView.scrollToBottom()
-//            }
+
         }
         Qiscus.sync()
-//        QiscusCommentClient.shared.delegate = QiscusDataPresenter.shared
-        
     }
     class func printLog(text:String){
         if Qiscus.showDebugPrint{
