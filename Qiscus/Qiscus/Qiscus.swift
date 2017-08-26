@@ -540,20 +540,22 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     }
     
     class func setupReachability(){
-        Qiscus.sharedInstance.reachability = QReachability()
-        
-        if let reachable = Qiscus.sharedInstance.reachability {
-            if reachable.isReachable {
-                Qiscus.sharedInstance.connected = true
-                if Qiscus.isLoggedIn {
-                    Qiscus.sharedInstance.RealtimeConnect()
-                    QComment.resendPendingMessage()
+        QiscusBackgroundThread.async {
+            Qiscus.sharedInstance.reachability = QReachability()
+            
+            if let reachable = Qiscus.sharedInstance.reachability {
+                if reachable.isReachable {
+                    Qiscus.sharedInstance.connected = true
+                    if Qiscus.isLoggedIn {
+                        Qiscus.sharedInstance.RealtimeConnect()
+                        DispatchQueue.main.async {
+                            QComment.resendPendingMessage()
+                        }
+                    }
                 }
             }
-        }
-        
-        Qiscus.sharedInstance.reachability?.whenReachable = { reachability in
-            DispatchQueue.main.async {
+            
+            Qiscus.sharedInstance.reachability?.whenReachable = { reachability in
                 if reachability.isReachableViaWiFi {
                     Qiscus.printLog(text: "connected via wifi")
                 } else {
@@ -562,20 +564,20 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
                 Qiscus.sharedInstance.connected = true
                 if Qiscus.isLoggedIn {
                     Qiscus.sharedInstance.RealtimeConnect()
-                    QComment.resendPendingMessage()
+                    DispatchQueue.main.async {
+                        QComment.resendPendingMessage()
+                    }
                 }
             }
-        }
-        Qiscus.sharedInstance.reachability?.whenUnreachable = { reachability in
-            DispatchQueue.main.async {
+            Qiscus.sharedInstance.reachability?.whenUnreachable = { reachability in
                 Qiscus.printLog(text: "disconnected")
                 Qiscus.sharedInstance.connected = false
             }
-        }
-        do {
-            try  Qiscus.sharedInstance.reachability?.startNotifier()
-        } catch {
-            Qiscus.printLog(text: "Unable to start network notifier")
+            do {
+                try  Qiscus.sharedInstance.reachability?.startNotifier()
+            } catch {
+                Qiscus.printLog(text: "Unable to start network notifier")
+            }
         }
     }
     
@@ -925,7 +927,23 @@ extension Qiscus:CocoaMQTTDelegate{
         }
     }
     public func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck){
-        
+        QiscusBackgroundThread.async {
+            let state = UIApplication.shared.applicationState
+            
+            if state == .active {
+                let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
+                mqtt.subscribe(commentChannel, qos: .qos2)
+                Qiscus.publishUserStatus()
+                for channel in Qiscus.realtimeChannel{
+                    mqtt.subscribe(channel)
+                }
+                Qiscus.shared.mqtt = mqtt
+            }
+            if self.syncTimer != nil {
+                self.syncTimer?.invalidate()
+                self.syncTimer = nil
+            }
+        }
     }
     public func mqtt(_ mqtt: CocoaMQTT, didPublishMessage message: CocoaMQTTMessage, id: UInt16){
         
