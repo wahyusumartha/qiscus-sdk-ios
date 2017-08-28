@@ -266,7 +266,7 @@ class ViewController: UIViewController {
 
   func goToChat(){
           let roomId = Int(targetField.text!)
-          let view = iscus.chatView(withRoomUniqueId: uniqueId)
+          let view = Qiscus.chatView(withRoomUniqueId: uniqueId)
           self.navigationController?.pushViewController(view, animated: true)
   }
 
