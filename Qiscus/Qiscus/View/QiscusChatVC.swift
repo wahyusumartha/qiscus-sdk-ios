@@ -21,7 +21,7 @@ open class QiscusChatVC: UIViewController{
     
     // MARK: - IBOutlet Properties
     @IBOutlet weak var inputBar: UIView!
-    @IBOutlet weak var backgroundView: UIImageView!
+    @IBOutlet public weak var backgroundView: UIImageView!
     @IBOutlet weak var inputText: ChatInputText!
     @IBOutlet weak var welcomeView: UIView!
     @IBOutlet weak var welcomeText: UILabel!
@@ -608,6 +608,7 @@ open class QiscusChatVC: UIViewController{
         }else{
             sendButton.isEnabled = true
         }
+
     }
     override open func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
