@@ -743,22 +743,20 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     
     @objc public class func didReceive(RemoteNotification userInfo:[AnyHashable : Any], completionHandler: @escaping (UIBackgroundFetchResult) -> Void = {_ in}){
         completionHandler(.newData)
-        print("userInfo silent:\(userInfo)")
         
-        if userInfo["qiscus_sdk"] != nil {
-            let state = Qiscus.shared.application.applicationState
-            if state != .active {
-                QChatService.sync()
-                if let payloadData = userInfo["payload"]{
-                    let jsonPayload = JSON(arrayLiteral: payloadData)[0]
-                    let tempComment = QComment.tempComment(fromJSON: jsonPayload)
-                    Qiscus.shared.delegate?.qiscus?(gotSilentNotification: tempComment)
+        if Qiscus.isLoggedIn{
+            if userInfo["qiscus_sdk"] != nil {
+                let state = Qiscus.shared.application.applicationState
+                if state != .active {
+                    QChatService.sync()
+                    if let payloadData = userInfo["payload"]{
+                        let jsonPayload = JSON(arrayLiteral: payloadData)[0]
+                        let tempComment = QComment.tempComment(fromJSON: jsonPayload)
+                        Qiscus.shared.delegate?.qiscus?(gotSilentNotification: tempComment)
+                    }
                 }
             }
         }
-//        if Qiscus.isLoggedIn{
-//            Qiscus.sync()
-//        }
     }
     @objc public class func notificationAction(roomId: Int){
         if let window = UIApplication.shared.keyWindow{
