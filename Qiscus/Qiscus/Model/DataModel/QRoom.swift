@@ -313,12 +313,10 @@ public class QRoom:Object {
             if !onTop {
                 self.delegate?.room(gotNewGroupComment: 0)
                 DispatchQueue.main.async {
-                    if newComment.id > QiscusMe.sharedInstance.lastKnownCommentId {
-                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                            roomDelegate.gotNewComment(newComment)
-                        }
-                        QiscusMe.updateLastKnownCommentId(commentId: newComment.id)
+                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                        roomDelegate.gotNewComment(newComment)
                     }
+                    QiscusMe.updateLastKnownCommentId(commentId: newComment.id)
                 }
                 self.updateUnreadCommentCount()
             }
@@ -376,12 +374,10 @@ public class QRoom:Object {
                 self.delegate?.room(gotNewCommentOn: self.commentsGroupCount - 1, withCommentIndex: lastComment.commentsCount - 1)
                 self.updateUnreadCommentCount()
                 DispatchQueue.main.async {
-                    if newComment.id > QiscusMe.sharedInstance.lastKnownCommentId {
-                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                            roomDelegate.gotNewComment(newComment)
-                        }
-                        QiscusMe.updateLastKnownCommentId(commentId: newComment.id)
+                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                        roomDelegate.gotNewComment(newComment)
                     }
+                    QiscusMe.updateLastKnownCommentId(commentId: newComment.id)
                 }
                 var i = 0
                 let section = self.comments.count - 1
@@ -421,12 +417,10 @@ public class QRoom:Object {
                 self.delegate?.room(gotNewGroupComment: self.commentsGroupCount - 1)
                 self.updateUnreadCommentCount()
                 DispatchQueue.main.async {
-                    if newComment.id > QiscusMe.sharedInstance.lastKnownCommentId {
-                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                            roomDelegate.gotNewComment(newComment)
-                        }
-                        QiscusMe.updateLastKnownCommentId(commentId: newComment.id)
+                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                        roomDelegate.gotNewComment(newComment)
                     }
+                    QiscusMe.updateLastKnownCommentId(commentId: newComment.id)
                 }
                 
             }
@@ -596,6 +590,14 @@ public class QRoom:Object {
                 newComment.data = "\(json["payload"])"
                 newComment.typeRaw = QCommentType.text.name()
                 break
+            case "location":
+                newComment.data = "\(json["payload"])"
+                newComment.typeRaw = QCommentType.location.name()
+                break
+            case "custom":
+                newComment.data = "\(json["payload"]["content"])"
+                newComment.typeRaw = json["payload"]["type"].stringValue
+                break
             case "text":
                 if newComment.text.hasPrefix("[file]"){
                     var type = QiscusFileType.file
@@ -732,13 +734,21 @@ public class QRoom:Object {
                 newComment.data = "\(json["payload"])"
                 newComment.typeRaw = QCommentType.card.name()
                 break
-            case "contact":
+            case "contact_person":
                 newComment.data = "\(json["payload"])"
                 newComment.typeRaw = QCommentType.contact.name()
+                break
+            case "location":
+                newComment.data = "\(json["payload"])"
+                newComment.typeRaw = QCommentType.location.name()
                 break
             case "button_postback_response" :
                 newComment.data = "\(json["payload"])"
                 newComment.typeRaw = QCommentType.text.name()
+                break
+            case "custom":
+                newComment.data = "\(json["payload"]["content"])"
+                newComment.typeRaw = json["payload"]["type"].stringValue
                 break
             case "text":
                 if newComment.text.hasPrefix("[file]"){
@@ -818,7 +828,53 @@ public class QRoom:Object {
         let service = QRoomService()
         service.publisComentStatus(onRoom: self, status: status)
     }
-    
+    public func newContactComment(name:String, value:String)->QComment{
+        let comment = QComment()
+        let payload = "{ \"name\": \"\(name)\", \"value\": \"\(value)\"}"
+        let time = Double(Date().timeIntervalSince1970)
+        let timeToken = UInt64(time * 10000)
+        let uniqueID = "ios-\(timeToken)"
+        
+        comment.uniqueId = uniqueID
+        comment.id = 0
+        comment.roomId = self.id
+        comment.text = "\(name) - \(value)"
+        comment.createdAt = Double(Date().timeIntervalSince1970)
+        comment.senderEmail = QiscusMe.sharedInstance.email
+        comment.senderName = QiscusMe.sharedInstance.userName
+        comment.statusRaw = QCommentStatus.sending.rawValue
+        comment.typeRaw = "contact_person"
+        comment.data = payload
+        
+        self.addComment(newComment: comment)
+        return comment
+    }
+    public func newCustomComment(type:String, payload:String, text:String? = nil )->QComment{
+        let comment = QComment()
+        let payload = "{ \"name\": \"\(name)\", \"value\": \"\(value)\"}"
+        let time = Double(Date().timeIntervalSince1970)
+        let timeToken = UInt64(time * 10000)
+        let uniqueID = "ios-\(timeToken)"
+        if text == nil {
+            comment.text = "message type \(type)"
+        }else{
+            comment.text = text
+        }
+        
+        comment.uniqueId = uniqueID
+        comment.id = 0
+        comment.roomId = self.id
+        
+        comment.createdAt = Double(Date().timeIntervalSince1970)
+        comment.senderEmail = QiscusMe.sharedInstance.email
+        comment.senderName = QiscusMe.sharedInstance.userName
+        comment.statusRaw = QCommentStatus.sending.rawValue
+        comment.typeRaw = type
+        comment.data = payload
+        
+        self.addComment(newComment: comment)
+        return comment
+    }
     public func newFileComment(type:QiscusFileType, filename:String = "", data:Data? = nil, thumbImage:UIImage? = nil)->QComment{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let comment = QComment()
@@ -1165,26 +1221,42 @@ public class QRoom:Object {
         service.updateRoom(onRoom: self, roomName: roomName, roomAvatarURL: roomAvatarURL, roomOptions: roomOptions, onSuccess: onSuccess, onError: onError)
     }
     public func publishStopTyping(){
-        let message: String = "0";
-        let channel = "r/\(self.id)/\(self.id)/\(QiscusMe.sharedInstance.email)/t"
-        Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
-        if self.selfTypingTimer != nil {
-            if self.typingTimer!.isValid {
-                self.typingTimer!.invalidate()
+        let roomId = self.id
+        QiscusBackgroundThread.async {
+            let message: String = "0";
+            let channel = "r/\(roomId)/\(roomId)/\(QiscusMe.sharedInstance.email)/t"
+            //DispatchQueue.main.async {
+                Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
+            //}
+            if self.selfTypingTimer != nil {
+                if self.typingTimer!.isValid {
+                    self.typingTimer!.invalidate()
+                }
+                self.typingTimer = nil
             }
-            self.typingTimer = nil
         }
+        
     }
     public func publishStartTyping(){
-        let message: String = "1";
-        let channel = "r/\(self.id)/\(self.id)/\(QiscusMe.sharedInstance.email)/t"
-        Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
-        if self.typingTimer != nil {
-            if self.typingTimer!.isValid {
-                self.typingTimer!.invalidate()
+        let roomId = self.id
+        QiscusBackgroundThread.async {
+            let message: String = "1";
+            let channel = "r/\(roomId)/\(roomId)/\(QiscusMe.sharedInstance.email)/t"
+            //DispatchQueue.main.async {
+                Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
+            //}
+            if self.typingTimer != nil {
+                if self.typingTimer!.isValid {
+                    self.typingTimer!.invalidate()
+                }
             }
+            
+            DispatchQueue.main.async {
+                self.typingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.publishStopTyping), userInfo: nil, repeats: false)
+            }
+            
         }
-        self.typingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.publishStopTyping), userInfo: nil, repeats: false)
+        
     }
     public func saveAvatar(image:UIImage){
         var filename = "room_\(self.id)"

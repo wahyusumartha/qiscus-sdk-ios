@@ -9,7 +9,7 @@ target 'Example' do
     pod 'RealmSwift', '~> 2.5.0'
     pod 'SwiftyJSON', '~> 3.1.4'
     pod 'ImageViewer', '4.0'
-    pod 'CocoaMQTT', '1.0.17'
+    pod 'CocoaMQTT', '1.0.19'
 end
 
 target 'Qiscus' do
@@ -20,7 +20,7 @@ target 'Qiscus' do
     pod 'RealmSwift', '~> 2.5.0'
     pod 'SwiftyJSON', '~> 3.1.4'
     pod 'ImageViewer', '4.0'
-    pod 'CocoaMQTT', '1.0.17'
+    pod 'CocoaMQTT', '1.0.19'
 end
 
 post_install do |installer|

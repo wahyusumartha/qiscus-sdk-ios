@@ -26,7 +26,7 @@ public class QChatService:NSObject {
         let userName = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_param_username") as? String
         let avatarURL = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_param_avatar") as? String
         if email != nil && userKey != nil && userName != nil {
-            QiscusCommentClient.sharedInstance.loginOrRegister(email!, password: userKey!, username: userName!, avatarURL: avatarURL, onSuccess: onSuccess)
+            QiscusCommentClient.sharedInstance.loginOrRegister(email!, password: userKey!, username: userName!, avatarURL: avatarURL, reconnect: true, onSuccess: onSuccess)
         }
     }
     
@@ -566,19 +566,18 @@ public class QChatService:NSObject {
                                                 }
                                             }
                                         }else{
-                                            if id > QiscusMe.sharedInstance.lastKnownCommentId {
-                                                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                                    let comment = QComment.tempComment(fromJSON: newComment)
-                                                    roomDelegate.gotNewComment(comment)
-                                                    QiscusMe.updateLastKnownCommentId(commentId: id)
+                                            QiscusBackgroundThread.async {
+                                                if id > QiscusMe.sharedInstance.lastKnownCommentId {
+                                                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                                                        DispatchQueue.main.async {
+                                                            let comment = QComment.tempComment(fromJSON: newComment)
+                                                            roomDelegate.gotNewComment(comment)
+                                                        }
+                                                        
+                                                        QiscusMe.updateLastKnownCommentId(commentId: id)
+                                                    }
                                                 }
                                             }
-                                            let chatService = QChatService()
-                                            chatService.room(withId: roomId, onSuccess: { (_) in
-                                                
-                                            }, onError: { (_) in
-                                                
-                                            })
                                         }
                                     })
                                 }

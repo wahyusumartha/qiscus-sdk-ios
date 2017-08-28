@@ -190,7 +190,14 @@ public class QRoomService:NSObject{
             parameters["type"] = type as AnyObject
             parameters["payload"] = "\(payload!)" as AnyObject
         }
-        
+        if comment.type == .contact {
+            parameters["type"] = comment.typeRaw as AnyObject
+            parameters["payload"] = comment.data as AnyObject
+        }
+        if comment.type == .custom {
+            parameters["type"] = "custom"
+            parameters["payload"] = "{ \"type\": \"\(comment.typeRaw)\", \"content\": \(comment.data)}"
+        }
         Alamofire.request(QiscusConfig.postCommentURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {response in
             switch response.result {
             case .success:

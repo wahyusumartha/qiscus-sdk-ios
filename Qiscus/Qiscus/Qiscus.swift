@@ -40,7 +40,12 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     
     var config = QiscusConfig.sharedInstance
     var commentService = QiscusCommentClient.sharedInstance
-    var iCloudUpload:Bool = false
+    
+    var iCloudUpload = false
+    var cameraUpload = true
+    var galeryUpload = true
+    var contactShare = true
+    
     var isPushed:Bool = false
     var reachability:QReachability?
     internal var mqtt:CocoaMQTT?
@@ -222,12 +227,11 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
         }else{
             needLogin = true
         }
-        
+        Qiscus.setupReachability()
         if needLogin {
             Qiscus.clear()
             QiscusCommentClient.sharedInstance.loginOrRegister(userEmail, password: userKey, username: username, avatarURL: avatarURL)
         }else{
-            Qiscus.setupReachability()
             if let delegate = Qiscus.shared.delegate {
                 Qiscus.uiThread.async {
                     delegate.qiscusConnected?()
@@ -536,20 +540,22 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     }
     
     class func setupReachability(){
-        Qiscus.sharedInstance.reachability = QReachability()
-        
-        if let reachable = Qiscus.sharedInstance.reachability {
-            if reachable.isReachable {
-                Qiscus.sharedInstance.connected = true
-                if Qiscus.isLoggedIn {
-                    Qiscus.sharedInstance.RealtimeConnect()
-                    QComment.resendPendingMessage()
+        QiscusBackgroundThread.async {
+            Qiscus.sharedInstance.reachability = QReachability()
+            
+            if let reachable = Qiscus.sharedInstance.reachability {
+                if reachable.isReachable {
+                    Qiscus.sharedInstance.connected = true
+                    if Qiscus.isLoggedIn {
+                        Qiscus.sharedInstance.RealtimeConnect()
+                        DispatchQueue.main.async {
+                            QComment.resendPendingMessage()
+                        }
+                    }
                 }
             }
-        }
-        
-        Qiscus.sharedInstance.reachability?.whenReachable = { reachability in
-            DispatchQueue.main.async {
+            
+            Qiscus.sharedInstance.reachability?.whenReachable = { reachability in
                 if reachability.isReachableViaWiFi {
                     Qiscus.printLog(text: "connected via wifi")
                 } else {
@@ -558,20 +564,20 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
                 Qiscus.sharedInstance.connected = true
                 if Qiscus.isLoggedIn {
                     Qiscus.sharedInstance.RealtimeConnect()
-                    QComment.resendPendingMessage()
+                    DispatchQueue.main.async {
+                        QComment.resendPendingMessage()
+                    }
                 }
             }
-        }
-        Qiscus.sharedInstance.reachability?.whenUnreachable = { reachability in
-            DispatchQueue.main.async {
+            Qiscus.sharedInstance.reachability?.whenUnreachable = { reachability in
                 Qiscus.printLog(text: "disconnected")
                 Qiscus.sharedInstance.connected = false
             }
-        }
-        do {
-            try  Qiscus.sharedInstance.reachability?.startNotifier()
-        } catch {
-            Qiscus.printLog(text: "Unable to start network notifier")
+            do {
+                try  Qiscus.sharedInstance.reachability?.startNotifier()
+            } catch {
+                Qiscus.printLog(text: "Unable to start network notifier")
+            }
         }
     }
     
@@ -579,6 +585,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     
     func applicationDidBecomeActife(){
         Qiscus.checkDatabaseMigration()
+        Qiscus.setupReachability()
         if Qiscus.isLoggedIn{
             Qiscus.sharedInstance.RealtimeConnect()
         }
@@ -587,14 +594,9 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
         }
         if let chatView = self.topViewController() as? QiscusChatVC {
             chatView.isPresence = true
-//            QiscusDataPresenter.shared.delegate = chatView
-//            Qiscus.uiThread.async {
-//                chatView.scrollToBottom()
-//            }
+
         }
         Qiscus.sync()
-//        QiscusCommentClient.shared.delegate = QiscusDataPresenter.shared
-        
     }
     class func printLog(text:String){
         if Qiscus.showDebugPrint{
@@ -737,32 +739,24 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
             QChatService.registerDevice(withToken: tokenString)
         }
     }
-    @objc public class func didRegisterUserNotification(){
-        if Qiscus.isLoggedIn{
-            let voipRegistry = PKPushRegistry(queue: DispatchQueue.main)
-            voipRegistry.desiredPushTypes = Set([PKPushType.voIP])
-            voipRegistry.delegate = Qiscus.sharedInstance
-        }
-    }
+    
     
     @objc public class func didReceive(RemoteNotification userInfo:[AnyHashable : Any], completionHandler: @escaping (UIBackgroundFetchResult) -> Void = {_ in}){
         completionHandler(.newData)
-        print("userInfo silent:\(userInfo)")
         
-        if userInfo["qiscus_sdk"] != nil {
-            let state = Qiscus.shared.application.applicationState
-            if state != .active {
-                QChatService.sync()
-                if let payloadData = userInfo["payload"]{
-                    let jsonPayload = JSON(arrayLiteral: payloadData)[0]
-                    let tempComment = QComment.tempComment(fromJSON: jsonPayload)
-                    Qiscus.shared.delegate?.qiscus?(gotSilentNotification: tempComment)
+        if Qiscus.isLoggedIn{
+            if userInfo["qiscus_sdk"] != nil {
+                let state = Qiscus.shared.application.applicationState
+                if state != .active {
+                    QChatService.sync()
+                    if let payloadData = userInfo["payload"]{
+                        let jsonPayload = JSON(arrayLiteral: payloadData)[0]
+                        let tempComment = QComment.tempComment(fromJSON: jsonPayload)
+                        Qiscus.shared.delegate?.qiscus?(gotSilentNotification: tempComment)
+                    }
                 }
             }
         }
-//        if Qiscus.isLoggedIn{
-//            Qiscus.sync()
-//        }
     }
     @objc public class func notificationAction(roomId: Int){
         if let window = UIApplication.shared.keyWindow{
@@ -866,23 +860,23 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     }
     class func publishUserStatus(offline:Bool = false){
         if Qiscus.isLoggedIn{
-            DispatchQueue.global().async {
+            QiscusBackgroundThread.async {
                 var message: String = "1";
                 
                 let channel = "u/\(QiscusMe.sharedInstance.email)/s"
                 if offline {
                     message = "0"
-                    Qiscus.uiThread.async {
+                    DispatchQueue.main.async {
                         Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: true)
                     }
                 }else{
                     if Qiscus.sharedInstance.application.applicationState == UIApplicationState.active {
-                        Qiscus.uiThread.async {
+                        DispatchQueue.main.async {
                             Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: true)
                         }
                         
-                        let when = DispatchTime.now() + 10
-                        DispatchQueue.global().asyncAfter(deadline: when) {
+                        let when = DispatchTime.now() + 40
+                        QiscusBackgroundThread.asyncAfter(deadline: when) {
                             Qiscus.publishUserStatus()
                         }
                     }
@@ -931,7 +925,23 @@ extension Qiscus:CocoaMQTTDelegate{
         }
     }
     public func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck){
-        
+        QiscusBackgroundThread.async {
+            let state = UIApplication.shared.applicationState
+            
+            if state == .active {
+                let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
+                mqtt.subscribe(commentChannel, qos: .qos2)
+                Qiscus.publishUserStatus()
+                for channel in Qiscus.realtimeChannel{
+                    mqtt.subscribe(channel)
+                }
+                Qiscus.shared.mqtt = mqtt
+            }
+            if self.syncTimer != nil {
+                self.syncTimer?.invalidate()
+                self.syncTimer = nil
+            }
+        }
     }
     public func mqtt(_ mqtt: CocoaMQTT, didPublishMessage message: CocoaMQTTMessage, id: UInt16){
         
@@ -1005,22 +1015,11 @@ extension Qiscus:CocoaMQTTDelegate{
                 case "t":
                     let topicId:Int = Int(String(channelArr[2]))!
                     let userEmail:String = String(channelArr[3])
+                    let data = (messageData == "0") ? "" : userEmail
                     if userEmail != QiscusMe.sharedInstance.email {
                         DispatchQueue.main.async {
-                            if let room = QRoom.room(withId: topicId){
-                                if room.typingUser == userEmail {
-                                    if messageData == "0" {
-                                        room.updateUserTyping(userEmail: "")
-                                    }
-                                }else{
-                                    if messageData == "1" {
-                                        room.updateUserTyping(userEmail: userEmail)
-                                    }
-                                }
-                                if let user = QUser.user(withEmail: userEmail) {
-                                    user.updateLastSeen(lastSeen: Double(Date().timeIntervalSince1970))
-                                }
-                            }
+                            QRoom.room(withId: topicId)?.updateUserTyping(userEmail: data)
+                            QUser.user(withEmail: userEmail)?.updateLastSeen(lastSeen: Double(Date().timeIntervalSince1970))
                         }
                     }
                     break
@@ -1029,25 +1028,20 @@ extension Qiscus:CocoaMQTTDelegate{
                     let messageArr = messageData.characters.split(separator: ":")
                     let commentId = Int(String(messageArr[0]))!
                     let userEmail = String(channelArr[3])
-                    DispatchQueue.main.async {
-                        if let participant = QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail){
-                            if userEmail != QiscusMe.sharedInstance.email {
-                                participant.updateLastDeliveredId(commentId: commentId)
-                            }
+                    if userEmail != QiscusMe.sharedInstance.email {
+                        DispatchQueue.main.async {
+                            QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail)?.updateLastDeliveredId(commentId: commentId)
                         }
                     }
-                    
                     break
                 case "r":
                     let roomId:Int = Int(String(channelArr[2]))!
                     let messageArr = messageData.characters.split(separator: ":")
                     let commentId = Int(String(messageArr[0]))!
                     let userEmail = String(channelArr[3])
-                    DispatchQueue.main.async {
-                        if let participant = QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail){
-                            if userEmail != QiscusMe.sharedInstance.email{
-                                participant.updateLastReadId(commentId: commentId)
-                            }
+                    if userEmail != QiscusMe.sharedInstance.email {
+                        DispatchQueue.main.async {
+                            QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail)?.updateLastReadId(commentId: commentId)
                         }
                     }
                     break
@@ -1055,11 +1049,9 @@ extension Qiscus:CocoaMQTTDelegate{
                     let messageArr = messageData.characters.split(separator: ":")
                     let userEmail = String(channelArr[1])
                     if userEmail != QiscusMe.sharedInstance.email{
-                        DispatchQueue.main.async {
-                            if let user = QUser.user(withEmail: userEmail){
-                                if let timeToken = Double(String(messageArr[1])){
-                                    user.updateLastSeen(lastSeen: Double(timeToken)/1000)
-                                }
+                        if let timeToken = Double(String(messageArr[1])){
+                            DispatchQueue.main.async {
+                                QUser.user(withEmail: userEmail)?.updateLastSeen(lastSeen: Double(timeToken)/1000)
                             }
                         }
                     }

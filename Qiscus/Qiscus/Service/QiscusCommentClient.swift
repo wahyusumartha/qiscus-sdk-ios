@@ -53,7 +53,7 @@ open class QiscusCommentClient: NSObject {
     
     
     // MARK: - Login or register
-    open func loginOrRegister(_ email:String = "", password:String = "", username:String? = nil, avatarURL:String? = nil, onSuccess:(()->Void)? = nil){
+    open func loginOrRegister(_ email:String = "", password:String = "", username:String? = nil, avatarURL:String? = nil, reconnect:Bool = false, onSuccess:(()->Void)? = nil){
         
         var parameters:[String: AnyObject] = [String: AnyObject]()
         
@@ -86,7 +86,7 @@ open class QiscusCommentClient: NSObject {
                             
                             if success {
                                 let userData = json["results"]["user"]
-                                let _ = QiscusMe.saveData(fromJson: userData)
+                                let _ = QiscusMe.saveData(fromJson: userData, reconnect: reconnect)
                                 Qiscus.setupReachability()
                                 if let delegate = Qiscus.shared.delegate {
                                     Qiscus.uiThread.async {
@@ -201,7 +201,7 @@ open class QiscusCommentClient: NSObject {
         let userName = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_param_username") as? String
         let avatarURL = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_param_avatar") as? String
         if email != nil && userKey != nil && userName != nil {
-            QiscusCommentClient.sharedInstance.loginOrRegister(email!, password: userKey!, username: userName!, avatarURL: avatarURL, onSuccess: onSuccess)
+            QiscusCommentClient.sharedInstance.loginOrRegister(email!, password: userKey!, username: userName!, avatarURL: avatarURL, reconnect: true, onSuccess: onSuccess)
         }
         
     }

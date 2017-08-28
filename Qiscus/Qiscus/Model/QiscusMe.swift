@@ -48,7 +48,7 @@ open class QiscusMe: NSObject {
     }
     
     fileprivate override init(){
-        let userData = UserDefaults.standard
+        
         if let userId = userData.value(forKey: "qiscus_id") as? Int {
             self.id = userId
         }
@@ -96,7 +96,7 @@ open class QiscusMe: NSObject {
         }
     }
     
-    open class func saveData(fromJson json:JSON)->QiscusMe{
+    open class func saveData(fromJson json:JSON, reconnect:Bool = false)->QiscusMe{
         Qiscus.printLog(text: "jsonFron saveData: \(json)")
         QiscusMe.sharedInstance.id = json["id"].intValue
         QiscusMe.sharedInstance.email = json["email"].stringValue
@@ -104,16 +104,24 @@ open class QiscusMe: NSObject {
         QiscusMe.sharedInstance.avatarUrl = json["avatar"].stringValue
         QiscusMe.sharedInstance.rtKey = json["rtKey"].stringValue
         QiscusMe.sharedInstance.token = json["token"].stringValue
-        QiscusMe.sharedInstance.lastCommentId = json["last_comment_id"].intValue
-                
+        
         QiscusMe.sharedInstance.userData.set(json["id"].intValue, forKey: "qiscus_id")
         QiscusMe.sharedInstance.userData.set(json["email"].stringValue, forKey: "qiscus_email")
         QiscusMe.sharedInstance.userData.set(json["username"].stringValue, forKey: "qiscus_username")
         QiscusMe.sharedInstance.userData.set(json["avatar"].stringValue, forKey: "qiscus_avatar_url")
         QiscusMe.sharedInstance.userData.set(json["rtKey"].stringValue, forKey: "qiscus_rt_key")
         QiscusMe.sharedInstance.userData.set(json["token"].stringValue, forKey: "qiscus_token")
-        QiscusMe.sharedInstance.userData.set(json["last_comment_id"].intValue, forKey: "qiscus_lastComment_id")
-        QiscusMe.sharedInstance.userData.set(json["last_comment_id"].intValue, forKey: "qiscus_lastKnownComment_id")
+        
+        if !reconnect {
+            QiscusMe.sharedInstance.userData.set(json["last_comment_id"].intValue, forKey: "qiscus_lastComment_id")
+            QiscusMe.sharedInstance.userData.set(json["last_comment_id"].intValue, forKey: "qiscus_lastKnownComment_id")
+        }
+        if let lastComment = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_lastComment_id") as? Int{
+            QiscusMe.sharedInstance.lastCommentId = lastComment
+        }
+        if let lastComment = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_lastKnownComment_id") as? Int{
+            QiscusMe.sharedInstance.lastKnownCommentId = lastComment
+        }
         return QiscusMe.sharedInstance
     }
     public class func updateLastCommentId(commentId:Int){
