@@ -583,6 +583,9 @@ public class QChatService:NSObject {
                                 }
                             }
                         }
+                        if comments.count == 20 {
+                            self.syncProcess()
+                        }
                     }else if error != JSON.null{
                         Qiscus.printLog(text: "error sync message: \(error)")
                     }
