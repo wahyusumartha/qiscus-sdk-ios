@@ -79,7 +79,7 @@ extension QiscusChatVC {
         }
         
         if Qiscus.shared.galeryUpload {
-            let galeryActionButton = UIAlertAction(title: "Galery", style: .default) { action -> Void in
+            let galeryActionButton = UIAlertAction(title: "Gallery", style: .default) { action -> Void in
                 self.uploadImage()
             }
             actionSheetController.addAction(galeryActionButton)
