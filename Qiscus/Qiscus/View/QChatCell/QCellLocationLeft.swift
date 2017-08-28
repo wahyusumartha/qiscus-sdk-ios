@@ -34,21 +34,27 @@ class QCellLocationLeft: QChatCell {
         // Initialization code
     }
     override func commentChanged() {
+        self.mapView.removeAnnotations(self.mapView.annotations)
+        
         let payload = JSON(parseJSON: self.comment!.data)
         
-        let lat = CLLocationDegrees(payload["latitude"].doubleValue)
-        let long = CLLocationDegrees(payload["longitude"].doubleValue)
+        DispatchQueue.global(qos: .background).async {
+            let lat = CLLocationDegrees(payload["latitude"].doubleValue)
+            let long = CLLocationDegrees(payload["longitude"].doubleValue)
+            
+            let center = CLLocationCoordinate2DMake(lat, long)
+            
+            let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+            let newPin = MKPointAnnotation()
+            newPin.coordinate = center
+            DispatchQueue.main.async {
+                self.mapView.setRegion(region, animated: false)
+                self.mapView.addAnnotation(newPin)
+            }
+        }
         
-        let center = CLLocationCoordinate2DMake(lat, long)
-        
-        let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
-        let newPin = MKPointAnnotation()
-        newPin.coordinate = center
         
         //set region on the map
-        self.mapView.removeAnnotations(self.mapView.annotations)
-        self.mapView.setRegion(region, animated: true)
-        self.mapView.addAnnotation(newPin)
         self.addressHeight.constant = self.comment!.textSize.height - 168.0
         self.addressView.attributedText = self.comment?.attributedText
         self.locationLabel.text = payload["name"].stringValue

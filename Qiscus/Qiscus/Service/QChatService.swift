@@ -207,7 +207,7 @@ public class QChatService:NSObject {
         }
     }
     //
-    public func room(withUniqueId uniqueId:String, title:String, avatarURL:String, onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){ //
+    public func room(withUniqueId uniqueId:String, title:String = "", avatarURL:String = "", onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){ //
         if Qiscus.isLoggedIn{
             if let room = QRoom.room(withUniqueId: uniqueId){
                 onSuccess(room)
@@ -294,7 +294,7 @@ public class QChatService:NSObject {
             }
         }
     }
-    public func room(withUniqueId uniqueId:String, title:String, avatarURL:String, withMessage:String? = nil){ //
+    public func room(withUniqueId uniqueId:String, title:String = "", avatarURL:String = "", withMessage:String? = nil){ //
         
         if Qiscus.isLoggedIn{
             if let room = QRoom.room(withUniqueId: uniqueId){

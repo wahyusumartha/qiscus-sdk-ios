@@ -849,6 +849,59 @@ public class QRoom:Object {
         self.addComment(newComment: comment)
         return comment
     }
+    public func newLocationComment(latitude:Double, longitude:Double, title:String?=nil, address:String?=nil)->QComment{
+        let comment = QComment()
+        var locTitle = title
+        var locAddress = ""
+        if address != nil {
+            locAddress = address!
+        }
+        if title == nil {
+            var newLat = latitude
+            var newLong = longitude
+            var latString = "N"
+            var longString = "E"
+            if latitude < 0 {
+                latString = "S"
+                newLat = 0 - latitude
+            }
+            if longitude < 0 {
+                longString = "W"
+                newLong = 0 - longitude
+            }
+            let intLat = Int(newLat)
+            let intLong = Int(newLong)
+            let subLat = Int((newLat - Double(intLat)) * 100)
+            let subLong = Int((newLong - Double(intLong)) * 100)
+            let subSubLat = Int((newLat - Double(intLat) - Double(Double(subLat)/100)) * 10000)
+            let subSubLong = Int((newLong - Double(intLong) - Double(Double(subLong)/100)) * 10000)
+            let pLat = Int((newLat - Double(intLat) - Double(Double(subLat)/100) - Double(Double(subSubLat)/10000)) * 100000)
+            let pLong = Int((newLong - Double(intLong) - Double(Double(subLong)/100) - Double(Double(subSubLong)/10000)) * 100000)
+            
+            locTitle = "\(intLat)º\(subLat)\'\(subSubLat).\(pLat)\"\(latString) \(intLong)º\(subLong)\'\(subSubLong).\(pLong)\"\(longString)"
+        }
+        let url = "http://maps.google.com/maps?daddr=\(latitude),\(longitude)"
+        
+        let payload = "{ \"name\": \"\(locTitle!)\", \"address\": \"\(locAddress)\", \"latitude\": \(latitude), \"longitude\": \(longitude), \"map_url\": \"\(url)\"}"
+        
+        let time = Double(Date().timeIntervalSince1970)
+        let timeToken = UInt64(time * 10000)
+        let uniqueID = "ios-\(timeToken)"
+        
+        comment.uniqueId = uniqueID
+        comment.id = 0
+        comment.roomId = self.id
+        comment.text = ""
+        comment.createdAt = Double(Date().timeIntervalSince1970)
+        comment.senderEmail = QiscusMe.sharedInstance.email
+        comment.senderName = QiscusMe.sharedInstance.userName
+        comment.statusRaw = QCommentStatus.sending.rawValue
+        comment.typeRaw = "location"
+        comment.data = payload
+        
+        self.addComment(newComment: comment)
+        return comment
+    }
     public func newCustomComment(type:String, payload:String, text:String? = nil )->QComment{
         let comment = QComment()
         let payload = "{ \"name\": \"\(name)\", \"value\": \"\(payload)\"}"

@@ -41,10 +41,11 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     var config = QiscusConfig.sharedInstance
     var commentService = QiscusCommentClient.sharedInstance
     
-    var iCloudUpload = false
-    var cameraUpload = true
-    var galeryUpload = true
-    var contactShare = true
+    public var iCloudUpload = false
+    public var cameraUpload = true
+    public var galeryUpload = true
+    public var contactShare = true
+    public var locationShare = true
     
     var isPushed:Bool = false
     var reachability:QReachability?

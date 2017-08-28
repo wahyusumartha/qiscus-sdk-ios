@@ -26,7 +26,11 @@ extension QiscusChatVC:CNContactPickerDelegate{
             let name = "\(contactProperty.contact.givenName) \(contactProperty.contact.familyName)".trimmingCharacters(in: .whitespacesAndNewlines)
         
             let newComment = self.chatRoom!.newContactComment(name: name, value: value)
+            let section = self.chatRoom!.commentsGroupCount - 1
+            let item = self.chatRoom!.commentGroup(index: section)!.commentsCount - 1
             self.chatRoom!.post(comment: newComment)
+            let indexPath = IndexPath(item: item, section: section)
+            self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
         }
     }
 }
@@ -98,7 +102,24 @@ extension QiscusChatVC {
             }
             actionSheetController.addAction(contactActionButton)
         }
+//        if Qiscus.shared.locationShare {
+//            let contactActionButton = UIAlertAction(title: "Current Location", style: .default) { action -> Void in
+//                self.shareCurrentLocation()
+//            }
+//            actionSheetController.addAction(contactActionButton)
+//        }
         self.present(actionSheetController, animated: true, completion: nil)
+    }
+    func shareCurrentLocation(){
+        self.showLoading("Getting your current location")
+        self.locationManager.requestWhenInUseAuthorization()
+        
+        if CLLocationManager.locationServicesEnabled() {
+            locationManager.delegate = self
+            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            self.didFindLocation = false
+            self.locationManager.startUpdatingLocation()
+        }
     }
     func getLinkPreview(url:String){
 //        var urlToCheck = url.lowercased()

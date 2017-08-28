@@ -13,6 +13,8 @@ import ImageViewer
 import SwiftyJSON
 import UserNotifications
 import ContactsUI
+import CoreLocation
+
 //
 import RealmSwift
 open class QiscusChatVC: UIViewController{
@@ -66,6 +68,8 @@ open class QiscusChatVC: UIViewController{
     var archived:Bool = QiscusUIConfiguration.sharedInstance.readOnly
     
     var selectedCellIndex:IndexPath? = nil
+    let locationManager = CLLocationManager()
+    var didFindLocation = true
     
     var replyData:QComment? = nil {
         didSet{
@@ -498,6 +502,12 @@ open class QiscusChatVC: UIViewController{
     override open func viewDidLoad() {
         super.viewDidLoad()
         
+        self.locationManager.requestWhenInUseAuthorization()
+        
+        if CLLocationManager.locationServicesEnabled() {
+            locationManager.delegate = self
+            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+        }
     }
     private func firstLoadSetup(){
         self.chatService.delegate = self
@@ -1028,6 +1038,45 @@ extension QiscusChatVC:QRoomDelegate{
         }else{
             self.unreadIndicator.text = ""
             self.unreadIndicator.isHidden = true
+        }
+    }
+}
+
+extension QiscusChatVC: CLLocationManagerDelegate {
+    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        QiscusBackgroundThread.async {
+            manager.stopUpdatingLocation()
+            if !self.didFindLocation {
+                if let currentLocation = manager.location {
+                    let geoCoder = CLGeocoder()
+                    let latitude = currentLocation.coordinate.latitude
+                    let longitude = currentLocation.coordinate.longitude
+                    var address:String?
+                    var title:String?
+                    
+                    geoCoder.reverseGeocodeLocation(currentLocation, completionHandler: { (placemarks, error) in
+                        if error == nil {
+                            let placeArray = placemarks
+                            var placeMark: CLPlacemark!
+                            placeMark = placeArray?[0]
+                            
+                            if let addressDictionary = placeMark.addressDictionary{
+                                if let addressArray = addressDictionary["FormattedAddressLines"] as? [String] {
+                                    address = addressArray.joined(separator: ", ")
+                                }
+                                title = addressDictionary["Name"] as? String
+                                DispatchQueue.main.async {
+                                    let comment = self.chatRoom!.newLocationComment(latitude: latitude, longitude: longitude, title: title, address: address)
+                                    self.chatRoom?.post(comment: comment)
+                                }
+                            }
+                        }
+                    })
+                    
+                }
+                self.didFindLocation = true
+                self.dismissLoading()
+            }
         }
     }
 }
