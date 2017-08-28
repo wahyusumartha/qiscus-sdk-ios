@@ -908,7 +908,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     }
     
     // MARK: - register PushNotification
-    @objc public class func registerDevice(withToken deviceToken: String){
+    @objc class func registerDevice(withToken deviceToken: String){
         QiscusCommentClient.sharedInstance.registerDevice(withToken: deviceToken)
     }
 }
