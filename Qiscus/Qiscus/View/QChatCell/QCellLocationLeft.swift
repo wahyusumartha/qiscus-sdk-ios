@@ -38,19 +38,17 @@ class QCellLocationLeft: QChatCell {
         
         let payload = JSON(parseJSON: self.comment!.data)
         
-        DispatchQueue.global(qos: .background).async {
-            let lat = CLLocationDegrees(payload["latitude"].doubleValue)
-            let long = CLLocationDegrees(payload["longitude"].doubleValue)
-            
-            let center = CLLocationCoordinate2DMake(lat, long)
-            
-            let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
-            let newPin = MKPointAnnotation()
-            newPin.coordinate = center
-            DispatchQueue.main.async {
-                self.mapView.setRegion(region, animated: false)
-                self.mapView.addAnnotation(newPin)
-            }
+        let lat = CLLocationDegrees(payload["latitude"].doubleValue)
+        let long = CLLocationDegrees(payload["longitude"].doubleValue)
+        
+        let center = CLLocationCoordinate2DMake(lat, long)
+        
+        let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+        let newPin = MKPointAnnotation()
+        newPin.coordinate = center
+        DispatchQueue.main.async {
+            self.mapView.setRegion(region, animated: false)
+            self.mapView.addAnnotation(newPin)
         }
         
         
