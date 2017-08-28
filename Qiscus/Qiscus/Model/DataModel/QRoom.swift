@@ -594,6 +594,10 @@ public class QRoom:Object {
                 newComment.data = "\(json["payload"])"
                 newComment.typeRaw = QCommentType.location.name()
                 break
+            case "custom":
+                newComment.data = "\(json["payload"]["content"])"
+                newComment.typeRaw = json["payload"]["type"].stringValue
+                break
             case "text":
                 if newComment.text.hasPrefix("[file]"){
                     var type = QiscusFileType.file
@@ -730,7 +734,7 @@ public class QRoom:Object {
                 newComment.data = "\(json["payload"])"
                 newComment.typeRaw = QCommentType.card.name()
                 break
-            case "contact":
+            case "contact_person":
                 newComment.data = "\(json["payload"])"
                 newComment.typeRaw = QCommentType.contact.name()
                 break
@@ -741,6 +745,10 @@ public class QRoom:Object {
             case "button_postback_response" :
                 newComment.data = "\(json["payload"])"
                 newComment.typeRaw = QCommentType.text.name()
+                break
+            case "custom":
+                newComment.data = "\(json["payload"]["content"])"
+                newComment.typeRaw = json["payload"]["type"].stringValue
                 break
             case "text":
                 if newComment.text.hasPrefix("[file]"){
@@ -836,6 +844,32 @@ public class QRoom:Object {
         comment.senderName = QiscusMe.sharedInstance.userName
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.typeRaw = "contact_person"
+        comment.data = payload
+        
+        self.addComment(newComment: comment)
+        return comment
+    }
+    public func newCustomComment(type:String, payload:String, text:String? = nil )->QComment{
+        let comment = QComment()
+        let payload = "{ \"name\": \"\(name)\", \"value\": \"\(value)\"}"
+        let time = Double(Date().timeIntervalSince1970)
+        let timeToken = UInt64(time * 10000)
+        let uniqueID = "ios-\(timeToken)"
+        if text == nil {
+            comment.text = "message type \(type)"
+        }else{
+            comment.text = text
+        }
+        
+        comment.uniqueId = uniqueID
+        comment.id = 0
+        comment.roomId = self.id
+        
+        comment.createdAt = Double(Date().timeIntervalSince1970)
+        comment.senderEmail = QiscusMe.sharedInstance.email
+        comment.senderName = QiscusMe.sharedInstance.userName
+        comment.statusRaw = QCommentStatus.sending.rawValue
+        comment.typeRaw = type
         comment.data = payload
         
         self.addComment(newComment: comment)
