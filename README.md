@@ -356,8 +356,7 @@ Lots of our items inside Chat Room can be modified based on our needs, here is t
 
 ### UI Source code
 
-If you want full customisations, you can modify everything on the view by extend our `QiscusChatVC` or just right away modifying our[ QiscusUIConfiguration.swift](https://github.com/qiscus/qiscus-sdk-ios/blob/master/Qiscus/Qiscus/QiscusUIConfiguration.swift) and [QiscusTextConfiguration.swift](https://github.com/qiscus/qiscus-sdk-ios/blob/master/Qiscus/Qiscus/QiscusTextConfiguration.swift) based on your needs.
-
+If you want full customisations, you can modify everything on the view by extend our `QiscusChatVC` based on your needs.
 
 here is sample of modification by extending our `QiscusChatVC` :
 
