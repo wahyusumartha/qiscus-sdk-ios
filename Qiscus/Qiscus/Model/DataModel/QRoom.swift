@@ -851,14 +851,14 @@ public class QRoom:Object {
     }
     public func newCustomComment(type:String, payload:String, text:String? = nil )->QComment{
         let comment = QComment()
-        let payload = "{ \"name\": \"\(name)\", \"value\": \"\(value)\"}"
+        let payload = "{ \"name\": \"\(name)\", \"value\": \"\(payload)\"}"
         let time = Double(Date().timeIntervalSince1970)
         let timeToken = UInt64(time * 10000)
         let uniqueID = "ios-\(timeToken)"
         if text == nil {
             comment.text = "message type \(type)"
         }else{
-            comment.text = text
+            comment.text = text!
         }
         
         comment.uniqueId = uniqueID
