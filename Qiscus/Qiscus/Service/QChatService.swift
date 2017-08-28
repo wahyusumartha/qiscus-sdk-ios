@@ -26,7 +26,7 @@ public class QChatService:NSObject {
         let userName = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_param_username") as? String
         let avatarURL = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_param_avatar") as? String
         if email != nil && userKey != nil && userName != nil {
-            QiscusCommentClient.sharedInstance.loginOrRegister(email!, password: userKey!, username: userName!, avatarURL: avatarURL, onSuccess: onSuccess)
+            QiscusCommentClient.sharedInstance.loginOrRegister(email!, password: userKey!, username: userName!, avatarURL: avatarURL, reconnect: true, onSuccess: onSuccess)
         }
     }
     
