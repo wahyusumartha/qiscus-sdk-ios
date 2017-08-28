@@ -102,12 +102,12 @@ extension QiscusChatVC {
             }
             actionSheetController.addAction(contactActionButton)
         }
-//        if Qiscus.shared.locationShare {
-//            let contactActionButton = UIAlertAction(title: "Current Location", style: .default) { action -> Void in
-//                self.shareCurrentLocation()
-//            }
-//            actionSheetController.addAction(contactActionButton)
-//        }
+        if Qiscus.shared.locationShare {
+            let contactActionButton = UIAlertAction(title: "Current Location", style: .default) { action -> Void in
+                self.shareCurrentLocation()
+            }
+            actionSheetController.addAction(contactActionButton)
+        }
         self.present(actionSheetController, animated: true, completion: nil)
     }
     func shareCurrentLocation(){
