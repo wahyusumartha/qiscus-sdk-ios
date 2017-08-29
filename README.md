@@ -183,7 +183,7 @@ Qiscus also support group chat. To create new group chat, all you need is just c
 
 Swift 3.0:
 
-`Qiscus.createChatView(withUsers: ["TARGET_EMAIL_1, TARGET_EMAIL_2"], title: "CHAT_GROUP_TITLE")
+`Qiscus.createChatView(withUsers: ["TARGET_EMAIL_1, TARGET_EMAIL_2"], title: "CHAT_GROUP_TITLE")`
 
 For example in your ViewController :
 
