@@ -590,8 +590,7 @@ public class QChatService:NSObject {
                                                             let comment = QComment.tempComment(fromJSON: newComment)
                                                             roomDelegate.gotNewComment(comment)
                                                         }}
-                                                        
-                                                        QiscusMe.updateLastKnownCommentId(commentId: id)
+                                                        QiscusMe.updateLastCommentId(commentId: id)
                                                     }
                                                 }
                                             }}

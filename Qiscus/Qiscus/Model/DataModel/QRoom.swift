@@ -316,8 +316,8 @@ public class QRoom:Object {
                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                         roomDelegate.gotNewComment(newComment)
                     }
-                    QiscusMe.updateLastKnownCommentId(commentId: newComment.id)
                 }}
+                QiscusMe.updateLastCommentId(commentId: newComment.id)
                 self.updateUnreadCommentCount()
             }
         }
@@ -377,7 +377,7 @@ public class QRoom:Object {
                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                         roomDelegate.gotNewComment(newComment)
                     }
-                    QiscusMe.updateLastKnownCommentId(commentId: newComment.id)
+                    QiscusMe.updateLastCommentId(commentId: newComment.id)
                 }}
                 var i = 0
                 let section = self.comments.count - 1
@@ -420,8 +420,8 @@ public class QRoom:Object {
                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                         roomDelegate.gotNewComment(newComment)
                     }
-                    QiscusMe.updateLastKnownCommentId(commentId: newComment.id)
                 }}
+                QiscusMe.updateLastCommentId(commentId: newComment.id)
             }
         }
         if let user = QUser.user(withEmail: newComment.senderEmail){
