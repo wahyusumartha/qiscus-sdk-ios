@@ -503,12 +503,6 @@ open class QiscusChatVC: UIViewController{
     override open func viewDidLoad() {
         super.viewDidLoad()
         
-        self.locationManager.requestWhenInUseAuthorization()
-        
-        if CLLocationManager.locationServicesEnabled() {
-            locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-        }
     }
     private func firstLoadSetup(){
         self.chatService.delegate = self
