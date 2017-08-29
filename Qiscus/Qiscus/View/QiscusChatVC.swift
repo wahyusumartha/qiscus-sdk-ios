@@ -666,13 +666,14 @@ open class QiscusChatVC: UIViewController{
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QiscusChatVC.goToTitleAction))
         self.titleView.addGestureRecognizer(tapRecognizer)
         
+        let containerWidth = QiscusHelper.screenWidth() - 49
         let titleWidth = QiscusHelper.screenWidth() - CGFloat(49 * totalButton) - 40
         
         self.titleLabel.frame = CGRect(x: 40, y: 7, width: titleWidth, height: 17)
         self.subtitleLabel.frame = CGRect(x: 40, y: 25, width: titleWidth, height: 13)
         self.roomAvatarLabel.frame = CGRect(x: 0,y: 6,width: 32,height: 32)
         self.roomAvatar.frame = CGRect(x: 0,y: 6,width: 32,height: 32)
-        self.titleView.frame = CGRect(x: 0, y: 0, width: titleWidth + 40, height: 44)
+        self.titleView.frame = CGRect(x: 0, y: 0, width: containerWidth, height: 44)
         if self.chatTitle != nil {
             let roomTitle = self.chatTitle!.trimmingCharacters(in: .whitespacesAndNewlines)
             if roomTitle != "" {
