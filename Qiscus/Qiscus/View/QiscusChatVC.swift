@@ -30,7 +30,7 @@ open class QiscusChatVC: UIViewController{
     @IBOutlet weak var archievedNotifLabel: UILabel!
     @IBOutlet weak var unlockButton: UIButton!
     @IBOutlet weak var emptyChatImage: UIImageView!
-    @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet public weak var collectionView: UICollectionView!
     @IBOutlet weak var bottomButton: UIButton!
     @IBOutlet weak var unreadIndicator: UILabel!
     @IBOutlet weak var linkPreviewContainer: UIView!
