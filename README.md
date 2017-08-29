@@ -209,7 +209,7 @@ class ViewController: UIViewController {
 for accesing room that created by this call, you need to call it with its roomId. This methode is always creating new chat room.
 
 
-### Get a Group Room instance by room id
+### Get a room by id
 
 
 When you already know your chat room id, you can easily go to that room. Just call
@@ -241,7 +241,7 @@ class ViewController: UIViewController {
 }
 ```
 
-### Get or Create Room instance by client defined id
+### Create or join room by client defined id
 
 
 When you already know your chat room id, you can easily go to that room. Just call
