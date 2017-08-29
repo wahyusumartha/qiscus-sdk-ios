@@ -541,6 +541,7 @@ public class QChatService:NSObject {
             let parameters:[String: AnyObject] =  [
                 "last_received_comment_id"  : QiscusMe.sharedInstance.lastCommentId as AnyObject,
                 "token" : qiscus.config.USER_TOKEN as AnyObject,
+                "order" : "asc" as AnyObject
                 ]
             Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                 if let response = responseData.result.value {
