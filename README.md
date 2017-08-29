@@ -241,10 +241,17 @@ class ViewController: UIViewController {
 }
 ```
 
-### Create or join room by client defined id
+### Create or join room by defined id
 
+You probably want to set defined id for the room you are creating so that the id can be reference for users to get into.
 
-When you already know your chat room id, you can easily go to that room. Just call
+Usual usage for this is when user create common room or channel which expecting other users can join to the same channel by knowing the channel name or id, you can use the channel name or id as qiscus room defined id.
+
+Additional note: 
+If room with predefined unique id is not exist then it will create a new one with requester as the only one participant. Otherwise, if room with predefined unique id is already exist, it will return that room and add requester as a participant.
+
+When first call (room is not exist), if requester did not send avatar_url and/or room name it will use default value. But, after the second call (room is exist) and user (requester) send avatar_url and/or room name, it will be updated to that value. Object changed will be true in first call and when avatar_url or room name is updated.
+
 
 Swift 3.0:
 
