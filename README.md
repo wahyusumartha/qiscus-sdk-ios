@@ -2,7 +2,6 @@
 
 <p align="center"><br/><img src="https://res.cloudinary.com/qiscus/image/upload/zKB8jtyLZJ/ssios1.png" width="45%" /><br/></p>
 
-
 # Quick Start
 
 ### Create a new app
@@ -125,9 +124,9 @@ Updating user profile and details is simply by re-init the user using new detail
         )
 ```
 
-# Room Types 
+# Chat Rooms 
 
-### Creating and starting 1-to-1 chat
+### Creating 1-to-1 chat
 
 Start chat with target is very easy, all you need is just call
 
@@ -210,7 +209,7 @@ class ViewController: UIViewController {
 for accesing room that created by this call, you need to call it with its roomId. This methode is always creating new chat room.
 
 
-### Getting a Group Room instance with room id
+### Get a Group Room instance by room id
 
 
 When you already know your chat room id, you can easily go to that room. Just call
@@ -242,7 +241,7 @@ class ViewController: UIViewController {
 }
 ```
 
-### Getting or Create Room instance with unique id
+### Get or Create Room instance by client defined id
 
 
 When you already know your chat room id, you can easily go to that room. Just call
@@ -426,12 +425,20 @@ class QChatView: QiscusChatVC {
 ```
 
 
-
 # Push Notifications 
 
 Currently we recommend to use our Webhook-API to push notification from your own server to client app for simplicity and flexibility handling
 
-# Resources
+# Offline Messages
+
+## Post Messages
+
+During post message, if you dont have any internet connection, message will be store locally and will be automatically being send once your internet connection is back. 
+
+## Get Messages
+
+Messages are stored locally so you can still access the messages when you dont have internet conenction. However any new messages will not being received after you have your internet connection back.
+
 
 # Notes
 
