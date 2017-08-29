@@ -2,7 +2,6 @@
 
 <p align="center"><br/><img src="https://res.cloudinary.com/qiscus/image/upload/zKB8jtyLZJ/ssios1.png" width="45%" /><br/></p>
 
-
 # Quick Start
 
 ### Create a new app
@@ -125,9 +124,9 @@ Updating user profile and details is simply by re-init the user using new detail
         )
 ```
 
-# Room Types 
+# Chat Rooms 
 
-### Creating and starting 1-to-1 chat
+### Creating 1-to-1 chat
 
 Start chat with target is very easy, all you need is just call
 
@@ -184,8 +183,7 @@ Qiscus also support group chat. To create new group chat, all you need is just c
 
 Swift 3.0:
 
-`Qiscus.createChat(withUsers users:["TARGET_EMAIL_1, TARGET_EMAIL_2"], target:self)`
-
+`Qiscus.createChatView(withUsers: ["TARGET_EMAIL_1, TARGET_EMAIL_2"], title: "CHAT_GROUP_TITLE")`
 
 For example in your ViewController :
 
@@ -200,7 +198,8 @@ class ViewController: UIViewController {
     .....
     func goToChat(){
         let chatTargets = ["081111111111@qiscuswa.com, 081234567890@qiscuswa.com"]
-        Qiscus.createChat(withUsers:chatTargets, target:self)
+        let view = Qiscus.createChatView(withUsers: chatTargets, title: "New Group Chat")
+        self.navigationController?.pushViewController(view, animated: true)
     }
     .....
 }
@@ -210,7 +209,7 @@ class ViewController: UIViewController {
 for accesing room that created by this call, you need to call it with its roomId. This methode is always creating new chat room.
 
 
-### Getting a Group Room instance with room id
+### Get a room by id
 
 
 When you already know your chat room id, you can easily go to that room. Just call
@@ -242,10 +241,17 @@ class ViewController: UIViewController {
 }
 ```
 
-### Getting or Create Room instance with unique id
+### Create or join room by defined id
 
+You probably want to set defined id for the room you are creating so that the id can be reference for users to get into.
 
-When you already know your chat room id, you can easily go to that room. Just call
+Usual usage for this is when user create common room or channel which expecting other users can join to the same channel by knowing the channel name or id, you can use the channel name or id as qiscus room defined id.
+
+Additional note: 
+If room with predefined unique id is not exist then it will create a new one with requester as the only one participant. Otherwise, if room with predefined unique id is already exist, it will return that room and add requester as a participant.
+
+When first call (room is not exist), if requester did not send avatar_url and/or room name it will use default value. But, after the second call (room is exist) and user (requester) send avatar_url and/or room name, it will be updated to that value. Object changed will be true in first call and when avatar_url or room name is updated.
+
 
 Swift 3.0:
 
@@ -266,7 +272,7 @@ class ViewController: UIViewController {
 
   func goToChat(){
           let roomId = Int(targetField.text!)
-          let view = iscus.chatView(withRoomUniqueId: uniqueId)
+          let view = Qiscus.chatView(withRoomUniqueId: uniqueId)
           self.navigationController?.pushViewController(view, animated: true)
   }
 
@@ -356,18 +362,90 @@ Lots of our items inside Chat Room can be modified based on our needs, here is t
 
 ### UI Source code
 
-If you want full customisations, you can modify everything on the view by forking our repository or just right away modifying our[ QiscusUIConfiguration.swift](https://github.com/qiscus/qiscus-sdk-ios/blob/master/Qiscus/Qiscus/QiscusUIConfiguration.swift) and [QiscusTextConfiguration.swift](https://github.com/qiscus/qiscus-sdk-ios/blob/master/Qiscus/Qiscus/QiscusTextConfiguration.swift)** **based on your needs.
+If you want full customisations, you can modify everything on the view by extend our `QiscusChatVC` based on your needs.
+
+here is sample of modification by extending our `QiscusChatVC` :
+
+```
+class QChatView: QiscusChatVC {
+    var actions : [ChatAction]? = nil
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view.
+        // self.collectionViewTopMargin.constant = 100
+        self.backgroundView.isHidden    = true
+
+        let iconCall        = UIImage(named: "ic_phone_call", in: QChat.bundle, compatibleWith: nil)
+        let iconCallVideo   = UIImage(named: "ic_video_call", in: QChat.bundle, compatibleWith: nil)
+        let iconEnd         = UIImage(named: "ic_end_consultation", in: QChat.bundle, compatibleWith: nil)
+        
+        let endButton = UIButton(frame: CGRect(x: 0, y: 0, width: 40, height: 20))
+        endButton.setBackgroundImage(iconEnd, for: .normal)
+        endButton.imageView?.contentMode = UIViewContentMode.scaleAspectFit
+        endButton.addTarget(self, action: #selector(endConsultation), for: .touchUpInside)
+        let barButtonEnd    = UIBarButtonItem(customView: endButton)
+
+        let callButton = UIButton(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
+        callButton.setBackgroundImage(iconCall, for: .normal)
+        callButton.imageView?.contentMode = UIViewContentMode.scaleAspectFit
+        callButton.addTarget(self, action: #selector(addTapped), for: .touchUpInside)
+        let barButtonCall    = UIBarButtonItem(customView: callButton)
+        
+        let callVideoButton = UIButton(frame: CGRect(x: 0, y: 0, width: 30, height: 20))
+        callVideoButton.setBackgroundImage(iconCallVideo, for: .normal)
+        callVideoButton.imageView?.contentMode = UIViewContentMode.scaleAspectFit
+        callVideoButton.addTarget(self, action: #selector(addTapped), for: .touchUpInside)
+        let barButtonCallVideo    = UIBarButtonItem(customView: callVideoButton)
+        
+        navigationItem.rightBarButtonItems = [barButtonEnd, barButtonCallVideo, barButtonCall]
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.tabBarController?.tabBar.isHidden = true
+    }
+    
+    func addTapped() {
+        print("something")
+    }
+    
+    func endConsultation() {
+        postComment(type: "endConsultation", payload: "Semoga Lekas sembuh")
+    }
+    
+    func postComment(type: String, payload: String) {
+        let newComment = self.chatRoom?.newCustomComment(type: type, payload: payload, text: "Pesan Doktor")
+        self.chatRoom?.post(comment: newComment!)
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        return super.collectionView(collectionView, cellForItemAt: indexPath)
+    }
+}
+```
+
 
 # Push Notifications 
 
 Currently we recommend to use our Webhook-API to push notification from your own server to client app for simplicity and flexibility handling
 
-# Resources
+# Offline Messages
 
-### Video
+## Post Messages
 
-Here's a video showing how you can set up sample app for qiscus SDK
-[<p align="center"><img src="https://res.cloudinary.com/qiscus/image/upload/2XNZ4UNnAZ/ssiosvideo.png" width="50%" /></p>](https://www.youtube.com/watch?v=LxAA6cydVOw)
+During post message, if you dont have any internet connection, message will be store locally and will be automatically being send once your internet connection is back. 
+
+## Get Messages
+
+Messages are stored locally so you can still access the messages when you dont have internet conenction. However any new messages will not being received after you have your internet connection back.
+
 
 # Notes
 
