@@ -550,14 +550,14 @@ extension QiscusChatVC {
             AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
         ]
         
-        self.recordButton.isHidden = true
-        self.sendButton.isHidden = false
-        self.recordBackground.clipsToBounds = true
-        let inputWidth = self.inputText.frame.width
-        let recorderWidth = inputWidth + 17
-        self.recordViewLeading.constant = 0 - recorderWidth
-        
         Qiscus.uiThread.async {autoreleasepool{
+            self.recordButton.isHidden = true
+            self.sendButton.isHidden = false
+            self.recordBackground.clipsToBounds = true
+            let inputWidth = self.inputText.frame.width
+            let recorderWidth = inputWidth + 17
+            self.recordViewLeading.constant = 0 - recorderWidth
+            
             UIView.animate(withDuration: 0.5, animations: {
                 self.inputText.isHidden = true
                 self.cancelRecordButton.isHidden = false
@@ -662,7 +662,7 @@ extension QiscusChatVC {
     func finishRecording(){
         self.recorder?.stop()
         self.recorder = nil
-        self.recordViewLeading.constant = 0 - 2
+        self.recordViewLeading.constant = 8
         Qiscus.uiThread.async {autoreleasepool{
             UIView.animate(withDuration: 0.5, animations: {
                 self.inputText.isHidden = false

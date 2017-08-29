@@ -532,6 +532,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
             chatView.tintColor = tintColor
         }
     }
+    
     /**
      Class function to set upload from iCloud active or not
      - parameter active: **Bool** to set active or not.

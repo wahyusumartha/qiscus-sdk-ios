@@ -457,14 +457,14 @@ open class QiscusChatVC: UIViewController{
         
         titleLabel = UILabel(frame:CGRect(x: 40, y: 7, width: titleWidth, height: 17))
         titleLabel.backgroundColor = UIColor.clear
-        titleLabel.textColor = UIColor.white
+        titleLabel.textColor = self.tintColor
         titleLabel.font = UIFont.boldSystemFont(ofSize: UIFont.systemFontSize)
         titleLabel.text = self.chatTitle
         titleLabel.textAlignment = .left
         
         subtitleLabel = UILabel(frame:CGRect(x: 40, y: 25, width: titleWidth, height: 13))
         subtitleLabel.backgroundColor = UIColor.clear
-        subtitleLabel.textColor = UIColor.white
+        subtitleLabel.textColor = self.tintColor
         subtitleLabel.font = UIFont.systemFont(ofSize: 11)
         subtitleLabel.text = self.chatSubtitle
         subtitleLabel.textAlignment = .left
@@ -492,6 +492,7 @@ open class QiscusChatVC: UIViewController{
         self.titleView.addSubview(self.subtitleLabel)
         self.titleView.addSubview(self.roomAvatar)
         self.titleView.addSubview(self.roomAvatarLabel)
+        
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -527,8 +528,8 @@ open class QiscusChatVC: UIViewController{
         }
         UIMenuController.shared.menuItems = menuItems
         
-        self.navigationController?.navigationBar.verticalGradientColor(topColor, bottomColor: bottomColor)
-        self.navigationController?.navigationBar.tintColor = tintColor
+        //self.navigationController?.navigationBar.verticalGradientColor(topColor, bottomColor: bottomColor)
+        //self.navigationController?.navigationBar.tintColor = tintColor
         
         if let _ = self.navigationController {
             //self.isBeforeTranslucent = navController.navigationBar.isTranslucent
@@ -536,7 +537,6 @@ open class QiscusChatVC: UIViewController{
             self.defaultNavBarVisibility = self.navigationController!.isNavigationBarHidden
         }
         
-       
         setupNavigationTitle()
         
         setupPage()
@@ -738,6 +738,9 @@ open class QiscusChatVC: UIViewController{
             room.unsubscribeRealtimeStatus()
             room.delegate = nil
         }
+//        audioPlayer?.pause()
+//        stopTimer()
+//        updateAudioDisplay()
         if self.backAction != nil{
             self.backAction!()
         }else{
