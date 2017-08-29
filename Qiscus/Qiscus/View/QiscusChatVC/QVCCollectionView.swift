@@ -69,6 +69,10 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
         let group = self.chatRoom!.comments[indexPath.section]
         
+        if let chatCell = cell as? QChatCell {
+            chatCell.willDisplayCell()
+        }
+        
         if let selectedIndex = self.selectedCellIndex {
             if indexPath.section == selectedIndex.section && indexPath.item == selectedIndex.item{
                 cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
@@ -107,7 +111,9 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                     self.selectedCellIndex = nil
                 }
             }
-            
+            if let chatCell = cell as? QChatCell {
+                chatCell.endDisplayingCell()
+            }
             if indexPath.section == (self.chatRoom!.commentsGroupCount - 1){
                 if indexPath.row == commentGroup.commentsCount - 1{
                     let visibleIndexPath = collectionView.indexPathsForVisibleItems
@@ -165,7 +171,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             }
             break
         case "reply":
-            if Qiscus.sharedInstance.connected && comment.type != .postback && comment.type != .account && comment.status != .failed && comment.type != .system && comment.status != .sending && comment.type != .card{
+            if Qiscus.sharedInstance.connected && comment.type != .postback && comment.type != .account && comment.status != .failed && comment.type != .system && comment.status != .sending && comment.type != .card && comment.type != .location && comment.type != .contact{
                 show = true
             }
             break

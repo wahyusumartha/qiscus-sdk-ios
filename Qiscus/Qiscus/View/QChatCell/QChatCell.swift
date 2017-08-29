@@ -164,7 +164,12 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
         
         return Qiscus.image(named:imageName)?.resizableImage(withCapInsets: edgeInset, resizingMode: .stretch).withRenderingMode(.alwaysTemplate)
     }
+    public func willDisplayCell(){
+        
+    }
+    public func endDisplayingCell(){
     
+    }
     public func cellWidthChanged(){
     
     }
@@ -207,4 +212,6 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
     func comment(didDownload downloading:Bool){}
     func comment(didUpload uploading:Bool){}
     func comment(didChangeProgress progress:CGFloat){}
+    
+    
 }

@@ -33,7 +33,10 @@ class QCellLocationRight: QChatCell {
         self.mapView.addGestureRecognizer(tapRecognizer)
         // Initialization code
     }
-    override func commentChanged() {
+    override func endDisplayingCell() {
+        self.mapView.removeAnnotations(self.mapView.annotations)
+    }
+    override func willDisplayCell() {
         let payload = JSON(parseJSON: self.comment!.data)
         
         let lat = CLLocationDegrees(payload["latitude"].doubleValue)
@@ -44,11 +47,12 @@ class QCellLocationRight: QChatCell {
         let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
         let newPin = MKPointAnnotation()
         newPin.coordinate = center
-        
-        //set region on the map
-        self.mapView.removeAnnotations(self.mapView.annotations)
-        self.mapView.setRegion(region, animated: true)
+        self.mapView.setRegion(region, animated: false)
         self.mapView.addAnnotation(newPin)
+    }
+    override func commentChanged() {
+        
+        let payload = JSON(parseJSON: self.comment!.data)
         self.addressHeight.constant = self.comment!.textSize.height - 168.0
         self.addressView.attributedText = self.comment?.attributedText
         self.locationLabel.text = payload["name"].stringValue
