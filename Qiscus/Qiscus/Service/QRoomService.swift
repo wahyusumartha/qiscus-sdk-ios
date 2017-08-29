@@ -289,7 +289,7 @@ public class QRoomService:NSObject{
                                         thumbImage = image
                                     }
                                     
-                                    DispatchQueue.main.async {
+                                    DispatchQueue.main.async {autoreleasepool{
                                         file.saveFile(withData: fileData)
                                         file.saveThumbImage(withImage: thumbImage)
                                         
@@ -297,7 +297,7 @@ public class QRoomService:NSObject{
                                         comment.updateProgress(progress: 1)
                                         comment.displayImage = thumbImage
                                         room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
-                                    }
+                                    }}
                                 }else{
                                     let assetMedia = AVURLAsset(url: URL(fileURLWithPath: "\(localPath)"))
                                     let thumbGenerator = AVAssetImageGenerator(asset: assetMedia)
@@ -314,7 +314,7 @@ public class QRoomService:NSObject{
                                         Qiscus.printLog(text: "error creating thumb image")
                                     }
                                     
-                                    DispatchQueue.main.async {
+                                    DispatchQueue.main.async { autoreleasepool{
                                         file.saveFile(withData: imageData)
                                         if thumbImage != nil {
                                             file.saveThumbImage(withImage: thumbImage!)
@@ -322,45 +322,45 @@ public class QRoomService:NSObject{
                                         comment.updateProgress(progress: 1)
                                         comment.updateDownloading(downloading: false)
                                         room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
-                                    }
+                                    }}
                                 }
                             }
                             else{
-                                DispatchQueue.main.async {
+                                DispatchQueue.main.async { autoreleasepool{
                                     file.saveFile(withData: imageData)
                                     comment.updateDownloading(downloading: false)
                                     comment.updateProgress(progress: 1)
                                     
                                     room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
-                                }
+                                }}
                             }
                         }
                         break
                     case .failure:
-                        DispatchQueue.main.async {
+                        DispatchQueue.main.async { autoreleasepool{
                             comment.updateDownloading(downloading: false)
                             comment.updateProgress(progress: 1)
                             room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
-                        }
+                        }}
                         
                         break
                     }
                 }).downloadProgress(closure: { progressData in
                     let progress = CGFloat(progressData.fractionCompleted)
                     
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async { autoreleasepool{
                         comment.updateProgress(progress: progress)
                         comment.updateDownloading(downloading: true)
                         
                         room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadProgress")
-                    }
+                    }}
                 })
             }
         }
     }
     public func publishStatus(inRoom roomId: Int, commentId:Int, commentStatus:QCommentStatus){
         if commentStatus == QCommentStatus.delivered || commentStatus == QCommentStatus.read{
-            QiscusRequestThread.async {
+            QiscusRequestThread.async {autoreleasepool{
                 let loadURL = QiscusConfig.UPDATE_COMMENT_STATUS_URL
                 
                 var parameters:[String : AnyObject] =  [
@@ -391,7 +391,7 @@ public class QRoomService:NSObject{
                         }
                     })
                 }
-            }
+            }}
         }
     }
     
@@ -402,10 +402,10 @@ public class QRoomService:NSObject{
             let filename = file.filename
             let mimeType = file.mimeType
             
-            QiscusFileThread.async {
+            QiscusFileThread.async {autoreleasepool{
             do {
                 let data = try Data(contentsOf: URL(string: "file://\(localPath)")!)
-                QiscusUploadThread.async {
+                QiscusUploadThread.async { autoreleasepool{
                     let headers = QiscusConfig.sharedInstance.requestHeader
                     var urlUpload = URLRequest(url: URL(string: QiscusConfig.UPLOAD_URL)!)
                     if headers.count > 0 {
@@ -426,7 +426,7 @@ public class QRoomService:NSObject{
                                 if let jsonData = response.result.value {
                                     let json = JSON(jsonData)
                                     if let url = json["url"].string {
-                                        DispatchQueue.main.async {
+                                        DispatchQueue.main.async { autoreleasepool{
                                             file.update(fileURL: url)
                                             comment.update(text: "[file]\(url) [/file]")
                                             comment.updateUploading(uploading: false)
@@ -434,14 +434,14 @@ public class QRoomService:NSObject{
                                             room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadFinish")
                                             comment.updateStatus(status: .sent)
                                             onSuccess(room,comment)
-                                        }
+                                        }}
                                     }
                                     else if json["results"].count > 0 {
                                         let jsonData = json["results"]
                                         if jsonData["file"].count > 0 {
                                             let fileData = jsonData["file"]
                                             if let url = fileData["url"].string {
-                                                DispatchQueue.main.async {
+                                                DispatchQueue.main.async { autoreleasepool{
                                                     file.update(fileURL: url)
                                                     comment.update(text: "[file]\(url) [/file]")
                                                     comment.updateUploading(uploading: false)
@@ -449,49 +449,49 @@ public class QRoomService:NSObject{
                                                     room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadFinish")
                                                     comment.updateStatus(status: .sent)
                                                     onSuccess(room,comment)
-                                                }
+                                                }}
                                             }
                                         }
                                     }else{
-                                        DispatchQueue.main.async {
+                                        DispatchQueue.main.async { autoreleasepool{
                                             comment.updateUploading(uploading: false)
                                             comment.updateProgress(progress: 0)
                                             comment.updateStatus(status: .failed)
                                             room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
-                                        }
+                                        }}
                                         onError(room,comment,"Fail to upload file, no readable response")
                                     }
                                 }else{
-                                    DispatchQueue.main.async {
+                                    DispatchQueue.main.async { autoreleasepool{
                                         comment.updateUploading(uploading: false)
                                         comment.updateProgress(progress: 0)
                                         comment.updateStatus(status: .failed)
                                         room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
-                                    }
+                                    }}
                                     onError(room,comment,"Fail to upload file, no readable response")
                                 }
                             })
                             upload.uploadProgress(closure: {uploadProgress in
                                 let progress = CGFloat(uploadProgress.fractionCompleted)
-                                DispatchQueue.main.async {
+                                DispatchQueue.main.async { autoreleasepool{
                                     comment.updateUploading(uploading: true)
                                     comment.updateProgress(progress: progress)
                                     room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadProgress")
-                                }
+                                }}
                             })
                             break
                         case .failure(let error):
-                            DispatchQueue.main.async {
+                            DispatchQueue.main.async { autoreleasepool{
                                 comment.updateUploading(uploading: false)
                                 comment.updateProgress(progress: 0)
                                 comment.updateStatus(status: .failed)
                                 room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
-                            }
+                            }}
                             onError(room,comment,"Fail to upload file, \(error)")
                             break
                         }
                     })
-                }
+                }}
             } catch {
                 DispatchQueue.main.async {
                     comment.updateUploading(uploading: false)
@@ -500,7 +500,7 @@ public class QRoomService:NSObject{
                 }
                 onError(room, comment, "Local file not found")
             }
-            }
+            }}
         }
     }
 }

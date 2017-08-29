@@ -89,41 +89,41 @@ open class QiscusCommentClient: NSObject {
                                 let _ = QiscusMe.saveData(fromJson: userData, reconnect: reconnect)
                                 Qiscus.setupReachability()
                                 if let delegate = Qiscus.shared.delegate {
-                                    Qiscus.uiThread.async {
+                                    Qiscus.uiThread.async { autoreleasepool{
                                         delegate.qiscus?(didConnect: true, error: nil)
                                         delegate.qiscusConnected?()
-                                    }
+                                    }}
                                 }
                                 Qiscus.registerNotification()
                                 if let successAction = onSuccess {
-                                    Qiscus.uiThread.async {
+                                    Qiscus.uiThread.async { autoreleasepool{
                                         successAction()
-                                    }
+                                    }}
                                 }
                             }else{
                                 if let delegate = Qiscus.shared.delegate {
-                                    Qiscus.uiThread.async {
+                                    Qiscus.uiThread.async { autoreleasepool{
                                         delegate.qiscusFailToConnect?("\(json["message"].stringValue)")
                                         delegate.qiscus?(didConnect: false, error: "\(json["message"].stringValue)")
-                                    }
+                                    }}
                                 }
                             }
                         }else{
                             if let delegate = Qiscus.shared.delegate {
-                                Qiscus.uiThread.async {
+                                Qiscus.uiThread.async { autoreleasepool{
                                     let error = "Cant get data from qiscus server"
                                     delegate.qiscusFailToConnect?(error)
                                     delegate.qiscus?(didConnect: false, error: error)
-                                }
+                                }}
                             }
                         }
                     break
                     case .failure(let error):
                         if let delegate = Qiscus.shared.delegate {
-                            Qiscus.uiThread.async {
+                            Qiscus.uiThread.async {autoreleasepool{
                                 delegate.qiscusFailToConnect?("\(error)")
                                 delegate.qiscus?(didConnect: false, error: "\(error)")
-                            }
+                            }}
                         }
                     break
                 }
@@ -234,9 +234,9 @@ open class QiscusCommentClient: NSObject {
                                     if let delegate = Qiscus.shared.delegate{
                                         delegate.qiscus?(didUnregisterPushNotification: false, error: "cannot unregister device")
                                     }
-                                    DispatchQueue.global().async {
+                                    DispatchQueue.global().async { autoreleasepool{
                                         self.unRegisterDevice()
-                                    }
+                                    }}
                                 }
                             }else{
                                 if let delegate = Qiscus.shared.delegate {

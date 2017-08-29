@@ -178,7 +178,7 @@ public class QUser:Object {
         if !self.isInvalidated {
             self.avatar = image
             var filename = self.email.replacingOccurrences(of: ".", with: "_").replacingOccurrences(of: "@", with: "_")
-            QiscusFileThread.async {
+            QiscusFileThread.async {autoreleasepool{
                 var ext = "png"
                 var avatarData:Data? = nil
                 if let data = UIImagePNGRepresentation(image) {
@@ -190,14 +190,14 @@ public class QUser:Object {
                 filename = "\(filename).\(ext)"
                 if avatarData != nil {
                     let localPath = QFileManager.saveFile(withData: avatarData!, fileName: filename, type: .user)
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async {autoreleasepool{
                         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                         try! realm.write {
                             self.avatarLocalPath = localPath
                         }
-                    }
+                    }}
                 }
-            }
+            }}
         }
     }
     public class func all() -> [QUser]{

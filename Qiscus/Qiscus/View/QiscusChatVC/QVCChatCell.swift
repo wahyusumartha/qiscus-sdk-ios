@@ -16,14 +16,14 @@ import ContactsUI
 extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
     // MARK: ChatCellPostbackDelegate
     func didTapAccountLinking(withData data: JSON) {
-        Qiscus.uiThread.async {
+        Qiscus.uiThread.async { autoreleasepool{
             let webView = ChatPreviewDocVC()
             webView.accountLinking = true
             webView.accountData = data
             
             self.navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
             self.navigationController?.pushViewController(webView, animated: true)
-        }
+        }}
     }
     func didTapPostbackButton(withData data: JSON) {
         if Qiscus.sharedInstance.connected{
@@ -77,9 +77,9 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
             }
             
         }else{
-            Qiscus.uiThread.async {
+            Qiscus.uiThread.async { autoreleasepool{
                 self.showNoConnectionToast()
-            }
+            }}
         }
     }
     func didTouchLink(onCell cell: QChatCell) {
@@ -189,7 +189,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                 if audioPlayer != nil {
                     if audioPlayer!.isPlaying {
                         if let activeCell = activeAudioCell{
-                            DispatchQueue.main.async {
+                            DispatchQueue.main.async { autoreleasepool{
                                 if let targetCell = activeCell as? QCellAudioRight{
                                     targetCell.isPlaying = false
                                 }
@@ -198,7 +198,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                                 }
                                 activeCell.comment?.updatePlaying(playing: false)
                                 self.didChangeData(onCell: activeCell, withData: activeCell.comment!, dataTypeChanged: "isPlaying")
-                            }
+                            }}
                         }
                         audioPlayer?.stop()
                         stopTimer()

@@ -124,8 +124,10 @@ open class ChatInputText: UITextView, UITextViewDelegate {
     open func clearValue(){
         self.value = ""
         Qiscus.uiThread.async {
-            self.text = self.placeholder
-            self.textColor = self.placeHolderColor
+            autoreleasepool{
+                self.text = self.placeholder
+                self.textColor = self.placeHolderColor
+            }
         }
     }
     

@@ -132,9 +132,9 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     }
     
     class func disconnectRealtime(){
-        Qiscus.uiThread.async {
+        Qiscus.uiThread.async { autoreleasepool{
             Qiscus.sharedInstance.mqtt?.disconnect()
-        }
+        }}
     }
     
     @objc public class func clear(){
@@ -168,13 +168,13 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     // need Documentation
     func backgroundCheck(){
         if Qiscus.isLoggedIn{
-            QiscusBackgroundThread.async {
+            QiscusBackgroundThread.async { autoreleasepool{
                 if Qiscus.shared.mqtt?.connState != CocoaMQTTConnState.connected {
                     Qiscus.mqttConnect()
                 }else{
                     QChatService.sync()
                 }
-            }
+            }}
         }
     }
     func checkChat(){
@@ -234,10 +234,10 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
             QiscusCommentClient.sharedInstance.loginOrRegister(userEmail, password: userKey, username: username, avatarURL: avatarURL)
         }else{
             if let delegate = Qiscus.shared.delegate {
-                Qiscus.uiThread.async {
+                Qiscus.uiThread.async { autoreleasepool{
                     delegate.qiscusConnected?()
                     delegate.qiscus?(didConnect: true, error: nil)
-                }
+                }}
             }
         }
         Qiscus.sharedInstance.RealtimeConnect()
@@ -266,10 +266,10 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
         if delegate != nil {
             Qiscus.shared.delegate = delegate
         }
-        Qiscus.uiThread.async {
+        Qiscus.uiThread.async {autoreleasepool{
             Qiscus.shared.delegate?.qiscusConnected?()
             Qiscus.shared.delegate?.qiscus?(didConnect: true, error: nil)
-        }
+        }}
     }
     
     
@@ -541,7 +541,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     }
     
     class func setupReachability(){
-        QiscusBackgroundThread.async {
+        QiscusBackgroundThread.async {autoreleasepool{
             Qiscus.sharedInstance.reachability = QReachability()
             
             if let reachable = Qiscus.sharedInstance.reachability {
@@ -549,9 +549,9 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
                     Qiscus.sharedInstance.connected = true
                     if Qiscus.isLoggedIn {
                         Qiscus.sharedInstance.RealtimeConnect()
-                        DispatchQueue.main.async {
+                        DispatchQueue.main.async { autoreleasepool{
                             QComment.resendPendingMessage()
-                        }
+                        }}
                     }
                 }
             }
@@ -565,9 +565,9 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
                 Qiscus.sharedInstance.connected = true
                 if Qiscus.isLoggedIn {
                     Qiscus.sharedInstance.RealtimeConnect()
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async { autoreleasepool{
                         QComment.resendPendingMessage()
-                    }
+                    }}
                 }
             }
             Qiscus.sharedInstance.reachability?.whenUnreachable = { reachability in
@@ -579,7 +579,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
             } catch {
                 Qiscus.printLog(text: "Unable to start network notifier")
             }
-        }
+        }}
     }
     
     
@@ -813,7 +813,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
         }
     }
     public class func createLocalNotification(forComment comment:QComment, alertTitle:String? = nil, alertBody:String? = nil, userInfo:[AnyHashable : Any]? = nil){
-        DispatchQueue.main.async {
+        DispatchQueue.main.async {autoreleasepool{
             let localNotification = UILocalNotification()
             if let title = alertTitle {
                 localNotification.alertTitle = title
@@ -840,7 +840,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
             localNotification.userInfo = userData
             localNotification.fireDate = Date().addingTimeInterval(0.4)
             Qiscus.shared.application.scheduleLocalNotification(localNotification)
-        }
+        }}
     }
     public class func didReceiveNotification(notification:UILocalNotification){
         if notification.userInfo != nil {
@@ -861,20 +861,20 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
     }
     class func publishUserStatus(offline:Bool = false){
         if Qiscus.isLoggedIn{
-            QiscusBackgroundThread.async {
+            QiscusBackgroundThread.async {autoreleasepool{
                 var message: String = "1";
                 
                 let channel = "u/\(QiscusMe.sharedInstance.email)/s"
                 if offline {
                     message = "0"
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async {autoreleasepool{
                         Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: true)
-                    }
+                    }}
                 }else{
                     if Qiscus.sharedInstance.application.applicationState == UIApplicationState.active {
-                        DispatchQueue.main.async {
+                        DispatchQueue.main.async { autoreleasepool{
                             Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: true)
-                        }
+                        }}
                         
                         let when = DispatchTime.now() + 40
                         QiscusBackgroundThread.asyncAfter(deadline: when) {
@@ -882,7 +882,7 @@ var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attri
                         }
                     }
                 }
-            }
+            }}
         }
     }
     func goToBackgroundMode(){
@@ -926,7 +926,7 @@ extension Qiscus:CocoaMQTTDelegate{
         }
     }
     public func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck){
-        QiscusBackgroundThread.async {
+        QiscusBackgroundThread.async {autoreleasepool{
             let state = UIApplication.shared.applicationState
             
             if state == .active {
@@ -942,7 +942,7 @@ extension Qiscus:CocoaMQTTDelegate{
                 self.syncTimer?.invalidate()
                 self.syncTimer = nil
             }
-        }
+        }}
     }
     public func mqtt(_ mqtt: CocoaMQTT, didPublishMessage message: CocoaMQTTMessage, id: UInt16){
         
@@ -951,7 +951,7 @@ extension Qiscus:CocoaMQTTDelegate{
         
     }
     public func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16 ){
-        QiscusBackgroundThread.async {
+        QiscusBackgroundThread.async {autoreleasepool{
             if let messageData = message.string {
                 let channelArr = message.topic.characters.split(separator: "/")
                 let lastChannelPart = String(channelArr.last!)
@@ -967,7 +967,7 @@ extension Qiscus:CocoaMQTTDelegate{
                         if commentType == "system_event" {
                             let payload = json["payload"]
                             if payload["type"].stringValue == "remove_member" && payload["object_email"].stringValue == QiscusMe.sharedInstance.email{
-                                DispatchQueue.main.async {
+                                DispatchQueue.main.async {autoreleasepool{
                                     if commentId > QiscusMe.sharedInstance.lastKnownCommentId{
                                         if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                                             let comment = QComment.tempComment(fromJSON: json)
@@ -986,12 +986,12 @@ extension Qiscus:CocoaMQTTDelegate{
                                         Qiscus.chatRooms[roomId] = nil
                                         QRoom.deleteRoom(room: room)
                                     }
-                                }
+                                }}
                             }
                         }
                     }else{
                         let uniqueId = json["unique_temp_id"].stringValue
-                        DispatchQueue.main.async {
+                        DispatchQueue.main.async {autoreleasepool{
                             if let room = QRoom.room(withId: roomId) {
                                 if let comment = QComment.comment(withUniqueId: uniqueId){
                                     if comment.status != .delivered && comment.status != .read {
@@ -999,7 +999,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                     }
                                 }
                             }
-                        }
+                        }}
                     }
                     if #available(iOS 10.0, *) {
                         if Qiscus.publishStatustimer != nil {
@@ -1018,10 +1018,10 @@ extension Qiscus:CocoaMQTTDelegate{
                     let userEmail:String = String(channelArr[3])
                     let data = (messageData == "0") ? "" : userEmail
                     if userEmail != QiscusMe.sharedInstance.email {
-                        DispatchQueue.main.async {
+                        DispatchQueue.main.async {autoreleasepool{
                             QRoom.room(withId: topicId)?.updateUserTyping(userEmail: data)
                             QUser.user(withEmail: userEmail)?.updateLastSeen(lastSeen: Double(Date().timeIntervalSince1970))
-                        }
+                        }}
                     }
                     break
                 case "d":
@@ -1030,9 +1030,9 @@ extension Qiscus:CocoaMQTTDelegate{
                     let commentId = Int(String(messageArr[0]))!
                     let userEmail = String(channelArr[3])
                     if userEmail != QiscusMe.sharedInstance.email {
-                        DispatchQueue.main.async {
+                        DispatchQueue.main.async { autoreleasepool{
                             QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail)?.updateLastDeliveredId(commentId: commentId)
-                        }
+                        }}
                     }
                     break
                 case "r":
@@ -1041,9 +1041,9 @@ extension Qiscus:CocoaMQTTDelegate{
                     let commentId = Int(String(messageArr[0]))!
                     let userEmail = String(channelArr[3])
                     if userEmail != QiscusMe.sharedInstance.email {
-                        DispatchQueue.main.async {
+                        DispatchQueue.main.async { autoreleasepool{
                             QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail)?.updateLastReadId(commentId: commentId)
-                        }
+                        }}
                     }
                     break
                 case "s":
@@ -1051,9 +1051,9 @@ extension Qiscus:CocoaMQTTDelegate{
                     let userEmail = String(channelArr[1])
                     if userEmail != QiscusMe.sharedInstance.email{
                         if let timeToken = Double(String(messageArr[1])){
-                            DispatchQueue.main.async {
+                            DispatchQueue.main.async { autoreleasepool{
                                 QUser.user(withEmail: userEmail)?.updateLastSeen(lastSeen: Double(timeToken)/1000)
-                            }
+                            }}
                         }
                     }
                     break
@@ -1062,7 +1062,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     break
                 }
             }
-        }
+        }}
         
     }
     public func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopic topic: String){

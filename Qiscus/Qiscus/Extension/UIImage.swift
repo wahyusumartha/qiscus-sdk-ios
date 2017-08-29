@@ -23,35 +23,35 @@ extension UIImage {
         }
     }
     internal class func loadAsync(fromLocalPath localPath:String, onSuccess: @escaping ((UIImage)->Void), onError: @escaping (()->Void)){
-        QiscusRequestThread.async {
+        QiscusRequestThread.async {autoreleasepool{
             if localPath != "" {
                 if let cachedImage = cache.object(forKey: localPath as NSString) {
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async {autoreleasepool{
                         onSuccess(cachedImage)
-                    }
+                    }}
                 }else if let image = UIImage(contentsOfFile: localPath){
                     QiscusImageCache.setObject(image, forKey: localPath as NSString)
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async {autoreleasepool{
                         onSuccess(image)
-                    }
+                    }}
                 }else{
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async {autoreleasepool{
                         onError()
-                    }
+                    }}
                 }
             }else{
-                DispatchQueue.main.async {
+                DispatchQueue.main.async {autoreleasepool{
                     onError()
-                }
+                }}
             }
-        }
+        }}
     }
     internal class func loadAsync(url urlString: String, header: [String : String] = [String : String](), onSuccess:@escaping (_ image: UIImage) -> (), onError:@escaping () -> ()){
-        QiscusRequestThread.async {
+        QiscusRequestThread.async {autoreleasepool{
             if let image = QiscusImageCache.object(forKey: urlString as NSString) {
-                DispatchQueue.main.async {
+                DispatchQueue.main.async { autoreleasepool{
                     onSuccess(image)
-                }
+                }}
             }else{
                 if let url = URL(string: urlString){
                     var urlRequest = URLRequest(url: url)
@@ -63,9 +63,9 @@ extension UIImage {
                     let downloadTask = URLSession.shared.dataTask(with: urlRequest, completionHandler: {(data: Data?, response: URLResponse?, error: Error?) -> Void in
                         
                         if (error != nil) {
-                            DispatchQueue.main.async {
+                            DispatchQueue.main.async { autoreleasepool{
                                 onError()
-                            }
+                            }}
                             Qiscus.printLog(text: "[QiscusImage] : \(String(describing: error!))")
                             return
                         }
@@ -73,13 +73,13 @@ extension UIImage {
                         if let data = data {
                             if let image = UIImage(data: data) {
                                 QiscusImageCache.setObject(image, forKey: urlString as NSString)
-                                DispatchQueue.main.async {
+                                DispatchQueue.main.async { autoreleasepool{
                                     onSuccess(image)
-                                }
+                                }}
                             }else{
-                                DispatchQueue.main.async {
+                                DispatchQueue.main.async {autoreleasepool{
                                     onError()
-                                }
+                                }}
                             }
                             return
                         }
@@ -88,7 +88,7 @@ extension UIImage {
                     downloadTask.resume()
                 }
             }
-        }
+        }}
     }
 }
 
@@ -103,12 +103,12 @@ extension UIImage {
 extension UIImageView {
     
     public func loadGif(name: String) {
-        DispatchQueue.global().async {
+        DispatchQueue.global().async { autoreleasepool{
             let image = UIImage.gif(name: name)
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { autoreleasepool{
                 self.image = image
-            }
-        }
+            }}
+        }}
     }
     
 }

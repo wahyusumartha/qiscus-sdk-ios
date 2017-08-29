@@ -74,7 +74,7 @@ open class QiscusChatVC: UIViewController{
     var replyData:QComment? = nil {
         didSet{
             if replyData == nil {
-                Qiscus.uiThread.async {
+                Qiscus.uiThread.async { autoreleasepool{
                     self.linkPreviewTopMargin.constant = 0
                     UIView.animate(withDuration: 0.65, animations: {
                         self.view.layoutIfNeeded()
@@ -86,10 +86,10 @@ open class QiscusChatVC: UIViewController{
                             self.linkImage.image = nil
                         }
                     })
-                }
+                }}
             }
             else{
-                Qiscus.uiThread.async {
+                Qiscus.uiThread.async {autoreleasepool{
                     if self.replyData!.type == .text || self.replyData!.type == .reply {
                         self.linkDescription.text = self.replyData!.text
                         self.linkImageWidth.constant = 0
@@ -139,7 +139,7 @@ open class QiscusChatVC: UIViewController{
                         self.sendButton.isHidden = false
                         self.recordButton.isHidden = true
                     })
-                }
+                }}
             }
         }
     }
@@ -1046,7 +1046,7 @@ extension QiscusChatVC:QRoomDelegate{
 
 extension QiscusChatVC: CLLocationManagerDelegate {
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        QiscusBackgroundThread.async {
+        QiscusBackgroundThread.async {autoreleasepool{
             manager.stopUpdatingLocation()
             if !self.didFindLocation {
                 if let currentLocation = manager.location {
@@ -1067,10 +1067,10 @@ extension QiscusChatVC: CLLocationManagerDelegate {
                                     address = addressArray.joined(separator: ", ")
                                 }
                                 title = addressDictionary["Name"] as? String
-                                DispatchQueue.main.async {
+                                DispatchQueue.main.async { autoreleasepool{
                                     let comment = self.chatRoom!.newLocationComment(latitude: latitude, longitude: longitude, title: title, address: address)
                                     self.chatRoom?.post(comment: comment)
-                                }
+                                }}
                             }
                         }
                     })
@@ -1079,6 +1079,6 @@ extension QiscusChatVC: CLLocationManagerDelegate {
                 self.didFindLocation = true
                 self.dismissLoading()
             }
-        }
+        }}
     }
 }

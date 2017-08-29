@@ -142,12 +142,12 @@ extension QiscusChatVC {
 //        })
     }
     func hideLinkContainer(){
-        Qiscus.uiThread.async {
+        Qiscus.uiThread.async { autoreleasepool{
             self.linkPreviewTopMargin.constant = 0
             UIView.animate(withDuration: 0.65, animations: {
                 self.view.layoutIfNeeded()
             }, completion: nil)
-        }
+        }}
     }
     func startTypingIndicator(withUser user:String){
         self.typingIndicatorUser = user
@@ -231,7 +231,7 @@ extension QiscusChatVC {
     }
     
     func loadTitle(){
-        DispatchQueue.main.async {
+        DispatchQueue.main.async {autoreleasepool{
             if self.chatTitle == nil || self.chatTitle == "" {
                 if let room = self.chatRoom {
                     self.titleLabel.text = room.name
@@ -288,10 +288,10 @@ extension QiscusChatVC {
                     
                 }
             }
-        }
+        }}
     }
     func loadSubtitle(){
-        DispatchQueue.main.async {
+        DispatchQueue.main.async {autoreleasepool{
             if self.chatSubtitle == nil || self.chatSubtitle == ""{
                 if let room = self.chatRoom {
                     var subtitleString = "You"
@@ -342,7 +342,7 @@ extension QiscusChatVC {
             }else{
                 self.subtitleLabel.text = self.chatSubtitle!
             }
-        }
+        }}
     }
     
     func showPhotoAccessAlert(){
@@ -453,12 +453,12 @@ extension QiscusChatVC {
                 
                 self.inputText.clearValue()
                 
-                DispatchQueue.main.async {
+                DispatchQueue.main.async { autoreleasepool{
                     self.inputText.text = ""
                     self.minInputHeight.constant = 32
                     self.sendButton.isEnabled = false
                     self.inputText.layoutIfNeeded()
-                }
+                }}
             }else{
                 self.finishRecording()
             }
@@ -557,7 +557,7 @@ extension QiscusChatVC {
         let recorderWidth = inputWidth + 17
         self.recordViewLeading.constant = 0 - recorderWidth
         
-        Qiscus.uiThread.async {
+        Qiscus.uiThread.async {autoreleasepool{
             UIView.animate(withDuration: 0.5, animations: {
                 self.inputText.isHidden = true
                 self.cancelRecordButton.isHidden = false
@@ -611,7 +611,7 @@ extension QiscusChatVC {
                     print("error recording")
                 }
             })
-        }
+        }}
     }
     func prepareRecording(){
         do {
@@ -621,15 +621,15 @@ extension QiscusChatVC {
                 if allowed {
                     self.startRecording()
                 } else {
-                    Qiscus.uiThread.async {
+                    Qiscus.uiThread.async { autoreleasepool{
                         self.showMicrophoneAccessAlert()
-                    }
+                    }}
                 }
             }
         } catch {
-            Qiscus.uiThread.async {
+            Qiscus.uiThread.async { autoreleasepool{
                 self.showMicrophoneAccessAlert()
-            }
+            }}
         }
     }
     func updateTimer(){
@@ -652,18 +652,18 @@ extension QiscusChatVC {
         if let audioRecorder = self.recorder{
             audioRecorder.updateMeters()
             let normalizedValue:CGFloat = pow(10.0, CGFloat(audioRecorder.averagePower(forChannel: 0)) / 20)
-            Qiscus.uiThread.async {
+            Qiscus.uiThread.async {autoreleasepool{
                 if let waveView = self.recordBackground.viewWithTag(544) as? QSiriWaveView {
                     waveView.update(withLevel: normalizedValue)
                 }
-            }
+            }}
         }
     }
     func finishRecording(){
         self.recorder?.stop()
         self.recorder = nil
         self.recordViewLeading.constant = 0 - 2
-        Qiscus.uiThread.async {
+        Qiscus.uiThread.async {autoreleasepool{
             UIView.animate(withDuration: 0.5, animations: {
                 self.inputText.isHidden = false
                 self.cancelRecordButton.isHidden = true
@@ -678,7 +678,7 @@ extension QiscusChatVC {
                 }
                 self.isRecording = false
             }
-        }
+        }}
         if let audioURL = self.recordingURL {
             var fileContent: Data?
             fileContent = try! Data(contentsOf: audioURL)
@@ -696,7 +696,7 @@ extension QiscusChatVC {
     }
     func cancelRecordVoice(){
         self.recordViewLeading.constant = 8
-        Qiscus.uiThread.async {
+        Qiscus.uiThread.async { autoreleasepool{
             UIView.animate(withDuration: 0.5, animations: {
                 self.inputText.isHidden = false
                 self.cancelRecordButton.isHidden = true
@@ -711,7 +711,7 @@ extension QiscusChatVC {
                 }
                 self.isRecording = false
             }
-        }
+        }}
     }
     
     func postFile(filename:String, data:Data? = nil, type:QiscusFileType, thumbImage:UIImage? = nil){

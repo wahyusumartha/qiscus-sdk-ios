@@ -117,12 +117,13 @@ class QCellAudioRight: QCellAudio {
                         case .loaded:
                             let duration = Double(CMTimeGetSeconds(audioAsset.duration))
                             DispatchQueue.main.async {
-                                self.currentTimeSlider.maximumValue = Float(duration)
-                                if let durationString = self.timeFormatter?.string(from: duration) {
-                                    
-                                    self.comment!.updateDurationLabel(label: durationString)
-                                    self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "durationLabel")
-                                    self.durationLabel.text = durationString
+                                autoreleasepool{
+                                    self.currentTimeSlider.maximumValue = Float(duration)
+                                    if let durationString = self.timeFormatter?.string(from: duration) {
+                                        self.comment!.updateDurationLabel(label: durationString)
+                                        self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "durationLabel")
+                                        self.durationLabel.text = durationString
+                                    }
                                 }
                             }
                             break
@@ -159,18 +160,22 @@ class QCellAudioRight: QCellAudio {
     func playButtonTapped(_ sender: UIButton) {
         self.isPlaying = true
         DispatchQueue.main.async {
-            self.comment?.updatePlaying(playing: true)
-            self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "audioIsPlaying")
-            self.audioCellDelegate?.didTapPlayButton(sender, onCell: self)
+            autoreleasepool{
+                self.comment?.updatePlaying(playing: true)
+                self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "audioIsPlaying")
+                self.audioCellDelegate?.didTapPlayButton(sender, onCell: self)
+            }
         }
     }
     
     func pauseButtonTapped(_ sender: UIButton) {
         self.isPlaying = false
         DispatchQueue.main.async {
-            self.comment?.updatePlaying(playing: false)
-            self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "audioIsPlaying")
-            self.audioCellDelegate?.didTapPauseButton(sender, onCell: self)
+            autoreleasepool{
+                self.comment?.updatePlaying(playing: false)
+                self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "audioIsPlaying")
+                self.audioCellDelegate?.didTapPauseButton(sender, onCell: self)
+            }
         }
     }
     
@@ -180,21 +185,25 @@ class QCellAudioRight: QCellAudio {
     
     @IBAction func sliderValueChanged(_ sender: UISlider) {
         DispatchQueue.main.async {
-            if let seekTimeString = self.timeFormatter?.string(from: Double(sender.value)){
-                self.comment?.updateTimeSlider(value: self.currentTimeSlider.value)
-                self.comment?.updateSeekLabel(label: seekTimeString)
-                
-                self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "seekTimeLabel")
-                self.seekTimeLabel.text = seekTimeString
+            autoreleasepool{
+                if let seekTimeString = self.timeFormatter?.string(from: Double(sender.value)){
+                    self.comment?.updateTimeSlider(value: self.currentTimeSlider.value)
+                    self.comment?.updateSeekLabel(label: seekTimeString)
+                    
+                    self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "seekTimeLabel")
+                    self.seekTimeLabel.text = seekTimeString
+                }
+                self.audioCellDelegate?.didStartSeekTimeSlider(sender, onCell: self)
             }
-            self.audioCellDelegate?.didStartSeekTimeSlider(sender, onCell: self)
         }
     }
     @IBAction func sliderTouchUpInside(_ sender: UISlider) {
         DispatchQueue.main.async {
-            self.comment!.updateTimeSlider(value: self.currentTimeSlider.value)
-            self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "currentTimeSlider")
-            self.audioCellDelegate?.didEndSeekTimeSlider(sender, onCell: self)
+            autoreleasepool{
+                self.comment!.updateTimeSlider(value: self.currentTimeSlider.value)
+                self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "currentTimeSlider")
+                self.audioCellDelegate?.didEndSeekTimeSlider(sender, onCell: self)
+            }
         }
     }
 
@@ -255,24 +264,28 @@ class QCellAudioRight: QCellAudio {
     open override func displayAudioDownloading() {
         self.isDownloading = true
         DispatchQueue.main.async {
-            self.comment?.updateDownloading(downloading: true)
-            self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "isDownloading")
-            self.playButton.removeTarget(nil, action: nil, for: .allEvents)
+            autoreleasepool{
+                self.comment?.updateDownloading(downloading: true)
+                self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "isDownloading")
+                self.playButton.removeTarget(nil, action: nil, for: .allEvents)
+            }
         }
     }
     open override func updateAudioDisplay(withTimeInterval timeInterval:TimeInterval) {
         self.isPlaying = self.comment!.audioIsPlaying
         DispatchQueue.main.async {
-            self.comment?.updateTimeSlider(value: Float(timeInterval))
-            self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "currentTimeSlider")
-            self.currentTimeSlider.setValue(Float(timeInterval), animated: true)
-            
-            self.seekTimeLabel.text = self.timeFormatter?.string(from: timeInterval)
-            
-            if Float(timeInterval) == Float(0) {
+            autoreleasepool{
                 self.comment?.updateTimeSlider(value: Float(timeInterval))
-                self.comment?.updatePlaying(playing: false)
-                self.isPlaying = false
+                self.audioCellDelegate?.didChangeData(onCell: self, withData: self.comment!, dataTypeChanged: "currentTimeSlider")
+                self.currentTimeSlider.setValue(Float(timeInterval), animated: true)
+                
+                self.seekTimeLabel.text = self.timeFormatter?.string(from: timeInterval)
+                
+                if Float(timeInterval) == Float(0) {
+                    self.comment?.updateTimeSlider(value: Float(timeInterval))
+                    self.comment?.updatePlaying(playing: false)
+                    self.isPlaying = false
+                }
             }
         }
     }
@@ -291,10 +304,12 @@ class QCellAudioRight: QCellAudio {
                         case .loaded:
                             let duration = Double(CMTimeGetSeconds(audioAsset.duration))
                             DispatchQueue.main.async {
-                                self.currentTimeSlider.maximumValue = Float(duration)
-                                if let durationString = self.timeFormatter?.string(from: duration) {
-                                    self.comment?.updateDurationLabel(label: durationString)
-                                    self.durationLabel.text = durationString
+                                autoreleasepool{
+                                    self.currentTimeSlider.maximumValue = Float(duration)
+                                    if let durationString = self.timeFormatter?.string(from: duration) {
+                                        self.comment?.updateDurationLabel(label: durationString)
+                                        self.durationLabel.text = durationString
+                                    }
                                 }
                             }
                             break
@@ -324,11 +339,13 @@ class QCellAudioRight: QCellAudio {
                         case .loaded:
                             let duration = Double(CMTimeGetSeconds(audioAsset.duration))
                             DispatchQueue.main.async {
-                                self.currentTimeSlider.maximumValue = Float(duration)
-                                if let durationString = self.timeFormatter?.string(from: duration) {
-                                    
-                                    self.comment!.updateDurationLabel(label: durationString)
-                                    self.durationLabel.text = durationString
+                                autoreleasepool{
+                                    self.currentTimeSlider.maximumValue = Float(duration)
+                                    if let durationString = self.timeFormatter?.string(from: duration) {
+                                        
+                                        self.comment!.updateDurationLabel(label: durationString)
+                                        self.durationLabel.text = durationString
+                                    }
                                 }
                             }
                             break

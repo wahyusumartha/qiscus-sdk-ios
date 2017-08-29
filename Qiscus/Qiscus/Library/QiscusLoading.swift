@@ -10,7 +10,7 @@ import UIKit
 
 public extension UIViewController{
     @objc public func showQiscusLoading(withText text:String? = nil, andProgress progress:Float = 0, isBlocking:Bool = false){
-        Qiscus.uiThread.async {
+        Qiscus.uiThread.async {autoreleasepool{
             let loadingView = QLoadingViewController.sharedInstance
             if !loadingView.isPresence{
                 loadingView.modalTransitionStyle = .crossDissolve
@@ -38,10 +38,10 @@ public extension UIViewController{
                         loadingView.isPresence = true
                 })
             }
-        }
+        }}
     }
     public func dismissQiscusLoading(){
-        Qiscus.uiThread.async {
+        Qiscus.uiThread.async { autoreleasepool{
             let loadingView = QLoadingViewController.sharedInstance
             if loadingView.isPresence{
                 loadingView.dismiss(animated: false, completion: {
@@ -49,6 +49,6 @@ public extension UIViewController{
                     loadingView.isPresence = false
                 })
             }
-        }
+        }}
     }
 }

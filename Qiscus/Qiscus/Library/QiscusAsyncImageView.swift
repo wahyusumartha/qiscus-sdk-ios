@@ -37,41 +37,41 @@ public extension UIImageView {
             returnImage = placeholderImage!
             self.image = returnImage
         }
-        QAsyncThread.async {
+        QAsyncThread.async { autoreleasepool{
             if let image = UIImage(contentsOfFile: localPath){
-                DispatchQueue.main.async {
+                DispatchQueue.main.async { autoreleasepool{
                     self.image = image
                     if let completion = onLoaded{
                         completion()
                     }
-                }
+                }}
             }
-        }
+        }}
     }
     public func loadAsync(_ url:String, onLoaded: @escaping ((UIImage,AnyObject?)->Void), optionalData:AnyObject? = nil){
         imageForUrl(url: url, completionHandler:{(image: UIImage?, url: String) in
             if let returnImage = image{
-                DispatchQueue.main.async {
+                DispatchQueue.main.async { autoreleasepool{
                     onLoaded(returnImage,optionalData)
-                }
+                }}
             }
         })
     }
     public func loadAsync(fromLocalPath localPath:String, onLoaded: @escaping ((UIImage,AnyObject?)->Void), optionalData:AnyObject? = nil){
-        QAsyncThread.async {
+        QAsyncThread.async {autoreleasepool{
             if let cachedImage = cache.object(forKey: localPath as NSString) {
-                DispatchQueue.main.async {
+                DispatchQueue.main.async {autoreleasepool{
                     onLoaded(cachedImage,optionalData)
-                }
+                }}
             }else if let image = UIImage(contentsOfFile: localPath){
-                DispatchQueue.main.async {
+                DispatchQueue.main.async {autoreleasepool{
                     if cache.object(forKey: localPath as NSString) == nil {
                         cache.setObject(image, forKey: localPath as NSString)
                     }
                     onLoaded(image,optionalData)
-                }
+                }}
             }
-        }
+        }}
     }
     // func imageForUrl
     //  Modified from ImageLoader.swift Created by Nate Lyman on 7/5/14.
@@ -80,7 +80,7 @@ public extension UIImageView {
     //
     func imageForUrl(url urlString: String, header: [String : String] = [String : String](), useCache:Bool = true, completionHandler:@escaping (_ image: UIImage?, _ url: String) -> ()) {
         
-        QAsyncThread.async {
+        QAsyncThread.async {autoreleasepool{
             
             let image = cache.object(forKey: urlString as NSString)
             
@@ -132,7 +132,7 @@ public extension UIImageView {
                     downloadTask.resume()
                 }
             }
-        }
+        }}
     }
 }
 public extension UIImage {
