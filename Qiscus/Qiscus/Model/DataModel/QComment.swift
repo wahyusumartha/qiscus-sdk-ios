@@ -477,14 +477,15 @@ public class QComment:Object {
         comment.senderEmail = QiscusMe.sharedInstance.email
         comment.senderName = QiscusMe.sharedInstance.userName
         comment.statusRaw = QCommentStatus.sending.rawValue
+        comment.data = self.data
+        comment.typeRaw = self.type.name()
         
         print("commentType to forward : \(comment.type.rawValue)")
         
         if self.type == .reply {
             comment.typeRaw = QCommentType.text.name()
-        }else{
-            comment.typeRaw = self.type.name()
         }
+        
         var file:QFile? = nil
         if let fileRef = self.file {
             file = QFile()
@@ -506,9 +507,9 @@ public class QComment:Object {
                 }
             }
             room.addComment(newComment: comment)
+            room.post(comment: comment)
         }
-        let service = QRoomService()
-        service.postComment(onRoom: roomId, comment: comment)
+        
     }
     
     
