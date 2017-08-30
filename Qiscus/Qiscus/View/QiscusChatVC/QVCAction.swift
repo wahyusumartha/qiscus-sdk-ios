@@ -466,13 +466,17 @@ extension QiscusChatVC {
                     if let user = reply.sender{
                         senderName = user.fullname
                     }
-                    let payloadArray: [(String,Any)] = [
+                    var payloadArray: [(String,Any)] = [
                         ("replied_comment_sender_email",reply.senderEmail),
                         ("replied_comment_id", reply.id),
                         ("text", value),
                         ("replied_comment_message", reply.text),
-                        ("replied_comment_sender_username", senderName)
+                        ("replied_comment_sender_username", senderName),
+                        ("replied_comment_payload", reply.data)
                     ]
+                    if reply.type == .location {
+                        payloadArray.append(("replied_comment_type",reply.typeRaw))
+                    }
                     payload = JSON(dictionaryLiteral: payloadArray)
                     type = .reply
                     self.replyData = nil

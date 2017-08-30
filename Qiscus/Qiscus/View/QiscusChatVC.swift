@@ -90,10 +90,12 @@ open class QiscusChatVC: UIViewController{
             }
             else{
                 Qiscus.uiThread.async {autoreleasepool{
-                    if self.replyData!.type == .text || self.replyData!.type == .reply {
+                    switch self.replyData!.type {
+                    case .text:
                         self.linkDescription.text = self.replyData!.text
                         self.linkImageWidth.constant = 0
-                    }else{
+                        break
+                    case .video, .image:
                         if let file = self.replyData!.file {
                             if self.replyData!.type == .video || self.replyData!.type == .image {
                                 if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
@@ -112,12 +114,21 @@ open class QiscusChatVC: UIViewController{
                                     })
                                 }
                                 self.linkImageWidth.constant = 55
-                            }else{
-                            
                             }
                             self.linkDescription.text = file.filename
                         }
+                        break
+                    case .location:
+                        let payload = JSON(parseJSON: self.replyData!.data)
+                        print("location payload: \(payload)")
+                        self.linkImage.image = Qiscus.image(named: "map_ico")
+                        self.linkImageWidth.constant = 55
+                        self.linkDescription.text = "\(payload["name"].stringValue) - \(payload["address"].stringValue)"
+                        break
+                    default:
+                        break
                     }
+                    
                     if let user = self.replyData!.sender {
                         self.linkTitle.text = user.fullname
                     }else{

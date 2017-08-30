@@ -101,8 +101,17 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         if self.comment!.type == .reply{
             let replyData = JSON(parseJSON: self.comment!.data)
             var text = replyData["replied_comment_message"].stringValue
-            let replyType = self.comment!.replyType(message: text)
+            var replyType = self.comment!.replyType(message: text)
             
+            if replyType == .text  {
+                switch replyData["replied_comment_type"].stringValue {
+                case "location":
+                    replyType = .location
+                    break
+                default:
+                    break
+                }
+            }
             var username = replyData["replied_comment_sender_username"].stringValue
             let repliedEmail = replyData["replied_comment_sender_email"].stringValue
             if repliedEmail == QiscusMe.sharedInstance.email {
@@ -112,6 +121,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
                     username = user.fullname
                 }
             }
+            print("replyData: \(replyData)")
             switch replyType {
             case .text:
                 self.linkImageWidth.constant = 0
@@ -162,6 +172,14 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
                 }
                 text = filename
                 
+                break
+            case .location :
+                self.linkImage.image = Qiscus.image(named: "map_ico")
+                self.linkImageWidth.constant = 55
+                self.linkImage.isHidden = false
+                
+                let payload = JSON(parseJSON: "\(replyData["replied_comment_payload"])")
+                text = "\(payload["name"].stringValue) - \(payload["address"].stringValue)"
                 break
             default:
                 let filename = self.comment!.fileName(text: text)

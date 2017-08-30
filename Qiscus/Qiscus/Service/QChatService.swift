@@ -604,6 +604,14 @@ public class QChatService:NSObject {
                             self.sync(first: false)
                         }else{
                             Qiscus.printLog(text: "finish syncing process.")
+                            if !Qiscus.realtimeConnected {
+                                Qiscus.mqttConnect()
+                            }else{
+                                if Qiscus.shared.syncTimer != nil {
+                                    Qiscus.shared.syncTimer?.invalidate()
+                                    Qiscus.shared.syncTimer = nil
+                                }
+                            }
                             Qiscus.shared.delegate?.qiscus?(finishSync: true, error: nil)
                         }
                     }else if error != JSON.null{
@@ -628,9 +636,9 @@ public class QChatService:NSObject {
         self.perform(#selector(self.syncProcess), with: nil, afterDelay: 1.0)
     }
     internal class func sync(){
-        DispatchQueue.main.async { autoreleasepool{
+        DispatchQueue.main.async {
             QChatService.defaultService.sync()
-        }}
+        }
     }
     public func createRoom(withUsers users:[String], roomName:String, optionalData:String? = nil, withMessage:String? = nil){ //
         if Qiscus.isLoggedIn{
