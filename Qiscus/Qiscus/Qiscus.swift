@@ -1146,5 +1146,16 @@ extension Qiscus:CocoaMQTTDelegate{
         QUser.cacheAll()
         QParticipant.cacheAll()
     }
+    @objc public class func getNonce(withAppId appId:String, onSuccess:@escaping ((String)->Void), onFailed:@escaping ((String)->Void), secureURL:Bool = true){
+        QChatService.getNonce(withAppId: appId, onSuccess: onSuccess, onFailed: onFailed)
+    }
+    @objc public class func setup(withUserIdentityToken uidToken:String, delegate: QiscusConfigDelegate? = nil){
+        if delegate != nil {
+            Qiscus.shared.delegate = delegate
+        }
+        QChatService.setup(withuserIdentityToken: uidToken)
+        Qiscus.setupReachability()
+        Qiscus.sharedInstance.RealtimeConnect()
+    }
 }
 

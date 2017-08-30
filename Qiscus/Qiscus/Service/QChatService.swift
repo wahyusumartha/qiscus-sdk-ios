@@ -784,4 +784,107 @@ public class QChatService:NSObject {
         }
         
     }
+    internal class func getNonce(withAppId appId:String, onSuccess:@escaping ((String)->Void), onFailed:@escaping ((String)->Void), secureURL:Bool = true){
+        QiscusRequestThread.async { autoreleasepool{
+            var requestProtocol = "https"
+            if !secureURL {
+                requestProtocol = "http"
+            }
+            let baseUrl = "\(requestProtocol)://\(appId).qiscus.com/api/v2/mobile"
+            let authURL = "\(baseUrl)/auth/nonce"
+            QiscusMe.sharedInstance.baseUrl = baseUrl
+            QiscusMe.sharedInstance.userData.set(baseUrl, forKey: "qiscus_base_url")
+            
+            Alamofire.request(authURL, method: .post, parameters: nil, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+                
+                switch response.result {
+                case .success:
+                    if let result = response.result.value{
+                        let json = JSON(result)
+                        let success:Bool = (json["status"].intValue == 200)
+                        
+                        if success {
+                            let resultData = json["results"]
+                            let nonce = resultData["nonce"].stringValue
+                            DispatchQueue.main.async {
+                                onSuccess(nonce)
+                            }
+                        }else{
+                            DispatchQueue.main.async {
+                                onSuccess("Cant get nonce from server")
+                            }
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            onSuccess("Cant get nonce from server")
+                        }
+                    }
+                    break
+                case .failure(let error):
+                    DispatchQueue.main.async {
+                        onSuccess("\(error)")
+                    }
+                    break
+                }
+            })
+        }}
+    }
+    internal class func setup(withuserIdentityToken uidToken:String){
+        QiscusRequestThread.async { autoreleasepool{
+            
+            let authURL = "\(QiscusConfig.sharedInstance.BASE_URL)/auth/verify_identity_token"
+            let parameters:[String: AnyObject] = [
+                "identity_token"  : uidToken as AnyObject
+            ]
+            
+            Alamofire.request(authURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+                
+                switch response.result {
+                case .success:
+                    if let result = response.result.value{
+                        let json = JSON(result)
+                        let success:Bool = (json["status"].intValue == 200)
+                        
+                        if success {
+                            let userData = json["results"]["user"]
+                            let _ = QiscusMe.saveData(fromJson: userData)
+                            Qiscus.setupReachability()
+                            if let delegate = Qiscus.shared.delegate {
+                                Qiscus.uiThread.async { autoreleasepool{
+                                    delegate.qiscus?(didConnect: true, error: nil)
+                                    delegate.qiscusConnected?()
+                                    }}
+                            }
+                            Qiscus.registerNotification()
+                            
+                        }else{
+                            if let delegate = Qiscus.shared.delegate {
+                                Qiscus.uiThread.async { autoreleasepool{
+                                    delegate.qiscusFailToConnect?("\(json["message"].stringValue)")
+                                    delegate.qiscus?(didConnect: false, error: "\(json["message"].stringValue)")
+                                }}
+                            }
+                        }
+                    }else{
+                        if let delegate = Qiscus.shared.delegate {
+                            Qiscus.uiThread.async { autoreleasepool{
+                                let error = "Cant get data from qiscus server"
+                                delegate.qiscusFailToConnect?(error)
+                                delegate.qiscus?(didConnect: false, error: error)
+                            }}
+                        }
+                    }
+                    break
+                case .failure(let error):
+                    if let delegate = Qiscus.shared.delegate {
+                        Qiscus.uiThread.async {autoreleasepool{
+                            delegate.qiscusFailToConnect?("\(error)")
+                            delegate.qiscus?(didConnect: false, error: "\(error)")
+                        }}
+                    }
+                    break
+                }
+            })
+        }}
+    }
 }
