@@ -552,13 +552,14 @@ public class QChatService:NSObject {
     }
     
     @objc private func syncProcess(){
-        QiscusRequestThread.async { autoreleasepool{
+        QiscusRequestThread.async {
             let loadURL = QiscusConfig.SYNC_URL
             let parameters:[String: AnyObject] =  [
                 "last_received_comment_id"  : QiscusMe.sharedInstance.lastCommentId as AnyObject,
                 "token" : qiscus.config.USER_TOKEN as AnyObject,
                 "order" : "asc" as AnyObject
                 ]
+            print("paremeters sync: \(parameters)")
             Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                 if let response = responseData.result.value {
                     let json = JSON(response)
@@ -572,6 +573,7 @@ public class QChatService:NSObject {
                                 let id = newComment["id"].intValue
                                 let type = newComment["type"].string
                                 if id > QiscusMe.sharedInstance.lastCommentId {
+                                    QiscusMe.updateLastCommentId(commentId: id)
                                     DispatchQueue.main.async { autoreleasepool{
                                         if let room = QRoom.room(withId: roomId){
                                             if !room.isInvalidated {
@@ -584,13 +586,12 @@ public class QChatService:NSObject {
                                             }
                                         }else{
                                             QiscusBackgroundThread.async { autoreleasepool{
-                                                if id > QiscusMe.sharedInstance.lastKnownCommentId {
+                                                if id > QiscusMe.sharedInstance.lastCommentId {
                                                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                                                         DispatchQueue.main.async { autoreleasepool{
                                                             let comment = QComment.tempComment(fromJSON: newComment)
                                                             roomDelegate.gotNewComment(comment)
                                                         }}
-                                                        QiscusMe.updateLastCommentId(commentId: id)
                                                     }
                                                 }
                                             }}
@@ -600,7 +601,7 @@ public class QChatService:NSObject {
                             }
                         }
                         if comments.count == 20 {
-                            self.syncProcess()
+                            self.sync()
                         }
                     }else if error != JSON.null{
                         Qiscus.printLog(text: "error sync message: \(error)")
@@ -611,7 +612,7 @@ public class QChatService:NSObject {
                     
                 }
             })
-        }}
+        }
     }
     // MARK syncMethod
     private func sync(){

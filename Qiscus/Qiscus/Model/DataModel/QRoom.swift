@@ -508,151 +508,157 @@ public class QRoom:Object {
         }
     }
     public func saveNewComment(fromJSON json:JSON){
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let commentId = json["id"].intValue
-        let commentUniqueId = json["unique_temp_id"].stringValue
-        var commentText = json["message"].stringValue
-        let commentSenderName = json["username"].stringValue
-        let commentCreatedAt = json["unix_timestamp"].doubleValue
-        let commentBeforeId = json["comment_before_id"].intValue
-        let senderEmail = json["email"].stringValue
-        let commentType = json["type"].stringValue
-        
-        if commentType == "reply" || commentType == "buttons" {
-            commentText = json["payload"]["text"].stringValue
-        }
-        
-        let avatarURL = json["user_avatar_url"].stringValue
-        let _ = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL, lastSeen: commentCreatedAt)
-        
-        if let oldComment = QComment.comment(withUniqueId: commentUniqueId) {
-            try! realm.write {
-                oldComment.id = commentId
-                oldComment.text = commentText
-                oldComment.senderName = commentSenderName
-                oldComment.createdAt = commentCreatedAt
-                oldComment.beforeId = commentBeforeId
-            }
-            var status = QCommentStatus.sent
-            if oldComment.id < self.lastParticipantsReadId {
-                status = .read
-            }else if oldComment.id < self.lastParticipantsDeliveredId{
-                status = .delivered
-            }
-            oldComment.updateStatus(status: status)
-        }else{
-            let newComment = QComment()
-            newComment.uniqueId = commentUniqueId
-            newComment.id = commentId
-            newComment.roomId = self.id
-            newComment.text = commentText
-            newComment.senderName = commentSenderName
-            newComment.createdAt = commentCreatedAt
-            newComment.beforeId = commentBeforeId
-            newComment.senderEmail = senderEmail
-            newComment.cellPosRaw = QCellPosition.single.rawValue
+        let roomTS = ThreadSafeReference(to: self)
+        QiscusDBThread.sync { autoreleasepool{
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             
-            var status = QCommentStatus.sent
-            if newComment.id < self.lastParticipantsReadId {
-                status = .read
-            }else if newComment.id < self.lastParticipantsDeliveredId{
-                status = .delivered
-            }
-            newComment.statusRaw = status.rawValue
+            guard let room = realm.resolve(roomTS) else { return }
             
-            switch commentType {
-            case "buttons":
-                newComment.data = "\(json["payload"]["buttons"])"
-                newComment.typeRaw = QCommentType.postback.name()
-                break
-            case "account_linking":
-                newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.account.name()
-                break
-            case "reply":
-                newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.reply.name()
-                break
-            case "system_event":
-                newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.system.name()
-                break
-            case "card":
-                newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.card.name()
-                break
-            case "contact_person":
-                newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.contact.name()
-                break
-            case "button_postback_response" :
-                newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.text.name()
-                break
-            case "location":
-                newComment.data = "\(json["payload"])"
-                newComment.typeRaw = QCommentType.location.name()
-                break
-            case "custom":
-                newComment.data = "\(json["payload"]["content"])"
-                newComment.typeRaw = json["payload"]["type"].stringValue
-                break
-            case "text":
-                if newComment.text.hasPrefix("[file]"){
-                    var type = QiscusFileType.file
-                    let fileURL = QFile.getURL(fromString: newComment.text)
-                    if newComment.file == nil {
-                        let file = QFile()
-                        file.id = newComment.uniqueId
-                        file.url = fileURL
-                        file.senderEmail = newComment.senderEmail
-                        try! realm.write {
-                            realm.add(file)
-                        }
-                        type = file.type
-                    }else{
-                        try! realm.write {
-                            newComment.file!.url = QFile.getURL(fromString: newComment.text)
-                        }
-                        type = newComment.file!.type
-                    }
-                    switch type {
-                    case .image:
-                        newComment.typeRaw = QCommentType.image.name()
-                        break
-                    case .video:
-                        newComment.typeRaw = QCommentType.video.name()
-                        break
-                    case .audio:
-                        newComment.typeRaw = QCommentType.audio.name()
-                        break
-                    default:
-                        newComment.typeRaw = QCommentType.file.name()
-                        break
-                    }
-                }else{
-                    newComment.typeRaw = QCommentType.text.name()
+            let commentId = json["id"].intValue
+            let commentUniqueId = json["unique_temp_id"].stringValue
+            var commentText = json["message"].stringValue
+            let commentSenderName = json["username"].stringValue
+            let commentCreatedAt = json["unix_timestamp"].doubleValue
+            let commentBeforeId = json["comment_before_id"].intValue
+            let senderEmail = json["email"].stringValue
+            let commentType = json["type"].stringValue
+            
+            if commentType == "reply" || commentType == "buttons" {
+                commentText = json["payload"]["text"].stringValue
+            }
+            
+            let avatarURL = json["user_avatar_url"].stringValue
+            let _ = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL, lastSeen: commentCreatedAt)
+            
+            if let oldComment = QComment.comment(withUniqueId: commentUniqueId) {
+                try! realm.write {
+                    oldComment.id = commentId
+                    oldComment.text = commentText
+                    oldComment.senderName = commentSenderName
+                    oldComment.createdAt = commentCreatedAt
+                    oldComment.beforeId = commentBeforeId
                 }
-                break
+                var status = QCommentStatus.sent
+                if oldComment.id < room.lastParticipantsReadId {
+                    status = .read
+                }else if oldComment.id < room.lastParticipantsDeliveredId{
+                    status = .delivered
+                }
+                oldComment.updateStatus(status: status)
+            }else{
+                let newComment = QComment()
+                newComment.uniqueId = commentUniqueId
+                newComment.id = commentId
+                newComment.roomId = room.id
+                newComment.text = commentText
+                newComment.senderName = commentSenderName
+                newComment.createdAt = commentCreatedAt
+                newComment.beforeId = commentBeforeId
+                newComment.senderEmail = senderEmail
+                newComment.cellPosRaw = QCellPosition.single.rawValue
+                
+                var status = QCommentStatus.sent
+                if newComment.id < room.lastParticipantsReadId {
+                    status = .read
+                }else if newComment.id < room.lastParticipantsDeliveredId{
+                    status = .delivered
+                }
+                newComment.statusRaw = status.rawValue
+                
+                switch commentType {
+                case "buttons":
+                    newComment.data = "\(json["payload"]["buttons"])"
+                    newComment.typeRaw = QCommentType.postback.name()
+                    break
+                case "account_linking":
+                    newComment.data = "\(json["payload"])"
+                    newComment.typeRaw = QCommentType.account.name()
+                    break
+                case "reply":
+                    newComment.data = "\(json["payload"])"
+                    newComment.typeRaw = QCommentType.reply.name()
+                    break
+                case "system_event":
+                    newComment.data = "\(json["payload"])"
+                    newComment.typeRaw = QCommentType.system.name()
+                    break
+                case "card":
+                    newComment.data = "\(json["payload"])"
+                    newComment.typeRaw = QCommentType.card.name()
+                    break
+                case "contact_person":
+                    newComment.data = "\(json["payload"])"
+                    newComment.typeRaw = QCommentType.contact.name()
+                    break
+                case "button_postback_response" :
+                    newComment.data = "\(json["payload"])"
+                    newComment.typeRaw = QCommentType.text.name()
+                    break
+                case "location":
+                    newComment.data = "\(json["payload"])"
+                    newComment.typeRaw = QCommentType.location.name()
+                    break
+                case "custom":
+                    newComment.data = "\(json["payload"]["content"])"
+                    newComment.typeRaw = json["payload"]["type"].stringValue
+                    break
+                case "text":
+                    if newComment.text.hasPrefix("[file]"){
+                        var type = QiscusFileType.file
+                        let fileURL = QFile.getURL(fromString: newComment.text)
+                        if newComment.file == nil {
+                            let file = QFile()
+                            file.id = newComment.uniqueId
+                            file.url = fileURL
+                            file.senderEmail = newComment.senderEmail
+                            try! realm.write {
+                                realm.add(file)
+                            }
+                            type = file.type
+                        }else{
+                            try! realm.write {
+                                newComment.file!.url = QFile.getURL(fromString: newComment.text)
+                            }
+                            type = newComment.file!.type
+                        }
+                        switch type {
+                        case .image:
+                            newComment.typeRaw = QCommentType.image.name()
+                            break
+                        case .video:
+                            newComment.typeRaw = QCommentType.video.name()
+                            break
+                        case .audio:
+                            newComment.typeRaw = QCommentType.audio.name()
+                            break
+                        default:
+                            newComment.typeRaw = QCommentType.file.name()
+                            break
+                        }
+                    }else{
+                        newComment.typeRaw = QCommentType.text.name()
+                    }
+                    break
                 default:
                     newComment.data = "\(json["payload"])"
                     newComment.typeRaw = json["payload"]["type"].stringValue
-                break
-            }
-            self.addComment(newComment: newComment)
-        }
-        if let participant = QParticipant.participant(inRoomWithId: self.id, andEmail: senderEmail) {
-            if participant.lastReadCommentId < commentId {
-                try! realm.write {
-                    participant.lastReadCommentId = commentId
-                    participant.lastDeliveredCommentId = commentId
+                    break
                 }
-            }else if participant.lastDeliveredCommentId < commentId{
-                try! realm.write {
-                    participant.lastDeliveredCommentId = commentId
+                room.addComment(newComment: newComment)
+            }
+            if let participant = QParticipant.participant(inRoomWithId: room.id, andEmail: senderEmail) {
+                if participant.lastReadCommentId < commentId {
+                    try! realm.write {
+                        participant.lastReadCommentId = commentId
+                        participant.lastDeliveredCommentId = commentId
+                    }
+                }else if participant.lastDeliveredCommentId < commentId{
+                    try! realm.write {
+                        participant.lastDeliveredCommentId = commentId
+                    }
                 }
             }
-        }
+        }}
     }
     public func saveOldComment(fromJSON json:JSON){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
@@ -1378,49 +1384,62 @@ public class QRoom:Object {
         }
     }
     internal func update(avatarURL:String){
-        if self.avatarURL != avatarURL {
+        let roomTS = ThreadSafeReference(to: self)
+        QiscusDBThread.sync { autoreleasepool {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            guard let r = realm.resolve(roomTS) else { return }
             try! realm.write {
-                self.avatarURL = avatarURL
-                self.avatarLocalPath = ""
+                r.avatarURL = avatarURL
+                r.avatarLocalPath = ""
             }
-            self.delegate?.room(didChangeAvatar: self)
-        }
+            DispatchQueue.main.sync {
+                self.delegate?.room(didChangeAvatar: self)
+            }
+        }}
     }
     internal func update(data:String){
-        if self.data != data {
+        let roomTS = ThreadSafeReference(to: self)
+        QiscusDBThread.sync { autoreleasepool {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            try! realm.write {
-                self.data = data
+            guard let r = realm.resolve(roomTS) else { return }
+            if r.data != data {
+                try! realm.write {
+                    r.data = data
+                }
             }
-        }
+        }}
     }
     internal class func deleteRoom(room:QRoom){
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        for group in room.comments {
-            for comment in group.comments{
-                QComment.cache[comment.uniqueId] = nil
+        let roomTS = ThreadSafeReference(to: room)
+        QiscusDBThread.sync {autoreleasepool{
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            guard let r = realm.resolve(roomTS) else { return }
+            
+            for group in r.comments {
+                for comment in group.comments{
+                    QComment.cache[comment.uniqueId] = nil
+                    try! realm.write {
+                        realm.delete(comment)
+                    }
+                }
+                QCommentGroup.cache[group.id] = nil
                 try! realm.write {
-                    realm.delete(comment)
+                    realm.delete(group)
                 }
             }
-            QCommentGroup.cache[group.id] = nil
+            for participant in r.participants {
+                let id = "\(r.id)_\(participant.email)"
+                if let data = QParticipant.participant(inRoomWithId: r.id, andEmail: participant.email) {
+                    QParticipant.cache[id] = nil
+                    try! realm.write {
+                        realm.delete(data)
+                    }
+                }
+            }
             try! realm.write {
-                realm.delete(group)
+                realm.delete(r)
             }
-        }
-        for participant in room.participants {
-            let id = "\(room.id)_\(participant.email)"
-            if let data = QParticipant.participant(inRoomWithId: room.id, andEmail: participant.email) {
-                QParticipant.cache[id] = nil
-                try! realm.write {
-                    realm.delete(data)
-                }
-            }
-        }
-        try! realm.write {
-            realm.delete(room)
-        }
+        }}
     }
     public func comment(onIndexPath indexPath:IndexPath)->QComment?{
         if self.comments.count > indexPath.section && self.comments[indexPath.section].commentsCount > indexPath.row{

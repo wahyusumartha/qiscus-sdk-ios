@@ -18,6 +18,7 @@ var QiscusFileThread = DispatchQueue(label: "com.qiscus.file", attributes: .conc
 var QiscusRequestThread = DispatchQueue(label: "com.qiscus.request", attributes: .concurrent)
 var QiscusUploadThread = DispatchQueue(label: "com.qiscus.upload", attributes: .concurrent)
 var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attributes: .concurrent)
+var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurrent)
 
 @objc public class Qiscus: NSObject, PKPushRegistryDelegate, UNUserNotificationCenterDelegate {
     
@@ -969,12 +970,12 @@ extension Qiscus:CocoaMQTTDelegate{
                             let payload = json["payload"]
                             if payload["type"].stringValue == "remove_member" && payload["object_email"].stringValue == QiscusMe.sharedInstance.email{
                                 DispatchQueue.main.async {autoreleasepool{
-                                    if commentId > QiscusMe.sharedInstance.lastKnownCommentId{
+                                    if commentId > QiscusMe.sharedInstance.lastCommentId{
                                         if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                                             let comment = QComment.tempComment(fromJSON: json)
                                             roomDelegate.gotNewComment(comment)
                                         }
-                                        QiscusMe.updateLastKnownCommentId(commentId: commentId)
+                                        QiscusMe.updateLastCommentId(commentId: commentId)
                                     }
                                     if let chatView = Qiscus.shared.chatViews[roomId] {
                                         if chatView.isPresence {
