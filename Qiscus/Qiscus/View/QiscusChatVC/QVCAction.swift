@@ -111,14 +111,17 @@ extension QiscusChatVC {
         self.present(actionSheetController, animated: true, completion: nil)
     }
     func shareCurrentLocation(){
-        self.showLoading("Getting your current location")
+        
         self.locationManager.requestWhenInUseAuthorization()
         
         if CLLocationManager.locationServicesEnabled() {
+            self.showLoading("Getting your current location")
             locationManager.delegate = self
             locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
             self.didFindLocation = false
             self.locationManager.startUpdatingLocation()
+        }else{
+            self.showLocationAccessAlert()
         }
     }
     func getLinkPreview(url:String){
@@ -344,7 +347,19 @@ extension QiscusChatVC {
             }
         }}
     }
-    
+    func showLocationAccessAlert(){
+        DispatchQueue.main.async{autoreleasepool{
+            let text = QiscusTextConfiguration.sharedInstance.locationAccessAlertText
+            let cancelTxt = QiscusTextConfiguration.sharedInstance.alertCancelText
+            let settingTxt = QiscusTextConfiguration.sharedInstance.alertSettingText
+            QPopUpView.showAlert(withTarget: self, message: text, firstActionTitle: settingTxt, secondActionTitle: cancelTxt,
+                                 doneAction: {
+                                    self.goToIPhoneSetting()
+            },
+                                 cancelAction: {}
+            )
+        }}
+    }
     func showPhotoAccessAlert(){
         DispatchQueue.main.async(execute: {
             let text = QiscusTextConfiguration.sharedInstance.galeryAccessAlertText

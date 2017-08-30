@@ -34,6 +34,7 @@ open class QiscusTextConfiguration: NSObject {
     
     /// Your text to show as content alert when you access gallery but you not allow gallery access, Default value : "We need photos access to upload image.\nPlease allow photos access in your iPhone Setting"
     open var galeryAccessAlertText = "We need photos access to upload image.\nPlease allow photos access in your iPhone Setting"
+    open var locationAccessAlertText = "We need location access to share your current location.\nPlease allow location access in your iPhone Setting"
     open var cameraAccessAlertText = "We need camera access to upload image from camera.\nPlease allow camera access in your iPhone Setting"
     open var microphoneAccessAlertText = "We need microphone access to upload recorded audio.\nPlease allow mictophone access in your iPhone Setting"
     
