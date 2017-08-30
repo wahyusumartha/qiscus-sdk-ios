@@ -17,6 +17,9 @@ import UIKit
     @objc optional func qiscus(didRegisterPushNotification success:Bool, deviceToken:String, error:String?)
     @objc optional func qiscus(didUnregisterPushNotification success:Bool, error:String?)
     @objc optional func qiscus(didTapLocalNotification comment:QComment, userInfo:[AnyHashable : Any]?)
+    
+    @objc optional func qiscusStartSyncing()
+    @objc optional func qiscus(finishSync success:Bool, error:String?)
     //@objc optional func failToRegisterQiscusPushNotification(withError error:String?, andDeviceToken token:String)
     
     //@objc optional func didRegisterQiscusPushNotification(withDeviceToken token:String)

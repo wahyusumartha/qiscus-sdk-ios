@@ -551,7 +551,7 @@ public class QChatService:NSObject {
         }
     }
     
-    @objc private func syncProcess(){
+    @objc private func syncProcess(first:Bool = true){
         QiscusRequestThread.async {
             let loadURL = QiscusConfig.SYNC_URL
             let parameters:[String: AnyObject] =  [
@@ -601,21 +601,29 @@ public class QChatService:NSObject {
                             }
                         }
                         if comments.count == 20 {
-                            self.sync()
+                            self.sync(first: false)
+                        }else{
+                            Qiscus.printLog(text: "finish syncing process.")
+                            Qiscus.shared.delegate?.qiscus?(finishSync: true, error: nil)
                         }
                     }else if error != JSON.null{
                         Qiscus.printLog(text: "error sync message: \(error)")
+                        Qiscus.shared.delegate?.qiscus?(finishSync: false, error: "\(error)")
                     }
                 }
                 else{
+                    Qiscus.shared.delegate?.qiscus?(finishSync: false, error: "error sync message")
                     Qiscus.printLog(text: "error sync message")
-                    
                 }
             })
         }
     }
     // MARK syncMethod
-    private func sync(){
+    private func sync(first:Bool = true){
+        if first {
+            Qiscus.printLog(text: "start syncing process...")
+            Qiscus.shared.delegate?.qiscusStartSyncing?()
+        }
         NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector( self.syncProcess), object: nil)
         self.perform(#selector(self.syncProcess), with: nil, afterDelay: 1.0)
     }
