@@ -108,6 +108,9 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
                 case "location":
                     replyType = .location
                     break
+                case "contact_person":
+                    replyType = .contact
+                    break
                 default:
                     break
                 }
@@ -128,6 +131,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
                 self.linkImage.isHidden = true
                 break
             case .image, .video:
+                self.linkImage.contentMode = .scaleAspectFill
                 self.linkImage.image = Qiscus.image(named: "link")
                 let filename = self.comment!.fileName(text: text)
                 let url = self.comment!.getAttachmentURL(message: text)
@@ -174,12 +178,22 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
                 
                 break
             case .location :
+                self.linkImage.contentMode = .scaleAspectFill
                 self.linkImage.image = Qiscus.image(named: "map_ico")
                 self.linkImageWidth.constant = 55
                 self.linkImage.isHidden = false
                 
                 let payload = JSON(parseJSON: "\(replyData["replied_comment_payload"])")
                 text = "\(payload["name"].stringValue) - \(payload["address"].stringValue)"
+                break
+            case .contact:
+                self.linkImage.contentMode = .top
+                self.linkImage.image = Qiscus.image(named: "contact")
+                self.linkImageWidth.constant = 55
+                self.linkImage.isHidden = false
+                
+                let payload = JSON(parseJSON: "\(replyData["replied_comment_payload"])")
+                text = "\(payload["name"].stringValue) - \(payload["value"].stringValue)"
                 break
             default:
                 let filename = self.comment!.fileName(text: text)

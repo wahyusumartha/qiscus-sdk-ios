@@ -96,6 +96,7 @@ open class QiscusChatVC: UIViewController{
                         self.linkImageWidth.constant = 0
                         break
                     case .video, .image:
+                        self.linkImage.contentMode = .scaleAspectFill
                         if let file = self.replyData!.file {
                             if self.replyData!.type == .video || self.replyData!.type == .image {
                                 if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
@@ -120,10 +121,17 @@ open class QiscusChatVC: UIViewController{
                         break
                     case .location:
                         let payload = JSON(parseJSON: self.replyData!.data)
-                        print("location payload: \(payload)")
+                        self.linkImage.contentMode = .scaleAspectFill
                         self.linkImage.image = Qiscus.image(named: "map_ico")
                         self.linkImageWidth.constant = 55
                         self.linkDescription.text = "\(payload["name"].stringValue) - \(payload["address"].stringValue)"
+                        break
+                    case .contact:
+                        let payload = JSON(parseJSON: self.replyData!.data)
+                        self.linkImage.contentMode = .top
+                        self.linkImage.image = Qiscus.image(named: "contact")
+                        self.linkImageWidth.constant = 55
+                        self.linkDescription.text = "\(payload["name"].stringValue) - \(payload["value"].stringValue)"
                         break
                     default:
                         break

@@ -171,12 +171,12 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             }
             break
         case "reply":
-            if Qiscus.sharedInstance.connected && comment.type != .postback && comment.type != .account && comment.status != .failed && comment.type != .system && comment.status != .sending && comment.type != .card && comment.type != .contact{
+            if Qiscus.sharedInstance.connected && comment.type != .postback && comment.type != .account && comment.status != .failed && comment.type != .system && comment.status != .sending && comment.type != .card {
                 show = true
             }
             break
         case "forward":
-            if self.forwardAction != nil && Qiscus.sharedInstance.connected && comment.type != .postback && comment.type != .account && comment.status != .failed && comment.type != .system && comment.status != .sending && comment.type != .card {
+            if self.forwardAction != nil && Qiscus.sharedInstance.connected && comment.type != .postback && comment.type != .account && comment.status != .failed && comment.type != .system && comment.status != .sending{
                 show = true
             }
         case "info":

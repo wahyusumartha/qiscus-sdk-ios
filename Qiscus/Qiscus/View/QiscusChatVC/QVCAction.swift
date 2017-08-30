@@ -474,7 +474,7 @@ extension QiscusChatVC {
                         ("replied_comment_sender_username", senderName),
                         ("replied_comment_payload", reply.data)
                     ]
-                    if reply.type == .location {
+                    if reply.type == .location || reply.type == .contact {
                         payloadArray.append(("replied_comment_type",reply.typeRaw))
                     }
                     payload = JSON(dictionaryLiteral: payloadArray)

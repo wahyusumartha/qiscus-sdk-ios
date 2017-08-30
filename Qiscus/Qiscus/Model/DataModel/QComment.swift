@@ -17,6 +17,7 @@ public enum QReplyType:Int{
     case audio
     case document
     case location
+    case contact
     case other
 }
 @objc public enum QCellPosition:Int {
