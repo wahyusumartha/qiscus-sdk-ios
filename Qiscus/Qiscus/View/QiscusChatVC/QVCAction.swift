@@ -115,11 +115,25 @@ extension QiscusChatVC {
         self.locationManager.requestWhenInUseAuthorization()
         
         if CLLocationManager.locationServicesEnabled() {
-            self.showLoading("Getting your current location")
-            locationManager.delegate = self
-            locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-            self.didFindLocation = false
-            self.locationManager.startUpdatingLocation()
+            switch CLLocationManager.authorizationStatus() {
+            case .authorizedAlways, .authorizedWhenInUse:
+                self.showLoading("Getting your current location")
+                
+                locationManager.delegate = self
+                locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+                self.didFindLocation = false
+                self.locationManager.startUpdatingLocation()
+                break
+            case .denied:
+                self.showLocationAccessAlert()
+                break
+            case .restricted:
+                self.showLocationAccessAlert()
+                break
+            case .notDetermined:
+                self.showLocationAccessAlert()
+                break
+            }
         }else{
             self.showLocationAccessAlert()
         }
