@@ -36,6 +36,13 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     static var dbConfiguration = Realm.Configuration.defaultConfiguration
     static var chatRooms = [Int : QRoom]()
     static var qiscusDownload:[String] = [String]()
+    
+    
+    static var realtimeConnected:Bool{
+        get{
+            return Qiscus.shared.mqtt?.connState == .connected
+        }
+    }
     internal static var publishStatustimer:Timer?
     internal static var realtimeChannel = [String]()
     
@@ -928,7 +935,7 @@ extension Qiscus:CocoaMQTTDelegate{
         }
     }
     public func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck){
-        QiscusBackgroundThread.async {autoreleasepool{
+        QiscusBackgroundThread.async {
             let state = UIApplication.shared.applicationState
             
             if state == .active {
@@ -944,7 +951,7 @@ extension Qiscus:CocoaMQTTDelegate{
                 self.syncTimer?.invalidate()
                 self.syncTimer = nil
             }
-        }}
+        }
     }
     public func mqtt(_ mqtt: CocoaMQTT, didPublishMessage message: CocoaMQTTMessage, id: UInt16){
         
@@ -968,27 +975,42 @@ extension Qiscus:CocoaMQTTDelegate{
                         let commentType = json["type"].stringValue
                         if commentType == "system_event" {
                             let payload = json["payload"]
-                            if payload["type"].stringValue == "remove_member" && payload["object_email"].stringValue == QiscusMe.sharedInstance.email{
-                                DispatchQueue.main.async {autoreleasepool{
-                                    if commentId > QiscusMe.sharedInstance.lastCommentId{
-                                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                            let comment = QComment.tempComment(fromJSON: json)
-                                            roomDelegate.gotNewComment(comment)
+                            if payload["object_email"].stringValue == QiscusMe.sharedInstance.email {
+                                switch payload["type"].stringValue {
+                                case "remove_member":
+                                    DispatchQueue.main.async {autoreleasepool{
+                                        if commentId > QiscusMe.sharedInstance.lastCommentId{
+                                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                                                let comment = QComment.tempComment(fromJSON: json)
+                                                roomDelegate.gotNewComment(comment)
+                                            }
+                                            QiscusMe.updateLastCommentId(commentId: commentId)
                                         }
-                                        QiscusMe.updateLastCommentId(commentId: commentId)
-                                    }
-                                    if let chatView = Qiscus.shared.chatViews[roomId] {
-                                        if chatView.isPresence {
-                                            chatView.goBack()
+                                        if let chatView = Qiscus.shared.chatViews[roomId] {
+                                            if chatView.isPresence {
+                                                chatView.goBack()
+                                            }
+                                            Qiscus.shared.chatViews[roomId] = nil
                                         }
-                                        Qiscus.shared.chatViews[roomId] = nil
-                                    }
-                                    
-                                    if let room = QRoom.room(withId: roomId){
-                                        Qiscus.chatRooms[roomId] = nil
-                                        QRoom.deleteRoom(room: room)
-                                    }
-                                }}
+                                        
+                                        if let room = QRoom.room(withId: roomId){
+                                            Qiscus.chatRooms[roomId] = nil
+                                            QRoom.deleteRoom(room: room)
+                                        }
+                                        }}
+                                break
+                                default:
+                                    DispatchQueue.main.async {autoreleasepool{
+                                        if commentId > QiscusMe.sharedInstance.lastCommentId{
+                                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                                                let comment = QComment.tempComment(fromJSON: json)
+                                                roomDelegate.gotNewComment(comment)
+                                            }
+                                            QiscusMe.updateLastCommentId(commentId: commentId)
+                                        }
+                                    }}
+                                break
+                                }
                             }
                         }
                     }else{
