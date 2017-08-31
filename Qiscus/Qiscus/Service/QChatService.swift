@@ -311,7 +311,6 @@ public class QChatService:NSObject {
         }
     }
     public func room(withUniqueId uniqueId:String, title:String = "", avatarURL:String = "", withMessage:String? = nil){ //
-        
         if Qiscus.isLoggedIn{
             if let room = QRoom.room(withUniqueId: uniqueId){
                 self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)

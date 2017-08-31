@@ -271,7 +271,15 @@ public class QRoom:Object {
             }
             
         }
-        room.cache()
+        
+        if Qiscus.chatRooms[room.id] == nil {
+            Qiscus.chatRooms[room.id] = room
+        }
+        if Qiscus.shared.chatViews[room.id] ==  nil{
+            let chatView = QiscusChatVC()
+            chatView.chatRoom = Qiscus.chatRooms[room.id]
+            Qiscus.shared.chatViews[room.id] = chatView
+        }
         Qiscus.sharedInstance.RealtimeConnect()
         DispatchQueue.main.async { autoreleasepool{
             if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
