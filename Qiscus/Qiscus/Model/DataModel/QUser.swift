@@ -28,8 +28,12 @@ public class QUser:Object {
     
     public dynamic var avatar:UIImage?{
         didSet{
+            let email = self.email
+            let avatar = self.avatar
             if self.avatar != nil {
-                self.delegate?.user?(didChangeAvatar: self.avatar!)
+                DispatchQueue.main.async {autoreleasepool {
+                    QUser.cache[email]?.delegate?.user?(didChangeAvatar: avatar!)
+                }}
             }
         }
     }
@@ -140,8 +144,7 @@ public class QUser:Object {
             try! realm.write {
                 realm.add(user)
             }
-            
-            QUser.cache[email] = user
+            user.cacheObject()
         }
         
         return user
@@ -222,6 +225,16 @@ public class QUser:Object {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         try! realm.write {
             self.avatarLocalPath = ""
+        }
+    }
+    internal func cacheObject(){
+        let userTS = ThreadSafeReference(to:self)
+        DispatchQueue.main.async {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            guard let user = realm.resolve(userTS) else { return }
+            if QUser.cache[user.email] == nil {
+                QUser.cache[user.email] = user
+            }
         }
     }
 }

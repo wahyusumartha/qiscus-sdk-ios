@@ -122,4 +122,7 @@ class QCellLocationRight: QChatCell {
         mapItem.name = payload["name"].stringValue
         mapItem.openInMaps(launchOptions: options)
     }
+    public override func comment(didChangePosition position: QCellPosition) {
+        self.balloonView.image = self.getBallon()
+    }
 }

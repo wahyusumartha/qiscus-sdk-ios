@@ -126,4 +126,7 @@ class QCellPostbackLeft: QChatCell {
         let data = JSON(parseJSON: self.comment!.data)
         self.delegate?.didTapAccountLinking(withData: data)
     }
+    public override func comment(didChangePosition position: QCellPosition) {
+        self.balloonView.image = self.getBallon()
+    }
 }

@@ -72,4 +72,7 @@ class QCellFileLeft: QChatCell {
             self.userNameLabel.text = self.comment?.senderName
         }
     }
+    public override func comment(didChangePosition position: QCellPosition) {
+        self.balloonView.image = self.getBallon()
+    }
 }

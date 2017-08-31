@@ -88,4 +88,7 @@ class QCellContactRight: QChatCell {
             break
         }
     }
+    public override func comment(didChangePosition position: QCellPosition) {
+        self.balloonView.image = self.getBallon()
+    }
 }

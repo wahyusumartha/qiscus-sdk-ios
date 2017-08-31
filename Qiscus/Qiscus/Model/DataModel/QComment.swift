@@ -388,7 +388,7 @@ public class QComment:Object {
         }
         if let comment =  realm.object(ofType: QComment.self, forPrimaryKey: uniqueId) {
             let _ = comment.textSize
-            QComment.cache[uniqueId] = comment
+            comment.cacheObject()
             return QComment.cache[uniqueId]
         }
         
@@ -535,79 +535,102 @@ public class QComment:Object {
         }
     }
     public func updateCellPos(cellPos: QCellPosition){
+        let uId = self.uniqueId
         if self.cellPos != cellPos {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
                 self.cellPosRaw = cellPos.rawValue
             }
-            self.delegate?.comment(didChangePosition: cellPos)
+            DispatchQueue.main.async { autoreleasepool {
+                QComment.cache[uId]?.delegate?.comment(didChangePosition: cellPos)
+            }}
         }
     }
     public func updateDurationLabel(label:String){
+        let uId = self.uniqueId
         if self.durationLabel != label {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
                 self.durationLabel = label
             }
-            self.delegate?.comment?(didChangeDurationLabel: label)
+            DispatchQueue.main.async { autoreleasepool {
+                QComment.cache[uId]?.delegate?.comment?(didChangeDurationLabel: label)
+            }}
         }
     }
     public func updateTimeSlider(value:Float){
+        let uId = self.uniqueId
         if self.currentTimeSlider != value {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
                 self.currentTimeSlider = value
             }
-            self.delegate?.comment?(didChangeCurrentTimeSlider: value)
+            DispatchQueue.main.async { autoreleasepool {
+                QComment.cache[uId]?.delegate?.comment?(didChangeCurrentTimeSlider: value)
+            }}
         }
     }
     public func updateSeekLabel(label:String){
+        let uId = self.uniqueId
         if self.seekTimeLabel != label {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
                 self.seekTimeLabel = label
             }
-            self.delegate?.comment?(didChangeSeekTimeLabel: label)
+            DispatchQueue.main.async { autoreleasepool {
+                QComment.cache[uId]?.delegate?.comment?(didChangeSeekTimeLabel: label)
+            }}
         }
     }
     public func updatePlaying(playing:Bool){
+        let uId = self.uniqueId
         if self.audioIsPlaying != playing {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
                 self.audioIsPlaying = playing
             }
-            self.delegate?.comment?(didChangeAudioPlaying: playing)
+            DispatchQueue.main.async { autoreleasepool {
+                QComment.cache[uId]?.delegate?.comment?(didChangeAudioPlaying: playing)
+            }}
         }
     }
     public func updateUploading(uploading:Bool){
+        let uId = self.uniqueId
         if self.isUploading != uploading {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
                 self.isUploading = uploading
             }
-            self.delegate?.comment?(didUpload: uploading)
+            DispatchQueue.main.async { autoreleasepool {
+                QComment.cache[uId]?.delegate?.comment?(didUpload: uploading)
+            }}
         }
     }
     public func updateDownloading(downloading:Bool){
+        let uId = self.uniqueId
         if self.isDownloading != downloading {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
                 self.isDownloading = downloading
             }
-            self.delegate?.comment?(didDownload: downloading)
+            DispatchQueue.main.async { autoreleasepool {
+                QComment.cache[uId]?.delegate?.comment?(didDownload: downloading)
+            }}
         }
     }
     public func updateProgress(progress:CGFloat){
+        let uId = self.uniqueId
         if self.progress != progress {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
                 self.progress = progress
             }
-            self.delegate?.comment?(didChangeProgress: progress)
+            DispatchQueue.main.async { autoreleasepool {
+                QComment.cache[uId]?.delegate?.comment?(didChangeProgress: progress)
+            }}
         }
     }
     public class func decodeDictionary(data:[AnyHashable : Any]) -> QComment? {
-        
         if let isQiscusdata = data["qiscus_commentdata"] as? Bool{
             if isQiscusdata {
                 let temp = QComment()
@@ -791,9 +814,7 @@ public class QComment:Object {
     internal class func cacheAll(){
         let comments = QComment.all()
         for comment in comments{
-            if QComment.cache[comment.uniqueId] == nil {
-                QComment.cache[comment.uniqueId] = comment
-            }
+            comment.cacheObject()
         }
     }
     internal class func resendPendingMessage(){
@@ -806,6 +827,16 @@ public class QComment:Object {
                     room.updateCommentStatus(inComment: comment, status: .sending)
                     room.post(comment: comment)
                 }
+            }
+        }
+    }
+    internal func cacheObject(){
+        let commentTS = ThreadSafeReference(to:self)
+        DispatchQueue.main.async {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            guard let comment = realm.resolve(commentTS) else { return }
+            if QComment.cache[comment.uniqueId] == nil {
+                QComment.cache[comment.uniqueId] = comment
             }
         }
     }

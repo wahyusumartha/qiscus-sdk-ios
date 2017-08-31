@@ -60,4 +60,7 @@ class QCellContactLeft: QChatCell {
         print("saving contact")
         self.delegate?.didTapSaveContact(withData: self.comment!)
     }
+    public override func comment(didChangePosition position: QCellPosition) {
+        self.balloonView.image = self.getBallon()
+    }
 }

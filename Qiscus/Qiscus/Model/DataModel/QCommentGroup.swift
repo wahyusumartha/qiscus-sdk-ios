@@ -110,6 +110,14 @@ public class QCommentGroup: Object{
     internal class func cacheAll(){
         let groups = QCommentGroup.all()
         for group in groups{
+            group.cacheObject()
+        }
+    }
+    internal func cacheObject(){
+        let groupTS = ThreadSafeReference(to:self)
+        DispatchQueue.main.async {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            guard let group = realm.resolve(groupTS) else { return }
             if QCommentGroup.cache[group.id] == nil {
                 QCommentGroup.cache[group.id] = group
             }

@@ -910,71 +910,71 @@ extension QiscusChatVC:QRoomDelegate{
     }
     public func room(didChangeComment section: Int, row: Int, action: String) {
         let indexPath = IndexPath(item: row, section: section)
-        let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
-        
-        func defaultChange(){
-            self.collectionView.reloadItems(at: [indexPath])
-        }
-        switch action {
-        case "uploadProgress":
-            switch comment.type {
-            case .image, .video, .audio:
-                if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
-                    cell.uploadingMedia()
+        if let comment = self.chatRoom?.comment(onIndexPath: indexPath) {
+            func defaultChange(){
+                self.collectionView.reloadItems(at: [indexPath])
+            }
+            switch action {
+            case "uploadProgress":
+                switch comment.type {
+                case .image, .video, .audio:
+                    if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
+                        cell.uploadingMedia()
+                    }
+                    break
+                default:
+                    defaultChange()
+                    break
                 }
+                break
+            case "downloadProgress":
+                switch comment.type {
+                case .image, .video, .audio:
+                    if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
+                        cell.downloadingMedia()
+                    }
+                    break
+                default:
+                    defaultChange()
+                    break
+                }
+                break
+            case "uploadFinish":
+                switch comment.type {
+                case .image, .video, .audio:
+                    if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
+                        cell.uploadFinished()
+                    }
+                default:
+                    defaultChange()
+                    break
+                }
+                break
+            case "downloadFinish":
+                switch comment.type {
+                case .image, .video, .audio:
+                    if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
+                        cell.downloadFinished()
+                    }
+                default:
+                    defaultChange()
+                    break
+                }
+                break
+            case "status":
+                //            if comment.senderEmail == QiscusMe.sharedInstance.email {
+                //                let delay = 0.5 * Double(NSEC_PER_SEC)
+                //                let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
+                //                DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                //                    if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
+                //                        cell.updateStatus(toStatus: comment.status)
+                //                    }
+                //                })
+                //            }
                 break
             default:
                 defaultChange()
-                break
             }
-            break
-        case "downloadProgress":
-            switch comment.type {
-            case .image, .video, .audio:
-                if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
-                    cell.downloadingMedia()
-                }
-                break
-            default:
-                defaultChange()
-                break
-            }
-            break
-        case "uploadFinish":
-            switch comment.type {
-            case .image, .video, .audio:
-                if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
-                    cell.uploadFinished()
-                }
-            default:
-                defaultChange()
-                break
-            }
-            break
-        case "downloadFinish":
-            switch comment.type {
-            case .image, .video, .audio:
-                if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
-                    cell.downloadFinished()
-                }
-            default:
-                defaultChange()
-                break
-            }
-            break
-        case "status":
-//            if comment.senderEmail == QiscusMe.sharedInstance.email {
-//                let delay = 0.5 * Double(NSEC_PER_SEC)
-//                let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
-//                DispatchQueue.main.asyncAfter(deadline: time, execute: {
-//                    if let cell = self.collectionView.cellForItem(at: indexPath) as? QChatCell{
-//                        cell.updateStatus(toStatus: comment.status)
-//                    }
-//                })
-//            }
-            break
-        default:
-            defaultChange()
         }
     }
     public func room(gotNewGroupComment onIndex: Int) {
