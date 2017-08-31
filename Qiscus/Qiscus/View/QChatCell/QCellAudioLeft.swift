@@ -289,14 +289,10 @@ class QCellAudioLeft: QCellAudio {
         self.balloonView.image = self.getBallon()
     }
     public override func comment(didDownload downloading:Bool){
-        if !downloading {
             self.downloadFinished()
-        }
     }
     public override func comment(didUpload uploading:Bool){
-        if !uploading {
             self.uploadFinished()
-        }
     }
     public override func comment(didChangeProgress progress:CGFloat){
         self.progressContainer.isHidden = false

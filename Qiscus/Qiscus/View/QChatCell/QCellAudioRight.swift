@@ -376,9 +376,7 @@ class QCellAudioRight: QCellAudio {
         }
     }
     public override func comment(didUpload uploading:Bool){
-        if !uploading {
-            self.uploadFinished()
-        }
+        self.uploadFinished()
     }
     public override func comment(didChangeProgress progress:CGFloat){
         self.progressImageView.image = Qiscus.image(named: "audio_download")
