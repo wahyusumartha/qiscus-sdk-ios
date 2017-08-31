@@ -266,7 +266,6 @@ public class QRoomService:NSObject{
         })
     }
     public func downloadMedia(inRoom room: QRoom, comment:QComment, thumbImageRef:UIImage? = nil, isAudioFile:Bool = false){
-        let indexPath = room.getIndexPath(ofComment: comment)!
         if let file = comment.file {
             comment.updateDownloading(downloading: true)
             comment.updateProgress(progress: 0)

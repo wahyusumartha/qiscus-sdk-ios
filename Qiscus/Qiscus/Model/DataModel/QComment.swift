@@ -831,12 +831,18 @@ public class QComment:Object {
         }
     }
     internal func cacheObject(){
-        let commentTS = ThreadSafeReference(to:self)
-        DispatchQueue.main.async {
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            guard let comment = realm.resolve(commentTS) else { return }
-            if QComment.cache[comment.uniqueId] == nil {
-                QComment.cache[comment.uniqueId] = comment
+        if Thread.isMainThread {
+            if QComment.cache[self.uniqueId] == nil {
+                QComment.cache[self.uniqueId] = self
+            }
+        }else{
+            let commentTS = ThreadSafeReference(to:self)
+            DispatchQueue.main.sync {
+                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                guard let comment = realm.resolve(commentTS) else { return }
+                if QComment.cache[comment.uniqueId] == nil {
+                    QComment.cache[comment.uniqueId] = comment
+                }
             }
         }
     }

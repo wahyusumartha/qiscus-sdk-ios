@@ -1255,7 +1255,6 @@ public class QRoom:Object {
     }
     private func updateLastParticipantsReadId(readId:Int){
         var section = 0
-        let id = self.id
         for commentGroup in self.comments {
             var item = 0
             for comment in commentGroup.comments{
@@ -1269,7 +1268,6 @@ public class QRoom:Object {
     }
     private func updateLastParticipantsDeliveredId(deliveredId:Int){
         var section = 0
-        let id = self.id
         for commentGroup in self.comments {
             var item = 0
             for comment in commentGroup.comments{
