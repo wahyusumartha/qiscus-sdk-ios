@@ -233,4 +233,27 @@ class QCellMediaLeft: QChatCell {
     public override func comment(didChangePosition position: QCellPosition) {
         self.balloonView.image = self.getBallon()
     }
+    public override func comment(didDownload downloading:Bool){
+        if !downloading {
+            self.downloadFinished()
+        }
+    }
+    public override func comment(didUpload uploading:Bool){
+        if !uploading {
+            self.uploadFinished()
+        }
+    }
+    public override func comment(didChangeProgress progress:CGFloat){
+        self.downloadButton.isHidden = true
+        self.progressLabel.text = "\(Int(progress * 100)) %"
+        self.progressLabel.isHidden = false
+        self.progressContainer.isHidden = false
+        self.progressView.isHidden = false
+        
+        let newHeight = progress * maxProgressHeight
+        self.progressHeight.constant = newHeight
+        UIView.animate(withDuration: 0.65, animations: {
+            self.progressView.layoutIfNeeded()
+        })
+    }
 }

@@ -92,7 +92,6 @@ class QCellTextRight: QChatCell {
             let replyData = JSON(parseJSON: self.comment!.data)
             var text = replyData["replied_comment_message"].stringValue
             var replyType = self.comment!.replyType(message: text)
-            print("reply data: \(replyData)")
             if replyType == .text  {
                 switch replyData["replied_comment_type"].stringValue {
                 case "location":

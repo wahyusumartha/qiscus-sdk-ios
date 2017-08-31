@@ -261,7 +261,6 @@ public class QRoomService:NSObject{
         if let file = comment.file {
             comment.updateDownloading(downloading: true)
             comment.updateProgress(progress: 0)
-            room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadProgress")
             let fileURL = file.url.replacingOccurrences(of: " ", with: "%20")
             let ext = file.ext
             let localPath = file.localPath
@@ -296,7 +295,6 @@ public class QRoomService:NSObject{
                                         comment.updateDownloading(downloading: false)
                                         comment.updateProgress(progress: 1)
                                         comment.displayImage = thumbImage
-                                        room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
                                     }}
                                 }else{
                                     let assetMedia = AVURLAsset(url: URL(fileURLWithPath: "\(localPath)"))
@@ -321,7 +319,6 @@ public class QRoomService:NSObject{
                                         }
                                         comment.updateProgress(progress: 1)
                                         comment.updateDownloading(downloading: false)
-                                        room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
                                     }}
                                 }
                             }
@@ -331,7 +328,6 @@ public class QRoomService:NSObject{
                                     comment.updateDownloading(downloading: false)
                                     comment.updateProgress(progress: 1)
                                     
-                                    room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
                                 }}
                             }
                         }
@@ -340,7 +336,6 @@ public class QRoomService:NSObject{
                         DispatchQueue.main.async { autoreleasepool{
                             comment.updateDownloading(downloading: false)
                             comment.updateProgress(progress: 1)
-                            room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadFinish")
                         }}
                         
                         break
@@ -351,8 +346,6 @@ public class QRoomService:NSObject{
                     DispatchQueue.main.async { autoreleasepool{
                         comment.updateProgress(progress: progress)
                         comment.updateDownloading(downloading: true)
-                        
-                        room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "downloadProgress")
                     }}
                 })
             }
@@ -431,7 +424,6 @@ public class QRoomService:NSObject{
                                             comment.update(text: "[file]\(url) [/file]")
                                             comment.updateUploading(uploading: false)
                                             comment.updateProgress(progress: 1)
-                                            room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadFinish")
                                             comment.updateStatus(status: .sent)
                                             onSuccess(room,comment)
                                         }}
@@ -446,7 +438,6 @@ public class QRoomService:NSObject{
                                                     comment.update(text: "[file]\(url) [/file]")
                                                     comment.updateUploading(uploading: false)
                                                     comment.updateProgress(progress: 1)
-                                                    room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadFinish")
                                                     comment.updateStatus(status: .sent)
                                                     onSuccess(room,comment)
                                                 }}
@@ -476,7 +467,6 @@ public class QRoomService:NSObject{
                                 DispatchQueue.main.async { autoreleasepool{
                                     comment.updateUploading(uploading: true)
                                     comment.updateProgress(progress: progress)
-                                    room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "uploadProgress")
                                 }}
                             })
                             break
