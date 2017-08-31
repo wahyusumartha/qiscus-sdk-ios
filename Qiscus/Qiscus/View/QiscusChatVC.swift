@@ -913,7 +913,7 @@ extension QiscusChatVC:QRoomDelegate{
     }
     public func room(gotNewGroupComment onIndex: Int) {
         self.collectionView.reloadData()
-        let indexPath = IndexPath(item: index, section: groupIndex)
+        let indexPath = IndexPath(item: 0, section: onIndex)
         if let comment = self.chatRoom!.comment(onIndexPath: indexPath) {
             if self.isLastRowVisible || comment.senderEmail == QiscusMe.sharedInstance.email{
                 self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
