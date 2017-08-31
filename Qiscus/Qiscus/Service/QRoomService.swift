@@ -197,7 +197,16 @@ public class QRoomService:NSObject{
             break
         case .custom:
             parameters["type"] = "custom" as AnyObject
-            parameters["payload"] = "{ \"type\": \"\(comment.typeRaw)\", \"content\": \(comment.data)}" as AnyObject
+            let payload = JSON(parseJSON: comment.data)
+            var contentString = ""
+            if let content = payload["content"].string {
+                contentString = "\"\(content)\""
+            }else if payload["content"] != JSON.null{
+                contentString = "\(payload["content"])"
+            }
+            print("comment data: \(comment.data)")
+            print("payload content: \(payload["content"])")
+            parameters["payload"] = "{ \"type\": \"\(comment.typeRaw)\", \"content\": \(contentString)}" as AnyObject
             break
         default:
             break

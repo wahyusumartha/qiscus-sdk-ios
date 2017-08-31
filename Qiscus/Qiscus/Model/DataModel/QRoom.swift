@@ -130,54 +130,67 @@ public class QRoom:Object {
         }
     }
     public class func room(withId id:Int) -> QRoom? {
-//        Qiscus.checkDatabaseMigration()
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        var room:QRoom? = nil
-        room = realm.object(ofType: QRoom.self, forPrimaryKey: id)
-        if room != nil {
-            if let cachedRoom = Qiscus.chatRooms[room!.id] {
-                room = cachedRoom
-            }else{
-                room!.resetRoomComment()
+        if let cache = Qiscus.chatRooms[id] {
+            return cache
+        }else{
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            let room = realm.object(ofType: QRoom.self, forPrimaryKey: id)
+            if room != nil {
+                room?.resetRoomComment()
                 Qiscus.chatRooms[room!.id] = room!
-                Qiscus.sharedInstance.RealtimeConnect()
+                if Qiscus.shared.chatViews[room!.id] ==  nil{
+                    let chatView = QiscusChatVC()
+                    chatView.chatRoom = Qiscus.chatRooms[room!.id]
+                    Qiscus.shared.chatViews[room!.id] = chatView
+                }
+                return room
             }
         }
-        return room
+        return nil
     }
     public class func room(withUniqueId uniqueId:String) -> QRoom? {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        var room:QRoom? = nil
         let data =  realm.objects(QRoom.self).filter("uniqueId == '\(uniqueId)'")
         
         if data.count > 0{
-            room = data.first!
-            if let cachedRoom = Qiscus.chatRooms[room!.id] {
-                room = cachedRoom
+            let room = data.first!
+            if let cachedRoom = Qiscus.chatRooms[room.id] {
+                return cachedRoom
             }else{
-                room!.resetRoomComment()
-                Qiscus.chatRooms[room!.id] = room!
+                room.resetRoomComment()
+                Qiscus.chatRooms[room.id] = room
+                if Qiscus.shared.chatViews[room.id] ==  nil{
+                    let chatView = QiscusChatVC()
+                    chatView.chatRoom = Qiscus.chatRooms[room.id]
+                    Qiscus.shared.chatViews[room.id] = chatView
+                }
                 Qiscus.sharedInstance.RealtimeConnect()
+                return room
             }
         }
-        return room
+        return nil
     }
     public class func room(withUser user:String) -> QRoom? {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        var room:QRoom? = nil
         let data =  realm.objects(QRoom.self).filter("singleUser == '\(user)'")
         
         if data.count > 0{
-            room = data.first!
-            if let cachedRoom = Qiscus.chatRooms[room!.id] {
-                room = cachedRoom
+            let room = data.first!
+            if let cachedRoom = Qiscus.chatRooms[room.id] {
+                return cachedRoom
             }else{
-                room!.resetRoomComment()
-                Qiscus.chatRooms[room!.id] = room!
+                room.resetRoomComment()
+                Qiscus.chatRooms[room.id] = room
+                if Qiscus.shared.chatViews[room.id] ==  nil{
+                    let chatView = QiscusChatVC()
+                    chatView.chatRoom = Qiscus.chatRooms[room.id]
+                    Qiscus.shared.chatViews[room.id] = chatView
+                }
                 Qiscus.sharedInstance.RealtimeConnect()
+                return room
             }
         }
-        return room
+        return nil
     }
     public class func addRoom(fromJSON json:JSON)->QRoom{
         let room = QRoom()
@@ -904,7 +917,14 @@ public class QRoom:Object {
     }
     public func newCustomComment(type:String, payload:String, text:String? = nil )->QComment{
         let comment = QComment()
-        let payload = "{ \"type\": \"\(type)\", \"content\": \(payload)}"
+        let payloadData = JSON(parseJSON: payload)
+        var contentString = "\"\""
+        if payloadData == JSON.null{
+            contentString = "\"\(payload)\""
+        }else{
+            contentString = "\(payloadData)"
+        }
+        let payload = "{ \"type\": \"\(type)\", \"content\": \(contentString)}"
         let time = Double(Date().timeIntervalSince1970)
         let timeToken = UInt64(time * 10000)
         let uniqueID = "ios-\(timeToken)"

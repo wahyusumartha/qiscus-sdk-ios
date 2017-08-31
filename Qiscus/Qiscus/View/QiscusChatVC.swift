@@ -912,49 +912,48 @@ extension QiscusChatVC:QRoomDelegate{
         
     }
     public func room(gotNewGroupComment onIndex: Int) {
-        if self.dataLoaded{
-            let indexSet = IndexSet(integer: onIndex)
-            
-            if onIndex == 0 && self.chatRoom!.commentsGroupCount > 1{
-                self.loadMoreControl.endRefreshing()
+        self.collectionView.reloadData()
+        let indexPath = IndexPath(item: index, section: groupIndex)
+        if let comment = self.chatRoom!.comment(onIndexPath: indexPath) {
+            if self.isLastRowVisible || comment.senderEmail == QiscusMe.sharedInstance.email{
+                self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
             }
-            
-            self.collectionView.performBatchUpdates({ 
-                self.collectionView.insertSections(indexSet)
-            }) { (success) in
-                let indexPath = IndexPath(item: 0, section: onIndex)
-                let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
-                let email = comment.senderEmail
-                if (success && self.isLastRowVisible) || email == QiscusMe.sharedInstance.email {
-                    self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
-                }else{
-                    self.chatRoom?.updateUnreadCommentCount()
-                }
-            }
-        }else{
-            self.collectionView.reloadData()
         }
+//        if self.dataLoaded{
+//            let indexSet = IndexSet(integer: onIndex)
+//            
+//            if onIndex == 0 && self.chatRoom!.commentsGroupCount > 1{
+//                self.loadMoreControl.endRefreshing()
+//            }
+//
+//            self.collectionView.performBatchUpdates({ 
+//                self.collectionView.insertSections(indexSet)
+//            }) { (success) in
+//                let indexPath = IndexPath(item: 0, section: onIndex)
+//                let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
+//                let email = comment.senderEmail
+//                if (success && self.isLastRowVisible) || email == QiscusMe.sharedInstance.email {
+//                    self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+//                }else{
+//                    self.chatRoom?.updateUnreadCommentCount()
+//                }
+//            }
+//        }else{
+//            self.collectionView.reloadData()
+//        }
     }
     public func room(gotNewCommentOn groupIndex: Int, withCommentIndex index: Int) {
-        if self.dataLoaded {
+        //if self.dataLoaded {
+            self.collectionView.reloadData()
             let indexPath = IndexPath(item: index, section: groupIndex)
-            let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
-            let email = comment.senderEmail
-            if index == 0 && groupIndex == 0 {
-                self.loadMoreControl.endRefreshing()
-            }
-            self.collectionView.performBatchUpdates({
-                self.collectionView.insertItems(at: [indexPath])
-            }) { (success) in
-                if (success && self.isLastRowVisible) || email == QiscusMe.sharedInstance.email{
+            if let comment = self.chatRoom!.comment(onIndexPath: indexPath) {
+                if self.isLastRowVisible || comment.senderEmail == QiscusMe.sharedInstance.email{
                     self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
-                }else{
-                    self.chatRoom?.updateUnreadCommentCount()
                 }
             }
-        }else{
-            self.collectionView.reloadData()
-        }
+//        }else{
+//            self.collectionView.reloadData()
+//        }
     }
     public func room(userDidTyping userEmail: String) {
         if userEmail == "" {
