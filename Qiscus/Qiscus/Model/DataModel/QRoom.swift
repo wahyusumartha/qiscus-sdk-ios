@@ -1421,7 +1421,7 @@ public class QRoom:Object {
     internal func update(avatarURL:String){
         let id = self.id
         let roomTS = ThreadSafeReference(to: self)
-        QiscusDBThread.sync { autoreleasepool {
+        QiscusDBThread.async { autoreleasepool {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             guard let r = realm.resolve(roomTS) else { return }
             try! realm.write {
