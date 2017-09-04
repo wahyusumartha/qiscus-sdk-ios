@@ -525,8 +525,9 @@ public class QComment:Object {
             let delay = 0.4 * Double(NSEC_PER_SEC)
             
             let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
+            let uniqueId = self.uniqueId
             DispatchQueue.main.asyncAfter(deadline: time, execute: {
-                if let cache = QComment.cache[self.uniqueId] {
+                if let cache = QComment.cache[uniqueId] {
                     if !cache.isInvalidated {
                         cache.delegate?.comment(didChangeStatus: status)
                     }
@@ -818,14 +819,21 @@ public class QComment:Object {
         }
     }
     internal class func resendPendingMessage(){
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let data = realm.objects(QComment.self).filter("statusRaw == 1")
-        
-        if data.count > 0 {
-            for comment in data {
-                if let room = QRoom.room(withId: comment.roomId){
-                    room.updateCommentStatus(inComment: comment, status: .sending)
-                    room.post(comment: comment)
+        QiscusDBThread.async {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            let data = realm.objects(QComment.self).filter("statusRaw == 1")
+            
+            if data.count > 0 {
+                for comment in data {
+                    let commentTS = ThreadSafeReference(to: comment)
+                    DispatchQueue.main.async {autoreleasepool {
+                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        guard let c = realm.resolve(commentTS) else { return }
+                        if let room = QRoom.room(withId: c.roomId){
+                            room.updateCommentStatus(inComment: c, status: .sending)
+                            room.post(comment: c)
+                        }
+                    }}
                 }
             }
         }

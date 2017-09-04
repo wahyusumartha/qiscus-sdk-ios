@@ -212,12 +212,12 @@ public class QRoomService:NSObject{
             break
         }
         print("post parameters: \(parameters)")
+        
         Alamofire.request(QiscusConfig.postCommentURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {response in
             switch response.result {
             case .success:
                 if let result = response.result.value {
                     let json = JSON(result)
-                    print("post comment result: \(json)")
                     let success = (json["status"].intValue == 200)
                     
                     if success == true {
@@ -234,19 +234,13 @@ public class QRoomService:NSObject{
                             self.sync(onRoom: room)
                         }
                     }else{
-                        var status = QCommentStatus.failed
-                        if comment.type == .text || comment.type == .reply || comment.type == .custom {
-                            status = .pending
-                        }
+                        let status = QCommentStatus.failed
                         if let room = QRoom.room(withId: roomId){
                             room.updateCommentStatus(inComment: comment, status: status)
                         }
                     }
                 }else{
-                    var status = QCommentStatus.failed
-                    if comment.type == .text || comment.type == .reply || comment.type == .custom {
-                        status = .pending
-                    }
+                    let status = QCommentStatus.failed
                     if let room = QRoom.room(withId: roomId){
                         room.updateCommentStatus(inComment: comment, status: status)
                     }
