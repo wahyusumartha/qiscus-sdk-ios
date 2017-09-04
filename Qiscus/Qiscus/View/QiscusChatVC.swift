@@ -90,6 +90,7 @@ open class QiscusChatVC: UIViewController{
             }
             else{
                 Qiscus.uiThread.async {autoreleasepool{
+                    print()
                     switch self.replyData!.type {
                     case .text:
                         self.linkDescription.text = self.replyData!.text
@@ -852,9 +853,7 @@ extension QiscusChatVC:QChatServiceDelegate{
         self.chatRoom = inRoom
         self.chatRoom?.delegate = self
         self.loadRoomView()
-        if Qiscus.shared.chatViews[inRoom.id] == nil {
-            Qiscus.shared.chatViews[inRoom.id] = self
-        }
+        Qiscus.shared.chatViews[inRoom.id] = self
     }
     public func chatService(didFailLoadRoom error: String) {
         let delay = 1.5 * Double(NSEC_PER_SEC)
