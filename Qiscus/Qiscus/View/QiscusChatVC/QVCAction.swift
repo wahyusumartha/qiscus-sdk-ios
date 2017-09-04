@@ -430,8 +430,9 @@ extension QiscusChatVC {
     }
     func scrollToBottom(_ animated:Bool = false){
         if self.chatRoom!.commentsGroupCount > 0 {
-            let section = self.numberOfSections(in: self.collectionView) - 1
-            let row = self.collectionView(self.collectionView, numberOfItemsInSection: section) - 1
+            
+            let section = self.chatRoom!.commentsGroupCount - 1
+            let row = self.chatRoom!.commentGroup(index:section)!.commentsCount - 1
             let lastIndexPath = IndexPath(row: row, section: section)
             self.collectionView.scrollToItem(at: lastIndexPath, at: .bottom, animated: animated)
         }

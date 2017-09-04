@@ -72,7 +72,6 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                     let newComment = room.newComment(text: text)
                     room.post(comment: newComment, type: type, payload: payload)
                 }
-                self.scrollToBottom()
                 break
             }
             
