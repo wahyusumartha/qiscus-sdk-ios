@@ -585,13 +585,11 @@ public class QChatService:NSObject {
                                             }
                                         }else{
                                             QiscusBackgroundThread.async { autoreleasepool{
-                                                if id > QiscusMe.sharedInstance.lastCommentId {
-                                                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                                        DispatchQueue.main.async { autoreleasepool{
-                                                            let comment = QComment.tempComment(fromJSON: newComment)
-                                                            roomDelegate.gotNewComment(comment)
-                                                        }}
-                                                    }
+                                                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                                                    DispatchQueue.main.async { autoreleasepool{
+                                                        let comment = QComment.tempComment(fromJSON: newComment)
+                                                        roomDelegate.gotNewComment(comment)
+                                                    }}
                                                 }
                                             }}
                                         }
