@@ -556,6 +556,7 @@ public class QRoom:Object {
                     oldComment.senderName = commentSenderName
                     oldComment.createdAt = commentCreatedAt
                     oldComment.beforeId = commentBeforeId
+                    oldComment.roomName = self.name
                 }
                 var status = QCommentStatus.sent
                 if oldComment.id < room.lastParticipantsReadId {
@@ -575,7 +576,7 @@ public class QRoom:Object {
                 newComment.beforeId = commentBeforeId
                 newComment.senderEmail = senderEmail
                 newComment.cellPosRaw = QCellPosition.single.rawValue
-                
+                newComment.roomName = self.name
                 var status = QCommentStatus.sent
                 if newComment.id < room.lastParticipantsReadId {
                     status = .read
@@ -704,6 +705,7 @@ public class QRoom:Object {
                 oldComment.senderEmail = user.email
                 oldComment.createdAt = commentCreatedAt
                 oldComment.beforeId = commentBeforeId
+                oldComment.roomName = self.name
             }
             if oldComment.statusRaw < QCommentStatus.sent.rawValue {
                 var status = QCommentStatus.sent
@@ -726,6 +728,8 @@ public class QRoom:Object {
             newComment.beforeId = commentBeforeId
             newComment.senderEmail = senderEmail
             newComment.cellPosRaw = QCellPosition.single.rawValue
+            newComment.roomName = self.name
+            
             var status = QCommentStatus.sent
             if newComment.id < self.lastParticipantsReadId {
                 status = .read

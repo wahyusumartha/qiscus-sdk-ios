@@ -886,4 +886,63 @@ public class QChatService:NSObject {
             })
         }}
     }
+    public class func searchComment(withQuery text:String, room:QRoom? = nil, fromComment:QComment? = nil, onSuccess:@escaping (([QComment])->Void), onFailed: @escaping ((String)->Void)){
+        let roomId:Int? = room?.id
+        let commentId:Int? = fromComment?.id
+        if text.trimmingCharacters(in: .whitespacesAndNewlines) == "" {
+            onFailed("cant search empty string")
+            return
+        }
+        QiscusRequestThread.async {
+            var parameters:[String: AnyObject] = [
+                "token"  : qiscus.config.USER_TOKEN as AnyObject,
+                "query" : text as AnyObject,
+            ]
+            if roomId != nil {
+                parameters["room_id"] = roomId as AnyObject
+            }
+            if commentId != nil {
+                parameters["last_comment_id"] = commentId as AnyObject
+            }
+            Qiscus.printLog(text: "search url: \(QiscusConfig.SEARCH_URL)")
+            Qiscus.printLog(text: "search parameters: \(parameters)")
+            Alamofire.request(QiscusConfig.SEARCH_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+                Qiscus.printLog(text: "search result: \(response)")
+                switch response.result {
+                case .success:
+                    if let result = response.result.value{
+                        let json = JSON(result)
+                        let success:Bool = (json["status"].intValue == 200)
+                        
+                        if success {
+                            let resultData = json["results"]
+                            let comments = resultData["comments"].arrayValue
+                            
+                            DispatchQueue.main.async { autoreleasepool {
+                                var commentResult = [QComment]()
+                                for commentData in comments {
+                                    let uniqueId = commentData["unique_temp_id"].stringValue
+                                    if let comment = QComment.comment(withUniqueId: uniqueId){
+                                        commentResult.append(comment)
+                                    }else{
+                                        let comment = QComment.tempComment(fromJSON: commentData)
+                                        commentResult.append(comment)
+                                    }
+                                }
+                                onSuccess(commentResult)
+                            }}
+                        }else{
+                            onFailed("can't get search result")
+                        }
+                    }else{
+                        onFailed("can't get search result")
+                    }
+                    break
+                case .failure(let error):
+                    onFailed("\(error.localizedDescription)")
+                    break
+                }
+            })
+        }
+    }
 }

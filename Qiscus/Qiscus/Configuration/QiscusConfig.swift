@@ -13,7 +13,7 @@ open class QiscusConfig: NSObject {
     static let sharedInstance = QiscusConfig()
     
     open var commentPerLoad:Int = 10
-    open var dbSchemaVersion:UInt64 = 47
+    open var dbSchemaVersion:UInt64 = 48
     
     open var UPLOAD_URL = ""
     
@@ -47,7 +47,7 @@ open class QiscusConfig: NSObject {
     
     fileprivate override init() {}
     
-    open class var postCommentURL:String{
+    public class var postCommentURL:String{
         get{
             let config = QiscusConfig.sharedInstance
             return "\(config.BASE_URL)/post_comment"
@@ -56,7 +56,15 @@ open class QiscusConfig: NSObject {
     
     // MARK: -URL
     open class var SYNC_URL:String{
-        return "\(QiscusConfig.sharedInstance.BASE_URL)/sync"
+        get{
+            return "\(QiscusConfig.sharedInstance.BASE_URL)/sync"
+    
+        }
+    }
+    public class var SEARCH_URL:String{
+        get{
+            return "\(QiscusConfig.sharedInstance.BASE_URL)/search_messages"
+        }
     }
     open class var SET_DEVICE_TOKEN_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/set_user_device_token"
