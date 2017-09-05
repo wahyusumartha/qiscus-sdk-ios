@@ -81,6 +81,22 @@ class goToChatVC: UIViewController {
     @IBAction func ClearData(_ sender: Any) {
         Qiscus.clearData()
     }
+    @IBAction func search(_ sender: Any) {
+        if targetField.text! != "" {
+            QChatService.searchComment(withQuery: targetField.text!, onSuccess: { (comments) in
+                print("success search comment with result:\n\(comments)")
+                DispatchQueue.main.async {
+                    let searchView = SearchResultVC()
+                    searchView.comments = comments
+                    searchView.searchText = self.targetField.text!
+                    self.navigationController?.pushViewController(searchView, animated: true)
+                }
+                
+            }, onFailed: { (error) in
+                print("fail to get search result")
+            })
+        }
+    }
     
     @IBAction func logOut(_ sender: UIButton) {
         Qiscus.clear()

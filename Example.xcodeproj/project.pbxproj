@@ -21,6 +21,10 @@
 		395291281E28559B004BD6B4 /* MainView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 395291241E28559B004BD6B4 /* MainView.xib */; };
 		39955B6D1D656D1700927ADD /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 39955B6C1D656D1700927ADD /* Media.xcassets */; };
 		39BD59171EB2F1A3001AFB7C /* Qiscus.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 39BD59161EB2F1A3001AFB7C /* Qiscus.podspec */; };
+		39E7542F1F5E7327003C3302 /* SearchResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E7542D1F5E7327003C3302 /* SearchResultVC.swift */; };
+		39E754301F5E7327003C3302 /* SearchResultVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39E7542E1F5E7327003C3302 /* SearchResultVC.xib */; };
+		39E754331F5E84B0003C3302 /* SearchCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E754311F5E84B0003C3302 /* SearchCell.swift */; };
+		39E754341F5E84B0003C3302 /* SearchCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39E754321F5E84B0003C3302 /* SearchCell.xib */; };
 		39F1F6AD1D3B90E200FF1C8C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F1F6AC1D3B90E200FF1C8C /* AppDelegate.swift */; };
 		39F1F6B21D3B90E200FF1C8C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 39F1F6B01D3B90E200FF1C8C /* Main.storyboard */; };
 		39F1F6B71D3B90E200FF1C8C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 39F1F6B61D3B90E200FF1C8C /* Assets.xcassets */; };
@@ -162,6 +166,10 @@
 		39955B801D65A2D900927ADD /* QAsyncImageView.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QAsyncImageView.framework; path = "../../../Library/Developer/Xcode/DerivedData/Example-gfoaldkgffrxjdelneboawwkwliw/Build/Products/Debug-iphonesimulator/QAsyncImageView/QAsyncImageView.framework"; sourceTree = "<group>"; };
 		39955B811D65A2D900927ADD /* QToasterSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QToasterSwift.framework; path = "../../../Library/Developer/Xcode/DerivedData/Example-gfoaldkgffrxjdelneboawwkwliw/Build/Products/Debug-iphonesimulator/QToasterSwift/QToasterSwift.framework"; sourceTree = "<group>"; };
 		39BD59161EB2F1A3001AFB7C /* Qiscus.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Qiscus.podspec; sourceTree = "<group>"; };
+		39E7542D1F5E7327003C3302 /* SearchResultVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchResultVC.swift; sourceTree = "<group>"; };
+		39E7542E1F5E7327003C3302 /* SearchResultVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchResultVC.xib; sourceTree = "<group>"; };
+		39E754311F5E84B0003C3302 /* SearchCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchCell.swift; sourceTree = "<group>"; };
+		39E754321F5E84B0003C3302 /* SearchCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchCell.xib; sourceTree = "<group>"; };
 		39F1F6A91D3B90E200FF1C8C /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		39F1F6AC1D3B90E200FF1C8C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		39F1F6B11D3B90E200FF1C8C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -417,6 +425,10 @@
 				39F1F6B61D3B90E200FF1C8C /* Assets.xcassets */,
 				39F1F6B81D3B90E200FF1C8C /* LaunchScreen.storyboard */,
 				39F1F6BB1D3B90E200FF1C8C /* Info.plist */,
+				39E7542D1F5E7327003C3302 /* SearchResultVC.swift */,
+				39E7542E1F5E7327003C3302 /* SearchResultVC.xib */,
+				39E754311F5E84B0003C3302 /* SearchCell.swift */,
+				39E754321F5E84B0003C3302 /* SearchCell.xib */,
 			);
 			path = Example;
 			sourceTree = "<group>";
@@ -669,9 +681,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				39F1F6BA1D3B90E200FF1C8C /* LaunchScreen.storyboard in Resources */,
+				39E754301F5E7327003C3302 /* SearchResultVC.xib in Resources */,
 				395291261E28559B004BD6B4 /* goToChatVC.xib in Resources */,
 				39F1F6B71D3B90E200FF1C8C /* Assets.xcassets in Resources */,
 				39F1F6B21D3B90E200FF1C8C /* Main.storyboard in Resources */,
+				39E754341F5E84B0003C3302 /* SearchCell.xib in Resources */,
 				39BD59171EB2F1A3001AFB7C /* Qiscus.podspec in Resources */,
 				395291281E28559B004BD6B4 /* MainView.xib in Resources */,
 			);
@@ -818,6 +832,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				395291251E28559B004BD6B4 /* goToChatVC.swift in Sources */,
+				39E754331F5E84B0003C3302 /* SearchCell.swift in Sources */,
+				39E7542F1F5E7327003C3302 /* SearchResultVC.swift in Sources */,
 				395291271E28559B004BD6B4 /* MainView.swift in Sources */,
 				39F1F6AD1D3B90E200FF1C8C /* AppDelegate.swift in Sources */,
 			);
