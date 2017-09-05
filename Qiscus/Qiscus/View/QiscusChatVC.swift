@@ -187,7 +187,7 @@ open class QiscusChatVC: UIViewController{
             }
         }
     }
-    var chatMessage:String?
+    public var chatMessage:String?
     public var chatRoomId:Int?
     public var chatUser:String?
     public var chatTitle:String?{
@@ -200,6 +200,8 @@ open class QiscusChatVC: UIViewController{
     var chatDistinctId:String?
     var chatData:String?
     public var chatRoomUniqueId:String?
+    public var chatTarget:QComment?
+    
     var chatAvatarURL = ""
     var chatService = QChatService()
     var collectionWidth:CGFloat = 0
@@ -631,6 +633,15 @@ open class QiscusChatVC: UIViewController{
             self.loadData()
         }else if self.firstLoad {
             self.loadRoomView()
+            if let target = self.chatTarget {
+                if let indexPath = self.chatRoom?.getIndexPath(ofComment: target){
+                    self.selectedCellIndex = indexPath
+                    self.collectionView.scrollToItem(at: indexPath, at: UICollectionViewScrollPosition.top, animated: true)
+                }else{
+                    QToasterSwift.toast(target: self, text: "Can't find message", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+                }
+                self.chatTarget = nil
+            }
         }else{
             self.collectionView.reloadData()
             self.chatRoom?.updateUnreadCommentCount {
@@ -649,9 +660,18 @@ open class QiscusChatVC: UIViewController{
                     self.chatRoom!.delegate = self
                 }
             }
-            
+            if let target = self.chatTarget {
+                if let indexPath = self.chatRoom?.getIndexPath(ofComment: target){
+                    self.selectedCellIndex = indexPath
+                    self.collectionView.scrollToItem(at: indexPath, at: UICollectionViewScrollPosition.top, animated: true)
+                }else{
+                    QToasterSwift.toast(target: self, text: "Can't find message", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+                }
+                self.chatTarget = nil
+            }
             self.chatService.delegate = self
             self.chatRoom!.subscribeRealtimeStatus()
+            
             self.chatRoom!.sync()
         }
         
@@ -854,6 +874,15 @@ extension QiscusChatVC:QChatServiceDelegate{
         self.chatRoom?.delegate = self
         self.loadRoomView()
         Qiscus.shared.chatViews[inRoom.id] = self
+        if let target = self.chatTarget {
+            if let indexPath = self.chatRoom?.getIndexPath(ofComment: target){
+                self.selectedCellIndex = indexPath
+                self.collectionView.scrollToItem(at: indexPath, at: UICollectionViewScrollPosition.top, animated: true)
+            }else{
+                QToasterSwift.toast(target: self, text: "Can't find message", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+            }
+            self.chatTarget = nil
+        }
     }
     public func chatService(didFailLoadRoom error: String) {
         let delay = 1.5 * Double(NSEC_PER_SEC)
@@ -918,41 +947,15 @@ extension QiscusChatVC:QRoomDelegate{
                 self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
             }
         }
-//        if self.dataLoaded{
-//            let indexSet = IndexSet(integer: onIndex)
-//            
-//            if onIndex == 0 && self.chatRoom!.commentsGroupCount > 1{
-//                self.loadMoreControl.endRefreshing()
-//            }
-//
-//            self.collectionView.performBatchUpdates({ 
-//                self.collectionView.insertSections(indexSet)
-//            }) { (success) in
-//                let indexPath = IndexPath(item: 0, section: onIndex)
-//                let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
-//                let email = comment.senderEmail
-//                if (success && self.isLastRowVisible) || email == QiscusMe.sharedInstance.email {
-//                    self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
-//                }else{
-//                    self.chatRoom?.updateUnreadCommentCount()
-//                }
-//            }
-//        }else{
-//            self.collectionView.reloadData()
-//        }
     }
     public func room(gotNewCommentOn groupIndex: Int, withCommentIndex index: Int) {
-        //if self.dataLoaded {
-            self.collectionView.reloadData()
-            let indexPath = IndexPath(item: index, section: groupIndex)
-            if let comment = self.chatRoom!.comment(onIndexPath: indexPath) {
-                if self.isLastRowVisible || comment.senderEmail == QiscusMe.sharedInstance.email{
-                    self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
-                }
+        self.collectionView.reloadData()
+        let indexPath = IndexPath(item: index, section: groupIndex)
+        if let comment = self.chatRoom!.comment(onIndexPath: indexPath) {
+            if self.isLastRowVisible || comment.senderEmail == QiscusMe.sharedInstance.email{
+                self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
             }
-//        }else{
-//            self.collectionView.reloadData()
-//        }
+        }
     }
     public func room(userDidTyping userEmail: String) {
         if userEmail == "" {
