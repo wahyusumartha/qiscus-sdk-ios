@@ -70,6 +70,7 @@ open class QiscusChatVC: UIViewController{
     var selectedCellIndex:IndexPath? = nil
     let locationManager = CLLocationManager()
     var didFindLocation = true
+    var topComment:QComment?
     
     var replyData:QComment? = nil {
         didSet{
@@ -967,17 +968,26 @@ extension QiscusChatVC:QRoomDelegate{
         }
     }
     public func room(didDeleteComment section: Int, row: Int) {
-        let indexPath = IndexPath(item: row, section: section)
-        self.collectionView.deleteItems(at: [indexPath])
+        self.collectionView.reloadData()
     }
     public func room(didDeleteGroupComment section: Int) {
-        let indexSet = IndexSet(integer: section)
-        self.collectionView.deleteSections(indexSet)
+        self.collectionView.reloadData()
     }
     public func room(didFinishLoadMore inRoom: QRoom, success: Bool, gotNewComment: Bool) {
         self.loadMoreControl.endRefreshing()
         if success && gotNewComment {
             self.collectionView.reloadData()
+            if let targetComment = self.topComment {
+                if let indexPath = self.chatRoom!.getIndexPath(ofComment: targetComment){
+                    self.collectionView.scrollToItem(at: indexPath, at: .top, animated: false)
+                }
+            }else{
+                let section = self.chatRoom!.commentsGroupCount - 1
+                let item = self.chatRoom!.commentGroup(index: section)!.commentsCount - 1
+                let indexPath = IndexPath(item: item, section: section)
+                self.collectionView.scrollToItem(at: indexPath, at: .top, animated: false)
+            }
+            self.topComment = nil
         }
     }
     public func room(didChangeUnread lastReadCommentId:Int, unreadCount:Int) {

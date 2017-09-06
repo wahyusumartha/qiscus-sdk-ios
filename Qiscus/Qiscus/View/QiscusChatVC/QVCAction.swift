@@ -765,6 +765,10 @@ extension QiscusChatVC {
     // MARK: - Load More Control
     func loadMore(){
         if let room = self.chatRoom {
+            if room.commentsGroupCount > 0 {
+                let indexPath = IndexPath(item: 0, section: 0)
+                self.topComment = room.comment(onIndexPath: indexPath)
+            }
             room.loadMore()
         }
     }

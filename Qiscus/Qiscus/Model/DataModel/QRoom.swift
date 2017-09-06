@@ -731,6 +731,8 @@ public class QRoom:Object {
             newComment.roomName = self.name
             
             var status = QCommentStatus.sent
+            print("r: \(self.lastParticipantsReadId) ::: \(newComment.id)")
+            print("d: \(self.lastParticipantsDeliveredId) ::: \(newComment.id)")
             if newComment.id < self.lastParticipantsReadId {
                 status = .read
             }else if newComment.id < self.lastParticipantsDeliveredId{
@@ -1265,40 +1267,52 @@ public class QRoom:Object {
                 updateLastParticipantsDeliveredId(deliveredId: minDeliveredId)
             }
         }
-        
     }
     private func updateLastParticipantsReadId(readId:Int){
-        var section = 0
-        for commentGroup in self.comments {
-            var item = 0
-            for comment in commentGroup.comments{
-                if (comment.statusRaw < QCommentStatus.read.rawValue && comment.status != .failed && comment.status != .sending && comment.id < readId) || comment.id == readId{
-                    comment.updateStatus(status: .read)
+        if readId > self.lastParticipantsReadId {
+            var section = 0
+            for commentGroup in self.comments {
+                var item = 0
+                for comment in commentGroup.comments{
+                    if (comment.statusRaw < QCommentStatus.read.rawValue && comment.status != .failed && comment.status != .sending && comment.id < readId) || comment.id == readId{
+                        comment.updateStatus(status: .read)
+                    }
+                    item += 1
                 }
-                item += 1
+                section += 1
             }
-            section += 1
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.lastParticipantsReadId = readId
+                self.lastParticipantsDeliveredId = readId
+            }
         }
     }
     private func updateLastParticipantsDeliveredId(deliveredId:Int){
-        var section = 0
-        for commentGroup in self.comments {
-            var item = 0
-            for comment in commentGroup.comments{
-                if (comment.statusRaw < QCommentStatus.delivered.rawValue && comment.status != .failed && comment.status != .sending && comment.id < deliveredId) || (comment.id == deliveredId && comment.status != .read){
-                    if let cache = QComment.cache[comment.uniqueId] {
-                        if !cache.isInvalidated {
-                            cache.updateStatus(status: .read)
+        if deliveredId > self.lastParticipantsDeliveredId {
+            var section = 0
+            for commentGroup in self.comments {
+                var item = 0
+                for comment in commentGroup.comments{
+                    if (comment.statusRaw < QCommentStatus.delivered.rawValue && comment.status != .failed && comment.status != .sending && comment.id < deliveredId) || (comment.id == deliveredId && comment.status != .read){
+                        if let cache = QComment.cache[comment.uniqueId] {
+                            if !cache.isInvalidated {
+                                cache.updateStatus(status: .read)
+                            }else{
+                                comment.updateStatus(status: .read)
+                            }
                         }else{
                             comment.updateStatus(status: .read)
                         }
-                    }else{
-                        comment.updateStatus(status: .read)
                     }
+                    item += 1
                 }
-                item += 1
+                section += 1
             }
-            section += 1
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.lastParticipantsDeliveredId = deliveredId
+            }
         }
     }
     public class func publishStatus(roomId:Int, commentId:Int, status:QCommentStatus){
