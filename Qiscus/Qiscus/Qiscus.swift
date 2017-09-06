@@ -976,40 +976,25 @@ extension Qiscus:CocoaMQTTDelegate{
                         if commentType == "system_event" {
                             let payload = json["payload"]
                             let type = payload["type"].stringValue
-                            switch type {
-                            case "remove_member", "add_member" :
+                            if type == "remove_member" {
                                 if payload["object_email"].stringValue == QiscusMe.sharedInstance.email {
                                     DispatchQueue.main.async {autoreleasepool{
                                         if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                                             let comment = QComment.tempComment(fromJSON: json)
                                             roomDelegate.gotNewComment(comment)
                                         }
-                                        if type == "remove_member" {
-                                            if let chatView = Qiscus.shared.chatViews[roomId] {
-                                                if chatView.isPresence {
-                                                    chatView.goBack()
-                                                }
-                                                Qiscus.shared.chatViews[roomId] = nil
+                                        if let chatView = Qiscus.shared.chatViews[roomId] {
+                                            if chatView.isPresence {
+                                                chatView.goBack()
                                             }
-                                            Qiscus.chatRooms[roomId] = nil
-                                            if let room = QRoom.room(withId: roomId){
-                                                QRoom.deleteRoom(room: room)
-                                            }
-                                            QiscusMe.updateLastCommentId(commentId: commentId)
+                                            Qiscus.shared.chatViews[roomId] = nil
+                                        }
+                                        Qiscus.chatRooms[roomId] = nil
+                                        if let room = QRoom.room(withId: roomId){
+                                            QRoom.deleteRoom(room: room)
                                         }
                                     }}
                                 }
-                            break
-                            case "create_room", "join_room", "left_room", "change_room_name", "change_room_avatar", "custom":
-                                DispatchQueue.main.async {
-                                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                        let comment = QComment.tempComment(fromJSON: json)
-                                        roomDelegate.gotNewComment(comment)
-                                    }
-                                }
-                            break
-                            default:
-                            break
                             }
                         }
                     }else{
