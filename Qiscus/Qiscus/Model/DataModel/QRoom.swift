@@ -1159,33 +1159,43 @@ public class QRoom:Object {
             let commentGroup = self.comments[commentIndex.section]
             let commentUniqueId = comment.uniqueId
             let commentGroupId = commentGroup.id
-            QiscusDBThread.sync {
-            DispatchQueue.main.sync { autoreleasepool {
-                if QComment.cache[commentUniqueId] != nil {
+            if Thread.isMainThread {
+                QComment.cache[commentUniqueId] = nil
+            }else{
+                DispatchQueue.main.sync { autoreleasepool {
                     QComment.cache[commentUniqueId] = nil
-                }
-            }}
+                }}
             }
             if self.comments[commentIndex.section].commentsCount > 1{
-                try! realm.write {
-                    realm.delete(comment)
-                }
-                DispatchQueue.main.async {autoreleasepool {
+                try! realm.write { realm.delete(comment) }
+                if Thread.isMainThread {
                     Qiscus.chatRooms[id]?.delegate?.room(didDeleteComment: commentIndex.section, row: commentIndex.item)
-                }}
+                }else{
+                    DispatchQueue.main.sync { autoreleasepool {
+                        Qiscus.chatRooms[id]?.delegate?.room(didDeleteComment: commentIndex.section, row: commentIndex.item)
+                    }}
+                }
             }else{
-                DispatchQueue.main.async {
-                    if QCommentGroup.cache[commentGroupId] != nil {
+                if Thread.isMainThread {
+                    QComment.cache[commentUniqueId] = nil
+                    QCommentGroup.cache[commentGroupId] = nil
+                }else{
+                    DispatchQueue.main.sync { autoreleasepool {
+                        QComment.cache[commentUniqueId] = nil
                         QCommentGroup.cache[commentGroupId] = nil
-                    }
+                    }}
                 }
                 try! realm.write {
                     realm.delete(comment)
                     realm.delete(commentGroup)
                 }
-                DispatchQueue.main.async {autoreleasepool {
+                if Thread.isMainThread {
                     Qiscus.chatRooms[id]?.delegate?.room(didDeleteGroupComment: commentIndex.section)
-                }}
+                }else{
+                    DispatchQueue.main.sync { autoreleasepool {
+                        Qiscus.chatRooms[id]?.delegate?.room(didDeleteGroupComment: commentIndex.section)
+                    }}
+                }
             }
         }
     }
