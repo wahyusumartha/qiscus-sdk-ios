@@ -19,7 +19,7 @@ class SearchResultVC: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.title = "Seach Result"
+        self.title = "Search Result"
         self.tableView.dataSource = self
         self.tableView.register(UINib(nibName: "SearchCell", bundle: nil), forCellReuseIdentifier: "searchCell")
         self.tableView.estimatedRowHeight = 300

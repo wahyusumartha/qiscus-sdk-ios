@@ -20,7 +20,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         self.window = UIWindow(frame: UIScreen.main.bounds)
         
         UINavigationBar.appearance().barTintColor = UIColor.black
-        UINavigationBar.appearance().tintColor = UIColor.black
+        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName:UIColor.white]
+        UINavigationBar.appearance().tintColor = UIColor.white
+        //UINavigationBar.appearance().barStyle = UIBarStyle.default
         UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalMinimum)
         
         if !Qiscus.isLoggedIn{
