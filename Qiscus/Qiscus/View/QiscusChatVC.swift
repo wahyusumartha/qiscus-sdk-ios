@@ -813,6 +813,9 @@ open class QiscusChatVC: UIViewController{
         super.viewWillTransition(to: size, with: coordinator)
         collectionView.collectionViewLayout.invalidateLayout()
     }
+    
+    @IBAction func doNothing(_ sender: Any) {}
+    
     public func loadRoomView(){
         self.chatRoom?.delegate = self
         self.chatRoom!.subscribeRealtimeStatus()

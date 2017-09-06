@@ -36,6 +36,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
         
         var cell = collectionView.dequeueReusableCell(withReuseIdentifier: comment.cellIdentifier, for: indexPath) as! QChatCell
+        cell.clipsToBounds = true
         cell.comment = comment
         cell.delegate = self
         if let audioCell = cell as? QCellAudio{
