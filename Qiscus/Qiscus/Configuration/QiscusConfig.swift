@@ -13,7 +13,7 @@ open class QiscusConfig: NSObject {
     static let sharedInstance = QiscusConfig()
     
     open var commentPerLoad:Int = 10
-    open var dbSchemaVersion:UInt64 = 48
+    open var dbSchemaVersion:UInt64 = 49
     
     open var UPLOAD_URL = ""
     
@@ -47,7 +47,7 @@ open class QiscusConfig: NSObject {
     
     fileprivate override init() {}
     
-    public class var postCommentURL:String{
+    internal class var postCommentURL:String{
         get{
             let config = QiscusConfig.sharedInstance
             return "\(config.BASE_URL)/post_comment"
@@ -55,42 +55,48 @@ open class QiscusConfig: NSObject {
     }
     
     // MARK: -URL
-    open class var SYNC_URL:String{
+    internal class var SYNC_URL:String{
         get{
             return "\(QiscusConfig.sharedInstance.BASE_URL)/sync"
     
         }
     }
-    public class var SEARCH_URL:String{
+    internal class var SEARCH_URL:String{
         get{
             return "\(QiscusConfig.sharedInstance.BASE_URL)/search_messages"
         }
     }
-    open class var SET_DEVICE_TOKEN_URL:String{
+    internal class var ROOMLIST_URL:String{
+        get{
+            return "\(QiscusConfig.sharedInstance.BASE_URL)/get_user_rooms"
+            
+        }
+    }
+    internal class var SET_DEVICE_TOKEN_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/set_user_device_token"
     }
-    open class var REMOVE_DEVICE_TOKEN_URL:String{
+    internal class var REMOVE_DEVICE_TOKEN_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/remove_user_device_token"
     }
-    open class var UPLOAD_URL:String{
+    internal class var UPLOAD_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/upload"
     }
-    open class var UPDATE_ROOM_URL:String{
+    internal class var UPDATE_ROOM_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/update_room"
     }
-    open class var UPDATE_COMMENT_STATUS_URL:String{
+    internal class var UPDATE_COMMENT_STATUS_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/update_comment_status"
     }
-    open class var LOGIN_REGISTER:String{
+    internal class var LOGIN_REGISTER:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/login_or_register"
     }
-    open class var CREATE_NEW_ROOM:String{
+    internal class var CREATE_NEW_ROOM:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/create_room"
     }
-    open class var ROOM_REQUEST_URL:String{
+    internal class var ROOM_REQUEST_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/get_or_create_room_with_target"
     }
-    open class var ROOM_UNIQUEID_URL:String{
+    internal class var ROOM_UNIQUEID_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_URL)/get_or_create_room_with_unique_id"
     }
     open class var LINK_METADATA_URL:String{
@@ -98,7 +104,7 @@ open class QiscusConfig: NSObject {
         //return "\(config.BASE_URL)/topic/\(topicId)/comment/\(commentId)/token/\(config.USER_TOKEN)"
         return "\(config.BASE_URL)/get_url_metadata"
     }
-    open class var LOAD_URL:String{
+    internal class var LOAD_URL:String{
         let config = QiscusConfig.sharedInstance
         //return "\(config.BASE_URL)/topic/\(topicId)/comment/\(commentId)/token/\(config.USER_TOKEN)"
         return "\(config.BASE_URL)/load_comments/"
