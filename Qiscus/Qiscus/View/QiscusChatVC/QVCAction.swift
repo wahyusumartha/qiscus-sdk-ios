@@ -13,25 +13,52 @@ import SwiftyJSON
 import ContactsUI
 
 extension QiscusChatVC:CNContactPickerDelegate{
-    public func contactPicker(_ picker: CNContactPickerViewController, didSelect contactProperty: CNContactProperty) {
-        print("masuk")
-        var value = ""
-        if let contactValue = contactProperty.value as? String {
-            value = contactValue
-        }else if let contactValue = contactProperty.value as? CNPhoneNumber {
-            value = contactValue.stringValue
-        }
-        
-        if value != "" {
-            let name = "\(contactProperty.contact.givenName) \(contactProperty.contact.familyName)".trimmingCharacters(in: .whitespacesAndNewlines)
-        
+    //func shareContact
+    public func contactPicker(_ picker: CNContactPickerViewController, didSelect contact: CNContact) {
+        print("contact: \(contact)")
+        func share(name:String, value:String){
             let newComment = self.chatRoom!.newContactComment(name: name, value: value)
             let section = self.chatRoom!.commentsGroupCount - 1
             let item = self.chatRoom!.commentGroup(index: section)!.commentsCount - 1
+            self.collectionView.reloadData()
             self.chatRoom!.post(comment: newComment)
             let indexPath = IndexPath(item: item, section: section)
             self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
         }
+        let contactName = "\(contact.givenName) \(contact.familyName)".trimmingCharacters(in: .whitespacesAndNewlines)
+        let contactSheetController = UIAlertController(title: contactName, message: "select contact you want to share", preferredStyle: .actionSheet)
+        
+        let cancelActionButton = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+            print("Cancel")
+        }
+        contactSheetController.addAction(cancelActionButton)
+        
+        for phoneNumber in contact.phoneNumbers {
+            let value = phoneNumber.value.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            var title = "\(value)"
+            if let label = phoneNumber.label {
+                let labelString = CNLabeledValue<CNPhoneNumber>.localizedString(forLabel: label)
+                title = "\(labelString): \(value)"
+            }
+            let phoneButton = UIAlertAction(title: title, style: .default) { action -> Void in
+                share(name: contactName, value: value)
+            }
+            contactSheetController.addAction(phoneButton)
+        }
+        for email in contact.emailAddresses {
+            let value = email.value as String
+            var title = "\(value)"
+            if let label = email.label {
+                let labelString = CNLabeledValue<NSString>.localizedString(forLabel: label)
+                title = "\(labelString): \(value)"
+            }
+            let emailButton = UIAlertAction(title: title, style: .default) { action -> Void in
+                share(name: contactName, value: value)
+            }
+            contactSheetController.addAction(emailButton)
+        }
+        picker.dismiss(animated: true, completion: nil)
+        self.present(contactSheetController, animated: true, completion: nil)
     }
 }
 extension QiscusChatVC {
@@ -308,6 +335,7 @@ extension QiscusChatVC {
         }}
     }
     func loadSubtitle(){
+        if self.chatRoom != nil && !self.chatRoom!.isInvalidated {
         DispatchQueue.main.async {autoreleasepool{
             if self.chatSubtitle == nil || self.chatSubtitle == ""{
                 if let room = self.chatRoom {
@@ -360,6 +388,7 @@ extension QiscusChatVC {
                 self.subtitleLabel.text = self.chatSubtitle!
             }
         }}
+        }
     }
     func showLocationAccessAlert(){
         DispatchQueue.main.async{autoreleasepool{

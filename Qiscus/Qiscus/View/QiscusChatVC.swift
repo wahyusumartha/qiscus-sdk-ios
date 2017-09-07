@@ -317,16 +317,6 @@ open class QiscusChatVC: UIViewController{
             return Qiscus.bundle
         }
     }
-    var sendOnImage:UIImage?{
-        get{
-            return UIImage(named: "ic_send_on", in: self.bundle, compatibleWith: nil)?.localizedImage()
-        }
-    }
-    var sendOffImage:UIImage?{
-        get{
-            return UIImage(named: "ic_send_off", in: self.bundle, compatibleWith: nil)?.localizedImage()
-        }
-    }
     
     var isLastRowVisible: Bool = false {
         didSet{
@@ -634,15 +624,21 @@ open class QiscusChatVC: UIViewController{
             self.loadData()
         }else if self.firstLoad {
             self.loadRoomView()
-            if let target = self.chatTarget {
-                if let indexPath = self.chatRoom?.getIndexPath(ofComment: target){
-                    self.selectedCellIndex = indexPath
-                    self.collectionView.scrollToItem(at: indexPath, at: UICollectionViewScrollPosition.top, animated: true)
-                }else{
-                    QToasterSwift.toast(target: self, text: "Can't find message", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+            if self.chatRoom!.commentsGroupCount == 0 {
+                self.showLoading("Load Data ...")
+                self.chatRoom!.sync()
+            }else{
+                if let target = self.chatTarget {
+                    if let indexPath = self.chatRoom?.getIndexPath(ofComment: target){
+                        self.selectedCellIndex = indexPath
+                        self.collectionView.scrollToItem(at: indexPath, at: UICollectionViewScrollPosition.top, animated: true)
+                    }else{
+                        QToasterSwift.toast(target: self, text: "Can't find message", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+                    }
+                    self.chatTarget = nil
                 }
-                self.chatTarget = nil
             }
+            
         }else{
             self.collectionView.reloadData()
             self.chatRoom?.updateUnreadCommentCount {
@@ -909,6 +905,15 @@ extension QiscusChatVC:QRoomDelegate{
         let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
         DispatchQueue.main.asyncAfter(deadline: time, execute: {
             self.dismissLoading()
+            if let target = self.chatTarget {
+                if let indexPath = self.chatRoom?.getIndexPath(ofComment: target){
+                    self.selectedCellIndex = indexPath
+                    self.collectionView.scrollToItem(at: indexPath, at: UICollectionViewScrollPosition.top, animated: true)
+                }else{
+                    QToasterSwift.toast(target: self, text: "Can't find message", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+                }
+                self.chatTarget = nil
+            }
         })
     }
     public func room(didChangeAvatar room: QRoom) {

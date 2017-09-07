@@ -28,6 +28,18 @@ public class QRoomService:NSObject{
                 if results != JSON.null{
                     let roomData = results["room"]
                     room.syncRoomData(withJSON: roomData)
+                    let commentPayload = results["comments"].arrayValue
+                    for json in commentPayload {
+                        let commentId = json["id"].intValue
+                        
+                        if commentId <= QiscusMe.sharedInstance.lastCommentId {
+                            room.saveOldComment(fromJSON: json)
+                        }else{
+                            QiscusBackgroundThread.async { autoreleasepool{
+                                QChatService.sync()
+                            }}
+                        }
+                    }
                     room.delegate?.room(didFinishSync: room)
                 }else if error != JSON.null{
                     Qiscus.printLog(text: "error getRoom")
