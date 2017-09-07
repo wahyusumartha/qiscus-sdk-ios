@@ -20,6 +20,7 @@ class MainView: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         //self.navigationController?.isNavigationBarHidden = true
         let dismissRecognizer = UITapGestureRecognizer(target: self, action: #selector(MainView.hideKeyboard))
         self.view.addGestureRecognizer(dismissRecognizer)

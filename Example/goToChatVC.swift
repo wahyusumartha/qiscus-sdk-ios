@@ -21,6 +21,14 @@ class goToChatVC: UIViewController {
         Qiscus.cacheData()
         let dismissRecognizer = UITapGestureRecognizer(target: self, action: #selector(goToChatVC.hideKeyboard))
         self.view.addGestureRecognizer(dismissRecognizer)
+//        QChatService.roomList(withLimit: 100, onSuccess: { (rooms, totalRoom, currentPage, limit) in
+//            print("total room: \(totalRoom)")
+//            print("current page: \(currentPage)")
+//            print("limit: \(limit)")
+//            print("rooms: \(rooms)")
+//        }) { (error) in
+//            print("\(error)")
+//        }
         
     }
 
