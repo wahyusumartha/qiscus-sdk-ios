@@ -247,7 +247,6 @@
                     <subviews>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="61I-ey-CgG">
                             <rect key="frame" x="0.0" y="0.0" width="375" height="48"/>
-                            <state key="normal" title="Button"/>
                             <connections>
                                 <action selector="doNothing:" destination="-1" eventType="touchUpInside" id="mLB-RR-Hpg"/>
                             </connections>

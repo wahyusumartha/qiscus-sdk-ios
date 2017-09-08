@@ -615,7 +615,7 @@ open class QiscusChatVC: UIViewController{
         }else{
             sendButton.isEnabled = true
         }
-
+        self.chatRoom?.updateUnreadCommentCount(count: 0)
     }
     override open func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -948,24 +948,16 @@ extension QiscusChatVC:QRoomDelegate{
     public func room(didChangeComment section: Int, row: Int, action: String) {
         
     }
-    public func room(gotNewGroupComment onIndex: Int) {
+    public func room(gotNewComment comment: QComment) {
         self.collectionView.reloadData()
-        let indexPath = IndexPath(item: 0, section: onIndex)
-        if let comment = self.chatRoom!.comment(onIndexPath: indexPath) {
+        self.chatRoom!.updateUnreadCommentCount(count: 0)
+        if let indexPath = self.chatRoom!.getIndexPath(ofComment: comment){
             if self.isLastRowVisible || comment.senderEmail == QiscusMe.sharedInstance.email{
                 self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
             }
         }
     }
-    public func room(gotNewCommentOn groupIndex: Int, withCommentIndex index: Int) {
-        self.collectionView.reloadData()
-        let indexPath = IndexPath(item: index, section: groupIndex)
-        if let comment = self.chatRoom!.comment(onIndexPath: indexPath) {
-            if self.isLastRowVisible || comment.senderEmail == QiscusMe.sharedInstance.email{
-                self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
-            }
-        }
-    }
+    
     public func room(userDidTyping userEmail: String) {
         if userEmail == "" {
             self.stopTypingIndicator()

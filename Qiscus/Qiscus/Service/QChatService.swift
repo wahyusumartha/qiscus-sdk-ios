@@ -603,6 +603,12 @@ public class QChatService:NSObject {
                                                     }}
                                                 }
                                             }}
+                                            let comment = QComment.tempComment(fromJSON: newComment)
+                                            QChatService.roomInfo(withId: comment.roomId, onSuccess: { (room) in
+                                                Qiscus.chatDelegate?.qiscusChat?(gotNewRoom: room)
+                                            }, onFailed: { (error) in
+                                                print("error getting room info")
+                                            })
                                         }
                                     }}
                                 }
@@ -895,7 +901,8 @@ public class QChatService:NSObject {
             })
         }}
     }
-    public class func roomList(withLimit limit:Int = 100, page:Int? = nil, showParticipant:Bool = false, onSuccess:@escaping (([QRoom],Int,Int,Int)->Void), onFailed: @escaping ((String)->Void)){
+    
+    public class func roomList(withLimit limit:Int = 100, page:Int? = nil, showParticipant:Bool = true, onSuccess:@escaping (([QRoom],Int,Int,Int)->Void), onFailed: @escaping ((String)->Void)){
         QiscusRequestThread.async {
             autoreleasepool{
                 var parameters:[String: AnyObject] = [
@@ -925,16 +932,15 @@ public class QChatService:NSObject {
                                 DispatchQueue.main.async { autoreleasepool {
                                     var roomResult = [QRoom]()
                                     for roomData in rooms {
-                                        let roomId = roomData["room_id"].intValue
+                                        let roomId = roomData["id"].intValue
                                         let unread = roomData["unread_count"].intValue
                                         if let room = QRoom.room(withId: roomId){
-                                            let lastCommentId = roomData["last_comment_id"].intValue
-                                            let lastCommentTxt = roomData["last_comment_message"].stringValue
-                                            let lastCommentTime = roomData["last_comment_timestamp_unix"].doubleValue
-                                            room.updateLastComentInfo(unreadCount: unread, lastCommentId: lastCommentId, lastCommentText: lastCommentTxt, lastCommentTime: lastCommentTime)
+                                            let lastCommentData = roomData["last_comment"]
+                                            let lastComment = QComment.tempComment(fromJSON: lastCommentData)
+                                            room.updateLastComentInfo(comment: lastComment)
                                             roomResult.append(room)
                                         }else{
-                                            let room = QRoom.addRoom(fromInfoJSON: roomData)
+                                            let room = QRoom.addRoom(fromJSON: roomData)
                                             room.updateUnreadCommentCount(count: unread)
                                             roomResult.append(room)
                                         }
@@ -954,6 +960,61 @@ public class QChatService:NSObject {
                     }
                 })
             }
+        }
+    }
+    
+    public class func roomInfo(withId id:Int, onSuccess:@escaping ((QRoom)->Void), onFailed: @escaping ((String)->Void)){
+        QiscusRequestThread.async {
+            let parameters:[String: AnyObject] = [
+                "token"  : qiscus.config.USER_TOKEN as AnyObject,
+                "room_id" : [id] as AnyObject,
+                "show_participants": true as AnyObject
+            ]
+            Qiscus.printLog(text: "room info url: \(QiscusConfig.SEARCH_URL)")
+            Qiscus.printLog(text: "room info parameters: \(parameters)")
+            Alamofire.request(QiscusConfig.ROOMINFO_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+                Qiscus.printLog(text: "room info result: \(response)")
+                switch response.result {
+                case .success:
+                    if let result = response.result.value{
+                        let json = JSON(result)
+                        let success:Bool = (json["status"].intValue == 200)
+                        
+                        if success {
+                            let resultData = json["results"]
+                            let roomsData = resultData["rooms_info"].arrayValue
+                            
+                            if roomsData.count > 0 {
+                                let roomData = roomsData[0]
+                                DispatchQueue.main.async { autoreleasepool {
+                                    let roomId = roomData["id"].intValue
+                                    let unread = roomData["unread_count"].intValue
+                                    if let room = QRoom.room(withId: roomId){
+                                        let lastCommentData = roomData["last_comment"]
+                                        let lastComment = QComment.tempComment(fromJSON: lastCommentData)
+                                        room.updateLastComentInfo(comment: lastComment)
+                                        onSuccess(room)
+                                    }else{
+                                        let room = QRoom.addRoom(fromJSON: roomData)
+                                        room.updateUnreadCommentCount(count: unread)
+                                        onSuccess(room)
+                                    }
+                                }}
+                            }else{
+                                onFailed("room notfound")
+                            }
+                        }else{
+                            onFailed("can't get search result")
+                        }
+                    }else{
+                        onFailed("can't get search result")
+                    }
+                    break
+                case .failure(let error):
+                    onFailed("\(error.localizedDescription)")
+                    break
+                }
+            })
         }
     }
     public class func searchComment(withQuery text:String, room:QRoom? = nil, fromComment:QComment? = nil, onSuccess:@escaping (([QComment])->Void), onFailed: @escaping ((String)->Void)){

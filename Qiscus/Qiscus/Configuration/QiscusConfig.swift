@@ -68,7 +68,13 @@ open class QiscusConfig: NSObject {
     }
     internal class var ROOMLIST_URL:String{
         get{
-            return "\(QiscusConfig.sharedInstance.BASE_URL)/get_user_rooms"
+            return "\(QiscusConfig.sharedInstance.BASE_URL)/user_rooms"
+            
+        }
+    }
+    internal class var ROOMINFO_URL:String{
+        get{
+            return "\(QiscusConfig.sharedInstance.BASE_URL)/rooms_info"
             
         }
     }

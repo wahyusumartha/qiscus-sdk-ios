@@ -36,7 +36,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     static var dbConfiguration = Realm.Configuration.defaultConfiguration
     static var chatRooms = [Int : QRoom]()
     static var qiscusDownload:[String] = [String]()
-    
+    public static var chatDelegate:QiscusChatDelegate?
     
     static var realtimeConnected:Bool{
         get{
@@ -979,10 +979,11 @@ extension Qiscus:CocoaMQTTDelegate{
                             if type == "remove_member" {
                                 if payload["object_email"].stringValue == QiscusMe.sharedInstance.email {
                                     DispatchQueue.main.async {autoreleasepool{
+                                        let comment = QComment.tempComment(fromJSON: json)
                                         if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                            let comment = QComment.tempComment(fromJSON: json)
                                             roomDelegate.gotNewComment(comment)
                                         }
+                                        Qiscus.chatDelegate?.qiscusChat?(gotNewComment: comment)
                                         if let chatView = Qiscus.shared.chatViews[roomId] {
                                             if chatView.isPresence {
                                                 chatView.goBack()
@@ -1141,5 +1142,6 @@ extension Qiscus:CocoaMQTTDelegate{
         Qiscus.setupReachability()
         Qiscus.sharedInstance.RealtimeConnect()
     }
+    
 }
 
