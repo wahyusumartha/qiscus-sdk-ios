@@ -25,6 +25,10 @@
 		39E754301F5E7327003C3302 /* SearchResultVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39E7542E1F5E7327003C3302 /* SearchResultVC.xib */; };
 		39E754331F5E84B0003C3302 /* SearchCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E754311F5E84B0003C3302 /* SearchCell.swift */; };
 		39E754341F5E84B0003C3302 /* SearchCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39E754321F5E84B0003C3302 /* SearchCell.xib */; };
+		39E754371F62226E003C3302 /* RoomListVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E754351F62226E003C3302 /* RoomListVC.swift */; };
+		39E754381F62226E003C3302 /* RoomListVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39E754361F62226E003C3302 /* RoomListVC.xib */; };
+		39E7543B1F6222AB003C3302 /* RoomListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E754391F6222AB003C3302 /* RoomListCell.swift */; };
+		39E7543C1F6222AB003C3302 /* RoomListCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39E7543A1F6222AB003C3302 /* RoomListCell.xib */; };
 		39F1F6AD1D3B90E200FF1C8C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F1F6AC1D3B90E200FF1C8C /* AppDelegate.swift */; };
 		39F1F6B21D3B90E200FF1C8C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 39F1F6B01D3B90E200FF1C8C /* Main.storyboard */; };
 		39F1F6B71D3B90E200FF1C8C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 39F1F6B61D3B90E200FF1C8C /* Assets.xcassets */; };
@@ -170,6 +174,10 @@
 		39E7542E1F5E7327003C3302 /* SearchResultVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchResultVC.xib; sourceTree = "<group>"; };
 		39E754311F5E84B0003C3302 /* SearchCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchCell.swift; sourceTree = "<group>"; };
 		39E754321F5E84B0003C3302 /* SearchCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchCell.xib; sourceTree = "<group>"; };
+		39E754351F62226E003C3302 /* RoomListVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoomListVC.swift; sourceTree = "<group>"; };
+		39E754361F62226E003C3302 /* RoomListVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RoomListVC.xib; sourceTree = "<group>"; };
+		39E754391F6222AB003C3302 /* RoomListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoomListCell.swift; sourceTree = "<group>"; };
+		39E7543A1F6222AB003C3302 /* RoomListCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RoomListCell.xib; sourceTree = "<group>"; };
 		39F1F6A91D3B90E200FF1C8C /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		39F1F6AC1D3B90E200FF1C8C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		39F1F6B11D3B90E200FF1C8C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -429,6 +437,10 @@
 				39E7542E1F5E7327003C3302 /* SearchResultVC.xib */,
 				39E754311F5E84B0003C3302 /* SearchCell.swift */,
 				39E754321F5E84B0003C3302 /* SearchCell.xib */,
+				39E754351F62226E003C3302 /* RoomListVC.swift */,
+				39E754361F62226E003C3302 /* RoomListVC.xib */,
+				39E754391F6222AB003C3302 /* RoomListCell.swift */,
+				39E7543A1F6222AB003C3302 /* RoomListCell.xib */,
 			);
 			path = Example;
 			sourceTree = "<group>";
@@ -683,10 +695,12 @@
 				39F1F6BA1D3B90E200FF1C8C /* LaunchScreen.storyboard in Resources */,
 				39E754301F5E7327003C3302 /* SearchResultVC.xib in Resources */,
 				395291261E28559B004BD6B4 /* goToChatVC.xib in Resources */,
+				39E754381F62226E003C3302 /* RoomListVC.xib in Resources */,
 				39F1F6B71D3B90E200FF1C8C /* Assets.xcassets in Resources */,
 				39F1F6B21D3B90E200FF1C8C /* Main.storyboard in Resources */,
 				39E754341F5E84B0003C3302 /* SearchCell.xib in Resources */,
 				39BD59171EB2F1A3001AFB7C /* Qiscus.podspec in Resources */,
+				39E7543C1F6222AB003C3302 /* RoomListCell.xib in Resources */,
 				395291281E28559B004BD6B4 /* MainView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -832,8 +846,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				395291251E28559B004BD6B4 /* goToChatVC.swift in Sources */,
+				39E7543B1F6222AB003C3302 /* RoomListCell.swift in Sources */,
 				39E754331F5E84B0003C3302 /* SearchCell.swift in Sources */,
 				39E7542F1F5E7327003C3302 /* SearchResultVC.swift in Sources */,
+				39E754371F62226E003C3302 /* RoomListVC.swift in Sources */,
 				395291271E28559B004BD6B4 /* MainView.swift in Sources */,
 				39F1F6AD1D3B90E200FF1C8C /* AppDelegate.swift in Sources */,
 			);

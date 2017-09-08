@@ -22,14 +22,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         UINavigationBar.appearance().barTintColor = UIColor.black
         UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName:UIColor.white]
         UINavigationBar.appearance().tintColor = UIColor.white
-        //UINavigationBar.appearance().barStyle = UIBarStyle.default
         UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalMinimum)
         
         if !Qiscus.isLoggedIn{
             goToLoginView()
         }else{
             Qiscus.connect(delegate: self)
-            goToChatNavigationView()
+            goToRoomList()
+            //goToChatNavigationView()
         }
         
         Qiscus.registerNotification()
@@ -86,6 +86,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("\(error)")
     }
+    func goToRoomList(){
+        let roomList = RoomListVC()
+        self.navigationController = UINavigationController(rootViewController:roomList)
+        window?.rootViewController = navigationController
+    }
     func goToChatNavigationView(){
         let chatView = goToChatVC()
         self.navigationController = UINavigationController(rootViewController: chatView)
@@ -99,7 +104,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
     }
     
     func qiscusLogin(withAppId: String, userEmail: String, userKey:String, username: String){
-        Qiscus.setup(withAppId: withAppId, userEmail: userEmail, userKey: userKey, username: username,delegate: self)
+        Qiscus.setup(withAppId: withAppId, userEmail: userEmail, userKey: userKey, username: username,delegate: self, secureURl: false)
     }
     
     // MARK: - QiscusConfigDelegate
@@ -107,7 +112,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         print(withMessage)
     }
     func qiscusConnected(){
-        self.goToChatNavigationView()
+        self.goToRoomList()
+        //self.goToChatNavigationView()
     }
     func qiscus(gotSilentNotification comment: QComment) {
         Qiscus.createLocalNotification(forComment: comment)
