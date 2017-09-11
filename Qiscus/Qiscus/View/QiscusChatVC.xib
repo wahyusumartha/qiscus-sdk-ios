@@ -245,6 +245,12 @@
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wZm-gC-isB">
                     <rect key="frame" x="0.0" y="619" width="375" height="48"/>
                     <subviews>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="61I-ey-CgG">
+                            <rect key="frame" x="0.0" y="0.0" width="375" height="48"/>
+                            <connections>
+                                <action selector="doNothing:" destination="-1" eventType="touchUpInside" id="mLB-RR-Hpg"/>
+                            </connections>
+                        </button>
                         <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="f4G-BC-QRU" customClass="ChatInputText" customModule="Qiscus" customModuleProvider="target">
                             <rect key="frame" x="58" y="8" width="259" height="32"/>
                             <color key="backgroundColor" red="0.95294117647058818" green="0.95686274509803915" blue="0.96078431372549022" alpha="1" colorSpace="calibratedRGB"/>
@@ -301,10 +307,12 @@
                     </subviews>
                     <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <constraints>
+                        <constraint firstItem="61I-ey-CgG" firstAttribute="top" secondItem="wZm-gC-isB" secondAttribute="top" id="2Rk-ti-vCh"/>
                         <constraint firstAttribute="bottom" secondItem="f4G-BC-QRU" secondAttribute="bottom" constant="8" id="4ux-Tg-e9A"/>
                         <constraint firstItem="f4G-BC-QRU" firstAttribute="top" secondItem="wZm-gC-isB" secondAttribute="top" constant="8" id="EZU-hO-VW5"/>
                         <constraint firstAttribute="trailing" secondItem="Q10-A0-ql9" secondAttribute="trailing" constant="4" id="FYJ-LK-SrS"/>
                         <constraint firstItem="kKk-jY-Y3u" firstAttribute="top" secondItem="Vv3-xa-Z9g" secondAttribute="top" constant="6" id="Hgu-UI-KkS"/>
+                        <constraint firstAttribute="trailing" secondItem="61I-ey-CgG" secondAttribute="trailing" id="IU1-rR-Xnc"/>
                         <constraint firstAttribute="height" secondItem="f4G-BC-QRU" secondAttribute="height" constant="16" id="Mjb-2I-awk"/>
                         <constraint firstItem="f4G-BC-QRU" firstAttribute="leading" secondItem="wZm-gC-isB" secondAttribute="leading" constant="58" id="N9u-PM-kl3"/>
                         <constraint firstItem="P1J-Dm-NtK" firstAttribute="leading" secondItem="wZm-gC-isB" secondAttribute="leading" constant="15" id="OiI-a5-wYU"/>
@@ -317,7 +325,9 @@
                         <constraint firstAttribute="bottom" secondItem="Q10-A0-ql9" secondAttribute="bottom" constant="2" id="cNQ-7n-jUW"/>
                         <constraint firstItem="kKk-jY-Y3u" firstAttribute="bottom" secondItem="Q10-A0-ql9" secondAttribute="bottom" constant="-6" id="kca-NQ-Yc8"/>
                         <constraint firstAttribute="bottom" secondItem="Vv3-xa-Z9g" secondAttribute="bottom" constant="2" id="n2b-va-egx"/>
+                        <constraint firstItem="61I-ey-CgG" firstAttribute="leading" secondItem="wZm-gC-isB" secondAttribute="leading" id="o1p-F4-Chf"/>
                         <constraint firstAttribute="trailing" secondItem="Vv3-xa-Z9g" secondAttribute="trailing" constant="4" id="tJc-ri-29a"/>
+                        <constraint firstAttribute="bottom" secondItem="61I-ey-CgG" secondAttribute="bottom" id="x4R-TO-5iR"/>
                     </constraints>
                 </view>
             </subviews>

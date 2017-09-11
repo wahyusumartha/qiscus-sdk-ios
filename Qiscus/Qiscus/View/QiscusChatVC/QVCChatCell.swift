@@ -15,6 +15,7 @@ import ContactsUI
 // MARK: - ChatCell Delegate
 extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
     // MARK: ChatCellPostbackDelegate
+    
     func didTapAccountLinking(withData data: JSON) {
         Qiscus.uiThread.async { autoreleasepool{
             let webView = ChatPreviewDocVC()
@@ -105,6 +106,47 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
         }
     }
     // MARK: ChatCellDelegate
+    func didShare(comment: QComment) {
+        switch comment.type {
+        case .image, .video, .audio:
+            if let file = comment.file {
+                if QFileManager.isFileExist(inLocalPath: file.localPath){
+                    var items:[Any] = [Any]()
+                    switch file.type {
+                    case .image:
+                        let image = UIImage(contentsOfFile: file.localPath)!
+                        items.append(image)
+                        break
+                    case.video:
+                        let videoLink = NSURL(fileURLWithPath: file.localPath)
+                        items.append(videoLink)
+                        break
+                    case.audio:
+                        let audioLink = NSURL(fileURLWithPath: file.localPath)
+                        items.append(audioLink)
+                        break
+                    default:
+                        break
+                    }
+                    let activityViewController = UIActivityViewController(activityItems: items, applicationActivities: nil)
+                    
+                    activityViewController.popoverPresentationController?.sourceView = self.view
+                    self.present(activityViewController, animated: true, completion: nil)
+                    
+                }
+            }
+            break
+        case .text:
+            let activityViewController = UIActivityViewController(activityItems: [comment.text], applicationActivities: nil)
+            
+            activityViewController.popoverPresentationController?.sourceView = self.view
+            self.present(activityViewController, animated: true, completion: nil)
+            break
+        default:
+            
+            break
+        }
+    }
     func didChangeSize(onCell cell:QChatCell){
         
     }

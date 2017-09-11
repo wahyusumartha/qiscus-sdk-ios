@@ -15,7 +15,7 @@ import AVFoundation
     case single
     case group
 }
-public protocol QRoomDelegate {
+@objc public protocol QRoomDelegate {
     func room(didChangeName room:QRoom)
     func room(didChangeAvatar room:QRoom)
     func room(didChangeParticipant room:QRoom)
@@ -26,8 +26,9 @@ public protocol QRoomDelegate {
     
     func room(didChangeUser room:QRoom, user:QUser)
     func room(didFinishSync room:QRoom)
-    func room(gotNewGroupComment onIndex:Int)
-    func room(gotNewCommentOn groupIndex:Int, withCommentIndex index:Int)
+    @objc optional func room(gotNewGroupComment onIndex:Int)
+    @objc optional func room(gotNewCommentOn groupIndex:Int, withCommentIndex index:Int)
+    @objc optional func room(gotNewComment comment:QComment)
     func room(didFailUpdate error:String)
     
     func room(userDidTyping userEmail:String)
@@ -46,12 +47,28 @@ public class QRoom:Object {
     public dynamic var singleUser:String = ""
     public dynamic var typingUser:String = ""
     public dynamic var lastReadCommentId: Int = 0
-    public dynamic var unreadCommentCount:Int = 0
+    internal dynamic var unreadCommentCount:Int = 0
+    public dynamic var unreadCount:Int = 0
+    
+    
+    // MARK: - lastComment variable
+    private dynamic var lastCommentId:Int = 0
+    private dynamic var lastCommentText:String = ""
+    private dynamic var lastCommentUniqueId: String = ""
+    private dynamic var lastCommentBeforeId:Int = 0
+    private dynamic var lastCommentCreatedAt: Double = 0
+    private dynamic var lastCommentSenderEmail:String = ""
+    private dynamic var lastCommentSenderName:String = ""
+    private dynamic var lastCommentStatusRaw:Int = QCommentStatus.sending.rawValue
+    private dynamic var lastCommentTypeRaw:String = QCommentType.text.name()
+    private dynamic var lastCommentData:String = ""
+    
     
     // MARK: private method
     private dynamic var lastParticipantsReadId:Int = 0
     private dynamic var lastParticipantsDeliveredId:Int = 0
-    private dynamic var roomVersion002:Bool = true
+    private dynamic var roomVersion003:Bool = true
+    
     
     public let comments = List<QCommentGroup>()
     public let participants = List<QParticipant>()
@@ -61,9 +78,11 @@ public class QRoom:Object {
     private var selfTypingTimer:Timer?
     
     
+    
+    
     // MARK: - Unstored properties
     override public static func ignoredProperties() -> [String] {
-        return ["typingTimer"]
+        return ["typingTimer","delegate"]
     }
     
     // MARK: - Getter variable
@@ -78,11 +97,27 @@ public class QRoom:Object {
     }
     public var lastComment:QComment?{
         get{
-            if let comment = self.lastCommentGroup?.lastComment {
-                return QComment.comment(withUniqueId: comment.uniqueId)
+            if let comment = QComment.comment(withUniqueId: self.lastCommentUniqueId){
+                return comment
             }else{
-                return nil
+                if self.lastCommentId > 0 {
+                    let comment = QComment()
+                    comment.id = self.lastCommentId
+                    comment.uniqueId = self.lastCommentUniqueId
+                    comment.roomId = self.id
+                    comment.text = self.lastCommentText
+                    comment.senderName = self.lastCommentSenderName
+                    comment.createdAt = self.lastCommentCreatedAt
+                    comment.beforeId = self.lastCommentBeforeId
+                    comment.senderEmail = self.lastCommentSenderName
+                    comment.roomName = self.name
+                    comment.cellPosRaw = QCellPosition.single.rawValue
+                    comment.typeRaw = self.lastCommentTypeRaw
+                    comment.data = self.lastCommentData
+                    return comment
+                }
             }
+            return nil
         }
     }
     public var commentsGroupCount:Int{
@@ -115,7 +150,7 @@ public class QRoom:Object {
     // MARK: - Class method
     public class func all() -> [QRoom]{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let data = realm.objects(QRoom.self)
+        let data = realm.objects(QRoom.self).sorted(byKeyPath: "lastCommentCreatedAt", ascending: false)
         
         if data.count > 0 {
             return Array(data)
@@ -192,6 +227,7 @@ public class QRoom:Object {
         }
         return nil
     }
+
     public class func addRoom(fromJSON json:JSON)->QRoom{
         let room = QRoom()
         if let id = json["id"].int {
@@ -223,6 +259,36 @@ public class QRoom:Object {
             if let roomAvatar = json["avatar_url"].string {
                 room.avatarURL = roomAvatar
             }
+            if json["last_comment"] != JSON.null {
+                let commentData = json["last_comment"]
+                let comment = QComment.tempComment(fromJSON: commentData)
+                
+                room.lastCommentId = comment.id
+                room.lastCommentText = comment.text
+                room.lastCommentUniqueId = comment.uniqueId
+                room.lastCommentBeforeId = comment.beforeId
+                room.lastCommentCreatedAt = comment.createdAt
+                room.lastCommentSenderEmail = comment.senderEmail
+                room.lastCommentSenderName = comment.senderName
+                room.lastCommentStatusRaw = comment.statusRaw
+                room.lastCommentTypeRaw = comment.typeRaw
+                room.lastCommentData = comment.data
+            }else{
+                if let lastMessage = json["last_comment_message"].string{
+                    room.lastCommentText = lastMessage
+                }
+                if let lastMessageTime = json["last_comment_timestamp_unix"].double{
+                    room.lastCommentCreatedAt = lastMessageTime
+                }
+                if let lastCommentId = json["last_comment_id"].int{
+                    room.lastCommentId = lastCommentId
+                }
+            }
+            
+            if let unread = json["unread_count"].int {
+                room.unreadCount = unread
+            }
+            
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             
             try! realm.write {
@@ -230,46 +296,46 @@ public class QRoom:Object {
             }
             
             // get the participants and save it
-            var participantString = [String]()
-            for participantJSON in json["participants"].arrayValue {
-                let participantEmail = participantJSON["email"].stringValue
-                let fullname = participantJSON["username"].stringValue
-                let avatarURL = participantJSON["avatar_url"].stringValue
-                let lastReadId = participantJSON["last_comment_read_id"].intValue
-                let lastDeliveredId = participantJSON["last_comment_received_id"].intValue
-                
-                let savedUser = QUser.saveUser(withEmail: participantEmail, fullname: fullname, avatarURL: avatarURL)
-                
-                if room.type == .single {
-                    if savedUser.email != QiscusMe.sharedInstance.email {
-                        try! realm.write {
-                            room.singleUser = participantEmail
+            if let participants = json["participants"].array{
+                var participantString = [String]()
+                for participantJSON in participants {
+                    let participantEmail = participantJSON["email"].stringValue
+                    let fullname = participantJSON["username"].stringValue
+                    let avatarURL = participantJSON["avatar_url"].stringValue
+                    let lastReadId = participantJSON["last_comment_read_id"].intValue
+                    let lastDeliveredId = participantJSON["last_comment_received_id"].intValue
+                    
+                    let savedUser = QUser.saveUser(withEmail: participantEmail, fullname: fullname, avatarURL: avatarURL)
+                    
+                    if room.type == .single {
+                        if savedUser.email != QiscusMe.sharedInstance.email {
+                            try! realm.write {
+                                room.singleUser = participantEmail
+                            }
                         }
                     }
-                }
-                //then save participants
-                if QParticipant.participant(inRoomWithId: room.id, andEmail: participantEmail) == nil{
-                    let newParticipant = QParticipant()
-                    newParticipant.localId = "\(room.id)_\(participantEmail)"
-                    newParticipant.roomId = room.id
-                    newParticipant.email = participantEmail
-                    newParticipant.lastReadCommentId = lastReadId
-                    newParticipant.lastDeliveredCommentId = lastDeliveredId
-                    try! realm.write {
-                        room.participants.append(newParticipant)
+                    if QParticipant.participant(inRoomWithId: room.id, andEmail: participantEmail) == nil{
+                        let newParticipant = QParticipant()
+                        newParticipant.localId = "\(room.id)_\(participantEmail)"
+                        newParticipant.roomId = room.id
+                        newParticipant.email = participantEmail
+                        newParticipant.lastReadCommentId = lastReadId
+                        newParticipant.lastDeliveredCommentId = lastDeliveredId
+                        try! realm.write {
+                            room.participants.append(newParticipant)
+                        }
                     }
+                    participantString.append(participantEmail)
                 }
-                participantString.append(participantEmail)
-            }
-            room.updateCommentStatus()
-            var index = 0
-            for participant in room.participants{
-                if !participantString.contains(participant.email){
-                    room.participants.remove(objectAtIndex: index)
+                room.updateCommentStatus()
+                var index = 0
+                for participant in room.participants{
+                    if !participantString.contains(participant.email){
+                        room.participants.remove(objectAtIndex: index)
+                    }
+                    index += 1
                 }
-                index += 1
             }
-            
         }
         
         if Qiscus.chatRooms[room.id] == nil {
@@ -314,6 +380,9 @@ public class QRoom:Object {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let _ = newComment.textSize
         let roomId = self.id
+        if let user = QUser.user(withEmail: newComment.senderEmail){
+            user.updateLastSeen(lastSeen: newComment.createdAt)
+        }
         if self.comments.count == 0 {
             let commentGroup = QCommentGroup()
             commentGroup.senderEmail = newComment.senderEmail
@@ -327,14 +396,17 @@ public class QRoom:Object {
             QCommentGroup.cache["\(newComment.uniqueId)"] = commentGroup
             if !onTop {
                 DispatchQueue.main.async { autoreleasepool{
-                    Qiscus.chatRooms[roomId]?.delegate?.room(gotNewGroupComment: 0)
-                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                        roomDelegate.gotNewComment(newComment)
-                    }
+                    Qiscus.chatRooms[roomId]?.delegate?.room?(gotNewGroupComment: 0)
                 }}
                 QiscusMe.updateLastCommentId(commentId: newComment.id)
-                self.updateUnreadCommentCount()
+                self.updateLastComentInfo(comment: newComment)
+                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                    DispatchQueue.main.async { autoreleasepool{
+                        roomDelegate.gotNewComment(newComment)
+                    }}
+                }
             }
+            
         }
         else if onTop{
             let firstCommentGroup = self.comments.first!
@@ -380,14 +452,10 @@ public class QRoom:Object {
                 let section = self.comments.count - 1
                 let item = lastComment.commentsCount - 1
                 DispatchQueue.main.async { autoreleasepool {
-                    Qiscus.chatRooms[roomId]?.delegate?.room(gotNewCommentOn: section, withCommentIndex: item)
+                    Qiscus.chatRooms[roomId]?.delegate?.room?(gotNewCommentOn: section, withCommentIndex: item)
                 }}
                 self.updateUnreadCommentCount()
-                DispatchQueue.main.async { autoreleasepool{
-                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                        roomDelegate.gotNewComment(newComment)
-                    }
-                }}
+                
                 QiscusMe.updateLastCommentId(commentId: newComment.id)
                 var i = 0
                 for comment in lastComment.comments{
@@ -416,23 +484,54 @@ public class QRoom:Object {
                 commentGroup.cacheObject()
                 let section = self.commentsGroupCount - 1
                 DispatchQueue.main.async { autoreleasepool {
-                    Qiscus.chatRooms[roomId]?.delegate?.room(gotNewGroupComment: section)
+                    Qiscus.chatRooms[roomId]?.delegate?.room?(gotNewGroupComment: section)
                 }}
                 self.updateUnreadCommentCount()
-                DispatchQueue.main.async { autoreleasepool{
-                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                        roomDelegate.gotNewComment(newComment)
-                    }
-                }}
+                
                 QiscusMe.updateLastCommentId(commentId: newComment.id)
+            }
+            self.updateLastComentInfo(comment: newComment)
+            if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                DispatchQueue.main.async { autoreleasepool{
+                    roomDelegate.gotNewComment(newComment)
+                }}
             }
         }
         newComment.cacheObject()
-        if let user = QUser.user(withEmail: newComment.senderEmail){
-            user.updateLastSeen(lastSeen: newComment.createdAt)
-        }
     }
     
+    internal func updateLastComentInfo(comment:QComment){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+
+        if comment.createdAt > self.lastCommentCreatedAt {
+            try! realm.write {
+                self.lastCommentId = comment.id
+                self.lastCommentText = comment.text
+                self.lastCommentUniqueId = comment.uniqueId
+                self.lastCommentBeforeId = comment.beforeId
+                self.lastCommentCreatedAt = comment.createdAt
+                self.lastCommentSenderEmail = comment.senderEmail
+                self.lastCommentSenderName = comment.senderName
+                self.lastCommentStatusRaw = comment.statusRaw
+                self.lastCommentTypeRaw = comment.typeRaw
+                self.lastCommentData = comment.data
+            }
+            
+            let roomId = self.id
+            let count = self.unreadCount + 1
+            self.updateUnreadCommentCount(count: count)
+            DispatchQueue.main.async {
+                if let room = QRoom.room(withId: roomId){
+                    if let c = room.lastComment {
+                        if let delegate = room.delegate {
+                            delegate.room?(gotNewComment: c)
+                        }
+                        Qiscus.chatDelegate?.qiscusChat?(gotNewComment: c)
+                    }
+                }
+            }
+        }
+    }
     // MARK: - Public Object method
     public func syncRoomData(withJSON json:JSON){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
@@ -447,6 +546,13 @@ public class QRoom:Object {
             if roomUniqueId != self.uniqueId {
                 try! realm.write {
                     self.uniqueId = roomUniqueId
+                }
+            }
+        }
+        if let unread = json["unread_count"].int {
+            if unread != self.unreadCount {
+                try! realm.write {
+                    self.unreadCount = unread
                 }
             }
         }
@@ -477,54 +583,97 @@ public class QRoom:Object {
                 }}
             }
         }
+        if json["last_comment"] != JSON.null {
+            let commentData = json["last_comment"]
+            let comment = QComment.tempComment(fromJSON: commentData)
+            if comment.id > self.lastCommentId {
+                try! realm.write {
+                    self.lastCommentId = comment.id
+                    self.lastCommentText = comment.text
+                    self.lastCommentUniqueId = comment.uniqueId
+                    self.lastCommentBeforeId = comment.beforeId
+                    self.lastCommentCreatedAt = comment.createdAt
+                    self.lastCommentSenderEmail = comment.senderEmail
+                    self.lastCommentSenderName = comment.senderName
+                    self.lastCommentStatusRaw = comment.statusRaw
+                    self.lastCommentTypeRaw = comment.typeRaw
+                    self.lastCommentData = comment.data
+                }
+            }
+        }else{
+            if let lastMessage = json["last_comment_message"].string{
+                if lastMessage != self.lastCommentText {
+                    try! realm.write {
+                        self.lastCommentText = lastMessage
+                    }
+                }
+            }
+            if let lastMessageTime = json["last_comment_timestamp_unix"].double{
+                if lastMessageTime != self.lastCommentCreatedAt {
+                    try! realm.write {
+                        self.lastCommentCreatedAt = lastMessageTime
+                    }
+                }
+            }
+            if let lastCommentId = json["last_comment_id"].int{
+                if lastCommentId > self.lastCommentId {
+                    try! realm.write {
+                        self.lastCommentId = lastCommentId
+                    }
+                }
+            }
+        }
         
-        var participantString = [String]()
-        var participantChanged = false
-        for participantJSON in json["participants"].arrayValue {
-            let participantEmail = participantJSON["email"].stringValue
-            let fullname = participantJSON["username"].stringValue
-            let avatarURL = participantJSON["avatar_url"].stringValue
-            let savedUser = QUser.saveUser(withEmail: participantEmail, fullname: fullname, avatarURL: avatarURL)
-            let lastReadId = participantJSON["last_comment_read_id"].intValue
-            let lastDeliveredId = participantJSON["last_comment_received_id"].intValue
-            
-            if let savedParticipant = QParticipant.participant(inRoomWithId: self.id, andEmail: savedUser.email){
-                savedParticipant.updateLastReadId(commentId: lastReadId)
-                savedParticipant.updateLastDeliveredId(commentId: lastDeliveredId)
-            }else {
-                let newParticipant = QParticipant()
-                newParticipant.localId = "\(self.id)_\(participantEmail)"
-                newParticipant.roomId = self.id
-                newParticipant.email = participantEmail
-                newParticipant.lastReadCommentId = lastReadId
-                newParticipant.lastDeliveredCommentId = lastDeliveredId
+        if let participants = json["participants"].array {
+            var participantString = [String]()
+            var participantChanged = false
+            for participantJSON in participants {
+                let participantEmail = participantJSON["email"].stringValue
+                let fullname = participantJSON["username"].stringValue
+                let avatarURL = participantJSON["avatar_url"].stringValue
+                let savedUser = QUser.saveUser(withEmail: participantEmail, fullname: fullname, avatarURL: avatarURL)
+                let lastReadId = participantJSON["last_comment_read_id"].intValue
+                let lastDeliveredId = participantJSON["last_comment_received_id"].intValue
                 
-                try! realm.write {
-                    self.participants.append(newParticipant)
+                if let savedParticipant = QParticipant.participant(inRoomWithId: self.id, andEmail: savedUser.email){
+                    savedParticipant.updateLastReadId(commentId: lastReadId)
+                    savedParticipant.updateLastDeliveredId(commentId: lastDeliveredId)
+                }else {
+                    let newParticipant = QParticipant()
+                    newParticipant.localId = "\(self.id)_\(participantEmail)"
+                    newParticipant.roomId = self.id
+                    newParticipant.email = participantEmail
+                    newParticipant.lastReadCommentId = lastReadId
+                    newParticipant.lastDeliveredCommentId = lastDeliveredId
+                    
+                    try! realm.write {
+                        self.participants.append(newParticipant)
+                    }
+                    participantChanged = true
                 }
-                participantChanged = true
+                participantString.append(participantEmail)
             }
-            participantString.append(participantEmail)
-        }
-        self.updateCommentStatus()
-        var index = 0
-        for participant in self.participants{
-            if !participantString.contains(participant.email){
-                try! realm.write {
-                    self.participants.remove(objectAtIndex: index)
+            self.updateCommentStatus()
+            var index = 0
+            for participant in self.participants{
+                if !participantString.contains(participant.email){
+                    try! realm.write {
+                        self.participants.remove(objectAtIndex: index)
+                    }
+                    participantChanged = true
                 }
-                participantChanged = true
+                index += 1
             }
-            index += 1
-        }
-        if participantChanged {
-            let id = self.id
+            if participantChanged {
+                let id = self.id
                 DispatchQueue.main.async { autoreleasepool {
                     if let cache = Qiscus.chatRooms[id] {
                         cache.delegate?.room(didChangeParticipant: cache)
                     }
-                }}
+                    }}
+            }
         }
+        
     }
     public func saveNewComment(fromJSON json:JSON){
         let roomTS = ThreadSafeReference(to: self)
@@ -549,6 +698,19 @@ public class QRoom:Object {
             let avatarURL = json["user_avatar_url"].stringValue
             let _ = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL, lastSeen: commentCreatedAt)
             
+            if let participant = QParticipant.participant(inRoomWithId: room.id, andEmail: senderEmail) {
+                if participant.lastReadCommentId < commentId {
+                    try! realm.write {
+                        participant.lastReadCommentId = commentId
+                        participant.lastDeliveredCommentId = commentId
+                    }
+                }else if participant.lastDeliveredCommentId < commentId{
+                    try! realm.write {
+                        participant.lastDeliveredCommentId = commentId
+                    }
+                }
+            }
+            
             if let oldComment = QComment.comment(withUniqueId: commentUniqueId) {
                 try! realm.write {
                     oldComment.id = commentId
@@ -565,7 +727,8 @@ public class QRoom:Object {
                     status = .delivered
                 }
                 oldComment.updateStatus(status: status)
-            }else{
+            }
+            else{
                 let newComment = QComment()
                 newComment.uniqueId = commentUniqueId
                 newComment.id = commentId
@@ -666,18 +829,6 @@ public class QRoom:Object {
                 }
                 room.addComment(newComment: newComment)
             }
-            if let participant = QParticipant.participant(inRoomWithId: room.id, andEmail: senderEmail) {
-                if participant.lastReadCommentId < commentId {
-                    try! realm.write {
-                        participant.lastReadCommentId = commentId
-                        participant.lastDeliveredCommentId = commentId
-                    }
-                }else if participant.lastDeliveredCommentId < commentId{
-                    try! realm.write {
-                        participant.lastDeliveredCommentId = commentId
-                    }
-                }
-            }
         }}
     }
     public func saveOldComment(fromJSON json:JSON){
@@ -696,6 +847,21 @@ public class QRoom:Object {
         }
         let avatarURL = json["user_avatar_url"].stringValue
         let user = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL, lastSeen: commentCreatedAt)
+        
+        if let participant = QParticipant.participant(inRoomWithId: self.id, andEmail: senderEmail) {
+            if !participant.isInvalidated {
+                if participant.lastReadCommentId < commentId {
+                    try! realm.write {
+                        participant.lastReadCommentId = commentId
+                        participant.lastDeliveredCommentId = commentId
+                    }
+                }else if participant.lastDeliveredCommentId < commentId{
+                    try! realm.write {
+                        participant.lastDeliveredCommentId = commentId
+                    }
+                }
+            }
+        }
         
         if let oldComment = QComment.comment(withUniqueId: commentUniqueId) {
             try! realm.write {
@@ -717,7 +883,8 @@ public class QRoom:Object {
                 
                 oldComment.updateStatus(status: status)
             }
-        }else{
+        }
+        else{
             let newComment = QComment()
             newComment.uniqueId = commentUniqueId
             newComment.id = commentId
@@ -819,20 +986,7 @@ public class QRoom:Object {
             }
             self.addComment(newComment: newComment, onTop: true)
         }
-        if let participant = QParticipant.participant(inRoomWithId: self.id, andEmail: senderEmail) {
-            if !participant.isInvalidated {
-                if participant.lastReadCommentId < commentId {
-                    try! realm.write {
-                        participant.lastReadCommentId = commentId
-                        participant.lastDeliveredCommentId = commentId
-                    }
-                }else if participant.lastDeliveredCommentId < commentId{
-                    try! realm.write {
-                        participant.lastDeliveredCommentId = commentId
-                    }
-                }
-            }
-        }
+        
     }
     
     public func sync(){
@@ -1159,33 +1313,43 @@ public class QRoom:Object {
             let commentGroup = self.comments[commentIndex.section]
             let commentUniqueId = comment.uniqueId
             let commentGroupId = commentGroup.id
-            QiscusDBThread.sync {
-            DispatchQueue.main.sync { autoreleasepool {
-                if QComment.cache[commentUniqueId] != nil {
+            if Thread.isMainThread {
+                QComment.cache[commentUniqueId] = nil
+            }else{
+                DispatchQueue.main.sync { autoreleasepool {
                     QComment.cache[commentUniqueId] = nil
-                }
-            }}
+                }}
             }
             if self.comments[commentIndex.section].commentsCount > 1{
-                try! realm.write {
-                    realm.delete(comment)
-                }
-                DispatchQueue.main.async {autoreleasepool {
+                try! realm.write { realm.delete(comment) }
+                if Thread.isMainThread {
                     Qiscus.chatRooms[id]?.delegate?.room(didDeleteComment: commentIndex.section, row: commentIndex.item)
-                }}
+                }else{
+                    DispatchQueue.main.sync { autoreleasepool {
+                        Qiscus.chatRooms[id]?.delegate?.room(didDeleteComment: commentIndex.section, row: commentIndex.item)
+                    }}
+                }
             }else{
-                DispatchQueue.main.async {
-                    if QCommentGroup.cache[commentGroupId] != nil {
+                if Thread.isMainThread {
+                    QComment.cache[commentUniqueId] = nil
+                    QCommentGroup.cache[commentGroupId] = nil
+                }else{
+                    DispatchQueue.main.sync { autoreleasepool {
+                        QComment.cache[commentUniqueId] = nil
                         QCommentGroup.cache[commentGroupId] = nil
-                    }
+                    }}
                 }
                 try! realm.write {
                     realm.delete(comment)
                     realm.delete(commentGroup)
                 }
-                DispatchQueue.main.async {autoreleasepool {
+                if Thread.isMainThread {
                     Qiscus.chatRooms[id]?.delegate?.room(didDeleteGroupComment: commentIndex.section)
-                }}
+                }else{
+                    DispatchQueue.main.sync { autoreleasepool {
+                        Qiscus.chatRooms[id]?.delegate?.room(didDeleteGroupComment: commentIndex.section)
+                    }}
+                }
             }
         }
     }
@@ -1203,6 +1367,12 @@ public class QRoom:Object {
                 self.lastReadCommentId = commentId
             }
             self.updateUnreadCommentCount()
+        }
+    }
+    internal func updateUnreadCommentCount(count:Int){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        try! realm.write {
+            self.unreadCount = count
         }
     }
     public func updateUnreadCommentCount(){
@@ -1255,40 +1425,52 @@ public class QRoom:Object {
                 updateLastParticipantsDeliveredId(deliveredId: minDeliveredId)
             }
         }
-        
     }
     private func updateLastParticipantsReadId(readId:Int){
-        var section = 0
-        for commentGroup in self.comments {
-            var item = 0
-            for comment in commentGroup.comments{
-                if (comment.statusRaw < QCommentStatus.read.rawValue && comment.status != .failed && comment.status != .sending && comment.id < readId) || comment.id == readId{
-                    comment.updateStatus(status: .read)
+        if readId > self.lastParticipantsReadId {
+            var section = 0
+            for commentGroup in self.comments {
+                var item = 0
+                for comment in commentGroup.comments{
+                    if (comment.statusRaw < QCommentStatus.read.rawValue && comment.status != .failed && comment.status != .sending && comment.id < readId) || comment.id == readId{
+                        comment.updateStatus(status: .read)
+                    }
+                    item += 1
                 }
-                item += 1
+                section += 1
             }
-            section += 1
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.lastParticipantsReadId = readId
+                self.lastParticipantsDeliveredId = readId
+            }
         }
     }
     private func updateLastParticipantsDeliveredId(deliveredId:Int){
-        var section = 0
-        for commentGroup in self.comments {
-            var item = 0
-            for comment in commentGroup.comments{
-                if (comment.statusRaw < QCommentStatus.delivered.rawValue && comment.status != .failed && comment.status != .sending && comment.id < deliveredId) || (comment.id == deliveredId && comment.status != .read){
-                    if let cache = QComment.cache[comment.uniqueId] {
-                        if !cache.isInvalidated {
-                            cache.updateStatus(status: .read)
+        if deliveredId > self.lastParticipantsDeliveredId {
+            var section = 0
+            for commentGroup in self.comments {
+                var item = 0
+                for comment in commentGroup.comments{
+                    if (comment.statusRaw < QCommentStatus.delivered.rawValue && comment.status != .failed && comment.status != .sending && comment.id < deliveredId) || (comment.id == deliveredId && comment.status != .read){
+                        if let cache = QComment.cache[comment.uniqueId] {
+                            if !cache.isInvalidated {
+                                cache.updateStatus(status: .read)
+                            }else{
+                                comment.updateStatus(status: .read)
+                            }
                         }else{
                             comment.updateStatus(status: .read)
                         }
-                    }else{
-                        comment.updateStatus(status: .read)
                     }
+                    item += 1
                 }
-                item += 1
+                section += 1
             }
-            section += 1
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.lastParticipantsDeliveredId = deliveredId
+            }
         }
     }
     public class func publishStatus(roomId:Int, commentId:Int, status:QCommentStatus){

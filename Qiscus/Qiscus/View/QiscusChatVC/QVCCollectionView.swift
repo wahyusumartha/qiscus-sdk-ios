@@ -36,6 +36,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
         
         var cell = collectionView.dequeueReusableCell(withReuseIdentifier: comment.cellIdentifier, for: indexPath) as! QChatCell
+        cell.clipsToBounds = true
         cell.comment = comment
         cell.delegate = self
         if let audioCell = cell as? QCellAudio{
@@ -179,10 +180,24 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             if self.forwardAction != nil && Qiscus.sharedInstance.connected && comment.type != .postback && comment.type != .account && comment.status != .failed && comment.type != .system && comment.status != .sending{
                 show = true
             }
+            break
         case "info":
             if self.infoAction != nil && Qiscus.sharedInstance.connected && comment.type != .postback && comment.type != .account && comment.status != .failed && comment.type != .system && comment.status != .sending && comment.type != .card && self.chatRoom!.type == .group && comment.senderEmail == QiscusMe.sharedInstance.email{
                 show = true
             }
+            break
+        case "share":
+            if Qiscus.sharedInstance.connected && ( comment.type == .image || comment.type == .video || comment.type == .audio || comment.type == .text) {
+                if comment.type == .text {
+                    return true
+                }
+                if let file = comment.file {
+                    if QFileManager.isFileExist(inLocalPath: file.localPath){
+                        show = true
+                    }
+                }
+            }
+            break
         default:
             break
         }

@@ -8,6 +8,11 @@
 
 import UIKit
 
+@objc public protocol QiscusChatDelegate {
+    @objc optional func qiscusChat(gotNewComment comment:QComment)
+    @objc optional func qiscusChat(userDidTyping users:QUser)
+    @objc optional func qiscusChat(gotNewRoom room:QRoom)
+}
 @objc public protocol QiscusConfigDelegate {
     @objc optional func qiscusFailToConnect(_ withMessage:String)
     @objc optional func qiscusConnected()

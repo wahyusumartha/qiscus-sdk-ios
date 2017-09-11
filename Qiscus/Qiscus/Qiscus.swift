@@ -24,8 +24,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     
     static let sharedInstance = Qiscus()
     
-    static let qiscusVersionNumber:String = "2.5.2"
-    static let qiscusBuildNumber:String = "1"
+    static let qiscusVersionNumber:String = "2.5.3"
     
     static let showDebugPrint = true
     
@@ -36,7 +35,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     static var dbConfiguration = Realm.Configuration.defaultConfiguration
     static var chatRooms = [Int : QRoom]()
     static var qiscusDownload:[String] = [String]()
-    
+    public static var chatDelegate:QiscusChatDelegate?
     
     static var realtimeConnected:Bool{
         get{
@@ -73,11 +72,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     
     public var chatViews = [Int:QiscusChatVC]()
     
-    @objc public class var buildNumber:String{
-        get{
-            return Qiscus.qiscusBuildNumber
-        }
-    }
     @objc public class var versionNumber:String{
         get{
             return Qiscus.qiscusVersionNumber
@@ -975,41 +969,26 @@ extension Qiscus:CocoaMQTTDelegate{
                         let commentType = json["type"].stringValue
                         if commentType == "system_event" {
                             let payload = json["payload"]
-                            if payload["object_email"].stringValue == QiscusMe.sharedInstance.email {
-                                switch payload["type"].stringValue {
-                                case "remove_member":
+                            let type = payload["type"].stringValue
+                            if type == "remove_member" {
+                                if payload["object_email"].stringValue == QiscusMe.sharedInstance.email {
                                     DispatchQueue.main.async {autoreleasepool{
-                                        if commentId > QiscusMe.sharedInstance.lastCommentId{
-                                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                                let comment = QComment.tempComment(fromJSON: json)
-                                                roomDelegate.gotNewComment(comment)
-                                            }
-                                            QiscusMe.updateLastCommentId(commentId: commentId)
+                                        let comment = QComment.tempComment(fromJSON: json)
+                                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                                            roomDelegate.gotNewComment(comment)
                                         }
+                                        Qiscus.chatDelegate?.qiscusChat?(gotNewComment: comment)
                                         if let chatView = Qiscus.shared.chatViews[roomId] {
                                             if chatView.isPresence {
                                                 chatView.goBack()
                                             }
                                             Qiscus.shared.chatViews[roomId] = nil
                                         }
-                                        
+                                        Qiscus.chatRooms[roomId] = nil
                                         if let room = QRoom.room(withId: roomId){
-                                            Qiscus.chatRooms[roomId] = nil
                                             QRoom.deleteRoom(room: room)
                                         }
-                                        }}
-                                break
-                                default:
-                                    DispatchQueue.main.async {autoreleasepool{
-                                        if commentId > QiscusMe.sharedInstance.lastCommentId{
-                                            if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                                let comment = QComment.tempComment(fromJSON: json)
-                                                roomDelegate.gotNewComment(comment)
-                                            }
-                                            QiscusMe.updateLastCommentId(commentId: commentId)
-                                        }
                                     }}
-                                break
                                 }
                             }
                         }
@@ -1157,5 +1136,6 @@ extension Qiscus:CocoaMQTTDelegate{
         Qiscus.setupReachability()
         Qiscus.sharedInstance.RealtimeConnect()
     }
+    
 }
 
