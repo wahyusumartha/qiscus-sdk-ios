@@ -533,6 +533,9 @@ open class QiscusChatVC: UIViewController{
             let infoMenuItem: UIMenuItem = UIMenuItem(title: "Info", action: #selector(QChatCell.info))
             menuItems.append(infoMenuItem)
         }
+        let shareMenuItem: UIMenuItem = UIMenuItem(title: "Share", action: #selector(QChatCell.share))
+        menuItems.append(shareMenuItem)
+
         UIMenuController.shared.menuItems = menuItems
         
         //self.navigationController?.navigationBar.verticalGradientColor(topColor, bottomColor: bottomColor)

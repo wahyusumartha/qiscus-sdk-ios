@@ -16,6 +16,7 @@ protocol ChatCellDelegate {
     func didTapPostbackButton(withData data: JSON)
     func didTapAccountLinking(withData data: JSON)
     func didTapSaveContact(withData data:QComment)
+    func didShare(comment: QComment)
 }
 class QChatCell: UICollectionViewCell, QCommentDelegate {
     
@@ -95,6 +96,12 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
     open func info(){
         if let chatView = Qiscus.shared.chatViews[self.comment!.roomId]{
             chatView.info(comment: self.comment!)
+        }
+    }
+    open func share(){
+        print("try to share")
+        if let comment = self.comment {
+            self.delegate?.didShare(comment: comment)
         }
     }
     open func showFile(){
