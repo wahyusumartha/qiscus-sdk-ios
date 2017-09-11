@@ -459,9 +459,13 @@ QChatService.roomList(withLimit: 100, page: page, onSuccess: { (rooms, totalRoom
         }
 ```
 ```
-QChatService.searchComment(withQuery: targetField.text!, onSuccess: { (comments) in
-                print("success search comment with result:\n\(comments)")                
+QChatService.searchComment(withQuery: text, onSuccess: { (comments) in
+                print("success search comment with result:\n\(comments)")
             }, onFailed: { (error) in
                 print("fail to get search result")
             })
+```
+```
+let view = Qiscus.chatView(withRoomId: comment.roomId)
+view.chatTarget = comment
 ```
