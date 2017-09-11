@@ -72,11 +72,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     
     public var chatViews = [Int:QiscusChatVC]()
     
-    @objc public class var buildNumber:String{
-        get{
-            return Qiscus.qiscusBuildNumber
-        }
-    }
     @objc public class var versionNumber:String{
         get{
             return Qiscus.qiscusVersionNumber
