@@ -453,11 +453,15 @@ Don't forget to add usage description for camera, photo library and microphone t
 
 ```
 QChatService.roomList(withLimit: 100, page: page, onSuccess: { (rooms, totalRoom, currentPage, limit) in
-            .
-            .
-            .
-            .
+            print("room list: \(rooms)")
         }) { (error) in
             print("\(error)")
         }
+```
+```
+QChatService.searchComment(withQuery: targetField.text!, onSuccess: { (comments) in
+                print("success search comment with result:\n\(comments)")                
+            }, onFailed: { (error) in
+                print("fail to get search result")
+            })
 ```
