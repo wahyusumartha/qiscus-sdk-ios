@@ -450,3 +450,14 @@ Messages are stored locally so you can still access the messages when you dont h
 # Notes
 
 Don't forget to add usage description for camera, photo library and microphone to your **info.plist **to use our attachment functionality in chat SDK
+
+```
+QChatService.roomList(withLimit: 100, page: page, onSuccess: { (rooms, totalRoom, currentPage, limit) in
+            .
+            .
+            .
+            .
+        }) { (error) in
+            print("\(error)")
+        }
+```
