@@ -782,7 +782,7 @@ public class QRoom:Object {
                     newComment.typeRaw = QCommentType.location.name()
                     break
                 case "custom":
-                    newComment.data = "\(json["payload"]["content"])"
+                    newComment.data = "\(json["payload"])"
                     newComment.typeRaw = json["payload"]["type"].stringValue
                     break
                 case "text":
@@ -939,7 +939,7 @@ public class QRoom:Object {
                 newComment.typeRaw = QCommentType.text.name()
                 break
             case "custom":
-                newComment.data = "\(json["payload"]["content"])"
+                newComment.data = "\(json["payload"])"
                 newComment.typeRaw = json["payload"]["type"].stringValue
                 break
             case "text":
