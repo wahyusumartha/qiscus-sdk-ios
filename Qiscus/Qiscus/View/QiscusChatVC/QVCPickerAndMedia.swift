@@ -50,7 +50,6 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
         let time = Double(Date().timeIntervalSince1970)
         let timeToken = UInt64(time * 10000)
         let fileType:String = info[UIImagePickerControllerMediaType] as! String
-        print("file info: \(info)")
         picker.dismiss(animated: true, completion: nil)
         
         if fileType == "public.image"{

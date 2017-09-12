@@ -155,6 +155,11 @@ public class QComment:Object {
             ]
         }
     }
+    public var room:QRoom? {
+        get{
+            return QRoom.room(withId: self.roomId)
+        }
+    }
     public var file:QFile? {
         get{
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
@@ -753,6 +758,40 @@ public class QComment:Object {
         case "button_postback_response" :
             temp.data = "\(json["payload"])"
             temp.typeRaw = QCommentType.text.name()
+            break
+        case "location":
+            temp.data = "\(json["payload"])"
+            temp.typeRaw = QCommentType.location.name()
+            break
+        case "custom":
+            temp.data = "\(json["payload"])"
+            temp.typeRaw = json["payload"]["type"].stringValue
+            break
+        case "file_attachment":
+            temp.data = "\(json["payload"])"
+            var type = QiscusFileType.file
+            let fileURL = json["payload"]["url"].stringValue
+            if temp.file == nil {
+                let file = QFile()
+                file.id = temp.uniqueId
+                file.url = fileURL
+                file.senderEmail = temp.senderEmail
+                type = file.type
+            }
+            switch type {
+            case .image:
+                temp.typeRaw = QCommentType.image.name()
+                break
+            case .video:
+                temp.typeRaw = QCommentType.video.name()
+                break
+            case .audio:
+                temp.typeRaw = QCommentType.audio.name()
+                break
+            default:
+                temp.typeRaw = QCommentType.file.name()
+                break
+            }
             break
         case "text":
             if temp.text.hasPrefix("[file]"){

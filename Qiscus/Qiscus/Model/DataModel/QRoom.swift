@@ -527,6 +527,7 @@ public class QRoom:Object {
                             delegate.room?(gotNewComment: c)
                         }
                         Qiscus.chatDelegate?.qiscusChat?(gotNewComment: c)
+                        QiscusNotification.publish(gotNewComment: c)
                     }
                 }
             }
@@ -785,6 +786,40 @@ public class QRoom:Object {
                     newComment.data = "\(json["payload"])"
                     newComment.typeRaw = json["payload"]["type"].stringValue
                     break
+                case "file_attachment":
+                    newComment.data = "\(json["payload"])"
+                    var type = QiscusFileType.file
+                    let fileURL = json["payload"]["url"].stringValue
+                    if newComment.file == nil {
+                        let file = QFile()
+                        file.id = newComment.uniqueId
+                        file.url = fileURL
+                        file.senderEmail = newComment.senderEmail
+                        try! realm.write {
+                            realm.add(file)
+                        }
+                        type = file.type
+                    }else{
+                        try! realm.write {
+                            newComment.file!.url = fileURL
+                        }
+                        type = newComment.file!.type
+                    }
+                    switch type {
+                    case .image:
+                        newComment.typeRaw = QCommentType.image.name()
+                        break
+                    case .video:
+                        newComment.typeRaw = QCommentType.video.name()
+                        break
+                    case .audio:
+                        newComment.typeRaw = QCommentType.audio.name()
+                        break
+                    default:
+                        newComment.typeRaw = QCommentType.file.name()
+                        break
+                    }
+                    break
                 case "text":
                     if newComment.text.hasPrefix("[file]"){
                         var type = QiscusFileType.file
@@ -941,6 +976,40 @@ public class QRoom:Object {
             case "custom":
                 newComment.data = "\(json["payload"])"
                 newComment.typeRaw = json["payload"]["type"].stringValue
+                break
+            case "file_attachment":
+                newComment.data = "\(json["payload"])"
+                var type = QiscusFileType.file
+                let fileURL = json["payload"]["url"].stringValue
+                if newComment.file == nil {
+                    let file = QFile()
+                    file.id = newComment.uniqueId
+                    file.url = fileURL
+                    file.senderEmail = newComment.senderEmail
+                    try! realm.write {
+                        realm.add(file)
+                    }
+                    type = file.type
+                }else{
+                    try! realm.write {
+                        newComment.file!.url = fileURL
+                    }
+                    type = newComment.file!.type
+                }
+                switch type {
+                case .image:
+                    newComment.typeRaw = QCommentType.image.name()
+                    break
+                case .video:
+                    newComment.typeRaw = QCommentType.video.name()
+                    break
+                case .audio:
+                    newComment.typeRaw = QCommentType.audio.name()
+                    break
+                default:
+                    newComment.typeRaw = QCommentType.file.name()
+                    break
+                }
                 break
             case "text":
                 if newComment.text.hasPrefix("[file]"){
@@ -1294,6 +1363,7 @@ public class QRoom:Object {
             let id = self.id
             DispatchQueue.main.async {
                 Qiscus.chatRooms[id]?.delegate?.room(userDidTyping: userEmail)
+                QiscusNotification.publish(userTyping: <#T##QUser#>)
             }
             if userEmail != "" {
                 if self.typingTimer != nil {
