@@ -1363,7 +1363,7 @@ public class QRoom:Object {
             let id = self.id
             DispatchQueue.main.async {
                 Qiscus.chatRooms[id]?.delegate?.room(userDidTyping: userEmail)
-                QiscusNotification.publish(userTyping: <#T##QUser#>)
+                //QiscusNotification.publish(userTyping: <#T##QUser#>)
             }
             if userEmail != "" {
                 if self.typingTimer != nil {
