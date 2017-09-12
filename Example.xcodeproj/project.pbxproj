@@ -29,6 +29,7 @@
 		39E754381F62226E003C3302 /* RoomListVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39E754361F62226E003C3302 /* RoomListVC.xib */; };
 		39E7543B1F6222AB003C3302 /* RoomListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E754391F6222AB003C3302 /* RoomListCell.swift */; };
 		39E7543C1F6222AB003C3302 /* RoomListCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39E7543A1F6222AB003C3302 /* RoomListCell.xib */; };
+		39E754431F678B2B003C3302 /* QiscusNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E754421F678B2B003C3302 /* QiscusNotification.swift */; };
 		39F1F6AD1D3B90E200FF1C8C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F1F6AC1D3B90E200FF1C8C /* AppDelegate.swift */; };
 		39F1F6B21D3B90E200FF1C8C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 39F1F6B01D3B90E200FF1C8C /* Main.storyboard */; };
 		39F1F6B71D3B90E200FF1C8C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 39F1F6B61D3B90E200FF1C8C /* Assets.xcassets */; };
@@ -178,6 +179,7 @@
 		39E754361F62226E003C3302 /* RoomListVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RoomListVC.xib; sourceTree = "<group>"; };
 		39E754391F6222AB003C3302 /* RoomListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoomListCell.swift; sourceTree = "<group>"; };
 		39E7543A1F6222AB003C3302 /* RoomListCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RoomListCell.xib; sourceTree = "<group>"; };
+		39E754421F678B2B003C3302 /* QiscusNotification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusNotification.swift; path = Qiscus/Model/Protocol/QiscusNotification.swift; sourceTree = "<group>"; };
 		39F1F6A91D3B90E200FF1C8C /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		39F1F6AC1D3B90E200FF1C8C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		39F1F6B11D3B90E200FF1C8C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -506,6 +508,7 @@
 				39F710031F3D62D600774D97 /* QiscusChatCellDelegate.swift */,
 				39F710041F3D62D600774D97 /* QiscusConfigDelegate.swift */,
 				39F710051F3D62D600774D97 /* QiscusRoomDelegate.swift */,
+				39E754421F678B2B003C3302 /* QiscusNotification.swift */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";
@@ -922,6 +925,7 @@
 				39F7101A1F3D63B500774D97 /* ChatInputText.swift in Sources */,
 				39F70FFC1F3D619900774D97 /* QChatFooterLeft.swift in Sources */,
 				39F7101B1F3D63B500774D97 /* ChatTapRecognizer.swift in Sources */,
+				39E754431F678B2B003C3302 /* QiscusNotification.swift in Sources */,
 				39F70FBD1F3D5FE000774D97 /* QVCPickerAndMedia.swift in Sources */,
 				39F7101D1F3D63B500774D97 /* QTextView.swift in Sources */,
 				392F18971F4D175800ABE232 /* QCellContactLeft.swift in Sources */,
