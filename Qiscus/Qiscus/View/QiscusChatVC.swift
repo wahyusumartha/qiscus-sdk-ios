@@ -769,7 +769,7 @@ open class QiscusChatVC: UIViewController{
         self.isPresence = false
         view.endEditing(true)
         if let room = self.chatRoom {
-            room.unsubscribeRealtimeStatus()
+            //room.unsubscribeRealtimeStatus()
             room.delegate = nil
         }
 //        audioPlayer?.pause()

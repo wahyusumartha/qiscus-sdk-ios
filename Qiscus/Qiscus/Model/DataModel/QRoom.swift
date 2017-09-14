@@ -162,8 +162,10 @@ public class QRoom:Object {
         let rooms = QRoom.all()
         for room in rooms{
             room.cache()
+            
         }
     }
+    
     public class func room(withId id:Int) -> QRoom? {
         if let cache = Qiscus.chatRooms[id] {
             return cache

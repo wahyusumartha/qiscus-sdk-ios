@@ -229,11 +229,17 @@ public class QUser:Object {
     }
     internal func cacheObject(){
         let userTS = ThreadSafeReference(to:self)
-        DispatchQueue.main.async {
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            guard let user = realm.resolve(userTS) else { return }
-            if QUser.cache[user.email] == nil {
-                QUser.cache[user.email] = user
+        if Thread.isMainThread {
+            if QUser.cache[self.email] == nil {
+                QUser.cache[self.email] = self
+            }
+        }else{
+            DispatchQueue.main.sync {
+                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                guard let user = realm.resolve(userTS) else { return }
+                if QUser.cache[user.email] == nil {
+                    QUser.cache[user.email] = user
+                }
             }
         }
     }

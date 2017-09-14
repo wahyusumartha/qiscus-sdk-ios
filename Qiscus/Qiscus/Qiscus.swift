@@ -901,8 +901,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                 }
             }
         }
-        //Qiscus.chatRooms = [Int:QRoom]()
-        //Qiscus.shared.chatViews = [Int:QiscusChatVC]()
+        
         Qiscus.publishUserStatus(offline: true)
     }
     @objc public class func setNotificationAction(onClick action:@escaping ((QiscusChatVC)->Void)){
@@ -1021,12 +1020,18 @@ extension Qiscus:CocoaMQTTDelegate{
                     
                     break
                 case "t":
-                    let topicId:Int = Int(String(channelArr[2]))!
+                    let roomId:Int = Int(String(channelArr[2]))!
                     let userEmail:String = String(channelArr[3])
                     let data = (messageData == "0") ? "" : userEmail
                     if userEmail != QiscusMe.sharedInstance.email {
                         DispatchQueue.main.async {autoreleasepool{
-                            QRoom.room(withId: topicId)?.updateUserTyping(userEmail: data)
+                            if let room = QRoom.room(withId: roomId) {
+                                if let user = QUser.user(withEmail: userEmail){
+                                    let typing = (messageData == "0") ? false : true
+                                    QiscusNotification.publish(userTyping: user, room: room, typing: typing)
+                                }
+                                room.updateUserTyping(userEmail: data)
+                            }
                             QUser.user(withEmail: userEmail)?.updateLastSeen(lastSeen: Double(Date().timeIntervalSince1970))
                         }}
                     }
@@ -1140,6 +1145,11 @@ extension Qiscus:CocoaMQTTDelegate{
         Qiscus.setupReachability()
         Qiscus.sharedInstance.RealtimeConnect()
     }
-    
+    public class func subscrileAllRoomNotification(){
+        let rooms = QRoom.all()
+        for room in rooms {
+            room.subscribeRealtimeStatus()
+        }
+    }
 }
 
