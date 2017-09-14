@@ -253,7 +253,13 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         
         switch comment.type {
             case .card, .contact    : break
-            case .video, .image     : size.height = 190 ; break
+            case .video, .image     :
+                if size.height > 0 {
+                    size.height += 151 ;
+                }else{
+                    size.height = 140
+                }
+            break
             case .audio             : size.height = 83  ; break
             case .file              : size.height = 67  ; break
             case .reply             : size.height += 88 ; break

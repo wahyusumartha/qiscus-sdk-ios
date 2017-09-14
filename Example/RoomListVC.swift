@@ -33,12 +33,18 @@ class RoomListVC: UITableViewController {
         self.navigationItem.rightBarButtonItems = rightBarButtons
         
         Qiscus.chatDelegate = self
-        self.showQiscusLoading()
-        self.loadRoomList()
+        
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.showQiscusLoading()
         self.rooms = QRoom.all()
+        
+        if self.rooms.count == 0 {
+            self.loadRoomList()
+        }else{
+            self.dismissQiscusLoading()
+        }
     }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -71,12 +77,13 @@ class RoomListVC: UITableViewController {
     }
     
     func loadRoomList(page:Int? = 1){
-        QChatService.roomList(withLimit: 40, page: page, onSuccess: { (rooms, totalRoom, currentPage, limit) in
+        QChatService.roomList(withLimit: 100, page: page, onSuccess: { (rooms, totalRoom, currentPage, limit) in
             if totalRoom > (limit * (currentPage - 1)) + rooms.count{
                 self.loadRoomList(page: currentPage + 1)
             }else{
                 DispatchQueue.main.async {
                     self.rooms = QRoom.all()
+                    self.tableView.reloadData()
                     self.dismissQiscusLoading()
                 }
             }

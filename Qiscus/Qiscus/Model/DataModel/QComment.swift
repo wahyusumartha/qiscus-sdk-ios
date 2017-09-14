@@ -38,6 +38,8 @@ public enum QReplyType:Int{
     case location
     case custom
     
+    static let all = [text.name(), image.name(), video.name(), audio.name(),file.name(),postback.name(),account.name(), reply.name(), system.name(), card.name(), contact.name(), location.name(), custom.name()]
+    
     func name() -> String{
         switch self {
             case .text      : return "text"
@@ -252,8 +254,8 @@ public class QComment:Object {
             
             var size = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
             
-            if self.type == .postback && self.data != ""{
-                
+            switch self.type {
+            case .postback:
                 let payload = JSON(parseJSON: self.data)
                 
                 if let buttonsPayload = payload.array {
@@ -262,16 +264,35 @@ public class QComment:Object {
                 }else{
                     size.height += 35
                 }
-            }else if self.type == .account && self.data != ""{
+                break
+            case .account:
                 size.height += 35
-            }else if self.type == .card {
+                break
+            case .card:
                 let payload = JSON(parseJSON: self.data)
                 let buttons = payload["buttons"].arrayValue
                 size.height = CGFloat(240 + (buttons.count * 45)) + 5
-            }else if self.type == .contact {
+                break
+            case .contact:
                 size.height = 115
-            }else if self.type == .location {
+                break
+            case .location:
                 size.height += 168
+                break
+            case .image, .video:
+                let payload = JSON(parseJSON: self.data)
+                var height:CGFloat = 0
+                if payload != JSON.null {
+                    if let caption = payload["caption"].string {
+                        if caption != "" {
+                            height = size.height
+                        }
+                    }
+                }
+                size.height = height
+                break
+            default:
+                break
             }
             return size
         }
@@ -342,16 +363,30 @@ public class QComment:Object {
     var attributedText:NSMutableAttributedString {
         get{
             var attributedText = NSMutableAttributedString(string: self.text)
-            if self.type == .location {
+            switch self.type {
+            case .location:
                 let payload = JSON(parseJSON: self.data)
                 let address = payload["address"].stringValue
                 attributedText = NSMutableAttributedString(string: address)
                 let allRange = (address as NSString).range(of: address)
                 attributedText.addAttributes(self.textAttribute, range: allRange)
-            }else{
+                break
+            case .image, .video:
+                if self.data != "" {
+                    let payload = JSON(parseJSON: self.data)
+                    if let caption = payload["caption"].string {
+                        attributedText = NSMutableAttributedString(string: caption)
+                        let allRange = (caption as NSString).range(of: caption)
+                        attributedText.addAttributes(self.textAttribute, range: allRange)
+                    }
+                }
+                break
+            default:
                 let allRange = (self.text as NSString).range(of: self.text)
                 attributedText.addAttributes(self.textAttribute, range: allRange)
+                break
             }
+            
             return attributedText
         }
     }
@@ -841,6 +876,14 @@ public class QComment:Object {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
                 self.text = text
+            }
+        }
+    }
+    internal func update(data:String){
+        if self.data != data {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.data = data
             }
         }
     }

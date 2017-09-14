@@ -1183,7 +1183,7 @@ public class QRoom:Object {
         self.addComment(newComment: comment)
         return comment
     }
-    public func newFileComment(type:QiscusFileType, filename:String = "", data:Data? = nil, thumbImage:UIImage? = nil)->QComment{
+    public func newFileComment(type:QiscusFileType, filename:String = "", caption:String = "", data:Data? = nil, thumbImage:UIImage? = nil)->QComment{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let comment = QComment()
         let time = Double(Date().timeIntervalSince1970)
@@ -1197,6 +1197,8 @@ public class QRoom:Object {
             fileName = "\(uniqueID).\(fileExt)"
         }
         
+        let payload = "{\"url\":\"\(fileName)\", \"caption\": \"\(caption)\"}"
+        
         comment.uniqueId = uniqueID
         comment.id = 0
         comment.roomId = self.id
@@ -1208,6 +1210,7 @@ public class QRoom:Object {
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.isUploading = true
         comment.progress = 0
+        comment.data = payload
         
         let file = QFile()
         file.id = uniqueID

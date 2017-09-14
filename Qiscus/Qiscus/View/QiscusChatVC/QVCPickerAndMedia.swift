@@ -112,17 +112,24 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                 
                 data = UIImageJPEGRepresentation(image, compressVal)!
             }
+            
             if data != nil {
                 let text = QiscusTextConfiguration.sharedInstance.confirmationImageUploadText
                 let okText = QiscusTextConfiguration.sharedInstance.alertOkText
                 let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
                 
-                QPopUpView.showAlert(withTarget: self, image: image, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
-                doneAction: {
-                    self.postFile(filename: imageName, data: data!, type: .image)
-                },
-                cancelAction: {}
-                )
+//                QPopUpView.showAlert(withTarget: self, image: image, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
+//                doneAction: {
+//                    self.postFile(filename: imageName, data: data!, type: .image)
+//                },
+//                cancelAction: {}
+//                )
+                let uploader = QiscusUploaderVC(nibName: "QiscusUploaderVC", bundle: Qiscus.bundle)
+                uploader.data = data
+                uploader.fileName = imageName
+                uploader.room = self.chatRoom
+                self.navigationController?.pushViewController(uploader, animated: true)
+                
             }
         }else if fileType == "public.movie" {
             let mediaURL = info[UIImagePickerControllerMediaURL] as! URL
@@ -245,15 +252,17 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                     fileType = QiscusFileType.file
                 }
                 self.dismissLoading()
-                QPopUpView.showAlert(withTarget: self, image: thumb, message:popupText, isVideoImage: video,
-                                     doneAction: {
-                                        self.postFile(filename: fileName, data: data, type: fileType, thumbImage: thumb)
-                },
-                                     cancelAction: {
-                                        Qiscus.printLog(text: "cancel upload")
-                }
-                )
-                
+//                QPopUpView.showAlert(withTarget: self, image: thumb, message:popupText, isVideoImage: video,
+//                                     doneAction: {
+//                                        self.postFile(filename: fileName, data: data, type: fileType, thumbImage: thumb)
+//                },
+//                                     cancelAction: {
+//                                        Qiscus.printLog(text: "cancel upload")
+//                }
+//                )
+                let uploader = QiscusUploaderVC()
+                //uploader.image = UIImage(data: data)
+                //self.navigationController?.pushViewController(uploader, animated: true)
             }catch _{
                 self.dismissLoading()
             }

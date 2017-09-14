@@ -192,7 +192,10 @@ public class QRoomService:NSObject{
             "disable_link_preview" : true as AnyObject,
             "token" : Qiscus.shared.config.USER_TOKEN as AnyObject
         ]
-        
+        if comment.type == .image || comment.type == .video {
+            parameters["type"] = "file_attachment" as AnyObject
+            parameters["payload"] = comment.data as AnyObject
+        }
         if comment.type == .reply && comment.data != ""{
             parameters["type"] = "reply" as AnyObject
             parameters["payload"] = "\(comment.data)" as AnyObject
@@ -423,6 +426,7 @@ public class QRoomService:NSObject{
                                 Qiscus.printLog(text: "success upload: \(response)")
                                 if let jsonData = response.result.value {
                                     let json = JSON(jsonData)
+                                    print("json upload response: \(json)")
                                     if let url = json["url"].string {
                                         DispatchQueue.main.async { autoreleasepool{
                                             file.update(fileURL: url)
@@ -430,6 +434,10 @@ public class QRoomService:NSObject{
                                             comment.updateUploading(uploading: false)
                                             comment.updateProgress(progress: 1)
                                             comment.updateStatus(status: .sent)
+                                            let fileInfo = JSON(parseJSON: comment.data)
+                                            let caption = fileInfo["caption"].stringValue
+                                            let newData = "{\"url\":\"\(url)\", \"caption\":\"\(caption)\"}"
+                                            comment.update(data: newData)
                                             onSuccess(room,comment)
                                         }}
                                     }
@@ -444,6 +452,10 @@ public class QRoomService:NSObject{
                                                     comment.updateUploading(uploading: false)
                                                     comment.updateProgress(progress: 1)
                                                     comment.updateStatus(status: .sent)
+                                                    let fileInfo = JSON(parseJSON: comment.data)
+                                                    let caption = fileInfo["caption"].stringValue
+                                                    let newData = "{\"url\":\"\(url)\", \"caption\":\"\(caption)\"}"
+                                                    comment.update(data: newData)
                                                     onSuccess(room,comment)
                                                 }}
                                             }
@@ -459,10 +471,12 @@ public class QRoomService:NSObject{
                                     }
                                 }else{
                                     DispatchQueue.main.async { autoreleasepool{
-                                        comment.updateUploading(uploading: false)
-                                        comment.updateProgress(progress: 0)
-                                        comment.updateStatus(status: .failed)
-                                        room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
+                                        if !comment.isInvalidated {
+                                            comment.updateUploading(uploading: false)
+                                            comment.updateProgress(progress: 0)
+                                            comment.updateStatus(status: .failed)
+                                            room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
+                                        }
                                     }}
                                     onError(room,comment,"Fail to upload file, no readable response")
                                 }

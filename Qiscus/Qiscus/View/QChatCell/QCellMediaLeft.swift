@@ -8,10 +8,16 @@
 
 import UIKit
 import ImageViewer
+import SwiftyJSON
 
 class QCellMediaLeft: QChatCell {
 
+    @IBOutlet weak var containerHeight: NSLayoutConstraint!
+    @IBOutlet weak var captionHeight: NSLayoutConstraint!
+    @IBOutlet weak var captionWidth: NSLayoutConstraint!
+    @IBOutlet weak var containerView: UIView!
     @IBOutlet weak var userNameLabel: UILabel!
+    @IBOutlet weak var mediaCaption: QTextView!
     @IBOutlet weak var imageDisplay: UIImageView!
     @IBOutlet weak var videoFrame: UIImageView!
     @IBOutlet weak var downloadButton: ChatFileButton!
@@ -49,15 +55,33 @@ class QCellMediaLeft: QChatCell {
         self.imageDisplay.clipsToBounds = true
         self.imageDisplay.backgroundColor = UIColor.black
         self.imageDisplay.isUserInteractionEnabled = true
-        imageDisplay.layer.cornerRadius = 10
+        //imageDisplay.layer.cornerRadius = 10
+        containerView.layer.cornerRadius = 10
+        containerView.clipsToBounds = true
+        mediaCaption.type = .caption
     }
     
     public override func commentChanged() {
+        captionWidth.constant = QiscusUIConfiguration.chatTextMaxWidth
         balloonView.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor
         self.balloonView.image = self.getBallon()
         progressContainer.isHidden = true
         progressView.isHidden = true
         
+        mediaCaption.isHidden = true
+        captionHeight.constant = 0
+        containerHeight.constant = 130
+        if self.comment!.data != "" {
+            let payload = JSON(parseJSON: self.comment!.data)
+            let caption = payload["caption"].stringValue
+            if caption != "" {
+                mediaCaption.attributedText = self.comment!.attributedText
+                captionHeight.constant = self.comment!.textSize.height
+                mediaCaption.sizeToFit()
+                mediaCaption.isHidden = false
+                containerHeight.constant = 140
+            }
+        }
         if let file = self.comment!.file {
             if let image = self.comment!.displayImage {
                 self.imageDisplay.image = image

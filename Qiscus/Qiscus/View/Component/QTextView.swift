@@ -7,8 +7,12 @@
 //
 
 import UIKit
-
+enum QTextViewType {
+    case caption
+    case text
+}
 class QTextView: UITextView {
+    var type = QTextViewType.text
     var commentLinkTextAttributes:[String: Any]{
         get{
             var foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor
@@ -48,9 +52,14 @@ class QTextView: UITextView {
         switch action.description {
         case "cut:","select:","selectAll:","paste:","_lookup:","_define:","_addShortcut:","_share:":
             return false
+        case "copy:":
+            if self.type == .text {
+                return super.canPerformAction(action, withSender: sender)
+            }else{
+                return false
+            }
         default:
             return super.canPerformAction(action, withSender: sender)
         }
-        
     }
 }

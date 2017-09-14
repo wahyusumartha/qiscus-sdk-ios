@@ -29,6 +29,7 @@ open class QiscusTextConfiguration: NSObject {
     /// Your text placeholder if you want to send any message, Default value : "Text a message here ..."
     open var textPlaceholder = "Text Message"
     
+    public var captionPlaceholder = "Caption here..."
     /// Your text to show as title alert when you access gallery but you not allow gallery access, Default value : "Important"
     open var galeryAccessAlertTitle = "Important"
     

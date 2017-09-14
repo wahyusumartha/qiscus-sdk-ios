@@ -10,6 +10,7 @@ import UIKit
 import Qiscus
 
 class RoomListCell: UITableViewCell {
+    
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var unreadLabel: UILabel!
     @IBOutlet weak var commentLabel: UILabel!
@@ -33,8 +34,10 @@ class RoomListCell: UITableViewCell {
                 if room!.avatarURL != "" {
                     let roomAvatar = room!.avatarURL
                     self.avatarView.loadAsync(roomAvatar, onLoaded: { (image, _) in
-                        if roomAvatar == self.room!.avatarURL {
-                            self.avatarView.image = image
+                        if !self.room!.isInvalidated {
+                            if roomAvatar == self.room!.avatarURL {
+                                self.avatarView.image = image
+                            }
                         }
                     })
                 }
