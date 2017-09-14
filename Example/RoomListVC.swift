@@ -45,7 +45,7 @@ class RoomListVC: UITableViewController {
         if self.rooms.count == 0 {
             self.loadRoomList()
         }else{
-            Qiscus.subscrileAllRoomNotification()
+            Qiscus.subscribeAllRoomNotification()
             self.dismissQiscusLoading()
         }
     }
@@ -87,7 +87,7 @@ class RoomListVC: UITableViewController {
                 DispatchQueue.main.async {
                     self.rooms = QRoom.all()
                     self.tableView.reloadData()
-                    Qiscus.subscrileAllRoomNotification()
+                    Qiscus.subscribeAllRoomNotification()
                     self.dismissQiscusLoading()
                 }
             }

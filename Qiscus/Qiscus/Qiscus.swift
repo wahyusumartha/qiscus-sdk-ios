@@ -1148,7 +1148,7 @@ extension Qiscus:CocoaMQTTDelegate{
         Qiscus.setupReachability()
         Qiscus.sharedInstance.RealtimeConnect()
     }
-    public class func subscrileAllRoomNotification(){
+    public class func subscribeAllRoomNotification(){
         let rooms = QRoom.all()
         for room in rooms {
             room.subscribeRealtimeStatus()
