@@ -1079,6 +1079,9 @@ extension Qiscus:CocoaMQTTDelegate{
     }
     public func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopic topic: String){
         Qiscus.printLog(text: "topic : \(topic) subscribed")
+        if !Qiscus.realtimeChannel.contains(topic) {
+            Qiscus.realtimeChannel.append(topic)
+        }
     }
     public func mqtt(_ mqtt: CocoaMQTT, didUnsubscribeTopic topic: String){
         if Qiscus.realtimeChannel.contains(topic){
