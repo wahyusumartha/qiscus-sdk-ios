@@ -402,7 +402,14 @@ public class QChatService:NSObject {
     }
     public func room(withId roomId:Int, withMessage:String? = nil){
         if Qiscus.isLoggedIn {
+            var needToLoad = true
             if let room = QRoom.room(withId: roomId){
+                if room.comments.count > 0 {
+                    needToLoad = false
+                }
+            }
+            if !needToLoad {
+                let room = QRoom.room(withId: roomId)!
                 self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
                 DispatchQueue.main.async { autoreleasepool{
                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
@@ -486,8 +493,14 @@ public class QChatService:NSObject {
     }
     public func room(withId roomId:Int, onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){
         if Qiscus.isLoggedIn {
+            var needToLoad = true
             if let room = QRoom.room(withId: roomId){
-                onSuccess(room)
+                if room.comments.count > 0 {
+                    needToLoad = false
+                }
+            }
+            if !needToLoad {
+                onSuccess(QRoom.room(withId: roomId)!)
             }
             else{
                 QiscusRequestThread.async { autoreleasepool{
