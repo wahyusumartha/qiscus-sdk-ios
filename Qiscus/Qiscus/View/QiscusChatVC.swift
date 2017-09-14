@@ -19,6 +19,7 @@ import CoreLocation
 import RealmSwift
 open class QiscusChatVC: UIViewController{
     
+    @IBOutlet weak var inputBarHeight: NSLayoutConstraint!
     // MARK: - IBOutlet Properties
     @IBOutlet weak var inputBar: UIView!
     @IBOutlet public weak var backgroundView: UIImageView!
@@ -74,94 +75,7 @@ open class QiscusChatVC: UIViewController{
     
     var replyData:QComment? = nil {
         didSet{
-            if replyData == nil {
-                Qiscus.uiThread.async { autoreleasepool{
-                    self.linkPreviewTopMargin.constant = 0
-                    UIView.animate(withDuration: 0.65, animations: {
-                        self.view.layoutIfNeeded()
-                    }, completion: {(_) in
-                        if self.inputText.value == "" {
-                            self.sendButton.isEnabled = false
-                            self.sendButton.isHidden = true
-                            self.recordButton.isHidden = false
-                            self.linkImage.image = nil
-                        }
-                    })
-                }}
-            }
-            else{
-                Qiscus.uiThread.async {autoreleasepool{
-                    print()
-                    switch self.replyData!.type {
-                    case .text:
-                        self.linkDescription.text = self.replyData!.text
-                        self.linkImageWidth.constant = 0
-                        break
-                    case .video, .image:
-                        self.linkImage.contentMode = .scaleAspectFill
-                        if let file = self.replyData!.file {
-                            if self.replyData!.type == .video || self.replyData!.type == .image {
-                                if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
-                                    self.linkImage.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
-                                        self.linkImage.image = image
-                                    })
-                                }
-                                else if QFileManager.isFileExist(inLocalPath: file.localMiniThumbPath){
-                                    self.linkImage.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
-                                        self.linkImage.image = image
-                                    })
-                                }
-                                else{
-                                    self.linkImage.loadAsync(file.thumbURL, onLoaded: { (image, _) in
-                                        self.linkImage.image = image
-                                    })
-                                }
-                                self.linkImageWidth.constant = 55
-                            }
-                            self.linkDescription.text = file.filename
-                        }
-                        break
-                    case .location:
-                        let payload = JSON(parseJSON: self.replyData!.data)
-                        self.linkImage.contentMode = .scaleAspectFill
-                        self.linkImage.image = Qiscus.image(named: "map_ico")
-                        self.linkImageWidth.constant = 55
-                        self.linkDescription.text = "\(payload["name"].stringValue) - \(payload["address"].stringValue)"
-                        break
-                    case .contact:
-                        let payload = JSON(parseJSON: self.replyData!.data)
-                        self.linkImage.contentMode = .top
-                        self.linkImage.image = Qiscus.image(named: "contact")
-                        self.linkImageWidth.constant = 55
-                        self.linkDescription.text = "\(payload["name"].stringValue) - \(payload["value"].stringValue)"
-                        break
-                    default:
-                        break
-                    }
-                    
-                    if let user = self.replyData!.sender {
-                        self.linkTitle.text = user.fullname
-                    }else{
-                        self.linkTitle.text = self.replyData!.senderName
-                    }
-                    self.linkPreviewTopMargin.constant = -65
-                    
-                    UIView.animate(withDuration: 0.35, animations: {
-                        self.view.layoutIfNeeded()
-                        if self.lastVisibleRow != nil {
-                            self.collectionView.scrollToItem(at: self.lastVisibleRow!, at: .bottom, animated: true)
-                        }
-                    }, completion: { (_) in
-                        if self.inputText.value == "" {
-                            self.sendButton.isEnabled = false
-                        }else{
-                            self.sendButton.isEnabled = true
-                        }
-                        self.sendButton.isHidden = false
-                        self.recordButton.isHidden = true
-                    })
-                }}
-            }
+            self.reply(toComment: replyData)
         }
     }
     
@@ -1004,6 +918,100 @@ extension QiscusChatVC:QRoomDelegate{
         }else{
             self.unreadIndicator.text = ""
             self.unreadIndicator.isHidden = true
+        }
+    }
+    public func hideInputBar(){
+        self.inputBarHeight.constant = 0
+        self.minInputHeight.constant = 0
+    }
+    open func reply(toComment comment:QComment?){
+        if comment == nil {
+            Qiscus.uiThread.async { autoreleasepool{
+                self.linkPreviewTopMargin.constant = 0
+                UIView.animate(withDuration: 0.65, animations: {
+                    self.view.layoutIfNeeded()
+                }, completion: {(_) in
+                    if self.inputText.value == "" {
+                        self.sendButton.isEnabled = false
+                        self.sendButton.isHidden = true
+                        self.recordButton.isHidden = false
+                        self.linkImage.image = nil
+                    }
+                })
+                }}
+        }
+        else{
+            Qiscus.uiThread.async {autoreleasepool{
+                print()
+                switch comment!.type {
+                case .text:
+                    self.linkDescription.text = comment!.text
+                    self.linkImageWidth.constant = 0
+                    break
+                case .video, .image:
+                    self.linkImage.contentMode = .scaleAspectFill
+                    if let file = comment!.file {
+                        if comment!.type == .video || comment!.type == .image {
+                            if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
+                                self.linkImage.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
+                                    self.linkImage.image = image
+                                })
+                            }
+                            else if QFileManager.isFileExist(inLocalPath: file.localMiniThumbPath){
+                                self.linkImage.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
+                                    self.linkImage.image = image
+                                })
+                            }
+                            else{
+                                self.linkImage.loadAsync(file.thumbURL, onLoaded: { (image, _) in
+                                    self.linkImage.image = image
+                                })
+                            }
+                            self.linkImageWidth.constant = 55
+                        }
+                        self.linkDescription.text = file.filename
+                    }
+                    break
+                case .location:
+                    let payload = JSON(parseJSON: comment!.data)
+                    self.linkImage.contentMode = .scaleAspectFill
+                    self.linkImage.image = Qiscus.image(named: "map_ico")
+                    self.linkImageWidth.constant = 55
+                    self.linkDescription.text = "\(payload["name"].stringValue) - \(payload["address"].stringValue)"
+                    break
+                case .contact:
+                    let payload = JSON(parseJSON: comment!.data)
+                    self.linkImage.contentMode = .top
+                    self.linkImage.image = Qiscus.image(named: "contact")
+                    self.linkImageWidth.constant = 55
+                    self.linkDescription.text = "\(payload["name"].stringValue) - \(payload["value"].stringValue)"
+                    break
+                default:
+                    break
+                }
+                
+                if let user = self.replyData!.sender {
+                    self.linkTitle.text = user.fullname
+                }else{
+                    self.linkTitle.text = comment!.senderName
+                }
+                self.linkPreviewTopMargin.constant = -65
+                
+                UIView.animate(withDuration: 0.35, animations: {
+                    self.view.layoutIfNeeded()
+                    if self.lastVisibleRow != nil {
+                        self.collectionView.scrollToItem(at: self.lastVisibleRow!, at: .bottom, animated: true)
+                    }
+                }, completion: { (_) in
+                    if self.inputText.value == "" {
+                        self.sendButton.isEnabled = false
+                    }else{
+                        self.sendButton.isEnabled = true
+                    }
+                    self.sendButton.isHidden = false
+                    self.recordButton.isHidden = true
+                })
+                }}
         }
     }
 }
