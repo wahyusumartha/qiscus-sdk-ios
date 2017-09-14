@@ -30,6 +30,86 @@ public class QChatService:NSObject {
         }
     }
     
+    internal class func updateProfil(userName: String? = nil, userAvatarURL: String? = nil, onSuccess: @escaping (()->Void),onError:@escaping ((String)->Void)){
+        if Qiscus.isLoggedIn {
+            var parameters:[String: AnyObject] = [String: AnyObject]()
+            let email = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_param_email") as? String
+            let userKey = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_param_pass") as? String
+            let currentName = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_param_username") as? String
+            let currentAvatarURL = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_param_avatar") as? String
+            
+            parameters = [
+                "email"  : email as AnyObject,
+                "password" : userKey as AnyObject,
+            ]
+            var noChange = true
+            if let name = userName{
+                if name != currentName {
+                    parameters["username"] = name as AnyObject?
+                    noChange = false
+                }
+            }
+            if let avatar =  userAvatarURL{
+                if avatar != currentAvatarURL {
+                    parameters["avatar_url"] = avatar as AnyObject?
+                    noChange = false
+                }
+            }
+            
+            if noChange {
+                onError("no change")
+            }else{
+                DispatchQueue.global().async(execute: {
+                    Alamofire.request(QiscusConfig.LOGIN_REGISTER, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+                        switch response.result {
+                        case .success:
+                            if let result = response.result.value{
+                                let json = JSON(result)
+                                let success:Bool = (json["status"].intValue == 200)
+                                
+                                if success {
+                                    let userData = json["results"]["user"]
+                                    let _ = QiscusMe.saveData(fromJson: userData, reconnect: true)
+                                    Qiscus.setupReachability()
+                                    if let delegate = Qiscus.shared.delegate {
+                                        Qiscus.uiThread.async { autoreleasepool{
+                                            delegate.qiscus?(didConnect: true, error: nil)
+                                            delegate.qiscusConnected?()
+                                            }}
+                                    }
+                                    Qiscus.registerNotification()
+                                    Qiscus.uiThread.async { autoreleasepool{
+                                        onSuccess()
+                                    }}
+                                }else{
+                                    Qiscus.uiThread.async { autoreleasepool{
+                                        onError(json["message"].stringValue)
+                                    }}
+                                }
+                            }else{
+                                if let delegate = Qiscus.shared.delegate {
+                                    Qiscus.uiThread.async { autoreleasepool{
+                                        let error = "Cant get data from qiscus server"
+                                        onError(error)
+                                    }}
+                                }
+                            }
+                            break
+                        case .failure(let error):
+                            if let delegate = Qiscus.shared.delegate {
+                                Qiscus.uiThread.async {autoreleasepool{
+                                    onError("\(error)")
+                                }}
+                            }
+                            break
+                        }
+                    })
+                })
+            }
+        }else{
+            onError("Not logged in to Qiscus")
+        }
+    }
     // MARK : - room getter method
     public func room(withUser user:String, distincId:String? = nil, optionalData:String? = nil, withMessage:String? = nil){ //
         if Qiscus.isLoggedIn{

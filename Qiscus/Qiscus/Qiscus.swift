@@ -201,6 +201,9 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             Qiscus.shared.delegate = delegate
         }
     }
+    public class func updateProfile(username:String? = nil, avatarURL:String? = nil, onSuccess:@escaping (()->Void), onFailed:@escaping ((String)->Void)) {
+        QChatService.updateProfil(userName: username, userAvatarURL: avatarURL, onSuccess: onSuccess, onError: onFailed)
+    }
     @objc public class func setup(withAppId appId:String, userEmail:String, userKey:String, username:String, avatarURL:String? = nil, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true){
         Qiscus.checkDatabaseMigration()
         var requestProtocol = "https"
@@ -215,6 +218,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         QiscusMe.sharedInstance.userData.set(email, forKey: "qiscus_param_email")
         QiscusMe.sharedInstance.userData.set(userKey, forKey: "qiscus_param_pass")
         QiscusMe.sharedInstance.userData.set(username, forKey: "qiscus_param_username")
+        
         if avatarURL != nil{
             QiscusMe.sharedInstance.userData.set(avatarURL, forKey: "qiscus_param_avatar")
         }
