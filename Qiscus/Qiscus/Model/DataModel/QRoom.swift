@@ -740,7 +740,10 @@ public class QRoom:Object {
                 newComment.beforeId = commentBeforeId
                 newComment.senderEmail = senderEmail
                 newComment.cellPosRaw = QCellPosition.single.rawValue
+                newComment.roomAvatar = self.avatarURL
                 newComment.roomName = self.name
+                newComment.roomTypeRaw = self.typeRaw
+                
                 var status = QCommentStatus.sent
                 if newComment.id < room.lastParticipantsReadId {
                     status = .read
@@ -930,7 +933,9 @@ public class QRoom:Object {
             newComment.beforeId = commentBeforeId
             newComment.senderEmail = senderEmail
             newComment.cellPosRaw = QCellPosition.single.rawValue
+            newComment.roomAvatar = self.avatarURL
             newComment.roomName = self.name
+            newComment.roomTypeRaw = self.typeRaw
             
             var status = QCommentStatus.sent
             if newComment.id < self.lastParticipantsReadId {
@@ -1093,6 +1098,9 @@ public class QRoom:Object {
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.typeRaw = "contact_person"
         comment.data = payload
+        comment.roomAvatar = self.avatarURL
+        comment.roomName = self.name
+        comment.roomTypeRaw = self.typeRaw
         
         self.addComment(newComment: comment)
         return comment
@@ -1146,6 +1154,9 @@ public class QRoom:Object {
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.typeRaw = "location"
         comment.data = payload
+        comment.roomAvatar = self.avatarURL
+        comment.roomName = self.name
+        comment.roomTypeRaw = self.typeRaw
         
         self.addComment(newComment: comment)
         return comment
@@ -1179,6 +1190,9 @@ public class QRoom:Object {
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.typeRaw = type
         comment.data = payload
+        comment.roomAvatar = self.avatarURL
+        comment.roomName = self.name
+        comment.roomTypeRaw = self.typeRaw
         
         self.addComment(newComment: comment)
         return comment
@@ -1211,6 +1225,9 @@ public class QRoom:Object {
         comment.isUploading = true
         comment.progress = 0
         comment.data = payload
+        comment.roomAvatar = self.avatarURL
+        comment.roomName = self.name
+        comment.roomTypeRaw = self.typeRaw
         
         let file = QFile()
         file.id = uniqueID
@@ -1293,7 +1310,10 @@ public class QRoom:Object {
         comment.senderName = QiscusMe.sharedInstance.userName
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.typeRaw = type.name()
-    
+        comment.roomName = self.name
+        comment.roomTypeRaw = self.typeRaw
+        comment.roomAvatar = self.avatarURL
+        
         if let data = payload {
             comment.data = "\(data)"
         }

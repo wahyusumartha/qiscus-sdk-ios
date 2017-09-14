@@ -113,7 +113,10 @@ public class QComment:Object {
     public dynamic var typeRaw:String = QCommentType.text.name()
     public dynamic var data:String = ""
     public dynamic var cellPosRaw:Int = 0
+    
     public dynamic var roomName:String = ""
+    internal dynamic var roomTypeRaw:Int = 0
+    public dynamic var roomAvatar:String = ""
     
     private dynamic var cellWidth:Float = 0
     private dynamic var cellHeight:Float = 0
@@ -176,6 +179,11 @@ public class QComment:Object {
     public var cellPos:QCellPosition {
         get{
             return QCellPosition(rawValue: self.cellPosRaw)!
+        }
+    }
+    public var roomType:QRoomType {
+        get{
+            return QRoomType(rawValue: self.roomTypeRaw)!
         }
     }
     public var type:QCommentType {
@@ -762,9 +770,21 @@ public class QComment:Object {
         temp.beforeId = commentBeforeId
         temp.senderEmail = senderEmail
         temp.cellPosRaw = QCellPosition.single.rawValue
+        
         if let roomName = json["room_name"].string {
             temp.roomName = roomName
         }
+        if let chatType = json["chat_type"].string {
+            if chatType == "group" {
+                temp.roomTypeRaw = QRoomType.group.rawValue
+            }else{
+                temp.roomTypeRaw = QRoomType.single.rawValue
+            }
+        }
+        if let roomAvatar = json["room_avatar"].string {
+            temp.roomAvatar = roomAvatar
+        }
+        
         switch commentType {
         case "contact":
             temp.data = "\(json["payload"])"

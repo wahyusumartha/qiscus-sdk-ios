@@ -115,6 +115,10 @@ open class QiscusMe: NSObject {
         if !reconnect {
             QiscusMe.sharedInstance.userData.set(json["last_comment_id"].intValue, forKey: "qiscus_lastComment_id")
             QiscusMe.sharedInstance.userData.set(json["last_comment_id"].intValue, forKey: "qiscus_lastKnownComment_id")
+        }else{
+            if json["last_comment_id"].intValue > QiscusMe.sharedInstance.lastCommentId {
+                Qiscus.sync()
+            }
         }
         if let lastComment = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_lastComment_id") as? Int{
             QiscusMe.sharedInstance.lastCommentId = lastComment
