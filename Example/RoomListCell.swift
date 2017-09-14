@@ -16,10 +16,25 @@ class RoomListCell: UITableViewCell {
     @IBOutlet weak var commentLabel: UILabel!
     @IBOutlet weak var avatarView: UIImageView!
     
+    var typingUser:QUser?{
+        didSet{
+            if typingUser != nil {
+                self.commentLabel.text = "\(typingUser!.fullname) is typing ..."
+                self.commentLabel.textColor = UIColor(red: 59/255, green: 147/255, blue: 61/255, alpha: 1)
+            }else{
+                if let lastComment = room!.lastComment{
+                    self.commentLabel.text = "\(lastComment.senderName): \(lastComment.text)"
+                    self.commentLabel.textColor = UIColor.black
+                }
+            }
+        }
+    }
     var room:QRoom? {
         didSet{
+            self.typingUser = nil
             if room != nil {
                 self.unreadLabel.isHidden = true
+                self.commentLabel.textColor = UIColor.black
                 if room!.unreadCount > 0 {
                     self.unreadLabel.text = "\(room!.unreadCount)"
                     if room!.unreadCount > 99 {
@@ -57,5 +72,15 @@ class RoomListCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
 
     }
-    
+    public func userStartTyping(user:QUser) {
+        self.typingUser = user
+    }
+    public func userStopTyping(user:QUser){
+        if user.email == self.typingUser?.email {
+            self.typingUser = nil
+        }
+    }
+    public func updateDescription(description:String){
+        self.commentLabel.text = description
+    }
 }

@@ -34,6 +34,8 @@ class RoomListVC: UITableViewController {
         
         Qiscus.chatDelegate = self
         
+        let center: NotificationCenter = NotificationCenter.default
+        center.addObserver(self, selector: #selector(RoomListVC.userTyping(_:)), name: QiscusNotification.USER_TYPING, object: nil)
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -43,6 +45,7 @@ class RoomListVC: UITableViewController {
         if self.rooms.count == 0 {
             self.loadRoomList()
         }else{
+            Qiscus.subscrileAllRoomNotification()
             self.dismissQiscusLoading()
         }
     }
@@ -84,6 +87,7 @@ class RoomListVC: UITableViewController {
                 DispatchQueue.main.async {
                     self.rooms = QRoom.all()
                     self.tableView.reloadData()
+                    Qiscus.subscrileAllRoomNotification()
                     self.dismissQiscusLoading()
                 }
             }
@@ -125,6 +129,28 @@ class RoomListVC: UITableViewController {
         let view = goToChatVC()
         view.type = type
         self.navigationController?.pushViewController(view, animated: true)
+    }
+    func userTyping(_ notification: Notification){
+        if let userInfo = notification.userInfo {
+            let user = userInfo["user"] as! QUser
+            let typing = userInfo["typing"] as! Bool
+            let room = userInfo["room"] as! QRoom
+            
+            var i = 0
+            for roomData in self.rooms {
+                if room.id == roomData.id {
+                    let indexPath = IndexPath(row: i, section: 0)
+                    let cell = self.tableView.cellForRow(at: indexPath) as! RoomListCell
+                    if typing {
+                        cell.userStartTyping(user: user)
+                    }else{
+                        cell.userStopTyping(user: user)
+                    }
+                }
+                i += 1
+            }
+            
+        }
     }
 }
 
