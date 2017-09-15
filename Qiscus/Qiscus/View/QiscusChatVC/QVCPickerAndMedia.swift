@@ -114,9 +114,9 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
             }
             
             if data != nil {
-                let text = QiscusTextConfiguration.sharedInstance.confirmationImageUploadText
-                let okText = QiscusTextConfiguration.sharedInstance.alertOkText
-                let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
+//                let text = QiscusTextConfiguration.sharedInstance.confirmationImageUploadText
+//                let okText = QiscusTextConfiguration.sharedInstance.alertOkText
+//                let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
                 
 //                QPopUpView.showAlert(withTarget: self, image: image, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
 //                doneAction: {
@@ -193,6 +193,9 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                 let jpeg = (ext == "jpg" || ext == "jpg_")
                 let png = (ext == "png" || ext == "png_")
                 let video = (ext == "mp4" || ext == "mp4_" || ext == "mov" || ext == "mov_")
+                
+                var usePopup = false
+                
                 if jpeg{
                     let image = UIImage(data: data)!
                     let imageSize = image.size
@@ -226,6 +229,7 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                             data = gifData!
                         }
                     }
+                    usePopup = true
                 }else if video {
                     fileType = .video
                     
@@ -244,7 +248,9 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                     }catch{
                         Qiscus.printLog(text: "error creating thumb image")
                     }
+                    usePopup = true
                 }else{
+                    usePopup = true
                     let textFirst = QiscusTextConfiguration.sharedInstance.confirmationFileUploadText
                     let textMiddle = "\(fileName as String)"
                     let textLast = QiscusTextConfiguration.sharedInstance.questionMark
@@ -252,17 +258,25 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                     fileType = QiscusFileType.file
                 }
                 self.dismissLoading()
-//                QPopUpView.showAlert(withTarget: self, image: thumb, message:popupText, isVideoImage: video,
-//                                     doneAction: {
-//                                        self.postFile(filename: fileName, data: data, type: fileType, thumbImage: thumb)
-//                },
-//                                     cancelAction: {
-//                                        Qiscus.printLog(text: "cancel upload")
-//                }
-//                )
-                let uploader = QiscusUploaderVC()
-                //uploader.image = UIImage(data: data)
-                //self.navigationController?.pushViewController(uploader, animated: true)
+                
+                if usePopup {
+                    QPopUpView.showAlert(withTarget: self, image: thumb, message:popupText, isVideoImage: video,
+                                         doneAction: {
+                                            self.postFile(filename: fileName, data: data, type: fileType, thumbImage: thumb)
+                    },
+                                         cancelAction: {
+                                            Qiscus.printLog(text: "cancel upload")
+                    }
+                    )
+                }else{
+                    let uploader = QiscusUploaderVC(nibName: "QiscusUploaderVC", bundle: Qiscus.bundle)
+                    uploader.data = data
+                    uploader.fileName = fileName
+                    uploader.room = self.chatRoom
+                    self.navigationController?.pushViewController(uploader, animated: true)
+                }
+                
+                
             }catch _{
                 self.dismissLoading()
             }
