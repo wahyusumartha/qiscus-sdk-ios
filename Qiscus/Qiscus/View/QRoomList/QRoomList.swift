@@ -32,10 +32,14 @@ open class QRoomList: UITableView{
         // Drawing code
         self.delegate = self
         self.dataSource = self
+        self.rowHeight = 63.0
+        self.tableFooterView = UIView()
         registerCell()
     }
  
-    open func registerCell(){}
+    open func registerCell(){
+        self.register(UINib(nibName: "QRoomListDefaultCell", bundle: Qiscus.bundle), forCellReuseIdentifier: "roomDefaultCell")
+    }
     internal func didSelectRoom(room: QRoom){
         self.listDelegate?.didSelect(room: room)
     }
@@ -43,7 +47,10 @@ open class QRoomList: UITableView{
         self.listDelegate?.didSelect(comment: comment)
     }
     
-    open func cell(at indexPath: IndexPath) -> QRoomListCell { return QRoomListCell()}
+    open func cell(at indexPath: IndexPath) -> QRoomListCell {
+        let cell = self.dequeueReusableCell(withIdentifier: "roomDefaultCell", for: indexPath) as! QRoomListDefaultCell
+        return cell
+    }
     
 }
 

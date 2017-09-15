@@ -25,8 +25,7 @@ class RoomListVC2: UIViewController {
         super.viewDidLoad()
 
         self.title = "Chat List"
-        self.roomListView.rowHeight = 63.0
-        self.roomListView.tableFooterView = UIView()
+        
         self.roomListView.listDelegate = self
         
         let logoutButton = UIBarButtonItem(image: UIImage(named: "ic_exit_to_app"), style: .plain, target: self, action: #selector(logOut))

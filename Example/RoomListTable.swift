@@ -12,13 +12,13 @@ import Qiscus
 
 class RoomListTable: QRoomList {
     
-    override func registerCell() {
-        self.register(UINib(nibName: "RoomListCell", bundle: nil), forCellReuseIdentifier: "roomCell")
-    }
+//    override func registerCell() {
+//        self.register(UINib(nibName: "RoomListCell", bundle: nil), forCellReuseIdentifier: "roomCell")
+//    }
+//    
+//    override func cell(at indexPath: IndexPath) -> QRoomListCell {
+//        let cell = self.dequeueReusableCell(withIdentifier: "roomCell", for: indexPath) as! RoomListCell
+//        return cell
+//    }
     
-    override func cell(at indexPath: IndexPath) -> QRoomListCell {
-        let cell = self.dequeueReusableCell(withIdentifier: "roomCell", for: indexPath) as! RoomListCell
-        return cell
-    }
-        
 }
