@@ -19,6 +19,11 @@
 		395291261E28559B004BD6B4 /* goToChatVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 395291221E28559B004BD6B4 /* goToChatVC.xib */; };
 		395291271E28559B004BD6B4 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395291231E28559B004BD6B4 /* MainView.swift */; };
 		395291281E28559B004BD6B4 /* MainView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 395291241E28559B004BD6B4 /* MainView.xib */; };
+		396CBDB71F6B6F080028C3FE /* QRoomListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 396CBDB61F6B6F080028C3FE /* QRoomListCell.swift */; };
+		396CBDBB1F6B78580028C3FE /* QRoomList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 396CBDBA1F6B78580028C3FE /* QRoomList.swift */; };
+		396CBDBE1F6B80390028C3FE /* RoomListVC2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 396CBDBC1F6B80390028C3FE /* RoomListVC2.swift */; };
+		396CBDBF1F6B80390028C3FE /* RoomListVC2.xib in Resources */ = {isa = PBXBuildFile; fileRef = 396CBDBD1F6B80390028C3FE /* RoomListVC2.xib */; };
+		396CBDC11F6B81630028C3FE /* RoomListTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 396CBDC01F6B81630028C3FE /* RoomListTable.swift */; };
 		39955B6D1D656D1700927ADD /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 39955B6C1D656D1700927ADD /* Media.xcassets */; };
 		39BD59171EB2F1A3001AFB7C /* Qiscus.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 39BD59161EB2F1A3001AFB7C /* Qiscus.podspec */; };
 		39E7542F1F5E7327003C3302 /* SearchResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E7542D1F5E7327003C3302 /* SearchResultVC.swift */; };
@@ -169,6 +174,11 @@
 		395291221E28559B004BD6B4 /* goToChatVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = goToChatVC.xib; sourceTree = "<group>"; };
 		395291231E28559B004BD6B4 /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		395291241E28559B004BD6B4 /* MainView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainView.xib; sourceTree = "<group>"; };
+		396CBDB61F6B6F080028C3FE /* QRoomListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QRoomListCell.swift; path = Qiscus/View/QRoomList/QRoomListCell.swift; sourceTree = "<group>"; };
+		396CBDBA1F6B78580028C3FE /* QRoomList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QRoomList.swift; path = Qiscus/View/QRoomList/QRoomList.swift; sourceTree = "<group>"; };
+		396CBDBC1F6B80390028C3FE /* RoomListVC2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoomListVC2.swift; sourceTree = "<group>"; };
+		396CBDBD1F6B80390028C3FE /* RoomListVC2.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RoomListVC2.xib; sourceTree = "<group>"; };
+		396CBDC01F6B81630028C3FE /* RoomListTable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoomListTable.swift; sourceTree = "<group>"; };
 		39955B6C1D656D1700927ADD /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Media.xcassets; path = Qiscus/Media.xcassets; sourceTree = "<group>"; };
 		39955B801D65A2D900927ADD /* QAsyncImageView.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QAsyncImageView.framework; path = "../../../Library/Developer/Xcode/DerivedData/Example-gfoaldkgffrxjdelneboawwkwliw/Build/Products/Debug-iphonesimulator/QAsyncImageView/QAsyncImageView.framework"; sourceTree = "<group>"; };
 		39955B811D65A2D900927ADD /* QToasterSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QToasterSwift.framework; path = "../../../Library/Developer/Xcode/DerivedData/Example-gfoaldkgffrxjdelneboawwkwliw/Build/Products/Debug-iphonesimulator/QToasterSwift/QToasterSwift.framework"; sourceTree = "<group>"; };
@@ -337,6 +347,15 @@
 			name = Helper;
 			sourceTree = "<group>";
 		};
+		396CBDB31F6B6E910028C3FE /* QRoomList */ = {
+			isa = PBXGroup;
+			children = (
+				396CBDB61F6B6F080028C3FE /* QRoomListCell.swift */,
+				396CBDBA1F6B78580028C3FE /* QRoomList.swift */,
+			);
+			name = QRoomList;
+			sourceTree = "<group>";
+		};
 		39955B3F1D655B6700927ADD /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
@@ -397,6 +416,7 @@
 		39E790511E5298150011850B /* QiscusChatVC */ = {
 			isa = PBXGroup;
 			children = (
+				396CBDB31F6B6E910028C3FE /* QRoomList */,
 				39F70FB31F3D5FB500774D97 /* QChatCell */,
 				39F70FB41F3D5FE000774D97 /* QVCAction.swift */,
 				39F70FB51F3D5FE000774D97 /* QVCChatCell.swift */,
@@ -449,6 +469,9 @@
 				39E754361F62226E003C3302 /* RoomListVC.xib */,
 				39E754391F6222AB003C3302 /* RoomListCell.swift */,
 				39E7543A1F6222AB003C3302 /* RoomListCell.xib */,
+				396CBDBC1F6B80390028C3FE /* RoomListVC2.swift */,
+				396CBDBD1F6B80390028C3FE /* RoomListVC2.xib */,
+				396CBDC01F6B81630028C3FE /* RoomListTable.swift */,
 			);
 			path = Example;
 			sourceTree = "<group>";
@@ -711,6 +734,7 @@
 				39BD59171EB2F1A3001AFB7C /* Qiscus.podspec in Resources */,
 				39E7543C1F6222AB003C3302 /* RoomListCell.xib in Resources */,
 				395291281E28559B004BD6B4 /* MainView.xib in Resources */,
+				396CBDBF1F6B80390028C3FE /* RoomListVC2.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -855,6 +879,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				396CBDBE1F6B80390028C3FE /* RoomListVC2.swift in Sources */,
 				395291251E28559B004BD6B4 /* goToChatVC.swift in Sources */,
 				39E7543B1F6222AB003C3302 /* RoomListCell.swift in Sources */,
 				39E754331F5E84B0003C3302 /* SearchCell.swift in Sources */,
@@ -862,6 +887,7 @@
 				39E754371F62226E003C3302 /* RoomListVC.swift in Sources */,
 				395291271E28559B004BD6B4 /* MainView.swift in Sources */,
 				39F1F6AD1D3B90E200FF1C8C /* AppDelegate.swift in Sources */,
+				396CBDC11F6B81630028C3FE /* RoomListTable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -873,6 +899,7 @@
 				39F70FAB1F3D5E8300774D97 /* QFileManager.swift in Sources */,
 				39F70FF51F3D619900774D97 /* QCellSystem.swift in Sources */,
 				39F70FAC1F3D5E8300774D97 /* QiscusCommentClient.swift in Sources */,
+				396CBDBB1F6B78580028C3FE /* QRoomList.swift in Sources */,
 				39F70F9A1F3D5CD200774D97 /* QiscusHelper.swift in Sources */,
 				39F70FFE1F3D619900774D97 /* QChatFooterRight.swift in Sources */,
 				39F70FA01F3D5D6F00774D97 /* QiscusAssetsConfiguration.swift in Sources */,
@@ -903,6 +930,7 @@
 				39F70FA31F3D5D6F00774D97 /* QiscusTextConfiguration.swift in Sources */,
 				394D7AA31F4E979E00E69E1C /* QCellLocationLeft.swift in Sources */,
 				39F70FF91F3D619900774D97 /* QCellTextRight.swift in Sources */,
+				396CBDB71F6B6F080028C3FE /* QRoomListCell.swift in Sources */,
 				39F70FE31F3D619900774D97 /* QCellAudioRight.swift in Sources */,
 				39F70FF31F3D619900774D97 /* QCellPostbackLeft.swift in Sources */,
 				39F70FA21F3D5D6F00774D97 /* QiscusConfig.swift in Sources */,

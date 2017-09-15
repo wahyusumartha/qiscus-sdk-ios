@@ -87,7 +87,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         print("\(error)")
     }
     func goToRoomList(){
-        let roomList = RoomListVC()
+        let roomList = RoomListVC2()
         self.navigationController = UINavigationController(rootViewController:roomList)
         window?.rootViewController = navigationController
     }

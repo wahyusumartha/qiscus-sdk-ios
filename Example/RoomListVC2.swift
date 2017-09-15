@@ -1,30 +1,33 @@
 //
-//  RoomListVC.swift
+//  RoomListVC2.swift
 //  Example
 //
-//  Created by Ahmad Athaullah on 9/8/17.
+//  Created by Ahmad Athaullah on 9/15/17.
 //  Copyright © 2017 Ahmad Athaullah. All rights reserved.
 //
 
 import UIKit
 import Qiscus
 
-class RoomListVC: UITableViewController {
+class RoomListVC2: UIViewController {
+
+    @IBOutlet weak var roomListView: RoomListTable!
     
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
     
-    var rooms = [QRoom]() {
+    var rooms = [QRoom](){
         didSet{
-            self.tableView.reloadData()
+            roomListView.rooms = self.rooms
         }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
         self.title = "Chat List"
-        self.tableView.register(UINib(nibName: "RoomListCell", bundle: nil), forCellReuseIdentifier: "roomCell")
-        self.tableView.rowHeight = 63.0
-        self.tableView.tableFooterView = UIView()
+        self.roomListView.rowHeight = 63.0
+        self.roomListView.tableFooterView = UIView()
+        self.roomListView.listDelegate = self
         
         let logoutButton = UIBarButtonItem(image: UIImage(named: "ic_exit_to_app"), style: .plain, target: self, action: #selector(logOut))
         self.navigationItem.leftBarButtonItems = [logoutButton]
@@ -33,10 +36,8 @@ class RoomListVC: UITableViewController {
         self.navigationItem.rightBarButtonItems = rightBarButtons
         
         Qiscus.chatDelegate = self
-        
-//        let center: NotificationCenter = NotificationCenter.default
-//        center.addObserver(self, selector: #selector(RoomListVC.userTyping(_:)), name: QiscusNotification.USER_TYPING, object: nil)
     }
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.showQiscusLoading()
@@ -49,36 +50,13 @@ class RoomListVC: UITableViewController {
             self.dismissQiscusLoading()
         }
     }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-    // MARK: - Table view data source
-
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
-
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        return self.rooms.count
-    }
-
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "roomCell", for: indexPath) as! RoomListCell
-        cell.room = self.rooms[indexPath.row]
 
-        return cell
-    }
-    
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let room = self.rooms[indexPath.row]
-        let chatView = Qiscus.chatView(withRoomId: room.id)
-        self.navigationController?.pushViewController(chatView, animated: true)
-    }
-    
     func loadRoomList(page:Int? = 1){
         QChatService.roomList(withLimit: 100, page: page, onSuccess: { (rooms, totalRoom, currentPage, limit) in
             if totalRoom > (limit * (currentPage - 1)) + rooms.count{
@@ -86,7 +64,6 @@ class RoomListVC: UITableViewController {
             }else{
                 DispatchQueue.main.async {
                     self.rooms = QRoom.all()
-                    self.tableView.reloadData()
                     Qiscus.subscribeAllRoomNotification()
                     self.dismissQiscusLoading()
                 }
@@ -132,8 +109,16 @@ class RoomListVC: UITableViewController {
     }
 
 }
-
-extension RoomListVC: QiscusChatDelegate {
+extension RoomListVC2: QRoomListDelegate {
+    func didSelect(room: QRoom) {
+        let chatView = Qiscus.chatView(withRoomId: room.id)
+        self.navigationController?.pushViewController(chatView, animated: true)
+    }
+    func didSelect(comment: QComment) {
+        
+    }
+}
+extension RoomListVC2: QiscusChatDelegate {
     func qiscusChat(gotNewComment comment: QComment) {  self.rooms = QRoom.all() }
     func qiscusChat(gotNewRoom room: QRoom) { self.rooms = QRoom.all() }
 }
