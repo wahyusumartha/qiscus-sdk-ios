@@ -1657,14 +1657,14 @@ public class QRoom:Object {
             }
         }
         
-        QiscusBackgroundThread.async {
+        //QiscusBackgroundThread.async {
             for channel in channels{
                 Qiscus.shared.mqtt?.subscribe(channel)
                 if !Qiscus.realtimeChannel.contains(channel){
                     Qiscus.realtimeChannel.append(channel)
                 }
             }
-        }
+        //}
     }
     public func unsubscribeRealtimeStatus(){
         var channels = [String]()

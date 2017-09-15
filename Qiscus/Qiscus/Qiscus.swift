@@ -35,6 +35,9 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     static var dbConfiguration = Realm.Configuration.defaultConfiguration
     static var chatRooms = [Int : QRoom]()
     static var qiscusDownload:[String] = [String]()
+    
+    var backgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
+    
     public static var chatDelegate:QiscusChatDelegate?
     
     static var realtimeConnected:Bool{
@@ -989,7 +992,9 @@ extension Qiscus:CocoaMQTTDelegate{
                                         }
                                         Qiscus.chatRooms[roomId] = nil
                                         if let room = QRoom.room(withId: roomId){
-                                            QRoom.deleteRoom(room: room)
+                                            if !room.isInvalidated {
+                                                QRoom.deleteRoom(room: room)
+                                            }
                                         }
                                     }}
                                 }
