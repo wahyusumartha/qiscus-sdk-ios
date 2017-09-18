@@ -1161,3 +1161,71 @@ extension Qiscus:CocoaMQTTDelegate{
     }
 }
 
+extension Qiscus { // Public class API to get room
+    
+    public class func room(withId roomId:Int, onSuccess:@escaping ((QRoom)->Void),onError:@escaping ((String)->Void)){
+        let service = QChatService()
+        var needToLoad = true
+        var room:QRoom?
+        if QRoom.room(withId: roomId) != nil{
+            room = QRoom.room(withId: roomId)
+            if room!.comments.count > 0 {
+                needToLoad = false
+            }
+        }
+        if !needToLoad {
+            onSuccess(room!)
+        }else{
+            service.room(withId: roomId, onSuccess: { (room) in
+                onSuccess(room)
+            }) { (error) in
+                onError(error)
+            }
+        }
+    }
+    
+    public class func room(withChannel channelName:String, onSuccess:@escaping ((QRoom)->Void),onError:@escaping ((String)->Void)){
+        let service = QChatService()
+        var needToLoad = true
+        var room:QRoom?
+        if QRoom.room(withUniqueId: channelName) != nil{
+            room = QRoom.room(withUniqueId: channelName)
+            if room!.comments.count > 0 {
+                needToLoad = false
+            }
+        }
+        if !needToLoad {
+            onSuccess(room!)
+        }else{
+            service.room(withUniqueId: channelName, onSuccess: { (room) in
+                onSuccess(room)
+            }) { (error) in
+                onError(error)
+            }
+        }
+        
+    }
+    
+    public class func room(withUserId userId:String, onSuccess:@escaping ((QRoom)->Void),onError:@escaping ((String)->Void)){
+        let service = QChatService()
+        var needToLoad = true
+        var room:QRoom?
+        
+        if QRoom.room(withUser: userId) != nil{
+            room = QRoom.room(withUser: userId)
+            if room!.comments.count > 0 {
+                needToLoad = false
+            }
+        }
+        if !needToLoad {
+            onSuccess(room!)
+        }else{
+            service.room(withUser: userId, onSuccess: { (room) in
+                onSuccess(room)
+            }, onError: { (error) in
+                onError(error)
+            })
+        }
+    }
+}
+
