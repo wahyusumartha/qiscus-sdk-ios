@@ -1227,5 +1227,45 @@ extension Qiscus { // Public class API to get room
             })
         }
     }
+    
+    // MARK: - Room List
+    public class func roomList(withLimit limit:Int, page:Int, onSuccess:@escaping (([QRoom], Int, Int, Int)->Void),onError:@escaping ((String)->Void)){
+        QChatService.roomList(onSuccess: { (rooms, totalRoom, currentPage, limit) in
+            onSuccess(rooms, totalRoom, currentPage, limit)
+        }) { (error) in
+            onError(error)
+        }
+    }
+    
+    public class func roomInfo(withId id:Int, onSuccess:@escaping ((QRoom)->Void), onError: @escaping ((String)->Void)){
+        QChatService.roomInfo(withId: id, onSuccess: { (room) in
+            onSuccess(room)
+        }) { (error) in
+            onError(error)
+        }
+    }
+    
+    public class func roomsInfo(withIds ids:[Int], onSuccess:@escaping (([QRoom])->Void), onError: @escaping ((String)->Void)){
+        QChatService.roomsInfo(withIds: ids, onSuccess: { (rooms) in
+            onSuccess(rooms)
+        }) { (error) in
+            onError(error)
+        }
+    }
+    public class func channelInfo(withName name:String, onSuccess:@escaping ((QRoom)->Void), onError: @escaping ((String)->Void)){
+        QChatService.roomInfo(withUniqueId: name, onSuccess: { (room) in
+            onSuccess(room)
+        }) { (error) in
+            onError(error)
+        }
+    }
+    
+    public class func channelsInfo(withNames names:[String], onSuccess:@escaping (([QRoom])->Void), onError: @escaping ((String)->Void)){
+        QChatService.roomsInfo(withUniqueIds: names, onSuccess: { (rooms) in
+            onSuccess(rooms)
+        }) { (error) in
+            onError(error)
+        }
+    }
 }
 
