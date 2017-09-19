@@ -25,7 +25,7 @@ open class QRoomListCell: UITableViewCell {
         let center: NotificationCenter = NotificationCenter.default
         center.addObserver(self, selector: #selector(QRoomListCell.userTyping(_:)), name: QiscusNotification.USER_TYPING, object: nil)
         center.addObserver(self, selector: #selector(QRoomListCell.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
-        // Initialization code
+        center.addObserver(self, selector: #selector(QRoomListCell.roomChangeNotif(_:)), name: QiscusNotification.ROOM_CHANGE, object: nil)
     }
 
     override open func setSelected(_ selected: Bool, animated: Bool) {
@@ -36,8 +36,12 @@ open class QRoomListCell: UITableViewCell {
     
     open func setupUI(){}
     open func onUserTyping(user:QUser, typing:Bool){}
-    open func onRoomChange(){}
-    open func gotNewComment(comment:QComment){}
+    open func onRoomChange(room: QRoom){
+        self.room = room
+    }
+    open func gotNewComment(comment:QComment){
+        self.room = comment.room!
+    }
     
     @objc private func userTyping(_ notification: Notification){
         if let userInfo = notification.userInfo {
@@ -52,10 +56,18 @@ open class QRoomListCell: UITableViewCell {
     }
     @objc private func newCommentNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
-            
             let comment = userInfo["comment"] as! QComment
             if room?.id == comment.roomId {
-                self.room = comment.room
+                self.gotNewComment(comment: comment)
+            }
+        }
+    }
+    
+    @objc private func roomChangeNotif(_ notification: Notification){
+        if let userInfo = notification.userInfo {
+            let room = userInfo["room"] as! QRoom
+            if room.id == self.room?.id {
+                self.onRoomChange(room: room)
             }
         }
     }

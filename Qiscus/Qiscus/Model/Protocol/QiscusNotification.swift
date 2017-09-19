@@ -18,11 +18,16 @@ public class QiscusNotification: NSObject {
     public static let GOT_NEW_COMMENT = NSNotification.Name("qiscus_gotNewComment")
     public static let USER_TYPING = NSNotification.Name("qiscus_userTyping")
     public static let MESSAGE_STATUS = NSNotification.Name("qiscus_messageStatus")
+    public static let ROOM_CHANGE = NSNotification.Name("qiscus_roomChange")
     
     override private init(){
         super.init()
     }
     
+    public class func publish(roomChange room:QRoom){
+        let notification = QiscusNotification.shared
+        notification.publish(roomChange: room)
+    }
     public class func publish(messageStatus comment:QComment, status:QCommentStatus){
         let notification = QiscusNotification.shared
         notification.publish(messageStatus: comment, status: status)
@@ -31,13 +36,16 @@ public class QiscusNotification: NSObject {
         let notification = QiscusNotification.shared
         notification.publish(gotNewComment: comment)
     }
-    
     public class func publish(userTyping user:QUser, room:QRoom ,typing:Bool = true){
         let notification = QiscusNotification.shared
         notification.publish(userTyping: user, room: room, typing: typing)
     }
     
     // MARK: - private method
+    private func publish(roomChange room:QRoom){
+        let userInfo: [AnyHashable: Any] = ["room" : room]
+        self.nc.post(name: QiscusNotification.ROOM_CHANGE, object: nil, userInfo: userInfo)
+    }
     private func publish(messageStatus comment:QComment, status:QCommentStatus){
         let userInfo: [AnyHashable: Any] = ["comment" : comment, "status": status]
         self.nc.post(name: QiscusNotification.MESSAGE_STATUS, object: nil, userInfo: userInfo)

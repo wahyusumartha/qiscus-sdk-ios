@@ -1062,7 +1062,7 @@ public class QChatService:NSObject {
             Qiscus.printLog(text: "room info url: \(QiscusConfig.SEARCH_URL)")
             Qiscus.printLog(text: "room info parameters: \(parameters)")
             Alamofire.request(QiscusConfig.ROOMINFO_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
-                Qiscus.printLog(text: "room info result: \(response)")
+                
                 switch response.result {
                 case .success:
                     if let result = response.result.value{
@@ -1072,7 +1072,7 @@ public class QChatService:NSObject {
                         if success {
                             let resultData = json["results"]
                             let roomsData = resultData["rooms_info"].arrayValue
-                            
+                            print("room info result: \(roomsData)")
                             if roomsData.count > 0 {
                                 let roomData = roomsData[0]
                                 DispatchQueue.main.async { autoreleasepool {
@@ -1082,6 +1082,7 @@ public class QChatService:NSObject {
                                         let lastCommentData = roomData["last_comment"]
                                         let lastComment = QComment.tempComment(fromJSON: lastCommentData)
                                         room.updateLastComentInfo(comment: lastComment)
+                                        room.updateUnreadCommentCount(count: unread)
                                         onSuccess(room)
                                     }else{
                                         let room = QRoom.addRoom(fromJSON: roomData)

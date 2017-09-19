@@ -1062,6 +1062,12 @@ extension Qiscus:CocoaMQTTDelegate{
                         DispatchQueue.main.async { autoreleasepool{
                             QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail)?.updateLastReadId(commentId: commentId)
                         }}
+                    }else{
+                        Qiscus.roomInfo(withId: roomId, onSuccess: { (room) in
+                            QiscusNotification.publish(roomChange: room)
+                        }, onError: { (error) in
+                            Qiscus.printLog(text: "fail to update room: \(error)")
+                        })
                     }
                     break
                 case "s":

@@ -42,7 +42,6 @@ class QRoomListDefaultCell: QRoomListCell {
         //print("room name setup UI: \(room?.name)")
         //print("room lastComment setup UI: \(room?.lastComment?.text)")
         if room != nil {
-            self.unreadLabel.isHidden = true
             self.descriptionLabel.textColor = UIColor.black
             if room!.unreadCount > 0 {
                 self.unreadLabel.text = "\(room!.unreadCount)"
@@ -50,6 +49,8 @@ class QRoomListDefaultCell: QRoomListCell {
                     self.unreadLabel.text = "99+"
                 }
                 self.unreadLabel.isHidden = false
+            }else{
+                self.unreadLabel.isHidden = true
             }
             self.titleLabel.text = room!.name
             if let lastComment = room!.lastComment{
@@ -80,8 +81,5 @@ class QRoomListDefaultCell: QRoomListCell {
         super.setSelected(selected, animated: animated)
 
         // Configure the view for the selected state
-    }
-    override func gotNewComment(comment: QComment) {
-        self.descriptionLabel.text = "\(comment.senderName): \(comment.text)"
     }
 }

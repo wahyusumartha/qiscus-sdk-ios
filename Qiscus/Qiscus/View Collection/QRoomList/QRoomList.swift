@@ -56,18 +56,18 @@ open class QRoomList: UITableView{
         return cell
     }
     
+    open func gotNewComment(inRoom room:QRoom?, comment:QComment){
+        self.rooms = QRoom.all()
+        let indexSet = IndexSet(integer: 0)
+        self.reloadSections(indexSet, with: .none)
+    }
     @objc private func newCommentNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
             let comment = userInfo["comment"] as! QComment
-            
             self.gotNewComment(inRoom: comment.room, comment: comment)
         }
     }
     
-    open func gotNewComment(inRoom room:QRoom?, comment:QComment){
-        self.rooms = QRoom.all()
-        self.reloadData()
-    }
 }
 
 extension QRoomList: UITableViewDelegate,UITableViewDataSource {
