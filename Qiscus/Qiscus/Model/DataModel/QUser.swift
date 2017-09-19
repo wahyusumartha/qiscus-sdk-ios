@@ -194,9 +194,11 @@ public class QUser:Object {
                 if avatarData != nil {
                     let localPath = QFileManager.saveFile(withData: avatarData!, fileName: filename, type: .user)
                     DispatchQueue.main.async {autoreleasepool{
-                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-                        try! realm.write {
-                            self.avatarLocalPath = localPath
+                        if !self.isInvalidated {
+                            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            try! realm.write {
+                                self.avatarLocalPath = localPath
+                            }
                         }
                     }}
                 }

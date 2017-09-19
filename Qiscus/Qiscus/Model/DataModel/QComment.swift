@@ -581,6 +581,9 @@ public class QComment:Object {
                         cache.delegate?.comment(didChangeStatus: status)
                     }
                 }
+                if let comment = QComment.comment(withUniqueId: uniqueId) {
+                    QiscusNotification.publish(messageStatus: comment, status: status)
+                }
             })
         }
     }

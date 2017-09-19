@@ -23,7 +23,6 @@
 		396CBDBB1F6B78580028C3FE /* QRoomList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 396CBDBA1F6B78580028C3FE /* QRoomList.swift */; };
 		396CBDBE1F6B80390028C3FE /* RoomListVC2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 396CBDBC1F6B80390028C3FE /* RoomListVC2.swift */; };
 		396CBDBF1F6B80390028C3FE /* RoomListVC2.xib in Resources */ = {isa = PBXBuildFile; fileRef = 396CBDBD1F6B80390028C3FE /* RoomListVC2.xib */; };
-		396CBDC11F6B81630028C3FE /* RoomListTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 396CBDC01F6B81630028C3FE /* RoomListTable.swift */; };
 		396CBDC61F6BA3D60028C3FE /* QRoomListDefaultCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 396CBDC41F6BA3D60028C3FE /* QRoomListDefaultCell.swift */; };
 		396CBDC71F6BA3D60028C3FE /* QRoomListDefaultCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 396CBDC51F6BA3D60028C3FE /* QRoomListDefaultCell.xib */; };
 		39955B6D1D656D1700927ADD /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 39955B6C1D656D1700927ADD /* Media.xcassets */; };
@@ -180,7 +179,6 @@
 		396CBDBA1F6B78580028C3FE /* QRoomList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QRoomList.swift; path = Qiscus/View/QRoomList/QRoomList.swift; sourceTree = "<group>"; };
 		396CBDBC1F6B80390028C3FE /* RoomListVC2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoomListVC2.swift; sourceTree = "<group>"; };
 		396CBDBD1F6B80390028C3FE /* RoomListVC2.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RoomListVC2.xib; sourceTree = "<group>"; };
-		396CBDC01F6B81630028C3FE /* RoomListTable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoomListTable.swift; sourceTree = "<group>"; };
 		396CBDC41F6BA3D60028C3FE /* QRoomListDefaultCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QRoomListDefaultCell.swift; path = Qiscus/View/QRoomList/QRoomListDefaultCell.swift; sourceTree = "<group>"; };
 		396CBDC51F6BA3D60028C3FE /* QRoomListDefaultCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = QRoomListDefaultCell.xib; path = Qiscus/View/QRoomList/QRoomListDefaultCell.xib; sourceTree = "<group>"; };
 		39955B6C1D656D1700927ADD /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Media.xcassets; path = Qiscus/Media.xcassets; sourceTree = "<group>"; };
@@ -477,7 +475,6 @@
 				39E7543A1F6222AB003C3302 /* RoomListCell.xib */,
 				396CBDBC1F6B80390028C3FE /* RoomListVC2.swift */,
 				396CBDBD1F6B80390028C3FE /* RoomListVC2.xib */,
-				396CBDC01F6B81630028C3FE /* RoomListTable.swift */,
 			);
 			path = Example;
 			sourceTree = "<group>";
@@ -894,7 +891,6 @@
 				39E754371F62226E003C3302 /* RoomListVC.swift in Sources */,
 				395291271E28559B004BD6B4 /* MainView.swift in Sources */,
 				39F1F6AD1D3B90E200FF1C8C /* AppDelegate.swift in Sources */,
-				396CBDC11F6B81630028C3FE /* RoomListTable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -17,8 +17,10 @@ open class QRoomList: UITableView{
     
     public var rooms = [QRoom]() {
         didSet{
-            let indexSet = IndexSet(integer: 0)
-            self.reloadSections(indexSet, with: UITableViewRowAnimation.fade)
+//            DispatchQueue.main.async {
+//                //let indexSet = IndexSet(integer: 0)
+//                //self.reloadData()
+//            }
         }
     }
     
@@ -34,6 +36,7 @@ open class QRoomList: UITableView{
         self.dataSource = self
         self.rowHeight = 63.0
         self.tableFooterView = UIView()
+        NotificationCenter.default.addObserver(self, selector: #selector(QRoomList.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
         registerCell()
     }
  
@@ -49,9 +52,22 @@ open class QRoomList: UITableView{
     
     open func cell(at indexPath: IndexPath) -> QRoomListCell {
         let cell = self.dequeueReusableCell(withIdentifier: "roomDefaultCell", for: indexPath) as! QRoomListDefaultCell
+        //cell.room = self.rooms[indexPath.row]
         return cell
     }
     
+    @objc private func newCommentNotif(_ notification: Notification){
+        if let userInfo = notification.userInfo {
+            let comment = userInfo["comment"] as! QComment
+            
+            self.gotNewComment(inRoom: comment.room, comment: comment)
+        }
+    }
+    
+    open func gotNewComment(inRoom room:QRoom?, comment:QComment){
+        self.rooms = QRoom.all()
+        self.reloadData()
+    }
 }
 
 extension QRoomList: UITableViewDelegate,UITableViewDataSource {
@@ -78,7 +94,7 @@ extension QRoomList: UITableViewDelegate,UITableViewDataSource {
         }else{
             cell.comment = self.comments[indexPath.row]
         }
-        return self.cell(at: indexPath)
+        return cell
     }
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

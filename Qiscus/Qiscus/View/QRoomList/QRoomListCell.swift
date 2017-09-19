@@ -24,6 +24,7 @@ open class QRoomListCell: UITableViewCell {
         super.awakeFromNib()
         let center: NotificationCenter = NotificationCenter.default
         center.addObserver(self, selector: #selector(QRoomListCell.userTyping(_:)), name: QiscusNotification.USER_TYPING, object: nil)
+        center.addObserver(self, selector: #selector(QRoomListCell.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
         // Initialization code
     }
 
@@ -46,6 +47,15 @@ open class QRoomListCell: UITableViewCell {
             
             if self.room?.id == room.id {
                 self.onUserTyping(user: user, typing: typing)
+            }
+        }
+    }
+    @objc private func newCommentNotif(_ notification: Notification){
+        if let userInfo = notification.userInfo {
+            
+            let comment = userInfo["comment"] as! QComment
+            if room?.id == comment.roomId {
+                self.room = comment.room
             }
         }
     }
