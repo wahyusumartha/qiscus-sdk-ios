@@ -43,12 +43,16 @@ public class QiscusNotification: NSObject {
     
     // MARK: - private method
     private func publish(roomChange room:QRoom){
-        let userInfo: [AnyHashable: Any] = ["room" : room]
-        self.nc.post(name: QiscusNotification.ROOM_CHANGE, object: nil, userInfo: userInfo)
+        if !room.isInvalidated {
+            let userInfo: [AnyHashable: Any] = ["room" : room]
+            self.nc.post(name: QiscusNotification.ROOM_CHANGE, object: nil, userInfo: userInfo)
+        }
     }
     private func publish(messageStatus comment:QComment, status:QCommentStatus){
-        let userInfo: [AnyHashable: Any] = ["comment" : comment, "status": status]
-        self.nc.post(name: QiscusNotification.MESSAGE_STATUS, object: nil, userInfo: userInfo)
+        if !comment.isInvalidated {
+            let userInfo: [AnyHashable: Any] = ["comment" : comment, "status": status]
+            self.nc.post(name: QiscusNotification.MESSAGE_STATUS, object: nil, userInfo: userInfo)
+        }
     }
     private func publish(gotNewComment comment:QComment){
         let userInfo = ["comment" : comment]

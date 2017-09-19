@@ -557,6 +557,12 @@ public class QRoom:Object {
                 try! realm.write {
                     self.unreadCount = unread
                 }
+                let id = self.id
+                DispatchQueue.main.async { autoreleasepool {
+                    if let room = QRoom.room(withId: id){
+                        QiscusNotification.publish(roomChange: room)
+                    }
+                }}
             }
         }
         if let roomName = json["room_name"].string {
@@ -566,7 +572,8 @@ public class QRoom:Object {
                 }
                 let id = self.id
                 DispatchQueue.main.async { autoreleasepool {
-                    if let cache = Qiscus.chatRooms[id] {
+                    if let cache = QRoom.room(withId: id) {
+                        QiscusNotification.publish(roomChange: cache)
                         cache.delegate?.room(didChangeName: cache)
                     }
                 }}
@@ -580,7 +587,8 @@ public class QRoom:Object {
                 }
                 let id = self.id
                 DispatchQueue.main.async { autoreleasepool {
-                    if let cache = Qiscus.chatRooms[id] {
+                    if let cache = QRoom.room(withId: id) {
+                        QiscusNotification.publish(roomChange: cache)
                         cache.delegate?.room(didChangeAvatar: cache)
                     }
                 }}
@@ -602,10 +610,18 @@ public class QRoom:Object {
                     self.lastCommentTypeRaw = comment.typeRaw
                     self.lastCommentData = comment.data
                 }
+                let id = self.id
+                DispatchQueue.main.async { autoreleasepool {
+                    if let room = QRoom.room(withId: id){
+                        QiscusNotification.publish(roomChange: room)
+                    }
+                }}
             }
         }else{
+            var change = false
             if let lastMessage = json["last_comment_message"].string{
                 if lastMessage != self.lastCommentText {
+                    change = true
                     try! realm.write {
                         self.lastCommentText = lastMessage
                     }
@@ -613,17 +629,27 @@ public class QRoom:Object {
             }
             if let lastMessageTime = json["last_comment_timestamp_unix"].double{
                 if lastMessageTime != self.lastCommentCreatedAt {
+                    change = true
                     try! realm.write {
                         self.lastCommentCreatedAt = lastMessageTime
                     }
                 }
             }
             if let lastCommentId = json["last_comment_id"].int{
+                change = true
                 if lastCommentId > self.lastCommentId {
                     try! realm.write {
                         self.lastCommentId = lastCommentId
                     }
                 }
+            }
+            if change {
+                let id = self.id
+                DispatchQueue.main.async { autoreleasepool {
+                    if let room = QRoom.room(withId: id){
+                        QiscusNotification.publish(roomChange: room)
+                    }
+                }}
             }
         }
         
@@ -670,10 +696,11 @@ public class QRoom:Object {
             if participantChanged {
                 let id = self.id
                 DispatchQueue.main.async { autoreleasepool {
-                    if let cache = Qiscus.chatRooms[id] {
+                    if let cache = QRoom.room(withId: id) {
                         cache.delegate?.room(didChangeParticipant: cache)
+                        QiscusNotification.publish(roomChange: cache)
                     }
-                    }}
+                }}
             }
         }
         
@@ -1693,9 +1720,11 @@ public class QRoom:Object {
                 self.name = name
             }
             DispatchQueue.main.async { autoreleasepool {
-                if let cache = Qiscus.chatRooms[id]{
-                    cache.delegate?.room(didChangeName: cache)
+                if let room = QRoom.room(withId: id){
+                    QiscusNotification.publish(roomChange: room)
+                    room.delegate?.room(didChangeName: room)
                 }
+                
             }}
         }
     }
@@ -1710,8 +1739,9 @@ public class QRoom:Object {
                 r.avatarLocalPath = ""
             }
             DispatchQueue.main.sync { autoreleasepool {
-                if let cache = Qiscus.chatRooms[id]{
-                    cache.delegate?.room(didChangeAvatar: cache)
+                if let room = QRoom.room(withId: id){
+                    QiscusNotification.publish(roomChange: room)
+                    room.delegate?.room(didChangeAvatar: room)
                 }
             }}
         }}

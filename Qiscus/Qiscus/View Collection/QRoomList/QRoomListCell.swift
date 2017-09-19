@@ -66,8 +66,10 @@ open class QRoomListCell: UITableViewCell {
     @objc private func roomChangeNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
             let room = userInfo["room"] as! QRoom
-            if room.id == self.room?.id {
-                self.onRoomChange(room: room)
+            if room.isInvalidated {
+                if room.id == self.room?.id {
+                    self.onRoomChange(room: room)
+                }
             }
         }
     }
