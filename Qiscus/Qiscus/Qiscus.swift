@@ -996,6 +996,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                                 QRoom.deleteRoom(room: room)
                                             }
                                         }
+                                        QiscusNotification.publish(gotNewComment: comment)
                                     }}
                                 }
                             }
