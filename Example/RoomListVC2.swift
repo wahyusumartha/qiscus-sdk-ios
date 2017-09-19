@@ -33,8 +33,6 @@ class RoomListVC2: UIViewController {
         let addButton = UIBarButtonItem(title: "+", style: .plain, target: self, action: #selector(addChat))
         let rightBarButtons = [ addButton]
         self.navigationItem.rightBarButtonItems = rightBarButtons
-//        NotificationCenter.default.addObserver(self, selector: #selector(RoomListVC2.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
-        //Qiscus.chatDelegate = self
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -106,12 +104,7 @@ class RoomListVC2: UIViewController {
         view.type = type
         self.navigationController?.pushViewController(view, animated: true)
     }
-    @objc private func newCommentNotif(_ notification: Notification){
-        //self.rooms = QRoom.all()
-//        DispatchQueue.main.async {
-//             self.roomListView.reloadData()
-//        }
-    }
+    
 }
 extension RoomListVC2: QRoomListDelegate {
     func didSelect(room: QRoom) {
@@ -122,7 +115,4 @@ extension RoomListVC2: QRoomListDelegate {
         
     }
 }
-extension RoomListVC2: QiscusChatDelegate {
-    //func qiscusChat(gotNewComment comment: QComment) {  self.rooms = QRoom.all() }
-    //func qiscusChat(gotNewRoom room: QRoom) { self.rooms = QRoom.all() }
-}
+

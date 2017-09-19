@@ -507,6 +507,7 @@
 		39F1F72D1D3B928D00FF1C8C /* Service */ = {
 			isa = PBXGroup;
 			children = (
+				39E754421F678B2B003C3302 /* QiscusNotification.swift */,
 				39F70FA51F3D5E8300774D97 /* QChatService.swift */,
 				39F70FA61F3D5E8300774D97 /* QFileManager.swift */,
 				39F70FA71F3D5E8300774D97 /* QiscusCommentClient.swift */,
@@ -548,7 +549,6 @@
 				39F710031F3D62D600774D97 /* QiscusChatCellDelegate.swift */,
 				39F710041F3D62D600774D97 /* QiscusConfigDelegate.swift */,
 				39F710051F3D62D600774D97 /* QiscusRoomDelegate.swift */,
-				39E754421F678B2B003C3302 /* QiscusNotification.swift */,
 			);
 			name = Protocol;
 			sourceTree = "<group>";

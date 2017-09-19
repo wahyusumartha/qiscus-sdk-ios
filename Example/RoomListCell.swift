@@ -32,10 +32,9 @@ class RoomListCell: QRoomListCell {
     }
     
     override func setupUI() {
-        
         self.typingUser = nil
         if room != nil {
-            self.unreadLabel.isHidden = true
+            
             self.commentLabel.textColor = UIColor.black
             if room!.unreadCount > 0 {
                 self.unreadLabel.text = "\(room!.unreadCount)"
@@ -43,6 +42,8 @@ class RoomListCell: QRoomListCell {
                     self.unreadLabel.text = "99+"
                 }
                 self.unreadLabel.isHidden = false
+            }else{
+                self.unreadLabel.isHidden = true
             }
             self.nameLabel.text = room!.name
             if let lastComment = room!.lastComment{
@@ -79,8 +80,8 @@ class RoomListCell: QRoomListCell {
     }
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
     }
+    
 //    public func userStartTyping(user:QUser) {
 //        
 //    }
