@@ -31,7 +31,9 @@ class RoomListVC2: UIViewController {
         let logoutButton = UIBarButtonItem(image: UIImage(named: "ic_exit_to_app"), style: .plain, target: self, action: #selector(logOut))
         self.navigationItem.leftBarButtonItems = [logoutButton]
         let addButton = UIBarButtonItem(title: "+", style: .plain, target: self, action: #selector(addChat))
-        let rightBarButtons = [ addButton]
+        let searchButton = UIBarButtonItem(title: "s", style: .plain, target: self, action: #selector(searchText))
+
+        let rightBarButtons = [ addButton, searchButton]
         self.navigationItem.rightBarButtonItems = rightBarButtons
     }
     
@@ -44,6 +46,7 @@ class RoomListVC2: UIViewController {
             self.loadRoomList()
         }else{
             Qiscus.subscribeAllRoomNotification()
+            
             self.dismissQiscusLoading()
         }
     }
@@ -53,7 +56,9 @@ class RoomListVC2: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-
+    func searchText(){
+        self.roomListView.search(text: "kiwari")
+    }
     func loadRoomList(page:Int? = 1){
         QChatService.roomList(withLimit: 100, page: page, onSuccess: { (rooms, totalRoom, currentPage, limit) in
             if totalRoom > (limit * (currentPage - 1)) + rooms.count{
@@ -114,5 +119,11 @@ extension RoomListVC2: QRoomListDelegate {
     func didSelect(comment: QComment) {
         
     }
+}
+extension QRoomList {
+    func commentCell(at indexPath: IndexPath) -> UITableViewCell{
+    return UITableViewCell()
+    }
+
 }
 

@@ -10,16 +10,18 @@ import UIKit
 
 open class QRoomListCell: UITableViewCell {
     
+    public var searchText = ""{
+        didSet{
+            self.searchTextChanged()
+        }
+    }
+    
     public var room:QRoom? {
         didSet{
             setupUI()
         }
     }
-    public var comment:QComment? {
-        didSet{
-            setupUI()
-        }
-    }
+
     override open func awakeFromNib() {
         super.awakeFromNib()
         let center: NotificationCenter = NotificationCenter.default
@@ -33,7 +35,6 @@ open class QRoomListCell: UITableViewCell {
 
         // Configure the view for the selected state
     }
-    
     open func setupUI(){}
     open func onUserTyping(user:QUser, typing:Bool){}
     open func onRoomChange(room: QRoom){
@@ -42,6 +43,7 @@ open class QRoomListCell: UITableViewCell {
     open func gotNewComment(comment:QComment){
         self.room = comment.room!
     }
+    open func searchTextChanged(){}
     
     @objc private func userTyping(_ notification: Notification){
         if let userInfo = notification.userInfo {
@@ -66,7 +68,9 @@ open class QRoomListCell: UITableViewCell {
     @objc private func roomChangeNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
             let room = userInfo["room"] as! QRoom
-            if room.isInvalidated {
+            //print("room on notif: \(room)")
+            print("id comp: \(room.id)  ::: \(self.room!.id), \(self.room!.name)")
+            if !room.isInvalidated {
                 if room.id == self.room?.id {
                     self.onRoomChange(room: room)
                 }

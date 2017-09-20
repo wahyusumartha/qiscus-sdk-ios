@@ -68,7 +68,7 @@ class RoomListCell: QRoomListCell {
         self.unreadLabel.layer.cornerRadius = 12.5
         self.unreadLabel.clipsToBounds = true
     }
-    
+
     override func onUserTyping(user: QUser, typing: Bool) {
         if typing {
             self.typingUser = user

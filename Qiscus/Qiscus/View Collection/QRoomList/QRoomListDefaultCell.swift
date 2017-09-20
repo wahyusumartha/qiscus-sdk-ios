@@ -36,6 +36,7 @@ class QRoomListDefaultCell: QRoomListCell {
             }
         }
     }
+   
     override func setupUI() {
         self.avatarView.image = Qiscus.image(named: "avatar")
         self.typingUser = nil
@@ -66,6 +67,24 @@ class QRoomListDefaultCell: QRoomListCell {
                     }
                 })
             }
+        }
+    }
+    override func searchTextChanged() {
+        let boldAttr = [NSForegroundColorAttributeName: UIColor.red,
+                        NSFontAttributeName: UIFont.boldSystemFont(ofSize: self.titleLabel.font.pointSize)]
+        let roomName = self.room!.name
+        // check if label text contains search text
+        if let matchRange: Range = roomName.lowercased().range(of: searchText.lowercased()) {
+            
+            let matchRangeStart: Int = roomName.distance(from: roomName.startIndex, to: matchRange.lowerBound)
+            let matchRangeEnd: Int = roomName.distance(from: roomName.startIndex, to: matchRange.upperBound)
+            let matchRangeLength: Int = matchRangeEnd - matchRangeStart
+            
+            let newLabelText = NSMutableAttributedString(string: roomName)
+            newLabelText.setAttributes(boldAttr, range: NSMakeRange(matchRangeStart, matchRangeLength))
+            
+            // set label attributed text
+            self.titleLabel.attributedText = newLabelText
         }
     }
     override func onUserTyping(user: QUser, typing: Bool) {
