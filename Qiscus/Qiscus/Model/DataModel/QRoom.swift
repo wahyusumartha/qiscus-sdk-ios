@@ -49,7 +49,7 @@ public class QRoom:Object {
     public dynamic var lastReadCommentId: Int = 0
     internal dynamic var unreadCommentCount:Int = 0
     public dynamic var unreadCount:Int = 0
-    
+    private dynamic var pinned:Double = 0
     
     // MARK: - lastComment variable
     private dynamic var lastCommentId:Int = 0
@@ -69,7 +69,6 @@ public class QRoom:Object {
     private dynamic var lastParticipantsDeliveredId:Int = 0
     private dynamic var roomVersion004:Bool = true
     
-    
     public let comments = List<QCommentGroup>()
     public let participants = List<QParticipant>()
     
@@ -77,8 +76,11 @@ public class QRoom:Object {
     private var typingTimer:Timer?
     private var selfTypingTimer:Timer?
     
-    
-    
+    public var isPinned:Bool {
+        get{
+            return self.pinned != 0
+        }
+    }
     
     // MARK: - Unstored properties
     override public static func ignoredProperties() -> [String] {
@@ -150,7 +152,7 @@ public class QRoom:Object {
     // MARK: - Class method
     public class func all() -> [QRoom]{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let data = realm.objects(QRoom.self).sorted(byKeyPath: "lastCommentCreatedAt", ascending: false)
+        let data = realm.objects(QRoom.self).sorted(byKeyPath: "pinned", ascending: false).sorted(byKeyPath: "lastCommentCreatedAt", ascending: false)
         
         if data.count > 0 {
             return Array(data)
@@ -158,11 +160,30 @@ public class QRoom:Object {
             return [QRoom]()
         }
     }
+    public func pin(){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        try! realm.write {
+            self.pinned = Double(Date().timeIntervalSince1970)
+        }
+    }
+    public func unpin(){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        try! realm.write {
+            self.pinned = 0
+        }
+    }
+    public class func unpinAll(){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let data = realm.objects(QRoom.self).filter(("pinned > 0"))
+        
+        for room in data {
+            room.unpin()
+        }
+    }
     internal class func cacheAll(){
         let rooms = QRoom.all()
         for room in rooms{
             room.cache()
-            
         }
     }
     

@@ -14,6 +14,9 @@ import AVFoundation
 
 public class QRoomService:NSObject{    
     public func sync(onRoom room:QRoom){
+        if room.isInvalidated {
+            return
+        }
         let loadURL = QiscusConfig.ROOM_REQUEST_ID_URL
         let parameters:[String : AnyObject] =  [
             "id" : room.id as AnyObject,
@@ -25,6 +28,9 @@ public class QRoomService:NSObject{
                 let results = json["results"]
                 let error = json["error"]
                 
+                if room.isInvalidated {
+                    return
+                }
                 if results != JSON.null{
                     let roomData = results["room"]
                     room.syncRoomData(withJSON: roomData)

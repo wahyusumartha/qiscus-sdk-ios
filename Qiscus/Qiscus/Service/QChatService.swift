@@ -1081,13 +1081,21 @@ public class QChatService:NSObject {
                                     if let room = QRoom.room(withId: roomId){
                                         let lastCommentData = roomData["last_comment"]
                                         let lastComment = QComment.tempComment(fromJSON: lastCommentData)
-                                        room.updateLastComentInfo(comment: lastComment)
-                                        room.updateUnreadCommentCount(count: unread)
-                                        onSuccess(room)
+                                        if !room.isInvalidated {
+                                            room.updateLastComentInfo(comment: lastComment)
+                                            room.updateUnreadCommentCount(count: unread)
+                                            onSuccess(room)
+                                        }else{
+                                            onFailed("room has been deleted")
+                                        }
                                     }else{
                                         let room = QRoom.addRoom(fromJSON: roomData)
-                                        room.updateUnreadCommentCount(count: unread)
-                                        onSuccess(room)
+                                        if !room.isInvalidated {
+                                            room.updateUnreadCommentCount(count: unread)
+                                            onSuccess(room)
+                                        }else{
+                                            onFailed("room has been deleted")
+                                        }
                                     }
                                 }}
                             }else{

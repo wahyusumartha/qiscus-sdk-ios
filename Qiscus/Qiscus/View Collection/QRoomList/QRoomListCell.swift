@@ -58,21 +58,21 @@ open class QRoomListCell: UITableViewCell {
     }
     @objc private func newCommentNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
-            let comment = userInfo["comment"] as! QComment
-            if room?.id == comment.roomId {
-                self.gotNewComment(comment: comment)
+            if let comment = userInfo["comment"] as? QComment{
+                if room?.id == comment.roomId {
+                    self.gotNewComment(comment: comment)
+                }
             }
         }
     }
     
     @objc private func roomChangeNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
-            let room = userInfo["room"] as! QRoom
-            //print("room on notif: \(room)")
-            print("id comp: \(room.id)  ::: \(self.room!.id), \(self.room!.name)")
-            if !room.isInvalidated {
-                if room.id == self.room?.id {
-                    self.onRoomChange(room: room)
+            if let room = userInfo["room"] as? QRoom {
+                if !room.isInvalidated {
+                    if room.id == self.room?.id {
+                        self.onRoomChange(room: room)
+                    }
                 }
             }
         }

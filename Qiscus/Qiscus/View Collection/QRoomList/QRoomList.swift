@@ -54,6 +54,7 @@ open class QRoomList: UITableView{
         self.rowHeight = UITableViewAutomaticDimension
         self.tableFooterView = UIView()
         NotificationCenter.default.addObserver(self, selector: #selector(QRoomList.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(QRoomList.roomDeletedNotif(_:)), name: QiscusNotification.ROOM_DELETED, object: nil)
         registerCell()
     }
  
@@ -102,6 +103,12 @@ open class QRoomList: UITableView{
             self.gotNewComment(inRoom: comment.room, comment: comment)
         }
     }
+    @objc private func roomDeletedNotif(_ notification: Notification){
+        if let userInfo = notification.userInfo {
+            let roomId = userInfo["room_id"] as! Int
+            self.roomDeleted(roomId: roomId)
+        }
+    }
     
     open func roomSectionHeight()->CGFloat{
         if self.searchText != ""{
@@ -118,7 +125,11 @@ open class QRoomList: UITableView{
             return 0
         }
     }
-    
+    open func roomDeleted(roomId:Int){
+        self.rooms = QRoom.all()
+        let indexSet = IndexSet(integer: 0)
+        self.reloadSections(indexSet, with: .none)
+    }
     open func roomHeader()->UIView? {
         if self.searchText != "" {
             let screenWidth: CGFloat    = QiscusHelper.screenWidth()

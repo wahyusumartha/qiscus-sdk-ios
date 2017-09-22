@@ -19,6 +19,7 @@ public class QiscusNotification: NSObject {
     public static let USER_TYPING = NSNotification.Name("qiscus_userTyping")
     public static let MESSAGE_STATUS = NSNotification.Name("qiscus_messageStatus")
     public static let ROOM_CHANGE = NSNotification.Name("qiscus_roomChange")
+    public static let ROOM_DELETED = NSNotification.Name("qiscus_roomDeleted")
     
     override private init(){
         super.init()
@@ -27,6 +28,10 @@ public class QiscusNotification: NSObject {
     public class func publish(roomChange room:QRoom){
         let notification = QiscusNotification.shared
         notification.publish(roomChange: room)
+    }
+    public class func publish(roomDeleted roomId:Int){
+        let notification = QiscusNotification.shared
+        notification.publish(roomDeleted: roomId)
     }
     public class func publish(messageStatus comment:QComment, status:QCommentStatus){
         let notification = QiscusNotification.shared
@@ -42,6 +47,10 @@ public class QiscusNotification: NSObject {
     }
     
     // MARK: - private method
+    private func publish(roomDeleted roomId:Int){
+        let userInfo: [AnyHashable: Any] = ["room_id" : roomId]
+        self.nc.post(name: QiscusNotification.ROOM_DELETED, object: nil, userInfo: userInfo)
+    }
     private func publish(roomChange room:QRoom){
         if !room.isInvalidated {
             let userInfo: [AnyHashable: Any] = ["room" : room]

@@ -984,6 +984,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                             roomDelegate.gotNewComment(comment)
                                         }
                                         Qiscus.chatDelegate?.qiscusChat?(gotNewComment: comment)
+                                        
                                         if let chatView = Qiscus.shared.chatViews[roomId] {
                                             if chatView.isPresence {
                                                 chatView.goBack()
@@ -996,7 +997,8 @@ extension Qiscus:CocoaMQTTDelegate{
                                                 QRoom.deleteRoom(room: room)
                                             }
                                         }
-                                        QiscusNotification.publish(gotNewComment: comment)
+                                        QiscusNotification.publish(roomDeleted: roomId)
+                                        //QiscusNotification.publish(gotNewComment: comment)
                                     }}
                                 }
                             }
@@ -1032,7 +1034,9 @@ extension Qiscus:CocoaMQTTDelegate{
                     if userEmail != QiscusMe.sharedInstance.email {
                         DispatchQueue.main.async {autoreleasepool{
                             if let room = QRoom.room(withId: roomId) {
+                                if room.isInvalidated{ return }
                                 if let user = QUser.user(withEmail: userEmail){
+                                    if user.isInvalidated { return }
                                     let typing = (messageData == "0") ? false : true
                                     QiscusNotification.publish(userTyping: user, room: room, typing: typing)
                                 }
@@ -1090,7 +1094,7 @@ extension Qiscus:CocoaMQTTDelegate{
         
     }
     public func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopic topic: String){
-        Qiscus.printLog(text: "topic : \(topic) subscribed")
+        //Qiscus.printLog(text: "topic : \(topic) subscribed")
         if !Qiscus.realtimeChannel.contains(topic) {
             Qiscus.realtimeChannel.append(topic)
         }
