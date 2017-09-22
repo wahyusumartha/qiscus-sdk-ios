@@ -50,7 +50,12 @@ open class QRoomListCell: UITableViewCell {
             let user = userInfo["user"] as! QUser
             let typing = userInfo["typing"] as! Bool
             let room = userInfo["room"] as! QRoom
-            
+            if room.isInvalidated || user.isInvalidated {
+                return
+            }
+            if let currentRoom = self.room {
+                if currentRoom.isInvalidated { return }
+            }
             if self.room?.id == room.id {
                 self.onUserTyping(user: user, typing: typing)
             }
@@ -69,6 +74,9 @@ open class QRoomListCell: UITableViewCell {
     @objc private func roomChangeNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
             if let room = userInfo["room"] as? QRoom {
+                if let currentRoom = self.room {
+                    if currentRoom.isInvalidated { return}
+                }
                 if !room.isInvalidated {
                     if room.id == self.room?.id {
                         self.onRoomChange(room: room)

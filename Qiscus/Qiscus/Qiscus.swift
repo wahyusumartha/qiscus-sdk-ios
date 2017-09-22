@@ -980,6 +980,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                 if payload["object_email"].stringValue == QiscusMe.sharedInstance.email {
                                     DispatchQueue.main.async {autoreleasepool{
                                         let comment = QComment.tempComment(fromJSON: json)
+                                        
                                         if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                                             roomDelegate.gotNewComment(comment)
                                         }
@@ -992,13 +993,14 @@ extension Qiscus:CocoaMQTTDelegate{
                                             Qiscus.shared.chatViews[roomId] = nil
                                         }
                                         Qiscus.chatRooms[roomId] = nil
+                                    
                                         if let room = QRoom.room(withId: roomId){
                                             if !room.isInvalidated {
+                                                room.unsubscribeRealtimeStatus()
                                                 QRoom.deleteRoom(room: room)
                                             }
                                         }
                                         QiscusNotification.publish(roomDeleted: roomId)
-                                        //QiscusNotification.publish(gotNewComment: comment)
                                     }}
                                 }
                             }

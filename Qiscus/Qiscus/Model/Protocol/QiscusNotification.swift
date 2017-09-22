@@ -68,7 +68,9 @@ public class QiscusNotification: NSObject {
         self.nc.post(name: QiscusNotification.GOT_NEW_COMMENT, object: nil, userInfo: userInfo)
     }
     private func publish(userTyping user:QUser, room:QRoom ,typing:Bool = true){
-        
+        if room.isInvalidated || user.isInvalidated {
+            return
+        }
         let userInfo: [AnyHashable: Any] = ["room" : room,"user" : user, "typing": typing]
         
         self.nc.post(name: QiscusNotification.USER_TYPING, object: nil, userInfo: userInfo)
