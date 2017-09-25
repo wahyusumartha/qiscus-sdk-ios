@@ -46,7 +46,6 @@ class RoomListVC2: UIViewController {
             self.loadRoomList()
         }else{
             Qiscus.subscribeAllRoomNotification()
-            
             self.dismissQiscusLoading()
         }
     }
@@ -67,6 +66,7 @@ class RoomListVC2: UIViewController {
                 DispatchQueue.main.async {
                     self.rooms = QRoom.all()
                     Qiscus.subscribeAllRoomNotification()
+                    self.roomListView.reloadData()
                     self.dismissQiscusLoading()
                 }
             }
