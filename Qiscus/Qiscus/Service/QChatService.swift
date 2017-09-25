@@ -822,7 +822,65 @@ public class QChatService:NSObject {
             }
         }
     }
-    
+    public func createRoom(withUsers users:[String], roomName:String , onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){ //
+        if Qiscus.isLoggedIn{
+            QiscusRequestThread.async {autoreleasepool{
+                let loadURL = QiscusConfig.CREATE_NEW_ROOM
+                
+                var parameters:[String : AnyObject] =  [
+                    "name" : roomName as AnyObject,
+                    "participants" : users as AnyObject,
+                    "token"  : qiscus.config.USER_TOKEN as AnyObject
+                ]
+                
+                Alamofire.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                    if let response = responseData.result.value {
+                        Qiscus.printLog(text: "create group room api response:\n\(response)")
+                        let json = JSON(response)
+                        let results = json["results"]
+                        let error = json["error"]
+                        
+                        if results != JSON.null{
+                            Qiscus.printLog(text: "getListComment with id response: \(responseData)")
+                            let roomData = results["room"]
+                            let commentPayload = results["comments"].arrayValue
+                            
+                            DispatchQueue.main.async { autoreleasepool{
+                                let room = QRoom.addRoom(fromJSON: roomData)
+                                for json in commentPayload {
+                                    let commentId = json["id"].intValue
+                                    
+                                    if commentId <= QiscusMe.sharedInstance.lastCommentId {
+                                        room.saveOldComment(fromJSON: json)
+                                    }
+                                }
+                                onSuccess(room)
+                            }}
+                        }else if error != JSON.null{
+                            DispatchQueue.main.async { autoreleasepool{
+                                onError("\(error)")
+                            }}
+                        }else{
+                            let error = "Failed to load room data"
+                            DispatchQueue.main.async { autoreleasepool{
+                                onError(error)
+                            }}
+                        }
+                    }else{
+                        let error = "Failed to load room data"
+                        DispatchQueue.main.async { autoreleasepool{
+                            onError("\(error)")
+                        }}
+                    }
+                })
+            }}
+        }
+        else{
+            reconnect {
+                self.createRoom(withUsers: users, roomName: roomName, onSuccess: onSuccess, onError: onError)
+            }
+        }
+    }
     internal class func registerDevice(withToken deviceToken: String){
         func register(){
             let parameters:[String: AnyObject] = [
