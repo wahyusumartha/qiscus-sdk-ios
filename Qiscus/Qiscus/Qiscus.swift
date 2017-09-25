@@ -966,7 +966,7 @@ extension Qiscus:CocoaMQTTDelegate{
                 let lastChannelPart = String(channelArr.last!)
                 switch lastChannelPart {
                 case "c":
-                    let json = JSON.parse(messageData)
+                    let json = JSON(parseJSON:messageData)
                     let roomId = json["room_id"].intValue
                     let commentId = json["id"].intValue
                     print("mqtt data: \(json)")
