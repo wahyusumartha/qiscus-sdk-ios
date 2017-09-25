@@ -1218,10 +1218,10 @@ extension Qiscus { // Public class API to get room
         }
         
     }
-    public class func newRoom(withUsers usersId:[String], roomName: String,onSuccess:@escaping ((QRoom)->Void),onError:@escaping ((String)->Void)){
+    public class func newRoom(withUsers usersId:[String], roomName: String, avatarURL:String = "", onSuccess:@escaping ((QRoom)->Void),onError:@escaping ((String)->Void)){
         let service = QChatService()
         if roomName.trimmingCharacters(in: .whitespacesAndNewlines) != "" {
-            service.createRoom(withUsers: usersId, roomName: roomName, onSuccess: onSuccess, onError: onError)
+            service.createRoom(withUsers: usersId, roomName: roomName, avatarURL: avatarURL, onSuccess: onSuccess, onError: onError)
         }else{
             onError("room name can not be empty string")
         }

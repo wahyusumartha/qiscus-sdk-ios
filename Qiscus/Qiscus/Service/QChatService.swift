@@ -822,7 +822,7 @@ public class QChatService:NSObject {
             }
         }
     }
-    public func createRoom(withUsers users:[String], roomName:String , onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){ //
+    public func createRoom(withUsers users:[String], roomName:String , avatarURL:String = "", onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){ //
         if Qiscus.isLoggedIn{
             QiscusRequestThread.async {autoreleasepool{
                 let loadURL = QiscusConfig.CREATE_NEW_ROOM
@@ -832,6 +832,10 @@ public class QChatService:NSObject {
                     "participants" : users as AnyObject,
                     "token"  : qiscus.config.USER_TOKEN as AnyObject
                 ]
+                
+                if avatarURL.trimmingCharacters(in: .whitespacesAndNewlines) != "" {
+                    parameters["avatar_url"] = avatarURL as AnyObject
+                }
                 
                 Alamofire.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                     if let response = responseData.result.value {
