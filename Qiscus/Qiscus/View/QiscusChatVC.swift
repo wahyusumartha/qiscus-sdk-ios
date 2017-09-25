@@ -986,6 +986,10 @@ extension QiscusChatVC:QRoomDelegate{
                     self.linkImageWidth.constant = 55
                     self.linkDescription.text = "\(payload["name"].stringValue) - \(payload["value"].stringValue)"
                     break
+                case .reply:
+                    self.linkDescription.text = comment!.text
+                    self.linkImageWidth.constant = 0
+                    break
                 default:
                     break
                 }

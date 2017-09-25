@@ -732,7 +732,7 @@ public class QChatService:NSObject {
     // MARK syncMethod
     private func sync(first:Bool = true){
         if first {
-            Qiscus.printLog(text: "start syncing process...")
+            //Qiscus.printLog(text: "start syncing process...")
             Qiscus.shared.delegate?.qiscusStartSyncing?()
         }
         NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector( self.syncProcess), object: nil)

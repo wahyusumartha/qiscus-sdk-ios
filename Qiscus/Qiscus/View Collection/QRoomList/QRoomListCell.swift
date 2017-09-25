@@ -63,9 +63,13 @@ open class QRoomListCell: UITableViewCell {
     }
     @objc private func newCommentNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
-            if let comment = userInfo["comment"] as? QComment{
-                if room?.id == comment.roomId {
-                    self.gotNewComment(comment: comment)
+            if let currentRoom = self.room {
+                if currentRoom.isInvalidated { return }
+                if let comment = userInfo["comment"] as? QComment{
+                    if comment.isInvalidated { return }
+                    if currentRoom.id == comment.roomId {
+                        self.gotNewComment(comment: comment)
+                    }
                 }
             }
         }
