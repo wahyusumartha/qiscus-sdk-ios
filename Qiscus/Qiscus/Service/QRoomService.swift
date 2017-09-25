@@ -271,7 +271,7 @@ public class QRoomService:NSObject{
             }
         })
     }
-    public func downloadMedia(inRoom room: QRoom, comment:QComment, thumbImageRef:UIImage? = nil, isAudioFile:Bool = false){
+    public func downloadMedia(inRoom room: QRoom, comment:QComment, thumbImageRef:UIImage? = nil, isAudioFile:Bool = false, onSuccess: ((QComment)->Void)? = nil, onError:((String)->Void)? = nil, onProgress:((Double)->Void)? = nil){
         if let file = comment.file {
             comment.updateDownloading(downloading: true)
             comment.updateProgress(progress: 0)
@@ -344,12 +344,16 @@ public class QRoomService:NSObject{
                                     
                                 }}
                             }
+                            DispatchQueue.main.async { autoreleasepool{
+                                onSuccess?(comment)
+                            }}
                         }
                         break
                     case .failure:
                         DispatchQueue.main.async { autoreleasepool{
                             comment.updateDownloading(downloading: false)
                             comment.updateProgress(progress: 1)
+                            onError?("fail to download file")
                         }}
                         
                         break
@@ -360,6 +364,7 @@ public class QRoomService:NSObject{
                     DispatchQueue.main.async { autoreleasepool{
                         comment.updateProgress(progress: progress)
                         comment.updateDownloading(downloading: true)
+                        onProgress?(progressData.fractionCompleted)
                     }}
                 })
             }
@@ -402,7 +407,7 @@ public class QRoomService:NSObject{
         }
     }
     
-    public func uploadCommentFile(inRoom room:QRoom, comment:QComment, onSuccess:  @escaping (QRoom, QComment)->Void, onError:  @escaping (QRoom,QComment,String)->Void){
+    public func uploadCommentFile(inRoom room:QRoom, comment:QComment, onSuccess:  @escaping (QRoom, QComment)->Void, onError:  @escaping (QRoom,QComment,String)->Void, onProgress:((Double)->Void)? = nil){
         if let file = comment.file {
             let localPath = file.localPath
             let indexPath = room.getIndexPath(ofComment: comment)!
@@ -492,6 +497,7 @@ public class QRoomService:NSObject{
                                 DispatchQueue.main.async { autoreleasepool{
                                     comment.updateUploading(uploading: true)
                                     comment.updateProgress(progress: progress)
+                                    onProgress?(uploadProgress.fractionCompleted)
                                 }}
                             })
                             break

@@ -1394,12 +1394,14 @@ public class QRoom:Object {
         let service = QRoomService()
         service.postComment(onRoom: self.id, comment: comment, type: type, payload:payload)
     }
-    public func upload(comment:QComment, onSuccess:  @escaping (QRoom, QComment)->Void, onError:  @escaping (QRoom,QComment,String)->Void){
+    
+    public func upload(comment:QComment, onSuccess:  @escaping (QRoom, QComment)->Void, onError:  @escaping (QRoom,QComment,String)->Void, onProgress:((Double)->Void)? = nil){
         self.updateCommentStatus(inComment: comment, status: .sending)
         let service = QRoomService()
-        service.uploadCommentFile(inRoom: self, comment: comment, onSuccess: onSuccess, onError: onError)
+        service.uploadCommentFile(inRoom: self, comment: comment, onSuccess: onSuccess, onError: onError, onProgress: onProgress)
     }
-    public func downloadMedia(onComment comment:QComment, thumbImageRef: UIImage? = nil, isAudioFile: Bool = false){
+    
+    public func downloadMedia(onComment comment:QComment, thumbImageRef: UIImage? = nil, isAudioFile: Bool = false, onSuccess: ((QComment)->Void)? = nil, onError:((String)->Void)? = nil, onProgress:((Double)->Void)? = nil){
         let service = QRoomService()
         service.downloadMedia(inRoom: self, comment: comment, thumbImageRef: thumbImageRef, isAudioFile: isAudioFile)
     }
