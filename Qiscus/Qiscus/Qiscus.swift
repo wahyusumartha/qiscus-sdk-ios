@@ -33,6 +33,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     
     static var qiscusDeviceToken: String = ""
     static var dbConfiguration = Realm.Configuration.defaultConfiguration
+    
     static var chatRooms = [Int : QRoom]()
     static var qiscusDownload:[String] = [String]()
     
@@ -194,11 +195,13 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         let center = NotificationCenter.default
         center.addObserver(self, selector: #selector(Qiscus.applicationDidBecomeActife), name: .UIApplicationDidBecomeActive, object: nil)
         center.addObserver(self, selector: #selector(Qiscus.goToBackgroundMode), name: .UIApplicationDidEnterBackground, object: nil)
+        
         if Qiscus.isLoggedIn {
             Qiscus.mqttConnect()
         }
     }
     public class func connect(delegate:QiscusConfigDelegate? = nil){
+        Qiscus.checkDatabaseMigration()
         Qiscus.shared.RealtimeConnect()
         if delegate != nil {
             Qiscus.shared.delegate = delegate
@@ -807,19 +810,20 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             deviceID = vendorIdentifier.uuidString
         }
         
-        QChatService.sync()
-        
-        let clientID = "iosMQTT-\(appName)-\(deviceID)-\(QiscusMe.sharedInstance.id)"
-        let mqtt = CocoaMQTT(clientID: clientID, host: "mqtt.qiscus.com", port: 1883)
-        mqtt.username = ""
-        mqtt.password = ""
-        mqtt.cleanSession = true
-        mqtt.willMessage = CocoaMQTTWill(topic: "u/\(QiscusMe.sharedInstance.email)/s", message: "0")
-        mqtt.keepAlive = 60
-        mqtt.delegate = Qiscus.shared
-        let state = UIApplication.shared.applicationState
-        if state == .active {
-            mqtt.connect()
+        //QChatService.sync()
+        QiscusBackgroundThread.async {
+            let clientID = "iosMQTT-\(appName)-\(deviceID)-\(QiscusMe.sharedInstance.id)"
+            let mqtt = CocoaMQTT(clientID: clientID, host: "mqtt.qiscus.com", port: 1883)
+            mqtt.username = ""
+            mqtt.password = ""
+            mqtt.cleanSession = true
+            mqtt.willMessage = CocoaMQTTWill(topic: "u/\(QiscusMe.sharedInstance.email)/s", message: "0")
+            mqtt.keepAlive = 60
+            mqtt.delegate = Qiscus.shared
+            let state = UIApplication.shared.applicationState
+            if state == .active {
+                mqtt.connect()
+            }
         }
     }
     public class func createLocalNotification(forComment comment:QComment, alertTitle:String? = nil, alertBody:String? = nil, userInfo:[AnyHashable : Any]? = nil){
@@ -1167,10 +1171,12 @@ extension Qiscus:CocoaMQTTDelegate{
         Qiscus.sharedInstance.RealtimeConnect()
     }
     public class func subscribeAllRoomNotification(){
-        let rooms = QRoom.all()
-        for room in rooms {
-            room.subscribeRealtimeStatus()
-        }
+        QiscusBackgroundThread.async { autoreleasepool {
+            let rooms = QRoom.all()
+            for room in rooms {
+                room.subscribeRealtimeStatus()
+            }
+        }}
     }
 }
 
@@ -1250,13 +1256,36 @@ extension Qiscus { // Public class API to get room
     
     // MARK: - Room List
     public class func roomList(withLimit limit:Int, page:Int, onSuccess:@escaping (([QRoom], Int, Int, Int)->Void),onError:@escaping ((String)->Void)){
+        
         QChatService.roomList(onSuccess: { (rooms, totalRoom, currentPage, limit) in
             onSuccess(rooms, totalRoom, currentPage, limit)
-        }) { (error) in
+        }, onFailed: {(error) in
             onError(error)
-        }
+        })
     }
-    
+    public class func fetchAllRoom(loadLimit:Int = 0, onSuccess:@escaping (([QRoom])->Void),onError:@escaping ((String)->Void), onProgress: ((Double,Int,Int)->Void)? = nil){
+        var page = 1
+        var limit = 100
+        if loadLimit > 0 {
+            limit = loadLimit
+        }
+        func load(onPage:Int) {
+            QChatService.roomList(withLimit: limit, page: page, showParticipant: true, onSuccess: { (rooms, totalRoom, currentPage, limit) in
+                if totalRoom > (limit * (currentPage - 1)) + rooms.count{
+                    page += 1
+                    load(onPage: page)
+                }else{
+                    let rooms = QRoom.all()
+                    onSuccess(rooms)
+                }
+            }, onFailed: { (error) in
+                onError(error)
+            }) { (progress, loadedRoomm, totalRoom) in
+                onProgress?(progress,loadedRoomm,totalRoom)
+            }
+        }
+        load(onPage: 1)
+    }
     public class func roomInfo(withId id:Int, onSuccess:@escaping ((QRoom)->Void), onError: @escaping ((String)->Void)){
         QChatService.roomInfo(withId: id, onSuccess: { (room) in
             onSuccess(room)
