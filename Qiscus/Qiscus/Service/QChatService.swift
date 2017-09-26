@@ -1053,7 +1053,7 @@ public class QChatService:NSObject {
         }}
     }
     
-    public class func roomList(withLimit limit:Int = 100, page:Int? = nil, showParticipant:Bool = true, onSuccess:@escaping (([QRoom],Int,Int,Int)->Void), onFailed: @escaping ((String)->Void)){
+    public class func roomList(withLimit limit:Int = 100, page:Int? = nil, showParticipant:Bool = true, onSuccess:@escaping (([QRoom],Int,Int,Int)->Void), onFailed: @escaping ((String)->Void), onProgress: ((Double,Int, Int)->Void)? = nil){
         QiscusRequestThread.async {
             autoreleasepool{
                 var parameters:[String: AnyObject] = [
@@ -1064,24 +1064,30 @@ public class QChatService:NSObject {
                 if page != nil {
                     parameters["page"] = page as AnyObject
                 }
-                Qiscus.printLog(text: "room list url: \(QiscusConfig.SEARCH_URL)")
-                Qiscus.printLog(text: "room list parameters: \(parameters)")
+                //Qiscus.printLog(text: "room list url: \(QiscusConfig.SEARCH_URL)")
+                //Qiscus.printLog(text: "room list parameters: \(parameters)")
                 Alamofire.request(QiscusConfig.ROOMLIST_URL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
-                    Qiscus.printLog(text: "room list result: \(response)")
+                    //Qiscus.printLog(text: "room list result: \(response)")
                     switch response.result {
                     case .success:
                         if let result = response.result.value{
                             let json = JSON(result)
                             let success:Bool = (json["status"].intValue == 200)
-                            
+                            var recordedRoom = 0
+                            if page != nil{
+                                if page! > 0 {
+                                    recordedRoom = (page! - 1) * limit
+                                }
+                            }
                             if success {
                                 let resultData = json["results"]
                                 let currentPage = resultData["meta"]["current_page"].intValue
                                 let totalRoom = resultData["meta"]["total_room"].intValue
                                 let rooms = resultData["rooms_info"].arrayValue
-                                
-                                DispatchQueue.main.async { autoreleasepool {
+
+                                func proceed() {
                                     var roomResult = [QRoom]()
+                                    var i = 0
                                     for roomData in rooms {
                                         let roomId = roomData["id"].intValue
                                         let unread = roomData["unread_count"].intValue
@@ -1095,9 +1101,22 @@ public class QChatService:NSObject {
                                             room.updateUnreadCommentCount(count: unread)
                                             roomResult.append(room)
                                         }
+                                        let progress = Double(Double(recordedRoom + i)/(Double(totalRoom)))
+                                        let loadedRoom = recordedRoom + i
+                                        
+                                        onProgress?(progress, loadedRoom, totalRoom)
+                                        i += 1
                                     }
                                     onSuccess(roomResult,totalRoom,currentPage,limit)
-                                }}
+                                }
+                                
+                                if Thread.isMainThread{
+                                    proceed()
+                                }else{
+                                    DispatchQueue.main.sync {
+                                        proceed()
+                                    }
+                                }
                             }else{
                                 onFailed("can't load room list")
                             }
@@ -1121,7 +1140,7 @@ public class QChatService:NSObject {
                 "room_id" : [id] as AnyObject,
                 "show_participants": true as AnyObject
             ]
-            Qiscus.printLog(text: "room info url: \(QiscusConfig.SEARCH_URL)")
+            Qiscus.printLog(text: "room info url: \(QiscusConfig.ROOMINFO_URL)")
             Qiscus.printLog(text: "room info parameters: \(parameters)")
             Alamofire.request(QiscusConfig.ROOMINFO_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                 
@@ -1134,7 +1153,6 @@ public class QChatService:NSObject {
                         if success {
                             let resultData = json["results"]
                             let roomsData = resultData["rooms_info"].arrayValue
-                            print("room info result: \(roomsData)")
                             if roomsData.count > 0 {
                                 let roomData = roomsData[0]
                                 DispatchQueue.main.async { autoreleasepool {
@@ -1242,10 +1260,9 @@ public class QChatService:NSObject {
                 "room_unique_id" : [uniqueId] as AnyObject,
                 "show_participants": false as AnyObject
             ]
-            Qiscus.printLog(text: "room info url: \(QiscusConfig.SEARCH_URL)")
+            Qiscus.printLog(text: "room info url: \(QiscusConfig.ROOMINFO_URL)")
             Qiscus.printLog(text: "room info parameters: \(parameters)")
             Alamofire.request(QiscusConfig.ROOMINFO_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
-                Qiscus.printLog(text: "room info result: \(response)")
                 switch response.result {
                 case .success:
                     if let result = response.result.value{
