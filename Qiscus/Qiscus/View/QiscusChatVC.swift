@@ -517,6 +517,7 @@ open class QiscusChatVC: UIViewController{
         let center: NotificationCenter = NotificationCenter.default
         center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         center.addObserver(self, selector: #selector(QiscusChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
+        center.addObserver(self, selector: #selector(QiscusChatVC.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
         
         view.endEditing(true)
         center.addObserver(self, selector: #selector(QiscusChatVC.appDidEnterBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
@@ -783,6 +784,26 @@ open class QiscusChatVC: UIViewController{
             self.chatMessage = nil
         }
     }
+    // MARK: - New Comment Handler
+    @objc private func newCommentNotif(_ notification: Notification){
+        if let userInfo = notification.userInfo {
+            let comment = userInfo["comment"] as! QComment
+            if let room = self.chatRoom {
+                if room.id == comment.roomId {
+                    self.gotNewComment(comment: comment)
+                }
+            }
+        }
+    }
+    open func gotNewComment(comment: QComment) {
+        self.collectionView.reloadData()
+        self.chatRoom!.updateUnreadCommentCount(count: 0)
+        if let indexPath = self.chatRoom!.getIndexPath(ofComment: comment){
+            if self.isLastRowVisible || comment.senderEmail == QiscusMe.sharedInstance.email{
+                self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+            }
+        }
+    }
 }
 
 extension QiscusChatVC:QChatServiceDelegate{
@@ -865,14 +886,15 @@ extension QiscusChatVC:QRoomDelegate{
     public func room(didChangeComment section: Int, row: Int, action: String) {
         
     }
+    
     public func room(gotNewComment comment: QComment) {
-        self.collectionView.reloadData()
-        self.chatRoom!.updateUnreadCommentCount(count: 0)
-        if let indexPath = self.chatRoom!.getIndexPath(ofComment: comment){
-            if self.isLastRowVisible || comment.senderEmail == QiscusMe.sharedInstance.email{
-                self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
-            }
-        }
+//        self.collectionView.reloadData()
+//        self.chatRoom!.updateUnreadCommentCount(count: 0)
+//        if let indexPath = self.chatRoom!.getIndexPath(ofComment: comment){
+//            if self.isLastRowVisible || comment.senderEmail == QiscusMe.sharedInstance.email{
+//                self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+//            }
+//        }
     }
     
     public func room(userDidTyping userEmail: String) {
