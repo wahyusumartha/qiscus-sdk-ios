@@ -37,7 +37,7 @@ class goToChatVC: UIViewController {
             self.title = "Search Comment"
             break
         }
-        Qiscus.cacheData()
+        //Qiscus.cacheData()
         let dismissRecognizer = UITapGestureRecognizer(target: self, action: #selector(goToChatVC.hideKeyboard))
         self.view.addGestureRecognizer(dismissRecognizer)       
     }

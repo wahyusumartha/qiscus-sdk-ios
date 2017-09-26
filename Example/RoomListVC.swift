@@ -79,20 +79,16 @@ class RoomListVC: UITableViewController {
         self.navigationController?.pushViewController(chatView, animated: true)
     }
     
-    func loadRoomList(page:Int? = 1){
-        QChatService.roomList(withLimit: 100, page: page, onSuccess: { (rooms, totalRoom, currentPage, limit) in
-            if totalRoom > (limit * (currentPage - 1)) + rooms.count{
-                self.loadRoomList(page: currentPage + 1)
-            }else{
-                DispatchQueue.main.async {
-                    self.rooms = QRoom.all()
-                    self.tableView.reloadData()
-                    Qiscus.subscribeAllRoomNotification()
-                    self.dismissQiscusLoading()
-                }
-            }
-        }) { (error) in
-            print("\(error)")
+    func loadRoomList(){
+        Qiscus.fetchAllRoom(onSuccess: { (rooms) in
+            self.rooms = rooms
+            self.tableView.reloadData()
+            Qiscus.subscribeAllRoomNotification()
+            self.dismissQiscusLoading()
+        }, onError: { (error) in
+            print("error")
+        }) { (progress, loadedRoom, totalRoom) in
+            print("progress: \(progress) [\(loadedRoom)/\(totalRoom)]")
         }
     }
     

@@ -24,15 +24,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         UINavigationBar.appearance().tintColor = UIColor.white
         UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalMinimum)
         
-        if !Qiscus.isLoggedIn{
-            goToLoginView()
-        }else{
-            Qiscus.connect(delegate: self)
-            goToRoomList()
-            //goToChatNavigationView()
-        }
         
-        Qiscus.registerNotification()
+        
+        //Qiscus.registerNotification()
         
         //Chat view styling
         Qiscus.style.color.leftBaloonColor = UIColor(red: 0.5, green: 0.5, blue: 0.5, alpha: 1)
@@ -45,6 +39,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         Qiscus.iCloudUploadActive(true)
         window?.makeKeyAndVisible()
         
+        if !Qiscus.isLoggedIn{
+            goToLoginView()
+        }else{
+            Qiscus.connect(delegate: self)
+            let rooms = QRoom.all()
+            print("room count = \(rooms.count)")
+            if rooms.count > 0 {
+                goToRoomList(rooms: rooms)
+            }else{
+                goToFetch()
+            }
+            //goToChatNavigationView()
+        }
         
         return true
     }
@@ -86,8 +93,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("\(error)")
     }
-    func goToRoomList(){
+    func goToFetch(){
+        let progressVC = ProgressVC()
+        self.navigationController = UINavigationController(rootViewController:progressVC)
+        window?.rootViewController = navigationController
+    }
+    func goToRoomList(rooms:[QRoom]){
         let roomList = RoomListVC2()
+        roomList.rooms = rooms
         self.navigationController = UINavigationController(rootViewController:roomList)
         window?.rootViewController = navigationController
     }
@@ -112,7 +125,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         print(withMessage)
     }
     func qiscusConnected(){
-        self.goToRoomList()
+        //self.goToRoomList()
+        let rooms = QRoom.all()
+        if rooms.count > 0 {
+            goToRoomList(rooms: rooms)
+        }else{
+            goToFetch()
+        }
         //self.goToChatNavigationView()
     }
     func qiscus(gotSilentNotification comment: QComment) {

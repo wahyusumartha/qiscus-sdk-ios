@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		392F18971F4D175800ABE232 /* QCellContactLeft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 392F18951F4D175700ABE232 /* QCellContactLeft.swift */; };
 		392F18981F4D175800ABE232 /* QCellContactLeft.xib in Resources */ = {isa = PBXBuildFile; fileRef = 392F18961F4D175700ABE232 /* QCellContactLeft.xib */; };
+		3939EEA31F78E0470073B880 /* ProgressVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3939EEA11F78E0470073B880 /* ProgressVC.swift */; };
+		3939EEA41F78E0470073B880 /* ProgressVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3939EEA21F78E0470073B880 /* ProgressVC.xib */; };
 		393BE6E01F70B1F90099AD80 /* QRoomList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393BE6DC1F70B1F90099AD80 /* QRoomList.swift */; };
 		393BE6E11F70B1F90099AD80 /* QRoomListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393BE6DD1F70B1F90099AD80 /* QRoomListCell.swift */; };
 		393BE6E21F70B1F90099AD80 /* QRoomListDefaultCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393BE6DE1F70B1F90099AD80 /* QRoomListDefaultCell.swift */; };
@@ -170,6 +172,8 @@
 		390E9F8F1E482D2B004B5940 /* Example.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Example.entitlements; sourceTree = "<group>"; };
 		392F18951F4D175700ABE232 /* QCellContactLeft.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QCellContactLeft.swift; path = Qiscus/View/QChatCell/QCellContactLeft.swift; sourceTree = "<group>"; };
 		392F18961F4D175700ABE232 /* QCellContactLeft.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = QCellContactLeft.xib; path = Qiscus/View/QChatCell/QCellContactLeft.xib; sourceTree = "<group>"; };
+		3939EEA11F78E0470073B880 /* ProgressVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressVC.swift; sourceTree = "<group>"; };
+		3939EEA21F78E0470073B880 /* ProgressVC.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ProgressVC.xib; sourceTree = "<group>"; };
 		393BE6DC1F70B1F90099AD80 /* QRoomList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QRoomList.swift; path = "Qiscus/View Collection/QRoomList/QRoomList.swift"; sourceTree = "<group>"; };
 		393BE6DD1F70B1F90099AD80 /* QRoomListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QRoomListCell.swift; path = "Qiscus/View Collection/QRoomList/QRoomListCell.swift"; sourceTree = "<group>"; };
 		393BE6DE1F70B1F90099AD80 /* QRoomListDefaultCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QRoomListDefaultCell.swift; path = "Qiscus/View Collection/QRoomList/QRoomListDefaultCell.swift"; sourceTree = "<group>"; };
@@ -499,6 +503,8 @@
 				39E7543A1F6222AB003C3302 /* RoomListCell.xib */,
 				396CBDBC1F6B80390028C3FE /* RoomListVC2.swift */,
 				396CBDBD1F6B80390028C3FE /* RoomListVC2.xib */,
+				3939EEA11F78E0470073B880 /* ProgressVC.swift */,
+				3939EEA21F78E0470073B880 /* ProgressVC.xib */,
 			);
 			path = Example;
 			sourceTree = "<group>";
@@ -761,6 +767,7 @@
 				39E754341F5E84B0003C3302 /* SearchCell.xib in Resources */,
 				39BD59171EB2F1A3001AFB7C /* Qiscus.podspec in Resources */,
 				39E7543C1F6222AB003C3302 /* RoomListCell.xib in Resources */,
+				3939EEA41F78E0470073B880 /* ProgressVC.xib in Resources */,
 				395291281E28559B004BD6B4 /* MainView.xib in Resources */,
 				396CBDBF1F6B80390028C3FE /* RoomListVC2.xib in Resources */,
 			);
@@ -913,6 +920,7 @@
 				395291251E28559B004BD6B4 /* goToChatVC.swift in Sources */,
 				39E7543B1F6222AB003C3302 /* RoomListCell.swift in Sources */,
 				39E754331F5E84B0003C3302 /* SearchCell.swift in Sources */,
+				3939EEA31F78E0470073B880 /* ProgressVC.swift in Sources */,
 				39E7542F1F5E7327003C3302 /* SearchResultVC.swift in Sources */,
 				39E754371F62226E003C3302 /* RoomListVC.swift in Sources */,
 				395291271E28559B004BD6B4 /* MainView.swift in Sources */,

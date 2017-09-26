@@ -15,11 +15,7 @@ class RoomListVC2: UIViewController {
     
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
     
-    var rooms = [QRoom](){
-        didSet{
-            roomListView.rooms = self.rooms
-        }
-    }
+    var rooms = [QRoom]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,14 +35,16 @@ class RoomListVC2: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.showQiscusLoading()
-        self.rooms = QRoom.all()
+        //self.showQiscusLoading()
+        //self.rooms = QRoom.all()
         
-        if self.rooms.count == 0 {
-            self.loadRoomList()
-        }else{
+        if self.rooms.count > 0 {
+            self.roomListView.rooms = self.rooms
             Qiscus.subscribeAllRoomNotification()
-            self.dismissQiscusLoading()
+            //self.dismissQiscusLoading()
+        }else{
+            self.showQiscusLoading()
+            self.loadRoomList()
         }
     }
     
@@ -58,20 +56,18 @@ class RoomListVC2: UIViewController {
     func searchText(){
         self.roomListView.search(text: "kiwari")
     }
-    func loadRoomList(page:Int? = 1){
-        QChatService.roomList(withLimit: 100, page: page, onSuccess: { (rooms, totalRoom, currentPage, limit) in
-            if totalRoom > (limit * (currentPage - 1)) + rooms.count{
-                self.loadRoomList(page: currentPage + 1)
-            }else{
-                DispatchQueue.main.async {
-                    self.rooms = QRoom.all()
-                    Qiscus.subscribeAllRoomNotification()
-                    self.roomListView.reloadData()
-                    self.dismissQiscusLoading()
-                }
-            }
-        }) { (error) in
-            print("\(error)")
+    func loadRoomList(){
+        
+        Qiscus.fetchAllRoom(onSuccess: { (rooms) in
+            self.rooms = rooms
+            self.roomListView.rooms = rooms
+            self.roomListView.reloadData()
+            Qiscus.subscribeAllRoomNotification()
+            self.dismissQiscusLoading()
+        }, onError: { (error) in
+            print("error")
+        }) { (progress, loadedRoom, totalRoom) in
+            print("progress: \(progress) [\(loadedRoom)/\(totalRoom)]")
         }
     }
     
