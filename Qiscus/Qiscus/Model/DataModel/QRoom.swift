@@ -421,7 +421,6 @@ public class QRoom:Object {
                 DispatchQueue.main.async { autoreleasepool{
                     Qiscus.chatRooms[roomId]?.delegate?.room?(gotNewGroupComment: 0)
                 }}
-                QiscusMe.updateLastCommentId(commentId: newComment.id)
                 self.updateLastComentInfo(comment: newComment)
                 if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                     DispatchQueue.main.async { autoreleasepool{
@@ -429,7 +428,6 @@ public class QRoom:Object {
                     }}
                 }
             }
-            
         }
         else if onTop{
             let firstCommentGroup = self.comments.first!
@@ -479,7 +477,6 @@ public class QRoom:Object {
                 }}
                 self.updateUnreadCommentCount()
                 
-                QiscusMe.updateLastCommentId(commentId: newComment.id)
                 var i = 0
                 for comment in lastComment.comments{
                     var position = QCellPosition.first
@@ -510,8 +507,6 @@ public class QRoom:Object {
                     Qiscus.chatRooms[roomId]?.delegate?.room?(gotNewGroupComment: section)
                 }}
                 self.updateUnreadCommentCount()
-                
-                QiscusMe.updateLastCommentId(commentId: newComment.id)
             }
             self.updateLastComentInfo(comment: newComment)
             if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
