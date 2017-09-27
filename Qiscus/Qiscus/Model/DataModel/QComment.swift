@@ -160,6 +160,11 @@ public class QComment:Object {
             ]
         }
     }
+    public var messageId:String{
+        get{
+            return "\(self.id)"
+        }
+    }
     public var room:QRoom? {
         get{
             return QRoom.room(withId: self.roomId)
