@@ -1870,7 +1870,9 @@ public class QRoom:Object {
             onError("invalid offset")
         }
     }
-    
+    public func loadComments(onSuccess:@escaping ([QComment])->Void, onError:@escaping (String)->Void){
+        QRoomService.loadComments(inRoom: self, onSuccess: onSuccess, onError: onError)
+    }
     public func loadMore(limit:Int, offset:String, onSuccess:@escaping ([QComment],Bool)->Void, onError:@escaping (String)->Void){
         if let commentId = Int(offset) {
             if commentId == 0 {
