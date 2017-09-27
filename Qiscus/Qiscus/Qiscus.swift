@@ -34,7 +34,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     static var qiscusDeviceToken: String = ""
     static var dbConfiguration = Realm.Configuration.defaultConfiguration
     
-    static var chatRooms = [Int : QRoom]()
+    static var chatRooms = [String : QRoom]()
     static var qiscusDownload:[String] = [String]()
     
     var backgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
@@ -74,7 +74,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     let application = UIApplication.shared
     let appDelegate = UIApplication.shared.delegate
     
-    public var chatViews = [Int:QiscusChatVC]()
+    public var chatViews = [String:QiscusChatVC]()
     
     @objc public class var versionNumber:String{
         get{
@@ -151,12 +151,12 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         QiscusMe.clear()
     }
     @objc public class func clearData(){
-        Qiscus.chatRooms = [Int : QRoom]()
+        Qiscus.chatRooms = [String : QRoom]()
         QParticipant.cache = [String : QParticipant]()
         QCommentGroup.cache = [String : QCommentGroup]()
         QComment.cache = [String : QComment]()
         QUser.cache = [String: QUser]()
-        Qiscus.shared.chatViews = [Int:QiscusChatVC]()
+        Qiscus.shared.chatViews = [String:QiscusChatVC]()
         
         Qiscus.dbConfiguration.deleteRealmIfMigrationNeeded = true
         Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
@@ -339,7 +339,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
      No Documentation
      */
     
-    @objc public class func chat(withRoomId roomId:Int, target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
+    @objc public class func chat(withRoomId roomId:String, target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
 //        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -355,7 +355,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }else{
             chatVC.distincId = ""
         }
-        chatVC.roomId = roomId
+        chatVC.chatRoomId = roomId
         chatVC.optionalData = optionalData
         chatVC.message = withMessage
         chatVC.newRoom = false
@@ -461,7 +461,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             return chatVC
         }
     }
-    @objc public class func chatView(withRoomId roomId:Int, readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
+    @objc public class func chatView(withRoomId roomId:String, readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
 //        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -772,7 +772,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             }
         }
     }
-    @objc public class func notificationAction(roomId: Int){
+    @objc public class func notificationAction(roomId: String){
         if let window = UIApplication.shared.keyWindow{
             if Qiscus.sharedInstance.notificationAction != nil{
                 let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
@@ -971,7 +971,7 @@ extension Qiscus:CocoaMQTTDelegate{
                 switch lastChannelPart {
                 case "c":
                     let json = JSON(parseJSON:messageData)
-                    let roomId = json["room_id"].intValue
+                    let roomId = "\(json["room_id"])"
                     let commentId = json["id"].intValue
                     print("mqtt data: \(json)")
                     if commentId > QiscusMe.sharedInstance.lastCommentId {
@@ -1034,7 +1034,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     
                     break
                 case "t":
-                    let roomId:Int = Int(String(channelArr[2]))!
+                    let roomId = String(channelArr[2])
                     let userEmail:String = String(channelArr[3])
                     let data = (messageData == "0") ? "" : userEmail
                     if userEmail != QiscusMe.sharedInstance.email {
@@ -1053,7 +1053,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     }
                     break
                 case "d":
-                    let roomId = Int(String(channelArr[2]))!
+                    let roomId = String(channelArr[2])
                     let messageArr = messageData.characters.split(separator: ":")
                     let commentId = Int(String(messageArr[0]))!
                     let userEmail = String(channelArr[3])
@@ -1064,7 +1064,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     }
                     break
                 case "r":
-                    let roomId:Int = Int(String(channelArr[2]))!
+                    let roomId = String(channelArr[2])
                     let messageArr = messageData.characters.split(separator: ":")
                     let commentId = Int(String(messageArr[0]))!
                     let userEmail = String(channelArr[3])
@@ -1182,7 +1182,7 @@ extension Qiscus:CocoaMQTTDelegate{
 
 extension Qiscus { // Public class API to get room
     
-    public class func room(withId roomId:Int, onSuccess:@escaping ((QRoom)->Void),onError:@escaping ((String)->Void)){
+    public class func room(withId roomId:String, onSuccess:@escaping ((QRoom)->Void),onError:@escaping ((String)->Void)){
         let service = QChatService()
         var needToLoad = true
         var room:QRoom?
@@ -1286,7 +1286,7 @@ extension Qiscus { // Public class API to get room
         }
         load(onPage: 1)
     }
-    public class func roomInfo(withId id:Int, onSuccess:@escaping ((QRoom)->Void), onError: @escaping ((String)->Void)){
+    public class func roomInfo(withId id:String, onSuccess:@escaping ((QRoom)->Void), onError: @escaping ((String)->Void)){
         QChatService.roomInfo(withId: id, onSuccess: { (room) in
             onSuccess(room)
         }) { (error) in
@@ -1294,7 +1294,7 @@ extension Qiscus { // Public class API to get room
         }
     }
     
-    public class func roomsInfo(withIds ids:[Int], onSuccess:@escaping (([QRoom])->Void), onError: @escaping ((String)->Void)){
+    public class func roomsInfo(withIds ids:[String], onSuccess:@escaping (([QRoom])->Void), onError: @escaping ((String)->Void)){
         QChatService.roomsInfo(withIds: ids, onSuccess: { (rooms) in
             onSuccess(rooms)
         }) { (error) in

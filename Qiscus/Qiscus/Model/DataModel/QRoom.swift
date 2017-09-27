@@ -36,7 +36,7 @@ import AVFoundation
     func room(didChangeUnread lastReadCommentId:Int, unreadCount:Int)
 }
 public class QRoom:Object {
-    public dynamic var id:Int = 0
+    public dynamic var id:String = ""
     public dynamic var uniqueId:String = ""
     public dynamic var name:String = ""
     public dynamic var avatarURL:String = ""
@@ -135,7 +135,7 @@ public class QRoom:Object {
         get{
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             var comments = [QComment]()
-            let data =  realm.objects(QComment.self).filter("roomId == \(self.id)").sorted(byKeyPath: "createdAt", ascending: true)
+            let data =  realm.objects(QComment.self).filter("roomId == '\(self.id)'").sorted(byKeyPath: "createdAt", ascending: true)
             for comment in data {
                 let data = QComment.comment(withUniqueId: comment.uniqueId)!
                 comments.append(data)
@@ -187,7 +187,7 @@ public class QRoom:Object {
         }
     }
     
-    public class func room(withId id:Int) -> QRoom? {
+    public class func room(withId id:String) -> QRoom? {
         if let cache = Qiscus.chatRooms[id] {
             return cache
         }else{
@@ -253,8 +253,8 @@ public class QRoom:Object {
 
     public class func addRoom(fromJSON json:JSON)->QRoom{
         let room = QRoom()
-        if let id = json["id"].int {
-            room.id = id
+        if json["id"] != JSON.null {
+            room.id = "\(json["id"])"
             if let option = json["options"].string {
                 if option != "" && option != "<null>" {
                     room.data = option
@@ -381,7 +381,7 @@ public class QRoom:Object {
     // MARK: Private Object Method
     private func resetRoomComment(){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let data =  realm.objects(QComment.self).filter("roomId == \(self.id)")
+        let data =  realm.objects(QComment.self).filter("roomId == '\(self.id)'")
         
         try! realm.write {
             self.typingUser = ""
@@ -1613,7 +1613,7 @@ public class QRoom:Object {
             }
         }
     }
-    public class func publishStatus(roomId:Int, commentId:Int, status:QCommentStatus){
+    public class func publishStatus(roomId:String, commentId:Int, status:QCommentStatus){
         let service = QRoomService()
         service.publishStatus(inRoom: roomId, commentId: commentId, commentStatus: status)
     }
@@ -1840,6 +1840,63 @@ public class QRoom:Object {
                     Qiscus.shared.chatViews[room.id] = chatView
                 }
             }
+        }
+    }
+    
+    public func loadComments(limit:Int, offset:String, onSuccess:@escaping ([QComment])->Void, onError:@escaping (String)->Void){
+        if let commentId = Int(offset) {
+            if commentId == 0 {
+                onError("invalid offset")
+                return
+            }
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            let data =  realm.objects(QComment.self).filter("roomId == '\(self.id)' AND id > \(commentId)").sorted(byKeyPath: "createdAt", ascending: true)
+            if data.count >= limit {
+                var comments = [QComment]()
+                var i = 0
+                for comment in data {
+                    if i < limit {
+                        comments.append(comment)
+                    }else{
+                        break
+                    }
+                    i += 1
+                }
+                onSuccess(comments)
+            }else{
+                QRoomService.loadComments(inRoom: self, limit: limit, offset: offset, onSuccess: onSuccess, onError: onError)
+            }
+        }else{
+            onError("invalid offset")
+        }
+    }
+    
+    public func loadMore(limit:Int, offset:String, onSuccess:@escaping ([QComment])->Void, onError:@escaping (String)->Void){
+        if let commentId = Int(offset) {
+            if commentId == 0 {
+                onError("invalid offset")
+                return
+            }
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            let data =  realm.objects(QComment.self).filter("roomId == '\(self.id)' AND id < \(commentId)").sorted(byKeyPath: "createdAt", ascending: true)
+            if data.count >= limit {
+                var comments = [QComment]()
+                var i = 0
+                for comment in data {
+                    if i < limit {
+                        comments.append(comment)
+                    }else{
+                        break
+                    }
+                    i += 1
+                }
+                onSuccess(comments)
+            }else{
+                // CALL API Here
+                QRoomService.loadMore(inRoom: self, limit: limit, offset: offset, onSuccess: onSuccess, onError: onError)
+            }
+        }else{
+            onError("invalid offset")
         }
     }
 }

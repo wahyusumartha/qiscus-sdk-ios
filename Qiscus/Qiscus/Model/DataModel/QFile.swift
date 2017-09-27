@@ -22,7 +22,7 @@ public class QFile:Object{
     public dynamic var localPath:String = ""
     public dynamic var localThumbPath:String = ""
     public dynamic var localMiniThumbPath:String = ""
-    public dynamic var roomId:Int = 0
+    public dynamic var roomId:String = ""
     public dynamic var mimeType:String = ""
     public dynamic var senderEmail:String = ""
     

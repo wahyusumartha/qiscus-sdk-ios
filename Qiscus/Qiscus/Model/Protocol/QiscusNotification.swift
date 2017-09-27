@@ -13,7 +13,7 @@ public class QiscusNotification: NSObject {
     static let shared = QiscusNotification()
     let nc = NotificationCenter.default
     
-    private static var typingTimer = [Int:Timer]()
+    private static var typingTimer = [String:Timer]()
     
     public static let GOT_NEW_COMMENT = NSNotification.Name("qiscus_gotNewComment")
     public static let USER_TYPING = NSNotification.Name("qiscus_userTyping")
@@ -29,7 +29,7 @@ public class QiscusNotification: NSObject {
         let notification = QiscusNotification.shared
         notification.publish(roomChange: room)
     }
-    public class func publish(roomDeleted roomId:Int){
+    public class func publish(roomDeleted roomId:String){
         let notification = QiscusNotification.shared
         notification.publish(roomDeleted: roomId)
     }
@@ -47,7 +47,7 @@ public class QiscusNotification: NSObject {
     }
     
     // MARK: - private method
-    private func publish(roomDeleted roomId:Int){
+    private func publish(roomDeleted roomId:String){
         let userInfo: [AnyHashable: Any] = ["room_id" : roomId]
         self.nc.post(name: QiscusNotification.ROOM_DELETED, object: nil, userInfo: userInfo)
     }

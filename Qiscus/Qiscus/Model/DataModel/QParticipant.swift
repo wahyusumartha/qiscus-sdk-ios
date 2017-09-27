@@ -14,7 +14,7 @@ import RealmSwift
 public class QParticipant:Object {
     static var cache = [String : QParticipant]()
     public dynamic var localId:String = ""
-    public dynamic var roomId:Int = 0
+    public dynamic var roomId:String = ""
     public dynamic var email:String = ""
     public dynamic var lastReadCommentId:Int = 0
     public dynamic var lastDeliveredCommentId:Int = 0
@@ -35,7 +35,7 @@ public class QParticipant:Object {
             return QUser.user(withEmail: self.email)
         }
     }
-    public class func participant(inRoomWithId roomId:Int, andEmail email: String)->QParticipant?{
+    public class func participant(inRoomWithId roomId:String, andEmail email: String)->QParticipant?{
         let id = "\(roomId)_\(email)"
         if let cache = QParticipant.cache[id] {
             if !cache.isInvalidated {

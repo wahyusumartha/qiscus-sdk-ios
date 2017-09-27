@@ -105,7 +105,7 @@ open class QRoomList: UITableView{
     }
     @objc private func roomDeletedNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
-            let roomId = userInfo["room_id"] as! Int
+            let roomId = userInfo["room_id"] as! String
             self.roomDeleted(roomId: roomId)
         }
     }
@@ -125,7 +125,7 @@ open class QRoomList: UITableView{
             return 0
         }
     }
-    open func roomDeleted(roomId:Int){
+    open func roomDeleted(roomId:String){
         self.rooms = QRoom.all()
         let indexSet = IndexSet(integer: 0)
         self.reloadSections(indexSet, with: .none)

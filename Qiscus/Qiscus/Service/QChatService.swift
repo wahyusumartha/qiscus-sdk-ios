@@ -476,7 +476,7 @@ public class QChatService:NSObject {
             }
         }
     }
-    public func room(withId roomId:Int, withMessage:String? = nil){
+    public func room(withId roomId:String, withMessage:String? = nil){
         if Qiscus.isLoggedIn {
             var needToLoad = true
             if let room = QRoom.room(withId: roomId){
@@ -567,7 +567,7 @@ public class QChatService:NSObject {
             }
         }
     }
-    public func room(withId roomId:Int, onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){
+    public func room(withId roomId:String, onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){
         if Qiscus.isLoggedIn {
             var needToLoad = true
             if let room = QRoom.room(withId: roomId){
@@ -657,7 +657,7 @@ public class QChatService:NSObject {
                         let comments = json["results"]["comments"].arrayValue
                         if comments.count > 0 {
                             for newComment in comments.reversed() {
-                                let roomId = newComment["room_id"].intValue
+                                let roomId = "\(newComment["room_id"])"
                                 let id = newComment["id"].intValue
                                 let type = newComment["type"].string
                                 if id > QiscusMe.sharedInstance.lastCommentId {
@@ -1089,7 +1089,7 @@ public class QChatService:NSObject {
                                     var roomResult = [QRoom]()
                                     var i = 0
                                     for roomData in rooms {
-                                        let roomId = roomData["id"].intValue
+                                        let roomId = "\(roomData["id"])"
                                         let unread = roomData["unread_count"].intValue
                                         if let room = QRoom.room(withId: roomId){
                                             let lastCommentData = roomData["last_comment"]
@@ -1133,7 +1133,7 @@ public class QChatService:NSObject {
         }
     }
     
-    public class func roomInfo(withId id:Int, onSuccess:@escaping ((QRoom)->Void), onFailed: @escaping ((String)->Void)){
+    public class func roomInfo(withId id:String, onSuccess:@escaping ((QRoom)->Void), onFailed: @escaping ((String)->Void)){
         QiscusRequestThread.async {
             let parameters:[String: AnyObject] = [
                 "token"  : qiscus.config.USER_TOKEN as AnyObject,
@@ -1156,7 +1156,7 @@ public class QChatService:NSObject {
                             if roomsData.count > 0 {
                                 let roomData = roomsData[0]
                                 DispatchQueue.main.async { autoreleasepool {
-                                    let roomId = roomData["id"].intValue
+                                    let roomId = "\(roomData["id"])"
                                     let unread = roomData["unread_count"].intValue
                                     if let room = QRoom.room(withId: roomId){
                                         let lastCommentData = roomData["last_comment"]
@@ -1196,7 +1196,7 @@ public class QChatService:NSObject {
         }
     }
     
-    public class func roomsInfo(withIds ids:[Int], onSuccess:@escaping (([QRoom])->Void), onFailed: @escaping ((String)->Void)){
+    public class func roomsInfo(withIds ids:[String], onSuccess:@escaping (([QRoom])->Void), onFailed: @escaping ((String)->Void)){
         QiscusRequestThread.async {
             let parameters:[String: AnyObject] = [
                 "token"  : qiscus.config.USER_TOKEN as AnyObject,
@@ -1221,7 +1221,7 @@ public class QChatService:NSObject {
                                 DispatchQueue.main.async { autoreleasepool {
                                     var rooms = [QRoom]()
                                     for roomData in roomsData {
-                                        let roomId = roomData["id"].intValue
+                                        let roomId = "\(roomData["id"])"
                                         let unread = roomData["unread_count"].intValue
                                         if let room = QRoom.room(withId: roomId){
                                             let lastCommentData = roomData["last_comment"]
@@ -1276,7 +1276,7 @@ public class QChatService:NSObject {
                             if roomsData.count > 0 {
                                 let roomData = roomsData[0]
                                 DispatchQueue.main.async { autoreleasepool {
-                                    let roomId = roomData["id"].intValue
+                                    let roomId = "\(roomData["id"])"
                                     let unread = roomData["unread_count"].intValue
                                     if let room = QRoom.room(withId: roomId){
                                         let lastCommentData = roomData["last_comment"]
@@ -1332,7 +1332,7 @@ public class QChatService:NSObject {
                                 DispatchQueue.main.async { autoreleasepool {
                                     var rooms = [QRoom]()
                                     for roomData in roomsData {
-                                        let roomId = roomData["id"].intValue
+                                        let roomId = "\(roomData["id"])"
                                         let unread = roomData["unread_count"].intValue
                                         if let room = QRoom.room(withId: roomId){
                                             let lastCommentData = roomData["last_comment"]
@@ -1365,7 +1365,7 @@ public class QChatService:NSObject {
         }
     }
     public class func searchComment(withQuery text:String, room:QRoom? = nil, fromComment:QComment? = nil, onSuccess:@escaping (([QComment])->Void), onFailed: @escaping ((String)->Void)){
-        let roomId:Int? = room?.id
+        let roomId:String? = room?.id
         let commentId:Int? = fromComment?.id
         if text.trimmingCharacters(in: .whitespacesAndNewlines) == "" {
             onFailed("cant search empty string")

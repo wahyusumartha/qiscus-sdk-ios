@@ -103,7 +103,7 @@ open class QiscusChatVC: UIViewController{
         }
     }
     public var chatMessage:String?
-    public var chatRoomId:Int?
+    public var chatRoomId:String?
     public var chatUser:String?
     public var chatTitle:String?{
         didSet{

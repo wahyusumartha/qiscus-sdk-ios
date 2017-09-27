@@ -188,7 +188,7 @@ public class QRoomService:NSObject{
             })
         }
     }
-    public func postComment(onRoom roomId:Int, comment:QComment, type:String? = nil, payload:JSON? = nil){
+    public func postComment(onRoom roomId:String, comment:QComment, type:String? = nil, payload:JSON? = nil){
         var parameters:[String: AnyObject] = [String: AnyObject]()
         
         parameters = [
@@ -371,7 +371,7 @@ public class QRoomService:NSObject{
             }
         }
     }
-    public func publishStatus(inRoom roomId: Int, commentId:Int, commentStatus:QCommentStatus){
+    public func publishStatus(inRoom roomId: String, commentId:Int, commentStatus:QCommentStatus){
         if commentStatus == QCommentStatus.delivered || commentStatus == QCommentStatus.read{
             QiscusRequestThread.async {autoreleasepool{
                 let loadURL = QiscusConfig.UPDATE_COMMENT_STATUS_URL
@@ -524,5 +524,89 @@ public class QRoomService:NSObject{
             }
             }}
         }
+    }
+    internal class func loadComments(inRoom room:QRoom, limit:Int, offset:String, onSuccess:@escaping ([QComment])->Void, onError:@escaping (String)->Void){
+        let loadURL = QiscusConfig.LOAD_URL
+        var parameters =  [
+            "topic_id" : room.id as AnyObject,
+            "token" : Qiscus.shared.config.USER_TOKEN as AnyObject,
+            "after" : true as AnyObject,
+            "limit" : limit as AnyObject,
+            "last_comment_id" : offset as AnyObject
+        ]
+        if room.commentsGroupCount > 0 {
+            let firstComment = room.comments[0].comments[0]
+            parameters["last_comment_id"] = firstComment.id as AnyObject
+        }
+        Qiscus.printLog(text: "request loadCommentsLimit parameters: \(parameters)")
+        
+        Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+            if let response = responseData.result.value{
+                let json = JSON(response)
+                let results = json["results"]
+                let error = json["error"]
+                if results != JSON.null{
+                    let comments = json["results"]["comments"].arrayValue
+                        var commentsResult = [QComment]()
+                        for newComment in comments.reversed() {
+                            let comment = QComment.tempComment(fromJSON: newComment)
+                            commentsResult.append(comment)
+                            
+                            if QComment.comment(withId: comment.beforeId) != nil {
+                                room.saveOldComment(fromJSON: newComment)
+                            }else if QComment.comment(withBeforeId: comment.id) != nil{
+                                room.saveNewComment(fromJSON: newComment)
+                            }
+                        }
+                        onSuccess(commentsResult)
+                }else if error != JSON.null{
+                    onError("\(error)")
+                }
+            }else{
+                onError("fail to load comments")
+            }
+        })
+    }
+    internal class func loadMore(inRoom room:QRoom, limit:Int, offset:String, onSuccess:@escaping ([QComment])->Void, onError:@escaping (String)->Void){
+        let loadURL = QiscusConfig.LOAD_URL
+        var parameters =  [
+            "topic_id" : room.id as AnyObject,
+            "token" : Qiscus.shared.config.USER_TOKEN as AnyObject,
+            "after" : false as AnyObject,
+            "limit" : limit as AnyObject,
+            "last_comment_id" : offset as AnyObject
+        ]
+        if room.commentsGroupCount > 0 {
+            let firstComment = room.comments[0].comments[0]
+            parameters["last_comment_id"] = firstComment.id as AnyObject
+        }
+        Qiscus.printLog(text: "request loadCommentsLimit parameters: \(parameters)")
+        
+        Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+            if let response = responseData.result.value{
+                let json = JSON(response)
+                let results = json["results"]
+                let error = json["error"]
+                if results != JSON.null{
+                    let comments = json["results"]["comments"].arrayValue
+                    var commentsResult = [QComment]()
+                    for newComment in comments.reversed() {
+                        let comment = QComment.tempComment(fromJSON: newComment)
+                        commentsResult.append(comment)
+                        
+                        if QComment.comment(withId: comment.beforeId) != nil {
+                            room.saveOldComment(fromJSON: newComment)
+                        }else if QComment.comment(withBeforeId: comment.id) != nil{
+                            room.saveNewComment(fromJSON: newComment)
+                        }
+                    }
+                    onSuccess(commentsResult)
+                }else if error != JSON.null{
+                    onError("\(error)")
+                }
+            }else{
+                onError("fail to load comments")
+            }
+        })
     }
 }

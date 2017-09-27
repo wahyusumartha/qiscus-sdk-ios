@@ -103,7 +103,7 @@ public class QComment:Object {
     
     public dynamic var uniqueId: String = ""
     public dynamic var id:Int = 0
-    public dynamic var roomId:Int = 0
+    public dynamic var roomId:String = ""
     public dynamic var beforeId:Int = 0
     public dynamic var text:String = ""
     public dynamic var createdAt: Double = 0
@@ -454,9 +454,20 @@ public class QComment:Object {
             return nil
         }
     }
-    internal class func countComments(afterId id:Int, roomId:Int)->Int{
+    public class func comment(withBeforeId id:Int)->QComment?{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let data =  realm.objects(QComment.self).filter("id > \(id) AND roomId = \(roomId)").sorted(byKeyPath: "createdAt", ascending: true)
+        let data =  realm.objects(QComment.self).filter("beforeId == \(id) && id != 0")
+        
+        if data.count > 0 {
+            let commentData = data.first!
+            return QComment.comment(withUniqueId: commentData.uniqueId)
+        }else{
+            return nil
+        }
+    }
+    internal class func countComments(afterId id:Int, roomId:String)->Int{
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let data =  realm.objects(QComment.self).filter("id > \(id) AND roomId = \'(roomId)'").sorted(byKeyPath: "createdAt", ascending: true)
         
         return data.count
     }
@@ -515,7 +526,7 @@ public class QComment:Object {
             return .text
         }
     }
-    public func forward(toRoomWithId roomId: Int){
+    public func forward(toRoomWithId roomId: String){
         let comment = QComment()
         let time = Double(Date().timeIntervalSince1970)
         let timeToken = UInt64(time * 10000)
@@ -693,7 +704,7 @@ public class QComment:Object {
                 if let id = data["qiscus_id"] as? Int {
                     temp.id = id
                 }
-                if let roomId = data["qiscus_roomId"] as? Int {
+                if let roomId = data["qiscus_roomId"] as? String {
                     temp.roomId = roomId
                 }
                 if let beforeId = data["qiscus_beforeId"] as? Int {
@@ -754,7 +765,7 @@ public class QComment:Object {
         let commentBeforeId = json["comment_before_id"].intValue
         let senderEmail = json["email"].stringValue
         let commentType = json["type"].stringValue
-        let roomId = json["room_id"].intValue
+        let roomId = "\(json["room_id"])"
         
         if commentType == "reply" || commentType == "buttons" {
             commentText = json["payload"]["text"].stringValue
