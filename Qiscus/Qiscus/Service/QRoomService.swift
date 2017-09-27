@@ -567,7 +567,7 @@ public class QRoomService:NSObject{
             }
         })
     }
-    internal class func loadMore(inRoom room:QRoom, limit:Int, offset:String, onSuccess:@escaping ([QComment])->Void, onError:@escaping (String)->Void){
+    internal class func loadMore(inRoom room:QRoom, limit:Int, offset:String, onSuccess:@escaping ([QComment],Bool)->Void, onError:@escaping (String)->Void){
         let loadURL = QiscusConfig.LOAD_URL
         var parameters =  [
             "topic_id" : room.id as AnyObject,
@@ -600,7 +600,14 @@ public class QRoomService:NSObject{
                             room.saveNewComment(fromJSON: newComment)
                         }
                     }
-                    onSuccess(commentsResult)
+                    var hasMoreMessage = false
+                    if commentsResult.count > 0 {
+                        let first = commentsResult.first!
+                        if first.beforeId > 0 {
+                            hasMoreMessage = true
+                        }
+                    }
+                    onSuccess(commentsResult, hasMoreMessage)
                 }else if error != JSON.null{
                     onError("\(error)")
                 }

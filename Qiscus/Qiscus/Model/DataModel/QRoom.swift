@@ -1871,7 +1871,7 @@ public class QRoom:Object {
         }
     }
     
-    public func loadMore(limit:Int, offset:String, onSuccess:@escaping ([QComment])->Void, onError:@escaping (String)->Void){
+    public func loadMore(limit:Int, offset:String, onSuccess:@escaping ([QComment],Bool)->Void, onError:@escaping (String)->Void){
         if let commentId = Int(offset) {
             if commentId == 0 {
                 onError("invalid offset")
@@ -1890,7 +1890,9 @@ public class QRoom:Object {
                     }
                     i += 1
                 }
-                onSuccess(comments)
+                let first = comments.first!
+                let hasMoreMessages = first.id == 0 ? false : true
+                onSuccess(comments, hasMoreMessages)
             }else{
                 // CALL API Here
                 QRoomService.loadMore(inRoom: self, limit: limit, offset: offset, onSuccess: onSuccess, onError: onError)
