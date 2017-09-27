@@ -62,8 +62,8 @@ class SearchResultVC: UITableViewController {
         }
         view.forwardAction = {(comment) in
             view.navigationController?.popViewController(animated: true)
-            comment.forward(toRoomWithId: 13006)
-            let newView = Qiscus.chatView(withRoomId: 13006)
+            comment.forward(toRoomWithId: "13006")
+            let newView = Qiscus.chatView(withRoomId: "13006")
             self.navigationController?.pushViewController(newView, animated: true)
         }
         view.infoAction = {(comment) in

@@ -35,6 +35,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         Qiscus.style.color.rightBaloonColor = UIColor(red: 0.3, green: 0.3, blue: 0.3, alpha: 1)
         Qiscus.style.color.rightBaloonTextColor = UIColor.white
         Qiscus.style.color.rightBaloonLinkColor = UIColor.white
+        
         Qiscus.setGradientChatNavigation(UIColor.black, bottomColor: UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1), tintColor: UIColor.white)
         Qiscus.iCloudUploadActive(true)
         window?.makeKeyAndVisible()
@@ -147,8 +148,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         }
         view.forwardAction = {(comment) in
             view.navigationController?.popViewController(animated: true)
-            comment.forward(toRoomWithId: 13006)
-            let newView = Qiscus.chatView(withRoomId: 13006)
+            comment.forward(toRoomWithId: "13006")
+            let newView = Qiscus.chatView(withRoomId: "13006")
             self.navigationController?.pushViewController(newView, animated: true)
         }
         self.navigationController?.pushViewController(view, animated: true)
