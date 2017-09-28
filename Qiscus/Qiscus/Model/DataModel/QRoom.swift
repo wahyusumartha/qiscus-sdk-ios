@@ -1776,7 +1776,7 @@ public class QRoom:Object {
             }
         }}
     }
-    internal class func deleteRoom(room:QRoom){
+    public class func deleteRoom(room:QRoom){
         let roomTS = ThreadSafeReference(to: room)
         QiscusDBThread.sync {autoreleasepool{
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
