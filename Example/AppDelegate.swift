@@ -51,7 +51,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
             }else{
                 goToFetch()
             }
-            //goToChatNavigationView()
         }
         
         return true
