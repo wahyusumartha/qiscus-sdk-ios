@@ -38,8 +38,10 @@ public class QiscusNotification: NSObject {
         notification.publish(messageStatus: comment, status: status)
     }
     public class func publish(gotNewComment comment:QComment){
-        let notification = QiscusNotification.shared
-        notification.publish(gotNewComment: comment)
+        if !comment.isInvalidated {
+            let notification = QiscusNotification.shared
+            notification.publish(gotNewComment: comment)
+        }
     }
     public class func publish(userTyping user:QUser, room:QRoom ,typing:Bool = true){
         let notification = QiscusNotification.shared
