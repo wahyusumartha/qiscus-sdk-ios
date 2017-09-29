@@ -64,8 +64,10 @@ public class QiscusNotification: NSObject {
         }
     }
     private func publish(gotNewComment comment:QComment){
-        let userInfo = ["comment" : comment]
-        self.nc.post(name: QiscusNotification.GOT_NEW_COMMENT, object: nil, userInfo: userInfo)
+        if !comment.isInvalidated {
+            let userInfo = ["comment" : comment]
+            self.nc.post(name: QiscusNotification.GOT_NEW_COMMENT, object: nil, userInfo: userInfo)
+        }
     }
     private func publish(userTyping user:QUser, room:QRoom ,typing:Bool = true){
         if room.isInvalidated || user.isInvalidated {
