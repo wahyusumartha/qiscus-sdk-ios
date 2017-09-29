@@ -788,9 +788,12 @@ open class QiscusChatVC: UIViewController{
     @objc private func newCommentNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
             let comment = userInfo["comment"] as! QComment
+            
             if let room = self.chatRoom {
-                if room.id == comment.roomId {
-                    self.gotNewComment(comment: comment)
+                if !room.isInvalidated {
+                    if room.id == comment.roomId {
+                        self.gotNewComment(comment: comment)
+                    }
                 }
             }
         }

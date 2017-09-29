@@ -520,7 +520,7 @@ public class QRoom:Object {
     
     internal func updateLastComentInfo(comment:QComment){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-
+        if !self.isInvalidated {
         if comment.createdAt > self.lastCommentCreatedAt {
             try! realm.write {
                 self.lastCommentId = comment.id
@@ -549,6 +549,7 @@ public class QRoom:Object {
                     }
                 }
             }
+        }
         }
     }
     // MARK: - Public Object method
