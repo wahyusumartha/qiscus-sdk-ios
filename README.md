@@ -459,24 +459,6 @@ During post message, if you dont have any internet connection, message will be s
 
 Messages are stored locally so you can still access the messages when you dont have internet conenction. However any new messages will not being received after you have your internet connection back.
 
-## Search Messages
-
-Search messages can be done via this function, this function will return data of the messages 
-
-```
-QChatService.searchComment(withQuery: text, onSuccess: { (comments) in
-                print("success search comment with result:\n\(comments)")
-            }, onFailed: { (error) in
-                print("fail to get search result")
-            })
-```
-
-After get the message data, you will need to call `chatView` with stating `chatTarget` function to directly enter the room with specific message location inside the chat room.
-```
-let view = Qiscus.chatView(withRoomId: comment.roomId)
-view.chatTarget = comment
-self.navigationController?.pushViewController(view, animated: true)
-```
 
 
 # Notes
