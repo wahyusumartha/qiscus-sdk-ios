@@ -25,7 +25,7 @@ s.platform      = :ios, "9.0"
 
 s.dependency 'Alamofire', '~> 4.4.0'
 s.dependency 'AlamofireImage', '~> 3.2.0'
-s.dependency 'RealmSwift', '~> 2.5.0'
+s.dependency 'RealmSwift', '~> 2.10.2'
 s.dependency 'SwiftyJSON', '~> 3.1.4'
 s.dependency 'ImageViewer', '4.0'
 s.dependency 'CocoaMQTT', '1.0.19'

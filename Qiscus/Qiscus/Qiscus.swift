@@ -610,6 +610,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             chatView.isPresence = true
 
         }
+        Qiscus.connect()
         Qiscus.sync()
     }
     class func printLog(text:String){
