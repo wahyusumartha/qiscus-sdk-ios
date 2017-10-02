@@ -657,7 +657,7 @@ public class QChatService:NSObject {
                         let comments = json["results"]["comments"].arrayValue
                         print("sync comment result: \(comments)")
                         if comments.count > 0 {
-                            for newComment in comments {
+                            for newComment in comments.reversed() {
                                 let roomId = "\(newComment["room_id"])"
                                 let id = newComment["id"].intValue
                                 let type = newComment["type"].string
