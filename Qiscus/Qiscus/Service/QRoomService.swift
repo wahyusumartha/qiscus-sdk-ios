@@ -420,7 +420,9 @@ public class QRoomService:NSObject{
                 let data = try Data(contentsOf: URL(string: "file://\(localPath)")!)
                 QiscusUploadThread.async { autoreleasepool{
                     let headers = QiscusConfig.sharedInstance.requestHeader
+                    let parameters = ["token" : QiscusMe.sharedInstance.token as Any]
                     var urlUpload = URLRequest(url: URL(string: QiscusConfig.UPLOAD_URL)!)
+                    
                     if headers.count > 0 {
                         for (key,value) in headers {
                             urlUpload.setValue(value, forHTTPHeaderField: key)
@@ -430,6 +432,7 @@ public class QRoomService:NSObject{
                     
                     Alamofire.upload(multipartFormData: {formData in
                         formData.append(data, withName: "file", fileName: filename, mimeType: mimeType)
+                        formData.append(QiscusMe.sharedInstance.token.data(using: .utf8)! , withName: "token")
                     }, with: urlUpload, encodingCompletion: {
                         encodingResult in
                         switch encodingResult{

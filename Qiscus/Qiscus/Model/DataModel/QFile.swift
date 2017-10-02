@@ -43,7 +43,7 @@ public class QFile:Object{
                 }else if i < (thumbUrlArr.count - 1){
                     newThumbURL += ".\(String(thumbComponent))"
                 }else{
-                    newThumbURL += ".png"
+                    newThumbURL += ".jpg"
                 }
                 i += 1
             }
