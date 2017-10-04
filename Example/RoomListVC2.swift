@@ -39,7 +39,8 @@ class RoomListVC2: UIViewController {
         //self.rooms = QRoom.all()
         
         if self.rooms.count > 0 {
-            self.roomListView.rooms = self.rooms
+            //self.roomListView.rooms = self.rooms
+            self.roomListView.reload()
             Qiscus.subscribeAllRoomNotification()
             //self.dismissQiscusLoading()
         }else{
