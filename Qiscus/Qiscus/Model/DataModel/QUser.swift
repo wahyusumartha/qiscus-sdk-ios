@@ -85,8 +85,6 @@ public class QUser:Object {
                     }
                 }
                 
-                
-                
                 return result
             }
         }

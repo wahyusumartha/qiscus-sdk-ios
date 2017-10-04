@@ -663,7 +663,8 @@ public class QChatService:NSObject {
                                 let type = newComment["type"].string
                                 if id > QiscusMe.sharedInstance.lastCommentId {
                                     QiscusMe.updateLastCommentId(commentId: id)
-                                    DispatchQueue.main.async { autoreleasepool{
+                                    
+                                    func proceed(){
                                         if let room = QRoom.room(withId: roomId){
                                             if !room.isInvalidated {
                                                 if room.commentsGroupCount > 0 {
@@ -680,17 +681,17 @@ public class QChatService:NSObject {
                                                         DispatchQueue.main.async { autoreleasepool{
                                                             let comment = QComment.tempComment(fromJSON: newComment)
                                                             roomDelegate.gotNewComment(comment)
-                                                        }}
+                                                            }}
                                                     }
                                                 }
                                             }
                                         }else{
                                             QiscusBackgroundThread.async { autoreleasepool{
                                                 if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                                    DispatchQueue.main.async { autoreleasepool{
+                                                    DispatchQueue.main.sync { autoreleasepool{
                                                         let comment = QComment.tempComment(fromJSON: newComment)
                                                         roomDelegate.gotNewComment(comment)
-                                                    }}
+                                                        }}
                                                 }
                                             }}
                                             let comment = QComment.tempComment(fromJSON: newComment)
@@ -700,7 +701,14 @@ public class QChatService:NSObject {
                                                 print("error getting room info")
                                             })
                                         }
-                                    }}
+                                    }
+                                    if Thread.isMainThread {
+                                        proceed()
+                                    }else{
+                                        DispatchQueue.main.sync {
+                                            proceed()
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -1134,7 +1142,7 @@ public class QChatService:NSObject {
         }
     }
     
-    public class func roomInfo(withId id:String, onSuccess:@escaping ((QRoom)->Void), onFailed: @escaping ((String)->Void)){
+    public class func roomInfo(withId id:String, lastCommentUpdate:Bool = true, onSuccess:@escaping ((QRoom)->Void), onFailed: @escaping ((String)->Void)){
         QiscusRequestThread.async {
             let parameters:[String: AnyObject] = [
                 "token"  : qiscus.config.USER_TOKEN as AnyObject,
@@ -1163,7 +1171,9 @@ public class QChatService:NSObject {
                                         let lastCommentData = roomData["last_comment"]
                                         let lastComment = QComment.tempComment(fromJSON: lastCommentData)
                                         if !room.isInvalidated {
-                                            room.updateLastComentInfo(comment: lastComment)
+                                            if lastCommentUpdate {
+                                                room.updateLastComentInfo(comment: lastComment)
+                                            }
                                             room.updateUnreadCommentCount(count: unread)
                                             onSuccess(room)
                                         }else{

@@ -538,17 +538,28 @@ public class QRoom:Object {
             let roomId = self.id
             let count = self.unreadCount + 1
             self.updateUnreadCommentCount(count: count)
-            DispatchQueue.main.async {
-                if let room = QRoom.room(withId: roomId){
-                    if let c = room.lastComment {
-                        if let delegate = room.delegate {
-                            delegate.room?(gotNewComment: c)
+            if Thread.isMainThread {
+                if let c = self.lastComment {
+                    if let delegate = self.delegate {
+                        delegate.room?(gotNewComment: c)
+                    }
+                    Qiscus.chatDelegate?.qiscusChat?(gotNewComment: c)
+                    QiscusNotification.publish(gotNewComment: c, room: self)
+                }
+            }else{
+                DispatchQueue.main.sync {
+                    if let room = QRoom.room(withId: roomId){
+                        if let c = room.lastComment {
+                            if let delegate = room.delegate {
+                                delegate.room?(gotNewComment: c)
+                            }
+                            Qiscus.chatDelegate?.qiscusChat?(gotNewComment: c)
+                            QiscusNotification.publish(gotNewComment: c, room: room)
                         }
-                        Qiscus.chatDelegate?.qiscusChat?(gotNewComment: c)
-                        QiscusNotification.publish(gotNewComment: c)
                     }
                 }
             }
+            
         }
         }
     }

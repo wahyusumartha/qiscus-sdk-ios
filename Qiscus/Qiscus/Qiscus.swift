@@ -1074,7 +1074,7 @@ extension Qiscus:CocoaMQTTDelegate{
                             QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail)?.updateLastReadId(commentId: commentId)
                         }}
                     }else{
-                        Qiscus.roomInfo(withId: roomId, onSuccess: { (room) in
+                        Qiscus.roomInfo(withId: roomId, lastCommentUpdate: false, onSuccess: { (room) in
                             QiscusNotification.publish(roomChange: room)
                         }, onError: { (error) in
                             Qiscus.printLog(text: "fail to update room: \(error)")
@@ -1287,8 +1287,8 @@ extension Qiscus { // Public class API to get room
         }
         load(onPage: 1)
     }
-    public class func roomInfo(withId id:String, onSuccess:@escaping ((QRoom)->Void), onError: @escaping ((String)->Void)){
-        QChatService.roomInfo(withId: id, onSuccess: { (room) in
+    public class func roomInfo(withId id:String, lastCommentUpdate:Bool = true, onSuccess:@escaping ((QRoom)->Void), onError: @escaping ((String)->Void)){
+        QChatService.roomInfo(withId: id, lastCommentUpdate: lastCommentUpdate, onSuccess: { (room) in
             onSuccess(room)
         }) { (error) in
             onError(error)

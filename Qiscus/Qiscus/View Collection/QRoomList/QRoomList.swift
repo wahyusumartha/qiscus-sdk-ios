@@ -53,7 +53,7 @@ open class QRoomList: UITableView{
         self.estimatedRowHeight = 60
         self.rowHeight = UITableViewAutomaticDimension
         self.tableFooterView = UIView()
-        NotificationCenter.default.addObserver(self, selector: #selector(QRoomList.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(QRoomList.roomOrderChange(_:)), name: QiscusNotification.ROOM_ORDER_MAY_CHANGE, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(QRoomList.roomDeletedNotif(_:)), name: QiscusNotification.ROOM_DELETED, object: nil)
         registerCell()
     }
@@ -80,7 +80,7 @@ open class QRoomList: UITableView{
         let cell = self.dequeueReusableCell(withIdentifier: "searchDefaultCell", for: indexPath) as! QSearchListDefaultCell
         return cell
     }
-    open func gotNewComment(inRoom room:QRoom?, comment:QComment){
+    open func reload(){
         self.rooms = QRoom.all()
         let indexSet = IndexSet(integer: 0)
         self.reloadSections(indexSet, with: .none)
@@ -97,11 +97,8 @@ open class QRoomList: UITableView{
         }
     }
     
-    @objc private func newCommentNotif(_ notification: Notification){
-        if let userInfo = notification.userInfo {
-            let comment = userInfo["comment"] as! QComment
-            self.gotNewComment(inRoom: comment.room, comment: comment)
-        }
+    @objc private func roomOrderChange(_ notification: Notification){
+        self.reload()
     }
     @objc private func roomDeletedNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {

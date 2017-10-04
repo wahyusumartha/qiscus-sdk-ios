@@ -788,19 +788,22 @@ open class QiscusChatVC: UIViewController{
     @objc private func newCommentNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
             let comment = userInfo["comment"] as! QComment
-            
-            if let room = self.chatRoom {
-                if !room.isInvalidated {
-                    if room.id == comment.roomId {
-                        self.gotNewComment(comment: comment)
+            let room = userInfo["room"] as! QRoom
+            if room.isInvalidated { return }
+            if let currentRoom = self.chatRoom {
+                if !currentRoom.isInvalidated {
+                    if currentRoom.id == comment.roomId {
+                        self.gotNewComment(comment: comment, room: room)
                     }
                 }
             }
         }
     }
-    open func gotNewComment(comment: QComment) {
+    open func gotNewComment(comment: QComment, room:QRoom) {
+        self.chatRoom = room
         self.collectionView.reloadData()
         self.chatRoom!.updateUnreadCommentCount(count: 0)
+        print("commentText = \(comment.text)")
         if let indexPath = self.chatRoom!.getIndexPath(ofComment: comment){
             if self.isLastRowVisible || comment.senderEmail == QiscusMe.sharedInstance.email{
                 self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)

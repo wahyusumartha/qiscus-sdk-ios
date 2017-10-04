@@ -12,6 +12,7 @@ public class QiscusNotification: NSObject {
     
     static let shared = QiscusNotification()
     let nc = NotificationCenter.default
+    var roomOrderTimer:Timer?
     
     private static var typingTimer = [String:Timer]()
     
@@ -20,11 +21,16 @@ public class QiscusNotification: NSObject {
     public static let MESSAGE_STATUS = NSNotification.Name("qiscus_messageStatus")
     public static let ROOM_CHANGE = NSNotification.Name("qiscus_roomChange")
     public static let ROOM_DELETED = NSNotification.Name("qiscus_roomDeleted")
+    public static let ROOM_ORDER_MAY_CHANGE = NSNotification.Name("qiscus_romOrderChange")
     
     override private init(){
         super.init()
     }
     
+    public class func publish(roomOrder change:Bool = true){
+        let notification = QiscusNotification.shared
+        notification.roomOrderChange()
+    }
     public class func publish(roomChange room:QRoom){
         let notification = QiscusNotification.shared
         notification.publish(roomChange: room)
@@ -37,10 +43,11 @@ public class QiscusNotification: NSObject {
         let notification = QiscusNotification.shared
         notification.publish(messageStatus: comment, status: status)
     }
-    public class func publish(gotNewComment comment:QComment){
+    public class func publish(gotNewComment comment:QComment, room:QRoom){
         if !comment.isInvalidated {
             let notification = QiscusNotification.shared
-            notification.publish(gotNewComment: comment)
+            notification.publish(gotNewComment: comment, room: room)
+            notification.roomOrderChange()
         }
     }
     public class func publish(userTyping user:QUser, room:QRoom ,typing:Bool = true){
@@ -49,6 +56,16 @@ public class QiscusNotification: NSObject {
     }
     
     // MARK: - private method
+    private func roomOrderChange(){
+        if self.roomOrderTimer != nil {
+            self.roomOrderTimer?.invalidate()
+        }
+        self.roomOrderTimer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(self.publishRoomOrderChange), userInfo: nil, repeats: false)
+    }
+    @objc private func publishRoomOrderChange(){
+        self.nc.post(name: QiscusNotification.ROOM_ORDER_MAY_CHANGE, object: nil, userInfo: nil)
+        self.roomOrderTimer = nil
+    }
     private func publish(roomDeleted roomId:String){
         let userInfo: [AnyHashable: Any] = ["room_id" : roomId]
         self.nc.post(name: QiscusNotification.ROOM_DELETED, object: nil, userInfo: userInfo)
@@ -65,9 +82,9 @@ public class QiscusNotification: NSObject {
             self.nc.post(name: QiscusNotification.MESSAGE_STATUS, object: nil, userInfo: userInfo)
         }
     }
-    private func publish(gotNewComment comment:QComment){
+    private func publish(gotNewComment comment:QComment, room:QRoom){
         if !comment.isInvalidated {
-            let userInfo = ["comment" : comment]
+            let userInfo = ["comment" : comment, "room" : room]
             self.nc.post(name: QiscusNotification.GOT_NEW_COMMENT, object: nil, userInfo: userInfo)
         }
     }
