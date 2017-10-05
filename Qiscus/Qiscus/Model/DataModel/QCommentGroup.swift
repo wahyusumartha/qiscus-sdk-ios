@@ -123,4 +123,36 @@ public class QCommentGroup: Object{
             }
         }
     }
+    internal class func clearAllMessage(onFinish: (()->Void)? = nil){
+        //let all = QCommentGroup.all()
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let groups = realm.objects(QCommentGroup.self)
+        let comments = realm.objects(QComment.self)
+        let files = realm.objects(QFile.self)
+        for file in files {
+            if QFileManager.isFileExist(inLocalPath: file.localPath) {
+                let fileURL = URL(fileURLWithPath: file.localPath)
+                do {
+                    try FileManager.default.removeItem(at: fileURL)
+                } catch let error as NSError {
+                    print("Error: \(error.domain)")
+                }
+            }
+        }
+        try! realm.write {
+            realm.delete(groups)
+            realm.delete(comments)
+            realm.delete(files)
+        }
+        
+        
+        Qiscus.chatRooms = [String : QRoom]()
+        QParticipant.cache = [String : QParticipant]()
+        QCommentGroup.cache = [String : QCommentGroup]()
+        QComment.cache = [String : QComment]()
+        QUser.cache = [String: QUser]()
+        Qiscus.shared.chatViews = [String:QiscusChatVC]()
+        QiscusNotification.publish(finishedClearMessage: true)
+        onFinish?()
+    }
 }

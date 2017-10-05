@@ -47,6 +47,8 @@ public class QRoom:Object {
     public dynamic var singleUser:String = ""
     public dynamic var typingUser:String = ""
     public dynamic var lastReadCommentId: Int = 0
+    public dynamic var isLocked:Bool = false
+    
     internal dynamic var unreadCommentCount:Int = 0
     public dynamic var unreadCount:Int = 0
     private dynamic var pinned:Double = 0

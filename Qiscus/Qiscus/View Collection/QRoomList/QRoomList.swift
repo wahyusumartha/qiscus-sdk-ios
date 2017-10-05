@@ -18,6 +18,7 @@ open class QRoomList: UITableView{
     public var listDelegate: QRoomListDelegate?
     
     public var rooms = [QRoom]()
+    private var clearingData:Bool = false
     
     public var filteredRooms: [QRoom] {
         get{
@@ -53,8 +54,9 @@ open class QRoomList: UITableView{
         self.estimatedRowHeight = 60
         self.rowHeight = UITableViewAutomaticDimension
         self.tableFooterView = UIView()
-        NotificationCenter.default.addObserver(self, selector: #selector(QRoomList.roomOrderChange(_:)), name: QiscusNotification.ROOM_ORDER_MAY_CHANGE, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(QRoomList.roomDeletedNotif(_:)), name: QiscusNotification.ROOM_DELETED, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(QRoomList.roomListChange(_:)), name: QiscusNotification.ROOM_ORDER_MAY_CHANGE, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(QRoomList.roomListChange(_:)), name: QiscusNotification.ROOM_DELETED, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(QRoomList.dataCleared(_:)), name: QiscusNotification.FINISHED_CLEAR_MESSAGES, object: nil)
         registerCell()
     }
  
@@ -80,10 +82,12 @@ open class QRoomList: UITableView{
         let cell = self.dequeueReusableCell(withIdentifier: "searchDefaultCell", for: indexPath) as! QSearchListDefaultCell
         return cell
     }
-    open func reload(){
-        self.rooms = QRoom.all()
-        let indexSet = IndexSet(integer: 0)
-        self.reloadSections(indexSet, with: .none)
+    public func reload(){
+        if !self.clearingData {
+            self.rooms = QRoom.all()
+            let indexSet = IndexSet(integer: 0)
+            self.reloadSections(indexSet, with: .none)
+        }
     }
     
     public func search(text:String){
@@ -96,17 +100,22 @@ open class QRoomList: UITableView{
             print("test")
         }
     }
-    
-    @objc private func roomOrderChange(_ notification: Notification){
+    @objc private func dataCleared(_ notification: Notification){
+        dataCleared()
+        self.clearingData = true
+    }
+
+    @objc private func roomListChange(_ notification: Notification){
         self.reload()
     }
-    @objc private func roomDeletedNotif(_ notification: Notification){
-        if let userInfo = notification.userInfo {
-            let roomId = userInfo["room_id"] as! String
-            self.roomDeleted(roomId: roomId)
-        }
+    open func dataCleared(){
+        self.reload()
     }
-    
+    open func roomListChange(){
+        self.rooms = QRoom.all()
+        let indexSet = IndexSet(integer: 0)
+        self.reloadSections(indexSet, with: .none)
+    }
     open func roomSectionHeight()->CGFloat{
         if self.searchText != ""{
             return 25.0
@@ -122,11 +131,7 @@ open class QRoomList: UITableView{
             return 0
         }
     }
-    open func roomDeleted(roomId:String){
-        self.rooms = QRoom.all()
-        let indexSet = IndexSet(integer: 0)
-        self.reloadSections(indexSet, with: .none)
-    }
+    
     open func roomHeader()->UIView? {
         if self.searchText != "" {
             let screenWidth: CGFloat    = QiscusHelper.screenWidth()

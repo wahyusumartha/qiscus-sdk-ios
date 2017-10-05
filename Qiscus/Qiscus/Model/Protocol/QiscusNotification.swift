@@ -22,11 +22,20 @@ public class QiscusNotification: NSObject {
     public static let ROOM_CHANGE = NSNotification.Name("qiscus_roomChange")
     public static let ROOM_DELETED = NSNotification.Name("qiscus_roomDeleted")
     public static let ROOM_ORDER_MAY_CHANGE = NSNotification.Name("qiscus_romOrderChange")
+    public static let FINISHED_CLEAR_MESSAGES = NSNotification.Name("qiscus_finishedClearMessages")
+    public static let FINISHED_SYNC_ROOMLIST = NSNotification.Name("qiscus_finishedSyncRoomList")
     
     override private init(){
         super.init()
     }
-    
+    public class func publish(finishedClearMessage cleared:Bool = true){
+        let notification = QiscusNotification.shared
+        notification.finishedClearMessage()
+    }
+    public class func publish(finishedSyncRoomList synced:Bool = true){
+        let notification = QiscusNotification.shared
+        notification.finishedSyncRoomList()
+    }
     public class func publish(roomOrder change:Bool = true){
         let notification = QiscusNotification.shared
         notification.roomOrderChange()
@@ -56,11 +65,17 @@ public class QiscusNotification: NSObject {
     }
     
     // MARK: - private method
+    private func finishedSyncRoomList(){
+        self.nc.post(name: QiscusNotification.FINISHED_SYNC_ROOMLIST, object: nil, userInfo: nil)
+    }
+    private func finishedClearMessage(){
+        self.nc.post(name: QiscusNotification.FINISHED_CLEAR_MESSAGES, object: nil, userInfo: nil)
+    }
     private func roomOrderChange(){
         if self.roomOrderTimer != nil {
             self.roomOrderTimer?.invalidate()
         }
-        self.roomOrderTimer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(self.publishRoomOrderChange), userInfo: nil, repeats: false)
+        self.roomOrderTimer = Timer.scheduledTimer(timeInterval: 1.3, target: self, selector: #selector(self.publishRoomOrderChange), userInfo: nil, repeats: false)
     }
     @objc private func publishRoomOrderChange(){
         self.nc.post(name: QiscusNotification.ROOM_ORDER_MAY_CHANGE, object: nil, userInfo: nil)

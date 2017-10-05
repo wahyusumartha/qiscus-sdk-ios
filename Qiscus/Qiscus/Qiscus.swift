@@ -206,6 +206,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         if delegate != nil {
             Qiscus.shared.delegate = delegate
         }
+        QChatService.sync()
     }
     public class func updateProfile(username:String? = nil, avatarURL:String? = nil, onSuccess:@escaping (()->Void), onFailed:@escaping ((String)->Void)) {
         QChatService.updateProfil(userName: username, userAvatarURL: avatarURL, onSuccess: onSuccess, onError: onFailed)
@@ -1074,11 +1075,17 @@ extension Qiscus:CocoaMQTTDelegate{
                             QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail)?.updateLastReadId(commentId: commentId)
                         }}
                     }else{
-                        Qiscus.roomInfo(withId: roomId, lastCommentUpdate: false, onSuccess: { (room) in
-                            QiscusNotification.publish(roomChange: room)
-                        }, onError: { (error) in
-                            Qiscus.printLog(text: "fail to update room: \(error)")
-                        })
+                        DispatchQueue.main.async { autoreleasepool{
+                            if let room = QRoom.room(withId: roomId) {
+                                room.updateUnreadCommentCount(count: 0)
+                                QiscusNotification.publish(roomChange: room)
+                            }
+                        }}
+//                        Qiscus.roomInfo(withId: roomId, lastCommentUpdate: false, onSuccess: { (room) in
+//                            QiscusNotification.publish(roomChange: room)
+//                        }, onError: { (error) in
+//                            Qiscus.printLog(text: "fail to update room: \(error)")
+//                        })
                     }
                     break
                 case "s":
