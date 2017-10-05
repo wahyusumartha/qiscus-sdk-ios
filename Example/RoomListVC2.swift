@@ -12,6 +12,7 @@ import Qiscus
 class RoomListVC2: UIViewController {
 
     @IBOutlet weak var roomListView: QRoomList!
+    @IBOutlet weak var loadingView: UIView!
     
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
     
@@ -121,6 +122,6 @@ extension QRoomList {
     func commentCell(at indexPath: IndexPath) -> UITableViewCell{
     return UITableViewCell()
     }
-
+    
 }
 

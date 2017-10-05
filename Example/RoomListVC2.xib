@@ -11,6 +11,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="RoomListVC2" customModule="Example" customModuleProvider="target">
             <connections>
+                <outlet property="loadingView" destination="3hT-Js-ib0" id="p0z-Xt-av9"/>
                 <outlet property="roomListView" destination="N9G-LZ-JdN" id="XgG-Hz-2gZ"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
@@ -24,12 +25,36 @@
                     <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                 </tableView>
+                <view hidden="YES" clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3hT-Js-ib0">
+                    <rect key="frame" x="-0.5" y="-0.5" width="375" height="667"/>
+                    <subviews>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Syncing room list ..." textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PTa-QB-Pal">
+                            <rect key="frame" x="87.5" y="323" width="200" height="21"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="21" id="Ig3-5d-ahz"/>
+                                <constraint firstAttribute="width" constant="200" id="aiA-fX-Bld"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="boldSystem" pointSize="19"/>
+                            <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                    </subviews>
+                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.40000000000000002" colorSpace="calibratedRGB"/>
+                    <constraints>
+                        <constraint firstItem="PTa-QB-Pal" firstAttribute="centerY" secondItem="3hT-Js-ib0" secondAttribute="centerY" id="E9c-DN-Dlf"/>
+                        <constraint firstItem="PTa-QB-Pal" firstAttribute="centerX" secondItem="3hT-Js-ib0" secondAttribute="centerX" id="hKO-dy-bKN"/>
+                    </constraints>
+                </view>
             </subviews>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
                 <constraint firstAttribute="bottom" secondItem="N9G-LZ-JdN" secondAttribute="bottom" id="8dP-OU-1lX"/>
                 <constraint firstItem="N9G-LZ-JdN" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="HIt-ao-itU"/>
                 <constraint firstItem="N9G-LZ-JdN" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="YXO-Al-juY"/>
+                <constraint firstItem="3hT-Js-ib0" firstAttribute="centerY" secondItem="N9G-LZ-JdN" secondAttribute="centerY" id="ZwC-cV-TED"/>
+                <constraint firstItem="3hT-Js-ib0" firstAttribute="width" secondItem="N9G-LZ-JdN" secondAttribute="width" id="aDm-TY-BJY"/>
+                <constraint firstItem="3hT-Js-ib0" firstAttribute="centerX" secondItem="N9G-LZ-JdN" secondAttribute="centerX" id="dbe-ea-TAi"/>
+                <constraint firstItem="3hT-Js-ib0" firstAttribute="height" secondItem="N9G-LZ-JdN" secondAttribute="height" id="hXm-B6-Pfk"/>
                 <constraint firstAttribute="trailing" secondItem="N9G-LZ-JdN" secondAttribute="trailing" id="upD-U3-VhX"/>
             </constraints>
             <point key="canvasLocation" x="35.5" y="77.5"/>
