@@ -140,7 +140,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     class func disconnectRealtime(){
         Qiscus.uiThread.async { autoreleasepool{
             Qiscus.sharedInstance.mqtt?.disconnect()
-        }}
+            }}
     }
     
     @objc public class func clear(){
@@ -174,13 +174,12 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     // need Documentation
     func backgroundCheck(){
         if Qiscus.isLoggedIn{
+            QChatService.sync()
             QiscusBackgroundThread.async { autoreleasepool{
                 if Qiscus.shared.mqtt?.connState != CocoaMQTTConnState.connected {
                     Qiscus.mqttConnect()
-                }else{
-                    QChatService.sync()
                 }
-            }}
+                }}
         }
     }
     func checkChat(){
@@ -250,13 +249,13 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                 Qiscus.uiThread.async { autoreleasepool{
                     delegate.qiscusConnected?()
                     delegate.qiscus?(didConnect: true, error: nil)
-                }}
+                    }}
             }
         }
         Qiscus.sharedInstance.RealtimeConnect()
     }
     @objc public class func setup(withURL baseUrl:String, userEmail:String, id:Int, username:String, userKey:String, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true, realTimeKey:String){
-//        Qiscus.checkDatabaseMigration()
+        //        Qiscus.checkDatabaseMigration()
         let email = userEmail.lowercased()
         
         QiscusMe.sharedInstance.baseUrl = "\(baseUrl)/api/v2/mobile"
@@ -282,7 +281,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.uiThread.async {autoreleasepool{
             Qiscus.shared.delegate?.qiscusConnected?()
             Qiscus.shared.delegate?.qiscus?(didConnect: true, error: nil)
-        }}
+            }}
     }
     
     
@@ -293,55 +292,55 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
      - parameter title: **String** text to show as chat title (Optional), Default value : "".
      - parameter subtitle: **String** text to show as chat subtitle (Optional), Default value : "" (empty string).
      */
-//    @objc public class func chatVC(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
-//        Qiscus.checkDatabaseMigration()
-//        if !Qiscus.sharedInstance.connected {
-//            Qiscus.setupReachability()
-//        }
-//        
-//        Qiscus.sharedInstance.isPushed = true
-//        QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
-//        QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
-//        
-//        var chatVC = QiscusChatVC()
-//        for (_,chatRoom) in Qiscus.sharedInstance.chatViews {
-//            if let room = chatRoom.room {
-//                if !room.isGroup {
-//                    if let user = chatRoom.users?.first {
-//                        if user == users.first! {
-//                            chatVC = chatRoom
-//                            break
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        if distinctId != nil{
-//            chatVC.distincId = distinctId!
-//        }else{
-//            chatVC.distincId = ""
-//        }
-//        chatVC.optionalData = optionalData
-//        chatVC.message = withMessage
-//        chatVC.users = users
-//        chatVC.optionalData = optionalData
-//        chatVC.archived = readOnly
-//        
-//        if chatVC.isPresence {
-//            chatVC.goBack()
-//        }
-//        chatVC.backAction = nil
-//        
-//        
-//        return chatVC
-//    }
+    //    @objc public class func chatVC(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
+    //        Qiscus.checkDatabaseMigration()
+    //        if !Qiscus.sharedInstance.connected {
+    //            Qiscus.setupReachability()
+    //        }
+    //
+    //        Qiscus.sharedInstance.isPushed = true
+    //        QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
+    //        QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
+    //
+    //        var chatVC = QiscusChatVC()
+    //        for (_,chatRoom) in Qiscus.sharedInstance.chatViews {
+    //            if let room = chatRoom.room {
+    //                if !room.isGroup {
+    //                    if let user = chatRoom.users?.first {
+    //                        if user == users.first! {
+    //                            chatVC = chatRoom
+    //                            break
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        }
+    //        if distinctId != nil{
+    //            chatVC.distincId = distinctId!
+    //        }else{
+    //            chatVC.distincId = ""
+    //        }
+    //        chatVC.optionalData = optionalData
+    //        chatVC.message = withMessage
+    //        chatVC.users = users
+    //        chatVC.optionalData = optionalData
+    //        chatVC.archived = readOnly
+    //
+    //        if chatVC.isPresence {
+    //            chatVC.goBack()
+    //        }
+    //        chatVC.backAction = nil
+    //
+    //
+    //        return chatVC
+    //    }
     
     /**
      No Documentation
      */
     
     @objc public class func chat(withRoomId roomId:String, target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
-//        Qiscus.checkDatabaseMigration()
+        //        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -374,7 +373,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         UIApplication.shared.keyWindow?.rootViewController?.present(navController, animated: true, completion: nil)
     }
     @objc public class func chat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
-//        Qiscus.checkDatabaseMigration()
+        //        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -414,7 +413,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         if let room = QRoom.room(withUser: users.first!) {
             return Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
         }else{
-//            Qiscus.checkDatabaseMigration()
+            //            Qiscus.checkDatabaseMigration()
             if !Qiscus.sharedInstance.connected {
                 Qiscus.setupReachability()
             }
@@ -441,7 +440,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         if let room = QRoom.room(withUniqueId: uniqueId){
             return Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
         }else{
-//            Qiscus.checkDatabaseMigration()
+            //            Qiscus.checkDatabaseMigration()
             if !Qiscus.sharedInstance.connected {
                 Qiscus.setupReachability()
             }
@@ -463,7 +462,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }
     }
     @objc public class func chatView(withRoomId roomId:String, readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
-//        Qiscus.checkDatabaseMigration()
+        //        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -565,7 +564,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                         Qiscus.sharedInstance.RealtimeConnect()
                         DispatchQueue.main.async { autoreleasepool{
                             QComment.resendPendingMessage()
-                        }}
+                            }}
                     }
                 }
             }
@@ -581,7 +580,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                     Qiscus.sharedInstance.RealtimeConnect()
                     DispatchQueue.main.async { autoreleasepool{
                         QComment.resendPendingMessage()
-                    }}
+                        }}
                 }
             }
             Qiscus.sharedInstance.reachability?.whenUnreachable = { reachability in
@@ -593,7 +592,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             } catch {
                 Qiscus.printLog(text: "Unable to start network notifier")
             }
-        }}
+            }}
     }
     
     
@@ -609,7 +608,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }
         if let chatView = self.topViewController() as? QiscusChatVC {
             chatView.isPresence = true
-
+            
         }
         Qiscus.connect()
         Qiscus.sync()
@@ -654,7 +653,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     
     // MARK: - Create NEW Chat
     @objc public class func createChatView(withUsers users:[String], readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
-//        Qiscus.checkDatabaseMigration()
+        //        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -677,7 +676,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         return chatVC
     }
     @objc public class func createChat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil){
-//        Qiscus.checkDatabaseMigration()
+        //        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -706,12 +705,12 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     // MARK: - Update Room Methode
-//    @objc public class func updateRoom(withRoomId roomId:Int, roomName:String? = nil, roomAvatarURL:String? = nil, roomAvatar:UIImage? = nil, roomOptions:String? = nil){
-////        Qiscus.commentService.updateRoom(withRoomId: roomId, roomName: roomName, roomAvatarURL: roomAvatarURL, roomOptions: roomOptions)
-//        if let room = QRoom.room(withId: roomId) {
-//            room.update(name: roomName, avatarURL: roomAvatarURL, data: roomOptions)
-//        }
-//    }
+    //    @objc public class func updateRoom(withRoomId roomId:Int, roomName:String? = nil, roomAvatarURL:String? = nil, roomAvatar:UIImage? = nil, roomOptions:String? = nil){
+    ////        Qiscus.commentService.updateRoom(withRoomId: roomId, roomName: roomName, roomAvatarURL: roomAvatarURL, roomOptions: roomOptions)
+    //        if let room = QRoom.room(withId: roomId) {
+    //            room.update(name: roomName, avatarURL: roomAvatarURL, data: roomOptions)
+    //        }
+    //    }
     
     // MARK: - Push Notification Setup
     public func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, forType type: PKPushType) {
@@ -856,7 +855,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             localNotification.userInfo = userData
             localNotification.fireDate = Date().addingTimeInterval(0.4)
             Qiscus.shared.application.scheduleLocalNotification(localNotification)
-        }}
+            }}
     }
     public class func didReceiveNotification(notification:UILocalNotification){
         if notification.userInfo != nil {
@@ -885,12 +884,12 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                     message = "0"
                     DispatchQueue.main.async {autoreleasepool{
                         Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: true)
-                    }}
+                        }}
                 }else{
                     if Qiscus.sharedInstance.application.applicationState == UIApplicationState.active {
                         DispatchQueue.main.async { autoreleasepool{
                             Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: true)
-                        }}
+                            }}
                         
                         let when = DispatchTime.now() + 40
                         QiscusBackgroundThread.asyncAfter(deadline: when) {
@@ -898,7 +897,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                         }
                     }
                 }
-            }}
+                }}
         }
     }
     func goToBackgroundMode(){
@@ -999,7 +998,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                             Qiscus.shared.chatViews[roomId] = nil
                                         }
                                         Qiscus.chatRooms[roomId] = nil
-                                    
+                                        
                                         if let room = QRoom.room(withId: roomId){
                                             if !room.isInvalidated {
                                                 room.unsubscribeRealtimeStatus()
@@ -1007,7 +1006,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                             }
                                         }
                                         QiscusNotification.publish(roomDeleted: roomId)
-                                    }}
+                                        }}
                                 }
                             }
                         }
@@ -1021,7 +1020,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                     }
                                 }
                             }
-                        }}
+                            }}
                     }
                     if #available(iOS 10.0, *) {
                         if Qiscus.publishStatustimer != nil {
@@ -1051,7 +1050,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                 room.updateUserTyping(userEmail: data)
                             }
                             QUser.user(withEmail: userEmail)?.updateLastSeen(lastSeen: Double(Date().timeIntervalSince1970))
-                        }}
+                            }}
                     }
                     break
                 case "d":
@@ -1062,7 +1061,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     if userEmail != QiscusMe.sharedInstance.email {
                         DispatchQueue.main.async { autoreleasepool{
                             QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail)?.updateLastDeliveredId(commentId: commentId)
-                        }}
+                            }}
                     }
                     break
                 case "r":
@@ -1073,19 +1072,19 @@ extension Qiscus:CocoaMQTTDelegate{
                     if userEmail != QiscusMe.sharedInstance.email {
                         DispatchQueue.main.async { autoreleasepool{
                             QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail)?.updateLastReadId(commentId: commentId)
-                        }}
+                            }}
                     }else{
                         DispatchQueue.main.async { autoreleasepool{
                             if let room = QRoom.room(withId: roomId) {
                                 room.updateUnreadCommentCount(count: 0)
                                 QiscusNotification.publish(roomChange: room)
                             }
-                        }}
-//                        Qiscus.roomInfo(withId: roomId, lastCommentUpdate: false, onSuccess: { (room) in
-//                            QiscusNotification.publish(roomChange: room)
-//                        }, onError: { (error) in
-//                            Qiscus.printLog(text: "fail to update room: \(error)")
-//                        })
+                            }}
+                        //                        Qiscus.roomInfo(withId: roomId, lastCommentUpdate: false, onSuccess: { (room) in
+                        //                            QiscusNotification.publish(roomChange: room)
+                        //                        }, onError: { (error) in
+                        //                            Qiscus.printLog(text: "fail to update room: \(error)")
+                        //                        })
                     }
                     break
                 case "s":
@@ -1095,7 +1094,7 @@ extension Qiscus:CocoaMQTTDelegate{
                         if let timeToken = Double(String(messageArr[1])){
                             DispatchQueue.main.async { autoreleasepool{
                                 QUser.user(withEmail: userEmail)?.updateLastSeen(lastSeen: Double(timeToken)/1000)
-                            }}
+                                }}
                         }
                     }
                     break
@@ -1104,7 +1103,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     break
                 }
             }
-        }}
+            }}
         
     }
     public func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopic topic: String){
@@ -1132,9 +1131,11 @@ extension Qiscus:CocoaMQTTDelegate{
     }
     public func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?){
         if Qiscus.isLoggedIn {
-            if self.syncTimer == nil {
-                self.syncTimer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(self.sync), userInfo: nil, repeats: true)
+            if self.syncTimer != nil {
+                self.syncTimer!.invalidate()
             }
+            self.syncTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.sync), userInfo: nil, repeats: true)
+            
         }
     }
     
@@ -1184,7 +1185,7 @@ extension Qiscus:CocoaMQTTDelegate{
             for room in rooms {
                 room.subscribeRealtimeStatus()
             }
-        }}
+            }}
     }
 }
 
