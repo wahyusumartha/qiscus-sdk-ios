@@ -93,6 +93,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("\(error)")
     }
+    func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        QChatService.sync()
+        completionHandler(UIBackgroundFetchResult.newData)
+    }
     func goToFetch(){
         let progressVC = ProgressVC()
         self.navigationController = UINavigationController(rootViewController:progressVC)

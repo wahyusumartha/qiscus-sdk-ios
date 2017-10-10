@@ -778,7 +778,7 @@ public class QChatService:NSObject {
         NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector( self.syncProcess), object: nil)
         self.perform(#selector(self.syncProcess), with: nil, afterDelay: 1.0)
     }
-    internal class func sync(){
+    public class func sync(){
         DispatchQueue.main.async {
             QChatService.defaultService.sync()
         }
