@@ -15,7 +15,15 @@ import ContactsUI
 // MARK: - ChatCell Delegate
 extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
     // MARK: ChatCellPostbackDelegate
-    
+    func getInfo(comment: QComment) {
+        self.info(comment: comment)
+    }
+    func didForward(comment: QComment) {
+        self.forward(comment: commment)
+    }
+    func didReply(comment: QComment) {
+        self.replyData = comment
+    }
     func didTapAccountLinking(withData data: JSON) {
         Qiscus.uiThread.async { autoreleasepool{
             let webView = ChatPreviewDocVC()
