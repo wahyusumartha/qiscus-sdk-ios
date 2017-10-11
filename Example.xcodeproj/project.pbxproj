@@ -18,8 +18,6 @@
 		393BE6E51F7119F80099AD80 /* QSearchListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393BE6E41F7119F80099AD80 /* QSearchListCell.swift */; };
 		393BE6E91F7206280099AD80 /* QSearchListDefaultCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393BE6E71F7206280099AD80 /* QSearchListDefaultCell.swift */; };
 		393BE6EA1F7206280099AD80 /* QSearchListDefaultCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 393BE6E81F7206280099AD80 /* QSearchListDefaultCell.xib */; };
-		393BFC6B1F3ADE9E00CF4CB5 /* Qiscus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39F1F70F1D3B91E200FF1C8C /* Qiscus.framework */; };
-		393BFC6C1F3ADE9E00CF4CB5 /* Qiscus.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 39F1F70F1D3B91E200FF1C8C /* Qiscus.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		394D7A9F1F4E735300E69E1C /* QCellLocationRight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 394D7A9D1F4E735300E69E1C /* QCellLocationRight.swift */; };
 		394D7AA01F4E735300E69E1C /* QCellLocationRight.xib in Resources */ = {isa = PBXBuildFile; fileRef = 394D7A9E1F4E735300E69E1C /* QCellLocationRight.xib */; };
 		394D7AA31F4E979E00E69E1C /* QCellLocationLeft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 394D7AA11F4E979E00E69E1C /* QCellLocationLeft.swift */; };
@@ -143,30 +141,6 @@
 		6A7FF5E2D9CEB063A127937B /* Pods_Qiscus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A4527A84D23FDA5B8B32B9C1 /* Pods_Qiscus.framework */; };
 		B0846505F0ABD97C0375C737 /* Pods_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 88710D4C9FAFADF156A657F4 /* Pods_Example.framework */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		393BFC6D1F3ADE9E00CF4CB5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 39F1F6A11D3B90E200FF1C8C /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 39F1F70E1D3B91E200FF1C8C;
-			remoteInfo = Qiscus;
-		};
-/* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		393BFC6F1F3ADE9E00CF4CB5 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				393BFC6C1F3ADE9E00CF4CB5 /* Qiscus.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		390E9F8F1E482D2B004B5940 /* Example.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Example.entitlements; sourceTree = "<group>"; };
@@ -320,7 +294,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				393BFC6B1F3ADE9E00CF4CB5 /* Qiscus.framework in Frameworks */,
 				B0846505F0ABD97C0375C737 /* Pods_Example.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -670,12 +643,10 @@
 				39F1F6A71D3B90E200FF1C8C /* Resources */,
 				6CBAC89EC5BE7BD1A9459502 /* [CP] Embed Pods Frameworks */,
 				C33FFFD4AC05CBFAA47D24A3 /* [CP] Copy Pods Resources */,
-				393BFC6F1F3ADE9E00CF4CB5 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				393BFC6E1F3ADE9E00CF4CB5 /* PBXTargetDependency */,
 			);
 			name = Example;
 			productName = Example;
@@ -1022,14 +993,6 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXTargetDependency section */
-		393BFC6E1F3ADE9E00CF4CB5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 39F1F70E1D3B91E200FF1C8C /* Qiscus */;
-			targetProxy = 393BFC6D1F3ADE9E00CF4CB5 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
 /* Begin PBXVariantGroup section */
 		39F1F6B01D3B90E200FF1C8C /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
@@ -1144,7 +1107,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 98773C3A23586CB325C3DFE1 /* Pods-Example.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Example/Example.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -1179,7 +1141,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9CE65FBC6F02844B3B9F7A09 /* Pods-Example.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Example/Example.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
