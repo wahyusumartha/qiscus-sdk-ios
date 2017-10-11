@@ -10,8 +10,8 @@ end
 target 'Qiscus' do
     use_frameworks!
 
-    pod 'Alamofire', '~> 4.4.0'
-    pod 'AlamofireImage', '~> 3.2.0'
+    pod 'Alamofire', '~> 4.5.1'
+    pod 'AlamofireImage', '~> 3.3.0'
     pod 'RealmSwift', '~> 2.10.2'
     pod 'SwiftyJSON', '~> 3.1.4'
     pod 'ImageViewer', '4.0'
