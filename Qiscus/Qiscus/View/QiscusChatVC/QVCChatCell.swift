@@ -19,7 +19,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
         self.info(comment: comment)
     }
     func didForward(comment: QComment) {
-        self.forward(comment: commment)
+        self.forward(comment: comment)
     }
     func didReply(comment: QComment) {
         self.replyData = comment
