@@ -821,9 +821,13 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             mqtt.willMessage = CocoaMQTTWill(topic: "u/\(QiscusMe.sharedInstance.email)/s", message: "0")
             mqtt.keepAlive = 60
             mqtt.delegate = Qiscus.shared
-            let state = UIApplication.shared.applicationState
-            if state == .active {
-                mqtt.connect()
+            DispatchQueue.main.async {
+                let state = UIApplication.shared.applicationState
+                if state == .active {
+                    QiscusBackgroundThread.async {
+                        mqtt.connect()
+                    }
+                }
             }
         }
     }
@@ -940,10 +944,12 @@ extension Qiscus:CocoaMQTTDelegate{
         }
     }
     public func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck){
+        let state = UIApplication.shared.applicationState
+        let activeState = (state == .active)
         QiscusBackgroundThread.async {
-            let state = UIApplication.shared.applicationState
             
-            if state == .active {
+            
+            if activeState {
                 let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
                 mqtt.subscribe(commentChannel, qos: .qos2)
                 Qiscus.publishUserStatus()
