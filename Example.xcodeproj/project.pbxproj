@@ -643,6 +643,7 @@
 				39F1F6A71D3B90E200FF1C8C /* Resources */,
 				6CBAC89EC5BE7BD1A9459502 /* [CP] Embed Pods Frameworks */,
 				C33FFFD4AC05CBFAA47D24A3 /* [CP] Copy Pods Resources */,
+				046193211F8E01C00029D432 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -782,6 +783,19 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		046193211F8E01C00029D432 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "DSYM_INFO_PLIST=\"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist\"\nbuildNumber=$NEVERCODE_BUILD_NUMBER\nstringLength=${#buildNumber}\n    \n    if [ $stringLength -ne 0 ]; then\n    echo \"Updating build number to $buildNumber\"\n    /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n    if [ -f \"$DSYM_INFO_PLIST\" ]; then\n    /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD_NUMBER\" \"$DSYM_INFO_PLIST\"\n    fi\n    else\n    echo \"Missing build number, skip updating\"\n    fi";
+		};
 		162F137066E8CFD31C094F3B /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
