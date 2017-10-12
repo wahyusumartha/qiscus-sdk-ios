@@ -11,7 +11,7 @@ import UIKit
 extension UIViewController {
 
     func qiscusAutoHideKeyboard() {
-        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIViewController.dismissKeyboard))
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIViewController.qiscusDismissKeyboard))
         view.addGestureRecognizer(tap)
     }
     
