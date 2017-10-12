@@ -1,7 +1,7 @@
 
 # Quick Start
 
-![SDK iOS](https://res.cloudinary.com/qiscus/image/upload/zKB8jtyLZJ/ssios1.png "SDK iOS)
+![SDK iOS](https://res.cloudinary.com/qiscus/image/upload/zKB8jtyLZJ/ssios1.png "SDK iOS")
 
 ## Create a new app
 Register on [www.qiscus.com/dashboard](https://www.qiscus.com/dashboard)
