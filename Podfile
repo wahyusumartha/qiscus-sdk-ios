@@ -4,7 +4,12 @@ platform :ios, '9.0'
 target 'Example' do
     use_frameworks!
     
-    pod 'Qiscus', :path => '.'
+    pod 'Alamofire', '~> 4.5.1'
+    pod 'AlamofireImage', '~> 3.3.0'
+    pod 'RealmSwift', '~> 2.10.2'
+    pod 'SwiftyJSON', '~> 3.1.4'
+    pod 'ImageViewer', '4.0'
+    pod 'CocoaMQTT', '1.0.19'
 end
 
 target 'Qiscus' do
