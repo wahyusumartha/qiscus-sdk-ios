@@ -19,6 +19,10 @@ extension QiscusChatVC: ChatInputTextDelegate {
                     input.layoutIfNeeded()
                     self.chatRoom?.publishStartTyping()
                 }}
+            }else{
+                DispatchQueue.main.async {
+                    self.chatRoom?.publishStartTyping()
+                }
             }
         }}
     }
