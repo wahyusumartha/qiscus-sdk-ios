@@ -4,7 +4,7 @@ platform :ios, '9.0'
 target 'Example' do
     use_frameworks!
     
-    pod 'Qiscus', :path => '.'
+    pod 'Qiscus', :git => 'https://github.com/qiscus/qiscus-sdk-ios.git', :branch => 'develop'
 end
 
 target 'Qiscus' do
