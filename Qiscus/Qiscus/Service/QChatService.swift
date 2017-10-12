@@ -698,21 +698,10 @@ public class QChatService:NSObject {
                                         func proceed(){
                                             if let room = QRoom.room(withId: roomId){
                                                 if !room.isInvalidated {
-                                                    if room.commentsGroupCount > 0 {
-                                                        room.saveNewComment(fromJSON: newComment)
-                                                        if id > QiscusMe.sharedInstance.lastCommentId{
-                                                            if type == "system_event" {
-                                                                room.sync()
-                                                            }
-                                                        }
-                                                    }else{
-                                                        let commentTemp = QComment.tempComment(fromJSON: newComment)
-                                                        room.updateLastComentInfo(comment: commentTemp)
-                                                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                                            DispatchQueue.main.async { autoreleasepool{
-                                                                let comment = QComment.tempComment(fromJSON: newComment)
-                                                                roomDelegate.gotNewComment(comment)
-                                                                }}
+                                                    room.saveNewComment(fromJSON: newComment)
+                                                    if id > QiscusMe.sharedInstance.lastCommentId{
+                                                        if type == "system_event" {
+                                                            room.sync()
                                                         }
                                                     }
                                                 }
