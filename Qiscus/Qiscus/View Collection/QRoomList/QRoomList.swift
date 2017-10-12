@@ -57,6 +57,7 @@ open class QRoomList: UITableView{
         NotificationCenter.default.addObserver(self, selector: #selector(QRoomList.roomListChange(_:)), name: QiscusNotification.ROOM_ORDER_MAY_CHANGE, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(QRoomList.roomListChange(_:)), name: QiscusNotification.ROOM_DELETED, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(QRoomList.dataCleared(_:)), name: QiscusNotification.FINISHED_CLEAR_MESSAGES, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(QRoomList.newRoom(_:)), name: QiscusNotification.GOT_NEW_ROOM, object: nil)
         registerCell()
     }
  
@@ -104,11 +105,25 @@ open class QRoomList: UITableView{
         dataCleared()
         self.clearingData = true
     }
-
+    @objc private func newRoom(_ notification: Notification){
+        if let userInfo = notification.userInfo {
+            if let room = userInfo["room"] as? QRoom {
+                if room.isInvalidated {
+                    self.reload()
+                }else{
+                    self.gotNewRoom(room: room)
+                }
+            }
+        }
+        
+    }
     @objc private func roomListChange(_ notification: Notification){
         self.reload()
     }
     open func dataCleared(){
+        self.reload()
+    }
+    open func gotNewRoom(room:QRoom){
         self.reload()
     }
     open func roomListChange(){

@@ -420,7 +420,6 @@ public class QRoomService:NSObject{
                 let data = try Data(contentsOf: URL(string: "file://\(localPath)")!)
                 QiscusUploadThread.async { autoreleasepool{
                     let headers = QiscusConfig.sharedInstance.requestHeader
-                    let parameters = ["token" : QiscusMe.sharedInstance.token as Any]
                     var urlUpload = URLRequest(url: URL(string: QiscusConfig.UPLOAD_URL)!)
                     
                     if headers.count > 0 {
@@ -606,7 +605,7 @@ public class QRoomService:NSObject{
     }
     internal class func loadMore(inRoom room:QRoom, limit:Int, offset:String, onSuccess:@escaping ([QComment],Bool)->Void, onError:@escaping (String)->Void){
         let loadURL = QiscusConfig.LOAD_URL
-        var parameters =  [
+        let parameters =  [
             "topic_id" : room.id as AnyObject,
             "token" : Qiscus.shared.config.USER_TOKEN as AnyObject,
             "after" : false as AnyObject,

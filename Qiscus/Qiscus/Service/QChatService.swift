@@ -658,7 +658,7 @@ public class QChatService:NSObject {
         }
         load(onPage: 1)
     }
-    @objc private func syncProcess(first:Bool = true){
+    @objc internal func syncProcess(first:Bool = true){
         QiscusRequestThread.async {
             let loadURL = QiscusConfig.SYNC_URL
             let limit = 60
@@ -691,6 +691,7 @@ public class QChatService:NSObject {
                                     let roomId = "\(newComment["room_id"])"
                                     let id = newComment["id"].intValue
                                     let type = newComment["type"].string
+                                    print("newComment: \(newComment)")
                                     if id > QiscusMe.sharedInstance.lastCommentId {
                                         QiscusMe.updateLastCommentId(commentId: id)
                                         
@@ -724,12 +725,26 @@ public class QChatService:NSObject {
                                                             }}
                                                     }
                                                 }}
-                                                let comment = QComment.tempComment(fromJSON: newComment)
-                                                QChatService.roomInfo(withId: comment.roomId, onSuccess: { (room) in
-                                                    Qiscus.chatDelegate?.qiscusChat?(gotNewRoom: room)
-                                                }, onFailed: { (error) in
-                                                    print("error getting room info")
-                                                })
+                                                var needLoadRoom = true
+                                                if type == "system_event" {
+                                                    let payload = newComment["payload"]
+                                                    let typeSystem = payload["type"].stringValue
+                                                    let systemObject = payload["object_email"].stringValue
+                                                    if typeSystem == "remove_member" || type == "left_room"{
+                                                        if systemObject == QiscusMe.sharedInstance.email {
+                                                            needLoadRoom = false
+                                                        }
+                                                    }
+                                                }
+                                                if needLoadRoom {
+                                                    QChatService.roomInfo(withId: roomId, onSuccess: { (room) in
+                                                        room.saveNewComment(fromJSON: newComment)
+                                                        Qiscus.chatDelegate?.qiscusChat?(gotNewRoom: room)
+                                                        QiscusNotification.publish(gotNewRoom: room)
+                                                    }, onFailed: { (error) in
+                                                        print("error getting room info")
+                                                    })
+                                                }
                                             }
                                         }
                                         if Thread.isMainThread {
@@ -1189,7 +1204,7 @@ public class QChatService:NSObject {
                     if let result = response.result.value{
                         let json = JSON(result)
                         let success:Bool = (json["status"].intValue == 200)
-                        
+                        print("room info data: \(json)")
                         if success {
                             let resultData = json["results"]
                             let roomsData = resultData["rooms_info"].arrayValue
@@ -1221,7 +1236,24 @@ public class QChatService:NSObject {
                                     }
                                 }}
                             }else{
-                                onFailed("room notfound")
+                                DispatchQueue.main.async {
+                                    if let chatView = Qiscus.shared.chatViews[id] {
+                                        if chatView.isPresence {
+                                            chatView.goBack()
+                                        }
+                                        Qiscus.shared.chatViews[id] = nil
+                                    }
+                                    Qiscus.chatRooms[id] = nil
+                                    
+                                    if let room = QRoom.room(withId: id){
+                                        if !room.isInvalidated {
+                                            room.unsubscribeRealtimeStatus()
+                                            QRoom.deleteRoom(room: room)
+                                        }
+                                    }
+                                    QiscusNotification.publish(roomDeleted: id)
+                                }
+                                onFailed("noAccess to room")
                             }
                         }else{
                             onFailed("can't get search result")
