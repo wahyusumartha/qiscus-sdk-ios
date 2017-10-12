@@ -360,7 +360,7 @@ open class QiscusChatVC: UIViewController{
         self.inputText.chatInputDelegate = self
         
         // Keyboard stuff.
-        self.hideKeyboardWhenTappedAround()
+        self.qiscusAutoHideKeyboard()
         
         unreadIndexPath = [IndexPath]()
         bottomButton.isHidden = true
