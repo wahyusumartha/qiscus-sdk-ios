@@ -16,6 +16,7 @@ public class QiscusNotification: NSObject {
     
     private static var typingTimer = [String:Timer]()
     
+    public static let GOT_NEW_ROOM = NSNotification.Name("qiscus_gotNewRoom")
     public static let GOT_NEW_COMMENT = NSNotification.Name("qiscus_gotNewComment")
     public static let USER_TYPING = NSNotification.Name("qiscus_userTyping")
     public static let MESSAGE_STATUS = NSNotification.Name("qiscus_messageStatus")
@@ -28,6 +29,7 @@ public class QiscusNotification: NSObject {
     override private init(){
         super.init()
     }
+    
     public class func publish(finishedClearMessage cleared:Bool = true){
         let notification = QiscusNotification.shared
         notification.finishedClearMessage()
@@ -51,6 +53,12 @@ public class QiscusNotification: NSObject {
     public class func publish(messageStatus comment:QComment, status:QCommentStatus){
         let notification = QiscusNotification.shared
         notification.publish(messageStatus: comment, status: status)
+    }
+    public class func publish(gotNewRoom room:QRoom){
+        if !room.isInvalidated {
+            let notification = QiscusNotification.shared
+            notification.publish(gotNewRoom: room)
+        }
     }
     public class func publish(gotNewComment comment:QComment, room:QRoom){
         if !comment.isInvalidated {
@@ -95,6 +103,12 @@ public class QiscusNotification: NSObject {
         if !comment.isInvalidated {
             let userInfo: [AnyHashable: Any] = ["comment" : comment, "status": status]
             self.nc.post(name: QiscusNotification.MESSAGE_STATUS, object: nil, userInfo: userInfo)
+        }
+    }
+    private func publish(gotNewRoom room:QRoom){
+        if !room.isInvalidated {
+            let userInfo = ["room" : room]
+            self.nc.post(name: QiscusNotification.GOT_NEW_ROOM, object: nil, userInfo: userInfo)
         }
     }
     private func publish(gotNewComment comment:QComment, room:QRoom){

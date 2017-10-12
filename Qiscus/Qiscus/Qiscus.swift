@@ -982,12 +982,15 @@ extension Qiscus:CocoaMQTTDelegate{
                     let commentId = json["id"].intValue
                     print("mqtt data: \(json)")
                     if commentId > QiscusMe.sharedInstance.lastCommentId {
-                        QChatService.sync()
+                        func syncData(){
+                            let service = QChatService()
+                            service.syncProcess()
+                        }
                         let commentType = json["type"].stringValue
                         if commentType == "system_event" {
                             let payload = json["payload"]
                             let type = payload["type"].stringValue
-                            if type == "remove_member" {
+                            if type == "remove_member" || type == "left_room"{
                                 if payload["object_email"].stringValue == QiscusMe.sharedInstance.email {
                                     DispatchQueue.main.async {autoreleasepool{
                                         let comment = QComment.tempComment(fromJSON: json)
@@ -1014,7 +1017,14 @@ extension Qiscus:CocoaMQTTDelegate{
                                         QiscusNotification.publish(roomDeleted: roomId)
                                         }}
                                 }
+                                else{
+                                    syncData()
+                                }
+                            }else{
+                                syncData()
                             }
+                        }else{
+                            syncData()
                         }
                     }else{
                         let uniqueId = json["unique_temp_id"].stringValue
@@ -1026,7 +1036,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                     }
                                 }
                             }
-                            }}
+                        }}
                     }
                     if #available(iOS 10.0, *) {
                         if Qiscus.publishStatustimer != nil {
@@ -1082,10 +1092,12 @@ extension Qiscus:CocoaMQTTDelegate{
                     }else{
                         DispatchQueue.main.async { autoreleasepool{
                             if let room = QRoom.room(withId: roomId) {
-                                room.updateUnreadCommentCount(count: 0)
-                                QiscusNotification.publish(roomChange: room)
+                                if !room.isInvalidated {
+                                    room.updateUnreadCommentCount(count: 0)
+                                    QiscusNotification.publish(roomChange: room)
+                                }
                             }
-                            }}
+                        }}
                         //                        Qiscus.roomInfo(withId: roomId, lastCommentUpdate: false, onSuccess: { (room) in
                         //                            QiscusNotification.publish(roomChange: room)
                         //                        }, onError: { (error) in
@@ -1109,7 +1121,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     break
                 }
             }
-            }}
+        }}
         
     }
     public func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopic topic: String){
