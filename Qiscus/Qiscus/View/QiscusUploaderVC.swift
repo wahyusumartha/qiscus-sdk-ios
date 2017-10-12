@@ -29,7 +29,7 @@ class QiscusUploaderVC: UIViewController, UIScrollViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.hideKeyboardWhenTappedAround()
+        self.qiscusAutoHideKeyboard()
         self.scrollView.delegate = self
         self.scrollView.minimumZoomScale = 1.0
         self.scrollView.maximumZoomScale = 4.0
