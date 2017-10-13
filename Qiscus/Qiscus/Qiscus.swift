@@ -1230,7 +1230,7 @@ extension Qiscus { // Public class API to get room
         }
     }
     
-    public class func room(withChannel channelName:String, onSuccess:@escaping ((QRoom)->Void),onError:@escaping ((String)->Void)){
+    public class func room(withChannel channelName:String, title:String = "", avatarURL:String, onSuccess:@escaping ((QRoom)->Void),onError:@escaping ((String)->Void)){
         let service = QChatService()
         var needToLoad = true
         var room:QRoom?
@@ -1243,11 +1243,11 @@ extension Qiscus { // Public class API to get room
         if !needToLoad {
             onSuccess(room!)
         }else{
-            service.room(withUniqueId: channelName, onSuccess: { (room) in
+            service.room(withUniqueId: channelName, title: title, avatarURL: avatarURL, onSuccess: { (room) in
                 onSuccess(room)
-            }) { (error) in
+            }, onError: { (error) in
                 onError(error)
-            }
+            })
         }
         
     }
