@@ -742,10 +742,12 @@ open class QiscusChatVC: UIViewController{
                 let section = self.chatRoom!.commentsGroupCount - 1
                 let row = self.chatRoom!.commentGroup(index: section)!.commentsCount - 1
                 let indexPath = IndexPath(item: row, section: section)
-                self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
-                self.dismissLoading()
-                self.dataLoaded = true
-                self.collectionView.isHidden = false
+                DispatchQueue.main.async {
+                    self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
+                    self.dismissLoading()
+                    self.dataLoaded = true
+                    self.collectionView.isHidden = false
+                }
             }else{
                 self.dismissLoading()
                 self.dataLoaded = true
