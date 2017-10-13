@@ -278,7 +278,6 @@ public class QRoomService:NSObject{
             comment.updateProgress(progress: 0)
             let fileURL = file.url.replacingOccurrences(of: " ", with: "%20")
             let ext = file.ext
-            let localPath = file.localPath
             
             QiscusRequestThread.async {
                 Alamofire.request(fileURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil).responseData(completionHandler: { response in
@@ -304,7 +303,7 @@ public class QRoomService:NSObject{
                                     }
                                     
                                     DispatchQueue.main.async {autoreleasepool{
-                                        file.saveFile(withData: fileData)
+                                        let _ = file.saveFile(withData: fileData)
                                         file.saveThumbImage(withImage: thumbImage)
                                         
                                         comment.updateDownloading(downloading: false)
@@ -312,23 +311,23 @@ public class QRoomService:NSObject{
                                         comment.displayImage = thumbImage
                                     }}
                                 }else{
-                                    let assetMedia = AVURLAsset(url: URL(fileURLWithPath: "\(localPath)"))
-                                    let thumbGenerator = AVAssetImageGenerator(asset: assetMedia)
-                                    thumbGenerator.appliesPreferredTrackTransform = true
-                                    
-                                    let thumbTime = CMTimeMakeWithSeconds(0, 30)
-                                    let maxSize = CGSize(width: QiscusHelper.screenWidth(), height: QiscusHelper.screenWidth())
-                                    thumbGenerator.maximumSize = maxSize
-                                    var thumbImage:UIImage?
-                                    do{
-                                        let thumbRef = try thumbGenerator.copyCGImage(at: thumbTime, actualTime: nil)
-                                        thumbImage = UIImage(cgImage: thumbRef)
-                                    }catch{
-                                        Qiscus.printLog(text: "error creating thumb image")
-                                    }
-                                    
                                     DispatchQueue.main.async { autoreleasepool{
-                                        file.saveFile(withData: imageData)
+                                        let path = file.saveFile(withData: imageData)
+                                        let assetMedia = AVURLAsset(url: URL(fileURLWithPath: "\(path)"))
+                                        let thumbGenerator = AVAssetImageGenerator(asset: assetMedia)
+                                        thumbGenerator.appliesPreferredTrackTransform = true
+                                        
+                                        let thumbTime = CMTimeMakeWithSeconds(0, 30)
+                                        let maxSize = CGSize(width: QiscusHelper.screenWidth(), height: QiscusHelper.screenWidth())
+                                        thumbGenerator.maximumSize = maxSize
+                                        var thumbImage:UIImage?
+                                        
+                                        do{
+                                            let thumbRef = try thumbGenerator.copyCGImage(at: thumbTime, actualTime: nil)
+                                            thumbImage = UIImage(cgImage: thumbRef)
+                                        }catch let error as NSError{
+                                            Qiscus.printLog(text: "error creating thumb image: \(error.localizedDescription)")
+                                        }
                                         if thumbImage != nil {
                                             file.saveThumbImage(withImage: thumbImage!)
                                         }
@@ -339,7 +338,7 @@ public class QRoomService:NSObject{
                             }
                             else{
                                 DispatchQueue.main.async { autoreleasepool{
-                                    file.saveFile(withData: imageData)
+                                    let _ = file.saveFile(withData: imageData)
                                     comment.updateDownloading(downloading: false)
                                     comment.updateProgress(progress: 1)
                                     

@@ -101,7 +101,7 @@ class QCellMediaRight: QChatCell {
                 imageDisplay.loadAsync(file.thumbURL, onLoaded: { (image, _) in
                     self.imageDisplay.image = image
                     self.comment!.displayImage = image
-                    file.saveThumbImage(withImage: image)
+                    file.saveMiniThumbImage(withImage: image)
                 })
             }
             if self.tapRecognizer != nil{
@@ -120,7 +120,7 @@ class QCellMediaRight: QChatCell {
                 self.cellHeight.constant = 0
             }
             
-            if self.comment!.type == .video {
+            if self.comment!.type == .video  {
                 self.videoPlay.image = Qiscus.image(named: "play_button")
                 self.videoFrame.isHidden = false
                 self.videoPlay.isHidden = false
@@ -148,6 +148,7 @@ class QCellMediaRight: QChatCell {
                     self.progressView.isHidden = false
                     let newHeight = self.comment!.progress * maxProgressHeight
                     self.progressHeight.constant = newHeight
+                    self.videoPlay.isHidden = true
                     self.progressView.layoutIfNeeded()
                 }else{
                     self.videoPlay.isHidden = true
@@ -205,6 +206,7 @@ class QCellMediaRight: QChatCell {
             break
         case .sent:
             statusImage.image = Qiscus.image(named: "ic_sending")?.withRenderingMode(.alwaysTemplate)
+            uploadFinished()
             break
         case .delivered:
             statusImage.image = Qiscus.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)
@@ -257,10 +259,12 @@ class QCellMediaRight: QChatCell {
     }
     public override func downloadFinished() {
         if let file = self.comment!.file {
-            if QFileManager.isFileExist(inLocalPath: file.localPath){
-                imageDisplay.loadAsync(fromLocalPath: file.localPath, onLoaded: { (image, _) in
-                    self.imageDisplay.image = image
-                    self.comment!.displayImage = image
+            if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
+                imageDisplay.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
+                    DispatchQueue.main.async {
+                        self.imageDisplay.image = image
+                        self.comment!.displayImage = image
+                    }
                 })
             }else if QFileManager.isFileExist(inLocalPath: file.localMiniThumbPath){
                 imageDisplay.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
@@ -293,8 +297,12 @@ class QCellMediaRight: QChatCell {
         }
     }
     func didTapImage(){
-        if !self.comment!.isUploading && !self.comment!.isDownloading {
-            delegate?.didTapCell(withData: self.comment!)
+        if !self.comment!.isUploading && !self.comment!.isDownloading{
+            if let file = self.comment!.file{
+                if QFileManager.isFileExist(inLocalPath: file.localPath){
+                    delegate?.didTapCell(withData: self.comment!)
+                }
+            }
         }
     }
     public override func uploadingMedia() {
@@ -311,41 +319,23 @@ class QCellMediaRight: QChatCell {
         })
     }
     public override func uploadFinished(){
-        if let file = self.comment!.file {
-            if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
-                imageDisplay.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
-                    self.imageDisplay.image = image
-                    self.comment!.displayImage = image
-                })
-            }else if QFileManager.isFileExist(inLocalPath: file.localMiniThumbPath){
-                imageDisplay.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
-                    self.imageDisplay.image = image
-                    self.comment!.displayImage = image
-                })
-            }else{
-                imageDisplay.loadAsync(file.thumbURL, onLoaded: { (image, _) in
-                    self.imageDisplay.image = image
-                    self.comment!.displayImage = image
-                })
-            }
-            self.progressView.isHidden = true
-            self.progressContainer.isHidden = true
-            self.progressLabel.isHidden = true
-            if self.comment!.type == .video {
-                self.videoPlay.image = Qiscus.image(named: "play_button")
-                self.videoFrame.isHidden = false
-                self.videoPlay.isHidden = false
-            }else if file.ext == "gif"{
-                self.videoPlay.image = Qiscus.image(named: "ic_gif")
-                self.videoFrame.isHidden = true
-                self.videoPlay.isHidden = false
-            }else{
-                self.videoPlay.isHidden = true
-                self.videoFrame.isHidden = true
-            }
-            self.tapRecognizer = UITapGestureRecognizer(target:self,action:#selector(self.didTapImage))
-            self.imageDisplay.addGestureRecognizer(tapRecognizer!)
+        self.progressView.isHidden = true
+        self.progressContainer.isHidden = true
+        self.progressLabel.isHidden = true
+        if self.comment!.type == .video {
+            self.videoPlay.image = Qiscus.image(named: "play_button")
+            self.videoFrame.isHidden = false
+            self.videoPlay.isHidden = false
+        }else if self.comment!.file?.ext == "gif"{
+            self.videoPlay.image = Qiscus.image(named: "ic_gif")
+            self.videoFrame.isHidden = true
+            self.videoPlay.isHidden = false
+        }else{
+            self.videoPlay.isHidden = true
+            self.videoFrame.isHidden = true
         }
+        self.tapRecognizer = UITapGestureRecognizer(target:self,action:#selector(self.didTapImage))
+        self.imageDisplay.addGestureRecognizer(tapRecognizer!)
     }
     func setupImageView(){
         

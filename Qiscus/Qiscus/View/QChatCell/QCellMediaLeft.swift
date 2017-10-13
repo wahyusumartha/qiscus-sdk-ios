@@ -100,7 +100,7 @@ class QCellMediaLeft: QChatCell {
                 imageDisplay.loadAsync(file.thumbURL, onLoaded: { (image, _) in
                     self.imageDisplay.image = image
                     self.comment!.displayImage = image
-                    file.saveThumbImage(withImage: image)
+                    file.saveMiniThumbImage(withImage: image)
                 })
             }
             if self.tapRecognizer != nil{
@@ -203,8 +203,8 @@ class QCellMediaLeft: QChatCell {
     }
     public override func downloadFinished() {
         if let file = self.comment!.file {
-            if QFileManager.isFileExist(inLocalPath: file.localPath){
-                imageDisplay.loadAsync(fromLocalPath: file.localPath, onLoaded: { (image, _) in
+            if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
+                imageDisplay.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
                     self.imageDisplay.image = image
                     self.comment!.displayImage = image
                 })
@@ -239,8 +239,12 @@ class QCellMediaLeft: QChatCell {
         }
     }
     func didTapImage(){
-        if !self.comment!.isUploading && !self.comment!.isDownloading {
-            delegate?.didTapCell(withData: self.comment!)
+        if !self.comment!.isUploading && !self.comment!.isDownloading{
+            if let file = self.comment!.file{
+                if QFileManager.isFileExist(inLocalPath: file.localPath){
+                    delegate?.didTapCell(withData: self.comment!)
+                }
+            }
         }
     }
     
