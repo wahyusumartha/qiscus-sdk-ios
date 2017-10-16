@@ -767,7 +767,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                     if let payloadData = userInfo["payload"]{
                         let jsonPayload = JSON(arrayLiteral: payloadData)[0]
                         let tempComment = QComment.tempComment(fromJSON: jsonPayload)
-                        Qiscus.shared.delegate?.qiscus?(gotSilentNotification: tempComment)
+                        Qiscus.shared.delegate?.qiscus?(gotSilentNotification: tempComment, userInfo: userInfo)
                     }
                 }
             }

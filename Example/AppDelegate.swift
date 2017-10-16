@@ -138,7 +138,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         }
         //self.goToChatNavigationView()
     }
-    func qiscus(gotSilentNotification comment: QComment) {
+    func qiscus(gotSilentNotification comment: QComment, userInfo:[AnyHashable:Any]) {
         Qiscus.createLocalNotification(forComment: comment)
     }
     func qiscus(didTapLocalNotification comment: QComment, userInfo: [AnyHashable : Any]?) {

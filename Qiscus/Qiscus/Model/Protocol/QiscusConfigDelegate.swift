@@ -17,7 +17,7 @@ import UIKit
     @objc optional func qiscusFailToConnect(_ withMessage:String)
     @objc optional func qiscusConnected()
     
-    @objc optional func qiscus(gotSilentNotification comment:QComment)
+    @objc optional func qiscus(gotSilentNotification comment:QComment, userInfo:[AnyHashable:Any])
     @objc optional func qiscus(didConnect succes:Bool, error:String?)
     @objc optional func qiscus(didRegisterPushNotification success:Bool, deviceToken:String, error:String?)
     @objc optional func qiscus(didUnregisterPushNotification success:Bool, error:String?)
