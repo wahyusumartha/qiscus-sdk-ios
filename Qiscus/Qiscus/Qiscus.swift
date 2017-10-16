@@ -878,6 +878,21 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             }
         }
     }
+    public class func didReceiveUNUserNotification(withUserInfo userInfo:[AnyHashable:Any]){
+        if let comment = QComment.decodeDictionary(data: userInfo) {
+            var userData:[AnyHashable : Any]? = [AnyHashable : Any]()
+            let qiscusKey:[AnyHashable] = ["qiscus_commentdata","qiscus_uniqueId","qiscus_id","qiscus_roomId","qiscus_beforeId","qiscus_text","qiscus_createdAt","qiscus_senderEmail","qiscus_senderName","qiscus_statusRaw","qiscus_typeRaw","qiscus_data"]
+            for (key,value) in userInfo {
+                if !qiscusKey.contains(key) {
+                    userData![key] = value
+                }
+            }
+            if userData!.count == 0 {
+                userData = nil
+            }
+            Qiscus.shared.delegate?.qiscus?(didTapLocalNotification: comment, userInfo: userData)
+        }
+    }
     class func publishUserStatus(offline:Bool = false){
         if Qiscus.isLoggedIn{
             DispatchQueue.main.async {
