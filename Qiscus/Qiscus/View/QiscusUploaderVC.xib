@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13196" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13173"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -25,10 +26,10 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="66j-8D-8gE">
-                    <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                    <rect key="frame" x="0.0" y="50" width="375" height="617"/>
                     <subviews>
                         <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Lhw-an-yNz">
-                            <rect key="frame" x="0.0" y="0.0" width="374" height="666"/>
+                            <rect key="frame" x="0.0" y="0.0" width="374" height="616"/>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                         </imageView>
                     </subviews>
@@ -80,16 +81,32 @@
                         <constraint firstAttribute="trailing" secondItem="qaz-XA-cHL" secondAttribute="trailing" constant="58" id="l4e-oC-cnJ"/>
                     </constraints>
                 </view>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="v7d-tL-Rht">
+                    <rect key="frame" x="0.0" y="20" width="375" height="30"/>
+                    <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="30" id="vHo-yq-Jvq"/>
+                    </constraints>
+                    <state key="normal" title="Cancel">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <connections>
+                        <action selector="cancel:" destination="-1" eventType="touchUpInside" id="5JI-A4-mwZ"/>
+                    </connections>
+                </button>
             </subviews>
-            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <constraints>
                 <constraint firstItem="orB-oB-Ggp" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="1Xu-l1-leU"/>
+                <constraint firstItem="v7d-tL-Rht" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="1cb-MS-Gpd"/>
                 <constraint firstAttribute="bottom" secondItem="orB-oB-Ggp" secondAttribute="bottom" id="Dld-hL-Szd"/>
                 <constraint firstAttribute="trailing" secondItem="orB-oB-Ggp" secondAttribute="trailing" id="P3n-dg-m4V"/>
                 <constraint firstAttribute="trailing" secondItem="66j-8D-8gE" secondAttribute="trailing" id="Ton-4s-59V"/>
                 <constraint firstAttribute="bottom" secondItem="66j-8D-8gE" secondAttribute="bottom" id="nbe-FM-MeA"/>
-                <constraint firstItem="66j-8D-8gE" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="qOQ-Nx-iB1"/>
+                <constraint firstItem="66j-8D-8gE" firstAttribute="top" secondItem="v7d-tL-Rht" secondAttribute="bottom" id="ubK-37-ioN"/>
                 <constraint firstItem="66j-8D-8gE" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="vuG-wp-B6U"/>
+                <constraint firstItem="v7d-tL-Rht" firstAttribute="width" secondItem="orB-oB-Ggp" secondAttribute="width" id="wTR-UC-frb"/>
+                <constraint firstItem="v7d-tL-Rht" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="20" id="waM-Ru-K69"/>
             </constraints>
             <point key="canvasLocation" x="136.5" y="77.5"/>
         </view>

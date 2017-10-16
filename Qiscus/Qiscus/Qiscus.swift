@@ -880,28 +880,31 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     class func publishUserStatus(offline:Bool = false){
         if Qiscus.isLoggedIn{
-            QiscusBackgroundThread.async {autoreleasepool{
-                var message: String = "1";
-                
-                let channel = "u/\(QiscusMe.sharedInstance.email)/s"
-                if offline {
-                    message = "0"
-                    DispatchQueue.main.async {autoreleasepool{
-                        Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: true)
-                        }}
-                }else{
-                    if Qiscus.sharedInstance.application.applicationState == UIApplicationState.active {
-                        DispatchQueue.main.async { autoreleasepool{
+            DispatchQueue.main.async {
+                let isActive = (Qiscus.sharedInstance.application.applicationState == UIApplicationState.active)
+                QiscusBackgroundThread.async {autoreleasepool{
+                    var message: String = "1";
+                    
+                    let channel = "u/\(QiscusMe.sharedInstance.email)/s"
+                    if offline {
+                        message = "0"
+                        DispatchQueue.main.async {autoreleasepool{
                             Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: true)
                             }}
-                        
-                        let when = DispatchTime.now() + 40
-                        QiscusBackgroundThread.asyncAfter(deadline: when) {
-                            Qiscus.publishUserStatus()
+                    }else{
+                        if isActive {
+                            DispatchQueue.main.async { autoreleasepool{
+                                Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: true)
+                                }}
+                            
+                            let when = DispatchTime.now() + 40
+                            QiscusBackgroundThread.asyncAfter(deadline: when) {
+                                Qiscus.publishUserStatus()
+                            }
                         }
                     }
-                }
-                }}
+                    }}
+            }
         }
     }
     func goToBackgroundMode(){

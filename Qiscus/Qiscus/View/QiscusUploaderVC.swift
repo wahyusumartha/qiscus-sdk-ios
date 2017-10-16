@@ -55,6 +55,7 @@ class QiscusUploaderVC: UIViewController, UIScrollViewDelegate {
         let center: NotificationCenter = NotificationCenter.default
         center.addObserver(self, selector: #selector(QiscusUploaderVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         center.addObserver(self, selector: #selector(QiscusUploaderVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
+        self.navigationController?.isNavigationBarHidden = true
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -63,6 +64,7 @@ class QiscusUploaderVC: UIViewController, UIScrollViewDelegate {
     override func viewWillDisappear(_ animated: Bool) {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
+        self.navigationController?.isNavigationBarHidden = false
     }
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return self.imageView
@@ -106,6 +108,9 @@ class QiscusUploaderVC: UIViewController, UIScrollViewDelegate {
         }, completion: nil)
     }
 
+    @IBAction func cancel(_ sender: Any) {
+        let _ = self.navigationController?.popViewController(animated: true)
+    }
 }
 
 extension QiscusUploaderVC: ChatInputTextDelegate {
