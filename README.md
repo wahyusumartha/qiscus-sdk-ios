@@ -288,6 +288,19 @@ Currently we recommend to invite user into existing room through our **REST API*
 
 Currently we recommend to kick user out of specific room through our **REST API** for simplicity and security reason
 
+### Get Rooms List
+
+We can get room list for the user by executing this function, however no `view` being returned. The function will only return data of the rooms
+
+```
+QChatService.roomList(withLimit: 100, page: page, onSuccess: { (rooms, totalRoom, currentPage, limit) in
+            print("room list: \(rooms)")
+        }) { (error) in
+            print("\(error)")
+        }
+```
+
+
 # Event Handler
 
 **QiscusConfigDelegate**
@@ -447,6 +460,11 @@ During post message, if you dont have any internet connection, message will be s
 Messages are stored locally so you can still access the messages when you dont have internet conenction. However any new messages will not being received after you have your internet connection back.
 
 
+
 # Notes
 
 Don't forget to add usage description for camera, photo library and microphone to your **info.plist **to use our attachment functionality in chat SDK
+
+
+
+
