@@ -225,6 +225,7 @@ class QCellAudioRight: QCellAudio {
             break
         case .sent:
             statusImage.image = Qiscus.image(named: "ic_sending")?.withRenderingMode(.alwaysTemplate)
+            uploadFinished()
             break
         case .delivered:
             statusImage.image = Qiscus.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)

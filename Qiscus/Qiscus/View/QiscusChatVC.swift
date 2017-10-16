@@ -84,6 +84,8 @@ open class QiscusChatVC: UIViewController{
     // MARK: - Data Properties
     var hasMoreComment = true // rmove
     var loadMoreControl = UIRefreshControl()
+    var processingFile = false
+    var processingAudio = false
     
     // MARK: -  Data load configuration
     public var chatRoom:QRoom?{

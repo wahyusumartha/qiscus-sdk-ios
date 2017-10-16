@@ -13,6 +13,7 @@ import Photos
 
 // MARK: - GaleryItemDataSource
 extension QiscusChatVC:GalleryItemsDatasource{
+    
     // MARK: - Galery Function
     public func galleryConfiguration()-> GalleryConfiguration{
         let closeButton = UIButton(frame: CGRect(origin: CGPoint.zero, size: CGSize(width: 20, height: 20)))
@@ -47,26 +48,58 @@ extension QiscusChatVC:GalleryItemsDatasource{
 // MARK: - UIImagePickerDelegate
 extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDelegate{
     open func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]){
-        let time = Double(Date().timeIntervalSince1970)
-        let timeToken = UInt64(time * 10000)
-        let fileType:String = info[UIImagePickerControllerMediaType] as! String
-        picker.dismiss(animated: true, completion: nil)
-        
-        if fileType == "public.image"{
-            var imageName:String = ""
-            let image = info[UIImagePickerControllerOriginalImage] as! UIImage
-            var data = UIImagePNGRepresentation(image)
-            if let imageURL = info[UIImagePickerControllerReferenceURL] as? URL{
-                imageName = imageURL.lastPathComponent
-                
-                let imageNameArr = imageName.characters.split(separator: ".")
-                let imageExt:String = String(imageNameArr.last!).lowercased()
-                
-                let gif:Bool = (imageExt == "gif" || imageExt == "gif_")
-                let jpeg:Bool = (imageExt == "jpg" || imageExt == "jpg_")
-                let png:Bool = (imageExt == "png" || imageExt == "png_")
+        if !self.processingFile {
+            self.processingFile = true
+            let time = Double(Date().timeIntervalSince1970)
+            let timeToken = UInt64(time * 10000)
+            let fileType:String = info[UIImagePickerControllerMediaType] as! String
+            //picker.dismiss(animated: true, completion: nil)
             
-                if jpeg{
+            if fileType == "public.image"{
+                var imageName:String = ""
+                let image = info[UIImagePickerControllerOriginalImage] as! UIImage
+                var data = UIImagePNGRepresentation(image)
+                if let imageURL = info[UIImagePickerControllerReferenceURL] as? URL{
+                    imageName = imageURL.lastPathComponent
+                    
+                    let imageNameArr = imageName.characters.split(separator: ".")
+                    let imageExt:String = String(imageNameArr.last!).lowercased()
+                    
+                    let gif:Bool = (imageExt == "gif" || imageExt == "gif_")
+                    let jpeg:Bool = (imageExt == "jpg" || imageExt == "jpg_")
+                    let png:Bool = (imageExt == "png" || imageExt == "png_")
+                
+                    if jpeg{
+                        let imageSize = image.size
+                        var bigPart = CGFloat(0)
+                        if(imageSize.width > imageSize.height){
+                            bigPart = imageSize.width
+                        }else{
+                            bigPart = imageSize.height
+                        }
+                        
+                        var compressVal = CGFloat(1)
+                        if(bigPart > 2000){
+                            compressVal = 2000 / bigPart
+                        }
+                        
+                        data = UIImageJPEGRepresentation(image, compressVal)!
+                    }else if png{
+                        data = UIImagePNGRepresentation(image)!
+                    }else if gif{
+                        let asset = PHAsset.fetchAssets(withALAssetURLs: [imageURL], options: nil)
+                        if let phAsset = asset.firstObject {
+                            let option = PHImageRequestOptions()
+                            option.isSynchronous = true
+                            option.isNetworkAccessAllowed = true
+                            PHImageManager.default().requestImageData(for: phAsset, options: option) {
+                                (gifData, dataURI, orientation, info) -> Void in
+                                data = gifData
+                            }
+                        }
+                    }
+                }else{
+                    imageName = "\(timeToken).jpg"
                     let imageSize = image.size
                     var bigPart = CGFloat(0)
                     if(imageSize.width > imageSize.height){
@@ -81,89 +114,65 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                     }
                     
                     data = UIImageJPEGRepresentation(image, compressVal)!
-                }else if png{
-                    data = UIImagePNGRepresentation(image)!
-                }else if gif{
-                    let asset = PHAsset.fetchAssets(withALAssetURLs: [imageURL], options: nil)
-                    if let phAsset = asset.firstObject {
-                        let option = PHImageRequestOptions()
-                        option.isSynchronous = true
-                        option.isNetworkAccessAllowed = true
-                        PHImageManager.default().requestImageData(for: phAsset, options: option) {
-                            (gifData, dataURI, orientation, info) -> Void in
-                            data = gifData
-                        }
+                }
+                
+                if data != nil {
+    //                let text = QiscusTextConfiguration.sharedInstance.confirmationImageUploadText
+    //                let okText = QiscusTextConfiguration.sharedInstance.alertOkText
+    //                let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
+                    
+    //                QPopUpView.showAlert(withTarget: self, image: image, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
+    //                doneAction: {
+    //                    self.postFile(filename: imageName, data: data!, type: .image)
+    //                },
+    //                cancelAction: {}
+    //                )
+                    let uploader = QiscusUploaderVC(nibName: "QiscusUploaderVC", bundle: Qiscus.bundle)
+                    uploader.data = data
+                    uploader.fileName = imageName
+                    uploader.room = self.chatRoom
+                    self.navigationController?.pushViewController(uploader, animated: true)
+                    picker.dismiss(animated: true, completion: {
+                        self.processingFile = false
+                    })
+                }
+            }else if fileType == "public.movie" {
+                picker.dismiss(animated: true, completion: {
+                    self.processingFile = false
+                })
+                let mediaURL = info[UIImagePickerControllerMediaURL] as! URL
+                let fileName = mediaURL.lastPathComponent
+                let fileNameArr = fileName.characters.split(separator: ".")
+                let fileExt:NSString = String(fileNameArr.last!).lowercased() as NSString
+                
+                let mediaData = try? Data(contentsOf: mediaURL)
+                
+                Qiscus.printLog(text: "mediaURL: \(mediaURL)\nfileName: \(fileName)\nfileExt: \(fileExt)")
+                
+                //create thumb image
+                let assetMedia = AVURLAsset(url: mediaURL)
+                let thumbGenerator = AVAssetImageGenerator(asset: assetMedia)
+                thumbGenerator.appliesPreferredTrackTransform = true
+                
+                let thumbTime = CMTimeMakeWithSeconds(0, 30)
+                let maxSize = CGSize(width: QiscusHelper.screenWidth(), height: QiscusHelper.screenWidth())
+                thumbGenerator.maximumSize = maxSize
+                
+                do{
+                    let thumbRef = try thumbGenerator.copyCGImage(at: thumbTime, actualTime: nil)
+                    let thumbImage = UIImage(cgImage: thumbRef)
+                    
+                    QPopUpView.showAlert(withTarget: self, image: thumbImage, message:"Are you sure to send this video?", isVideoImage: true,
+                    doneAction: {
+                        self.postFile(filename: fileName, data: mediaData!, type: .video, thumbImage: thumbImage)
+                    },
+                    cancelAction: {
+                        Qiscus.printLog(text: "cancel upload")
                     }
+                    )
+                }catch{
+                    Qiscus.printLog(text: "error creating thumb image")
                 }
-            }else{
-                imageName = "\(timeToken).jpg"
-                let imageSize = image.size
-                var bigPart = CGFloat(0)
-                if(imageSize.width > imageSize.height){
-                    bigPart = imageSize.width
-                }else{
-                    bigPart = imageSize.height
-                }
-                
-                var compressVal = CGFloat(1)
-                if(bigPart > 2000){
-                    compressVal = 2000 / bigPart
-                }
-                
-                data = UIImageJPEGRepresentation(image, compressVal)!
-            }
-            
-            if data != nil {
-//                let text = QiscusTextConfiguration.sharedInstance.confirmationImageUploadText
-//                let okText = QiscusTextConfiguration.sharedInstance.alertOkText
-//                let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
-                
-//                QPopUpView.showAlert(withTarget: self, image: image, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
-//                doneAction: {
-//                    self.postFile(filename: imageName, data: data!, type: .image)
-//                },
-//                cancelAction: {}
-//                )
-                let uploader = QiscusUploaderVC(nibName: "QiscusUploaderVC", bundle: Qiscus.bundle)
-                uploader.data = data
-                uploader.fileName = imageName
-                uploader.room = self.chatRoom
-                self.navigationController?.pushViewController(uploader, animated: true)
-                
-            }
-        }else if fileType == "public.movie" {
-            let mediaURL = info[UIImagePickerControllerMediaURL] as! URL
-            let fileName = mediaURL.lastPathComponent
-            let fileNameArr = fileName.characters.split(separator: ".")
-            let fileExt:NSString = String(fileNameArr.last!).lowercased() as NSString
-            
-            let mediaData = try? Data(contentsOf: mediaURL)
-            
-            Qiscus.printLog(text: "mediaURL: \(mediaURL)\nfileName: \(fileName)\nfileExt: \(fileExt)")
-            
-            //create thumb image
-            let assetMedia = AVURLAsset(url: mediaURL)
-            let thumbGenerator = AVAssetImageGenerator(asset: assetMedia)
-            thumbGenerator.appliesPreferredTrackTransform = true
-            
-            let thumbTime = CMTimeMakeWithSeconds(0, 30)
-            let maxSize = CGSize(width: QiscusHelper.screenWidth(), height: QiscusHelper.screenWidth())
-            thumbGenerator.maximumSize = maxSize
-            
-            do{
-                let thumbRef = try thumbGenerator.copyCGImage(at: thumbTime, actualTime: nil)
-                let thumbImage = UIImage(cgImage: thumbRef)
-                
-                QPopUpView.showAlert(withTarget: self, image: thumbImage, message:"Are you sure to send this video?", isVideoImage: true,
-                doneAction: {
-                    self.postFile(filename: fileName, data: mediaData!, type: .video, thumbImage: thumbImage)
-                },
-                cancelAction: {
-                    Qiscus.printLog(text: "cancel upload")
-                }
-                )
-            }catch{
-                Qiscus.printLog(text: "error creating thumb image")
             }
         }
     }

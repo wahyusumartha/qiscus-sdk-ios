@@ -489,41 +489,46 @@ extension QiscusChatVC {
         //if Qiscus.shared.connected{
             if !self.isRecording {
                 let value = self.inputText.value.trimmingCharacters(in: .whitespacesAndNewlines)
-                var type:QCommentType = .text
-                var payload:JSON? = nil
-                if let reply = self.replyData {
-                    var senderName = reply.senderName
-                    if let user = reply.sender{
-                        senderName = user.fullname
+                if value != "" {
+                    var type:QCommentType = .text
+                    var payload:JSON? = nil
+                    if let reply = self.replyData {
+                        var senderName = reply.senderName
+                        if let user = reply.sender{
+                            senderName = user.fullname
+                        }
+                        var payloadArray: [(String,Any)] = [
+                            ("replied_comment_sender_email",reply.senderEmail),
+                            ("replied_comment_id", reply.id),
+                            ("text", value),
+                            ("replied_comment_message", reply.text),
+                            ("replied_comment_sender_username", senderName),
+                            ("replied_comment_payload", reply.data)
+                        ]
+                        if reply.type == .location || reply.type == .contact {
+                            payloadArray.append(("replied_comment_type",reply.typeRaw))
+                        }
+                        payload = JSON(dictionaryLiteral: payloadArray)
+                        type = .reply
+                        self.replyData = nil
                     }
-                    var payloadArray: [(String,Any)] = [
-                        ("replied_comment_sender_email",reply.senderEmail),
-                        ("replied_comment_id", reply.id),
-                        ("text", value),
-                        ("replied_comment_message", reply.text),
-                        ("replied_comment_sender_username", senderName),
-                        ("replied_comment_payload", reply.data)
-                    ]
-                    if reply.type == .location || reply.type == .contact {
-                        payloadArray.append(("replied_comment_type",reply.typeRaw))
-                    }
-                    payload = JSON(dictionaryLiteral: payloadArray)
-                    type = .reply
-                    self.replyData = nil
+                    let comment = chatRoom!.newComment(text: value, payload: payload, type: type)
+                    chatRoom?.post(comment: comment)
+                    
+                    self.inputText.clearValue()
+                    
+                    DispatchQueue.main.async { autoreleasepool{
+                        self.inputText.text = ""
+                        self.minInputHeight.constant = 32
+                        self.sendButton.isEnabled = false
+                        self.inputText.layoutIfNeeded()
+                    }}
                 }
-                let comment = chatRoom!.newComment(text: value, payload: payload, type: type)
-                chatRoom?.post(comment: comment)
-                
-                self.inputText.clearValue()
-                
-                DispatchQueue.main.async { autoreleasepool{
-                    self.inputText.text = ""
-                    self.minInputHeight.constant = 32
-                    self.sendButton.isEnabled = false
-                    self.inputText.layoutIfNeeded()
-                }}
             }else{
-                self.finishRecording()
+                if !self.processingAudio {
+                    self.processingAudio = true
+                    self.finishRecording()
+                }
             }
 //        }else{
 //            self.showNoConnectionToast()
@@ -740,6 +745,7 @@ extension QiscusChatVC {
                     self.recordDuration = 0
                 }
                 self.isRecording = false
+                self.processingAudio = false
             }
         }}
         if let audioURL = self.recordingURL {
