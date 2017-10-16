@@ -19,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         // Override point for customization after application launch.
         self.window = UIWindow(frame: UIScreen.main.bounds)
         
-        UINavigationBar.appearance().barTintColor = UIColor.black
+        UINavigationBar.appearance().barTintColor = UIColor.red
         UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName:UIColor.white]
         UINavigationBar.appearance().tintColor = UIColor.white
         UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalMinimum)
@@ -36,7 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         Qiscus.style.color.rightBaloonTextColor = UIColor.white
         Qiscus.style.color.rightBaloonLinkColor = UIColor.white
         
-        Qiscus.setGradientChatNavigation(UIColor.black, bottomColor: UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1), tintColor: UIColor.white)
+        Qiscus.setGradientChatNavigation(UIColor.red, bottomColor: UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1), tintColor: UIColor.white)
         Qiscus.iCloudUploadActive(true)
         window?.makeKeyAndVisible()
         
