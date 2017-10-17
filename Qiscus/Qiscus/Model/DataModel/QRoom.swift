@@ -38,7 +38,8 @@ import AVFoundation
 public class QRoom:Object {
     public dynamic var id:String = ""
     public dynamic var uniqueId:String = ""
-    public dynamic var name:String = ""
+    private dynamic var storedName:String = ""
+    private dynamic var definedname:String = ""
     public dynamic var avatarURL:String = ""
     public dynamic var avatarLocalPath:String = ""
     public dynamic var data:String = ""
@@ -90,6 +91,13 @@ public class QRoom:Object {
     }
     
     // MARK: - Getter variable
+    public var name:String{
+        if self.definedname != "" {
+            return self.definedname
+        }else{
+            return self.storedName
+        }
+    }
     public var lastCommentGroup:QCommentGroup?{
         get{
             if let group = self.comments.last {
@@ -279,7 +287,7 @@ public class QRoom:Object {
                 room.distinctId = distinctId
             }
             if let roomName = json["room_name"].string {
-                room.name = roomName
+                room.storedName = roomName
             }
             if let roomAvatar = json["avatar_url"].string {
                 room.avatarURL = roomAvatar
@@ -592,21 +600,23 @@ public class QRoom:Object {
                     if let room = QRoom.room(withId: id){
                         QiscusNotification.publish(roomChange: room)
                     }
-                    }}
+                }}
             }
         }
         if let roomName = json["room_name"].string {
-            if roomName != self.name {
+            if roomName != self.storedName {
                 try! realm.write {
-                    self.name = roomName
+                    self.storedName = roomName
                 }
                 let id = self.id
                 DispatchQueue.main.async { autoreleasepool {
                     if let cache = QRoom.room(withId: id) {
-                        QiscusNotification.publish(roomChange: cache)
-                        cache.delegate?.room(didChangeName: cache)
+                        if cache.definedname != "" {
+                            QiscusNotification.publish(roomChange: cache)
+                            cache.delegate?.room(didChangeName: cache)
+                        }
                     }
-                    }}
+                }}
             }
         }
         if let roomAvatar = json["avatar_url"].string {
@@ -1807,18 +1817,19 @@ public class QRoom:Object {
     }
     internal func update(name:String){
         let id = self.id
-        if self.name != name {
+        if self.storedName != name {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             try! realm.write {
-                self.name = name
+                self.storedName = name
             }
             DispatchQueue.main.async { autoreleasepool {
                 if let room = QRoom.room(withId: id){
-                    QiscusNotification.publish(roomChange: room)
-                    room.delegate?.room(didChangeName: room)
+                    if room.definedname != "" {
+                        QiscusNotification.publish(roomChange: room)
+                        room.delegate?.room(didChangeName: room)
+                    }
                 }
-                
-                }}
+            }}
         }
     }
     internal func update(avatarURL:String){
@@ -1850,6 +1861,30 @@ public class QRoom:Object {
                 }
             }
             }}
+    }
+    public func setName(name:String){
+        if name != self.definedname {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            try! realm.write {
+                self.definedname = name
+            }
+            if self.type == .single {
+                for participant in participants {
+                    if participant.email != QiscusMe.sharedInstance.email {
+                        if let user = participant.user {
+                            user.setName(name: name)
+                        }
+                    }
+                }
+            }
+            let id = self.id
+            DispatchQueue.main.async { autoreleasepool {
+                if let cache = QRoom.room(withId: id) {
+                    QiscusNotification.publish(roomChange: cache)
+                    cache.delegate?.room(didChangeName: cache)
+                }
+            }}
+        }
     }
     public class func deleteRoom(room:QRoom){
         let roomTS = ThreadSafeReference(to: room)
