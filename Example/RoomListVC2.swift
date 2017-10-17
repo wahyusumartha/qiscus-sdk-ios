@@ -19,6 +19,10 @@ class RoomListVC2: UIViewController {
     var rooms = [QRoom]()
     
     override func viewDidLoad() {
+        NotificationCenter.default.addObserver(self, selector: #selector(RoomListVC2.qiscusStartCloudSync(_:)), name: QiscusNotification.START_CLOUD_SYNC, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(RoomListVC2.qiscusFinishedCloudSync(_:)), name: QiscusNotification.FINISHED_CLOUD_SYNC, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(RoomListVC2.qiscusErrorCloudSync(_:)), name: QiscusNotification.ERROR_CLOUD_SYNC, object: nil)
+        
         super.viewDidLoad()
 
         self.title = "Chat List"
@@ -32,8 +36,28 @@ class RoomListVC2: UIViewController {
 
         let rightBarButtons = [ addButton, searchButton]
         self.navigationItem.rightBarButtonItems = rightBarButtons
+        
     }
-    
+    @objc private func qiscusStartCloudSync(_ notification: Notification){
+        DispatchQueue.main.async {
+            self.loadingView.isHidden = false
+        }
+    }
+    @objc private func qiscusFinishedCloudSync(_ notification: Notification){
+        DispatchQueue.main.async {
+            self.loadingView.isHidden = true
+        }
+        
+    }
+    @objc private func qiscusErrorCloudSync(_ notification: Notification){
+        if let userInfo = notification.userInfo {
+            if let error = userInfo["error"] as? String {
+                print("error cloud sync: \(error)")
+                self.loadingView.isHidden = true
+            }
+        }
+        
+    }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         //self.showQiscusLoading()
