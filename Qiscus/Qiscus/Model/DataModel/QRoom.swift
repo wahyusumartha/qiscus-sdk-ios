@@ -985,7 +985,7 @@ public class QRoom:Object {
                 try! realm.write {
                     oldComment.id = commentId
                     oldComment.text = commentText
-                    oldComment.senderName = user.fullname
+                    oldComment.senderName = user.storedName
                     oldComment.senderEmail = user.email
                     oldComment.createdAt = commentCreatedAt
                     oldComment.beforeId = commentBeforeId
