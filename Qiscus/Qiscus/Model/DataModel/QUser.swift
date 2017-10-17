@@ -23,9 +23,17 @@ public class QUser:Object {
     public dynamic var id:Int = 0
     public dynamic var avatarURL:String = ""
     public dynamic var avatarLocalPath:String = ""
-    public dynamic var fullname:String = ""
+    public dynamic var storedName:String = ""
+    public dynamic var definedName:String = ""
     public dynamic var lastSeen:Double = 0
     
+    public dynamic var fullname:String{
+        if self.definedName != "" {
+            return self.definedName
+        }else{
+            return self.storedName
+        }
+    }
     public dynamic var avatar:UIImage?{
         didSet{
             let email = self.email
@@ -102,11 +110,13 @@ public class QUser:Object {
         var user = QUser()
         if let savedUser = QUser.user(withEmail: email){
             user = savedUser
-            if fullname != nil  && fullname! != user.fullname {
+            if fullname != nil  && fullname! != user.storedName {
                 try! realm.write {
-                    user.fullname = fullname!
+                    user.storedName = fullname!
                 }
-                user.delegate?.user?(didChangeName: fullname!)
+                if user.definedName != "" {
+                    user.delegate?.user?(didChangeName: fullname!)
+                }
             }
             if id != nil {
                 try! realm.write {
@@ -128,7 +138,7 @@ public class QUser:Object {
         }else{
             user.email = email
             if fullname != nil {
-                user.fullname = fullname!
+                user.storedName = fullname!
             }
             if avatarURL != nil {
                 user.avatarURL = avatarURL!
@@ -173,6 +183,15 @@ public class QUser:Object {
             if let room = QRoom.room(withUser: self.email) {
                 room.delegate?.room(didChangeUser: room, user: self)
             }
+        }
+    }
+    public func setName(name:String){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        if name != self.definedName {
+            try! realm.write {
+                self.definedName = name
+            }
+            self.delegate?.user?(didChangeName: name)
         }
     }
     public func saveAvatar(withImage image:UIImage){
