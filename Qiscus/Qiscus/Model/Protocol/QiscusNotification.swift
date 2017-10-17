@@ -25,6 +25,9 @@ public class QiscusNotification: NSObject {
     public static let ROOM_ORDER_MAY_CHANGE = NSNotification.Name("qiscus_romOrderChange")
     public static let FINISHED_CLEAR_MESSAGES = NSNotification.Name("qiscus_finishedClearMessages")
     public static let FINISHED_SYNC_ROOMLIST = NSNotification.Name("qiscus_finishedSyncRoomList")
+    public static let START_CLOUD_SYNC = NSNotification.Name("qiscus_startCloudSync")
+    public static let FINISHED_CLOUD_SYNC = NSNotification.Name("qiscus_finishedCloudSync")
+    public static let ERROR_CLOUD_SYNC = NSNotification.Name("qiscus_finishedCloudSync")
     
     override private init(){
         super.init()
@@ -33,6 +36,18 @@ public class QiscusNotification: NSObject {
     public class func publish(finishedClearMessage cleared:Bool = true){
         let notification = QiscusNotification.shared
         notification.finishedClearMessage()
+    }
+    public class func publish(startCloudSync sync:Bool = true){
+        let notification = QiscusNotification.shared
+        notification.startCloudSync()
+    }
+    public class func publish(finishedCloudSync sync:Bool = true){
+        let notification = QiscusNotification.shared
+        notification.finishedCloudSync()
+    }
+    public class func publish(errorCloudSync error:String){
+        let notification = QiscusNotification.shared
+        notification.errorCloudSync(error: error)
     }
     public class func publish(finishedSyncRoomList synced:Bool = true){
         let notification = QiscusNotification.shared
@@ -73,6 +88,16 @@ public class QiscusNotification: NSObject {
     }
     
     // MARK: - private method
+    private func startCloudSync(){
+        self.nc.post(name: QiscusNotification.START_CLOUD_SYNC, object: nil, userInfo: nil)
+    }
+    private func finishedCloudSync(){
+        self.nc.post(name: QiscusNotification.FINISHED_CLOUD_SYNC, object: nil, userInfo: nil)
+    }
+    private func errorCloudSync(error:String){
+        let userInfo: [AnyHashable: Any] = ["error" : error]
+        self.nc.post(name: QiscusNotification.ERROR_CLOUD_SYNC, object: nil, userInfo: userInfo)
+    }
     private func finishedSyncRoomList(){
         self.nc.post(name: QiscusNotification.FINISHED_SYNC_ROOMLIST, object: nil, userInfo: nil)
     }
@@ -89,6 +114,7 @@ public class QiscusNotification: NSObject {
         self.nc.post(name: QiscusNotification.ROOM_ORDER_MAY_CHANGE, object: nil, userInfo: nil)
         self.roomOrderTimer = nil
     }
+    
     private func publish(roomDeleted roomId:String){
         let userInfo: [AnyHashable: Any] = ["room_id" : roomId]
         self.nc.post(name: QiscusNotification.ROOM_DELETED, object: nil, userInfo: userInfo)

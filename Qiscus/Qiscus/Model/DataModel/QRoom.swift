@@ -621,7 +621,7 @@ public class QRoom:Object {
                         QiscusNotification.publish(roomChange: cache)
                         cache.delegate?.room(didChangeAvatar: cache)
                     }
-                    }}
+                }}
             }
         }
         if json["last_comment"] != JSON.null {
@@ -1775,12 +1775,15 @@ public class QRoom:Object {
         }
         
         //QiscusBackgroundThread.async {
-        for channel in channels{
-            Qiscus.shared.mqtt?.subscribe(channel)
-            if !Qiscus.realtimeChannel.contains(channel){
-                Qiscus.realtimeChannel.append(channel)
+        DispatchQueue.main.async {
+            for channel in channels{
+                Qiscus.shared.mqtt?.subscribe(channel)
+                if !Qiscus.realtimeChannel.contains(channel){
+                    Qiscus.realtimeChannel.append(channel)
+                }
             }
         }
+        
         //}
     }
     public func unsubscribeRealtimeStatus(){

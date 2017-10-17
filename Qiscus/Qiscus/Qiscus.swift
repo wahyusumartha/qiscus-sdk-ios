@@ -172,14 +172,14 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }
     }
     // need Documentation
-    func backgroundCheck(){
+    func backgroundCheck(cloud:Bool = false){
         if Qiscus.isLoggedIn{
-            QChatService.sync()
+            QChatService.sync(cloud: cloud)
             QiscusBackgroundThread.async { autoreleasepool{
                 if Qiscus.shared.mqtt?.connState != CocoaMQTTConnState.connected {
                     Qiscus.mqttConnect()
                 }
-                }}
+            }}
         }
     }
     func checkChat(){
@@ -611,7 +611,8 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             
         }
         Qiscus.connect()
-        Qiscus.sync()
+        
+        Qiscus.sync(cloud: true)
     }
     class func printLog(text:String){
         if Qiscus.showDebugPrint{
@@ -1178,8 +1179,8 @@ extension Qiscus:CocoaMQTTDelegate{
     @objc public func sync(){
         self.backgroundCheck()
     }
-    public class func sync(){
-        Qiscus.sharedInstance.backgroundCheck()
+    public class func sync(cloud:Bool = false){
+        Qiscus.sharedInstance.backgroundCheck(cloud: cloud)
     }
     
     func topViewController(controller: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
