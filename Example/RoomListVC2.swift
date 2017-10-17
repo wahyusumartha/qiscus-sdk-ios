@@ -67,6 +67,12 @@ class RoomListVC2: UIViewController {
             //self.roomListView.rooms = self.rooms
             self.roomListView.reload()
             Qiscus.subscribeAllRoomNotification()
+            if let user = QUser.user(withEmail: "userid_117_6285727170251@kiwari-prod.com") {
+                user.setName(name: "Ashari J")
+            }
+            if let room = QRoom.room(withId: "13006") {
+                room.setName(name: "Test User")
+            }
             //self.dismissQiscusLoading()
         }else{
             self.showQiscusLoading()
@@ -89,6 +95,7 @@ class RoomListVC2: UIViewController {
             self.roomListView.rooms = rooms
             self.roomListView.reloadData()
             Qiscus.subscribeAllRoomNotification()
+            
             self.dismissQiscusLoading()
         }, onError: { (error) in
             print("error")
