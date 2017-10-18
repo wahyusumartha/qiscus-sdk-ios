@@ -160,6 +160,13 @@ public class QComment:Object {
             ]
         }
     }
+    public var content:String?{
+        if self.type == .custom {
+            let contentData = JSON(parseJSON: self.data)
+            return "\(contentData["content"].stringValue)"
+        }
+        return nil
+    }
     public var messageId:String{
         get{
             return "\(self.id)"
