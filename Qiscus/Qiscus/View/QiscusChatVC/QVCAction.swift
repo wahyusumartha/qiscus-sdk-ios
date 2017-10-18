@@ -77,6 +77,7 @@ extension QiscusChatVC {
         })
     }
     @objc public func lockChat(){
+        self.archived = true
         self.archievedNotifView.isHidden = false
         self.archievedNotifTop.constant = 0
         UIView.animate(withDuration: 0.6, animations: {
