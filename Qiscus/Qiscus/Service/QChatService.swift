@@ -668,6 +668,7 @@ public class QChatService:NSObject {
                 "order" : "asc" as AnyObject,
                 "limit" : limit as AnyObject
                 ]
+            print("REQUEST-HEADER: \(QiscusConfig.sharedInstance.requestHeader)")
             print("paremeters sync: \(parameters)")
             Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                 if let response = responseData.result.value {
@@ -1018,10 +1019,17 @@ public class QChatService:NSObject {
             if !secureURL {
                 requestProtocol = "http"
             }
-            let baseUrl = "\(requestProtocol)://\(appId).qiscus.com/api/v2/mobile"
-            let authURL = "\(baseUrl)/auth/nonce"
-            QiscusMe.sharedInstance.baseUrl = baseUrl
-            QiscusMe.sharedInstance.userData.set(baseUrl, forKey: "qiscus_base_url")
+            let baseUrl = "\(requestProtocol)://\(appId).qiscus.com"
+            
+            QiscusMe.sharedInstance.appId = appId
+            QiscusMe.sharedInstance.userData.set(appId, forKey: "qiscus_appId")
+            
+            if QiscusMe.sharedInstance.baseUrl == "" {
+                QiscusMe.sharedInstance.baseUrl = baseUrl
+                QiscusMe.sharedInstance.userData.set(baseUrl, forKey: "qiscus_base_url")
+            }
+            
+            let authURL = "\(QiscusConfig.sharedInstance.BASE_API_URL)/auth/nonce"
             
             Alamofire.request(authURL, method: .post, parameters: nil, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                 

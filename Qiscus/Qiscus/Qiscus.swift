@@ -207,6 +207,14 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }
         QChatService.sync()
     }
+    @objc public class func setBaseURL(withURL url:String){
+        QiscusMe.sharedInstance.baseUrl = url
+        QiscusMe.sharedInstance.userData.set(url, forKey: "qiscus_base_url")
+    }
+    @objc public class func setAppId(appId:String){
+        QiscusMe.sharedInstance.appId = appId
+        QiscusMe.sharedInstance.userData.set(appId, forKey: "qiscus_appId")
+    }
     public class func updateProfile(username:String? = nil, avatarURL:String? = nil, onSuccess:@escaping (()->Void), onFailed:@escaping ((String)->Void)) {
         QChatService.updateProfil(userName: username, userAvatarURL: avatarURL, onSuccess: onSuccess, onError: onFailed)
     }
@@ -217,13 +225,20 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             requestProtocol = "http"
         }
         let email = userEmail.lowercased()
-        let baseUrl = "\(requestProtocol)://\(appId).qiscus.com/api/v2/mobile"
+        let baseUrl = "\(requestProtocol)://\(appId).qiscus.com"
         
-        QiscusMe.sharedInstance.baseUrl = baseUrl
-        QiscusMe.sharedInstance.userData.set(baseUrl, forKey: "qiscus_base_url")
+        
+        QiscusMe.sharedInstance.appId = appId
+        QiscusMe.sharedInstance.userData.set(appId, forKey: "qiscus_appId")
+        
         QiscusMe.sharedInstance.userData.set(email, forKey: "qiscus_param_email")
         QiscusMe.sharedInstance.userData.set(userKey, forKey: "qiscus_param_pass")
         QiscusMe.sharedInstance.userData.set(username, forKey: "qiscus_param_username")
+        
+        if QiscusMe.sharedInstance.baseUrl == "" {
+            QiscusMe.sharedInstance.baseUrl = baseUrl
+            QiscusMe.sharedInstance.userData.set(baseUrl, forKey: "qiscus_base_url")
+        }
         
         if avatarURL != nil{
             QiscusMe.sharedInstance.userData.set(avatarURL, forKey: "qiscus_param_avatar")
@@ -253,35 +268,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             }
         }
         Qiscus.sharedInstance.RealtimeConnect()
-    }
-    @objc public class func setup(withURL baseUrl:String, userEmail:String, id:Int, username:String, userKey:String, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true, realTimeKey:String){
-        //        Qiscus.checkDatabaseMigration()
-        let email = userEmail.lowercased()
-        
-        QiscusMe.sharedInstance.baseUrl = "\(baseUrl)/api/v2/mobile"
-        QiscusMe.sharedInstance.id = id
-        QiscusMe.sharedInstance.email = email
-        QiscusMe.sharedInstance.userName = username
-        QiscusMe.sharedInstance.token = userKey
-        QiscusMe.sharedInstance.rtKey = realTimeKey
-        
-        QiscusMe.sharedInstance.userData.set(realTimeKey, forKey: "qiscus_rt_key")
-        QiscusMe.sharedInstance.userData.set(id, forKey: "qiscus_id")
-        QiscusMe.sharedInstance.userData.set(baseUrl, forKey: "qiscus_base_url")
-        QiscusMe.sharedInstance.userData.set(email, forKey: "qiscus_email")
-        QiscusMe.sharedInstance.userData.set(username, forKey: "qiscus_username")
-        QiscusMe.sharedInstance.userData.set(userKey, forKey: "qiscus_token")
-        Qiscus.setupReachability()
-        
-        Qiscus.sharedInstance.RealtimeConnect()
-        
-        if delegate != nil {
-            Qiscus.shared.delegate = delegate
-        }
-        Qiscus.uiThread.async {autoreleasepool{
-            Qiscus.shared.delegate?.qiscusConnected?()
-            Qiscus.shared.delegate?.qiscus?(didConnect: true, error: nil)
-            }}
     }
     
     
@@ -1362,5 +1348,6 @@ extension Qiscus { // Public class API to get room
             onError(error)
         }
     }
+    
 }
 

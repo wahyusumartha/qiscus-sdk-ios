@@ -538,6 +538,10 @@ extension QiscusChatVC {
 //            }
 //        }
     }
+    
+    func postComment(coment : QComment) {
+        
+    }
     func uploadImage(){
         view.endEditing(true)
         if Qiscus.sharedInstance.connected{

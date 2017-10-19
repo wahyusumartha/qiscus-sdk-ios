@@ -24,21 +24,24 @@ open class QiscusMe: NSObject {
             return (QiscusMe.sharedInstance.userKey != "" && QiscusMe.sharedInstance.email != "")
         }
     }
-    open var id = 0
-    open var email = ""
-    open var userName = ""
-    open var avatarUrl = ""
-    open var rtKey = ""
-    open var token = ""
-    open var userKey = ""
-    open var baseUrl = ""
-    open var lastCommentId = Int(0)
+    public var id = 0
+    public var email = ""
+    public var userName = ""
+    public var avatarUrl = ""
+    public var rtKey = ""
+    public var token = ""
+    public var userKey = ""
+    public var appId = ""
+    public var baseUrl = ""
+    public var 
+    
+    public var lastCommentId = Int(0)
     public var lastKnownCommentId = Int(0)
     
-    open var paramEmail = ""
-    open var paramPass = ""
-    open var paramUsername = ""
-    open var paramAvatar = ""
+    public var paramEmail = ""
+    public var paramPass = ""
+    public var paramUsername = ""
+    public var paramAvatar = ""
     
     open var deviceToken:String = ""{
         didSet{
@@ -54,6 +57,9 @@ open class QiscusMe: NSObject {
         }
         if let userEmail = userData.value(forKey: "qiscus_email") as? String {
             self.email = userEmail
+        }
+        if let appId = userData.value(forKey: "qiscus_appId") as? String {
+            self.appId = appId
         }
         if let name = userData.value(forKey: "qiscus_username") as? String {
             self.userName = name
@@ -152,6 +158,8 @@ open class QiscusMe: NSObject {
         QiscusMe.sharedInstance.rtKey = ""
         QiscusMe.sharedInstance.token = ""
         QiscusMe.sharedInstance.lastCommentId = 0
+        QiscusMe.sharedInstance.appId = ""
+        QiscusMe.sharedInstance.baseUrl = ""
         
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_id")
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_email")
@@ -161,6 +169,8 @@ open class QiscusMe: NSObject {
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_token")
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_lastComment_id")
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_lastKnownComment_id")
+        QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_base_url")
+        QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_appId")
     }
     
 }
