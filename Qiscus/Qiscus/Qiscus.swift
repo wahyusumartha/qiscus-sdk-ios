@@ -218,6 +218,8 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     @objc public class func setRealtimeServer(withServer server:String, port:Int = 1883){
         QiscusMe.sharedInstance.realtimeServer = server
         QiscusMe.sharedInstance.realtimePort = port
+        QiscusMe.sharedInstance.userData.set(server, forKey: "qiscus_realtimeServer")
+        QiscusMe.sharedInstance.userData.set(port, forKey: "qiscus_realtimePort")
     }
     public class func updateProfile(username:String? = nil, avatarURL:String? = nil, onSuccess:@escaping (()->Void), onFailed:@escaping ((String)->Void)) {
         QChatService.updateProfil(userName: username, userAvatarURL: avatarURL, onSuccess: onSuccess, onError: onFailed)
