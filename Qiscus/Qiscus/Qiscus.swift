@@ -234,21 +234,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         let baseUrl = "\(requestProtocol)://\(appId).qiscus.com"
         
         
-        QiscusMe.sharedInstance.appId = appId
-        QiscusMe.sharedInstance.userData.set(appId, forKey: "qiscus_appId")
         
-        QiscusMe.sharedInstance.userData.set(email, forKey: "qiscus_param_email")
-        QiscusMe.sharedInstance.userData.set(userKey, forKey: "qiscus_param_pass")
-        QiscusMe.sharedInstance.userData.set(username, forKey: "qiscus_param_username")
-        
-        if QiscusMe.sharedInstance.baseUrl == "" {
-            QiscusMe.sharedInstance.baseUrl = baseUrl
-            QiscusMe.sharedInstance.userData.set(baseUrl, forKey: "qiscus_base_url")
-        }
-        
-        if avatarURL != nil{
-            QiscusMe.sharedInstance.userData.set(avatarURL, forKey: "qiscus_param_avatar")
-        }
         if delegate != nil {
             Qiscus.shared.delegate = delegate
         }
@@ -264,13 +250,29 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.setupReachability()
         if needLogin {
             Qiscus.clear()
+            QiscusMe.sharedInstance.appId = appId
+            QiscusMe.sharedInstance.userData.set(appId, forKey: "qiscus_appId")
+            
+            QiscusMe.sharedInstance.userData.set(email, forKey: "qiscus_param_email")
+            QiscusMe.sharedInstance.userData.set(userKey, forKey: "qiscus_param_pass")
+            QiscusMe.sharedInstance.userData.set(username, forKey: "qiscus_param_username")
+            
+            if QiscusMe.sharedInstance.baseUrl == "" {
+                QiscusMe.sharedInstance.baseUrl = baseUrl
+                QiscusMe.sharedInstance.userData.set(baseUrl, forKey: "qiscus_base_url")
+            }
+            
+            if avatarURL != nil{
+                QiscusMe.sharedInstance.userData.set(avatarURL, forKey: "qiscus_param_avatar")
+            }
+            
             QiscusCommentClient.sharedInstance.loginOrRegister(userEmail, password: userKey, username: username, avatarURL: avatarURL)
         }else{
             if let delegate = Qiscus.shared.delegate {
                 Qiscus.uiThread.async { autoreleasepool{
                     delegate.qiscusConnected?()
                     delegate.qiscus?(didConnect: true, error: nil)
-                    }}
+                }}
             }
         }
         Qiscus.sharedInstance.RealtimeConnect()
