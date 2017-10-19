@@ -24,8 +24,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         UINavigationBar.appearance().tintColor = UIColor.white
         UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalMinimum)
         
-        
-        
+        Qiscus.setAppId(appId: "kiwari-prod")
+        Qiscus.setBaseURL(withURL: "https://kiwari-prod.qiscus.com")
+        Qiscus.setRealtimeServer(withServer: "mqtt.qiscus.com", port: 1883)
         //Qiscus.registerNotification()
         
         //Chat view styling
