@@ -215,6 +215,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         QiscusMe.sharedInstance.appId = appId
         QiscusMe.sharedInstance.userData.set(appId, forKey: "qiscus_appId")
     }
+    @objc public class func setRealtimeServer(withServer server:String, port:Int = 1883){
+        QiscusMe.sharedInstance.realtimeServer = server
+        QiscusMe.sharedInstance.realtimePort = port
+    }
     public class func updateProfile(username:String? = nil, avatarURL:String? = nil, onSuccess:@escaping (()->Void), onFailed:@escaping ((String)->Void)) {
         QChatService.updateProfil(userName: username, userAvatarURL: avatarURL, onSuccess: onSuccess, onError: onFailed)
     }
@@ -801,7 +805,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         //QChatService.sync()
         QiscusBackgroundThread.async {
             let clientID = "iosMQTT-\(appName)-\(deviceID)-\(QiscusMe.sharedInstance.id)"
-            let mqtt = CocoaMQTT(clientID: clientID, host: "mqtt.qiscus.com", port: 1883)
+            let mqtt = CocoaMQTT(clientID: clientID, host: QiscusMe.sharedInstance.realtimeServer, port: UInt16(QiscusMe.sharedInstance.realtimePort))
             mqtt.username = ""
             mqtt.password = ""
             mqtt.cleanSession = true

@@ -33,7 +33,8 @@ open class QiscusMe: NSObject {
     public var userKey = ""
     public var appId = ""
     public var baseUrl = ""
-    public var 
+    public var realtimeServer:String = "mqtt.qiscus.com"
+    public var realtimePort:Int = 1883
     
     public var lastCommentId = Int(0)
     public var lastKnownCommentId = Int(0)
@@ -60,6 +61,12 @@ open class QiscusMe: NSObject {
         }
         if let appId = userData.value(forKey: "qiscus_appId") as? String {
             self.appId = appId
+        }
+        if let realtimeServer = userData.value(forKey: "qiscus_realtimeServer") as? String{
+            self.realtimeServer = realtimeServer
+        }
+        if let realtimePort = userData.value(forKey: "qiscus_realtimePort") as? Int{
+            self.realtimePort = realtimePort
         }
         if let name = userData.value(forKey: "qiscus_username") as? String {
             self.userName = name
