@@ -24,9 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         UINavigationBar.appearance().tintColor = UIColor.white
         UIApplication.shared.setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalMinimum)
         
-        Qiscus.setAppId(appId: "kiwari-prod")
-        Qiscus.setBaseURL(withURL: "https://kiwari-prod.qiscus.com")
-        Qiscus.setRealtimeServer(withServer: "mqtt.qiscus.com", port: 1883)
+        
         //Qiscus.registerNotification()
         
         //Chat view styling
@@ -46,7 +44,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         }else{
             Qiscus.connect(delegate: self)
             let rooms = QRoom.all()
-            print("room count = \(rooms.count)")
             if rooms.count > 0 {
                 goToRoomList(rooms: rooms)
             }else{
@@ -88,11 +85,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         Qiscus.didReceiveNotification(notification: notification)
     }
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any]) {
-        print("hellooo ...")
        Qiscus.didReceive(RemoteNotification:userInfo)
     }
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("\(error)")
     }
     func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         QChatService.sync()
