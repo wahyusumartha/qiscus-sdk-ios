@@ -1422,7 +1422,8 @@ public class QRoom:Object {
         self.addComment(newComment: comment)
         return comment
     }
-    public func newComment(text:String, payload:JSON? = nil, type:QCommentType = .text, data:Data? = nil, image:UIImage? = nil, filename:String = "", filePath:URL? = nil )->QComment{
+    
+    public func newComment(text:String, payload:JSON? = nil,type:QCommentType = .text, data:Data? = nil, image:UIImage? = nil, filename:String = "", filePath:URL? = nil )->QComment{
         let comment = QComment()
         let time = Double(Date().timeIntervalSince1970)
         let timeToken = UInt64(time * 10000)

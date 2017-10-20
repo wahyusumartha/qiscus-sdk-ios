@@ -122,7 +122,7 @@ public class QComment:Object {
     private dynamic var cellHeight:Float = 0
     internal dynamic var textFontName:String = ""
     internal dynamic var textFontSize:Float = 0
-    
+    internal dynamic var rawExtra:String = ""
     // MARK : - Ignored Parameters
     var displayImage:UIImage?
     public var delegate:QCommentDelegate?
@@ -143,7 +143,19 @@ public class QComment:Object {
     }
     
     //MARK : - Getter variable
-    
+    public var extras: [String:Any]? {
+        get{
+            if let data = self.rawExtra.data(using: .utf8) {
+                do {
+                    let result = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+                    return result
+                } catch {
+                    Qiscus.printLog(text:error.localizedDescription)
+                }
+            }
+            return nil
+        }
+    }
     private var linkTextAttributes:[String: Any]{
         get{
             var foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor
@@ -983,5 +995,22 @@ public class QComment:Object {
             }
         }
     }
-    
+    public func set(extras data:[String:Any], onSuccess: @escaping (QComment)->Void, onError: @escaping (QComment, String)->Void){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        if let jsonData = try? JSONSerialization.data(withJSONObject: data as Any, options: []){
+            if let jsonString = String(data: jsonData,
+                                       encoding: .ascii){
+                try! realm.write {
+                    self.rawExtra = jsonString
+                }
+                onSuccess(self)
+            }else{
+                Qiscus.printLog(text: "cant parse object")
+                onError(self, "cant parse object")
+            }
+        }else{
+            Qiscus.printLog(text: "invalid json object")
+            onError(self,"invalid json object")
+        }
+    }
 }

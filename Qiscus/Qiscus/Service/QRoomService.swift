@@ -207,7 +207,9 @@ public class QRoomService:NSObject{
             parameters["type"] = "reply" as AnyObject
             parameters["payload"] = "\(comment.data)" as AnyObject
         }
-        
+        if comment.extras != nil {
+            parameters["extras"] = comment.rawExtra as AnyObject
+        }
         if type != nil && payload != nil {
             parameters["type"] = type as AnyObject
             parameters["payload"] = "\(payload!)" as AnyObject
