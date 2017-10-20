@@ -553,9 +553,7 @@ public class QComment:Object {
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.data = self.data
         comment.typeRaw = self.type.name()
-        
-        print("commentType to forward : \(comment.type.rawValue)")
-        
+                
         if self.type == .reply {
             comment.typeRaw = QCommentType.text.name()
         }

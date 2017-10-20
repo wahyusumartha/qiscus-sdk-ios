@@ -15,7 +15,6 @@ import ContactsUI
 extension QiscusChatVC:CNContactPickerDelegate{
     //func shareContact
     public func contactPicker(_ picker: CNContactPickerViewController, didSelect contact: CNContact) {
-        print("contact: \(contact)")
         func share(name:String, value:String){
             let newComment = self.chatRoom!.newContactComment(name: name, value: value)
             let section = self.chatRoom!.commentsGroupCount - 1
@@ -99,7 +98,7 @@ extension QiscusChatVC {
         let actionSheetController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
         let cancelActionButton = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
-            print("Cancel")
+            Qiscus.printLog(text: "Cancel attach file")
         }
         actionSheetController.addAction(cancelActionButton)
         
@@ -681,7 +680,7 @@ extension QiscusChatVC {
                     let displayLink = CADisplayLink(target: self, selector: #selector(QiscusChatVC.updateAudioMeter))
                     displayLink.add(to: RunLoop.current, forMode: RunLoopMode.commonModes)
                 } catch {
-                    print("error recording")
+                    Qiscus.printLog(text: "error recording")
                 }
             })
         }}
@@ -764,7 +763,7 @@ extension QiscusChatVC {
             self.chatRoom!.upload(comment: newComment, onSuccess: { (roomResult, commentResult) in
                 self.chatRoom!.post(comment: commentResult)
             }, onError: { (roomResult, commentResult, error) in
-                print("Error: \(error)")
+                Qiscus.printLog(text: "Error: \(error)")
             })
         }
     }
@@ -795,7 +794,7 @@ extension QiscusChatVC {
             self.chatRoom!.upload(comment: newComment, onSuccess: { (roomResult, commentResult) in
                 self.chatRoom!.post(comment: commentResult)
             }, onError: { (roomResult, commentResult, error) in
-                print("Error: \(error)")
+                Qiscus.printLog(text: "Error: \(error)")
             })
         }else{
             self.showNoConnectionToast()

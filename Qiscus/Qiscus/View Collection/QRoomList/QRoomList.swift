@@ -98,7 +98,7 @@ open class QRoomList: UITableView{
                 self.comments = comments
             }
         }) { (error) in
-            print("test")
+            Qiscus.printLog(text: "test")
         }
     }
     @objc private func dataCleared(_ notification: Notification){

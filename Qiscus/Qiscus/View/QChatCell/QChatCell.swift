@@ -73,7 +73,7 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
                             room.upload(comment: self.comment!, onSuccess: { (roomTarget, commentTarget) in
                                 roomTarget.post(comment: commentTarget)
                             }, onError: { (_, _, error) in
-                                print("error reupload file")
+                                Qiscus.printLog(text: "error reupload file")
                             })
                         }
                     }
@@ -141,7 +141,7 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
     }
     
     public func commentChanged(){
-        print("comment changed")
+        //print("comment changed")
     }
 
     public func getBallon()->UIImage?{

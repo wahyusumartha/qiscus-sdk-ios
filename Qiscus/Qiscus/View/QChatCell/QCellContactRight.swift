@@ -51,7 +51,6 @@ class QCellContactRight: QChatCell {
         self.updateStatus(toStatus: self.comment!.status)
     }
     @IBAction func saveContact(_ sender: Any) {
-        print("saving contact")
         self.delegate?.didTapSaveContact(withData: self.comment!)
     }
     public override func updateStatus(toStatus status:QCommentStatus){

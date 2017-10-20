@@ -49,9 +49,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                 }
                 
                 if urlArray.count > 2 {
-                    print("host = \(urlArray[2])")
                     if urlArray[2].lowercased().contains("instagram.com") {
-                        print("arrayCount: \(urlArray.count)")
                         var instagram = "instagram://app"
                         if urlArray.count == 4 || (urlArray.count == 5 && urlArray[4] == ""){
                             let usernameIG = urlArray[3]

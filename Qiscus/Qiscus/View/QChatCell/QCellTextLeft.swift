@@ -62,7 +62,6 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         LinkContainer.isHidden = true
     }
     func openLink(){
-        print("open link")
         self.delegate?.didTouchLink(onCell: self)
     }
     
@@ -124,7 +123,6 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
                     username = user.fullname
                 }
             }
-            print("replyData: \(replyData)")
             switch replyType {
             case .text:
                 self.linkImageWidth.constant = 0

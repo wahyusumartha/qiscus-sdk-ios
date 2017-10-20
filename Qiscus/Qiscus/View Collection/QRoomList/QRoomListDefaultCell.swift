@@ -40,8 +40,6 @@ class QRoomListDefaultCell: QRoomListCell {
     override func setupUI() {
         self.avatarView.image = Qiscus.image(named: "avatar")
         self.typingUser = nil
-        //print("room name setup UI: \(room?.name)")
-        //print("room lastComment setup UI: \(room?.lastComment?.text)")
         if room != nil {
             self.descriptionLabel.textColor = UIColor.black
             if room!.unreadCount > 0 {

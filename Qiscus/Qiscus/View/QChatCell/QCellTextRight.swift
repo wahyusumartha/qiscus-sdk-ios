@@ -290,7 +290,6 @@ class QCellTextRight: QChatCell {
         textView.font = UIFont.systemFont(ofSize: 14)
     }
     func openLink(){
-        print("open link")
         self.delegate?.didTouchLink(onCell: self)
     }
     public override func updateUserName() {

@@ -807,7 +807,6 @@ open class QiscusChatVC: UIViewController{
         self.chatRoom = room
         self.collectionView.reloadData()
         self.chatRoom!.updateUnreadCommentCount(count: 0)
-        print("commentText = \(comment.text)")
         if let indexPath = self.chatRoom!.getIndexPath(ofComment: comment){
             if self.isLastRowVisible || comment.senderEmail == QiscusMe.sharedInstance.email{
                 self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)

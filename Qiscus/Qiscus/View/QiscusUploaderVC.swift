@@ -71,14 +71,13 @@ class QiscusUploaderVC: UIViewController, UIScrollViewDelegate {
     }
     
     @IBAction func sendMedia(_ sender: Any) {
-        print("send media")
         if room != nil {
             if type == .image {
                 let newComment = self.room!.newFileComment(type: .image, filename: self.fileName!, caption: self.mediaCaption.value, data: self.data!)
                 self.room!.upload(comment: newComment, onSuccess: { (roomResult, commentResult) in
                     self.room!.post(comment: commentResult)
                 }, onError: { (roomResult, commentResult, error) in
-                    print("Error: \(error)")
+                    Qiscus.printLog(text:"Error: \(error)")
                 })
                 let _ = self.navigationController?.popViewController(animated: true)
             }

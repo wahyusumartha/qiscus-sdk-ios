@@ -484,7 +484,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
      - parameter action: **()->Void** as unlock action for your chat
      */
     @objc public class func unlockAction(_ action:@escaping (()->Void)){
-        print("[Qiscus] - methode deprecated")
+        Qiscus.printLog(text: "methode unlockAction deprecated")
     }
     /**
      Class function to show alert in chat with UIAlertController
@@ -993,7 +993,6 @@ extension Qiscus:CocoaMQTTDelegate{
                     let json = JSON(parseJSON:messageData)
                     let roomId = "\(json["room_id"])"
                     let commentId = json["id"].intValue
-                    print("mqtt data: \(json)")
                     if commentId > QiscusMe.sharedInstance.lastCommentId {
                         func syncData(){
                             let service = QChatService()

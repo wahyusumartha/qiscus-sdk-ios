@@ -135,7 +135,7 @@ public class QCommentGroup: Object{
                 do {
                     try FileManager.default.removeItem(at: fileURL)
                 } catch let error as NSError {
-                    print("Error: \(error.domain)")
+                    Qiscus.printLog(text: error.domain)
                 }
             }
         }

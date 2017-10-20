@@ -642,7 +642,6 @@ public class QChatService:NSObject {
         var page = 1
         func load(onPage:Int) {
             QChatService.roomList(withLimit: 50, page: page, showParticipant: true, onSuccess: { (rooms, totalRoom, currentPage, limit) in
-                print("room count: \(rooms.count)")
                 if rooms.count < limit {
                     QiscusNotification.publish(finishedSyncRoomList: true)
                 }else{
@@ -653,7 +652,7 @@ public class QChatService:NSObject {
                 load(onPage: page)
             }) { (progress, loadedRoom, totalRoom) in
                 let percentage = Int(progress * 100.0)
-                print("sync room List: \(percentage)% [\(loadedRoom)/\(totalRoom)]")
+                Qiscus.printLog(text: "sync room List: \(percentage)% [\(loadedRoom)/\(totalRoom)]")
             }
         }
         load(onPage: 1)
@@ -668,8 +667,6 @@ public class QChatService:NSObject {
                 "order" : "asc" as AnyObject,
                 "limit" : limit as AnyObject
                 ]
-            print("REQUEST-HEADER: \(QiscusConfig.sharedInstance.requestHeader)")
-            print("paremeters sync: \(parameters)")
             Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                 if let response = responseData.result.value {
                     let json = JSON(response)
@@ -692,7 +689,6 @@ public class QChatService:NSObject {
                                     let roomId = "\(newComment["room_id"])"
                                     let id = newComment["id"].intValue
                                     let type = newComment["type"].string
-                                    print("newComment: \(newComment)")
                                     if id > QiscusMe.sharedInstance.lastCommentId {
                                         QiscusMe.updateLastCommentId(commentId: id)
                                         
@@ -732,7 +728,7 @@ public class QChatService:NSObject {
                                                         Qiscus.chatDelegate?.qiscusChat?(gotNewRoom: room)
                                                         QiscusNotification.publish(gotNewRoom: room)
                                                     }, onFailed: { (error) in
-                                                        print("error getting room info")
+                                                        Qiscus.printLog(text:"error getting room info")
                                                     })
                                                 }
                                             }
@@ -1211,8 +1207,6 @@ public class QChatService:NSObject {
                 "room_id" : [id] as AnyObject,
                 "show_participants": true as AnyObject
             ]
-            Qiscus.printLog(text: "room info url: \(QiscusConfig.ROOMINFO_URL)")
-            Qiscus.printLog(text: "room info parameters: \(parameters)")
             Alamofire.request(QiscusConfig.ROOMINFO_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                 
                 switch response.result {
@@ -1220,7 +1214,6 @@ public class QChatService:NSObject {
                     if let result = response.result.value{
                         let json = JSON(result)
                         let success:Bool = (json["status"].intValue == 200)
-                        print("room info data: \(json)")
                         if success {
                             let resultData = json["results"]
                             let roomsData = resultData["rooms_info"].arrayValue

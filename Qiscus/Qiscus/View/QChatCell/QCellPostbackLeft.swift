@@ -117,7 +117,6 @@ class QCellPostbackLeft: QChatCell {
         let allData = JSON(parseJSON: self.comment!.data).arrayValue
         if allData.count > sender.tag {
             let data = allData[sender.tag]
-            print("postback data: \(data)")
             self.delegate?.didTapPostbackButton(withData: data)
         }
     }

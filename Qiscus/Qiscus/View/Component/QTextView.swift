@@ -48,7 +48,6 @@ class QTextView: UITextView {
     }
     
     override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
-        print("action description: \(action.description)")
         switch action.description {
         case "cut:","select:","selectAll:","paste:","_lookup:","_define:","_addShortcut:","_share:":
             return false

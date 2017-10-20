@@ -57,7 +57,6 @@ class QCellContactLeft: QChatCell {
     }
     
     @IBAction func saveContact(_ sender: Any) {
-        print("saving contact")
         self.delegate?.didTapSaveContact(withData: self.comment!)
     }
     public override func comment(didChangePosition position: QCellPosition) {

@@ -224,7 +224,6 @@ public class QRoomService:NSObject{
         default:
             break
         }
-        print("post parameters: \(parameters)")
         
         Alamofire.request(QiscusConfig.postCommentURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {response in
             switch response.result {
@@ -439,7 +438,6 @@ public class QRoomService:NSObject{
                                 Qiscus.printLog(text: "success upload: \(response)")
                                 if let jsonData = response.result.value {
                                     let json = JSON(jsonData)
-                                    print("json upload response: \(json)")
                                     if let url = json["url"].string {
                                         DispatchQueue.main.async { autoreleasepool{
                                             file.update(fileURL: url)
