@@ -65,6 +65,7 @@ public class QRoom:Object {
     private dynamic var lastCommentStatusRaw:Int = QCommentStatus.sending.rawValue
     private dynamic var lastCommentTypeRaw:String = QCommentType.text.name()
     private dynamic var lastCommentData:String = ""
+    private dynamic var lastCommentRawExtras:String = ""
     
     
     // MARK: private method
@@ -126,6 +127,7 @@ public class QRoom:Object {
                     comment.cellPosRaw = QCellPosition.single.rawValue
                     comment.typeRaw = self.lastCommentTypeRaw
                     comment.data = self.lastCommentData
+                    comment.rawExtra = self.lastCommentRawExtras
                     return comment
                 }
             }
@@ -543,6 +545,7 @@ public class QRoom:Object {
                     self.lastCommentStatusRaw = comment.statusRaw
                     self.lastCommentTypeRaw = comment.typeRaw
                     self.lastCommentData = comment.data
+                    self.lastCommentRawExtras = comment.rawExtra
                 }
                 
                 let roomId = self.id
@@ -760,7 +763,7 @@ public class QRoom:Object {
             let commentBeforeId = json["comment_before_id"].intValue
             let senderEmail = json["email"].stringValue
             let commentType = json["type"].stringValue
-            
+            let commentExtras = "\(json["extras"])"
             if commentType == "reply" || commentType == "buttons" {
                 commentText = json["payload"]["text"].stringValue
             }
@@ -812,6 +815,7 @@ public class QRoom:Object {
                 newComment.roomAvatar = self.avatarURL
                 newComment.roomName = self.name
                 newComment.roomTypeRaw = self.typeRaw
+                newComment.rawExtra = commentExtras
                 
                 var status = QCommentStatus.sent
                 if newComment.id < room.lastParticipantsReadId {
@@ -948,7 +952,7 @@ public class QRoom:Object {
         let commentBeforeId = json["comment_before_id"].intValue
         let senderEmail = json["email"].stringValue
         let commentType = json["type"].stringValue
-        
+        let commentExtras = "\(json["extras"])"
         if commentType == "reply" || commentType == "buttons" {
             commentText = json["payload"]["text"].stringValue
         }
@@ -985,6 +989,7 @@ public class QRoom:Object {
                 newComment.roomAvatar = self.avatarURL
                 newComment.roomName = self.name
                 newComment.roomTypeRaw = self.typeRaw
+                newComment.rawExtra = commentExtras
                 if let group = QCommentGroup.commentGroup(withId: newComment.uniqueId) {
                     try! realm.write {
                         realm.delete(group)
@@ -1001,6 +1006,7 @@ public class QRoom:Object {
                     oldComment.beforeId = commentBeforeId
                     oldComment.roomName = self.name
                     oldComment.roomId = self.id
+                    oldComment.rawExtra = commentExtras
                 }
                 if oldComment.statusRaw < QCommentStatus.sent.rawValue {
                     var status = QCommentStatus.sent
@@ -1038,6 +1044,7 @@ public class QRoom:Object {
                     newComment.roomAvatar = self.avatarURL
                     newComment.roomName = self.name
                     newComment.roomTypeRaw = self.typeRaw
+                    newComment.rawExtra = commentExtras
                     try! realm.write {
                         realm.delete(oldComment)
                     }
@@ -1064,6 +1071,7 @@ public class QRoom:Object {
             newComment.roomAvatar = self.avatarURL
             newComment.roomName = self.name
             newComment.roomTypeRaw = self.typeRaw
+            newComment.rawExtra = commentExtras
             
             var status = QCommentStatus.sent
             if newComment.id < self.lastParticipantsReadId {

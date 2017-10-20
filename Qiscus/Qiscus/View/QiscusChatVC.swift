@@ -784,7 +784,7 @@ open class QiscusChatVC: UIViewController{
         
         if self.chatMessage != nil && self.chatMessage != "" {
             let newMessage = self.chatRoom!.newComment(text: self.chatMessage!)
-            self.chatRoom!.post(comment: newMessage)
+            self.postComment(comment: newMessage)
             self.chatMessage = nil
         }
     }
@@ -812,6 +812,25 @@ open class QiscusChatVC: UIViewController{
                 self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
             }
         }
+    }
+    open func postComment(comment : QComment) {
+//        let extraData : [String: Any] = [
+//            "key1":"value1",
+//            "key2":2,
+//            "key3":true,
+//            "key4": [
+//                "subKey 1": 1,
+//                "subKey 2": "value subkey2"
+//            ]
+//        ]
+//        comment.set(extras: extraData, onSuccess: { (comment) in
+//            self.chatRoom?.post(comment: comment)
+//        }) { (_, error) in
+//            comment.updateStatus(status: .failed)
+//            print(error)
+//        }
+
+        chatRoom?.post(comment: comment)
     }
 }
 
@@ -973,7 +992,6 @@ extension QiscusChatVC:QRoomDelegate{
         }
         else{
             Qiscus.uiThread.async {autoreleasepool{
-                print()
                 switch comment!.type {
                 case .text:
                     self.linkDescription.text = comment!.text
@@ -1076,7 +1094,7 @@ extension QiscusChatVC: CLLocationManagerDelegate {
                                 title = addressDictionary["Name"] as? String
                                 DispatchQueue.main.async { autoreleasepool{
                                     let comment = self.chatRoom!.newLocationComment(latitude: latitude, longitude: longitude, title: title, address: address)
-                                    self.chatRoom?.post(comment: comment)
+                                    self.postComment(comment: comment)
                                 }}
                             }
                         }

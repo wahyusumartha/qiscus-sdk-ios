@@ -20,6 +20,8 @@ extension QiscusChatVC:CNContactPickerDelegate{
             let section = self.chatRoom!.commentsGroupCount - 1
             let item = self.chatRoom!.commentGroup(index: section)!.commentsCount - 1
             self.collectionView.reloadData()
+            self.postComment(comment: newComment)
+            
             self.chatRoom!.post(comment: newComment)
             let indexPath = IndexPath(item: item, section: section)
             self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
@@ -28,7 +30,7 @@ extension QiscusChatVC:CNContactPickerDelegate{
         let contactSheetController = UIAlertController(title: contactName, message: "select contact you want to share", preferredStyle: .actionSheet)
         
         let cancelActionButton = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
-            print("Cancel")
+            
         }
         contactSheetController.addAction(cancelActionButton)
         
@@ -513,7 +515,7 @@ extension QiscusChatVC {
                         self.replyData = nil
                     }
                     let comment = chatRoom!.newComment(text: value, payload: payload, type: type)
-                    chatRoom?.post(comment: comment)
+                    self.postComment(comment: comment)
                     
                     self.inputText.clearValue()
                     
@@ -538,9 +540,7 @@ extension QiscusChatVC {
 //        }
     }
     
-    func postComment(coment : QComment) {
-        
-    }
+    
     func uploadImage(){
         view.endEditing(true)
         if Qiscus.sharedInstance.connected{
@@ -761,7 +761,7 @@ extension QiscusChatVC {
             let newComment = self.chatRoom!.newFileComment(type: .audio, filename: fileName, data: fileContent!)
             
             self.chatRoom!.upload(comment: newComment, onSuccess: { (roomResult, commentResult) in
-                self.chatRoom!.post(comment: commentResult)
+                self.postComment(comment: commentResult)
             }, onError: { (roomResult, commentResult, error) in
                 Qiscus.printLog(text: "Error: \(error)")
             })
@@ -792,7 +792,7 @@ extension QiscusChatVC {
             let newComment = self.chatRoom!.newFileComment(type: type, filename: filename, data: data, thumbImage: thumbImage)
             
             self.chatRoom!.upload(comment: newComment, onSuccess: { (roomResult, commentResult) in
-                self.chatRoom!.post(comment: commentResult)
+                self.postComment(comment: commentResult)
             }, onError: { (roomResult, commentResult, error) in
                 Qiscus.printLog(text: "Error: \(error)")
             })

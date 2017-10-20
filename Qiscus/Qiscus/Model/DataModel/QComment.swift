@@ -147,8 +147,11 @@ public class QComment:Object {
         get{
             if let data = self.rawExtra.data(using: .utf8) {
                 do {
-                    let result = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-                    return result
+                    if let result = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                        if result.count > 0 {
+                            return result
+                        }
+                    }
                 } catch {
                     Qiscus.printLog(text:error.localizedDescription)
                 }
@@ -565,7 +568,8 @@ public class QComment:Object {
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.data = self.data
         comment.typeRaw = self.type.name()
-                
+        comment.rawExtra = self.rawExtra
+        
         if self.type == .reply {
             comment.typeRaw = QCommentType.text.name()
         }
@@ -753,6 +757,7 @@ public class QComment:Object {
                 if let payload = data["qiscus_data"] as? String {
                     temp.data = payload
                 }
+                
                 return temp
             }
         }
@@ -788,6 +793,7 @@ public class QComment:Object {
         let senderEmail = json["email"].stringValue
         let commentType = json["type"].stringValue
         let roomId = "\(json["room_id"])"
+        let commentExtras = "\(json["extras"])"
         
         if commentType == "reply" || commentType == "buttons" {
             commentText = json["payload"]["text"].stringValue
@@ -806,6 +812,7 @@ public class QComment:Object {
         temp.beforeId = commentBeforeId
         temp.senderEmail = senderEmail
         temp.cellPosRaw = QCellPosition.single.rawValue
+        temp.rawExtra = commentExtras
         
         if let roomName = json["room_name"].string {
             temp.roomName = roomName

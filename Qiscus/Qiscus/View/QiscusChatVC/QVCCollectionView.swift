@@ -34,7 +34,6 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     }
     open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
-        
         var cell = collectionView.dequeueReusableCell(withReuseIdentifier: comment.cellIdentifier, for: indexPath) as! QChatCell
         cell.clipsToBounds = true
         cell.comment = comment
