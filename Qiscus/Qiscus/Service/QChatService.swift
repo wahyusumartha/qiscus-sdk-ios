@@ -1361,17 +1361,23 @@ public class QChatService:NSObject {
                                     let roomId = "\(roomData["id"])"
                                     let unread = roomData["unread_count"].intValue
                                     if let room = QRoom.room(withId: roomId){
-                                        let lastCommentData = roomData["last_comment"]
-                                        let lastComment = QComment.tempComment(fromJSON: lastCommentData)
-                                        room.updateUnreadCommentCount(count: unread)
-                                        room.updateLastComentInfo(comment: lastComment)
-                                        onSuccess(room)
+                                        if !room.isInvalidated {
+                                            let lastCommentData = roomData["last_comment"]
+                                            let lastComment = QComment.tempComment(fromJSON: lastCommentData)
+                                            room.updateUnreadCommentCount(count: unread)
+                                            room.updateLastComentInfo(comment: lastComment)
+                                            onSuccess(room)
+                                        }else{
+                                            let room = QRoom.addRoom(fromJSON: roomData)
+                                            room.updateUnreadCommentCount(count: unread)
+                                            onSuccess(room)
+                                        }
                                     }else{
                                         let room = QRoom.addRoom(fromJSON: roomData)
                                         room.updateUnreadCommentCount(count: unread)
                                         onSuccess(room)
                                     }
-                                    }}
+                                }}
                             }else{
                                 onFailed("room notfound")
                             }
