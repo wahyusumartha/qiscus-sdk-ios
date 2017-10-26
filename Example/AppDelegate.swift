@@ -37,6 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         
         Qiscus.setGradientChatNavigation(UIColor.red, bottomColor: UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1), tintColor: UIColor.white)
         Qiscus.iCloudUploadActive(true)
+        Qiscus.showDebugPrint = true
         window?.makeKeyAndVisible()
         
         if !Qiscus.isLoggedIn{
