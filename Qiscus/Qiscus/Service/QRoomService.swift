@@ -11,6 +11,7 @@ import SwiftyJSON
 import Alamofire
 import AlamofireImage
 import AVFoundation
+import RealmSwift
 
 public class QRoomService:NSObject{    
     public func sync(onRoom room:QRoom){
@@ -227,6 +228,8 @@ public class QRoomService:NSObject{
             break
         }
         Alamofire.request(QiscusConfig.postCommentURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {response in
+            let statusCode = response.response?.statusCode
+            
             switch response.result {
             case .success:
                 if let result = response.result.value {
@@ -268,6 +271,16 @@ public class QRoomService:NSObject{
                     room.updateCommentStatus(inComment: comment, status: status)
                 }
                 Qiscus.printLog(text: "fail to post comment with error: \(error)")
+                let delay = 2.0 * Double(NSEC_PER_SEC)
+                let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
+                let commentTS = ThreadSafeReference(to: comment)
+                QiscusBackgroundThread.asyncAfter(deadline: time, execute: {
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    guard let c = realm.resolve(commentTS) else { return }
+                    if let room = QRoom.room(withId: roomId){
+                        room.post(comment: c)
+                    }
+                })
                 break
             }
         })

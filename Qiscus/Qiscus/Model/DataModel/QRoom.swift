@@ -1663,7 +1663,7 @@ public class QRoom:Object {
             for commentGroup in self.comments {
                 var item = 0
                 for comment in commentGroup.comments{
-                    if (comment.statusRaw < QCommentStatus.read.rawValue && comment.status != .failed && comment.status != .sending && comment.id < readId) || comment.id == readId{
+                    if (comment.statusRaw < QCommentStatus.read.rawValue && comment.status != .failed && comment.status != .sending && comment.status != .pending && comment.id < readId) || comment.id == readId{
                         comment.updateStatus(status: .read)
                     }
                     item += 1
