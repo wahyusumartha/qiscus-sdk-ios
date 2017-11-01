@@ -277,7 +277,7 @@ public class QRoomService:NSObject{
                 QiscusBackgroundThread.asyncAfter(deadline: time, execute: {
                     let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     guard let c = realm.resolve(commentTS) else { return }
-                    if let room = QRoom.room(withId: roomId){
+                    if let room = QRoom.threadSaveRoom(withId: roomId){
                         room.post(comment: c)
                     }
                 })

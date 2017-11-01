@@ -198,7 +198,14 @@ public class QRoom:Object {
             room.cache()
         }
     }
-    
+    internal class func threadSaveRoom(withId id:String) -> QRoom? {
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let room = realm.object(ofType: QRoom.self, forPrimaryKey: id)
+        if room != nil {
+            return room
+        }
+        return nil
+    }
     public class func room(withId id:String) -> QRoom? {
         if let cache = Qiscus.chatRooms[id] {
             return cache
