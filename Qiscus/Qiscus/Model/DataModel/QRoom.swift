@@ -436,8 +436,10 @@ public class QRoom:Object {
                 self.updateLastComentInfo(comment: newComment)
                 if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                     DispatchQueue.main.async { autoreleasepool{
-                        roomDelegate.gotNewComment(newComment)
-                        }}
+                        if !newComment.isInvalidated {
+                            roomDelegate.gotNewComment(newComment)
+                        }
+                    }}
                 }
             }
         }
