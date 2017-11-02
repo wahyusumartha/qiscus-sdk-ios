@@ -1954,9 +1954,9 @@ public class QRoom:Object {
             }
             for participant in r.participants {
                 if !participant.isInvalidated {
-                    QParticipant.cache[id] = nil
+                    QParticipant.cache[participant.localId] = nil
                     try! realm.write {
-                        realm.delete(savedParticipant)
+                        realm.delete(participant)
                     }
                 }
             }
