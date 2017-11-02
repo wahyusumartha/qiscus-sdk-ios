@@ -728,10 +728,11 @@ public class QRoom:Object {
                 let savedUser = QUser.saveUser(withEmail: participantEmail, fullname: fullname, avatarURL: avatarURL)
                 let lastReadId = participantJSON["last_comment_read_id"].intValue
                 let lastDeliveredId = participantJSON["last_comment_received_id"].intValue
-                
-                if let savedParticipant = QParticipant.participant(inRoomWithId: self.id, andEmail: savedUser.email){
-                    savedParticipant.updateLastReadId(commentId: lastReadId)
-                    savedParticipant.updateLastDeliveredId(commentId: lastDeliveredId)
+                let savedParticipant = self.participants.filter("localId == '\(self.id)_\(savedUser.email)'")
+                if savedParticipant.count > 0{
+                    let storedParticipant = savedParticipant.first!
+                    storedParticipant.updateLastReadId(commentId: lastReadId)
+                    storedParticipant.updateLastDeliveredId(commentId: lastDeliveredId)
                 }else {
                     let newParticipant = QParticipant()
                     newParticipant.localId = "\(self.id)_\(participantEmail)"
@@ -793,15 +794,17 @@ public class QRoom:Object {
             let avatarURL = json["user_avatar_url"].stringValue
             let _ = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL, lastSeen: commentCreatedAt)
             
-            if let participant = QParticipant.participant(inRoomWithId: room.id, andEmail: senderEmail) {
-                if participant.lastReadCommentId < commentId {
+            let savedParticipant = self.participants.filter("localId == '\(room.id)_\(senderEmail)'")
+            if savedParticipant.count > 0 {
+                let storedParticipant = savedParticipant.first!
+                if storedParticipant.lastReadCommentId < commentId {
                     try! realm.write {
-                        participant.lastReadCommentId = commentId
-                        participant.lastDeliveredCommentId = commentId
+                        storedParticipant.lastReadCommentId = commentId
+                        storedParticipant.lastDeliveredCommentId = commentId
                     }
-                }else if participant.lastDeliveredCommentId < commentId{
+                }else if storedParticipant.lastDeliveredCommentId < commentId{
                     try! realm.write {
-                        participant.lastDeliveredCommentId = commentId
+                        storedParticipant.lastDeliveredCommentId = commentId
                     }
                 }
             }
@@ -980,8 +983,10 @@ public class QRoom:Object {
         }
         let avatarURL = json["user_avatar_url"].stringValue
         let user = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL, lastSeen: commentCreatedAt)
-        
-        if let participant = QParticipant.participant(inRoomWithId: self.id, andEmail: senderEmail) {
+
+        let savedParticipant = self.participants.filter("localId == '\(self.id)_\(senderEmail)'")
+        if savedParticipant.count > 0 {
+            let participant = savedParticipant.first!
             if !participant.isInvalidated {
                 if participant.lastReadCommentId < commentId {
                     try! realm.write {
@@ -1607,8 +1612,9 @@ public class QRoom:Object {
         }
     }
     public func participant(withEmail email:String)->QParticipant?{
-        if let participant = QParticipant.participant(inRoomWithId: self.id, andEmail: email){
-            return participant
+        let savedParticipant = self.participants.filter("email == '\(email)'")
+        if savedParticipant.count > 0{
+            return savedParticipant.first!
         }else{
             return nil
         }
@@ -1937,17 +1943,18 @@ public class QRoom:Object {
             }
             for participant in r.participants {
                 let id = "\(r.id)_\(participant.email)"
-                if let data = QParticipant.participant(inRoomWithId: r.id, andEmail: participant.email) {
+                let savedParticipant = room.participants.filter("localId == '\(id)'")
+                if savedParticipant.count > 0 {
                     QParticipant.cache[id] = nil
                     try! realm.write {
-                        realm.delete(data)
+                        realm.delete(savedParticipant)
                     }
                 }
             }
             try! realm.write {
                 realm.delete(r)
             }
-            }}
+        }}
     }
     public func comment(onIndexPath indexPath:IndexPath)->QComment?{
         if self.comments.count > indexPath.section && self.comments[indexPath.section].commentsCount > indexPath.row{

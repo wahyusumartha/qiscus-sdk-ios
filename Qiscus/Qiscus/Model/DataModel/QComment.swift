@@ -435,14 +435,12 @@ public class QComment:Object {
                 commentInfo.undeliveredUser = [QParticipant]()
                 for participant in room.participants {
                     if participant.email != QiscusMe.sharedInstance.email{
-                        if let data = QParticipant.participant(inRoomWithId: self.roomId, andEmail: participant.email){
-                            if data.lastReadCommentId >= self.id {
-                                commentInfo.readUser.append(data)
-                            }else if data.lastDeliveredCommentId >= self.id{
-                                commentInfo.deliveredUser.append(data)
-                            }else{
-                                commentInfo.undeliveredUser.append(data)
-                            }
+                        if participant.lastReadCommentId >= self.id {
+                            commentInfo.readUser.append(participant)
+                        }else if participant.lastDeliveredCommentId >= self.id{
+                            commentInfo.deliveredUser.append(participant)
+                        }else{
+                            commentInfo.undeliveredUser.append(participant)
                         }
                     }
                 }

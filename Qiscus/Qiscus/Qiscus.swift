@@ -1088,8 +1088,14 @@ extension Qiscus:CocoaMQTTDelegate{
                     let userEmail = String(channelArr[3])
                     if userEmail != QiscusMe.sharedInstance.email {
                         DispatchQueue.main.async { autoreleasepool{
-                            QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail)?.updateLastDeliveredId(commentId: commentId)
-                            }}
+                            if let room = QRoom.room(withId: roomId){
+                                let savedParticipant = room.participants.filter("email == '\(userEmail)'")
+                                if savedParticipant.count > 0 {
+                                    let participant = savedParticipant.first!
+                                    participant.updateLastDeliveredId(commentId: commentId)
+                                }
+                            }
+                        }}
                     }
                     break
                 case "r":
@@ -1099,8 +1105,14 @@ extension Qiscus:CocoaMQTTDelegate{
                     let userEmail = String(channelArr[3])
                     if userEmail != QiscusMe.sharedInstance.email {
                         DispatchQueue.main.async { autoreleasepool{
-                            QParticipant.participant(inRoomWithId: roomId, andEmail: userEmail)?.updateLastReadId(commentId: commentId)
-                            }}
+                            if let room = QRoom.room(withId: roomId){
+                                let savedParticipant = room.participants.filter("email == '\(userEmail)'")
+                                if savedParticipant.count > 0 {
+                                    let participant = savedParticipant.first!
+                                    participant.updateLastReadId(commentId: commentId)
+                                }
+                            }
+                        }}
                     }else{
                         DispatchQueue.main.async { autoreleasepool{
                             if let room = QRoom.room(withId: roomId) {
