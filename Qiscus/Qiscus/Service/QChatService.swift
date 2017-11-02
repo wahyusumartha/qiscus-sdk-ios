@@ -112,7 +112,9 @@ public class QChatService:NSObject {
             if let room = QRoom.room(withUser: user){
                 self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
                 if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                    roomDelegate.didFinishLoadRoom(onRoom: room)
+                    if !room.isInvalidated {
+                        roomDelegate.didFinishLoadRoom(onRoom: room)
+                    }
                 }
             }
             else{
@@ -162,7 +164,9 @@ public class QChatService:NSObject {
                                     self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
                                     
                                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                        roomDelegate.didFinishLoadRoom(onRoom: room)
+                                        if room.isInvalidated {
+                                            roomDelegate.didFinishLoadRoom(onRoom: room)
+                                        }
                                     }
                                     }
                                 }
@@ -345,7 +349,9 @@ public class QChatService:NSObject {
                                     onSuccess(room)
                                     
                                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                                        roomDelegate.didFinishLoadRoom(onRoom: room)
+                                        if !room.isInvalidated {
+                                            roomDelegate.didFinishLoadRoom(onRoom: room)
+                                        }
                                     }
                                 }}
                             }else if error != JSON.null{
@@ -391,7 +397,9 @@ public class QChatService:NSObject {
             if let room = QRoom.room(withUniqueId: uniqueId){
                 self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
                 if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                    roomDelegate.didFinishLoadRoom(onRoom: room)
+                    if !room.isInvalidated {
+                        roomDelegate.didFinishLoadRoom(onRoom: room)
+                    }
                 }
             }else{
                 QiscusRequestThread.async { autoreleasepool{
@@ -435,7 +443,9 @@ public class QChatService:NSObject {
                                     self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
                                     
                                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                        roomDelegate.didFinishLoadRoom(onRoom: room)
+                                        if !room.isInvalidated {
+                                            roomDelegate.didFinishLoadRoom(onRoom: room)
+                                        }
                                     }
                                 }}
                             }else if error != JSON.null{
@@ -489,7 +499,9 @@ public class QChatService:NSObject {
                 self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
                 DispatchQueue.main.async { autoreleasepool{
                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                        roomDelegate.didFinishLoadRoom(onRoom: room)
+                        if !room.isInvalidated {
+                            roomDelegate.didFinishLoadRoom(onRoom: room)
+                        }
                     }
                 }}
             }
@@ -527,7 +539,9 @@ public class QChatService:NSObject {
                                     self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
                                     
                                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                        roomDelegate.didFinishLoadRoom(onRoom: room)
+                                        if !room.isInvalidated {
+                                            roomDelegate.didFinishLoadRoom(onRoom: room)
+                                        }
                                     }
                                 }}
                             }else if error != JSON.null{
@@ -841,7 +855,9 @@ public class QChatService:NSObject {
                                 self.delegate?.chatService(didFinishLoadRoom: room, withMessage: withMessage)
                                 
                                 if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                    roomDelegate.didFinishLoadRoom(onRoom: room)
+                                    if !room.isInvalidated {
+                                        roomDelegate.didFinishLoadRoom(onRoom: room)
+                                    }
                                 }
                             }}
                         }else if error != JSON.null{

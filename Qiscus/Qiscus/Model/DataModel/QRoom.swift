@@ -356,7 +356,9 @@ public class QRoom:Object {
                             }
                         }
                     }
-                    if QParticipant.participant(inRoomWithId: room.id, andEmail: participantEmail) == nil{
+                    let roomPariticipant = room.participants.filter("localId == '\(room.id)_\(participantEmail)'")
+                    
+                    if roomPariticipant.count == 0{
                         let newParticipant = QParticipant()
                         newParticipant.localId = "\(room.id)_\(participantEmail)"
                         newParticipant.roomId = room.id
@@ -365,6 +367,13 @@ public class QRoom:Object {
                         newParticipant.lastDeliveredCommentId = lastDeliveredId
                         try! realm.write {
                             room.participants.append(newParticipant)
+                        }
+                    }else{
+                        let selectedParticipant = roomPariticipant.first!
+                        try! realm.write {
+                            selectedParticipant.email = participantEmail
+                            selectedParticipant.lastReadCommentId = lastReadId
+                            selectedParticipant.lastDeliveredCommentId = lastDeliveredId
                         }
                     }
                     participantString.append(participantEmail)
@@ -391,7 +400,9 @@ public class QRoom:Object {
         Qiscus.sharedInstance.RealtimeConnect()
         DispatchQueue.main.async { autoreleasepool{
             if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                roomDelegate.didFinishLoadRoom(onRoom: room)
+                if !room.isInvalidated {
+                    roomDelegate.didFinishLoadRoom(onRoom: room)
+                }
             }
             }}
         return room
@@ -532,8 +543,10 @@ public class QRoom:Object {
             self.updateLastComentInfo(comment: newComment)
             if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                 DispatchQueue.main.async { autoreleasepool{
-                    roomDelegate.gotNewComment(newComment)
-                    }}
+                    if !newComment.isInvalidated {
+                        roomDelegate.gotNewComment(newComment)
+                    }
+                }}
             }
         }
         newComment.cacheObject()
