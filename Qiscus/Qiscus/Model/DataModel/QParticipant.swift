@@ -35,21 +35,21 @@ public class QParticipant:Object {
             return QUser.user(withEmail: self.email)
         }
     }
-    public class func participant(inRoomWithId roomId:String, andEmail email: String)->QParticipant?{
-        let id = "\(roomId)_\(email)"
-        if let cache = QParticipant.cache[id] {
-            if !cache.isInvalidated {
-                return cache
-            }
-        }
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        if let data = realm.object(ofType: QParticipant.self, forPrimaryKey: id) {
-            QParticipant.cache[id] = data
-            return data
-        }
-        
-        return nil
-    }
+//    public class func participant(inRoomWithId roomId:String, andEmail email: String)->QParticipant?{
+//        let id = "\(roomId)_\(email)"
+//        if let cache = QParticipant.cache[id] {
+//            if !cache.isInvalidated {
+//                return cache
+//            }
+//        }
+//        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+//        if let data = realm.object(ofType: QParticipant.self, forPrimaryKey: id) {
+//            QParticipant.cache[id] = data
+//            return data
+//        }
+//        
+//        return nil
+//    }
     public func updateLastDeliveredId(commentId:Int){
         if !self.isInvalidated {
             if commentId > self.lastDeliveredCommentId {
