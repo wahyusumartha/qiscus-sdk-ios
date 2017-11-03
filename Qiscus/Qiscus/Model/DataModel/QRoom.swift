@@ -208,20 +208,23 @@ public class QRoom:Object {
     }
     public class func room(withId id:String) -> QRoom? {
         if let cache = Qiscus.chatRooms[id] {
-            return cache
-        }else{
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            let room = realm.object(ofType: QRoom.self, forPrimaryKey: id)
-            if room != nil {
-                room?.resetRoomComment()
-                Qiscus.chatRooms[room!.id] = room!
-                if Qiscus.shared.chatViews[room!.id] ==  nil{
-                    let chatView = QiscusChatVC()
-                    chatView.chatRoom = Qiscus.chatRooms[room!.id]
-                    Qiscus.shared.chatViews[room!.id] = chatView
-                }
-                return room
+            if !cache.isInvalidated {
+                return cache
+            }else{
+                Qiscus.chatRooms[id] == nil
             }
+        }
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let room = realm.object(ofType: QRoom.self, forPrimaryKey: id)
+        if room != nil {
+            room?.resetRoomComment()
+            Qiscus.chatRooms[room!.id] = room!
+            if Qiscus.shared.chatViews[room!.id] ==  nil{
+                let chatView = QiscusChatVC()
+                chatView.chatRoom = Qiscus.chatRooms[room!.id]
+                Qiscus.shared.chatViews[room!.id] = chatView
+            }
+            return room
         }
         return nil
     }

@@ -1354,7 +1354,11 @@ extension Qiscus { // Public class API to get room
     }
     public class func channelInfo(withName name:String, onSuccess:@escaping ((QRoom)->Void), onError: @escaping ((String)->Void)){
         QChatService.roomInfo(withUniqueId: name, onSuccess: { (room) in
-            onSuccess(room)
+            if !room.isInvalidated {
+                onSuccess(room)
+            }else{
+                Qiscus.channelInfo(withName: name, onSuccess: onSuccess, onError: onError)
+            }
         }) { (error) in
             onError(error)
         }
