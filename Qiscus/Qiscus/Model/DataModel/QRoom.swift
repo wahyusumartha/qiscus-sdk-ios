@@ -211,7 +211,7 @@ public class QRoom:Object {
             if !cache.isInvalidated {
                 return cache
             }else{
-                Qiscus.chatRooms[id] == nil
+                Qiscus.chatRooms[id] = nil
             }
         }
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
