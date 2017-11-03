@@ -365,6 +365,11 @@ public class QRoom:Object {
                         newParticipant.email = participantEmail
                         newParticipant.lastReadCommentId = lastReadId
                         newParticipant.lastDeliveredCommentId = lastDeliveredId
+                        if let storedParticipant = realm.object(ofType: QParticipant.self, forPrimaryKey: "\(room.id)_\(participantEmail)"){
+                            try! realm.write {
+                                realm.delete(storedParticipant)
+                            }
+                        }
                         do {
                             try realm.write {
                                 room.participants.append(newParticipant)
@@ -734,7 +739,7 @@ public class QRoom:Object {
                 let savedUser = QUser.saveUser(withEmail: participantEmail, fullname: fullname, avatarURL: avatarURL)
                 let lastReadId = participantJSON["last_comment_read_id"].intValue
                 let lastDeliveredId = participantJSON["last_comment_received_id"].intValue
-                let savedParticipant = self.participants.filter("email == '\(savedUser.email)'")
+                let savedParticipant = self.participants.filter("email == '\(participantEmail)'")
                 if savedParticipant.count > 0{
                     let storedParticipant = savedParticipant.first!
                     storedParticipant.updateLastReadId(commentId: lastReadId)
@@ -747,6 +752,12 @@ public class QRoom:Object {
                     newParticipant.lastReadCommentId = lastReadId
                     newParticipant.lastDeliveredCommentId = lastDeliveredId
                     
+                    if let storedParticipant = realm.object(ofType: QParticipant.self, forPrimaryKey: "\(self.id)_\(participantEmail)"){
+                        try! realm.write {
+                            realm.delete(storedParticipant)
+                        }
+                    }
+                    
                     do {
                         try realm.write {
                             self.participants.append(newParticipant)
@@ -755,6 +766,7 @@ public class QRoom:Object {
                     catch let error as NSError {
                         Qiscus.printLog(text: "WARNING!! - \(error.localizedDescription)")
                     }
+                    
                     participantChanged = true
                 }
                 participantString.append(participantEmail)
