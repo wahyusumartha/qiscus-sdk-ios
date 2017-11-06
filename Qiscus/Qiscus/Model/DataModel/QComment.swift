@@ -610,7 +610,17 @@ public class QComment:Object {
             
             let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
             let uniqueId = self.uniqueId
+            let roomId = self.roomId
+            
             DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                if let room = QRoom.room(withId: roomId){
+                    if uniqueId == room.lastCommentUniqueId {
+                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        try! realm.write {
+                            room.lastCommentStatusRaw = status.rawValue
+                        }
+                    }
+                }
                 if let cache = QComment.cache[uniqueId] {
                     if !cache.isInvalidated {
                         cache.delegate?.comment(didChangeStatus: status)

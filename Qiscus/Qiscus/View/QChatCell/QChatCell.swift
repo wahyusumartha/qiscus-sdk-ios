@@ -50,6 +50,20 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
             ]
         }
     }
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        let center: NotificationCenter = NotificationCenter.default
+        center.addObserver(self, selector: #selector(QChatCell.messageStatusNotif(_:)), name: QiscusNotification.MESSAGE_STATUS, object: nil)
+    }
+    @objc private func messageStatusNotif(_ notification: Notification){
+        if let userInfo = notification.userInfo {
+            let commentData = userInfo["comment"] as! QComment
+            if commentData.isInvalidated { return }
+            if self.comment?.uniqueId == commentData.uniqueId {
+                self.updateStatus(toStatus: commentData.status)
+            }
+        }
+    }
     func setupCell(){
         // implementation will be overrided on child class
     }

@@ -57,12 +57,12 @@ public class QRoom:Object {
     // MARK: - lastComment variable
     private dynamic var lastCommentId:Int = 0
     private dynamic var lastCommentText:String = ""
-    private dynamic var lastCommentUniqueId: String = ""
+    internal dynamic var lastCommentUniqueId: String = ""
     private dynamic var lastCommentBeforeId:Int = 0
     private dynamic var lastCommentCreatedAt: Double = 0
     private dynamic var lastCommentSenderEmail:String = ""
     private dynamic var lastCommentSenderName:String = ""
-    private dynamic var lastCommentStatusRaw:Int = QCommentStatus.sending.rawValue
+    internal dynamic var lastCommentStatusRaw:Int = QCommentStatus.sending.rawValue
     private dynamic var lastCommentTypeRaw:String = QCommentType.text.name()
     private dynamic var lastCommentData:String = ""
     private dynamic var lastCommentRawExtras:String = ""
@@ -206,6 +206,7 @@ public class QRoom:Object {
         }
         return nil
     }
+    
     public class func room(withId id:String) -> QRoom? {
         if let cache = Qiscus.chatRooms[id] {
             if !cache.isInvalidated {
@@ -557,7 +558,7 @@ public class QRoom:Object {
             self.updateLastComentInfo(comment: newComment)
             if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                 DispatchQueue.main.async { autoreleasepool{
-                    if !newComment.isInvalidated {
+                    if !newComment.isInvalidated  {
                         roomDelegate.gotNewComment(newComment)
                     }
                 }}
@@ -569,7 +570,7 @@ public class QRoom:Object {
     internal func updateLastComentInfo(comment:QComment){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         if !self.isInvalidated {
-            if comment.createdAt > self.lastCommentCreatedAt {
+            if comment.createdAt > self.lastCommentCreatedAt || comment.id == 0{
                 try! realm.write {
                     self.lastCommentId = comment.id
                     self.lastCommentText = comment.text
@@ -1740,12 +1741,12 @@ public class QRoom:Object {
                     if (comment.statusRaw < QCommentStatus.delivered.rawValue && comment.status != .failed && comment.status != .sending && comment.id < deliveredId) || (comment.id == deliveredId && comment.status != .read){
                         if let cache = QComment.cache[comment.uniqueId] {
                             if !cache.isInvalidated {
-                                cache.updateStatus(status: .read)
+                                cache.updateStatus(status: .delivered)
                             }else{
-                                comment.updateStatus(status: .read)
+                                comment.updateStatus(status: .delivered)
                             }
                         }else{
-                            comment.updateStatus(status: .read)
+                            comment.updateStatus(status: .delivered)
                         }
                     }
                     item += 1
