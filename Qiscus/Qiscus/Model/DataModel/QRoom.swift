@@ -1609,9 +1609,11 @@ public class QRoom:Object {
                 try! realm.write { realm.delete(comment) }
                 if Thread.isMainThread {
                     Qiscus.chatRooms[id]?.delegate?.room(didDeleteComment: commentIndex.section, row: commentIndex.item)
+                    QiscusNotification.publish(commentDelete:comment, room:Qiscus.chatRooms[id]!)
                 }else{
                     DispatchQueue.main.sync { autoreleasepool {
                         Qiscus.chatRooms[id]?.delegate?.room(didDeleteComment: commentIndex.section, row: commentIndex.item)
+                        QiscusNotification.publish(commentDelete:comment, room:Qiscus.chatRooms[id]!)
                         }}
                 }
             }else{
@@ -1630,9 +1632,11 @@ public class QRoom:Object {
                 }
                 if Thread.isMainThread {
                     Qiscus.chatRooms[id]?.delegate?.room(didDeleteGroupComment: commentIndex.section)
+                    QiscusNotification.publish(commentDelete:comment, room:Qiscus.chatRooms[id]!)
                 }else{
                     DispatchQueue.main.sync { autoreleasepool {
                         Qiscus.chatRooms[id]?.delegate?.room(didDeleteGroupComment: commentIndex.section)
+                        QiscusNotification.publish(commentDelete:comment, room:Qiscus.chatRooms[id]!)
                         }}
                 }
             }

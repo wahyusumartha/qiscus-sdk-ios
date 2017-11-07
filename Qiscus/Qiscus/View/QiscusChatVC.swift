@@ -521,6 +521,7 @@ open class QiscusChatVC: UIViewController{
         center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         center.addObserver(self, selector: #selector(QiscusChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
         center.addObserver(self, selector: #selector(QiscusChatVC.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
+        center.addObserver(self, selector: #selector(QiscusChatVC.commentDeleted(_:)), name: QiscusNotification.COMMENT_DELETE, object: nil)
         
         view.endEditing(true)
         center.addObserver(self, selector: #selector(QiscusChatVC.appDidEnterBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
@@ -804,6 +805,11 @@ open class QiscusChatVC: UIViewController{
             }
         }
     }
+    
+    @objc private func commentDeleted(_ notification: Notification) {
+        self.collectionView.reloadData()
+    }
+    
     open func gotNewComment(comment: QComment, room:QRoom) {
         self.chatRoom = room
         self.collectionView.reloadData()
