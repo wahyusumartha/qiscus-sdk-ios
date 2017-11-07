@@ -148,9 +148,9 @@ public class QiscusNotification: NSObject {
             self.nc.post(name: QiscusNotification.GOT_NEW_COMMENT, object: nil, userInfo: userInfo)
         }
     }
-    private func publish(commentDelete: comment, room: room) {
-        if !comment.isInvalidated {
-            let userInfo = ["comment" : comment, "room" : room]
+    private func publish(commentDelete: QComment, room: QRoom) {
+        if !commentDelete.isInvalidated {
+            let userInfo = ["comment" : commentDelete, "room" : room]
             self.nc.post(name: QiscusNotification.COMMENT_DELETE, object: nil, userInfo: userInfo)
         }
     }
