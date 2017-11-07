@@ -613,6 +613,16 @@ public class QRoom:Object {
                             }
                         }
                     }
+                }else{
+                    let roomId = self.id
+                    DispatchQueue.main.async { autoreleasepool {
+                        if let cache = QRoom.room(withId: roomId) {
+                            if cache.definedname != "" {
+                                QiscusNotification.publish(roomChange: cache)
+                                cache.delegate?.room(didChangeName: cache)
+                            }
+                        }
+                    }}
                 }
             }
         }
