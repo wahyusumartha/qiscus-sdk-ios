@@ -71,7 +71,7 @@ public class QRoom:Object {
     // MARK: private method
     private dynamic var lastParticipantsReadId:Int = 0
     private dynamic var lastParticipantsDeliveredId:Int = 0
-    private dynamic var roomVersion005:Bool = true
+    private dynamic var roomVersion006:Bool = true
     
     public let comments = List<QCommentGroup>()
     public let participants = List<QParticipant>()
@@ -511,6 +511,9 @@ public class QRoom:Object {
                 }
                 commentGroup.cacheObject()
             }
+            if self.lastCommentId < newComment.id || self.lastCommentCreatedAt < newComment.createdAt {
+                self.updateLastComentInfo(comment: newComment, triggerNotification: false)
+            }
         }
         else{
             let lastComment = self.comments[self.commentsGroupCount - 1]
@@ -567,10 +570,10 @@ public class QRoom:Object {
         newComment.cacheObject()
     }
     
-    internal func updateLastComentInfo(comment:QComment){
+    internal func updateLastComentInfo(comment:QComment, triggerNotification:Bool = true){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         if !self.isInvalidated {
-            if comment.createdAt > self.lastCommentCreatedAt || comment.id == 0{
+            if comment.createdAt > self.lastCommentCreatedAt || comment.id > self.lastCommentId || comment.id == 0{
                 try! realm.write {
                     self.lastCommentId = comment.id
                     self.lastCommentText = comment.text
@@ -585,31 +588,32 @@ public class QRoom:Object {
                     self.lastCommentRawExtras = comment.rawExtra
                 }
                 
-                let roomId = self.id
-                let count = self.unreadCount + 1
-                self.updateUnreadCommentCount(count: count)
-                if Thread.isMainThread {
-                    if let c = self.lastComment {
-                        if let delegate = self.delegate {
-                            delegate.room?(gotNewComment: c)
+                if triggerNotification {
+                    let roomId = self.id
+                    let count = self.unreadCount + 1
+                    self.updateUnreadCommentCount(count: count)
+                    if Thread.isMainThread {
+                        if let c = self.lastComment {
+                            if let delegate = self.delegate {
+                                delegate.room?(gotNewComment: c)
+                            }
+                            Qiscus.chatDelegate?.qiscusChat?(gotNewComment: c)
+                            QiscusNotification.publish(gotNewComment: c, room: self)
                         }
-                        Qiscus.chatDelegate?.qiscusChat?(gotNewComment: c)
-                        QiscusNotification.publish(gotNewComment: c, room: self)
-                    }
-                }else{
-                    DispatchQueue.main.sync {
-                        if let room = QRoom.room(withId: roomId){
-                            if let c = room.lastComment {
-                                if let delegate = room.delegate {
-                                    delegate.room?(gotNewComment: c)
+                    }else{
+                        DispatchQueue.main.sync {
+                            if let room = QRoom.room(withId: roomId){
+                                if let c = room.lastComment {
+                                    if let delegate = room.delegate {
+                                        delegate.room?(gotNewComment: c)
+                                    }
+                                    Qiscus.chatDelegate?.qiscusChat?(gotNewComment: c)
+                                    QiscusNotification.publish(gotNewComment: c, room: room)
                                 }
-                                Qiscus.chatDelegate?.qiscusChat?(gotNewComment: c)
-                                QiscusNotification.publish(gotNewComment: c, room: room)
                             }
                         }
                     }
                 }
-                
             }
         }
     }
@@ -1050,6 +1054,7 @@ public class QRoom:Object {
                     }
                 }
                 self.addComment(newComment: newComment, onTop: true)
+                
             }else{
                 try! realm.write {
                     oldComment.id = commentId
@@ -1108,6 +1113,7 @@ public class QRoom:Object {
                         }
                     }
                     self.addComment(newComment: newComment, onTop: true)
+                    
                 }
             }
         }
@@ -1607,14 +1613,17 @@ public class QRoom:Object {
             }
             if self.comments[commentIndex.section].commentsCount > 1{
                 try! realm.write { realm.delete(comment) }
+                let roomId = self.id
                 if Thread.isMainThread {
                     Qiscus.chatRooms[id]?.delegate?.room(didDeleteComment: commentIndex.section, row: commentIndex.item)
-                    QiscusNotification.publish(commentDelete:comment, room:Qiscus.chatRooms[id]!)
+                    QiscusNotification.publish(commentDelete:comment, room:self)
                 }else{
                     DispatchQueue.main.sync { autoreleasepool {
                         Qiscus.chatRooms[id]?.delegate?.room(didDeleteComment: commentIndex.section, row: commentIndex.item)
-                        QiscusNotification.publish(commentDelete:comment, room:Qiscus.chatRooms[id]!)
-                        }}
+                        if let room = QRoom.room(withId: roomId) {
+                            QiscusNotification.publish(commentDelete:comment, room:room)
+                        }
+                    }}
                 }
             }else{
                 if Thread.isMainThread {
