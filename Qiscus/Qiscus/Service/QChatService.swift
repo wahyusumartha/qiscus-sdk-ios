@@ -1079,7 +1079,7 @@ public class QChatService:NSObject {
     internal class func setup(withuserIdentityToken uidToken:String){
         QiscusRequestThread.async { autoreleasepool{
             
-            let authURL = "\(QiscusConfig.sharedInstance.BASE_URL)/auth/verify_identity_token"
+            let authURL = "\(QiscusConfig.sharedInstance.BASE_API_URL)/auth/verify_identity_token"
             let parameters:[String: AnyObject] = [
                 "identity_token"  : uidToken as AnyObject
             ]
