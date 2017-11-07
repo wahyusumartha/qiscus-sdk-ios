@@ -33,8 +33,10 @@ open class QiscusMe: NSObject {
     public var userKey = ""
     public var appId = ""
     public var baseUrl = ""
+    
     public var realtimeServer:String = "mqtt.qiscus.com"
     public var realtimePort:Int = 1883
+    public var realtimeSSL:Bool = false
     
     public var lastCommentId = Int(0)
     public var lastKnownCommentId = Int(0)
@@ -67,6 +69,9 @@ open class QiscusMe: NSObject {
         }
         if let realtimePort = userData.value(forKey: "qiscus_realtimePort") as? Int{
             self.realtimePort = realtimePort
+        }
+        if let realtimeSSL = userData.value(forKey: "qiscus_realtimeSSL") as? Bool{
+            self.realtimeSSL = realtimeSSL
         }
         if let name = userData.value(forKey: "qiscus_username") as? String {
             self.userName = name
@@ -167,6 +172,9 @@ open class QiscusMe: NSObject {
         QiscusMe.sharedInstance.lastCommentId = 0
         QiscusMe.sharedInstance.appId = ""
         QiscusMe.sharedInstance.baseUrl = ""
+        QiscusMe.sharedInstance.realtimeSSL = false
+        QiscusMe.sharedInstance.realtimePort = 1883
+        QiscusMe.sharedInstance.realtimeServer = "mqtt.qiscus.com"
         
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_id")
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_email")
@@ -178,6 +186,10 @@ open class QiscusMe: NSObject {
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_lastKnownComment_id")
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_base_url")
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_appId")
+        QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_realtimeServer")
+        QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_realtimePort")
+        QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_realtimeSSL")
+        
     }
     
 }

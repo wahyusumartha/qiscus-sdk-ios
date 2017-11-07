@@ -216,11 +216,13 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         QiscusMe.sharedInstance.appId = appId
         QiscusMe.sharedInstance.userData.set(appId, forKey: "qiscus_appId")
     }
-    @objc public class func setRealtimeServer(withServer server:String, port:Int = 1883){
+    @objc public class func setRealtimeServer(withServer server:String, port:Int = 1883, enableSSL:Bool = false){
         QiscusMe.sharedInstance.realtimeServer = server
         QiscusMe.sharedInstance.realtimePort = port
+        QiscusMe.sharedInstance.realtimeSSL = enableSSL
         QiscusMe.sharedInstance.userData.set(server, forKey: "qiscus_realtimeServer")
         QiscusMe.sharedInstance.userData.set(port, forKey: "qiscus_realtimePort")
+        QiscusMe.sharedInstance.userData.set(enableSSL, forKey: "qiscus_realtimeSSL")
     }
     public class func updateProfile(username:String? = nil, avatarURL:String? = nil, onSuccess:@escaping (()->Void), onFailed:@escaping ((String)->Void)) {
         QChatService.updateProfil(userName: username, userAvatarURL: avatarURL, onSuccess: onSuccess, onError: onFailed)
@@ -818,6 +820,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             mqtt.willMessage = CocoaMQTTWill(topic: "u/\(QiscusMe.sharedInstance.email)/s", message: "0")
             mqtt.keepAlive = 60
             mqtt.delegate = Qiscus.shared
+            mqtt.enableSSL = QiscusMe.sharedInstance.realtimeSSL
             DispatchQueue.main.async {
                 let state = UIApplication.shared.applicationState
                 if state == .active {
