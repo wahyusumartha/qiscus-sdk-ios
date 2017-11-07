@@ -65,6 +65,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     var syncing = false
     var syncTimer: Timer?
     var delegate:QiscusConfigDelegate?
+    public var diagnosticDelegate:QiscusDiagnosticDelegate?
     
     @objc public var styleConfiguration = QiscusUIConfiguration.sharedInstance
     @objc public var connected:Bool = false
@@ -613,6 +614,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             DispatchQueue.global().async{
                 print("[Qiscus]: \(text)")
             }
+            Qiscus.shared.diagnosticDelegate?.qiscusDiagnostic(sendLog: "[Qiscus]: \(text)")
         }
     }
     class func deleteAllFiles(){

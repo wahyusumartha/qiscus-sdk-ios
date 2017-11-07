@@ -8,6 +8,9 @@
 
 import UIKit
 
+@objc public protocol QiscusDiagnosticDelegate {
+    @objc func qiscusDiagnostic(sendLog log:String)
+}
 @objc public protocol QiscusChatDelegate {
     @objc optional func qiscusChat(gotNewComment comment:QComment)
     @objc optional func qiscusChat(userDidTyping users:QUser)
