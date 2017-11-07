@@ -474,6 +474,10 @@ public class QRoom:Object {
                         }
                     }}
                 }
+            }else{
+                if self.lastCommentId < newComment.id || self.lastCommentCreatedAt < newComment.createdAt {
+                    self.updateLastComentInfo(comment: newComment, triggerNotification: false)
+                }
             }
         }
         else if onTop{
@@ -613,14 +617,6 @@ public class QRoom:Object {
                             }
                         }
                     }
-                }else{
-                    let roomId = self.id
-                    DispatchQueue.main.async { autoreleasepool {
-                        if let cache = QRoom.room(withId: roomId) {
-                            QiscusNotification.publish(roomChange: cache)
-                            cache.delegate?.room(didChangeName: cache)
-                        }
-                    }}
                 }
             }
         }
