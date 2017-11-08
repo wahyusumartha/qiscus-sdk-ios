@@ -94,17 +94,21 @@ public class QRoom:Object {
     
     // MARK: - Getter variable
     public var name:String{
-        if self.definedname != "" {
-            return self.definedname
-        }else{
-            return self.storedName
+        get{
+            if self.definedname != "" {
+                return self.definedname
+            }else{
+                return self.storedName
+            }
         }
     }
     public var avatarURL:String{
-        if self.definedname != "" {
-            return self.definedAvatarURL
-        }else{
-            return self.storedAvatarURL
+        get{
+            if self.definedAvatarURL != "" {
+                return self.definedAvatarURL
+            }else{
+                return self.storedAvatarURL
+            }
         }
     }
     
@@ -1957,6 +1961,7 @@ public class QRoom:Object {
         let oldAvatarURL = self.avatarURL
         try! realm.write {
             self.definedAvatarURL = url
+            self.avatarLocalPath = ""
         }
         let id = self.id
         if oldAvatarURL != url {
