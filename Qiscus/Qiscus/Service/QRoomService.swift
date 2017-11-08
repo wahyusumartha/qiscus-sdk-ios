@@ -230,7 +230,7 @@ public class QRoomService:NSObject{
             break
         }
         Alamofire.request(QiscusConfig.postCommentURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {response in
-            let statusCode = response.response?.statusCode
+            //let statusCode = response.response?.statusCode
             
             switch response.result {
             case .success:

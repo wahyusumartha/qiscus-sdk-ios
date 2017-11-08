@@ -143,7 +143,7 @@ class QCellTextRight: QChatCell {
                     }
                 }else{
                     var thumbURL = url.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/")
-                    let thumbUrlArr = thumbURL.characters.split(separator: ".")
+                    let thumbUrlArr = thumbURL.split(separator: ".")
                     
                     var newThumbURL = ""
                     var i = 0

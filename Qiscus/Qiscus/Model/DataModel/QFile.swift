@@ -33,7 +33,7 @@ public class QFile:Object{
     public var thumbURL:String{
         get{
             var thumbURL = self.url.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/").replacingOccurrences(of: " ", with: "%20")
-            let thumbUrlArr = thumbURL.characters.split(separator: ".")
+            let thumbUrlArr = thumbURL.split(separator: ".")
             
             var newThumbURL = ""
             var i = 0
@@ -67,7 +67,7 @@ public class QFile:Object{
             }else if self.localPath.range(of: "/") == nil{
                 fileName = self.localPath as String
             }else{
-                fileName = String(self.localPath.characters.split(separator: "/").last!)
+                fileName = String(self.localPath.split(separator: "/").last!)
             }
             return fileName
         }
@@ -76,7 +76,7 @@ public class QFile:Object{
         get{
             var ext = ""
             if self.filename.range(of: ".") != nil{
-                let fileNameArr = self.filename.characters.split(separator: ".")
+                let fileNameArr = self.filename.split(separator: ".")
                 ext = String(fileNameArr.last!).lowercased()
             }
             return ext

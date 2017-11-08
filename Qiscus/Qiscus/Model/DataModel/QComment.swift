@@ -522,10 +522,10 @@ public class QComment:Object {
     private func fileExtension(fromURL url:String) -> String{
         var ext = ""
         if url.range(of: ".") != nil{
-            let fileNameArr = url.characters.split(separator: ".")
+            let fileNameArr = url.split(separator: ".")
             ext = String(fileNameArr.last!).lowercased()
             if ext.contains("?"){
-                let newArr = ext.characters.split(separator: "?")
+                let newArr = ext.split(separator: "?")
                 ext = String(newArr.first!).lowercased()
             }
         }

@@ -25,12 +25,13 @@ class QChatFooterLeft: UICollectionReusableView {
                     avatarImage.image = nil
                     avatarLabel.isHidden = false
                     let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
-                    let colorIndex = sender.fullname.characters.count % bgColor.count
+                    let colorIndex = sender.fullname.count % bgColor.count
                     avatarImage.backgroundColor = bgColor[colorIndex]
-                    
-                    if let fullName = sender.fullname.characters.first{
-                        avatarLabel.text = String(fullName).uppercased()
+                    if sender.fullname.count > 0 {
+                        let index = sender.fullname.index(sender.fullname.startIndex, offsetBy: 0)
+                        avatarLabel.text = String(sender.fullname[index]).uppercased()
                     }
+                    
                     if QFileManager.isFileExist(inLocalPath: sender.avatarLocalPath){
                         UIImage.loadAsync(fromLocalPath: sender.avatarLocalPath, onSuccess: { image in
                             sender.avatar = image

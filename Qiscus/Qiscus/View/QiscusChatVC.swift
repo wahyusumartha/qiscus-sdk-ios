@@ -630,8 +630,10 @@ open class QiscusChatVC: UIViewController{
         if self.chatTitle != nil {
             let roomTitle = self.chatTitle!.trimmingCharacters(in: .whitespacesAndNewlines)
             if roomTitle != "" {
-                self.roomAvatarLabel.text = String(roomTitle.characters.first!).uppercased()
-                let colorIndex = roomTitle.characters.count % bgColor.count
+                let index = roomTitle.index(roomTitle.startIndex, offsetBy: 0)
+                self.roomAvatarLabel.text = String(roomTitle[index]).uppercased()
+                //self.roomAvatarLabel.text = String(roomTitle.characters.first!).uppercased()
+                let colorIndex = roomTitle.count % bgColor.count
                 self.roomAvatar.backgroundColor = bgColor[colorIndex]
             }
             self.titleLabel.text = self.chatTitle

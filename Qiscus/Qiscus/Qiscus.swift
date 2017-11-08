@@ -991,7 +991,7 @@ extension Qiscus:CocoaMQTTDelegate{
     public func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16 ){
         QiscusBackgroundThread.async {autoreleasepool{
             if let messageData = message.string {
-                let channelArr = message.topic.characters.split(separator: "/")
+                let channelArr = message.topic.split(separator: "/")
                 let lastChannelPart = String(channelArr.last!)
                 switch lastChannelPart {
                 case "c":
@@ -1088,7 +1088,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     break
                 case "d":
                     let roomId = String(channelArr[2])
-                    let messageArr = messageData.characters.split(separator: ":")
+                    let messageArr = messageData.split(separator: ":")
                     let commentId = Int(String(messageArr[0]))!
                     let userEmail = String(channelArr[3])
                     if userEmail != QiscusMe.sharedInstance.email {
@@ -1105,7 +1105,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     break
                 case "r":
                     let roomId = String(channelArr[2])
-                    let messageArr = messageData.characters.split(separator: ":")
+                    let messageArr = messageData.split(separator: ":")
                     let commentId = Int(String(messageArr[0]))!
                     let userEmail = String(channelArr[3])
                     if userEmail != QiscusMe.sharedInstance.email {
@@ -1135,7 +1135,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     }
                     break
                 case "s":
-                    let messageArr = messageData.characters.split(separator: ":")
+                    let messageArr = messageData.split(separator: ":")
                     let userEmail = String(channelArr[1])
                     if userEmail != QiscusMe.sharedInstance.email{
                         if let timeToken = Double(String(messageArr[1])){

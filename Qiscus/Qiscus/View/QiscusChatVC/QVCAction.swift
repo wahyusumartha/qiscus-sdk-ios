@@ -283,8 +283,9 @@ extension QiscusChatVC {
                     self.titleLabel.text = room.name
                     if self.roomAvatarImage == nil {
                         let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
-                        self.roomAvatarLabel.text = String(room.name.characters.first!).uppercased()
-                        let colorIndex = room.name.characters.count % bgColor.count
+                        let index = room.name.index(room.name.startIndex, offsetBy: 0)
+                        self.roomAvatarLabel.text = String(room.name[index]).uppercased()
+                        let colorIndex = room.name.count % bgColor.count
                         self.roomAvatar.backgroundColor = bgColor[colorIndex]
                         if QFileManager.isFileExist(inLocalPath: room.avatarLocalPath){
                             self.roomAvatar.loadAsync(fromLocalPath: room.avatarLocalPath, onLoaded: { (image, _) in
@@ -309,8 +310,11 @@ extension QiscusChatVC {
             else{
                 self.titleLabel.text = self.chatTitle
                 let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
-                self.roomAvatarLabel.text = String(self.chatTitle!.characters.first!).uppercased()
-                let colorIndex = self.chatTitle!.characters.count % bgColor.count
+                if self.chatTitle != nil && self.chatTitle!.count > 0 {
+                    let index = self.chatTitle!.index(self.chatTitle!.startIndex, offsetBy: 0)
+                    self.roomAvatarLabel.text = String(self.chatTitle![index]).uppercased()
+                }
+                let colorIndex = self.chatTitle!.count % bgColor.count
                 self.roomAvatar.backgroundColor = bgColor[colorIndex]
                 if let room = self.chatRoom {
                     if self.roomAvatarImage == nil {

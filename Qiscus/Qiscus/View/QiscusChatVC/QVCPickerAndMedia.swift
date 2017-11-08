@@ -62,7 +62,7 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                 if let imageURL = info[UIImagePickerControllerReferenceURL] as? URL{
                     imageName = imageURL.lastPathComponent
                     
-                    let imageNameArr = imageName.characters.split(separator: ".")
+                    let imageNameArr = imageName.split(separator: ".")
                     let imageExt:String = String(imageNameArr.last!).lowercased()
                     
                     let gif:Bool = (imageExt == "gif" || imageExt == "gif_")
@@ -142,7 +142,7 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                 })
                 let mediaURL = info[UIImagePickerControllerMediaURL] as! URL
                 let fileName = mediaURL.lastPathComponent
-                let fileNameArr = fileName.characters.split(separator: ".")
+                let fileNameArr = fileName.split(separator: ".")
                 let fileExt:NSString = String(fileNameArr.last!).lowercased() as NSString
                 
                 let mediaData = try? Data(contentsOf: mediaURL)
@@ -195,7 +195,7 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                 var popupText = QiscusTextConfiguration.sharedInstance.confirmationImageUploadText
                 var fileType = QiscusFileType.image
                 var thumb:UIImage? = nil
-                let fileNameArr = (fileName as String).characters.split(separator: ".")
+                let fileNameArr = (fileName as String).split(separator: ".")
                 let ext = String(fileNameArr.last!).lowercased()
                 
                 let gif = (ext == "gif" || ext == "gif_")
