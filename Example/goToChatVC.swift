@@ -60,7 +60,7 @@ class goToChatVC: UIViewController {
                 self.navigationController?.pushViewController(view, animated: true)
                 break
             case .group:
-                let emailData = targetField.text!.characters.split(separator: ",")
+                let emailData = targetField.text!.split(separator: ",")
                 var emails = [String]()
                 for email in emailData{
                     emails.append(String(email).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines))
