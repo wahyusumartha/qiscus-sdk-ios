@@ -40,7 +40,8 @@ public class QRoom:Object {
     public dynamic var uniqueId:String = ""
     private dynamic var storedName:String = ""
     private dynamic var definedname:String = ""
-    public dynamic var avatarURL:String = ""
+    public dynamic var storedAvatarURL:String = ""
+    public dynamic var definedAvatarURL:String = ""
     public dynamic var avatarLocalPath:String = ""
     public dynamic var data:String = ""
     public dynamic var distinctId:String = ""
@@ -99,6 +100,14 @@ public class QRoom:Object {
             return self.storedName
         }
     }
+    public var avatarURL:String{
+        if self.definedname != "" {
+            return self.definedAvatarURL
+        }else{
+            return self.storedAvatarURL
+        }
+    }
+    
     public var lastCommentGroup:QCommentGroup?{
         get{
             if let group = self.comments.last {
@@ -303,7 +312,7 @@ public class QRoom:Object {
                 room.storedName = roomName
             }
             if let roomAvatar = json["avatar_url"].string {
-                room.avatarURL = roomAvatar
+                room.storedAvatarURL = roomAvatar
             }
             if json["last_comment"] != JSON.null {
                 let commentData = json["last_comment"]
@@ -670,7 +679,7 @@ public class QRoom:Object {
         if let roomAvatar = json["avatar_url"].string {
             if roomAvatar != self.avatarURL {
                 try! realm.write {
-                    self.avatarURL = roomAvatar
+                    self.storedAvatarURL = roomAvatar
                     self.avatarLocalPath = ""
                 }
                 let id = self.id
@@ -748,7 +757,7 @@ public class QRoom:Object {
                 let participantEmail = participantJSON["email"].stringValue
                 let fullname = participantJSON["username"].stringValue
                 let avatarURL = participantJSON["avatar_url"].stringValue
-                let savedUser = QUser.saveUser(withEmail: participantEmail, fullname: fullname, avatarURL: avatarURL)
+                let _ = QUser.saveUser(withEmail: participantEmail, fullname: fullname, avatarURL: avatarURL)
                 let lastReadId = participantJSON["last_comment_read_id"].intValue
                 let lastDeliveredId = participantJSON["last_comment_received_id"].intValue
                 let savedParticipant = self.participants.filter("email == '\(participantEmail)'")
@@ -1402,7 +1411,7 @@ public class QRoom:Object {
         let time = Double(Date().timeIntervalSince1970)
         let timeToken = UInt64(time * 10000)
         let uniqueID = "ios-\(timeToken)"
-        let fileNameArr = filename.characters.split(separator: ".")
+        let fileNameArr = filename.split(separator: ".")
         let fileExt = String(fileNameArr.last!).lowercased()
         
         var fileName = filename.lowercased()
@@ -1920,7 +1929,7 @@ public class QRoom:Object {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             guard let r = realm.resolve(roomTS) else { return }
             try! realm.write {
-                r.avatarURL = avatarURL
+                r.storedAvatarURL = avatarURL
                 r.avatarLocalPath = ""
             }
             DispatchQueue.main.sync { autoreleasepool {
@@ -1941,7 +1950,23 @@ public class QRoom:Object {
                     r.data = data
                 }
             }
+        }}
+    }
+    public func setAvatar(url:String){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let oldAvatarURL = self.avatarURL
+        try! realm.write {
+            self.definedAvatarURL = url
+        }
+        let id = self.id
+        if oldAvatarURL != url {
+            DispatchQueue.main.async { autoreleasepool {
+                if let cache = QRoom.room(withId: id) {
+                    QiscusNotification.publish(roomChange: cache)
+                    cache.delegate?.room(didChangeName: cache)
+                }
             }}
+        }
     }
     public func setName(name:String){
         if name != self.definedname {
