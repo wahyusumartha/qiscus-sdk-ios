@@ -1242,9 +1242,8 @@ extension Qiscus { // Public class API to get room
         let service = QChatService()
         var needToLoad = true
         var room:QRoom?
-        if QRoom.room(withId: roomId) != nil{
-            room = QRoom.room(withId: roomId)
-            if room!.comments.count > 0 {
+        if let room = QRoom.room(withId: roomId){
+            if room.comments.count > 0 {
                 needToLoad = false
             }
         }
