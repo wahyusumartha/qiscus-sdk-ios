@@ -1255,6 +1255,12 @@ extension Qiscus { // Public class API to get room
                     onError(error)
                 }
             }
+        }else{
+            service.room(withId: roomId, onSuccess: { (room) in
+                onSuccess(room)
+            }) { (error) in
+                onError(error)
+            }
         }
         
     }
