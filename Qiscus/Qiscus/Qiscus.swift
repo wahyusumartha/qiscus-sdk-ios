@@ -1216,6 +1216,7 @@ extension Qiscus:CocoaMQTTDelegate{
         QParticipant.cacheAll()
     }
     @objc public class func getNonce(withAppId appId:String, onSuccess:@escaping ((String)->Void), onFailed:@escaping ((String)->Void), secureURL:Bool = true){
+        Qiscus.checkDatabaseMigration()
         QChatService.getNonce(withAppId: appId, onSuccess: onSuccess, onFailed: onFailed)
     }
     @objc public class func setup(withUserIdentityToken uidToken:String, delegate: QiscusConfigDelegate? = nil){
