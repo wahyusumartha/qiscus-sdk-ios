@@ -609,8 +609,7 @@ public class QChatService:NSObject {
                                 Qiscus.printLog(text: "getListComment with id response: \(responseData)")
                                 let roomData = results["room"]
                                 let commentPayload = results["comments"].arrayValue
-                                
-                                DispatchQueue.main.async { autoreleasepool{
+                                func saveRoom(){
                                     let room = QRoom.addRoom(fromJSON: roomData)
                                     for json in commentPayload {
                                         let commentId = json["id"].intValue
@@ -620,11 +619,18 @@ public class QChatService:NSObject {
                                         }else{
                                             QiscusBackgroundThread.async { autoreleasepool{
                                                 QChatService.sync()
-                                            }}
+                                                }}
                                         }
                                     }
                                     onSuccess(room)
-                                }}
+                                }
+                                if Thread.isMainThread {
+                                    saveRoom()
+                                }else{
+                                    DispatchQueue.main.sync {
+                                        saveRoom()
+                                    }
+                                }
                             }else if error != JSON.null{
                                 DispatchQueue.main.async { autoreleasepool{
                                     onError("\(error)")
