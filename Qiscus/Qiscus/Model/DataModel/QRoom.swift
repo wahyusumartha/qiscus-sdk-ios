@@ -1790,8 +1790,10 @@ public class QRoom:Object {
         }
     }
     public class func publishStatus(roomId:String, commentId:Int, status:QCommentStatus){
-        let service = QRoomService()
-        service.publishStatus(inRoom: roomId, commentId: commentId, commentStatus: status)
+        QiscusBackgroundThread.async {
+            let service = QRoomService()
+            service.publishStatus(inRoom: roomId, commentId: commentId, commentStatus: status)
+        }
     }
     public func commentGroup(index:Int)->QCommentGroup?{
         if self.comments.count > index {

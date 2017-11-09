@@ -704,7 +704,7 @@ public class QChatService:NSObject {
                                     let type = newComment["type"].string
                                     if id > QiscusMe.sharedInstance.lastCommentId {
                                         QiscusMe.updateLastCommentId(commentId: id)
-                                        
+                                        QRoom.publishStatus(roomId: roomId, commentId: id, status: .delivered)
                                         func proceed(){
                                             if let room = QRoom.room(withId: roomId){
                                                 if !room.isInvalidated {

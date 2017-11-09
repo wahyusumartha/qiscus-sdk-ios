@@ -155,6 +155,7 @@ open class QiscusMe: NSObject {
             QiscusMe.sharedInstance.lastKnownCommentId = commentId
             QiscusMe.sharedInstance.userData.set(commentId, forKey: "qiscus_lastKnownComment_id")
         }
+        
     }
     public class func updateLastKnownCommentId(commentId:Int){
         if QiscusMe.sharedInstance.lastKnownCommentId < commentId {
