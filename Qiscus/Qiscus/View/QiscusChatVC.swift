@@ -841,6 +841,32 @@ open class QiscusChatVC: UIViewController{
 
         chatRoom?.post(comment: comment)
     }
+    
+    open func qiscusChatView(cellHeightForComment comment:QComment, defaultHeight height:CGFloat, firstInSection first:Bool)->CGFloat{
+        var retHeight = height
+        
+        switch comment.type {
+        case .card, .contact    : break
+        case .video, .image     :
+            if retHeight > 0 {
+                retHeight += 151 ;
+            }else{
+                retHeight = 140
+            }
+            break
+        case .audio             : retHeight = 83 ; break
+        case .file              : retHeight = 67  ; break
+        case .reply             : retHeight += 88 ; break
+        case .system            : retHeight += 46 ; break
+        case .text              : retHeight += 15 ; break
+        default                 : retHeight += 20 ; break
+        }
+        
+        if (comment.type != .system && first) {
+            retHeight += 20
+        }
+        return retHeight
+    }
 }
 
 extension QiscusChatVC:QChatServiceDelegate{

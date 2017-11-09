@@ -248,28 +248,11 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     open func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
         var size = comment.textSize
+        let firstInSection = indexPath.row == 0
+        
         size.width = QiscusHelper.screenWidth() - 16
+        size.height = self.qiscusChatView(cellHeightForComment: comment, defaultHeight: size.height, firstInSection: firstInSection)
         
-        switch comment.type {
-            case .card, .contact    : break
-            case .video, .image     :
-                if size.height > 0 {
-                    size.height += 151 ;
-                }else{
-                    size.height = 140
-                }
-            break
-            case .audio             : size.height = 83  ; break
-            case .file              : size.height = 67  ; break
-            case .reply             : size.height += 88 ; break
-            case .system            : size.height += 46 ; break
-            case .text              : size.height += 15 ; break
-            default                 : size.height += 20 ; break
-        }
-        
-        if (comment.type != .system && indexPath.row == 0) {
-            size.height += 20
-        }
         return size
     }
     
