@@ -1246,7 +1246,7 @@ extension Qiscus { // Public class API to get room
                 needToLoad = false
             }
             if !needToLoad {
-                onSuccess(room!)
+                onSuccess(room)
             }else{
                 service.room(withId: roomId, onSuccess: { (room) in
                     onSuccess(room)
