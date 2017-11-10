@@ -45,9 +45,6 @@ public class QCommentGroup: Object{
             return dateString
         }
     }
-    override open class func primaryKey() -> String {
-        return "id"
-    }
     
     public class func commentGroup(withId id:String)->QCommentGroup?{
         if let cachedData = QCommentGroup.cache[id] {
@@ -56,7 +53,9 @@ public class QCommentGroup: Object{
             }
         }
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        if let cacheData = realm.object(ofType: QCommentGroup.self, forPrimaryKey: id) {
+        let groups = realm.objects(QCommentGroup.self).filter("id == '\(id)'")
+        if groups.count > 0 {
+            let cacheData = groups.first!
             QCommentGroup.cache[id] = cacheData
             return cacheData
         }
