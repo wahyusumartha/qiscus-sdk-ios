@@ -23,7 +23,7 @@ public class QRoomService:NSObject{
             "id" : room.id as AnyObject,
             "token"  : Qiscus.shared.config.USER_TOKEN as AnyObject
         ]
-        Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+        QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
             if let response = responseData.result.value {
                 let json = JSON(response)
                 let results = json["results"]
@@ -73,7 +73,7 @@ public class QRoomService:NSObject{
         Qiscus.printLog(text: "request loadMore parameters: \(parameters)")
         Qiscus.printLog(text: "request loadMore url \(loadURL)")
         
-        Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+        QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
             Qiscus.printLog(text: "loadMore result: \(responseData)")
             if let response = responseData.result.value{
                 let json = JSON(response)
@@ -118,7 +118,7 @@ public class QRoomService:NSObject{
                     parameters["options"] = roomOptions as AnyObject
                 }
                 Qiscus.printLog(text: "update room parameters: \(parameters)")
-                Alamofire.request(requestURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                QiscusService.session.request(requestURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                     if let response = responseData.result.value {
                         Qiscus.printLog(text: "update room api response:\n\(response)")
                         let json = JSON(response)
@@ -173,7 +173,7 @@ public class QRoomService:NSObject{
             }else{
                 parameters["last_comment_read_id"] = lastCommentId as AnyObject
             }
-            Alamofire.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+            QiscusService.session.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                 if let response = responseData.result.value {
                     Qiscus.printLog(text: "publish message status result: \(response)")
                     let savedParticipant = room.participants.filter("email == '\(QiscusMe.sharedInstance.email)'")
@@ -229,7 +229,7 @@ public class QRoomService:NSObject{
         default:
             break
         }
-        Alamofire.request(QiscusConfig.postCommentURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {response in
+        QiscusService.session.request(QiscusConfig.postCommentURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {response in
             //let statusCode = response.response?.statusCode
             
             switch response.result {
@@ -295,7 +295,7 @@ public class QRoomService:NSObject{
             let ext = file.ext
             
             QiscusRequestThread.async {
-                Alamofire.request(fileURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil).responseData(completionHandler: { response in
+                QiscusService.session.request(fileURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil).responseData(completionHandler: { response in
                     Qiscus.printLog(text: "download result: \(response)")
                     switch response.result {
                     case .success:
@@ -401,7 +401,7 @@ public class QRoomService:NSObject{
                     parameters["last_comment_read_id"] = commentId as AnyObject
                 }
                 DispatchQueue.global().async {
-                    Alamofire.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                    QiscusService.session.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                         if let response = responseData.result.value {
                             Qiscus.printLog(text: "publish message response:\n\(response)")
                             let json = JSON(response)
@@ -423,6 +423,9 @@ public class QRoomService:NSObject{
     }
     
     public func uploadCommentFile(inRoom room:QRoom, comment:QComment, onSuccess:  @escaping (QRoom, QComment)->Void, onError:  @escaping (QRoom,QComment,String)->Void, onProgress:((Double)->Void)? = nil){
+        if room.isInvalidated || comment.isInvalidated {
+            return
+        }
         if let file = comment.file {
             let localPath = file.localPath
             let indexPath = room.getIndexPath(ofComment: comment)!
@@ -443,7 +446,7 @@ public class QRoomService:NSObject{
                     }
                     urlUpload.httpMethod = "POST"
                     
-                    Alamofire.upload(multipartFormData: {formData in
+                    QiscusService.session.upload(multipartFormData: {formData in
                         formData.append(data, withName: "file", fileName: filename, mimeType: mimeType)
                         formData.append(QiscusMe.sharedInstance.token.data(using: .utf8)! , withName: "token")
                     }, with: urlUpload, encodingCompletion: {
@@ -456,6 +459,9 @@ public class QRoomService:NSObject{
                                     let json = JSON(jsonData)
                                     if let url = json["url"].string {
                                         DispatchQueue.main.async { autoreleasepool{
+                                            if file.isInvalidated || comment.isInvalidated || room.isInvalidated {
+                                                return
+                                            }
                                             file.update(fileURL: url)
                                             comment.update(text: "[file]\(url) [/file]")
                                             comment.updateUploading(uploading: false)
@@ -474,6 +480,9 @@ public class QRoomService:NSObject{
                                             let fileData = jsonData["file"]
                                             if let url = fileData["url"].string {
                                                 DispatchQueue.main.async { autoreleasepool{
+                                                    if file.isInvalidated || comment.isInvalidated || room.isInvalidated {
+                                                        return
+                                                    }
                                                     file.update(fileURL: url)
                                                     comment.update(text: "[file]\(url) [/file]")
                                                     comment.updateUploading(uploading: false)
@@ -489,6 +498,9 @@ public class QRoomService:NSObject{
                                         }
                                     }else{
                                         DispatchQueue.main.async { autoreleasepool{
+                                            if comment.isInvalidated || room.isInvalidated {
+                                                return
+                                            }
                                             comment.updateUploading(uploading: false)
                                             comment.updateProgress(progress: 0)
                                             comment.updateStatus(status: .failed)
@@ -498,12 +510,13 @@ public class QRoomService:NSObject{
                                     }
                                 }else{
                                     DispatchQueue.main.async { autoreleasepool{
-                                        if !comment.isInvalidated {
-                                            comment.updateUploading(uploading: false)
-                                            comment.updateProgress(progress: 0)
-                                            comment.updateStatus(status: .failed)
-                                            room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
+                                        if comment.isInvalidated || room.isInvalidated {
+                                            return
                                         }
+                                        comment.updateUploading(uploading: false)
+                                        comment.updateProgress(progress: 0)
+                                        comment.updateStatus(status: .failed)
+                                        room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
                                     }}
                                     onError(room,comment,"Fail to upload file, no readable response")
                                 }
@@ -511,6 +524,9 @@ public class QRoomService:NSObject{
                             upload.uploadProgress(closure: {uploadProgress in
                                 let progress = CGFloat(uploadProgress.fractionCompleted)
                                 DispatchQueue.main.async { autoreleasepool{
+                                    if comment.isInvalidated {
+                                        return
+                                    }
                                     comment.updateUploading(uploading: true)
                                     comment.updateProgress(progress: progress)
                                     onProgress?(uploadProgress.fractionCompleted)
@@ -519,6 +535,9 @@ public class QRoomService:NSObject{
                             break
                         case .failure(let error):
                             DispatchQueue.main.async { autoreleasepool{
+                                if comment.isInvalidated || room.isInvalidated {
+                                    return
+                                }
                                 comment.updateUploading(uploading: false)
                                 comment.updateProgress(progress: 0)
                                 comment.updateStatus(status: .failed)
@@ -531,10 +550,14 @@ public class QRoomService:NSObject{
                 }}
             } catch {
                 DispatchQueue.main.async {
+                    if comment.isInvalidated {
+                        return
+                    }
                     comment.updateUploading(uploading: false)
                     comment.updateProgress(progress: 0)
                     comment.updateStatus(status: .failed)
                 }
+                
                 onError(room, comment, "Local file not found")
             }
             }}
@@ -552,7 +575,7 @@ public class QRoomService:NSObject{
         
         Qiscus.printLog(text: "request loadCommentsLimit parameters: \(parameters)")
         
-        Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+        QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
             if let response = responseData.result.value{
                 let json = JSON(response)
                 let results = json["results"]
@@ -589,7 +612,7 @@ public class QRoomService:NSObject{
         
         Qiscus.printLog(text: "request loadCommentsLimit parameters: \(parameters)")
         
-        Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+        QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
             if let response = responseData.result.value{
                 let json = JSON(response)
                 let results = json["results"]
@@ -627,7 +650,7 @@ public class QRoomService:NSObject{
         ]
         Qiscus.printLog(text: "request loadCommentsLimit parameters: \(parameters)")
         
-        Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+        QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
             if let response = responseData.result.value{
                 let json = JSON(response)
                 let results = json["results"]

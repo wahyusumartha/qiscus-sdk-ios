@@ -73,7 +73,7 @@ open class QiscusCommentClient: NSObject {
             Qiscus.printLog(text: "login url: \(QiscusConfig.LOGIN_REGISTER)")
             Qiscus.printLog(text: "post parameters: \(parameters)")
             Qiscus.printLog(text: "post headers: \(QiscusConfig.sharedInstance.requestHeader)")
-            Alamofire.request(QiscusConfig.LOGIN_REGISTER, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+            QiscusService.session.request(QiscusConfig.LOGIN_REGISTER, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                 Qiscus.printLog(text: "login register result: \(response)")
                 Qiscus.printLog(text: "login url: \(QiscusConfig.LOGIN_REGISTER)")
                 Qiscus.printLog(text: "post parameters: \(parameters)")
@@ -142,7 +142,7 @@ open class QiscusCommentClient: NSObject {
             Qiscus.printLog(text: "registerDevice url: \(QiscusConfig.SET_DEVICE_TOKEN_URL)")
             Qiscus.printLog(text: "post parameters: \(parameters)")
             
-            Alamofire.request(QiscusConfig.SET_DEVICE_TOKEN_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+            QiscusService.session.request(QiscusConfig.SET_DEVICE_TOKEN_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                 Qiscus.printLog(text: "registerDevice result: \(response)")
                 Qiscus.printLog(text: "registerDevice url: \(QiscusConfig.LOGIN_REGISTER)")
                 Qiscus.printLog(text: "registerDevice parameters: \(parameters)")
@@ -214,7 +214,7 @@ open class QiscusCommentClient: NSObject {
                 "device_platform" : "ios" as AnyObject
             ]
             
-            Alamofire.request(QiscusConfig.REMOVE_DEVICE_TOKEN_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+            QiscusService.session.request(QiscusConfig.REMOVE_DEVICE_TOKEN_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                 switch response.result {
                 case .success:
                     DispatchQueue.main.async(execute: {

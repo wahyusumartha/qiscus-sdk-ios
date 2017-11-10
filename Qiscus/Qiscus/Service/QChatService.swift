@@ -60,7 +60,7 @@ public class QChatService:NSObject {
                 onError("no change")
             }else{
                 DispatchQueue.global().async(execute: {
-                    Alamofire.request(QiscusConfig.LOGIN_REGISTER, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+                    QiscusService.session.request(QiscusConfig.LOGIN_REGISTER, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                         switch response.result {
                         case .success:
                             if let result = response.result.value{
@@ -236,7 +236,7 @@ public class QChatService:NSObject {
                         parameters["options"] = optionalData! as AnyObject
                     }
                     Qiscus.printLog(text: "get or create room parameters: \(parameters)")
-                    Alamofire.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                    QiscusService.session.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                         if let response = responseData.result.value {
                             Qiscus.printLog(text: "get or create room api response:\n\(response)")
                             let json = JSON(response)
@@ -322,7 +322,7 @@ public class QChatService:NSObject {
                         parameters["avatar_url"] = avatarURL as AnyObject
                     }
                     Qiscus.printLog(text: "get or create room with uniqueId parameters: \(parameters)")
-                    Alamofire.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                    QiscusService.session.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                         if let response = responseData.result.value {
                             Qiscus.printLog(text: "get or create room with uniqueId response:\n\(response)")
                             let json = JSON(response)
@@ -416,7 +416,7 @@ public class QChatService:NSObject {
                         parameters["avatar_url"] = avatarURL as AnyObject
                     }
                     Qiscus.printLog(text: "get or create room with uniqueId parameters: \(parameters)")
-                    Alamofire.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                    QiscusService.session.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                         if let response = responseData.result.value {
                             Qiscus.printLog(text: "get or create room with uniqueId response:\n\(response)")
                             let json = JSON(response)
@@ -490,8 +490,10 @@ public class QChatService:NSObject {
         if Qiscus.isLoggedIn {
             var needToLoad = true
             if let room = QRoom.room(withId: roomId){
-                if room.comments.count > 0 {
-                    needToLoad = false
+                if !room.isInvalidated {
+                    if room.comments.count > 0 {
+                        needToLoad = false
+                    }
                 }
             }
             if !needToLoad {
@@ -512,7 +514,7 @@ public class QChatService:NSObject {
                         "id" : roomId as AnyObject,
                         "token"  : qiscus.config.USER_TOKEN as AnyObject
                     ]
-                    Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                    QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                         if let response = responseData.result.value {
                             let json = JSON(response)
                             let results = json["results"]
@@ -599,7 +601,7 @@ public class QChatService:NSObject {
                         "id" : roomId as AnyObject,
                         "token"  : qiscus.config.USER_TOKEN as AnyObject
                     ]
-                    Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                    QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                         if let response = responseData.result.value {
                             let json = JSON(response)
                             let results = json["results"]
@@ -687,7 +689,7 @@ public class QChatService:NSObject {
                 "order" : "asc" as AnyObject,
                 "limit" : limit as AnyObject
                 ]
-            Alamofire.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+            QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                 if let response = responseData.result.value {
                     let json = JSON(response)
                     let results = json["results"]
@@ -837,7 +839,7 @@ public class QChatService:NSObject {
                     parameters["options"] = optionalData! as AnyObject
                 }
                 Qiscus.printLog(text: "create new room parameters: \(parameters)")
-                Alamofire.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                QiscusService.session.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                     if let response = responseData.result.value {
                         Qiscus.printLog(text: "create group room api response:\n\(response)")
                         let json = JSON(response)
@@ -918,7 +920,7 @@ public class QChatService:NSObject {
                     parameters["avatar_url"] = avatarURL as AnyObject
                 }
                 
-                Alamofire.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                QiscusService.session.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                     if let response = responseData.result.value {
                         Qiscus.printLog(text: "create group room api response:\n\(response)")
                         let json = JSON(response)
@@ -977,7 +979,7 @@ public class QChatService:NSObject {
             Qiscus.printLog(text: "registerDevice url: \(QiscusConfig.SET_DEVICE_TOKEN_URL)")
             Qiscus.printLog(text: "post parameters: \(parameters)")
             
-            Alamofire.request(QiscusConfig.SET_DEVICE_TOKEN_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+            QiscusService.session.request(QiscusConfig.SET_DEVICE_TOKEN_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                 Qiscus.printLog(text: "registerDevice result: \(response)")
                 Qiscus.printLog(text: "registerDevice url: \(QiscusConfig.LOGIN_REGISTER)")
                 Qiscus.printLog(text: "registerDevice parameters: \(parameters)")
@@ -1048,7 +1050,7 @@ public class QChatService:NSObject {
             
             let authURL = "\(QiscusConfig.sharedInstance.BASE_API_URL)/auth/nonce"
             
-            Alamofire.request(authURL, method: .post, parameters: nil, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+            QiscusService.session.request(authURL, method: .post, parameters: nil, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                 
                 switch response.result {
                 case .success:
@@ -1090,7 +1092,7 @@ public class QChatService:NSObject {
                 "identity_token"  : uidToken as AnyObject
             ]
             
-            Alamofire.request(authURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+            QiscusService.session.request(authURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                 
                 switch response.result {
                 case .success:
@@ -1154,7 +1156,7 @@ public class QChatService:NSObject {
                 }
                 //Qiscus.printLog(text: "room list url: \(QiscusConfig.SEARCH_URL)")
                 //Qiscus.printLog(text: "room list parameters: \(parameters)")
-                Alamofire.request(QiscusConfig.ROOMLIST_URL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+                QiscusService.session.request(QiscusConfig.ROOMLIST_URL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                     //Qiscus.printLog(text: "room list result: \(response)")
                     switch response.result {
                     case .success:
@@ -1228,7 +1230,7 @@ public class QChatService:NSObject {
                 "room_id" : [id] as AnyObject,
                 "show_participants": true as AnyObject
             ]
-            Alamofire.request(QiscusConfig.ROOMINFO_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+            QiscusService.session.request(QiscusConfig.ROOMINFO_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                 
                 switch response.result {
                 case .success:
@@ -1309,7 +1311,7 @@ public class QChatService:NSObject {
             ]
             Qiscus.printLog(text: "rooms info url: \(QiscusConfig.SEARCH_URL)")
             Qiscus.printLog(text: "rooms info parameters: \(parameters)")
-            Alamofire.request(QiscusConfig.ROOMINFO_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+            QiscusService.session.request(QiscusConfig.ROOMINFO_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                 Qiscus.printLog(text: "rooms info result: \(response)")
                 switch response.result {
                 case .success:
@@ -1366,7 +1368,7 @@ public class QChatService:NSObject {
             ]
             Qiscus.printLog(text: "room info url: \(QiscusConfig.ROOMINFO_URL)")
             Qiscus.printLog(text: "room info parameters: \(parameters)")
-            Alamofire.request(QiscusConfig.ROOMINFO_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+            QiscusService.session.request(QiscusConfig.ROOMINFO_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                 switch response.result {
                 case .success:
                     if let result = response.result.value{
@@ -1427,7 +1429,7 @@ public class QChatService:NSObject {
             ]
             Qiscus.printLog(text: "rooms info url: \(QiscusConfig.SEARCH_URL)")
             Qiscus.printLog(text: "rooms info parameters: \(parameters)")
-            Alamofire.request(QiscusConfig.ROOMINFO_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+            QiscusService.session.request(QiscusConfig.ROOMINFO_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                 Qiscus.printLog(text: "rooms info result: \(response)")
                 switch response.result {
                 case .success:
@@ -1495,7 +1497,7 @@ public class QChatService:NSObject {
             }
             Qiscus.printLog(text: "search url: \(QiscusConfig.SEARCH_URL)")
             Qiscus.printLog(text: "search parameters: \(parameters)")
-            Alamofire.request(QiscusConfig.SEARCH_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+            QiscusService.session.request(QiscusConfig.SEARCH_URL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                 Qiscus.printLog(text: "search result: \(response)")
                 switch response.result {
                 case .success:

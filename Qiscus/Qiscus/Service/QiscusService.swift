@@ -9,17 +9,12 @@
 import Alamofire
 
 internal class QiscusService: NSObject {
-    static let shared = QiscusService()
-    static var manager: SessionManager {
-        get{
-            return QiscusService.shared.request()
-        }
-    }
+    static let session: SessionManager = {
+        // work
+        let configuration = URLSessionConfiguration.default
+        return SessionManager(configuration: configuration)
+    }()
+
     fileprivate override init(){}
     
-    func request()->SessionManager{
-        let configuration = URLSessionConfiguration.default
-        let manager = Alamofire.SessionManager(configuration: configuration)
-        return manager
-    }
 }
