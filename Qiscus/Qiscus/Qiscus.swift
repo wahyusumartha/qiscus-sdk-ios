@@ -161,6 +161,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         
         Qiscus.dbConfiguration.deleteRealmIfMigrationNeeded = true
         Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
+        Qiscus.cancellAllRequest()
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         try! realm.write {
             realm.deleteAll()
@@ -1382,6 +1383,14 @@ extension Qiscus { // Public class API to get room
             Qiscus.printLog(text: "Could not clear Qiscus folder: \(error.localizedDescription)")
         }
         
+    }
+    public class func cancellAllRequest(){
+        let sessionManager = QiscusService.session
+        sessionManager.session.getAllTasks { (allTask) in
+            allTask.forEach({ (task) in
+                task.cancel()
+            })
+        }
     }
 }
 
