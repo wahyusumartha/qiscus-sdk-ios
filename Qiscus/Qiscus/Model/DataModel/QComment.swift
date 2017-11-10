@@ -612,7 +612,7 @@ public class QComment:Object {
             let uniqueId = self.uniqueId
             let roomId = self.roomId
             
-            DispatchQueue.main.asyncAfter(deadline: time, execute: {
+            func update(){
                 if let room = QRoom.room(withId: roomId){
                     if uniqueId == room.lastCommentUniqueId {
                         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
@@ -629,7 +629,15 @@ public class QComment:Object {
                 if let comment = QComment.comment(withUniqueId: uniqueId) {
                     QiscusNotification.publish(messageStatus: comment, status: status)
                 }
-            })
+            }
+            
+            if Thread.isMainThread {
+                update()
+            }else{
+                DispatchQueue.main.sync {
+                    update()
+                }
+            }
         }
     }
     public func updateCellPos(cellPos: QCellPosition){
@@ -639,9 +647,16 @@ public class QComment:Object {
             try! realm.write {
                 self.cellPosRaw = cellPos.rawValue
             }
-            DispatchQueue.main.async { autoreleasepool {
+            func execute(){
                 QComment.cache[uId]?.delegate?.comment(didChangePosition: cellPos)
-            }}
+            }
+            if Thread.isMainThread{
+                execute()
+            }else{
+                DispatchQueue.main.sync {
+                    execute()
+                }
+            }
         }
     }
     public func updateDurationLabel(label:String){
@@ -651,9 +666,16 @@ public class QComment:Object {
             try! realm.write {
                 self.durationLabel = label
             }
-            DispatchQueue.main.async { autoreleasepool {
+            func execute(){
                 QComment.cache[uId]?.delegate?.comment?(didChangeDurationLabel: label)
-            }}
+            }
+            if Thread.isMainThread{
+                execute()
+            }else{
+                DispatchQueue.main.sync {
+                    execute()
+                }
+            }
         }
     }
     public func updateTimeSlider(value:Float){
@@ -663,9 +685,16 @@ public class QComment:Object {
             try! realm.write {
                 self.currentTimeSlider = value
             }
-            DispatchQueue.main.async { autoreleasepool {
+            func execute(){
                 QComment.cache[uId]?.delegate?.comment?(didChangeCurrentTimeSlider: value)
-            }}
+            }
+            if Thread.isMainThread{
+                execute()
+            }else{
+                DispatchQueue.main.sync {
+                    execute()
+                }
+            }
         }
     }
     public func updateSeekLabel(label:String){
@@ -675,9 +704,16 @@ public class QComment:Object {
             try! realm.write {
                 self.seekTimeLabel = label
             }
-            DispatchQueue.main.async { autoreleasepool {
+            func execute(){
                 QComment.cache[uId]?.delegate?.comment?(didChangeSeekTimeLabel: label)
-            }}
+            }
+            if Thread.isMainThread{
+                execute()
+            }else{
+                DispatchQueue.main.sync {
+                    execute()
+                }
+            }
         }
     }
     public func updatePlaying(playing:Bool){
@@ -687,9 +723,16 @@ public class QComment:Object {
             try! realm.write {
                 self.audioIsPlaying = playing
             }
-            DispatchQueue.main.async { autoreleasepool {
+            func execute(){
                 QComment.cache[uId]?.delegate?.comment?(didChangeAudioPlaying: playing)
-            }}
+            }
+            if Thread.isMainThread{
+                execute()
+            }else{
+                DispatchQueue.main.sync {
+                    execute()
+                }
+            }
         }
     }
     public func updateUploading(uploading:Bool){
@@ -699,9 +742,16 @@ public class QComment:Object {
             try! realm.write {
                 self.isUploading = uploading
             }
-            DispatchQueue.main.async { autoreleasepool {
+            func execute(){
                 QComment.cache[uId]?.delegate?.comment?(didUpload: uploading)
-            }}
+            }
+            if Thread.isMainThread{
+                execute()
+            }else{
+                DispatchQueue.main.sync {
+                    execute()
+                }
+            }
         }
     }
     public func updateDownloading(downloading:Bool){
@@ -711,9 +761,16 @@ public class QComment:Object {
             try! realm.write {
                 self.isDownloading = downloading
             }
-            DispatchQueue.main.async { autoreleasepool {
+            func execute(){
                 QComment.cache[uId]?.delegate?.comment?(didDownload: downloading)
-            }}
+            }
+            if Thread.isMainThread{
+                execute()
+            }else{
+                DispatchQueue.main.sync {
+                    execute()
+                }
+            }
         }
     }
     public func updateProgress(progress:CGFloat){
@@ -723,9 +780,16 @@ public class QComment:Object {
             try! realm.write {
                 self.progress = progress
             }
-            DispatchQueue.main.async { autoreleasepool {
+            func execute() {
                 QComment.cache[uId]?.delegate?.comment?(didChangeProgress: progress)
-            }}
+            }
+            if Thread.isMainThread{
+                execute()
+            }else{
+                DispatchQueue.main.sync {
+                    execute()
+                }
+            }
         }
     }
     public class func decodeDictionary(data:[AnyHashable : Any]) -> QComment? {
@@ -982,14 +1046,22 @@ public class QComment:Object {
             if data.count > 0 {
                 for comment in data {
                     let commentTS = ThreadSafeReference(to: comment)
-                    DispatchQueue.main.async {autoreleasepool {
-                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-                        guard let c = realm.resolve(commentTS) else { return }
+                    
+                    if Thread.isMainThread {
                         if let room = QRoom.room(withId: c.roomId){
                             room.updateCommentStatus(inComment: c, status: .sending)
                             room.post(comment: c)
                         }
-                    }}
+                    }else{
+                        DispatchQueue.main.sync {
+                            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            guard let c = realm.resolve(commentTS) else { return }
+                            if let room = QRoom.room(withId: c.roomId){
+                                room.updateCommentStatus(inComment: c, status: .sending)
+                                room.post(comment: c)
+                            }
+                        }
+                    }
                 }
             }
         }
