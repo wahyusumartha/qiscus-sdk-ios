@@ -21,10 +21,6 @@ public class QParticipant:Object {
     
     public var delegate:QParticipantDelegate? = nil
     
-    // MARK: - Primary Key
-    override public class func primaryKey() -> String {
-        return "localId"
-    }
     override public static func ignoredProperties() -> [String] {
         return ["delegate"]
     }
