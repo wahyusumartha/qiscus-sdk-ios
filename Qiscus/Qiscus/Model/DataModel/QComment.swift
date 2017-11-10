@@ -195,7 +195,11 @@ public class QComment:Object {
     public var file:QFile? {
         get{
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            return realm.object(ofType: QFile.self, forPrimaryKey: self.uniqueId)
+            let files = realm.objects(QFile.self).filter("id == '\(self.uniqueId)'")
+            if files.count > 0 {
+                return files.first!
+            }
+            return nil
         }
     }
     public var sender:QUser? {
@@ -449,9 +453,6 @@ public class QComment:Object {
             return nil
         }
     }
-    override open class func primaryKey() -> String {
-        return "uniqueId"
-    }
     
     public class func comment(withUniqueId uniqueId:String)->QComment?{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
@@ -460,10 +461,12 @@ public class QComment:Object {
                 return comment
             }
         }
-        if let comment =  realm.object(ofType: QComment.self, forPrimaryKey: uniqueId) {
+        let comments = realm.objects(QComment.self).filter("uniqueId == '\(uniqueId)'")
+        if comments.count > 0 {
+            let comment = comments.first!
             let _ = comment.textSize
             comment.cacheObject()
-            return QComment.cache[uniqueId]
+            return comment
         }
         
         return nil
