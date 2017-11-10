@@ -509,13 +509,7 @@ open class QiscusChatVC: UIViewController{
             self.navigationItem.leftBarButtonItems = [backButton]
         }
         
-        if #available(iOS 10.0, *) {
-            let center = UNUserNotificationCenter.current()
-            center.removeAllDeliveredNotifications() // To remove all delivered notifications
-            center.removeAllPendingNotificationRequests()
-        }else{
-            UIApplication.shared.cancelAllLocalNotifications()
-        }
+        self.clearAllNotification()
         
         let center: NotificationCenter = NotificationCenter.default
         center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
@@ -601,6 +595,16 @@ open class QiscusChatVC: UIViewController{
     // MARK: - Memory Warning
     override open func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
+    }
+    // MARK: - Clear Notification Method
+    open func clearAllNotification(){
+        if #available(iOS 10.0, *) {
+            let center = UNUserNotificationCenter.current()
+            center.removeAllDeliveredNotifications() // To remove all delivered notifications
+            center.removeAllPendingNotificationRequests()
+        }else{
+            UIApplication.shared.cancelAllLocalNotifications()
+        }
     }
     
     // MARK: - Setup UI
