@@ -158,15 +158,17 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         QComment.cache = [String : QComment]()
         QUser.cache = [String: QUser]()
         Qiscus.shared.chatViews = [String:QiscusChatVC]()
+        Qiscus.cancellAllRequest()
+        Qiscus.removeAllFile()
         
         Qiscus.dbConfiguration.deleteRealmIfMigrationNeeded = true
         Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
-        Qiscus.cancellAllRequest()
+        
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         try! realm.write {
             realm.deleteAll()
         }
-        Qiscus.removeAllFile()
+        Qiscus.removeDB()
     }
     @objc public class func unRegisterPN(){
         if Qiscus.isLoggedIn {
@@ -229,7 +231,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         QChatService.updateProfil(userName: username, userAvatarURL: avatarURL, onSuccess: onSuccess, onError: onFailed)
     }
     @objc public class func setup(withAppId appId:String, userEmail:String, userKey:String, username:String, avatarURL:String? = nil, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true){
-        Qiscus.checkDatabaseMigration()
+        Qiscus.checkDatabaseMigration(force:true)
         var requestProtocol = "https"
         if !secureURl {
             requestProtocol = "http"
@@ -622,7 +624,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     // MARK: - local DB
-    class func checkDatabaseMigration(){
+    class func checkDatabaseMigration(force:Bool = false){
         if Qiscus.dbConfiguration.fileURL?.lastPathComponent != "Qiscus.realm" {
             Qiscus.dbConfiguration = Realm.Configuration.defaultConfiguration
             var realmURL = Qiscus.dbConfiguration.fileURL!
@@ -1203,13 +1205,14 @@ extension Qiscus:CocoaMQTTDelegate{
         QParticipant.cacheAll()
     }
     @objc public class func getNonce(withAppId appId:String, onSuccess:@escaping ((String)->Void), onFailed:@escaping ((String)->Void), secureURL:Bool = true){
-        Qiscus.checkDatabaseMigration()
+        Qiscus.checkDatabaseMigration(force:true)
         QChatService.getNonce(withAppId: appId, onSuccess: onSuccess, onFailed: onFailed)
     }
     @objc public class func setup(withUserIdentityToken uidToken:String, delegate: QiscusConfigDelegate? = nil){
         if delegate != nil {
             Qiscus.shared.delegate = delegate
         }
+        Qiscus.checkDatabaseMigration(force:true)
         QChatService.setup(withuserIdentityToken: uidToken)
         Qiscus.setupReachability()
         Qiscus.sharedInstance.RealtimeConnect()
@@ -1390,6 +1393,21 @@ extension Qiscus { // Public class API to get room
             allTask.forEach({ (task) in
                 task.cancel()
             })
+        }
+    }
+    public class func removeDB(){
+        let filemanager = FileManager.default
+        let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory,.userDomainMask,true)[0] as NSString
+        let destinationPaths = [documentsPath.appendingPathComponent("Qiscus.realm"),
+                                documentsPath.appendingPathComponent("Qiscus.realm.lock"),
+                                documentsPath.appendingPathComponent("Qiscus.realm.management")]
+        
+        for destination in destinationPaths {
+            do {
+                try filemanager.removeItem(atPath: destination)
+            } catch {
+                Qiscus.printLog(text: "Could not clear Qiscus folder: \(error.localizedDescription)")
+            }
         }
     }
 }
