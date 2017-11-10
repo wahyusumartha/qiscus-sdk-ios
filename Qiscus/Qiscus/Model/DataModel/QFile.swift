@@ -98,11 +98,6 @@ public class QFile:Object{
         }
     }
     
-    
-    // MARK: - Primary key
-    override open class func primaryKey() -> String {
-        return "id"
-    }
     public class func file(withURL url:String) -> QFile?{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         var file:QFile? = nil

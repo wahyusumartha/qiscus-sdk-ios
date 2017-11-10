@@ -1553,7 +1553,7 @@ public class QRoom:Object {
         }
         
         try! realm.write {
-            realm.add(file, update: true)
+            realm.add(file)
         }
         self.addComment(newComment: comment)
         return comment
