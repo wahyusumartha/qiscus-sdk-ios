@@ -8,7 +8,6 @@
 
 import UIKit
 import RealmSwift
-import Alamofire
 import SwiftyJSON
 
 open class QiscusLinkData: Object {
