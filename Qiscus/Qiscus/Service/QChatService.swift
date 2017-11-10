@@ -825,7 +825,6 @@ public class QChatService:NSObject {
                                 if !Qiscus.realtimeConnected {
                                     let delay = 3.0 * Double(NSEC_PER_SEC)
                                     let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
-                                    let commentTS = ThreadSafeReference(to: comment)
                                     DispatchQueue.main.asyncAfter(deadline: time, execute: {
                                         Qiscus.mqttConnect()
                                     })
