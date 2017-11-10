@@ -151,14 +151,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         
         Qiscus.cancellAllRequest()
         Qiscus.removeAllFile()
-        
-//        Qiscus.dbConfiguration.deleteRealmIfMigrationNeeded = true
-//        Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
-//        
-//        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-//        try! realm.write {
-//            realm.deleteAll()
-//        }
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        try! realm.write {
+            realm.deleteAll()
+        }
         Qiscus.removeDB()
         Qiscus.chatRooms = [String : QRoom]()
         QParticipant.cache = [String : QParticipant]()
@@ -166,6 +162,8 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         QComment.cache = [String : QComment]()
         QUser.cache = [String: QUser]()
         Qiscus.shared.chatViews = [String:QiscusChatVC]()
+        Qiscus.dbConfiguration.deleteRealmIfMigrationNeeded = true
+        Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
     }
     @objc public class func unRegisterPN(){
         if Qiscus.isLoggedIn {
