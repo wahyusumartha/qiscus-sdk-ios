@@ -97,10 +97,7 @@ public class QUser:Object {
             }
         }
     }
-    // MARK: - Primary Key
-    override open class func primaryKey() -> String {
-        return "email"
-    }
+    
     // MARK: - Unstored properties
     override public static func ignoredProperties() -> [String] {
         return ["avatar","delegate"]
@@ -164,13 +161,13 @@ public class QUser:Object {
                 return cachedUser
             }
         }
-        if let user = realm.object(ofType: QUser.self, forPrimaryKey: email) {
-            QUser.cache[email] = user
+        let data = realm.objects(QUser.self).filter("email == '\(email)'")
+        if data.count > 0 {
+            let user = data.first!
+            user.cacheObject()
             return user
-        }else{
-            return nil
         }
-        
+        return nil
     }
     
     public func updateLastSeen(lastSeen:Double){
