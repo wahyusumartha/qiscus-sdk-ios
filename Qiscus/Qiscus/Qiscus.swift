@@ -165,7 +165,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         try! realm.write {
             realm.deleteAll()
         }
-        Qiscus.deleteAllFiles()
+        Qiscus.removeAllFile()
     }
     @objc public class func unRegisterPN(){
         if Qiscus.isLoggedIn {
@@ -617,20 +617,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                 print("[Qiscus]: \(text)")
             }
             Qiscus.shared.diagnosticDelegate?.qiscusDiagnostic(sendLog: "[Qiscus]: \(text)")
-        }
-    }
-    class func deleteAllFiles(){
-        let fileManager = FileManager.default
-        let dirPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-        let qiscusDirPath = "\(dirPath)/Qiscus"
-        
-        do {
-            let filePaths = try fileManager.contentsOfDirectory(atPath: qiscusDirPath)
-            for filePath in filePaths {
-                try fileManager.removeItem(atPath: NSTemporaryDirectory() + filePath)
-            }
-        } catch let error as NSError {
-            Qiscus.printLog(text: "Could not clear temp folder: \(error.debugDescription)")
         }
     }
     
@@ -1385,5 +1371,18 @@ extension Qiscus { // Public class API to get room
         }
     }
     
+    public class func removeAllFile(){
+        let dirPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
+        let filemanager = FileManager.default
+        let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory,.userDomainMask,true)[0] as NSString
+        let destinationPath = documentsPath.appendingPathComponent("Qiscus")
+        //print("destinationPath: \(destinationPath)")
+        do {
+            try filemanager.removeItem(atPath: destinationPath)
+        } catch {
+            Qiscus.printLog(text: "Could not clear Qiscus folder: \(error.localizedDescription)")
+        }
+        
+    }
 }
 
