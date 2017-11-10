@@ -170,9 +170,9 @@ public class QRoom:Object {
     }
     
     // MARK: - Primary Key
-    override public class func primaryKey() -> String {
-        return "id"
-    }
+//    override public class func primaryKey() -> String {
+//        return "id"
+//    }
     
     // MARK: - Class method
     public class func all() -> [QRoom]{
@@ -213,10 +213,11 @@ public class QRoom:Object {
     }
     internal class func threadSaveRoom(withId id:String) -> QRoom? {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let room = realm.object(ofType: QRoom.self, forPrimaryKey: id)
-        if room != nil {
-            return room
+        let rooms = realm.objects(QRoom.self).filter("id == '\(id)'")
+        if rooms.count > 0 {
+            return rooms.first!
         }
+        
         return nil
     }
     
@@ -229,14 +230,15 @@ public class QRoom:Object {
             }
         }
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let room = realm.object(ofType: QRoom.self, forPrimaryKey: id)
-        if room != nil {
-            room?.resetRoomComment()
-            Qiscus.chatRooms[room!.id] = room!
-            if Qiscus.shared.chatViews[room!.id] ==  nil{
+        let rooms = realm.objects(QRoom.self).filter("id == '\(id)'")
+        if rooms.count > 0 {
+            let room = rooms.first!
+            room.resetRoomComment()
+            Qiscus.chatRooms[room.id] = room
+            if Qiscus.shared.chatViews[room.id] ==  nil{
                 let chatView = QiscusChatVC()
-                chatView.chatRoom = Qiscus.chatRooms[room!.id]
-                Qiscus.shared.chatViews[room!.id] = chatView
+                chatView.chatRoom = Qiscus.chatRooms[room.id]
+                Qiscus.shared.chatViews[room.id] = chatView
             }
             return room
         }
@@ -289,6 +291,7 @@ public class QRoom:Object {
     
     public class func addRoom(fromJSON json:JSON)->QRoom{
         let room = QRoom()
+        
         if json["id"] != JSON.null {
             room.id = "\(json["id"])"
             if let option = json["options"].string {
@@ -351,7 +354,7 @@ public class QRoom:Object {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             
             try! realm.write {
-                realm.add(room, update: true)
+                realm.add(room)
             }
             
             // get the participants and save it
@@ -382,11 +385,7 @@ public class QRoom:Object {
                         newParticipant.email = participantEmail
                         newParticipant.lastReadCommentId = lastReadId
                         newParticipant.lastDeliveredCommentId = lastDeliveredId
-                        if let storedParticipant = realm.object(ofType: QParticipant.self, forPrimaryKey: "\(room.id)_\(participantEmail)"){
-                            try! realm.write {
-                                realm.delete(storedParticipant)
-                            }
-                        }
+                        
                         do {
                             try realm.write {
                                 room.participants.append(newParticipant)
@@ -826,12 +825,6 @@ public class QRoom:Object {
                     newParticipant.email = participantEmail
                     newParticipant.lastReadCommentId = lastReadId
                     newParticipant.lastDeliveredCommentId = lastDeliveredId
-                    
-                    if let storedParticipant = realm.object(ofType: QParticipant.self, forPrimaryKey: "\(self.id)_\(participantEmail)"){
-                        try! realm.write {
-                            realm.delete(storedParticipant)
-                        }
-                    }
                     
                     do {
                         try realm.write {
