@@ -1167,11 +1167,10 @@ extension Qiscus:CocoaMQTTDelegate{
     }
     public func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?){
         if Qiscus.isLoggedIn {
-            if self.syncTimer != nil {
-                self.syncTimer!.invalidate()
+            if let timer = self.syncTimer {
+                timer.invalidate()
             }
             self.syncTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.sync), userInfo: nil, repeats: true)
-            
         }
     }
     
