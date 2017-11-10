@@ -41,11 +41,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     
     public static var chatDelegate:QiscusChatDelegate?
     
-    static var realtimeConnected:Bool{
-        get{
-            return Qiscus.shared.mqtt?.connState == .connected
-        }
-    }
+    static var realtimeConnected:Bool = false
     internal static var publishStatustimer:Timer?
     internal static var realtimeChannel = [String]()
     
@@ -152,16 +148,24 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         QiscusMe.clear()
     }
     @objc public class func clearData(){
+        
+        Qiscus.cancellAllRequest()
+        Qiscus.removeAllFile()
+        
+//        Qiscus.dbConfiguration.deleteRealmIfMigrationNeeded = true
+//        Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
+//        
+//        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+//        try! realm.write {
+//            realm.deleteAll()
+//        }
+        Qiscus.removeDB()
         Qiscus.chatRooms = [String : QRoom]()
         QParticipant.cache = [String : QParticipant]()
         QCommentGroup.cache = [String : QCommentGroup]()
         QComment.cache = [String : QComment]()
         QUser.cache = [String: QUser]()
         Qiscus.shared.chatViews = [String:QiscusChatVC]()
-        Qiscus.cancellAllRequest()
-        Qiscus.removeAllFile()
-        
-        Qiscus.removeDB()
     }
     @objc public class func unRegisterPN(){
         if Qiscus.isLoggedIn {
@@ -172,11 +176,11 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     func backgroundCheck(cloud:Bool = false){
         if Qiscus.isLoggedIn{
             QChatService.sync(cloud: cloud)
-            QiscusBackgroundThread.async { autoreleasepool{
-                if Qiscus.shared.mqtt?.connState != CocoaMQTTConnState.connected {
-                    Qiscus.mqttConnect()
-                }
-            }}
+//            QiscusBackgroundThread.async { autoreleasepool{
+//                if !Qiscus.realtimeConnected {
+//                    Qiscus.mqttConnect()
+//                }
+//            }}
         }
     }
     func checkChat(){
@@ -947,8 +951,6 @@ extension Qiscus:CocoaMQTTDelegate{
         let state = UIApplication.shared.applicationState
         let activeState = (state == .active)
         QiscusBackgroundThread.async {
-            
-            
             if activeState {
                 let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
                 mqtt.subscribe(commentChannel, qos: .qos2)
@@ -956,12 +958,14 @@ extension Qiscus:CocoaMQTTDelegate{
                 for channel in Qiscus.realtimeChannel{
                     mqtt.subscribe(channel)
                 }
+                Qiscus.realtimeConnected = true
+                print(Qiscus.realtimeConnected)
                 Qiscus.shared.mqtt = mqtt
             }
-            if self.syncTimer != nil {
-                self.syncTimer?.invalidate()
-                self.syncTimer = nil
-            }
+//            if self.syncTimer != nil {
+//                self.syncTimer?.invalidate()
+//                self.syncTimer = nil
+//            }
         }
     }
     public func mqtt(_ mqtt: CocoaMQTT, didPublishMessage message: CocoaMQTTMessage, id: UInt16){
@@ -1160,10 +1164,12 @@ extension Qiscus:CocoaMQTTDelegate{
     }
     public func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?){
         if Qiscus.isLoggedIn {
-            if let timer = self.syncTimer {
-                timer.invalidate()
-            }
-            self.syncTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.sync), userInfo: nil, repeats: true)
+            Qiscus.realtimeConnected = false
+            self.sync()
+//            if let timer = self.syncTimer {
+//                timer.invalidate()
+//            }
+//            self.syncTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.sync), userInfo: nil, repeats: true)
         }
     }
     
