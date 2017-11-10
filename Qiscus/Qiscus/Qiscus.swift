@@ -141,7 +141,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     class func disconnectRealtime(){
         Qiscus.uiThread.async { autoreleasepool{
             Qiscus.sharedInstance.mqtt?.disconnect()
-            }}
+        }}
     }
     
     @objc public class func clear(){
@@ -161,13 +161,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.cancellAllRequest()
         Qiscus.removeAllFile()
         
-        Qiscus.dbConfiguration.deleteRealmIfMigrationNeeded = true
-        Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
-        
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        try! realm.write {
-            realm.deleteAll()
-        }
         Qiscus.removeDB()
     }
     @objc public class func unRegisterPN(){
@@ -1233,10 +1226,11 @@ extension Qiscus { // Public class API to get room
         var needToLoad = true
         func loadRoom(){
             service.room(withId: roomId, onSuccess: { (room) in
-                if room.isInvalidated {
-                    loadRoom()
-                }else{
+                if !room.isInvalidated {
                     onSuccess(room)
+                }else{
+                    Qiscus.printLog(text: "localRoom has been deleted")
+                    onError("localRoom has been deleted")
                 }
             }) { (error) in
                 onError(error)
@@ -1244,9 +1238,6 @@ extension Qiscus { // Public class API to get room
         }
         if let room = QRoom.room(withId: roomId){
             if room.comments.count > 0 {
-                needToLoad = false
-            }
-            if !needToLoad {
                 onSuccess(room)
             }else{
                 loadRoom()
