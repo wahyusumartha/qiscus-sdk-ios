@@ -97,11 +97,16 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         }
     }
     public func publishRead(){
-        let roomId = self.chatRoom!.id
-        let commentId = self.chatRoom!.lastReadCommentId
-        DispatchQueue.global().async(execute: {
-            QRoom.publishStatus(roomId: roomId, commentId: commentId, status: .read)
-        })
+        if let room = self.chatRoom {
+            if !room.isInvalidated{
+                let roomId = room.id
+                let commentId = room.lastReadCommentId
+                DispatchQueue.global().async(execute: {
+                    QRoom.publishStatus(roomId: roomId, commentId: commentId, status: .read)
+                })
+            }
+        }
+        
     }
     open func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if let commentGroup = self.chatRoom!.commentGroup(index: indexPath.section) {
