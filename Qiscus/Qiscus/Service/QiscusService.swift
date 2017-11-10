@@ -6,8 +6,20 @@
 //  Copyright © 2017 Ahmad Athaullah. All rights reserved.
 //
 
-import UIKit
+import Alamofire
 
-class QiscusService: NSObject {
-
+internal class QiscusService: NSObject {
+    static let shared = QiscusService()
+    static var manager: SessionManager {
+        get{
+            return QiscusService.shared.request()
+        }
+    }
+    fileprivate override init(){}
+    
+    func request()->SessionManager{
+        let configuration = URLSessionConfiguration.default
+        let manager = Alamofire.SessionManager(configuration: configuration)
+        return manager
+    }
 }
