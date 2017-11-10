@@ -1372,7 +1372,6 @@ extension Qiscus { // Public class API to get room
     }
     
     public class func removeAllFile(){
-        let dirPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as String
         let filemanager = FileManager.default
         let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory,.userDomainMask,true)[0] as NSString
         let destinationPath = documentsPath.appendingPathComponent("Qiscus")
