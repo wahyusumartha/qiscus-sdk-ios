@@ -1045,14 +1045,13 @@ public class QComment:Object {
             
             if data.count > 0 {
                 for comment in data {
-                    let commentTS = ThreadSafeReference(to: comment)
-                    
                     if Thread.isMainThread {
-                        if let room = QRoom.room(withId: c.roomId){
-                            room.updateCommentStatus(inComment: c, status: .sending)
-                            room.post(comment: c)
+                        if let room = QRoom.room(withId: comment.roomId){
+                            room.updateCommentStatus(inComment: comment, status: .sending)
+                            room.post(comment: comment)
                         }
                     }else{
+                        let commentTS = ThreadSafeReference(to: comment)
                         DispatchQueue.main.sync {
                             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                             guard let c = realm.resolve(commentTS) else { return }
