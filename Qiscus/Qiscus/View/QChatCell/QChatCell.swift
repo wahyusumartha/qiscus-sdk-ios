@@ -57,10 +57,13 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
     }
     @objc private func messageStatusNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
-            let commentData = userInfo["comment"] as! QComment
-            if commentData.isInvalidated { return }
-            if self.comment?.uniqueId == commentData.uniqueId {
-                self.updateStatus(toStatus: commentData.status)
+            if let commentData = userInfo["comment"] as? QComment {
+                if let currentComment = self.comment {
+                    if commentData.isInvalidated || currentComment.isInvalidated{ return }
+                    if self.comment?.uniqueId == commentData.uniqueId {
+                        self.updateStatus(toStatus: commentData.status)
+                    }
+                }
             }
         }
     }
