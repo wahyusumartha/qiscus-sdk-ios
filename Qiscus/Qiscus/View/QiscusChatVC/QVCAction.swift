@@ -376,7 +376,7 @@ extension QiscusChatVC {
                         }
                     }
                     if subtitleString != "not available" {
-                        if subtitleString == "online" || subtitleString.contains("minute") || subtitleString.contains("hours") {
+                        if subtitleString == "is online" || subtitleString.contains("minute") || subtitleString.contains("hours") {
                             var delay = 60.0 * Double(NSEC_PER_SEC)
                             if subtitleString.contains("hours"){
                                 delay = 3600.0 * Double(NSEC_PER_SEC)
