@@ -957,7 +957,6 @@ extension Qiscus:CocoaMQTTDelegate{
                     mqtt.subscribe(channel)
                 }
                 Qiscus.realtimeConnected = true
-                print(Qiscus.realtimeConnected)
                 Qiscus.shared.mqtt = mqtt
             }
 //            if self.syncTimer != nil {
@@ -1138,7 +1137,7 @@ extension Qiscus:CocoaMQTTDelegate{
         
     }
     public func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopic topic: String){
-        //Qiscus.printLog(text: "topic : \(topic) subscribed")
+        Qiscus.printLog(text: "realtime channel : \(topic) subscribed")
         if !Qiscus.realtimeChannel.contains(topic) {
             Qiscus.realtimeChannel.append(topic)
         }
