@@ -871,11 +871,12 @@ public class QRoom:Object {
         
     }
     public func saveNewComment(fromJSON json:JSON){
-        let roomTS = ThreadSafeReference(to: self)
+        let roomId = self.id
+        
         QiscusDBThread.sync { autoreleasepool{
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             
-            guard let room = realm.resolve(roomTS) else { return }
+            guard let room = QRoom.threadSaveRoom(withId: roomId) else { return }
             
             let commentId = json["id"].intValue
             let commentUniqueId = json["unique_temp_id"].stringValue
@@ -1064,7 +1065,7 @@ public class QRoom:Object {
                 }
                 room.addComment(newComment: newComment)
             }
-            }}
+        }}
     }
     public func saveOldComment(fromJSON json:JSON){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
