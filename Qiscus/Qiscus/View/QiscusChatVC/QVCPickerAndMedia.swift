@@ -168,6 +168,7 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                     },
                     cancelAction: {
                         Qiscus.printLog(text: "cancel upload")
+                        QFileManager.clearTempDirectory()
                     }
                     )
                 }catch{
@@ -275,6 +276,7 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                     },
                                          cancelAction: {
                                             Qiscus.printLog(text: "cancel upload")
+                                            QFileManager.clearTempDirectory()
                     }
                     )
                 }else{

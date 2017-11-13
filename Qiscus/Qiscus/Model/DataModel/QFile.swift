@@ -133,7 +133,7 @@ public class QFile:Object{
     }
     public class func saveFile(_ fileData: Data, fileName: String) -> String {
         let path = QFileManager.saveFile(withData: fileData, fileName: fileName, type: .comment)
-        
+        QFileManager.clearTempDirectory()
         return path
     }
     public class func getURL(fromString text:String) -> String{
