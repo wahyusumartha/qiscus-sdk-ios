@@ -758,7 +758,11 @@ extension QiscusChatVC {
         if let audioURL = self.recordingURL {
             var fileContent: Data?
             fileContent = try! Data(contentsOf: audioURL)
-            
+            let mediaSize = Double(fileContent!.count) / 1024.0
+            if mediaSize > Qiscus.maxUploadSizeInKB {
+                self.showFileTooBigAlert()
+                return
+            }
             let fileName = audioURL.lastPathComponent
             
             let newComment = self.chatRoom!.newFileComment(type: .audio, filename: fileName, data: fileContent!)

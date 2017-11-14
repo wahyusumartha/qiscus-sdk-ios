@@ -47,6 +47,12 @@ extension QiscusChatVC:GalleryItemsDatasource{
 }
 // MARK: - UIImagePickerDelegate
 extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDelegate{
+    func showFileTooBigAlert(){
+        let alertController = UIAlertController(title: "Fail to upload", message: "File too big", preferredStyle: .alert)
+        let galeryActionButton = UIAlertAction(title: "Cancel", style: .cancel) { _ -> Void in }
+        alertController.addAction(galeryActionButton)
+        self.present(alertController, animated: true, completion: nil)
+    }
     open func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]){
         if !self.processingFile {
             self.processingFile = true
@@ -127,6 +133,14 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
     //                },
     //                cancelAction: {}
     //                )
+                    let mediaSize = Double(data!.count) / 1024.0
+                    if mediaSize > Qiscus.maxUploadSizeInKB {
+                        picker.dismiss(animated: true, completion: {
+                            self.processingFile = false
+                            self.showFileTooBigAlert()
+                        })
+                        return
+                    }
                     let uploader = QiscusUploaderVC(nibName: "QiscusUploaderVC", bundle: Qiscus.bundle)
                     uploader.data = data
                     uploader.fileName = imageName
@@ -137,18 +151,21 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                     })
                 }
             }else if fileType == "public.movie" {
-                picker.dismiss(animated: true, completion: {
-                    self.processingFile = false
-                })
+                
                 let mediaURL = info[UIImagePickerControllerMediaURL] as! URL
                 let fileName = mediaURL.lastPathComponent
                 let fileNameArr = fileName.split(separator: ".")
                 let fileExt:NSString = String(fileNameArr.last!).lowercased() as NSString
                 
                 let mediaData = try? Data(contentsOf: mediaURL)
-                
-                Qiscus.printLog(text: "mediaURL: \(mediaURL)\nfileName: \(fileName)\nfileExt: \(fileExt)")
-                
+                let mediaSize = Double(mediaData!.count) / 1024.0
+                if mediaSize > Qiscus.maxUploadSizeInKB {
+                    picker.dismiss(animated: true, completion: {
+                        self.processingFile = false
+                        self.showFileTooBigAlert()
+                    })
+                    return
+                }
                 //create thumb image
                 let assetMedia = AVURLAsset(url: mediaURL)
                 let thumbGenerator = AVAssetImageGenerator(asset: assetMedia)
@@ -158,6 +175,9 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                 let maxSize = CGSize(width: QiscusHelper.screenWidth(), height: QiscusHelper.screenWidth())
                 thumbGenerator.maximumSize = maxSize
                 
+                picker.dismiss(animated: true, completion: {
+                    self.processingFile = false
+                })
                 do{
                     let thumbRef = try thumbGenerator.copyCGImage(at: thumbTime, actualTime: nil)
                     let thumbImage = UIImage(cgImage: thumbRef)
@@ -190,6 +210,14 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
         coordinator.coordinate(readingItemAt: url, options: NSFileCoordinator.ReadingOptions.forUploading, error: nil) { (dataURL) in
             do{
                 var data:Data = try Data(contentsOf: dataURL, options: NSData.ReadingOptions.mappedIfSafe)
+                let mediaSize = Double(data.count) / 1024.0
+                if mediaSize > Qiscus.maxUploadSizeInKB {
+                    self.processingFile = false
+                    self.dismissLoading()
+                    self.showFileTooBigAlert()
+                    return
+                }
+                
                 var fileName = dataURL.lastPathComponent.replacingOccurrences(of: "%20", with: "_")
                 fileName = fileName.replacingOccurrences(of: " ", with: "_")
                 

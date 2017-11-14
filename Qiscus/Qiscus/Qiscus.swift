@@ -40,6 +40,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     var backgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
     
     public static var chatDelegate:QiscusChatDelegate?
+    public static var maxUploadSizeInKB:Double = Double(100) * Double(1024)
     
     static var realtimeConnected:Bool = false
     internal static var publishStatustimer:Timer?
