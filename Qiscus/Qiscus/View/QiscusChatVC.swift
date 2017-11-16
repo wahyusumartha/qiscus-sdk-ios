@@ -90,6 +90,9 @@ open class QiscusChatVC: UIViewController{
     // MARK: -  Data load configuration
     public var chatRoom:QRoom?{
         didSet{
+            if let room = self.chatRoom {
+                room.subscribeRealtimeStatus()
+            }
             if oldValue == nil && self.chatRoom != nil {
                 if Qiscus.shared.connected {
                     self.chatRoom?.sync()
