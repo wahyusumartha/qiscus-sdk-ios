@@ -148,9 +148,9 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.shared.mqtt?.disconnect()
         Qiscus.unRegisterPN()
         QiscusMe.clear()
+        Qiscus.removeLogFile()
     }
     @objc public class func clearData(){
-        
         Qiscus.cancellAllRequest()
         Qiscus.removeAllFile()
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
