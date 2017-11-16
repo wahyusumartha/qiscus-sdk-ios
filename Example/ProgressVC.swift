@@ -19,10 +19,14 @@ class ProgressVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        let logoutButton = UIBarButtonItem(image: UIImage(named: "ic_exit_to_app"), style: .plain, target: self, action: #selector(logOut))
+        self.navigationItem.leftBarButtonItems = [logoutButton]
         // Do any additional setup after loading the view.
     }
-
+    func logOut(){
+        Qiscus.clear()
+        self.appDelegate.goToLoginView()
+    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
