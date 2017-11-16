@@ -850,7 +850,9 @@ public class QChatService:NSObject {
                         Qiscus.printLog(text: "error sync message: \(error)")
                         QChatService.inSyncProcess = false
                         QChatService.hasPendingSync = false
-                        QChatService.syncRetryTime += 3.0
+                        if QChatService.syncRetryTime < 180.0 {
+                            QChatService.syncRetryTime += 3.0
+                        }
                         let delay = QChatService.syncRetryTime * Double(NSEC_PER_SEC)
                         let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
                         DispatchQueue.main.asyncAfter(deadline: time, execute: {
@@ -860,13 +862,14 @@ public class QChatService:NSObject {
                         if cloud {
                             QiscusNotification.publish(errorCloudSync: "\(error)")
                         }
-                        
                     }
                 }
                 else{
                     QChatService.inSyncProcess = false
                     QChatService.hasPendingSync = false
-                    QChatService.syncRetryTime += 3.0
+                    if QChatService.syncRetryTime < 180.0 {
+                        QChatService.syncRetryTime += 3.0
+                    }
                     let delay = QChatService.syncRetryTime * Double(NSEC_PER_SEC)
                     let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
                     DispatchQueue.main.asyncAfter(deadline: time, execute: {
