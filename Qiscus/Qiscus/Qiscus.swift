@@ -608,11 +608,9 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             
         }
         Qiscus.connect()
-        
         Qiscus.sync(cloud: true)
     }
     class func printLog(text:String){
-        
         if Qiscus.showDebugPrint{
             let logText = "[Qiscus]: \(text)"
             DispatchQueue.global().sync{
