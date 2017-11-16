@@ -42,10 +42,7 @@ public class QRoomService:NSObject{
                         if commentId <= QiscusMe.sharedInstance.lastCommentId {
                             room.saveOldComment(fromJSON: json)
                         }else{
-                            //room.saveNewComment(fromJSON: json)
-                            QiscusBackgroundThread.async { autoreleasepool{
-                                QChatService.sync()
-                            }}
+                            QChatService.syncProcess()
                         }
                     }
                     room.delegate?.room(didFinishSync: room)

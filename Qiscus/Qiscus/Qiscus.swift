@@ -166,6 +166,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.shared.chatViews = [String:QiscusChatVC]()
         Qiscus.dbConfiguration.deleteRealmIfMigrationNeeded = true
         Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
+        Qiscus.realtimeChannel = [String]()
     }
     @objc public class func unRegisterPN(){
         if Qiscus.isLoggedIn {
@@ -175,12 +176,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     // need Documentation
     func backgroundCheck(cloud:Bool = false){
         if Qiscus.isLoggedIn{
-            QChatService.sync(cloud: cloud)
-//            QiscusBackgroundThread.async { autoreleasepool{
-//                if !Qiscus.realtimeConnected {
-//                    Qiscus.mqttConnect()
-//                }
-//            }}
+            QChatService.syncProcess(cloud: cloud)
         }
     }
     func checkChat(){
@@ -206,7 +202,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         if delegate != nil {
             Qiscus.shared.delegate = delegate
         }
-        QChatService.sync()
+        QChatService.syncProcess()
     }
     @objc public class func setBaseURL(withURL url:String){
         QiscusMe.sharedInstance.baseUrl = url
@@ -610,14 +606,14 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.connect()
         Qiscus.sync(cloud: true)
     }
-    class func printLog(text:String){
+    public class func printLog(text:String){
         if Qiscus.showDebugPrint{
             let logText = "[Qiscus]: \(text)"
             DispatchQueue.global().sync{
                 if Qiscus.saveLog {
                     let date = Date()
                     let df = DateFormatter()
-                    df.dateFormat = "y-MM-dd H:m:ss.SSSS"
+                    df.dateFormat = "y-MM-dd H:m:ss"
                     let dateTime = df.string(from: date)
                     
                     let logFileText = "[Qiscus - \(dateTime)] : \(text)"
@@ -767,7 +763,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             if userInfo["qiscus_sdk"] != nil {
                 let state = Qiscus.shared.application.applicationState
                 if state != .active {
-                    QChatService.sync()
+                    QChatService.syncProcess()
                     if let payloadData = userInfo["payload"]{
                         let jsonPayload = JSON(arrayLiteral: payloadData)[0]
                         let tempComment = QComment.tempComment(fromJSON: jsonPayload)
@@ -1004,8 +1000,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     let commentId = json["id"].intValue
                     if commentId > QiscusMe.sharedInstance.lastCommentId {
                         func syncData(){
-                            let service = QChatService()
-                            service.syncProcess()
+                            QChatService.syncProcess()
                         }
                         let commentType = json["type"].stringValue
                         if commentType == "system_event" {
@@ -1183,7 +1178,7 @@ extension Qiscus:CocoaMQTTDelegate{
     public func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?){
         if Qiscus.isLoggedIn {
             Qiscus.realtimeConnected = false
-            self.sync()
+            Qiscus.sync()
 //            if let timer = self.syncTimer {
 //                timer.invalidate()
 //            }
@@ -1191,11 +1186,16 @@ extension Qiscus:CocoaMQTTDelegate{
         }
     }
     
-    @objc public func sync(){
-        self.backgroundCheck()
-    }
+//    @objc public func sync(){
+//        if Qiscus.isLoggedIn{
+//
+//        }
+//        self.backgroundCheck()
+//    }
     public class func sync(cloud:Bool = false){
-        Qiscus.sharedInstance.backgroundCheck(cloud: cloud)
+        if Qiscus.isLoggedIn{
+            QChatService.syncProcess(cloud: cloud)
+        }
     }
     
     func topViewController(controller: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
