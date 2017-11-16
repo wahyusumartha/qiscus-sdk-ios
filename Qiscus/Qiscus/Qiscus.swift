@@ -27,6 +27,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     static let qiscusVersionNumber:String = "2.6.0"
     
     public static var showDebugPrint = false
+    public static var saveLog:Bool = false
     
     // MARK: - Thread
     static let uiThread = DispatchQueue.main
@@ -611,11 +612,32 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.sync(cloud: true)
     }
     class func printLog(text:String){
+        
         if Qiscus.showDebugPrint{
-            DispatchQueue.global().async{
-                print("[Qiscus]: \(text)")
+            let logText = "[Qiscus]: \(text)"
+            DispatchQueue.global().sync{
+                if Qiscus.saveLog {
+                    let date = Date()
+                    let df = DateFormatter()
+                    df.dateFormat = "y-MM-dd H:m:ss.SSSS"
+                    let dateTime = df.string(from: date)
+                    
+                    let logFileText = "[Qiscus - \(dateTime)] : \(text)"
+                    let logFilePath = Qiscus.logFile()
+                    var dump = ""
+                    if FileManager.default.fileExists(atPath: logFilePath) {
+                        dump =  try! String(contentsOfFile: logFilePath, encoding: String.Encoding.utf8)
+                    }
+                    do {
+                        // Write to the file
+                        try  "\(dump)\n\(logFileText)".write(toFile: logFilePath, atomically: true, encoding: String.Encoding.utf8)
+                    } catch let error as NSError {
+                        print("Failed writing to log file: \(logFilePath), Error: " + error.localizedDescription)
+                    }
+                }
+                print(logText)
             }
-            Qiscus.shared.diagnosticDelegate?.qiscusDiagnostic(sendLog: "[Qiscus]: \(text)")
+            Qiscus.shared.diagnosticDelegate?.qiscusDiagnostic(sendLog: logText)
         }
     }
     
@@ -1219,7 +1241,7 @@ extension Qiscus:CocoaMQTTDelegate{
             for room in rooms {
                 room.subscribeRealtimeStatus()
             }
-            }}
+        }}
     }
 }
 
@@ -1402,6 +1424,23 @@ extension Qiscus { // Public class API to get room
             } catch {
                 Qiscus.printLog(text: "Could not clear Qiscus folder: \(error.localizedDescription)")
             }
+        }
+    }
+    
+    internal class func logFile()->String{
+        let filemanager = FileManager.default
+        let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory,.userDomainMask,true)[0] as NSString
+        let logPath = documentsPath.appendingPathComponent("Qiscus.log")
+        return logPath
+    }
+    
+    public class func removeLogFile(){
+        let filemanager = FileManager.default
+        let logFilePath = Qiscus.logFile()
+        do {
+            try filemanager.removeItem(atPath: logFilePath)
+        } catch {
+            Qiscus.printLog(text: "Could not clear Qiscus folder: \(error.localizedDescription)")
         }
     }
 }
