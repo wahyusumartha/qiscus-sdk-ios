@@ -1477,12 +1477,12 @@ public class QRoom:Object {
                 let roomId = self.id
                 if Thread.isMainThread {
                     Qiscus.chatRooms[id]?.delegate?.room(didDeleteComment: commentIndex.section, row: commentIndex.item)
-                    QiscusNotification.publish(commentDelete:comment, room:self)
+                    QiscusNotification.publish(commentDeleteOnRoom: self)
                 }else{
                     DispatchQueue.main.sync { autoreleasepool {
                         Qiscus.chatRooms[id]?.delegate?.room(didDeleteComment: commentIndex.section, row: commentIndex.item)
                         if let room = QRoom.room(withId: roomId) {
-                            QiscusNotification.publish(commentDelete:comment, room:room)
+                            QiscusNotification.publish(commentDeleteOnRoom:room)
                         }
                     }}
                 }
@@ -1502,12 +1502,14 @@ public class QRoom:Object {
                 }
                 if Thread.isMainThread {
                     Qiscus.chatRooms[id]?.delegate?.room(didDeleteGroupComment: commentIndex.section)
-                    QiscusNotification.publish(commentDelete:comment, room:Qiscus.chatRooms[id]!)
+                    QiscusNotification.publish(commentDeleteOnRoom:self)
                 }else{
+                    let roomId = self.id
                     DispatchQueue.main.sync { autoreleasepool {
-                        Qiscus.chatRooms[id]?.delegate?.room(didDeleteGroupComment: commentIndex.section)
-                        QiscusNotification.publish(commentDelete:comment, room:Qiscus.chatRooms[id]!)
-                        }}
+                        if let room = QRoom.room(withId: roomId){
+                            QiscusNotification.publish(commentDeleteOnRoom:room)
+                        }
+                    }}
                 }
             }
         }

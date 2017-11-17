@@ -816,7 +816,17 @@ open class QiscusChatVC: UIViewController{
     }
     
     @objc private func commentDeleted(_ notification: Notification) {
-        self.collectionView.reloadData()
+        if let userInfo = notification.userInfo {
+            let room = userInfo["room"] as! QRoom
+            
+            if let currentRoom = self.chatRoom {
+                if !currentRoom.isInvalidated && !room.isInvalidated{
+                    if currentRoom.id == room.id {
+                        self.collectionView.reloadData()
+                    }
+                }
+            }
+        }
     }
     
     open func gotNewComment(comment: QComment, room:QRoom) {
