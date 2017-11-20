@@ -751,7 +751,6 @@ public class QChatService:NSObject {
                     }
                 }
                 if let response = responseData.result.value {
-                    print("sync status code: \(responseData.response?.statusCode)")
                     let json = JSON(response)
                     let results = json["results"]
                     let error = json["error"]
