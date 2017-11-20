@@ -1426,7 +1426,6 @@ extension Qiscus { // Public class API to get room
     }
     
     internal class func logFile()->String{
-        let filemanager = FileManager.default
         let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory,.userDomainMask,true)[0] as NSString
         let logPath = documentsPath.appendingPathComponent("Qiscus.log")
         return logPath
