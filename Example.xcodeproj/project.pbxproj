@@ -31,6 +31,10 @@
 		396CBDBE1F6B80390028C3FE /* RoomListVC2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 396CBDBC1F6B80390028C3FE /* RoomListVC2.swift */; };
 		396CBDBF1F6B80390028C3FE /* RoomListVC2.xib in Resources */ = {isa = PBXBuildFile; fileRef = 396CBDBD1F6B80390028C3FE /* RoomListVC2.xib */; };
 		39955B6D1D656D1700927ADD /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 39955B6C1D656D1700927ADD /* Media.xcassets */; };
+		399BD7411FC3BD9700BCD069 /* QRoom+PublicAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399BD7401FC3BD9700BCD069 /* QRoom+PublicAPI.swift */; };
+		399BD7431FC3BDE000BCD069 /* QRoom+PublicProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399BD7421FC3BDE000BCD069 /* QRoom+PublicProperty.swift */; };
+		399BD7471FC3C61200BCD069 /* QRoom+InternalClassMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399BD7461FC3C61200BCD069 /* QRoom+InternalClassMethod.swift */; };
+		399BD7491FC3C74400BCD069 /* QRoom+InternalObjectMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399BD7481FC3C74400BCD069 /* QRoom+InternalObjectMethod.swift */; };
 		39BD59171EB2F1A3001AFB7C /* Qiscus.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 39BD59161EB2F1A3001AFB7C /* Qiscus.podspec */; };
 		39C929C71FB5583F0068EBF3 /* QiscusService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C929C61FB5583F0068EBF3 /* QiscusService.swift */; };
 		39E7542F1F5E7327003C3302 /* SearchResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E7542D1F5E7327003C3302 /* SearchResultVC.swift */; };
@@ -195,6 +199,10 @@
 		39955B6C1D656D1700927ADD /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Media.xcassets; path = Qiscus/Media.xcassets; sourceTree = "<group>"; };
 		39955B801D65A2D900927ADD /* QAsyncImageView.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QAsyncImageView.framework; path = "../../../Library/Developer/Xcode/DerivedData/Example-gfoaldkgffrxjdelneboawwkwliw/Build/Products/Debug-iphonesimulator/QAsyncImageView/QAsyncImageView.framework"; sourceTree = "<group>"; };
 		39955B811D65A2D900927ADD /* QToasterSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QToasterSwift.framework; path = "../../../Library/Developer/Xcode/DerivedData/Example-gfoaldkgffrxjdelneboawwkwliw/Build/Products/Debug-iphonesimulator/QToasterSwift/QToasterSwift.framework"; sourceTree = "<group>"; };
+		399BD7401FC3BD9700BCD069 /* QRoom+PublicAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "QRoom+PublicAPI.swift"; path = "Qiscus/Model/DataModel/Public/QRoom+PublicAPI.swift"; sourceTree = "<group>"; };
+		399BD7421FC3BDE000BCD069 /* QRoom+PublicProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "QRoom+PublicProperty.swift"; path = "Qiscus/Model/DataModel/Public/QRoom+PublicProperty.swift"; sourceTree = "<group>"; };
+		399BD7461FC3C61200BCD069 /* QRoom+InternalClassMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "QRoom+InternalClassMethod.swift"; path = "Qiscus/Model/DataModel/Internal/QRoom+InternalClassMethod.swift"; sourceTree = "<group>"; };
+		399BD7481FC3C74400BCD069 /* QRoom+InternalObjectMethod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "QRoom+InternalObjectMethod.swift"; path = "Qiscus/Model/DataModel/Internal/QRoom+InternalObjectMethod.swift"; sourceTree = "<group>"; };
 		39BD59161EB2F1A3001AFB7C /* Qiscus.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Qiscus.podspec; sourceTree = "<group>"; };
 		39C929C61FB5583F0068EBF3 /* QiscusService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QiscusService.swift; path = Qiscus/Service/QiscusService.swift; sourceTree = "<group>"; };
 		39E7542D1F5E7327003C3302 /* SearchResultVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchResultVC.swift; sourceTree = "<group>"; };
@@ -341,6 +349,8 @@
 		390F446C1E53ED0A00C6B64B /* DataModel */ = {
 			isa = PBXGroup;
 			children = (
+				399BD7451FC3C14B00BCD069 /* Internal */,
+				399BD7441FC3C14100BCD069 /* Public */,
 				39F70F671F3D56E100774D97 /* QComment.swift */,
 				39F70F691F3D56F400774D97 /* QCommentGroup.swift */,
 				39F70F6A1F3D56F400774D97 /* QCommentInfo.swift */,
@@ -428,6 +438,24 @@
 				39F70F901F3D5BBD00774D97 /* ViewController.swift */,
 			);
 			name = Extension;
+			sourceTree = "<group>";
+		};
+		399BD7441FC3C14100BCD069 /* Public */ = {
+			isa = PBXGroup;
+			children = (
+				399BD7401FC3BD9700BCD069 /* QRoom+PublicAPI.swift */,
+				399BD7421FC3BDE000BCD069 /* QRoom+PublicProperty.swift */,
+			);
+			name = Public;
+			sourceTree = "<group>";
+		};
+		399BD7451FC3C14B00BCD069 /* Internal */ = {
+			isa = PBXGroup;
+			children = (
+				399BD7461FC3C61200BCD069 /* QRoom+InternalClassMethod.swift */,
+				399BD7481FC3C74400BCD069 /* QRoom+InternalObjectMethod.swift */,
+			);
+			name = Internal;
 			sourceTree = "<group>";
 		};
 		39E195E81DBDE392000DDF76 /* Library */ = {
@@ -984,6 +1012,7 @@
 				393BE6E11F70B1F90099AD80 /* QRoomListCell.swift in Sources */,
 				393BE6E21F70B1F90099AD80 /* QRoomListDefaultCell.swift in Sources */,
 				39F70FF11F3D619900774D97 /* QCellMediaRight.swift in Sources */,
+				399BD7491FC3C74400BCD069 /* QRoom+InternalObjectMethod.swift in Sources */,
 				39F70FBC1F3D5FE000774D97 /* QVCCollectionView.swift in Sources */,
 				39F70F891F3D5B4400774D97 /* QToasterSwift.swift in Sources */,
 				39F7100F1F3D62FE00774D97 /* QiscusGalleryItem.swift in Sources */,
@@ -992,6 +1021,7 @@
 				394D7A9F1F4E735300E69E1C /* QCellLocationRight.swift in Sources */,
 				39F70F961F3D5BBD00774D97 /* ViewController.swift in Sources */,
 				39F70F6F1F3D56F400774D97 /* QCommentGroup.swift in Sources */,
+				399BD7431FC3BDE000BCD069 /* QRoom+PublicProperty.swift in Sources */,
 				39F710111F3D62FE00774D97 /* QiscusMe.swift in Sources */,
 				39F70FA41F3D5D6F00774D97 /* QiscusUIConfiguration.swift in Sources */,
 				39F70F711F3D56F400774D97 /* QFile.swift in Sources */,
@@ -1024,6 +1054,7 @@
 				39F710191F3D63B500774D97 /* ChatFileButton.swift in Sources */,
 				39F70F951F3D5BBD00774D97 /* UIView.swift in Sources */,
 				39F70FBA1F3D5FE000774D97 /* QVCChatCell.swift in Sources */,
+				399BD7471FC3C61200BCD069 /* QRoom+InternalClassMethod.swift in Sources */,
 				39F70FE11F3D619900774D97 /* QCellAudioLeft.swift in Sources */,
 				39F70F741F3D56F400774D97 /* QUser.swift in Sources */,
 				39F70F731F3D56F400774D97 /* QRoom.swift in Sources */,
@@ -1044,6 +1075,7 @@
 				39F70F701F3D56F400774D97 /* QCommentInfo.swift in Sources */,
 				39F70FA11F3D5D6F00774D97 /* QiscusColorConfiguration.swift in Sources */,
 				39F70F681F3D56E100774D97 /* QComment.swift in Sources */,
+				399BD7411FC3BD9700BCD069 /* QRoom+PublicAPI.swift in Sources */,
 				39F70FEF1F3D619900774D97 /* QCellMediaLeft.swift in Sources */,
 				39F70FB11F3D5F5800774D97 /* QiscusChatVC.swift in Sources */,
 				39F70FB91F3D5FE000774D97 /* QVCAction.swift in Sources */,
