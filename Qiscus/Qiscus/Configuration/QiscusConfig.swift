@@ -13,7 +13,7 @@ open class QiscusConfig: NSObject {
     static let sharedInstance = QiscusConfig()
     
     open var commentPerLoad:Int = 10
-    open var dbSchemaVersion:UInt64 = 57
+    open var dbSchemaVersion:UInt64 = 58
     
     open var UPLOAD_URL = ""
     
@@ -130,18 +130,15 @@ open class QiscusConfig: NSObject {
     }
     open class var LINK_METADATA_URL:String{
         let config = QiscusConfig.sharedInstance
-        //return "\(config.BASE_URL)/topic/\(topicId)/comment/\(commentId)/token/\(config.USER_TOKEN)"
         return "\(config.BASE_API_URL)/get_url_metadata"
     }
     internal class var LOAD_URL:String{
         let config = QiscusConfig.sharedInstance
-        //return "\(config.BASE_URL)/topic/\(topicId)/comment/\(commentId)/token/\(config.USER_TOKEN)"
         return "\(config.BASE_API_URL)/load_comments/"
     }
     open class func LOAD_URL_(withTopicId topicId:Int, commentId:Int)->String{
         let config = QiscusConfig.sharedInstance
         return "\(config.BASE_API_URL)/topic/\(topicId)/comment/\(commentId)/token/\(config.USER_TOKEN)"
-        //return "\(config.BASE_URL)/topic_comments/"
     }
     open class var ROOM_REQUEST_ID_URL:String{
         let config = QiscusConfig.sharedInstance

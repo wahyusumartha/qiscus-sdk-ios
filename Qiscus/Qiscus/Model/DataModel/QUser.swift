@@ -15,7 +15,9 @@ import RealmSwift
     @objc optional func user(didChangeAvatar avatar:UIImage)
     @objc optional func user(didChangeLastSeen lastSeen:Double)
 }
-
+@objc public enum QUserPresence:Int {
+    case offline,online
+}
 public class QUser:Object {
     static var cache = [String: QUser]()
     
@@ -26,15 +28,21 @@ public class QUser:Object {
     public dynamic var storedName:String = ""
     public dynamic var definedName:String = ""
     public dynamic var lastSeen:Double = 0
+    internal dynamic var rawPresence:Int = 0
     
-    public dynamic var fullname:String{
+    public var fullname:String{
         if self.definedName != "" {
             return self.definedName
         }else{
             return self.storedName
         }
     }
-    public dynamic var avatar:UIImage?{
+    public var presence:QUserPresence {
+        get{
+            return QUserPresence(rawValue: self.rawPresence)!
+        }
+    }
+    public var avatar:UIImage?{
         didSet{
             let email = self.email
             let avatar = self.avatar
@@ -154,6 +162,15 @@ public class QUser:Object {
         
         return user
     }
+    internal class func getUser(email:String) -> QUser? {
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        let data = realm.objects(QUser.self).filter("email == '\(email)'")
+        if data.count > 0 {
+            let user = data.first!
+            return user
+        }
+        return nil
+    }
     public class func user(withEmail email:String) -> QUser? {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         if let cachedUser = QUser.cache[email] {
@@ -169,7 +186,22 @@ public class QUser:Object {
         }
         return nil
     }
-    
+    public func updatePresence(presence:QUserPresence){
+        let email = self.email
+        QiscusDBThread.async {
+            if let user = QUser.getUser(email: email){
+                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                try! realm.write {
+                    user.rawPresence = presence.rawValue
+                }
+                DispatchQueue.main.sync {
+                    if let updatedUser = QUser.user(withEmail: email){
+                        QiscusNotification.publish(userPresence: updatedUser)
+                    }
+                }
+            }
+        }
+    }
     public func updateLastSeen(lastSeen:Double){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let time = Double(Date().timeIntervalSince1970)

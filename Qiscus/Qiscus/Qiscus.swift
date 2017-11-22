@@ -1126,21 +1126,23 @@ extension Qiscus:CocoaMQTTDelegate{
                                 }
                             }
                         }}
-                        //                        Qiscus.roomInfo(withId: roomId, lastCommentUpdate: false, onSuccess: { (room) in
-                        //                            QiscusNotification.publish(roomChange: room)
-                        //                        }, onError: { (error) in
-                        //                            Qiscus.printLog(text: "fail to update room: \(error)")
-                        //                        })
                     }
                     break
                 case "s":
-                    let messageArr = messageData.split(separator: ":")
-                    let userEmail = String(channelArr[1])
-                    if userEmail != QiscusMe.sharedInstance.email{
-                        if let timeToken = Double(String(messageArr[1])){
-                            DispatchQueue.main.async { autoreleasepool{
-                                QUser.user(withEmail: userEmail)?.updateLastSeen(lastSeen: Double(timeToken)/1000)
-                                }}
+                    QiscusBackgroundThread.async {
+                        autoreleasepool{
+                            let messageArr = messageData.split(separator: ":")
+                            let userEmail = String(channelArr[1])
+                            let rawPresence = Int(String(channelArr[0]))!
+                            if userEmail != QiscusMe.sharedInstance.email{
+                                if let timeToken = Double(String(messageArr[1])){
+                                    if let user = QUser.getUser(email: userEmail){
+                                        user.updateLastSeen(lastSeen: Double(timeToken)/1000)
+                                        let presence = QUserPresence(rawValue: rawPresence)!
+                                        user.updatePresence(presence: presence)
+                                    }
+                                }
+                            }
                         }
                     }
                     break
