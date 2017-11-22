@@ -151,11 +151,8 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                     })
                 }
             }else if fileType == "public.movie" {
-                
                 let mediaURL = info[UIImagePickerControllerMediaURL] as! URL
                 let fileName = mediaURL.lastPathComponent
-                let fileNameArr = fileName.split(separator: ".")
-                let fileExt:NSString = String(fileNameArr.last!).lowercased() as NSString
                 
                 let mediaData = try? Data(contentsOf: mediaURL)
                 let mediaSize = Double(mediaData!.count) / 1024.0
