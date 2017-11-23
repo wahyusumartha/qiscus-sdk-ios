@@ -109,6 +109,7 @@ public class QComment:Object {
     public dynamic var createdAt: Double = 0
     public dynamic var senderEmail:String = ""
     public dynamic var senderName:String = ""
+    public dynamic var senderAvatarURL:String = ""
     public dynamic var statusRaw:Int = QCommentStatus.sending.rawValue
     public dynamic var typeRaw:String = QCommentType.text.name()
     public dynamic var data:String = ""
@@ -863,6 +864,7 @@ public class QComment:Object {
         let commentUniqueId = json["unique_temp_id"].stringValue
         var commentText = json["message"].stringValue
         let commentSenderName = json["username"].stringValue
+        let commentSenderAvatarURL = json["user_avatar_url"].stringValue
         let commentCreatedAt = json["unix_timestamp"].doubleValue
         let commentBeforeId = json["comment_before_id"].intValue
         let senderEmail = json["email"].stringValue
@@ -876,13 +878,14 @@ public class QComment:Object {
         
         let avatarURL = json["user_avatar_url"].stringValue
         
-        let _ = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL, lastSeen: commentCreatedAt)
+        let _ = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL)
         
         temp.uniqueId = commentUniqueId
         temp.id = commentId
         temp.roomId = roomId
         temp.text = commentText
         temp.senderName = commentSenderName
+        temp.senderAvatarURL = commentSenderAvatarURL
         temp.createdAt = commentCreatedAt
         temp.beforeId = commentBeforeId
         temp.senderEmail = senderEmail

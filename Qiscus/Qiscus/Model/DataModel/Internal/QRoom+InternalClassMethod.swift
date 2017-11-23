@@ -72,23 +72,25 @@ internal extension QRoom {
         return nil
     }
     internal class func getSingleRoom(withUser user:String) -> QRoom? {
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let data =  realm.objects(QRoom.self).filter("singleUser == '\(user)'")
-        
-        if data.count > 0{
-            let room = data.first!
-            if let cachedRoom = Qiscus.chatRooms[room.id] {
-                return cachedRoom
-            }else{
-                room.resetRoomComment()
-                Qiscus.chatRooms[room.id] = room
-                if Qiscus.shared.chatViews[room.id] ==  nil{
-                    let chatView = QiscusChatVC()
-                    chatView.chatRoom = Qiscus.chatRooms[room.id]
-                    Qiscus.shared.chatViews[room.id] = chatView
+        if Thread.isMainThread {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            let data =  realm.objects(QRoom.self).filter("singleUser == '\(user)'")
+            
+            if data.count > 0{
+                let room = data.first!
+                if let cachedRoom = Qiscus.chatRooms[room.id] {
+                    return cachedRoom
+                }else{
+                    room.resetRoomComment()
+                    Qiscus.chatRooms[room.id] = room
+                    if Qiscus.shared.chatViews[room.id] ==  nil{
+                        let chatView = QiscusChatVC()
+                        chatView.chatRoom = Qiscus.chatRooms[room.id]
+                        Qiscus.shared.chatViews[room.id] = chatView
+                    }
+                    Qiscus.sharedInstance.RealtimeConnect()
+                    return room
                 }
-                Qiscus.sharedInstance.RealtimeConnect()
-                return room
             }
         }
         return nil
@@ -170,6 +172,7 @@ internal extension QRoom {
                     let avatarURL = participantJSON["avatar_url"].stringValue
                     let lastReadId = participantJSON["last_comment_read_id"].intValue
                     let lastDeliveredId = participantJSON["last_comment_received_id"].intValue
+                    
                     
                     let savedUser = QUser.saveUser(withEmail: participantEmail, fullname: fullname, avatarURL: avatarURL)
                     

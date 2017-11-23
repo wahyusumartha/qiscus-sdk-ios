@@ -24,7 +24,11 @@ public extension QRoom {
         return QRoom.getRoom(withUniqueId:uniqueId)
     }
     public class func room(withUser user:String) -> QRoom? {
-        return QRoom.getSingleRoom(withUser: user)
+        if Thread.isMainThread {
+            return QRoom.getSingleRoom(withUser: user)
+        }else{
+            return nil
+        }
     }
     public class func addRoom(fromJSON json:JSON)->QRoom{
         return QRoom.addNewRoom(json:json)

@@ -62,6 +62,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     var notificationAction:((QiscusChatVC)->Void)? = nil
     var syncing = false
     var syncTimer: Timer?
+    var userStatusTimer: Timer?
     var delegate:QiscusConfigDelegate?
     public var diagnosticDelegate:QiscusDiagnosticDelegate?
     
@@ -144,7 +145,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     
     @objc public class func clear(){
         Qiscus.clearData()
-        Qiscus.publishUserStatus(offline: true)
+        Qiscus.shared.stopPublishOnlineStatus()
+        for channel in Qiscus.realtimeChannel {
+            Qiscus.shared.mqtt?.unsubscribe(channel)
+        }
         Qiscus.shared.mqtt?.disconnect()
         Qiscus.unRegisterPN()
         QiscusMe.clear()
@@ -904,24 +908,46 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                     let channel = "u/\(QiscusMe.sharedInstance.email)/s"
                     if offline {
                         message = "0"
+                        
                         DispatchQueue.main.async {autoreleasepool{
+                            Qiscus.shared.stopPublishOnlineStatus()
                             Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: true)
                             }}
                     }else{
                         if isActive {
-                            DispatchQueue.main.async { autoreleasepool{
-                                Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: true)
-                                }}
-                            
-                            let when = DispatchTime.now() + 40
-                            QiscusBackgroundThread.asyncAfter(deadline: when) {
-                                Qiscus.publishUserStatus()
-                            }
+                            Qiscus.shared.startPublishOnlineStatus()
                         }
                     }
                     }}
             }
         }
+    }
+    func startPublishOnlineStatus(){
+        if Thread.isMainThread{
+            self.userStatusTimer?.invalidate()
+            self.userStatusTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(Qiscus.publishOnlineStatus), userInfo: nil, repeats: true)
+        }else{
+            DispatchQueue.main.sync {
+                self.userStatusTimer?.invalidate()
+                self.userStatusTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(Qiscus.publishOnlineStatus), userInfo: nil, repeats: true)
+            }
+        }
+    }
+    func publishOnlineStatus(){
+        let channel = "u/\(QiscusMe.sharedInstance.email)/s"
+        //DispatchQueue.main.async {
+            let isActive = (Qiscus.sharedInstance.application.applicationState == UIApplicationState.active)
+            if isActive {
+                self.mqtt?.publish(channel, withString: "1", qos: .qos1, retained: true)
+            }
+        //}
+    }
+    func stopPublishOnlineStatus(){
+        let channel = "u/\(QiscusMe.sharedInstance.email)/s"
+        //DispatchQueue.main.async {
+            self.userStatusTimer?.invalidate()
+            self.mqtt?.publish(channel, withString: "0", qos: .qos1, retained: true)
+        //}
     }
     func goToBackgroundMode(){
         for (_,chatView) in self.chatViews {
@@ -932,11 +958,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                 }
             }
         }
-        
-        Qiscus.publishUserStatus(offline: true)
+        Qiscus.shared.stopPublishOnlineStatus()
     }
     @objc public class func setNotificationAction(onClick action:@escaping ((QiscusChatVC)->Void)){
-        Qiscus.sharedInstance.notificationAction = action
+        Qiscus.shared.notificationAction = action
     }
     
     // MARK: - register PushNotification
@@ -951,11 +976,12 @@ extension Qiscus:CocoaMQTTDelegate{
         if state == .active {
             let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
             mqtt.subscribe(commentChannel, qos: .qos2)
-            Qiscus.publishUserStatus()
+            
             for channel in Qiscus.realtimeChannel{
                 mqtt.subscribe(channel)
             }
             Qiscus.shared.mqtt = mqtt
+            Qiscus.shared.startPublishOnlineStatus()
         }
         if self.syncTimer != nil {
             self.syncTimer?.invalidate()
@@ -969,12 +995,13 @@ extension Qiscus:CocoaMQTTDelegate{
             if activeState {
                 let commentChannel = "\(QiscusMe.sharedInstance.token)/c"
                 mqtt.subscribe(commentChannel, qos: .qos2)
-                Qiscus.publishUserStatus()
+                
                 for channel in Qiscus.realtimeChannel{
                     mqtt.subscribe(channel)
                 }
                 Qiscus.realtimeConnected = true
                 Qiscus.shared.mqtt = mqtt
+                Qiscus.shared.startPublishOnlineStatus()
             }
 //            if self.syncTimer != nil {
 //                self.syncTimer?.invalidate()
@@ -1081,8 +1108,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                 }
                                 room.updateUserTyping(userEmail: data)
                             }
-                            QUser.user(withEmail: userEmail)?.updateLastSeen(lastSeen: Double(Date().timeIntervalSince1970))
-                            }}
+                        }}
                     }
                     break
                 case "d":
@@ -1130,11 +1156,14 @@ extension Qiscus:CocoaMQTTDelegate{
                     break
                 case "s":
                     QiscusBackgroundThread.async {
-                        autoreleasepool{
-                            let messageArr = messageData.split(separator: ":")
-                            let userEmail = String(channelArr[1])
-                            let rawPresence = Int(String(channelArr[0]))!
+                        let messageArr = messageData.split(separator: ":")
+                        let userEmail = String(channelArr[1])
+                        let presenceString = String(messageArr[0])
+                        if let rawPresence = Int(presenceString){
                             if userEmail != QiscusMe.sharedInstance.email{
+                                if userEmail == "userid_761_6286817778889@kiwari-prod.com"{
+                                    print("status user message: \(messageData)")
+                                }
                                 if let timeToken = Double(String(messageArr[1])){
                                     if let user = QUser.getUser(email: userEmail){
                                         user.updateLastSeen(lastSeen: Double(timeToken)/1000)
@@ -1152,7 +1181,6 @@ extension Qiscus:CocoaMQTTDelegate{
                 }
             }
         }}
-        
     }
     public func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopic topic: String){
         if !Qiscus.realtimeChannel.contains(topic) {
@@ -1179,21 +1207,12 @@ extension Qiscus:CocoaMQTTDelegate{
     }
     public func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?){
         if Qiscus.isLoggedIn {
+            Qiscus.shared.stopPublishOnlineStatus()
             Qiscus.realtimeConnected = false
             Qiscus.sync()
-//            if let timer = self.syncTimer {
-//                timer.invalidate()
-//            }
-//            self.syncTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.sync), userInfo: nil, repeats: true)
         }
     }
     
-//    @objc public func sync(){
-//        if Qiscus.isLoggedIn{
-//
-//        }
-//        self.backgroundCheck()
-//    }
     public class func sync(cloud:Bool = false){
         if Qiscus.isLoggedIn{
             QChatService.syncProcess(cloud: cloud)

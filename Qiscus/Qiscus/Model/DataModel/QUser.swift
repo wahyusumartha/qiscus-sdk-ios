@@ -58,7 +58,7 @@ public class QUser:Object {
     public var lastSeenString:String{
         get{
             if self.lastSeen == 0 {
-                return "offline"
+                return ""
             }else{
                 var result = ""
                 let date = Date(timeIntervalSince1970: self.lastSeen)
@@ -71,34 +71,32 @@ public class QUser:Object {
                 let timeString = timeFormatter.string(from: date)
                 
                 let now = Date()
-                let time = Double(now.timeIntervalSince1970)
+
+                let secondDiff = now.offsetFromInSecond(date: date)
+                let minuteDiff = Int(secondDiff/60)
+                let hourDiff = Int(minuteDiff/60)
                 
-                if time < self.lastSeen {
-                    result = "offline"
-                }else{
-                    let secondDiff = now.offsetFromInSecond(date: date)
-                    let minuteDiff = Int(secondDiff/60)
-                    let hourDiff = Int(minuteDiff/60)
-                    
-                    if minuteDiff < 2 {
-                        result = "online"
-                    }
-                    else if minuteDiff < 60 {
-                        result = "\(Int(secondDiff/60)) minute ago"
-                    }else if hourDiff == 1{
-                        result = "an hour ago"
-                    }else if hourDiff < 6 {
-                        result = "\(hourDiff) hours ago"
-                    }
-                    else if date.isToday{
-                        result = "today at \(timeString)"
-                    }
-                    else if date.isYesterday{
-                        result = "yesterday at \(timeString)"
-                    }
-                    else{
-                        result = "\(dateString) at \(timeString)"
-                    }
+                if secondDiff < 60 {
+                    result = "few seconds ago"
+                }
+                else if minuteDiff == 1 {
+                    result = "a minute ago"
+                }
+                else if minuteDiff < 60 {
+                    result = "\(Int(secondDiff/60)) minute ago"
+                }else if hourDiff == 1{
+                    result = "an hour ago"
+                }else if hourDiff < 6 {
+                    result = "\(hourDiff) hours ago"
+                }
+                else if date.isToday{
+                    result = "today at \(timeString)"
+                }
+                else if date.isYesterday{
+                    result = "yesterday at \(timeString)"
+                }
+                else{
+                    result = "\(dateString) at \(timeString)"
                 }
                 
                 return result
@@ -157,7 +155,9 @@ public class QUser:Object {
             try! realm.write {
                 realm.add(user)
             }
-            user.cacheObject()
+            if Thread.isMainThread {
+                user.cacheObject()
+            }
         }
         
         return user
@@ -165,6 +165,7 @@ public class QUser:Object {
     internal class func getUser(email:String) -> QUser? {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let data = realm.objects(QUser.self).filter("email == '\(email)'")
+        print("user data count: \(data.count) for email: \(email)")
         if data.count > 0 {
             let user = data.first!
             return user
@@ -182,9 +183,14 @@ public class QUser:Object {
         if data.count > 0 {
             let user = data.first!
             user.cacheObject()
+            user.subscribeRealtimeStatus()
             return user
         }
         return nil
+    }
+    public func subscribeRealtimeStatus(){
+        let channel = "u/\(self.email)/s"
+        Qiscus.shared.mqtt?.subscribe(channel)
     }
     public func updatePresence(presence:QUserPresence){
         let email = self.email
@@ -203,14 +209,22 @@ public class QUser:Object {
         }
     }
     public func updateLastSeen(lastSeen:Double){
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let time = Double(Date().timeIntervalSince1970)
-        if lastSeen > self.lastSeen && lastSeen <= time {
-            try! realm.write {
-                self.lastSeen = lastSeen
-            }
-            if let room = QRoom.room(withUser: self.email) {
-                room.delegate?.room(didChangeUser: room, user: self)
+        let email = self.email
+        QiscusDBThread.async {
+            if let user = QUser.getUser(email: email){
+                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                if lastSeen > user.lastSeen {
+                    try! realm.write {
+                        user.lastSeen = lastSeen
+                    }
+                    DispatchQueue.main.async {
+                        if let room = QRoom.room(withUser: email) {
+                            if let mainUser = QUser.user(withEmail: email){
+                                room.delegate?.room(didChangeUser: room, user: mainUser)
+                            }
+                        }
+                    }
+                }
             }
         }
     }

@@ -119,13 +119,9 @@ internal extension QRoom {
             }
         }
         
-        //QiscusBackgroundThread.async {
         DispatchQueue.main.async {
             for channel in channels{
                 Qiscus.shared.mqtt?.subscribe(channel)
-                if !Qiscus.realtimeChannel.contains(channel){
-                    Qiscus.realtimeChannel.append(channel)
-                }
             }
         }
         
@@ -174,8 +170,9 @@ internal extension QRoom {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let _ = newComment.textSize
         let roomId = self.id
-        if let user = QUser.user(withEmail: newComment.senderEmail){
-            user.updateLastSeen(lastSeen: newComment.createdAt)
+        let user = QUser.user(withEmail: newComment.senderEmail)
+        if user == nil {
+            let _ = QUser.saveUser(withEmail: newComment.senderEmail, fullname: newComment.senderName, avatarURL: newComment.senderAvatarURL)
         }
         if self.comments.count == 0 {
             let commentGroup = QCommentGroup()
@@ -187,7 +184,7 @@ internal extension QRoom {
             try! realm.write {
                 self.comments.append(commentGroup)
             }
-            QCommentGroup.cache["\(newComment.uniqueId)"] = commentGroup
+//            QCommentGroup.cache["\(newComment.uniqueId)"] = commentGroup
             if !onTop {
                 if Thread.isMainThread {
                     Qiscus.chatRooms[roomId]?.delegate?.room?(gotNewGroupComment: 0)
@@ -294,7 +291,7 @@ internal extension QRoom {
                 let section = self.commentsGroupCount - 1
                 DispatchQueue.main.async { autoreleasepool {
                     Qiscus.chatRooms[roomId]?.delegate?.room?(gotNewGroupComment: section)
-                    }}
+                }}
                 self.updateUnreadCommentCount()
             }
             self.updateLastComentInfo(comment: newComment)
@@ -303,7 +300,7 @@ internal extension QRoom {
                     if !newComment.isInvalidated  {
                         roomDelegate.gotNewComment(newComment)
                     }
-                    }}
+                }}
             }
         }
         newComment.cacheObject()
@@ -583,6 +580,7 @@ internal extension QRoom {
         let commentUniqueId = json["unique_temp_id"].stringValue
         var commentText = json["message"].stringValue
         let commentSenderName = json["username"].stringValue
+        let commentSenderAvatarURL = json["user_avatar_url"].stringValue
         let commentCreatedAt = json["unix_timestamp"].doubleValue
         let commentBeforeId = json["comment_before_id"].intValue
         let senderEmail = json["email"].stringValue
@@ -592,7 +590,7 @@ internal extension QRoom {
             commentText = json["payload"]["text"].stringValue
         }
         let avatarURL = json["user_avatar_url"].stringValue
-        let _ = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL, lastSeen: commentCreatedAt)
+        let _ = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL)
         
         let savedParticipant = self.participants.filter("email == '\(senderEmail)'")
         if savedParticipant.count > 0 {
@@ -625,6 +623,7 @@ internal extension QRoom {
         newComment.roomName = self.name
         newComment.roomTypeRaw = self.typeRaw
         newComment.rawExtra = commentExtras
+        newComment.senderAvatarURL = commentSenderAvatarURL
         
         var status = QCommentStatus.sent
         if newComment.id < self.lastParticipantsReadId {

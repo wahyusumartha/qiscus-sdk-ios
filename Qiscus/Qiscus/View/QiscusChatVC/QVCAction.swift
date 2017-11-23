@@ -198,24 +198,54 @@ extension QiscusChatVC {
     func startTypingIndicator(withUser user:String){
         self.typingIndicatorUser = user
         self.isTypingOn = true
-        let typingText = "\(user) is typing ..."
-        self.subtitleLabel.text = typingText
+        var typingText = ""
+        if let subtitle = self.subtitleLabel.text{
+            self.subtitleText = subtitle
+        }
+        if self.chatRoom?.type != .single {
+            typingText = "\(user) "
+        }
+        typingText = "\(typingText) is typing ..."
+        if self.subtitleText == "" {
+            // reduce title height
+            var frame = self.titleLabel.frame
+            frame.size.height = 17
+            UIView.animate(withDuration: 3.0, animations: {
+                self.titleLabel.frame = frame
+            }, completion: { (_) in
+                self.subtitleLabel.text = typingText
+            })
+        }else{
+            self.subtitleLabel.text = typingText
+        }
         if self.remoteTypingTimer != nil {
             if self.remoteTypingTimer!.isValid {
                 self.remoteTypingTimer?.invalidate()
             }
         }
-        //self.remoteTypingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.stopTypingIndicator), userInfo: nil, repeats: false)
+        self.remoteTypingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(QiscusChatVC.stopTypingIndicator), userInfo: nil, repeats: false)
     }
     
     func stopTypingIndicator(){
+        var frame = self.titleLabel.frame
+        frame.size.height = 30
+        if self.subtitleText == "" {
+            // increase title height
+            self.subtitleLabel.text = self.subtitleText
+            UIView.animate(withDuration: 0.5, animations: {
+                self.titleLabel.frame = frame
+            })
+        }else{
+            self.subtitleLabel.text = self.subtitleText
+            self.subtitleText = ""
+        }
+        
         self.typingIndicatorUser = ""
         self.isTypingOn = false
         if self.remoteTypingTimer != nil {
             self.remoteTypingTimer?.invalidate()
             self.remoteTypingTimer = nil
         }
-        self.loadSubtitle()
     }
     
     func showNoConnectionToast(){
@@ -340,12 +370,19 @@ extension QiscusChatVC {
         }}
     }
     func loadSubtitle(){
-        if self.chatRoom != nil && !self.chatRoom!.isInvalidated {
+        
+        if self.chatRoom != nil{
+            if self.chatRoom!.isInvalidated {return}
         DispatchQueue.main.async {autoreleasepool{
+            var prevSubtitle = ""
+            if let currentSubtitle = self.subtitleLabel.text {
+                prevSubtitle = currentSubtitle
+            }
             if self.chatSubtitle == nil || self.chatSubtitle == ""{
                 if let room = self.chatRoom {
-                    var subtitleString = "You"
+                    var subtitleString = ""
                     if room.type == .group{
+                        subtitleString = "You"
                         for participant in room.participants{
                             if participant.email != QiscusMe.sharedInstance.email {
                                 if let user = participant.user {
@@ -358,36 +395,59 @@ extension QiscusChatVC {
                             for participant in room.participants {
                                 if participant.email != QiscusMe.sharedInstance.email{
                                     if let user = participant.user{
-                                        if user.lastSeen == Double(0){
-                                            subtitleString = "is offline"
-                                        }else{
-                                            if user.lastSeenString == "online" {
-                                                subtitleString = "is online"
-                                            }else{
-                                                subtitleString = "last seen: \(user.lastSeenString)"
+                                        if user.presence == .offline{
+                                            let lastSeenString = user.lastSeenString
+                                            if lastSeenString != "" {
+                                                subtitleString = "lastSeen: \(user.lastSeenString)"
                                             }
+                                        }else{
+                                            subtitleString = "online"
                                         }
                                     }
                                     break
                                 }
                             }
                         }else{
-                            subtitleString = "not available"
+                            subtitleString = ""
                         }
                     }
-                    if subtitleString != "not available" {
-                        if subtitleString == "is online" || subtitleString.contains("minute") || subtitleString.contains("hours") {
-                            var delay = 60.0 * Double(NSEC_PER_SEC)
-                            if subtitleString.contains("hours"){
-                                delay = 3600.0 * Double(NSEC_PER_SEC)
-                            }
-                            let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
-                            DispatchQueue.main.asyncAfter(deadline: time, execute: {
-                                self.loadSubtitle()
-                            })
-                        }
+                    var frame = self.titleLabel.frame
+                    
+                    if subtitleString == "" && prevSubtitle == "" && frame.size.height == 17 && room.type == .single{
+                        self.subtitleLabel.text = ""
+                        frame.size.height = 30
+                        UIView.animate(withDuration: 0.5, animations: {
+                            self.titleLabel.frame = frame
+                        })
                     }
-                    self.subtitleLabel.text = subtitleString
+                    else if subtitleString == "" && prevSubtitle != "" && room.type == .single{
+                        // increase title height
+                        self.subtitleLabel.text = ""
+                        frame.size.height = 30
+                        UIView.animate(withDuration: 0.5, animations: {
+                            self.titleLabel.frame = frame
+                        })
+                    }else if subtitleString != "" && prevSubtitle == "" && room.type == .single{
+                        // reduce titleHeight
+                        frame.size.height = 17
+                        UIView.animate(withDuration: 0.5, animations: {
+                            self.titleLabel.frame = frame
+                        }, completion: { (_) in
+                            self.subtitleLabel.text = subtitleString
+                        })
+                    }else{
+                        self.subtitleLabel.text = subtitleString
+                    }
+                    if subtitleString.contains("minute") || subtitleString.contains("hours") || subtitleString.contains("seconds"){
+                        var delay = 60.0 * Double(NSEC_PER_SEC)
+                        if subtitleString.contains("hours"){
+                            delay = 3600.0 * Double(NSEC_PER_SEC)
+                        }
+                        let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
+                        DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                            self.loadSubtitle()
+                        })
+                    }
                 }
             }else{
                 self.subtitleLabel.text = self.chatSubtitle!

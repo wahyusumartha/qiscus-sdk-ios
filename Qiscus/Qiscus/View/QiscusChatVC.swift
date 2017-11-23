@@ -58,6 +58,7 @@ open class QiscusChatVC: UIViewController{
     var isPresence:Bool = false
     public var titleLabel = UILabel()
     public var subtitleLabel = UILabel()
+    internal var subtitleText:String = ""
     var roomAvatarImage:UIImage?
     public var roomAvatar = UIImageView()
     var roomAvatarLabel = UILabel()
@@ -427,7 +428,9 @@ open class QiscusChatVC: UIViewController{
         self.titleView.addSubview(self.roomAvatarLabel)
         
     }
-    
+    open func setupTitleView(){
+        
+    }
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -519,9 +522,10 @@ open class QiscusChatVC: UIViewController{
         center.addObserver(self, selector: #selector(QiscusChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
         center.addObserver(self, selector: #selector(QiscusChatVC.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
         center.addObserver(self, selector: #selector(QiscusChatVC.commentDeleted(_:)), name: QiscusNotification.COMMENT_DELETE, object: nil)
-        
-        view.endEditing(true)
+        center.addObserver(self, selector: #selector(QiscusChatVC.userPresenceChanged(_:)), name: QiscusNotification.USER_PRESENCE, object: nil)
+        center.addObserver(self, selector: #selector(QiscusChatVC.userTyping(_:)), name: QiscusNotification.USER_TYPING, object: nil)
         center.addObserver(self, selector: #selector(QiscusChatVC.appDidEnterBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
+        view.endEditing(true)
         if firstLoad {
             self.firstLoadSetup()
             self.collectionView.isHidden = true
@@ -536,6 +540,7 @@ open class QiscusChatVC: UIViewController{
         }
         self.chatRoom?.updateUnreadCommentCount(count: 0)
     }
+    
     override open func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if self.chatRoom == nil {
@@ -799,6 +804,53 @@ open class QiscusChatVC: UIViewController{
             self.chatMessage = nil
         }
     }
+    // MARK: - userPresence Handler
+    @objc private func userPresenceChanged(_ notification: Notification) {
+        if let room = self.chatRoom {
+            if let userInfo = notification.userInfo {
+                let user = userInfo["user"] as! QUser
+                if let participantData = room.participant(withEmail: user.email){
+                    if let participant = participantData.user {
+                        self.participantPresenceChanged(participant: participant)
+                    }
+                }
+            }
+        }
+    }
+    open func participantPresenceChanged(participant: QUser){
+        if let room = self.chatRoom {
+            if room.type == .single {
+                self.loadSubtitle()
+            }
+        }
+    }
+    
+    // MARK: - userTyping handler
+    @objc private func userTyping(_ notification: Notification){
+        if let userInfo = notification.userInfo {
+            let user = userInfo["user"] as! QUser
+            let typing = userInfo["typing"] as! Bool
+            let room = userInfo["room"] as! QRoom
+            if room.isInvalidated || user.isInvalidated {
+                return
+            }
+            if let currentRoom = self.chatRoom {
+                if currentRoom.isInvalidated { return }
+            }
+            if self.chatRoom!.id == room.id {
+                self.userTypingChanged(user: user, typing: typing)
+            }
+        }
+    }
+    open func userTypingChanged(user: QUser, typing:Bool){
+        if user.isInvalidated {return}
+        print("typing: \(typing) ::: \(user.fullname) ::: \(self.typingIndicatorUser)")
+        if !typing {
+            self.stopTypingIndicator()
+        }else{
+            self.startTypingIndicator(withUser: user.fullname)
+        }
+    }
     // MARK: - New Comment Handler
     @objc private func newCommentNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
@@ -978,13 +1030,13 @@ extension QiscusChatVC:QRoomDelegate{
     }
     
     public func room(userDidTyping userEmail: String) {
-        if userEmail == "" {
-            self.stopTypingIndicator()
-        }else{
-            if let user = QUser.user(withEmail: userEmail) {
-                self.startTypingIndicator(withUser: user.fullname)
-            }
-        }
+//        if userEmail == "" {
+//            self.stopTypingIndicator()
+//        }else{
+//            if let user = QUser.user(withEmail: userEmail) {
+//                self.startTypingIndicator(withUser: user.fullname)
+//            }
+//        }
     }
     public func room(didDeleteComment section: Int, row: Int) {
         self.collectionView.reloadData()

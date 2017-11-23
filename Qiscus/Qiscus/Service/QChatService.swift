@@ -1264,8 +1264,8 @@ public class QChatService:NSObject {
                 if page != nil {
                     parameters["page"] = page as AnyObject
                 }
-                //Qiscus.printLog(text: "room list url: \(QiscusConfig.SEARCH_URL)")
-                //Qiscus.printLog(text: "room list parameters: \(parameters)")
+                Qiscus.printLog(text: "room list url: \(QiscusConfig.SEARCH_URL)")
+                Qiscus.printLog(text: "room list parameters: \(parameters)")
                 QiscusService.session.request(QiscusConfig.ROOMLIST_URL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
                     //Qiscus.printLog(text: "room list result: \(response)")
                     switch response.result {
