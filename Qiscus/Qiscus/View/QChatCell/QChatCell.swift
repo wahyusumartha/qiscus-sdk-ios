@@ -75,7 +75,7 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
     func updateStatus(toStatus status:QCommentStatus){
         // implementation will be overrided on child class
     }
-    open func resend(){
+    @objc open func resend(){
         if let room = QRoom.room(withId: self.comment!.roomId) {
             if self.comment!.type == .text {
                 room.updateCommentStatus(inComment: self.comment!, status: .sending)
@@ -98,29 +98,29 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
             }
         }
     }
-    open func reply(){
+    @objc open func reply(){
         self.delegate?.didReply(comment: self.comment!)
     }
-    public func forward(){
+    @objc public func forward(){
         self.delegate?.didForward(comment: self.comment!)
         if let chatView = Qiscus.shared.chatViews[self.comment!.roomId]{
             chatView.forward(comment: self.comment!)
         }
     }
-    open func deleteComment(){
+    @objc open func deleteComment(){
         if let room = QRoom.room(withId: self.comment!.roomId){
             room.deleteComment(comment: self.comment!)
         }
     }
-    open func info(){
+    @objc open func info(){
         self.delegate?.getInfo(comment: self.comment!)
     }
-    open func share(){
+    @objc open func share(){
         if let comment = self.comment {
             self.delegate?.didShare(comment: comment)
         }
     }
-    open func showFile(){
+    @objc open func showFile(){
         if let chatView = Qiscus.shared.chatViews[self.comment!.roomId] {
             if let file = self.comment!.file {
                 if file.ext == "pdf" || file.ext == "pdf_" || file.ext == "doc" || file.ext == "docx" || file.ext == "ppt" || file.ext == "pptx" || file.ext == "xls" || file.ext == "xlsx" || file.ext == "txt" {
