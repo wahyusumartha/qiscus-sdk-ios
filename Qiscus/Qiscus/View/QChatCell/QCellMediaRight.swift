@@ -296,7 +296,7 @@ class QCellMediaRight: QChatCell {
             self.imageDisplay.addGestureRecognizer(tapRecognizer!)
         }
     }
-    func didTapImage(){
+    @objc func didTapImage(){
         if !self.comment!.isUploading && !self.comment!.isDownloading{
             if let file = self.comment!.file{
                 if QFileManager.isFileExist(inLocalPath: file.localPath){

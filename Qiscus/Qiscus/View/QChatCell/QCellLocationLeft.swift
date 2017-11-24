@@ -74,7 +74,7 @@ class QCellLocationLeft: QChatCell {
         dateLabel.text = self.comment!.time.lowercased()
         
     }
-    func openMap(){
+    @objc func openMap(){
         let payload = JSON(parseJSON: self.comment!.data)
         
         let latitude: CLLocationDegrees = payload["latitude"].doubleValue

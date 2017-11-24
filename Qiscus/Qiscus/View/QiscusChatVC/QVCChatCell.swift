@@ -224,7 +224,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
             seeAllButton.tintColor = UIColor.white
             seeAllButton.imageView?.contentMode = .scaleAspectFit
             
-            let gallery = GalleryViewController(startIndex: currentIndex, itemsDatasource: self, displacedViewsDatasource: nil, configuration: self.galleryConfiguration())
+            let gallery = GalleryViewController(startIndex: currentIndex, itemsDataSource: self, configuration: self.galleryConfiguration())
             self.presentImageGallery(gallery)
         }
     }

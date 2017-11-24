@@ -98,7 +98,7 @@ class QCellCardLeft: QChatCell {
         self.cardHeight.constant = 90 + yPos
         self.containerView.layoutIfNeeded()
     }
-    func cardButtonTapped(_ sender: QCardButton) {
+    @objc func cardButtonTapped(_ sender: QCardButton) {
         let data = JSON(parseJSON: sender.payload)
         self.delegate?.didTapPostbackButton(withData: data)
     }

@@ -113,7 +113,7 @@ class QCellPostbackLeft: QChatCell {
        
     }
     
-    func postback(sender:UIButton){
+    @objc func postback(sender:UIButton){
         let allData = JSON(parseJSON: self.comment!.data).arrayValue
         if allData.count > sender.tag {
             let data = allData[sender.tag]
@@ -121,7 +121,7 @@ class QCellPostbackLeft: QChatCell {
         }
     }
     
-    func accountLinking(sender:UIButton){
+    @objc func accountLinking(sender:UIButton){
         let data = JSON(parseJSON: self.comment!.data)
         self.delegate?.didTapAccountLinking(withData: data)
     }

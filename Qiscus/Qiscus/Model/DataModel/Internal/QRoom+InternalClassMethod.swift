@@ -216,7 +216,7 @@ internal extension QRoom {
                 var index = 0
                 for participant in room.participants{
                     if !participantString.contains(participant.email){
-                        room.participants.remove(objectAtIndex: index)
+                        room.participants.remove(at: index)
                     }
                     index += 1
                 }

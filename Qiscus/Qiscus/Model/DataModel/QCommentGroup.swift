@@ -12,10 +12,10 @@ import RealmSwift
 public class QCommentGroup: Object{
     static var cache = [String: QCommentGroup]()
     
-    public dynamic var id: String = ""
-    public dynamic var createdAt: Double = 0
-    public dynamic var senderEmail: String = ""
-    public dynamic var senderName: String = ""
+    @objc public dynamic var id: String = ""
+    @objc public dynamic var createdAt: Double = 0
+    @objc public dynamic var senderEmail: String = ""
+    @objc public dynamic var senderName: String = ""
     internal let comments = List<QComment>()
     
     public var commentsCount:Int{

@@ -61,7 +61,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         textView.layoutIfNeeded()
         LinkContainer.isHidden = true
     }
-    func openLink(){
+    @objc func openLink(){
         self.delegate?.didTouchLink(onCell: self)
     }
     

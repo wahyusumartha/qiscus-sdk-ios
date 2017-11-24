@@ -663,7 +663,7 @@ open class QiscusChatVC: UIViewController{
     }
     
     // MARK: - Keyboard Methode
-    func keyboardWillHide(_ notification: Notification){
+    @objc func keyboardWillHide(_ notification: Notification){
         let info: NSDictionary = (notification as NSNotification).userInfo! as NSDictionary
         
         let animateDuration = info[UIKeyboardAnimationDurationUserInfoKey] as! Double
@@ -676,7 +676,7 @@ open class QiscusChatVC: UIViewController{
             }
         }, completion: nil)
     }
-    func keyboardChange(_ notification: Notification){
+    @objc func keyboardChange(_ notification: Notification){
         let info:NSDictionary = (notification as NSNotification).userInfo! as NSDictionary
         let keyboardSize = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
         
@@ -698,7 +698,7 @@ open class QiscusChatVC: UIViewController{
     }
     func righRightButtonAction(_ sender: AnyObject) {
     }
-    func goBack() {
+    @objc func goBack() {
         self.isPresence = false
         view.endEditing(true)
         if let room = self.chatRoom {
@@ -716,7 +716,7 @@ open class QiscusChatVC: UIViewController{
     }
     
     // MARK: - Button Action
-    func appDidEnterBackground(){
+    @objc func appDidEnterBackground(){
         self.isPresence = false
         view.endEditing(true)
         self.dismissLoading()

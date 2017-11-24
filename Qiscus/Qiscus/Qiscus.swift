@@ -594,7 +594,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     
     
     
-    func applicationDidBecomeActife(){
+    @objc func applicationDidBecomeActife(){
         Qiscus.checkDatabaseMigration()
         Qiscus.setupReachability()
         if Qiscus.isLoggedIn{
@@ -717,7 +717,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     //    }
     
     // MARK: - Push Notification Setup
-    public func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, forType type: PKPushType) {
+    public func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, for type: PKPushType) {
         if Qiscus.isLoggedIn{
             var token: String = ""
             let deviceToken = credentials.token
@@ -730,7 +730,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             QiscusCommentClient.sharedInstance.registerDevice(withToken: token)
         }
     }
-    public func pushRegistry(_ registry: PKPushRegistry, didReceiveIncomingPushWith payload: PKPushPayload, forType type: PKPushType) {
+    public func pushRegistry(_ registry: PKPushRegistry, didReceiveIncomingPushWith payload: PKPushPayload, for type: PKPushType) {
         if Qiscus.isLoggedIn{
             let payloadData = JSON(payload.dictionaryPayload)
             if let _ = payloadData["qiscus_sdk"].string {
@@ -738,7 +738,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             }
         }
     }
-    public func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenForType type: PKPushType) {
+    public func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType) {
         Qiscus.registerNotification()
     }
     @objc public class func registerNotification(){
@@ -933,7 +933,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             }
         }
     }
-    func publishOnlineStatus(){
+    @objc func publishOnlineStatus(){
         let channel = "u/\(QiscusMe.sharedInstance.email)/s"
         //DispatchQueue.main.async {
             let isActive = (Qiscus.sharedInstance.application.applicationState == UIApplicationState.active)
@@ -949,7 +949,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             self.mqtt?.publish(channel, withString: "0", qos: .qos1, retained: true)
         //}
     }
-    func goToBackgroundMode(){
+    @objc func goToBackgroundMode(){
         for (_,chatView) in self.chatViews {
             if chatView.isPresence {
                 chatView.goBack()

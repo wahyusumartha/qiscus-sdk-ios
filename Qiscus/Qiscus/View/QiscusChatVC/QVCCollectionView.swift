@@ -96,7 +96,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             }
         }
     }
-    public func publishRead(){
+    @objc public func publishRead(){
         if let room = self.chatRoom {
             if !room.isInvalidated{
                 let roomId = room.id

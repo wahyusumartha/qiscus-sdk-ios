@@ -12,7 +12,7 @@ import AVFoundation
 import Photos
 
 // MARK: - GaleryItemDataSource
-extension QiscusChatVC:GalleryItemsDatasource{
+extension QiscusChatVC:GalleryItemsDataSource{
     
     // MARK: - Galery Function
     public func galleryConfiguration()-> GalleryConfiguration{

@@ -43,10 +43,10 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
                 underlineColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor
             }
             return [
-                NSForegroundColorAttributeName: foregroundColorAttributeName,
-                NSUnderlineColorAttributeName: underlineColorAttributeName,
-                NSUnderlineStyleAttributeName: NSUnderlineStyle.styleSingle.rawValue,
-                NSFontAttributeName: Qiscus.style.chatFont
+                NSAttributedStringKey.foregroundColor.rawValue: foregroundColorAttributeName,
+                NSAttributedStringKey.underlineColor.rawValue: underlineColorAttributeName,
+                NSAttributedStringKey.underlineStyle.rawValue: NSUnderlineStyle.styleSingle.rawValue,
+                NSAttributedStringKey.font.rawValue: Qiscus.style.chatFont
             ]
         }
     }

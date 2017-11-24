@@ -84,7 +84,7 @@ class QiscusUploaderVC: UIViewController, UIScrollViewDelegate {
         }
     }
     // MARK: - Keyboard Methode
-    func keyboardWillHide(_ notification: Notification){
+    @objc func keyboardWillHide(_ notification: Notification){
         let info: NSDictionary = (notification as NSNotification).userInfo! as NSDictionary
         
         let animateDuration = info[UIKeyboardAnimationDurationUserInfoKey] as! Double
@@ -94,7 +94,7 @@ class QiscusUploaderVC: UIViewController, UIScrollViewDelegate {
             
         }, completion: nil)
     }
-    func keyboardChange(_ notification: Notification){
+    @objc func keyboardChange(_ notification: Notification){
         let info:NSDictionary = (notification as NSNotification).userInfo! as NSDictionary
         let keyboardSize = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
         

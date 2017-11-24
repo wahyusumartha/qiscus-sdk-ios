@@ -157,7 +157,7 @@ class QCellAudioRight: QCellAudio {
     open override func setupCell(){
         
     }
-    func playButtonTapped(_ sender: UIButton) {
+    @objc func playButtonTapped(_ sender: UIButton) {
         self.isPlaying = true
         DispatchQueue.main.async {
             autoreleasepool{
@@ -168,7 +168,7 @@ class QCellAudioRight: QCellAudio {
         }
     }
     
-    func pauseButtonTapped(_ sender: UIButton) {
+    @objc func pauseButtonTapped(_ sender: UIButton) {
         self.isPlaying = false
         DispatchQueue.main.async {
             autoreleasepool{
@@ -179,7 +179,7 @@ class QCellAudioRight: QCellAudio {
         }
     }
     
-    func downloadButtonTapped(_ sender: UIButton) {
+    @objc func downloadButtonTapped(_ sender: UIButton) {
         self.audioCellDelegate?.didTapDownloadButton(sender, onCell: self)
     }
     

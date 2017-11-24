@@ -226,7 +226,7 @@ extension QiscusChatVC {
         self.remoteTypingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(QiscusChatVC.stopTypingIndicator), userInfo: nil, repeats: false)
     }
     
-    func stopTypingIndicator(){
+    @objc func stopTypingIndicator(){
         var frame = self.titleLabel.frame
         frame.size.height = 30
         if self.subtitleText == "" {
@@ -562,18 +562,33 @@ extension QiscusChatVC {
                         if let user = reply.sender{
                             senderName = user.fullname
                         }
-                        var payloadArray: [(String,Any)] = [
-                            ("replied_comment_sender_email",reply.senderEmail),
+                        payload = JSON(dictionaryLiteral:                ("replied_comment_sender_email",reply.senderEmail),
                             ("replied_comment_id", reply.id),
                             ("text", value),
                             ("replied_comment_message", reply.text),
                             ("replied_comment_sender_username", senderName),
                             ("replied_comment_payload", reply.data)
-                        ]
+                        )
+//                        var payloadArray: (String,Any) =
+//                            ("replied_comment_sender_email",reply.senderEmail),
+//                            ("replied_comment_id", reply.id),
+//                            ("text", value),
+//                            ("replied_comment_message", reply.text),
+//                            ("replied_comment_sender_username", senderName),
+//                            ("replied_comment_payload", reply.data)
+                        
                         if reply.type == .location || reply.type == .contact {
-                            payloadArray.append(("replied_comment_type",reply.typeRaw))
+                            payload = JSON(dictionaryLiteral:
+                                ("replied_comment_sender_email",reply.senderEmail),
+                                ("replied_comment_id", reply.id),
+                                ("text", value),
+                                ("replied_comment_message", reply.text),
+                                ("replied_comment_sender_username", senderName),
+                                ("replied_comment_payload", reply.data),
+                                ("replied_comment_type",reply.typeRaw)
+                            )
                         }
-                        payload = JSON(dictionaryLiteral: payloadArray)
+                        //payload = JSON(dictionaryLiteral: payloadArray)
                         type = .reply
                         self.replyData = nil
                     }
@@ -635,7 +650,7 @@ extension QiscusChatVC {
     func uploadFromCamera(){
         view.endEditing(true)
         if Qiscus.sharedInstance.connected{
-            if AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo) ==  AVAuthorizationStatus.authorized
+            if AVCaptureDevice.authorizationStatus(for: AVMediaType.video) ==  AVAuthorizationStatus.authorized
             {
                 DispatchQueue.main.async(execute: {
                     let picker = UIImagePickerController()
@@ -647,7 +662,7 @@ extension QiscusChatVC {
                     self.present(picker, animated: true, completion: nil)
                 })
             }else{
-                AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeVideo, completionHandler: { (granted :Bool) -> Void in
+                AVCaptureDevice.requestAccess(for: AVMediaType.video, completionHandler: { (granted :Bool) -> Void in
                     if granted {
                         let picker = UIImagePickerController()
                         picker.delegate = self
@@ -767,7 +782,7 @@ extension QiscusChatVC {
             }}
         }
     }
-    func updateTimer(){
+    @objc func updateTimer(){
         if let timerLabel = self.recordBackground.viewWithTag(543) as? UILabel {
             self.recordDuration += 1
             let minutes = Int(self.recordDuration / 60)
@@ -783,7 +798,7 @@ extension QiscusChatVC {
             timerLabel.text = "\(minutesString):\(secondsString)"
         }
     }
-    func updateAudioMeter(){
+    @objc func updateAudioMeter(){
         if let audioRecorder = self.recorder{
             audioRecorder.updateMeters()
             let normalizedValue:CGFloat = pow(10.0, CGFloat(audioRecorder.averagePower(forChannel: 0)) / 20)

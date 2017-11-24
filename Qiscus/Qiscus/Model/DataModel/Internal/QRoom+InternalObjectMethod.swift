@@ -548,7 +548,7 @@ internal extension QRoom {
             for participant in self.participants{
                 if !participantString.contains(participant.email){
                     try! realm.write {
-                        self.participants.remove(objectAtIndex: index)
+                        self.participants.remove(at: index)
                     }
                     participantChanged = true
                 }
