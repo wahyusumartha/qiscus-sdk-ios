@@ -815,6 +815,10 @@ open class QiscusChatVC: UIViewController{
         if let room = self.chatRoom {
             if let userInfo = notification.userInfo {
                 let user = userInfo["user"] as! QUser
+                if room.isInvalidated || user.isInvalidated {
+                    self.goBack()
+                    return
+                }
                 if let participantData = room.participant(withEmail: user.email){
                     if let participant = participantData.user {
                         self.participantPresenceChanged(participant: participant)
