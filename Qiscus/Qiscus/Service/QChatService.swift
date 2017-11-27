@@ -785,9 +785,9 @@ public class QChatService:NSObject {
                                                     }
                                                 }
                                             }else{
-                                                QiscusBackgroundThread.sync { autoreleasepool{
+                                                QiscusBackgroundThread.async { autoreleasepool{
                                                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                                        DispatchQueue.main.sync { autoreleasepool{
+                                                        DispatchQueue.main.async { autoreleasepool{
                                                             let comment = QComment.tempComment(fromJSON: newComment)
                                                             roomDelegate.gotNewComment(comment)
                                                         }}
