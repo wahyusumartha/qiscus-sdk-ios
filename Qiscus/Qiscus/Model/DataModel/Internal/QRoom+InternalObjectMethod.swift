@@ -107,44 +107,53 @@ internal extension QRoom {
         }
     }
     internal func subscribeRoomChannel(){
-        var channels = [String]()
-        
-        channels.append("r/\(self.id)/\(self.id)/+/d")
-        channels.append("r/\(self.id)/\(self.id)/+/r")
-        channels.append("r/\(self.id)/\(self.id)/+/t")
-        
-        for participant in self.participants{
-            if participant.email != QiscusMe.sharedInstance.email {
-                channels.append("u/\(participant.email)/s")
+        let id = self.id
+        QiscusBackgroundThread.async {
+            if let room = QRoom.threadSaveRoom(withId: id) {
+                var channels = [String]()
+                
+                channels.append("r/\(room.id)/\(room.id)/+/d")
+                channels.append("r/\(room.id)/\(room.id)/+/r")
+                channels.append("r/\(room.id)/\(room.id)/+/t")
+                
+                for participant in room.participants{
+                    if participant.email != QiscusMe.sharedInstance.email {
+                        channels.append("u/\(participant.email)/s")
+                    }
+                }
+                
+                DispatchQueue.main.async {
+                    for channel in channels{
+                        Qiscus.shared.mqtt?.subscribe(channel)
+                    }
+                }
             }
         }
-        
-        DispatchQueue.main.async {
-            for channel in channels{
-                Qiscus.shared.mqtt?.subscribe(channel)
-            }
-        }
-        
-        //}
     }
     internal func unsubscribeRoomChannel(){
-        var channels = [String]()
-        
-        channels.append("r/\(self.id)/\(self.id)/+/d")
-        channels.append("r/\(self.id)/\(self.id)/+/r")
-        channels.append("r/\(self.id)/\(self.id)/+/t")
-        
-        for participant in self.participants{
-            if participant.email != QiscusMe.sharedInstance.email {
-                channels.append(participant.email)
+        let id = self.id
+        QiscusBackgroundThread.async {
+            if let room = QRoom.threadSaveRoom(withId: id) {
+                var channels = [String]()
+                
+                channels.append("r/\(room.id)/\(room.id)/+/d")
+                channels.append("r/\(room.id)/\(room.id)/+/r")
+                channels.append("r/\(room.id)/\(room.id)/+/t")
+                
+                for participant in room.participants{
+                    if participant.email != QiscusMe.sharedInstance.email {
+                        channels.append(participant.email)
+                    }
+                }
+                
+                DispatchQueue.global().async {autoreleasepool{
+                    for channel in channels{
+                        Qiscus.shared.mqtt?.unsubscribe(channel)
+                    }
+                }}
             }
         }
         
-        DispatchQueue.global().async {autoreleasepool{
-            for channel in channels{
-                Qiscus.shared.mqtt?.unsubscribe(channel)
-            }
-            }}
     }
     internal func resetRoomComment(){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)

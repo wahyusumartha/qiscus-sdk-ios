@@ -14,6 +14,7 @@ class QChatFooterRight: UICollectionReusableView {
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        let _ = self.avatarImage
         avatarImage.layer.cornerRadius = 19
         avatarImage.clipsToBounds = true
     }

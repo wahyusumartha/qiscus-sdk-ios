@@ -278,10 +278,17 @@ open class QiscusChatVC: UIViewController{
         }
     }
     var contactVC = CNContactPickerViewController()
+    var typingUsers = [String:QUser]()
+    var typingUserTimer = [String:Timer]()
+    var processingTyping = false
+    var previewedTypingUsers = [String]()
     
     public init() {
         super.init(nibName: "QiscusChatVC", bundle: Qiscus.bundle)
         let _ = self.view
+        self.collectionView.register(UINib(nibName: "QCellTypingLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellTypingLeft")
+        self.collectionView.register(UINib(nibName: "QChatEmptyFooter",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: "emptyFooter")
+         self.collectionView.register(UINib(nibName: "QChatEmptyHeaderCell",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeader")
         self.collectionView.register(UINib(nibName: "QChatHeaderCell",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "cellHeader")
         self.collectionView.register(UINib(nibName: "QChatFooterLeft",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: "cellFooterLeft")
         self.collectionView.register(UINib(nibName: "QChatFooterRight",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: "cellFooterRight")
@@ -702,7 +709,6 @@ open class QiscusChatVC: UIViewController{
         self.isPresence = false
         view.endEditing(true)
         if let room = self.chatRoom {
-            //room.unsubscribeRealtimeStatus()
             room.delegate = nil
         }
 //        audioPlayer?.pause()
@@ -842,15 +848,77 @@ open class QiscusChatVC: UIViewController{
             }
         }
     }
+    @objc private func publishStopTyping(timer:Timer){
+        if let user = timer.userInfo as? QUser {
+            if let room = self.chatRoom {
+                QiscusNotification.publish(userTyping: user, room: room, typing: false )
+            }
+        }
+        
+    }
     open func userTypingChanged(user: QUser, typing:Bool){
-        if user.isInvalidated {return}
-        print("typing: \(typing) ::: \(user.fullname) ::: \(self.typingIndicatorUser)")
-        if !typing {
-            self.stopTypingIndicator()
-        }else{
-            self.startTypingIndicator(withUser: user.fullname)
+        if !processingTyping {
+            self.processingTyping = true
+            if user.isInvalidated {return}
+            let beforeEmpty = self.typingUsers.count == 0
+            if !typing {
+                if self.typingUsers[user.email] != nil {
+                    self.typingUsers[user.email] = nil
+                }
+                if let timer = self.typingUserTimer[user.email] {
+                    timer.invalidate()
+                    self.typingUserTimer[user.email] = nil
+                }
+            }else{
+                if self.typingUsers[user.email] == nil {
+                    self.typingUsers[user.email] = user
+                    if let timer = self.typingUserTimer[user.email] {
+                        timer.invalidate()
+                    }
+                    self.typingUserTimer[user.email] = Timer.scheduledTimer(timeInterval: 7.0, target: self, selector: #selector(QiscusChatVC.publishStopTyping(timer:)), userInfo: user, repeats: false)
+                }
+            }
+            var tempPreviewedUser = [String]()
+            var i = 0
+            var changed = false
+            for (key, _) in self.typingUsers.reversed() {
+                if i < 3 {
+                    if !self.previewedTypingUsers.contains(key){
+                        changed = true
+                    }
+                    tempPreviewedUser.append(key)
+                }
+                i += 1
+            }
+            self.previewedTypingUsers = tempPreviewedUser
+            func scroll(){
+                if self.isLastRowVisible{
+                    var item = 0
+                    var section = self.chatRoom!.commentsGroupCount - 1
+                    if self.typingUsers.count > 0 {
+                        section += 1
+                    }else{
+                        if let group = self.chatRoom!.commentGroup(index: section) {
+                            item = group.commentsCount - 1
+                        }
+                    }
+                    let indexPath = IndexPath(item: item, section: section)
+                    self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+                }
+            }
+            if (beforeEmpty && self.typingUsers.count > 0) || (!beforeEmpty && self.typingUsers.count == 0) || changed {
+                self.collectionView.reloadData()
+                scroll()
+            }else if changed{
+                let section = self.chatRoom!.commentsGroupCount
+                let indexPath = IndexPath(item: 0, section: section)
+                self.collectionView.reloadItems(at: [indexPath])
+                scroll()
+            }
+            self.processingTyping = false
         }
     }
+    
     // MARK: - New Comment Handler
     @objc private func newCommentNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {

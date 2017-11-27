@@ -242,17 +242,11 @@ open class QiscusCommentClient: NSObject {
                                 if let delegate = Qiscus.shared.delegate {
                                     delegate.qiscus?(didUnregisterPushNotification: false, error: "cannot unregister device")
                                 }
-//                                DispatchQueue.global().async {
-//                                    self.unRegisterDevice()
-//                                }
                             }
                         }else{
                             if let delegate = Qiscus.shared.delegate {
                                 delegate.qiscus?(didUnregisterPushNotification: false, error: "cannot unregister device")
                             }
-//                            DispatchQueue.global().async {
-//                                self.unRegisterDevice()
-//                            }
                         }
                     })
                     break

@@ -1161,9 +1161,6 @@ extension Qiscus:CocoaMQTTDelegate{
                         let presenceString = String(messageArr[0])
                         if let rawPresence = Int(presenceString){
                             if userEmail != QiscusMe.sharedInstance.email{
-                                if userEmail == "userid_761_6286817778889@kiwari-prod.com"{
-                                    print("status user message: \(messageData)")
-                                }
                                 if let timeToken = Double(String(messageArr[1])){
                                     if let user = QUser.getUser(email: userEmail){
                                         user.updateLastSeen(lastSeen: Double(timeToken)/1000)

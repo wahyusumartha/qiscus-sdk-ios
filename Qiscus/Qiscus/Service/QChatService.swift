@@ -21,6 +21,8 @@ public class QChatService:NSObject {
     static var inSyncProcess:Bool = false
     static var hasPendingSync:Bool = false
     static var syncRetryTime:Double = 3.0
+    static var downloadTasks = [String]()
+    
     // MARK: - reconnect
     private func reconnect(onSuccess:@escaping (()->Void)){
         let email = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_param_email") as? String
@@ -886,23 +888,7 @@ public class QChatService:NSObject {
         }
     }
     // MARK syncMethod
-//    private func sync(first:Bool = true, cloud:Bool = false){
-//        if cloud {
-//            if first {
-//                Qiscus.shared.delegate?.qiscusStartSyncing?()
-//                QiscusNotification.publish(startCloudSync: true)
-//
-//            }
-//            QChatService.syncProcess(first: first, cloud: cloud)
-//        }else{
-//            if first {
-//                //Qiscus.printLog(text: "start syncing process...")
-//                Qiscus.shared.delegate?.qiscusStartSyncing?()
-//            }
-////            NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector( self.syncProcess), object: nil)
-////            self.perform(#selector(self.syncProcess), with: nil, afterDelay: 1.0)
-//        }
-//    }
+
     public class func sync(cloud:Bool = false){
         if Qiscus.isLoggedIn{
             QChatService.syncProcess(cloud: cloud)
@@ -1692,6 +1678,29 @@ public class QChatService:NSObject {
                     break
                 case .failure(let error):
                     onFailed("\(error.localizedDescription)")
+                    break
+                }
+            })
+        }
+    }
+    
+    internal class func downloadImage(url:String, onSuccess:@escaping ((Data)->Void), onFailed: @escaping ((String)->Void)){
+        QiscusRequestThread.async {
+            QiscusService.session.request(url, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil).responseData(completionHandler: { response in
+                switch response.result {
+                case .success:
+                    if let imageData = response.data {
+                        if let _ = UIImage(data: imageData) {
+                            DispatchQueue.main.async {
+                                onSuccess(imageData)
+                            }
+                        }
+                    }
+                    break
+                case .failure:
+                    DispatchQueue.main.async {
+                        onFailed("fail to download image: \(url)")
+                    }
                     break
                 }
             })

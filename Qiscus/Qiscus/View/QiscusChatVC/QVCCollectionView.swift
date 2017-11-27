@@ -15,8 +15,13 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         var itemNumber = 0
         
         if let room = self.chatRoom {
-            itemNumber = room.commentGroup(index: section)!.commentsCount
+            if section < room.commentsGroupCount {
+                itemNumber = room.commentGroup(index: section)!.commentsCount
+            }else{
+                return 1
+            }
         }
+        
         return itemNumber
     }
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -30,42 +35,72 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             }
             sectionNumber = room.commentsGroupCount
         }
+        if self.typingUsers.count > 0 {
+            sectionNumber += 1
+        }
         return sectionNumber
     }
     open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
-        var cell = collectionView.dequeueReusableCell(withReuseIdentifier: comment.cellIdentifier, for: indexPath) as! QChatCell
-        cell.clipsToBounds = true
-        cell.comment = comment
-        cell.delegate = self
-        if let audioCell = cell as? QCellAudio{
-            audioCell.audioCellDelegate = self
-            cell = audioCell
+        if indexPath.section < self.chatRoom!.commentsGroupCount {
+            let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
+            var cell = collectionView.dequeueReusableCell(withReuseIdentifier: comment.cellIdentifier, for: indexPath) as! QChatCell
+            cell.clipsToBounds = true
+            cell.comment = comment
+            cell.delegate = self
+            if let audioCell = cell as? QCellAudio{
+                audioCell.audioCellDelegate = self
+                cell = audioCell
+            }
+            return cell
+        }else{
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cellTypingLeft", for: indexPath) as! QCellTypingLeft
+            
+            cell.users = typingUsers
+            return cell
         }
-        return cell
+        
     }
     open func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        let commentGroup = self.chatRoom!.commentGroup(index: indexPath.section)!
-        
-        if kind == UICollectionElementKindSectionFooter{
-            if commentGroup.senderEmail == QiscusMe.sharedInstance.email{
-                let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterRight", for: indexPath) as! QChatFooterRight
-                return footerCell
+        if indexPath.section < self.chatRoom!.commentsGroupCount {
+            let commentGroup = self.chatRoom!.commentGroup(index: indexPath.section)!
+            
+            if kind == UICollectionElementKindSectionFooter{
+                if commentGroup.senderEmail == QiscusMe.sharedInstance.email{
+                    let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterRight", for: indexPath) as! QChatFooterRight
+                    return footerCell
+                }else{
+                    let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterLeft", for: indexPath) as! QChatFooterLeft
+                    footerCell.user = commentGroup.sender
+                    return footerCell
+                }
             }else{
-                let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterLeft", for: indexPath) as! QChatFooterLeft
-                footerCell.user = commentGroup.sender
-                return footerCell
+                let headerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellHeader", for: indexPath) as! QChatHeaderCell
+            
+                headerCell.dateString = commentGroup.date
+                return headerCell
             }
         }else{
-            let headerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellHeader", for: indexPath) as! QChatHeaderCell
-        
-            headerCell.dateString = commentGroup.date
-            return headerCell
+            if kind == UICollectionElementKindSectionFooter{
+               // if commentGroup.senderEmail == QiscusMe.sharedInstance.email{
+                    let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "emptyFooter", for: indexPath) as! QChatEmptyFooter
+                    return footerCell
+//                }else{
+//                    let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterLeft", for: indexPath) as! QChatFooterLeft
+//                    footerCell.user = commentGroup.sender
+//                    return footerCell
+//                }
+            }else{
+                let headerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "emptyHeader", for: indexPath) as! QChatEmptyHeaderCell
+                
+                //headerCell.dateString = commentGroup.date
+                return headerCell
+            }
         }
     }
     
     // MARK: CollectionView delegate
     open func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if indexPath.section < self.chatRoom!.commentsGroupCount {
         let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
         let group = self.chatRoom!.comments[indexPath.section]
         
@@ -94,6 +129,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             if indexPath.row == group.commentsCount - 1{
                 isLastRowVisible = true
             }
+        }
         }
     }
     public func publishRead(){
@@ -139,9 +175,13 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         }
     }
     open func collectionView(_ collectionView: UICollectionView, shouldShowMenuForItemAt indexPath: IndexPath) -> Bool {
-        return true
+        if indexPath.section < self.chatRoom!.commentsGroupCount {
+            return true
+        }
+        return false
     }
     open func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
+        if indexPath.section < self.chatRoom!.commentsGroupCount {
         let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
         var show = false
         switch action.description {
@@ -207,6 +247,9 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         }
     
         return show
+        }else{
+            return false
+        }
     }
     open func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
         let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
@@ -218,21 +261,27 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     // MARK: CollectionView delegateFlowLayout
     open func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         var height = CGFloat(0)
-        if section > 0 {
-            let commentGroup = self.chatRoom!.commentGroup(index: section)!
-            let commentGroupBefore = self.chatRoom!.commentGroup(index: section - 1)!
-            if commentGroup.date != commentGroupBefore.date{
+        if let room = self.chatRoom {
+            if section >= room.commentsGroupCount{
+                height = 0
+            }else if section > 0 {
+                let commentGroup = room.commentGroup(index: section)!
+                let commentGroupBefore = room.commentGroup(index: section - 1)!
+                if commentGroup.date != commentGroupBefore.date{
+                    height = 35
+                }
+            }else{
                 height = 35
             }
-        }else{
-            height = 35
         }
         return CGSize(width: collectionView.bounds.size.width, height: height)
     }
     open func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
         var height = CGFloat(0)
         var width = CGFloat(0)
-        let commentGroup = self.chatRoom!.commentGroup(index: section)!
+        if let room = self.chatRoom {
+        if section < room.commentsGroupCount {
+        let commentGroup = room.commentGroup(index: section)!
         if commentGroup.senderEmail != QiscusMe.sharedInstance.email{
             let firstComment = commentGroup.comment(index: 0)!
             if firstComment.type != .system {
@@ -240,17 +289,29 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                 width = 44
             }
         }
+        }
+        }
         return CGSize(width: width, height: height)
     }
     open func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        let commentGroup = self.chatRoom!.commentGroup(index: section)!
-        if commentGroup.senderEmail != QiscusMe.sharedInstance.email{
-            return UIEdgeInsets(top: 0, left: 6, bottom: -44, right: 0)
+        if let room = self.chatRoom {
+            if section < room.commentsGroupCount {
+                let commentGroup = room.commentGroup(index: section)!
+                if commentGroup.senderEmail != QiscusMe.sharedInstance.email{
+                    return UIEdgeInsets(top: 0, left: 6, bottom: -44, right: 0)
+                }else{
+                    return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+                }
+            }else{
+                return UIEdgeInsets.zero
+            }
         }else{
-            return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+            return UIEdgeInsets.zero
         }
+        
     }
     open func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        if indexPath.section < self.chatRoom!.commentsGroupCount {
         let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
         var size = comment.textSize
         let firstInSection = indexPath.row == 0
@@ -259,6 +320,9 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         size.height = self.qiscusChatView(cellHeightForComment: comment, defaultHeight: size.height, firstInSection: firstInSection)
         
         return size
+        }else{
+            return CGSize(width: QiscusHelper.screenWidth() - 16, height: CGFloat(54))
+        }
     }
     
 }

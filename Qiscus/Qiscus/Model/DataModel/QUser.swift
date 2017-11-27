@@ -24,11 +24,11 @@ public class QUser:Object {
     public dynamic var email:String = ""
     public dynamic var id:Int = 0
     public dynamic var avatarURL:String = ""
-    public dynamic var avatarLocalPath:String = ""
     public dynamic var storedName:String = ""
     public dynamic var definedName:String = ""
     public dynamic var lastSeen:Double = 0
     internal dynamic var rawPresence:Int = 0
+    internal dynamic var avatarData:Data?
     
     public var fullname:String{
         if self.definedName != "" {
@@ -43,14 +43,13 @@ public class QUser:Object {
         }
     }
     public var avatar:UIImage?{
-        didSet{
-            let email = self.email
-            let avatar = self.avatar
-            if self.avatar != nil {
-                DispatchQueue.main.async {autoreleasepool {
-                    QUser.cache[email]?.delegate?.user?(didChangeAvatar: avatar!)
-                }}
+        get{
+            if let data = self.avatarData {
+                if let image = UIImage(data: data) {
+                    return image
+                }
             }
+            return nil
         }
     }
     public var delegate:QUserDelegate?
@@ -130,6 +129,7 @@ public class QUser:Object {
                 try! realm.write {
                     user.avatarURL = avatarURL!
                 }
+                user.downloadAvatar()
                 user.delegate?.user?(didChangeAvatarURL: avatarURL!)
             }
             if lastSeen != nil && lastSeen! > user.lastSeen{
@@ -165,7 +165,6 @@ public class QUser:Object {
     internal class func getUser(email:String) -> QUser? {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let data = realm.objects(QUser.self).filter("email == '\(email)'")
-        print("user data count: \(data.count) for email: \(email)")
         if data.count > 0 {
             let user = data.first!
             return user
@@ -237,34 +236,6 @@ public class QUser:Object {
             self.delegate?.user?(didChangeName: name)
         }
     }
-    public func saveAvatar(withImage image:UIImage){
-        if !self.isInvalidated {
-            self.avatar = image
-            var filename = self.email.replacingOccurrences(of: ".", with: "_").replacingOccurrences(of: "@", with: "_")
-            QiscusFileThread.async {autoreleasepool{
-                var ext = "png"
-                var avatarData:Data? = nil
-                if let data = UIImagePNGRepresentation(image) {
-                    avatarData = data
-                }else if let data = UIImageJPEGRepresentation(image, 1.0) {
-                    avatarData = data
-                    ext = "jpg"
-                }
-                filename = "\(filename).\(ext)"
-                if avatarData != nil {
-                    let localPath = QFileManager.saveFile(withData: avatarData!, fileName: filename, type: .user)
-                    DispatchQueue.main.async {autoreleasepool{
-                        if !self.isInvalidated {
-                            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-                            try! realm.write {
-                                self.avatarLocalPath = localPath
-                            }
-                        }
-                    }}
-                }
-            }}
-        }
-    }
     public class func all() -> [QUser]{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let data = realm.objects(QUser.self)
@@ -283,10 +254,10 @@ public class QUser:Object {
             }
         }
     }
-    public func clearLocalPath(){
+    public func clearAvatar(){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         try! realm.write {
-            self.avatarLocalPath = ""
+            self.avatarData = nil
         }
     }
     internal func cacheObject(){
@@ -294,6 +265,29 @@ public class QUser:Object {
             if QUser.cache[self.email] == nil {
                 QUser.cache[self.email] = self
             }
+        }
+    }
+    public func downloadAvatar(){
+        let email = self.email
+        let url = self.avatarURL.replacingOccurrences(of: "/upload/", with: "/upload/c_thumb,g_center,h_100,w_100/")
+        if !QChatService.downloadTasks.contains(url){
+            QChatService.downloadImage(url: url, onSuccess: { (data) in
+                QiscusDBThread.async {
+                    if let user = QUser.getUser(email: email){
+                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        try! realm.write {
+                            user.avatarData = data
+                        }
+                        DispatchQueue.main.sync {
+                            if let mainUser = QUser.user(withEmail: email){
+                                QiscusNotification.publish(userAvatarChange: mainUser)
+                            }
+                        }
+                    }
+                }
+            }, onFailed: { (error) in
+                Qiscus.printLog(text: error)
+            })
         }
     }
 }

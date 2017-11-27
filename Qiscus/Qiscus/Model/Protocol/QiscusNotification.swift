@@ -21,6 +21,7 @@ public class QiscusNotification: NSObject {
     public static let COMMENT_DELETE = NSNotification.Name("qiscus_commentDelete")
     public static let USER_PRESENCE = NSNotification.Name("quscys_userPresence")
     public static let USER_TYPING = NSNotification.Name("qiscus_userTyping")
+    public static let USER_AVATAR_CHANGE = NSNotification.Name("qiscus_userAvatarChange")
     public static let MESSAGE_STATUS = NSNotification.Name("qiscus_messageStatus")
     public static let ROOM_CHANGE = NSNotification.Name("qiscus_roomChange")
     public static let ROOM_DELETED = NSNotification.Name("qiscus_roomDeleted")
@@ -33,6 +34,10 @@ public class QiscusNotification: NSObject {
     
     override private init(){
         super.init()
+    }
+    internal class func publish(userAvatarChange user:QUser){
+        let notification = QiscusNotification.shared
+        notification.publish(userAvatarChange: user)
     }
     internal class func publish(userPresence user:QUser){
         let notification = QiscusNotification.shared
@@ -118,6 +123,10 @@ public class QiscusNotification: NSObject {
             self.roomOrderTimer?.invalidate()
         }
         self.roomOrderTimer = Timer.scheduledTimer(timeInterval: 1.3, target: self, selector: #selector(self.publishRoomOrderChange), userInfo: nil, repeats: false)
+    }
+    private func publish(userAvatarChange user:QUser){
+        let userInfo: [AnyHashable: Any] = ["user" : user]
+        self.nc.post(name: QiscusNotification.USER_AVATAR_CHANGE, object: nil, userInfo: userInfo)
     }
     private func publish(userPresence user:QUser){
         let userInfo: [AnyHashable: Any] = ["user" : user]

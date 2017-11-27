@@ -53,6 +53,11 @@ extension UIImage {
                     onSuccess(image)
                 }}
             }else{
+                if QChatService.downloadTasks.contains(urlString) {
+                    return
+                }else{
+                    QChatService.downloadTasks.append(urlString)
+                }
                 if let url = URL(string: urlString){
                     var urlRequest = URLRequest(url: url)
                     
@@ -66,6 +71,8 @@ extension UIImage {
                             DispatchQueue.main.async { autoreleasepool{
                                 onError()
                             }}
+                            let downloadTask = QChatService.downloadTasks.filter { $0 != urlString}
+                            QChatService.downloadTasks = downloadTask
                             Qiscus.printLog(text: "[QiscusImage] : \(String(describing: error!))")
                             return
                         }
@@ -73,10 +80,14 @@ extension UIImage {
                         if let data = data {
                             if let image = UIImage(data: data) {
                                 QiscusImageCache.setObject(image, forKey: urlString as NSString)
+                                let downloadTask = QChatService.downloadTasks.filter { $0 != urlString}
+                                QChatService.downloadTasks = downloadTask
                                 DispatchQueue.main.async { autoreleasepool{
                                     onSuccess(image)
                                 }}
                             }else{
+                                let downloadTask = QChatService.downloadTasks.filter { $0 != urlString}
+                                QChatService.downloadTasks = downloadTask
                                 DispatchQueue.main.async {autoreleasepool{
                                     onError()
                                 }}
@@ -143,7 +154,7 @@ extension UIImage {
     
     public class func gif(name: String) -> UIImage? {
         // Check for existance of gif
-        guard let bundleURL = Bundle.main
+        guard let bundleURL = Qiscus.bundle
             .url(forResource: name, withExtension: "gif") else {
                 Qiscus.printLog(text: "SwiftGif: This image named \"\(name)\" does not exist")
                 return nil
