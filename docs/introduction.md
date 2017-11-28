@@ -44,7 +44,7 @@ To meet your expectation, we suggest you to try our sample app. The sample app i
 
 ## Try Sample App Only
 
-If you simply want to try the IOS sample app, you can direct [here](https://github.com/qiscus/qiscus-sdk-web-sample) to clone our sample app. You can explore features of Qiscus Chat SDK.
+If you simply want to try the IOS sample app, you can direct [here](https://github.com/qiscus/qiscus-sdk-ios-sample) to clone our sample app. You can explore features of Qiscus Chat SDK.
 
 ## Try Sample App With sample dashboard
 
@@ -60,15 +60,15 @@ To start trying sample dashboard on your end, you should do the following steps:
 clone sample dashboard [here](https://github.com/qiscus/dashboard-sample) in our github, or just copy the following code.
 
 ```cmd
-git clone https://github.com/qiscus/dashboard-sample.git
-cd dashboard-sample
+$ git clone https://github.com/qiscus/dashboard-sample.git
+$ cd dashboard-sample
 ```
 
 Before running the sample app, first, you need to install composer. 
 
 ```cmd
-composer install
-php -S localhost:8000
+$ composer install
+$ php -S localhost:8000
 ```
 
 Now you have successfully run the sample dashboard. But please be noted that the sample app is running using our App ID. If you want the sample dashboard to be connected to your app with your own App ID, you need to change App ID and Secret Key in the sample dashboard login page. You can find your own App ID and Secret Key in your own [Qiscus SDK dashboard](https://www.qiscus.com/dashboard).
