@@ -2,7 +2,7 @@
 
 With Qiscus chat SDK (Software Development Kit), You can embed chat feature inside your application quickly and easily without dealing with complexity of real-time comunication infrastucture. We provide Chat UI that has been designed and optimized for easy customization. So, you can modify the UI to show off your branding identity, favorite color, or customize event.
 
-# A Brief About Chat
+## A Brief About Chat
 
 Talking about chat app, you may figure out such messager app like Whatsapp. You might have familiar with the flow, how to start conversation, and do things, like sharing image, inside chat room.  If you want to create chat app, for customer service, for instance, Qiscus Chat SDK enable you to establish chat UI and  functionalities easily. But before dive into it, there are essential basic knowledges you need to know about chat app.
 
@@ -71,7 +71,7 @@ composer install
 php -S localhost:8000
 ```
 
-Now you have successfully run the sample dashboard. But please be noted that the sample app is running using our App ID. If you want the sample dashboard to be connected to your app with your own App ID, you need to change App ID and Secret Key in the sample dashboard login page. You can find your own App ID and Secret Key in your own [Qiscus SDK dashboard](https://www.qiscus.com/dashboard)
+Now you have successfully run the sample dashboard. But please be noted that the sample app is running using our App ID. If you want the sample dashboard to be connected to your app with your own App ID, you need to change App ID and Secret Key in the sample dashboard login page. You can find your own App ID and Secret Key in your own [Qiscus SDK dashboard](https://www.qiscus.com/dashboard).
 
 If you are wondering how our sample app with dashboard worked, here some ilustration :
 ![sample-work](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/how-sample-work.png)
