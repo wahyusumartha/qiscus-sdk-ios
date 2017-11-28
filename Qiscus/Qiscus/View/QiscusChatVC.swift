@@ -910,10 +910,13 @@ open class QiscusChatVC: UIViewController{
                     self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
                 }
             }
-            if (beforeEmpty && self.typingUsers.count > 0) || (!beforeEmpty && self.typingUsers.count == 0) || changed {
+            if (beforeEmpty && self.typingUsers.count > 0) {
                 self.collectionView.reloadData()
                 scroll()
-            }else if changed{
+            }else if (!beforeEmpty && self.typingUsers.count == 0) {
+                self.collectionView.reloadData()
+            }
+            else if changed{
                 let section = self.chatRoom!.commentsGroupCount
                 let indexPath = IndexPath(item: 0, section: section)
                 self.collectionView.reloadItems(at: [indexPath])

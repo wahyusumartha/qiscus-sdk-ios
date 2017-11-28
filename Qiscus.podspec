@@ -18,7 +18,7 @@ s.source       = { :git => "https://github.com/qiscus/qiscus-sdk-ios.git", :tag 
 
 s.source_files  = "Qiscus/**/*.{swift}"
 s.resource_bundles = {
-    'Qiscus' => ['Qiscus/**/*.{storyboard,xib,xcassets,json,imageset,png}']
+    'Qiscus' => ['Qiscus/**/*.{storyboard,xib,xcassets,json,imageset,png,gif}']
 }
 
 s.platform      = :ios, "9.0"

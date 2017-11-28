@@ -41,7 +41,7 @@
 		399BD7571FC7F4DD00BCD069 /* QChatEmptyFooter.xib in Resources */ = {isa = PBXBuildFile; fileRef = 399BD7551FC7F4DD00BCD069 /* QChatEmptyFooter.xib */; };
 		399BD75A1FC7F50800BCD069 /* QChatEmptyHeaderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399BD7581FC7F50800BCD069 /* QChatEmptyHeaderCell.swift */; };
 		399BD75B1FC7F50800BCD069 /* QChatEmptyHeaderCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 399BD7591FC7F50800BCD069 /* QChatEmptyHeaderCell.xib */; };
-		399BD7601FCBF67D00BCD069 /* typing.gif in Resources */ = {isa = PBXBuildFile; fileRef = 399BD75F1FCBF67C00BCD069 /* typing.gif */; };
+		399BD7641FCD10F000BCD069 /* typing.gif in Resources */ = {isa = PBXBuildFile; fileRef = 399BD7631FCD10F000BCD069 /* typing.gif */; };
 		39BD59171EB2F1A3001AFB7C /* Qiscus.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 39BD59161EB2F1A3001AFB7C /* Qiscus.podspec */; };
 		39C929C71FB5583F0068EBF3 /* QiscusService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C929C61FB5583F0068EBF3 /* QiscusService.swift */; };
 		39E7542F1F5E7327003C3302 /* SearchResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E7542D1F5E7327003C3302 /* SearchResultVC.swift */; };
@@ -215,7 +215,7 @@
 		399BD7551FC7F4DD00BCD069 /* QChatEmptyFooter.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = QChatEmptyFooter.xib; path = Qiscus/View/QChatCell/QChatEmptyFooter.xib; sourceTree = "<group>"; };
 		399BD7581FC7F50800BCD069 /* QChatEmptyHeaderCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QChatEmptyHeaderCell.swift; path = Qiscus/View/QChatCell/QChatEmptyHeaderCell.swift; sourceTree = "<group>"; };
 		399BD7591FC7F50800BCD069 /* QChatEmptyHeaderCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = QChatEmptyHeaderCell.xib; path = Qiscus/View/QChatCell/QChatEmptyHeaderCell.xib; sourceTree = "<group>"; };
-		399BD75F1FCBF67C00BCD069 /* typing.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = typing.gif; sourceTree = "<group>"; };
+		399BD7631FCD10F000BCD069 /* typing.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = typing.gif; path = Qiscus/GIF/typing.gif; sourceTree = "<group>"; };
 		39BD59161EB2F1A3001AFB7C /* Qiscus.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Qiscus.podspec; sourceTree = "<group>"; };
 		39C929C61FB5583F0068EBF3 /* QiscusService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QiscusService.swift; path = Qiscus/Service/QiscusService.swift; sourceTree = "<group>"; };
 		39E7542D1F5E7327003C3302 /* SearchResultVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchResultVC.swift; sourceTree = "<group>"; };
@@ -473,7 +473,7 @@
 		399BD75C1FCBF42E00BCD069 /* gif assets */ = {
 			isa = PBXGroup;
 			children = (
-				399BD75F1FCBF67C00BCD069 /* typing.gif */,
+				399BD7631FCD10F000BCD069 /* typing.gif */,
 			);
 			name = "gif assets";
 			sourceTree = "<group>";
@@ -850,6 +850,7 @@
 				393BE6E31F70B1F90099AD80 /* QRoomListDefaultCell.xib in Resources */,
 				39F70FEE1F3D619900774D97 /* QCellFileRight.xib in Resources */,
 				39F70FFA1F3D619900774D97 /* QCellTextRight.xib in Resources */,
+				399BD7641FCD10F000BCD069 /* typing.gif in Resources */,
 				39F70FE81F3D619900774D97 /* QCellCardRight.xib in Resources */,
 				399BD7571FC7F4DD00BCD069 /* QChatEmptyFooter.xib in Resources */,
 				39F70FF61F3D619900774D97 /* QCellSystem.xib in Resources */,
@@ -860,7 +861,6 @@
 				392F18981F4D175800ABE232 /* QCellContactLeft.xib in Resources */,
 				394D7AA01F4E735300E69E1C /* QCellLocationRight.xib in Resources */,
 				39F70FEA1F3D619900774D97 /* QCellContactRight.xib in Resources */,
-				399BD7601FCBF67D00BCD069 /* typing.gif in Resources */,
 				39F70FFD1F3D619900774D97 /* QChatFooterLeft.xib in Resources */,
 				39F70F851F3D5B4400774D97 /* QPopUpView.xib in Resources */,
 				39955B6D1D656D1700927ADD /* Media.xcassets in Resources */,
