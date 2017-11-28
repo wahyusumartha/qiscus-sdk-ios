@@ -10,7 +10,7 @@ You can find your APP ID on your Qiscus app dashboard. Here you can see the pict
 
 ## Configuration
 
-To configure qiscus chat sdk you need to have CocoaPods installed. You can skip this part if you already installed CocoaPods.
+To configure Qiscus Chat SDK you need to have CocoaPods installed. You can skip this part if you already installed CocoaPods.
 
 [CocoaPods](http://cocoapods.org/) is a dependency manager for Cocoa projects and it is available for Swift or Objective-C. Here is how to install CocoaPods :
 
@@ -53,7 +53,7 @@ $ pod install
 To authenticate to SDK server, app needs to have user credential locally stored for further requests. The credential consists of a token that will identify a user in SDK server.
 When you want to disconnect from SDK server,  terminating authentication will be done by clearing the stored credential. You can learn more about disconnecting from Qiscus Chat SDK in the next section.
 Qiscus SDK authentication can be done separately with your main app authentication, especially if your main app has functionality before the messaging features.
-To initiate Qiscus SDK, you need to import Qiscus, then call Qiscus.setup() method to define your App Id, along with your user credentials such as userEmail, userKey, username and avatarURL. Here is how you can do :
+To initiate Qiscus SDK, you need to import Qiscus, then call `Qiscus.setup()` method to define your App Id, along with your user credentials such as userEmail, userKey, username and avatarURL. Here is how you can do :
 
 ```swift
   import Qiscus
@@ -88,7 +88,7 @@ Here are the explanation for the parameters on user setup:
 * **avatarURL** (string, optional): used to display user's avatar, fallback to default avatar if not provided.
 
 You can learn from the figure below to understand what really happened when calling `Qiscus.setup()` function:
-![set user](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/set-user.png)``
+![set user](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/set-user.png)
 
 
 ## Updating a User Profile and Avatar
@@ -97,9 +97,9 @@ After your user account is created, sometimes you may need to update a user info
 
 ```swift
 Qiscus.updateProfile(username: "Your Name", avatarURL: "https://myimage.com/myNewIma...", onSuccess: {
-//  if success, do anything here
+  //  if success, do anything here
 }) { (error) in
-// if error, do anything here
+  // if error, do anything here
 }
 ```
 
@@ -114,7 +114,7 @@ Qiscus.clear()
 
 ## Create Chat Room
 
-**Chat Room** is a place where 2 or more users can chat each other**.** There are 2 type of Chat Room that can be created using Qiscus Chat SDK: 1-on-1 Chat Room and Group Chat Room. For some cases, a room can be identified by room unique id or room name. All activities under Qiscus Chat SDK is inside this Chat Room. You can do whatever you need with the available chat features.
+**Chat Room** is a place where 2 or more users can chat each other. There are 2 type of Chat Room that can be created using Qiscus Chat SDK: 1-on-1 Chat Room and Group Chat Room. For some cases, a room can be identified by room unique id or room name. All activities under Qiscus Chat SDK is inside this Chat Room. You can do whatever you need with the available chat features.
 
 Before to start, you need to enable some permission by implementing few line of codes inside Info.plist file, to allow your app accessing phone camera for sending images, enable sharing location on your device, and many other functionalities. You can do that by right clicking on your Info.plist file → Open As → Source Code, then add the following codes:
 
@@ -153,11 +153,11 @@ Qiscus.shared.locationShare = true
 Specially for iCloud feature, you need to do some steps before you can share files from iCloud to your app :
 
 
-* Make sure you already have IOS Certificate with iCloud ON. You can check it at your [Account Apple Developer](https://developer.apple.com/account) and going to **Certificates, Identifiers & Profiles** menu, select** App IDs, **find your target application, and click the **Edit **Button and make sure** Service iCloud** have you set as Enable
+* Make sure you already have IOS Certificate with iCloud ON. You can check it at your [Account Apple Developer](https://developer.apple.com/account) and going to **Certificates, Identifiers & Profiles** menu, select **App IDs**, find your target application, and click the **Edit** Button and make sure **Service iCloud** have you set as Enable
 ![apple app ids](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-app-ids.png)
 
 * Open **Project** → **Capabilities** → **iCloud**. Set iCloud to be ON
-* On Service menu, make sure** Key-value storage** & **iCloud Documents** is checked
+* On Service menu, make sure **Key-value storage** & **iCloud Documents** is checked
 ![apple app ids](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-icloud-enable.png)
 
 * Add the following code on your project :
@@ -208,7 +208,7 @@ After successfully created your room, you may need to do advance development for
 
 ## Get Rooms List
 
-When a user is having conversation with many other users, either in 1-1 Chat Room or in Group Room, a user may have involved into many rooms and he may want to leave the room and enter it again later. In this case, you need to display list of room the user involved in your app. Please Keep in mind that Qiscus does not provide the UI of list rooms. However, we provide the information the get the list of room. Using QChatService.roomList() method, you can obtain list of room information where your user entered to. This method will return some data that you can benefit to make further modification in your app, for example displaying user rooms.
+When a user is having conversation with many other users, either in 1-1 Chat Room or in Group Room, a user may have involved into many rooms and he may want to leave the room and enter it again later. In this case, you need to display list of room the user involved in your app. Please Keep in mind that Qiscus does not provide the UI of list rooms. However, we provide the information the get the list of room. Using `QChatService.roomList()` method, you can obtain list of room information where your user entered to. This method will return some data that you can benefit to make further modification in your app, for example displaying user rooms.
 
 ```swift
 QChatService.roomList(withLimit: 100, page: page, onSuccess: { (rooms, totalRoom, currentPage, limit) in
@@ -237,7 +237,7 @@ The returned data above provide you several information such as room id, room na
 
 ## Get a room by id
 
-As explained in the previous section, we know how to obtain a roomID by calling roomList() method. To enter to a specific room, you need to pass the roomID to chatView() method. Here is how you can do: 
+As explained in the previous section, we know how to obtain a roomID by calling `roomList()` method. To enter to a specific room, you need to pass the roomID to` chatView()` method. Here is how you can do: 
 When you already know your chat room id, you can easily go to that room. Just call
 
 Swift 3.0
@@ -246,6 +246,7 @@ Swift 3.0
 
 import UIKit
 import Qiscus
+
 class ViewController: UIViewController {
 
   .....
@@ -278,7 +279,7 @@ Typically, you might want users to receive message when user not opening you app
 
 If you already have certificate with APNs, you can skip this tutorial.
 
-1. Create a Certificate Signing Request (CSR) 
+#### 1. Create a Certificate Signing Request (CSR) 
 
 Open **Keychain Access** on your Mac (Applications -> Utilities -> Keychain Access). Select **Request a Certificate From a Certificate Authority**.
 
@@ -294,9 +295,9 @@ In the **Certificate Information** window, do the following:
 ![create csr](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-certificate-assist.png)
 
 
-2. Create a Push Notification SSL Certificate
+#### 2. Create a Push Notification SSL Certificate
 
-Login to your Account Apple Developer at  https://developer.apple.com/account and going to **Certificates, Identifiers & Profiles** menu, select** App IDs, **find your target application, and click the **Edit **Button
+Login to your [Account Apple Developer](https://developer.apple.com/account) and going to **Certificates, Identifiers & Profiles** menu, select **App IDs**, find your target application, and click the **Edit** Button
 
 ![app ids](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-app-ids.png)
 
@@ -312,7 +313,7 @@ Double-click the file and register it to your **login keychain**.
 ![apple download](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-download.png)
 
 
-3. Export a p12 file and Upload it to Qiscus SDK Dashboard
+#### 3. Export a p12 file and Upload it to Qiscus SDK Dashboard
 
 Under **Keychain Access**, click the **Certificates** category from the left menu.
 Find the Push SSL certificate you just registered and right-click it without expanding the certificate. Then select **Export** to save the file to your disk.
@@ -326,7 +327,7 @@ and then upload your P12 file at **Push Notification** section.
 
 ![qiscus-dashboard](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/qiscus-dashboard.png)
 
-4. add some code to your project
+#### 4. Add some code to your project
 
 Final step to enable push notification, you should add the following code to your app, for example you can add it to file **AppDelegate.swift **
 
