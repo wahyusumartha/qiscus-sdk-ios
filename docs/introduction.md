@@ -44,34 +44,34 @@ To meet your expectation, we suggest you to try our sample app. The sample app i
 
 ## Try Sample App Only
 
-If you simply want to try the IOS sample app, you can direct here (https://github.com/qiscus/qiscus-sdk-web-sample) to clone our sample app. You can explore features of Qiscus Chat SDK.
+If you simply want to try the IOS sample app, you can direct [here](https://github.com/qiscus/qiscus-sdk-web-sample) to clone our sample app. You can explore features of Qiscus Chat SDK.
 
 ## Try Sample App With sample dashboard
 
-If you have your own chat app, you may think how to handle your user. In this case, we provide sample dashboard for user management. This sample dashboard can help you to figure out how to work with Qiscus Server Api for more advance functionalities. You can click here (https://www.qiscus.com/documentation/rest/list-api) to know more about Server API.
+If you have your own chat app, you may think how to handle your user. In this case, we provide sample dashboard for user management. This sample dashboard can help you to figure out how to work with Qiscus Server Api for more advance functionalities. You can click [here](https://www.qiscus.com/documentation/rest/list-api) to know more about Server API.
 
 
 Note: We assume that you already downloaded the sample app. The sample app will be needed to work together with the sample dashboard.
 
 
-You can explore the sample dashboard here (https://dashboard-sample.herokuapp.com/) to try it online, or you also can download the source code to deploy it locally or to your own server.
+You can explore the sample dashboard [here](https://dashboard-sample.herokuapp.com/) to try it online, or you also can download the source code to deploy it locally or to your own server.
 
 To start trying sample dashboard on your end, you should do the following steps:
-clone sample dashboard here (https://github.com/qiscus/dashboard-sample) in our github, or just copy the following code.
+clone sample dashboard [here](https://github.com/qiscus/dashboard-sample) in our github, or just copy the following code.
 
-```
+```cmd
 git clone https://github.com/qiscus/dashboard-sample.git
 cd dashboard-sample
 ```
 
 Before running the sample app, first, you need to install composer. 
 
-```
+```cmd
 composer install
 php -S localhost:8000
 ```
 
-Now you have successfully run the sample dashboard. But please be noted that the sample app is running using our App ID. If you want the sample dashboard to be connected to your app with your own App ID, you need to change App ID and Secret Key in the sample dashboard login page. You can find your own App ID and Secret Key in your own (Qiscus SDK dashboard)[https://www.qiscus.com/dashboard].
+Now you have successfully run the sample dashboard. But please be noted that the sample app is running using our App ID. If you want the sample dashboard to be connected to your app with your own App ID, you need to change App ID and Secret Key in the sample dashboard login page. You can find your own App ID and Secret Key in your own [Qiscus SDK dashboard](https://www.qiscus.com/dashboard)
 
 If you are wondering how our sample app with dashboard worked, here some ilustration :
 ![sample-work](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/how-sample-work.png)
