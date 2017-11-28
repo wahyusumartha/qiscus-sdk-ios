@@ -1,4 +1,4 @@
-#Advance Section
+# Advance Section
 
 ## UI Costomization
 
@@ -67,7 +67,7 @@ func qiscusStartSyncing() {
 
 func qiscus(finishSync success: Bool, error: String?) {
    // do anything after synchronizing finished
-   }
+}
 ```
 
 There are some event handlers that are provided by **QiscusRoomDelegate** as listed below :
