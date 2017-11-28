@@ -44,7 +44,7 @@ To meet your expectation, we suggest you to try our sample app. The sample app i
 
 ## Try Sample App Only
 
-If you simply want to try the IOS sample app, you can direct [here](https://github.com/qiscus/qiscus-sdk-ios-sample) to clone our sample app. You can explore features of Qiscus Chat SDK.
+If you simply want to try the IOS sample app, you can direct [here](https://github.com/qiscus/qiscus-sdk-ios-sample-v2) to clone our sample app. You can explore features of Qiscus Chat SDK.
 
 ## Try Sample App With sample dashboard
 
