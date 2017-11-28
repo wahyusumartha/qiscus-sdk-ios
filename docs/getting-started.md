@@ -329,7 +329,7 @@ and then upload your P12 file at **Push Notification** section.
 
 #### 4. Add some code to your project
 
-Final step to enable push notification, you should add the following code to your app, for example you can add it to file **AppDelegate.swift **
+Final step to enable push notification, you should add the following code to your app, for example you can add it to file **AppDelegate.swift**
 
 ```swift
 // AppDelegate.swift
