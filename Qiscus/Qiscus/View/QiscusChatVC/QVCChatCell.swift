@@ -174,7 +174,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                                 if let imageData = try? Data(contentsOf: url) {
                                     if file.type == .image {
                                         if file.ext == "gif"{
-                                            if let image = UIImage.gif(data: imageData){
+                                            if let image = UIImage.qiscusGIF(data: imageData){
                                                 let item = QiscusGalleryItem()
                                                 item.image = image
                                                 item.isVideo = false

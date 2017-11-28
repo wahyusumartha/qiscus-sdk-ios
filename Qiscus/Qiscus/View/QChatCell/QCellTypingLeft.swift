@@ -104,7 +104,7 @@ class QCellTypingLeft: UICollectionViewCell {
             }
             self.avatarAreaWidth.constant = areaWidth
             self.layoutIfNeeded()
-            self.typingAnimation.loadGif(name: "typing")
+            self.typingAnimation.loadQiscusGif(name: "typing")
             onSetup = false
         }
     }

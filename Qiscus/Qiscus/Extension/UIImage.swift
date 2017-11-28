@@ -113,9 +113,9 @@ extension UIImage {
 
 extension UIImageView {
     
-    public func loadGif(name: String) {
+    public func loadQiscusGif(name: String) {
         DispatchQueue.global().async { autoreleasepool{
-            let image = UIImage.gif(name: name)
+            let image = UIImage.qiscusGIF(name: name)
             DispatchQueue.main.async { autoreleasepool{
                 self.image = image
             }}
@@ -126,7 +126,7 @@ extension UIImageView {
 
 extension UIImage {
     
-    public class func gif(data: Data) -> UIImage? {
+    public class func qiscusGIF(data: Data) -> UIImage? {
         // Create source from data
         guard let source = CGImageSourceCreateWithData(data as CFData, nil) else {
             Qiscus.printLog(text: "SwiftGif: Source for the image does not exist")
@@ -136,7 +136,7 @@ extension UIImage {
         return UIImage.animatedImageWithSource(source)
     }
     
-    public class func gif(url: String) -> UIImage? {
+    public class func qiscusGIF(url: String) -> UIImage? {
         // Validate URL
         guard let bundleURL = URL(string: url) else {
             Qiscus.printLog(text: "SwiftGif: This image named \"\(url)\" does not exist")
@@ -149,10 +149,10 @@ extension UIImage {
             return nil
         }
         
-        return gif(data: imageData)
+        return qiscusGIF(data: imageData)
     }
     
-    public class func gif(name: String) -> UIImage? {
+    public class func qiscusGIF(name: String) -> UIImage? {
         // Check for existance of gif
         guard let bundleURL = Qiscus.bundle
             .url(forResource: name, withExtension: "gif") else {
@@ -166,7 +166,7 @@ extension UIImage {
             return nil
         }
         
-        return gif(data: imageData)
+        return qiscusGIF(data: imageData)
     }
     
     internal class func delayForImageAtIndex(_ index: Int, source: CGImageSource!) -> Double {
