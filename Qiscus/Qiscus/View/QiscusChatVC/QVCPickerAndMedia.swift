@@ -74,8 +74,12 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                     let gif:Bool = (imageExt == "gif" || imageExt == "gif_")
                     let jpeg:Bool = (imageExt == "jpg" || imageExt == "jpg_")
                     let png:Bool = (imageExt == "png" || imageExt == "png_")
-                
-                    if jpeg{
+                    let tif:Bool = (imageExt == "tif" || imageExt == "tif_")
+                    
+                    if jpeg || tif{
+                        if tif {
+                            imageName = "\(timeToken).jpg"
+                        }
                         let imageSize = image.size
                         var bigPart = CGFloat(0)
                         if(imageSize.width > imageSize.height){
