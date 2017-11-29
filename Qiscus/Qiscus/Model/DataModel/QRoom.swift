@@ -500,23 +500,23 @@ public class QRoom:Object {
     public func updateUnreadCommentCount(){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let unread = QComment.countComments(afterId: self.lastReadCommentId, roomId: self.id)
-        if self.unreadCommentCount != unread {
+        if self.unreadCount != unread {
             try! realm.write {
-                self.unreadCommentCount = unread
+                self.unreadCount = unread
             }
             let id = self.id
             let lastReadId = self.lastReadCommentId
             DispatchQueue.main.async { autoreleasepool {
                 Qiscus.chatRooms[id]?.delegate?.room(didChangeUnread: lastReadId, unreadCount: unread)
-                }}
+            }}
         }
     }
     public func updateUnreadCommentCount(onSuccess:@escaping ()->Void){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         let unread = QComment.countComments(afterId: self.lastReadCommentId, roomId: self.id)
-        if self.unreadCommentCount != unread {
+        if self.unreadCount != unread {
             try! realm.write {
-                self.unreadCommentCount = unread
+                self.unreadCount = unread
             }
         }
         onSuccess()

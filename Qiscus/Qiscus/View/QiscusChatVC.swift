@@ -244,7 +244,7 @@ open class QiscusChatVC: UIViewController{
     var isLastRowVisible: Bool = false {
         didSet{
             bottomButton.isHidden = isLastRowVisible
-            if self.chatRoom!.unreadCommentCount > 0 {
+            if self.chatRoom!.unreadCount > 0 {
                 unreadIndicator.isHidden = isLastRowVisible
             }else{
                 unreadIndicator.isHidden = true
@@ -576,23 +576,6 @@ open class QiscusChatVC: UIViewController{
             
         }else{
             self.collectionView.reloadData()
-            
-            self.chatRoom?.updateUnreadCommentCount {
-                if self.chatRoom!.unreadCommentCount > 0 {
-                    self.isLastRowVisible = false
-                    var unreadText = "\(self.chatRoom!.unreadCommentCount)"
-                    if self.chatRoom!.unreadCommentCount > 99 {
-                        unreadText = "99+"
-                    }
-                    self.unreadIndicator.text = unreadText
-                    self.unreadIndicator.isHidden = false
-                    self.dataLoaded = true
-                    self.chatRoom!.delegate = self
-                }else{
-                    self.dataLoaded = true
-                    self.chatRoom!.delegate = self
-                }
-            }
             
             if let target = self.chatTarget {
                 if let indexPath = self.chatRoom?.getIndexPath(ofComment: target){
