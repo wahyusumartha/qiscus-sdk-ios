@@ -547,7 +547,6 @@ open class QiscusChatVC: UIViewController{
         }else{
             sendButton.isEnabled = true
         }
-        self.chatRoom?.updateUnreadCommentCount(count: 0)
     }
     
     override open func viewDidAppear(_ animated: Bool) {
@@ -577,6 +576,7 @@ open class QiscusChatVC: UIViewController{
             
         }else{
             self.collectionView.reloadData()
+            
             self.chatRoom?.updateUnreadCommentCount {
                 if self.chatRoom!.unreadCommentCount > 0 {
                     self.isLastRowVisible = false
@@ -593,6 +593,7 @@ open class QiscusChatVC: UIViewController{
                     self.chatRoom!.delegate = self
                 }
             }
+            
             if let target = self.chatTarget {
                 if let indexPath = self.chatRoom?.getIndexPath(ofComment: target){
                     self.selectedCellIndex = indexPath
@@ -609,20 +610,6 @@ open class QiscusChatVC: UIViewController{
         }
         if !self.prefetch {
             self.isPresence = true
-            if let room = self.chatRoom {
-                let roomId = room.id
-                QiscusBackgroundThread.async {
-                    if let dbRoom = QRoom.threadSaveRoom(withId: roomId){
-                        if dbRoom.comments.count > 0 {
-                            let group = dbRoom.comments[dbRoom.comments.count - 1]
-                            if group.comments.count > 0 {
-                                let comment = group.comments[group.comments.count - 1]
-                                comment.read()
-                            }
-                        }
-                    }
-                }
-            }
         }
         self.firstLoad = false
         self.prefetch = false
@@ -985,10 +972,16 @@ open class QiscusChatVC: UIViewController{
     open func gotNewComment(comment: QComment, room:QRoom) {
         self.chatRoom = room
         self.collectionView.reloadData()
-        self.chatRoom!.updateUnreadCommentCount(count: 0)
-        if let indexPath = self.chatRoom!.getIndexPath(ofComment: comment){
-            if self.isLastRowVisible || comment.senderEmail == QiscusMe.sharedInstance.email{
-                self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+        if self.isPresence{
+            if let indexPath = self.chatRoom!.getIndexPath(ofComment: comment){
+                if self.isLastRowVisible || comment.senderEmail == QiscusMe.sharedInstance.email{
+                    self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
+                }
+            }
+        }else{
+            if self.chatRoom!.unreadCount > 0 {
+                self.collectionView.layoutIfNeeded()
+                self.scrollToBottom()
             }
         }
     }
@@ -1121,23 +1114,11 @@ extension QiscusChatVC:QRoomDelegate{
     }
     
     public func room(gotNewComment comment: QComment) {
-//        self.collectionView.reloadData()
-//        self.chatRoom!.updateUnreadCommentCount(count: 0)
-//        if let indexPath = self.chatRoom!.getIndexPath(ofComment: comment){
-//            if self.isLastRowVisible || comment.senderEmail == QiscusMe.sharedInstance.email{
-//                self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
-//            }
-//        }
+
     }
     
     public func room(userDidTyping userEmail: String) {
-//        if userEmail == "" {
-//            self.stopTypingIndicator()
-//        }else{
-//            if let user = QUser.user(withEmail: userEmail) {
-//                self.startTypingIndicator(withUser: user.fullname)
-//            }
-//        }
+
     }
     public func room(didDeleteComment section: Int, row: Int) {
         self.collectionView.reloadData()

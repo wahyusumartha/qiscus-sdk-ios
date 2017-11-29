@@ -483,6 +483,11 @@ public class QRoom:Object {
             try! realm.write {
                 self.lastReadCommentId = commentId
             }
+            if self.lastDeliveredCommentId < commentId {
+                try! realm.write {
+                    self.lastDeliveredCommentId = commentId
+                }
+            }
             self.updateUnreadCommentCount()
         }
     }

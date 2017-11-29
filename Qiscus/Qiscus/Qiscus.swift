@@ -1058,7 +1058,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                             }
                                         }
                                         QiscusNotification.publish(roomDeleted: roomId)
-                                        }}
+                                    }}
                                 }
                                 else{
                                     syncData()
@@ -1277,6 +1277,7 @@ extension Qiscus { // Public class API to get room
                     chatView.viewDidLoad()
                     chatView.viewWillAppear(false)
                     chatView.viewDidAppear(false)
+                    chatView.view.layoutSubviews()
                     chatView.collectionView.layoutSubviews()
                     chatView.scrollToBottom()
 

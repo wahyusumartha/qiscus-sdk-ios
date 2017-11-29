@@ -864,6 +864,7 @@ public class QComment:Object {
                                 room.lastDeliveredCommentId = comment.id
                             }
                         }
+                        room.updateUnreadCommentCount()
                     }
                 }
             }
