@@ -13,6 +13,8 @@ To make a chat app with the described flow, we noticed that the most complex par
 
 ## Qiscus Chat SDK and UI Components
 
+<p align="center"><br/><img alt="sdk-in-iphone" src="https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/sdk-in-iphone.png" width="37%" /><br/></p>
+
 In spite of real-time chat, Qiscus Chat SDK provides UI that can be customized according to your needs. But please keep in mind that, by default, Qiscus provides UI for chat room only. If you need to create contact list and conversation list UI, for example, you need to create it your own. However, we provide essential data that you can get and utilize for your app.
 
 
