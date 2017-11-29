@@ -767,32 +767,31 @@ public class QChatService:NSObject {
                         }else{
                             let comments = json["results"]["comments"].arrayValue
                             if comments.count > 0 {
-                                for newComment in comments.reversed() {
-                                    let roomId = "\(newComment["room_id"])"
-                                    let id = newComment["id"].intValue
-                                    let type = newComment["type"].string
-                                    if id > QiscusMe.sharedInstance.lastCommentId {
-                                        QiscusMe.updateLastCommentId(commentId: id)
-                                        QRoom.publishStatus(roomId: roomId, commentId: id, status: .delivered)
-                                        func proceed(){
-                                            if let room = QRoom.room(withId: roomId){
+                                QiscusBackgroundThread.async {
+                                    for newComment in comments.reversed() {
+                                        let roomId = "\(newComment["room_id"])"
+                                        let id = newComment["id"].intValue
+                                        let type = newComment["type"].string
+                                        
+                                        if id > QiscusMe.sharedInstance.lastCommentId {
+                                            QiscusMe.updateLastCommentId(commentId: id)
+                                            QRoom.publishStatus(roomId: roomId, commentId: id, status: .delivered)
+                                            
+                                            if let room = QRoom.threadSaveRoom(withId: roomId){
                                                 if !room.isInvalidated {
                                                     room.saveNewComment(fromJSON: newComment)
-                                                    if id > QiscusMe.sharedInstance.lastCommentId{
-                                                        if type == "system_event" {
-                                                            room.sync()
-                                                        }
+                                                    if type == "system_event" {
+                                                        room.sync()
                                                     }
                                                 }
                                             }else{
-                                                QiscusBackgroundThread.async { autoreleasepool{
-                                                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                                        DispatchQueue.main.async { autoreleasepool{
-                                                            let comment = QComment.tempComment(fromJSON: newComment)
-                                                            roomDelegate.gotNewComment(comment)
-                                                        }}
-                                                    }
-                                                }}
+                                                if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                                                    DispatchQueue.main.async { autoreleasepool{
+                                                        let comment = QComment.tempComment(fromJSON: newComment)
+                                                        roomDelegate.gotNewComment(comment)
+                                                    }}
+                                                }
+                                                
                                                 var needLoadRoom = true
                                                 if type == "system_event" {
                                                     let payload = newComment["payload"]
@@ -806,21 +805,20 @@ public class QChatService:NSObject {
                                                 }
                                                 if needLoadRoom {
                                                     QChatService.roomInfo(withId: roomId, onSuccess: { (room) in
-                                                        room.saveNewComment(fromJSON: newComment)
-                                                        Qiscus.chatDelegate?.qiscusChat?(gotNewRoom: room)
-                                                        QiscusNotification.publish(gotNewRoom: room)
+                                                        if let r = QRoom.threadSaveRoom(withId: roomId) {
+                                                            let new = QComment.tempComment(fromJSON: newComment)
+                                                            r.updateLastComentInfo(comment: new)
+                                                        }
+                                                        DispatchQueue.main.async {
+                                                            Qiscus.chatDelegate?.qiscusChat?(gotNewRoom: room)
+                                                            QiscusNotification.publish(gotNewRoom: room)
+                                                        }
                                                     }, onFailed: { (error) in
                                                         Qiscus.printLog(text:"error getting room info")
                                                     })
                                                 }
                                             }
-                                        }
-                                        if Thread.isMainThread {
-                                            proceed()
-                                        }else{
-                                            DispatchQueue.main.sync {
-                                                proceed()
-                                            }
+                                           
                                         }
                                     }
                                 }

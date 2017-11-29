@@ -117,14 +117,15 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                             }
                         }
                     }
-                    if self.isPresence {
-                        if comment.status != .failed && comment.status != .sending{
-                            comment.read()
-                        }
-                    }
+                    
                     if indexPath.section == (room.commentsGroupCount - 1){
                         if indexPath.row == group.commentsCount - 1{
                             self.isLastRowVisible = true
+                            if self.isPresence {
+                                if comment.status != .failed && comment.status != .sending{
+                                    comment.read()
+                                }
+                            }
                         }
                     }
                 }

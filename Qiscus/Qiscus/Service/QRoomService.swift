@@ -400,7 +400,6 @@ public class QRoomService:NSObject{
                 DispatchQueue.global().async {
                     QiscusService.session.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                         if let response = responseData.result.value {
-                            Qiscus.printLog(text: "publish message response:\n\(response)")
                             let json = JSON(response)
                             let results = json["results"]
                             let error = json["error"]
