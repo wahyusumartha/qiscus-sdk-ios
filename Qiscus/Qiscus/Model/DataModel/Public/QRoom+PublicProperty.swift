@@ -59,25 +59,27 @@ public extension QRoom {
     public var lastComment:QComment?{
         get{
             if self.isInvalidated {return nil}
-            if let comment = QComment.comment(withUniqueId: self.lastCommentUniqueId){
-                return comment
-            }else{
-                if self.lastCommentId > 0 {
-                    let comment = QComment()
-                    comment.id = self.lastCommentId
-                    comment.uniqueId = self.lastCommentUniqueId
-                    comment.roomId = self.id
-                    comment.text = self.lastCommentText
-                    comment.senderName = self.lastCommentSenderName
-                    comment.createdAt = self.lastCommentCreatedAt
-                    comment.beforeId = self.lastCommentBeforeId
-                    comment.senderEmail = self.lastCommentSenderName
-                    comment.roomName = self.name
-                    comment.cellPosRaw = QCellPosition.single.rawValue
-                    comment.typeRaw = self.lastCommentTypeRaw
-                    comment.data = self.lastCommentData
-                    comment.rawExtra = self.lastCommentRawExtras
+            if Thread.isMainThread {
+                if let comment = QComment.comment(withUniqueId: self.lastCommentUniqueId){
                     return comment
+                }else{
+                    if self.lastCommentId > 0 {
+                        let comment = QComment()
+                        comment.id = self.lastCommentId
+                        comment.uniqueId = self.lastCommentUniqueId
+                        comment.roomId = self.id
+                        comment.text = self.lastCommentText
+                        comment.senderName = self.lastCommentSenderName
+                        comment.createdAt = self.lastCommentCreatedAt
+                        comment.beforeId = self.lastCommentBeforeId
+                        comment.senderEmail = self.lastCommentSenderName
+                        comment.roomName = self.name
+                        comment.cellPosRaw = QCellPosition.single.rawValue
+                        comment.typeRaw = self.lastCommentTypeRaw
+                        comment.data = self.lastCommentData
+                        comment.rawExtra = self.lastCommentRawExtras
+                        return comment
+                    }
                 }
             }
             return nil
@@ -99,10 +101,12 @@ public extension QRoom {
             if self.isInvalidated { return [QComment]()}
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             var comments = [QComment]()
-            let data =  realm.objects(QComment.self).filter("roomId == '\(self.id)'").sorted(byKeyPath: "createdAt", ascending: true)
-            for comment in data {
-                let data = QComment.comment(withUniqueId: comment.uniqueId)!
-                comments.append(data)
+            if Thread.isMainThread {
+                let data =  realm.objects(QComment.self).filter("roomId == '\(self.id)'").sorted(byKeyPath: "createdAt", ascending: true)
+                for comment in data {
+                    let data = QComment.comment(withUniqueId: comment.uniqueId)!
+                    comments.append(data)
+                }
             }
             return comments
         }

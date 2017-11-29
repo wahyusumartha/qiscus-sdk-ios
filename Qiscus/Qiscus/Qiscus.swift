@@ -633,7 +633,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                         print("Failed writing to log file: \(logFilePath), Error: " + error.localizedDescription)
                     }
                 }
-                print(logText)
             }
             Qiscus.shared.diagnosticDelegate?.qiscusDiagnostic(sendLog: logText)
         }

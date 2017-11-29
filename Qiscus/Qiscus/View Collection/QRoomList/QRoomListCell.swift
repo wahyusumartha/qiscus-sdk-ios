@@ -65,6 +65,7 @@ open class QRoomListCell: UITableViewCell {
         if let userInfo = notification.userInfo {
             if let currentRoom = self.room {
                 if currentRoom.isInvalidated { return }
+                
                 if let comment = userInfo["comment"] as? QComment{
                     if comment.isInvalidated { return }
                     if currentRoom.id == comment.roomId {

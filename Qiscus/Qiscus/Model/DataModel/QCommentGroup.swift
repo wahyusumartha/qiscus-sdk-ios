@@ -23,11 +23,12 @@ public class QCommentGroup: Object{
     }
     public var lastComment:QComment?{
         get{
-            if let comment = self.comments.last {
-                return QComment.comment(withUniqueId: comment.uniqueId)
-            }else{
-                return nil
+            if Thread.isMainThread {
+                if let comment = self.comments.last {
+                    return QComment.comment(withUniqueId: comment.uniqueId)
+                }
             }
+            return nil
         }
     }
     public var sender:QUser? {

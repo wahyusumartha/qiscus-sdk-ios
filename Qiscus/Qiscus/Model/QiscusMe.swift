@@ -172,10 +172,6 @@ open class QiscusMe: NSObject {
         QiscusMe.sharedInstance.token = ""
         QiscusMe.sharedInstance.lastCommentId = 0
         QiscusMe.sharedInstance.appId = ""
-        QiscusMe.sharedInstance.baseUrl = ""
-        QiscusMe.sharedInstance.realtimeSSL = false
-        QiscusMe.sharedInstance.realtimePort = 1883
-        QiscusMe.sharedInstance.realtimeServer = "mqtt.qiscus.com"
         
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_id")
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_email")
@@ -185,12 +181,7 @@ open class QiscusMe: NSObject {
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_token")
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_lastComment_id")
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_lastKnownComment_id")
-        QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_base_url")
         QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_appId")
-        QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_realtimeServer")
-        QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_realtimePort")
-        QiscusMe.sharedInstance.userData.removeObject(forKey: "qiscus_realtimeSSL")
         
     }
-    
 }

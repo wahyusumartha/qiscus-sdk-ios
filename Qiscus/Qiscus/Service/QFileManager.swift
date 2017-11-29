@@ -72,7 +72,6 @@ extension FileManager {
     func clearTmpDirectory() {
         do {
             let tmpDirectory = try contentsOfDirectory(atPath: NSTemporaryDirectory())
-            print("tempDirectory: \(tmpDirectory)")
             try tmpDirectory.forEach {[unowned self] file in
                 let path = String.init(format: "%@%@", NSTemporaryDirectory(), file)
                 try self.removeItem(atPath: path)

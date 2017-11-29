@@ -278,6 +278,7 @@ public class QComment:Object {
         }
     }
     public var textSize:CGSize {
+        if !Thread.isMainThread { return CGSize() }
         var recalculate = false
         
         func recalculateSize()->CGSize{
@@ -465,43 +466,46 @@ public class QComment:Object {
         return nil
     }
     public class func comment(withUniqueId uniqueId:String)->QComment?{
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        if let comment = QComment.cache[uniqueId] {
-            if !comment.isInvalidated{
+        if Thread.isMainThread {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            if let comment = QComment.cache[uniqueId] {
+                if !comment.isInvalidated{
+                    return comment
+                }
+            }
+            let comments = realm.objects(QComment.self).filter("uniqueId == '\(uniqueId)'")
+            if comments.count > 0 {
+                let comment = comments.first!
+                let _ = comment.textSize
+                comment.cacheObject()
                 return comment
             }
         }
-        let comments = realm.objects(QComment.self).filter("uniqueId == '\(uniqueId)'")
-        if comments.count > 0 {
-            let comment = comments.first!
-            let _ = comment.textSize
-            comment.cacheObject()
-            return comment
-        }
-        
         return nil
     }
     public class func comment(withId id:Int)->QComment?{
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let data =  realm.objects(QComment.self).filter("id == \(id) && id != 0")
-        
-        if data.count > 0 {
-            let commentData = data.first!
-            return QComment.comment(withUniqueId: commentData.uniqueId)
-        }else{
-            return nil
+        if Thread.isMainThread {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            let data =  realm.objects(QComment.self).filter("id == \(id) && id != 0")
+            
+            if data.count > 0 {
+                let commentData = data.first!
+                return QComment.comment(withUniqueId: commentData.uniqueId)
+            }
         }
+        return nil
     }
     public class func comment(withBeforeId id:Int)->QComment?{
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let data =  realm.objects(QComment.self).filter("beforeId == \(id) && id != 0")
-        
-        if data.count > 0 {
-            let commentData = data.first!
-            return QComment.comment(withUniqueId: commentData.uniqueId)
-        }else{
-            return nil
+        if Thread.isMainThread {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            let data =  realm.objects(QComment.self).filter("beforeId == \(id) && id != 0")
+            
+            if data.count > 0 {
+                let commentData = data.first!
+                return QComment.comment(withUniqueId: commentData.uniqueId)
+            }
         }
+        return nil
     }
     internal class func countComments(afterId id:Int, roomId:String)->Int{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
