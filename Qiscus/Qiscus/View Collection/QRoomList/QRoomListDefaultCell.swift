@@ -55,16 +55,14 @@ class QRoomListDefaultCell: QRoomListCell {
             if let lastComment = room!.lastComment{
                 self.descriptionLabel.text = "\(lastComment.senderName): \(lastComment.text)"
             }
-            if room!.avatarURL != "" {
-                let roomAvatar = room!.avatarURL
-                self.avatarView.loadAsync(roomAvatar, onLoaded: { (image, _) in
-                    if !self.room!.isInvalidated {
-                        if roomAvatar == self.room!.avatarURL {
-                            self.avatarView.image = image
-                        }
-                    }
-                })
-            }
+            
+            room!.loadAvatar(onSuccess: { (avatar) in
+                self.avatarView.image = avatar
+            }, onError: { (_) in
+                if let thisRoom = self.room {
+                    thisRoom.downloadRoomAvatar()
+                }
+            })
         }
     }
     override func searchTextChanged() {

@@ -101,31 +101,35 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     // MARK: CollectionView delegate
     open func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if indexPath.section < self.chatRoom!.commentsGroupCount {
-            let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
-            let group = self.chatRoom!.comments[indexPath.section]
-            
+            let roomId = self.chatRoom!.id
             if let chatCell = cell as? QChatCell {
                 chatCell.willDisplayCell()
             }
+            QiscusBackgroundThread.async {
+                if let room = QRoom.threadSaveRoom(withId: roomId){
+                    let group = room.comments[indexPath.section]
+                    let comment = group.comments[indexPath.row]
+                    
+                    if let selectedIndex = self.selectedCellIndex {
+                        if indexPath.section == selectedIndex.section && indexPath.item == selectedIndex.item{
+                            DispatchQueue.main.async {
+                                cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
+                            }
+                        }
+                    }
+                    if self.isPresence {
+                        if comment.status != .failed && comment.status != .sending{
+                            comment.read()
+                        }
+                    }
+                    if indexPath.section == (room.commentsGroupCount - 1){
+                        if indexPath.row == group.commentsCount - 1{
+                            self.isLastRowVisible = true
+                        }
+                    }
+                }
+            }
             
-            if let selectedIndex = self.selectedCellIndex {
-                if indexPath.section == selectedIndex.section && indexPath.item == selectedIndex.item{
-                    cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
-                }
-            }
-            if self.isPresence {
-                if comment.status != .failed && comment.status != .sending{
-                    comment.read()
-                }
-            }
-    //        if let participant = self.chatRoom?.participant(withEmail: QiscusMe.sharedInstance.email){
-    //            participant.updateLastReadId(commentId: comment.id)
-    //        }
-            if indexPath.section == (self.chatRoom!.commentsGroupCount - 1){
-                if indexPath.row == group.commentsCount - 1{
-                    isLastRowVisible = true
-                }
-            }
         }
     }
     

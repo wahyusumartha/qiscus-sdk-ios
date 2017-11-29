@@ -312,59 +312,25 @@ extension QiscusChatVC {
                 if let room = self.chatRoom {
                     self.titleLabel.text = room.name
                     if self.roomAvatarImage == nil {
-                        let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
-                        let index = room.name.index(room.name.startIndex, offsetBy: 0)
-                        self.roomAvatarLabel.text = String(room.name[index]).uppercased()
-                        let colorIndex = room.name.count % bgColor.count
-                        self.roomAvatar.backgroundColor = bgColor[colorIndex]
-                        if QFileManager.isFileExist(inLocalPath: room.avatarLocalPath){
-                            self.roomAvatar.loadAsync(fromLocalPath: room.avatarLocalPath, onLoaded: { (image, _) in
-                                self.roomAvatarImage = image
-                                self.roomAvatar.image = image
-                                self.roomAvatarLabel.isHidden = true
-                            })
-                        }else{
-                            self.roomAvatar.loadAsync(room.avatarURL, onLoaded: { (image, _) in
-                                self.roomAvatarImage = image
-                                self.roomAvatar.image = image
-                                self.roomAvatar.backgroundColor = UIColor.clear
-                                self.roomAvatarLabel.isHidden = true
-                                self.chatRoom?.saveAvatar(image: image)
-                            })
-                        }
+                        self.roomAvatar.image = Qiscus.image(named: "avatar")
+                        room.loadAvatar(onSuccess: { (avatar) in
+                            self.roomAvatar.image = avatar
+                        }, onError: { (_) in
+                            room.downloadRoomAvatar()
+                        })
                     }
-                    
                 }
             }
             else{
                 self.titleLabel.text = self.chatTitle
-                let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
-                if self.chatTitle != nil && self.chatTitle!.count > 0 {
-                    let index = self.chatTitle!.index(self.chatTitle!.startIndex, offsetBy: 0)
-                    self.roomAvatarLabel.text = String(self.chatTitle![index]).uppercased()
-                }
-                let colorIndex = self.chatTitle!.count % bgColor.count
-                self.roomAvatar.backgroundColor = bgColor[colorIndex]
+                
                 if let room = self.chatRoom {
-                    if self.roomAvatarImage == nil {
-                        if QFileManager.isFileExist(inLocalPath: room.avatarLocalPath){
-                            self.roomAvatar.loadAsync(fromLocalPath: room.avatarLocalPath, onLoaded: { (image, _) in
-                                self.roomAvatarImage = image
-                                self.roomAvatar.image = image
-                                self.roomAvatarLabel.isHidden = true
-                                self.chatRoom?.saveAvatar(image: image)
-                            })
-                        }else{
-                            self.roomAvatar.loadAsync(room.avatarURL, onLoaded: { (image, _) in
-                                self.roomAvatarImage = image
-                                self.roomAvatar.image = image
-                                self.roomAvatar.backgroundColor = UIColor.clear
-                                self.roomAvatarLabel.isHidden = true
-                                self.chatRoom?.saveAvatar(image: image)
-                            })
-                        }
-                    }
-                    
+                    self.roomAvatar.image = Qiscus.image(named: "avatar")
+                    room.loadAvatar(onSuccess: { (avatar) in
+                        self.roomAvatar.image = avatar
+                    }, onError: { (_) in
+                        room.downloadRoomAvatar()
+                    })
                 }
             }
         }}

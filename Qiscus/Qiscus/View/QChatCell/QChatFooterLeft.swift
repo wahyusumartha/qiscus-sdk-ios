@@ -32,7 +32,6 @@ class QChatFooterLeft: UICollectionReusableView {
                         }
                     }
                 }
-                
             }else{
                 avatarImage.image = nil
             }

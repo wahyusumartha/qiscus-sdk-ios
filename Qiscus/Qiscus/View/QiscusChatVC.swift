@@ -61,7 +61,6 @@ open class QiscusChatVC: UIViewController{
     internal var subtitleText:String = ""
     var roomAvatarImage:UIImage?
     public var roomAvatar = UIImageView()
-    var roomAvatarLabel = UILabel()
     public var titleView = UIView()
     
     var isBeforeTranslucent = false
@@ -243,11 +242,13 @@ open class QiscusChatVC: UIViewController{
     
     var isLastRowVisible: Bool = false {
         didSet{
-            bottomButton.isHidden = isLastRowVisible
-            if self.chatRoom!.unreadCount > 0 {
-                unreadIndicator.isHidden = isLastRowVisible
-            }else{
-                unreadIndicator.isHidden = true
+            DispatchQueue.main.async {
+                self.bottomButton.isHidden = self.isLastRowVisible
+                if self.chatRoom!.unreadCount > 0 {
+                    self.unreadIndicator.isHidden = self.isLastRowVisible
+                }else{
+                    self.unreadIndicator.isHidden = true
+                }
             }
         }
     }
@@ -408,13 +409,6 @@ open class QiscusChatVC: UIViewController{
         subtitleLabel.text = self.chatSubtitle
         subtitleLabel.textAlignment = .left
         
-        self.roomAvatarLabel = UILabel(frame:CGRect(x: 0,y: 6,width: 32,height: 32))
-        self.roomAvatarLabel.font = UIFont.boldSystemFont(ofSize: 25)
-        self.roomAvatarLabel.textColor = UIColor.white
-        self.roomAvatarLabel.backgroundColor = UIColor.clear
-        self.roomAvatarLabel.text = "Q"
-        self.roomAvatarLabel.textAlignment = .center
-        
         self.roomAvatar = UIImageView()
         self.roomAvatar.contentMode = .scaleAspectFill
         self.roomAvatar.backgroundColor = UIColor.white
@@ -430,11 +424,8 @@ open class QiscusChatVC: UIViewController{
         self.titleView.addSubview(self.titleLabel)
         self.titleView.addSubview(self.subtitleLabel)
         self.titleView.addSubview(self.roomAvatar)
-        self.titleView.addSubview(self.roomAvatarLabel)
         
         let center: NotificationCenter = NotificationCenter.default
-        center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
-        center.addObserver(self, selector: #selector(QiscusChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
         center.addObserver(self, selector: #selector(QiscusChatVC.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
         center.addObserver(self, selector: #selector(QiscusChatVC.commentDeleted(_:)), name: QiscusNotification.COMMENT_DELETE, object: nil)
         center.addObserver(self, selector: #selector(QiscusChatVC.userPresenceChanged(_:)), name: QiscusNotification.USER_PRESENCE, object: nil)
@@ -504,6 +495,9 @@ open class QiscusChatVC: UIViewController{
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        let center: NotificationCenter = NotificationCenter.default
+        center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        center.addObserver(self, selector: #selector(QiscusChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
         if self.loadMoreControl.isRefreshing {
             self.loadMoreControl.endRefreshing()
         }
@@ -623,9 +617,6 @@ open class QiscusChatVC: UIViewController{
             totalButton += rightButtons.count
         }
         
-        let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
-        
-        
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QiscusChatVC.goToTitleAction))
         self.titleView.addGestureRecognizer(tapRecognizer)
         
@@ -634,18 +625,9 @@ open class QiscusChatVC: UIViewController{
         
         self.titleLabel.frame = CGRect(x: 40, y: 7, width: titleWidth, height: 17)
         self.subtitleLabel.frame = CGRect(x: 40, y: 25, width: titleWidth, height: 13)
-        self.roomAvatarLabel.frame = CGRect(x: 0,y: 6,width: 32,height: 32)
         self.roomAvatar.frame = CGRect(x: 0,y: 6,width: 32,height: 32)
         self.titleView.frame = CGRect(x: 0, y: 0, width: containerWidth, height: 44)
         if self.chatTitle != nil {
-            let roomTitle = self.chatTitle!.trimmingCharacters(in: .whitespacesAndNewlines)
-            if roomTitle != "" {
-                let index = roomTitle.index(roomTitle.startIndex, offsetBy: 0)
-                self.roomAvatarLabel.text = String(roomTitle[index]).uppercased()
-                //self.roomAvatarLabel.text = String(roomTitle.characters.first!).uppercased()
-                let colorIndex = roomTitle.count % bgColor.count
-                self.roomAvatar.backgroundColor = bgColor[colorIndex]
-            }
             self.titleLabel.text = self.chatTitle
         }
         self.navigationItem.titleView = titleView
@@ -670,7 +652,7 @@ open class QiscusChatVC: UIViewController{
         UIView.animate(withDuration: animateDuration, delay: 0, options: UIViewAnimationOptions(), animations: {
             self.view.layoutIfNeeded()
             if goToRow != nil {
-                self.collectionView.scrollToItem(at: goToRow!, at: .bottom, animated: true)
+                self.collectionView.scrollToItem(at: goToRow!, at: .bottom, animated: false)
             }
         }, completion: nil)
     }
@@ -1064,13 +1046,12 @@ extension QiscusChatVC:QRoomDelegate{
         })
     }
     public func room(didChangeAvatar room: QRoom) {
-        self.roomAvatar.loadAsync(room.avatarURL, onLoaded: { (image, _) in
-            self.roomAvatarImage = image
-            self.roomAvatar.backgroundColor = UIColor.clear
-            self.roomAvatarLabel.isHidden = true
-            self.chatRoom?.saveAvatar(image: image)
-            self.roomAvatar.image = image
-        })
+        room.loadAvatar(onSuccess: { (avatar) in
+            self.roomAvatar.image = avatar
+        }) { (_) in
+            self.roomAvatar.image = Qiscus.image(named: "avatar")
+            room.downloadAvatar()
+        }
     }
     public func room(didFailUpdate error: String) {
         

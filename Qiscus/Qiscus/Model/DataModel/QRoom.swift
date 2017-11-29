@@ -42,7 +42,7 @@ public class QRoom:Object {
     internal dynamic var definedname:String = ""
     public dynamic var storedAvatarURL:String = ""
     public dynamic var definedAvatarURL:String = ""
-    public dynamic var avatarLocalPath:String = ""
+    internal dynamic var avatarData:Data?
     public dynamic var data:String = ""
     public dynamic var distinctId:String = ""
     public dynamic var typeRaw:Int = QRoomType.single.rawValue
@@ -629,22 +629,28 @@ public class QRoom:Object {
         }
     }
     internal func update(avatarURL:String){
-        let id = self.id
-        let roomTS = ThreadSafeReference(to: self)
-        QiscusDBThread.async { autoreleasepool {
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            guard let r = realm.resolve(roomTS) else { return }
-            try! realm.write {
-                r.storedAvatarURL = avatarURL
-                r.avatarLocalPath = ""
-            }
-            DispatchQueue.main.sync { autoreleasepool {
-                if let room = QRoom.room(withId: id){
-                    QiscusNotification.publish(roomChange: room)
-                    room.delegate?.room(didChangeAvatar: room)
+        if self.storedAvatarURL != avatarURL {
+            let id = self.id
+            QiscusDBThread.async {
+                if let room = QRoom.threadSaveRoom(withId: id){
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    try! realm.write {
+                        room.storedAvatarURL = avatarURL
+                    }
+                    if room.definedAvatarURL == "" {
+                        try! realm.write {
+                            room.avatarData = nil
+                        }
+                        DispatchQueue.main.sync { autoreleasepool {
+                            if let cache = QRoom.room(withId: id){
+                                QiscusNotification.publish(roomChange: cache)
+                                cache.delegate?.room(didChangeAvatar: cache)
+                            }
+                        }}
+                    }
                 }
-                }}
-            }}
+            }
+        }
     }
     internal func update(data:String){
         let roomTS = ThreadSafeReference(to: self)
@@ -659,26 +665,20 @@ public class QRoom:Object {
         }}
     }
     public func setAvatar(url:String){
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let oldAvatarURL = self.avatarURL
-        try! realm.write {
-            self.definedAvatarURL = url
-            self.avatarLocalPath = ""
-        }
-        let id = self.id
-        if oldAvatarURL != url {
-            func execute(){
-                if let cache = QRoom.room(withId: id) {
-                    QiscusNotification.publish(roomChange: cache)
-                    cache.delegate?.room(didChangeName: cache)
-                }
-            }
-            if Thread.isMainThread {
-                execute()
-            }else{
-                DispatchQueue.main.sync {
-                    autoreleasepool{
-                        execute()
+        if self.avatarURL != url {
+            let id = self.id
+            QiscusDBThread.async {
+                if let room = QRoom.threadSaveRoom(withId: id){
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    try! realm.write {
+                        room.definedAvatarURL = url
+                        room.avatarData = nil
+                    }
+                    DispatchQueue.main.async {
+                        if let cache = QRoom.room(withId: id) {
+                            QiscusNotification.publish(roomChange: cache)
+                            cache.delegate?.room(didChangeName: cache)
+                        }
                     }
                 }
             }
@@ -809,6 +809,56 @@ public class QRoom:Object {
             }
         }else{
             onError("invalid offset")
+        }
+    }
+    internal func downloadRoomAvatar(){
+        let id = self.id
+        let url = self.avatarURL.replacingOccurrences(of: "/upload/", with: "/upload/c_thumb,g_center,h_100,w_100/")
+        if !QChatService.downloadTasks.contains(url){
+            QChatService.downloadImage(url: url, onSuccess: { (data) in
+                QiscusDBThread.async {
+                    if let room = QRoom.threadSaveRoom(withId: id){
+                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        try! realm.write {
+                            room.avatarData = data
+                        }
+                        DispatchQueue.main.sync { autoreleasepool {
+                            if let cache = QRoom.room(withId: id){
+                                QiscusNotification.publish(roomChange: cache)
+                                cache.delegate?.room(didChangeAvatar: cache)
+                            }
+                        }}
+                    }
+                }
+            }, onFailed: { (error) in
+                Qiscus.printLog(text: error)
+            })
+        }
+    }
+    internal func loadRoomAvatar(onSuccess:  @escaping (UIImage)->Void, onError:  @escaping (String)->Void){
+        let id = self.id
+        QiscusDBThread.async {
+            if let room = QRoom.threadSaveRoom(withId: id){
+                if let imageData = room.avatarData {
+                    if let image = UIImage(data: imageData){
+                        DispatchQueue.main.async {
+                            onSuccess(image)
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            onError("cant't render data to image")
+                        }
+                    }
+                }else{
+                    DispatchQueue.main.async {
+                        onError("image not found")
+                    }
+                }
+            }else{
+                DispatchQueue.main.async {
+                    onError("room not found")
+                }
+            }
         }
     }
 }

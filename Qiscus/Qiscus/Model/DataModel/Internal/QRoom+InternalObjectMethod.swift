@@ -45,15 +45,15 @@ internal extension QRoom {
         QiscusBackgroundThread.async { autoreleasepool{
             let message: String = "0";
             let channel = "r/\(roomId)/\(roomId)/\(QiscusMe.sharedInstance.email)/t"
-            func execute(){
+//            func execute(){
                 Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
-            }
+//            }
             
-            DispatchQueue.main.async {
-                autoreleasepool {
-                    execute()
-                }
-            }
+//            DispatchQueue.main.async {
+//                autoreleasepool {
+//                    execute()
+//                }
+//            }
             }}
         if self.selfTypingTimer != nil {
             if self.typingTimer!.isValid {
@@ -67,15 +67,15 @@ internal extension QRoom {
         QiscusBackgroundThread.async { autoreleasepool{
             let message: String = "1";
             let channel = "r/\(roomId)/\(roomId)/\(QiscusMe.sharedInstance.email)/t"
-            func execute(){
+            //func execute(){
                 Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
-            }
+            //}
             
-            DispatchQueue.main.async {
-                autoreleasepool{
-                    execute()
-                }
-            }
+//            DispatchQueue.main.async {
+//                autoreleasepool{
+//                    execute()
+//                }
+//            }
             }}
         if self.typingTimer != nil {
             if self.typingTimer!.isValid {
@@ -87,25 +87,7 @@ internal extension QRoom {
             self.typingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.publishStopTyping), userInfo: nil, repeats: false)
         }
     }
-    internal func saveRoomAvatar(image:UIImage){
-        var filename = "room_\(self.id)"
-        var ext = "png"
-        var avatarData:Data? = nil
-        if let data = UIImagePNGRepresentation(image) {
-            avatarData = data
-        }else if let data = UIImageJPEGRepresentation(image, 1.0) {
-            avatarData = data
-            ext = "jpg"
-        }
-        filename = "\(filename).\(ext)"
-        if avatarData != nil {
-            let localPath = QFileManager.saveFile(withData: avatarData!, fileName: filename, type: .room)
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            try! realm.write {
-                self.avatarLocalPath = localPath
-            }
-        }
-    }
+    
     internal func subscribeRoomChannel(){
         let id = self.id
         QiscusBackgroundThread.async {
@@ -422,26 +404,7 @@ internal extension QRoom {
             }
         }
         if let roomAvatar = json["avatar_url"].string {
-            if roomAvatar != self.avatarURL {
-                try! realm.write {
-                    self.storedAvatarURL = roomAvatar
-                    self.avatarLocalPath = ""
-                }
-                let id = self.id
-                func execute(){
-                    if let cache = QRoom.room(withId: id) {
-                        QiscusNotification.publish(roomChange: cache)
-                        cache.delegate?.room(didChangeAvatar: cache)
-                    }
-                }
-                if Thread.isMainThread {
-                    execute()
-                }else{
-                    DispatchQueue.main.sync {
-                        execute()
-                    }
-                }
-            }
+            self.update(avatarURL: roomAvatar)
         }
         if json["last_comment"] != JSON.null {
             let commentData = json["last_comment"]

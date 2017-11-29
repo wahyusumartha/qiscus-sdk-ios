@@ -56,9 +56,6 @@ public extension QRoom {
     public func publishStartTyping(){
         self.publishStartTypingRoom()
     }
-    public func saveAvatar(image:UIImage){
-        self.saveRoomAvatar(image: image)
-    }
     public func subscribeRealtimeStatus(){
         self.subscribeRoomChannel()
     }
@@ -76,5 +73,11 @@ public extension QRoom {
     }
     public func publishCommentStatus(withStatus status:QCommentStatus){
         self.publishStatus(withStatus: status)
+    }
+    public func downloadAvatar(){
+        self.downloadRoomAvatar()
+    }
+    public func loadAvatar(onSuccess:  @escaping (UIImage)->Void, onError:  @escaping (String)->Void){
+        self.loadRoomAvatar(onSuccess: onSuccess, onError: onError)
     }
 }

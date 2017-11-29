@@ -25,6 +25,16 @@ public extension QRoom {
             }
         }
     }
+    public var avatar:UIImage?{
+        get{
+            if !self.isInvalidated {
+                if let imageData = self.avatarData {
+                    return UIImage(data: imageData)
+                }
+            }
+            return nil
+        }
+    }
     public var avatarURL:String{
         get{
             if self.isInvalidated { return "" }
