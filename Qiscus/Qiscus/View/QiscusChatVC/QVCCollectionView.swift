@@ -101,74 +101,72 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     // MARK: CollectionView delegate
     open func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if indexPath.section < self.chatRoom!.commentsGroupCount {
-        let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
-        let group = self.chatRoom!.comments[indexPath.section]
-        
-        if let chatCell = cell as? QChatCell {
-            chatCell.willDisplayCell()
-        }
-        
-        if let selectedIndex = self.selectedCellIndex {
-            if indexPath.section == selectedIndex.section && indexPath.item == selectedIndex.item{
-                cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
-            }
-        }
-        if comment.status != .failed && comment.status != .sending{
-            if comment.id > self.chatRoom!.lastReadCommentId {
-                self.chatRoom?.updateLastReadId(commentId: comment.id)
-                if self.publishStatusTimer != nil {
-                    self.publishStatusTimer!.invalidate()
-                }
-                self.publishStatusTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(self.publishRead), userInfo: nil, repeats: false)
-            }
-        }
-        if let participant = self.chatRoom?.participant(withEmail: QiscusMe.sharedInstance.email){
-            participant.updateLastReadId(commentId: comment.id)
-        }
-        if indexPath.section == (self.chatRoom!.commentsGroupCount - 1){
-            if indexPath.row == group.commentsCount - 1{
-                isLastRowVisible = true
-            }
-        }
-        }
-    }
-    public func publishRead(){
-        if let room = self.chatRoom {
-            if !room.isInvalidated{
-                let roomId = room.id
-                let commentId = room.lastReadCommentId
-                DispatchQueue.global().async(execute: {
-                    QRoom.publishStatus(roomId: roomId, commentId: commentId, status: .read)
-                })
-            }
-        }
-        
-    }
-    open func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        if let commentGroup = self.chatRoom!.commentGroup(index: indexPath.section) {
-            if let selIndex = self.selectedCellIndex {
-                if selIndex.section == indexPath.section && selIndex.item == indexPath.item{
-                    cell.backgroundColor = UIColor.clear
-                    self.selectedCellIndex = nil
-                }
-            }
+            let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
+            let group = self.chatRoom!.comments[indexPath.section]
+            
             if let chatCell = cell as? QChatCell {
-                chatCell.endDisplayingCell()
+                chatCell.willDisplayCell()
             }
+            
+            if let selectedIndex = self.selectedCellIndex {
+                if indexPath.section == selectedIndex.section && indexPath.item == selectedIndex.item{
+                    cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
+                }
+            }
+            if self.isPresence {
+                if comment.status != .failed && comment.status != .sending{
+                    comment.read()
+                }
+            }
+    //        if let participant = self.chatRoom?.participant(withEmail: QiscusMe.sharedInstance.email){
+    //            participant.updateLastReadId(commentId: comment.id)
+    //        }
             if indexPath.section == (self.chatRoom!.commentsGroupCount - 1){
-                if indexPath.row == commentGroup.commentsCount - 1{
-                    let visibleIndexPath = collectionView.indexPathsForVisibleItems
-                    if visibleIndexPath.count > 0{
-                        var visible = false
-                        for visibleIndex in visibleIndexPath{
-                            if visibleIndex.row == indexPath.row && visibleIndex.section == indexPath.section{
-                                visible = true
-                                break
+                if indexPath.row == group.commentsCount - 1{
+                    isLastRowVisible = true
+                }
+            }
+        }
+    }
+    
+    open func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if let room = self.chatRoom {
+            if indexPath.section < (room.commentsGroupCount - 1 ){
+                let roomId = room.id
+                QiscusBackgroundThread.async {
+                    if let dbRoom = QRoom.threadSaveRoom(withId: roomId){
+                        if let commentGroup = dbRoom.commentGroup(index: indexPath.section) {
+                            if let selIndex = self.selectedCellIndex {
+                                if selIndex.section == indexPath.section && selIndex.item == indexPath.item{
+                                    DispatchQueue.main.async {
+                                        cell.backgroundColor = UIColor.clear
+                                    }
+                                    self.selectedCellIndex = nil
+                                }
+                            }
+                            if let chatCell = cell as? QChatCell {
+                                DispatchQueue.main.async {
+                                    chatCell.endDisplayingCell()
+                                }
+                            }
+                            if indexPath.section == (dbRoom.commentsGroupCount - 1){
+                                if indexPath.row == commentGroup.commentsCount - 1{
+                                    let visibleIndexPath = collectionView.indexPathsForVisibleItems
+                                    if visibleIndexPath.count > 0{
+                                        var visible = false
+                                        for visibleIndex in visibleIndexPath{
+                                            if visibleIndex.row == indexPath.row && visibleIndex.section == indexPath.section{
+                                                visible = true
+                                                break
+                                            }
+                                        }
+                                        self.isLastRowVisible = visible
+                                    }else{
+                                        self.isLastRowVisible = true
+                                    }
+                                }
                             }
                         }
-                        isLastRowVisible = visible
-                    }else{
-                        isLastRowVisible = true
                     }
                 }
             }
@@ -280,16 +278,16 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         var height = CGFloat(0)
         var width = CGFloat(0)
         if let room = self.chatRoom {
-        if section < room.commentsGroupCount {
-        let commentGroup = room.commentGroup(index: section)!
-        if commentGroup.senderEmail != QiscusMe.sharedInstance.email{
-            let firstComment = commentGroup.comment(index: 0)!
-            if firstComment.type != .system {
-                height = 44
-                width = 44
+            if section < room.commentsGroupCount {
+                let commentGroup = room.commentGroup(index: section)!
+                if commentGroup.senderEmail != QiscusMe.sharedInstance.email{
+                    let firstComment = commentGroup.comment(index: 0)!
+                    if firstComment.type != .system {
+                        height = 44
+                        width = 44
+                    }
+                }
             }
-        }
-        }
         }
         return CGSize(width: width, height: height)
     }

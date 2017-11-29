@@ -27,25 +27,29 @@ internal extension QRoom {
         }
     }
     internal class func getRoom(withId id:String) -> QRoom?{
-        if let cache = Qiscus.chatRooms[id] {
-            if !cache.isInvalidated {
-                return cache
-            }else{
-                Qiscus.chatRooms[id] = nil
+        if Thread.isMainThread {
+            if let cache = Qiscus.chatRooms[id] {
+                if !cache.isInvalidated {
+                    cache.subscribeRoomChannel()
+                    return cache
+                }else{
+                    Qiscus.chatRooms[id] = nil
+                }
             }
-        }
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let rooms = realm.objects(QRoom.self).filter("id == '\(id)'")
-        if rooms.count > 0 {
-            let room = rooms.first!
-            room.resetRoomComment()
-            Qiscus.chatRooms[room.id] = room
-            if Qiscus.shared.chatViews[room.id] ==  nil{
-                let chatView = QiscusChatVC()
-                chatView.chatRoom = Qiscus.chatRooms[room.id]
-                Qiscus.shared.chatViews[room.id] = chatView
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            let rooms = realm.objects(QRoom.self).filter("id == '\(id)'")
+            if rooms.count > 0 {
+                let room = rooms.first!
+                room.resetRoomComment()
+                Qiscus.chatRooms[room.id] = room
+                if Qiscus.shared.chatViews[room.id] ==  nil{
+                    let chatView = QiscusChatVC()
+                    chatView.chatRoom = Qiscus.chatRooms[room.id]
+                    Qiscus.shared.chatViews[room.id] = chatView
+                }
+                room.subscribeRoomChannel()
+                return room
             }
-            return room
         }
         return nil
     }
@@ -249,33 +253,34 @@ internal extension QRoom {
         return room
     }
     internal class func removeRoom(room:QRoom){
-        let roomTS = ThreadSafeReference(to: room)
+        let roomId = room.id
         QiscusDBThread.sync {autoreleasepool{
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            guard let r = realm.resolve(roomTS) else { return }
-            
-            for group in r.comments {
-                for comment in group.comments{
-                    QComment.cache[comment.uniqueId] = nil
+            if let r = QRoom.threadSaveRoom(withId: roomId){
+                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                r.unsubscribeRoomChannel()
+                for group in r.comments {
+                    for comment in group.comments{
+                        QComment.cache[comment.uniqueId] = nil
+                        try! realm.write {
+                            realm.delete(comment)
+                        }
+                    }
+                    QCommentGroup.cache[group.id] = nil
                     try! realm.write {
-                        realm.delete(comment)
+                        realm.delete(group)
                     }
                 }
-                QCommentGroup.cache[group.id] = nil
+                for participant in r.participants {
+                    if !participant.isInvalidated {
+                        QParticipant.cache[participant.localId] = nil
+                        try! realm.write {
+                            realm.delete(participant)
+                        }
+                    }
+                }
                 try! realm.write {
-                    realm.delete(group)
+                    realm.delete(r)
                 }
-            }
-            for participant in r.participants {
-                if !participant.isInvalidated {
-                    QParticipant.cache[participant.localId] = nil
-                    try! realm.write {
-                        realm.delete(participant)
-                    }
-                }
-            }
-            try! realm.write {
-                realm.delete(r)
             }
         }}
     }

@@ -11,11 +11,13 @@ import RealmSwift
 public extension QRoom {
     public var isPinned:Bool {
         get{
+            if self.isInvalidated { return false }
             return self.pinned != 0
         }
     }
     public var name:String{
         get{
+            if self.isInvalidated {return ""}
             if self.definedname != "" {
                 return self.definedname
             }else{
@@ -25,6 +27,7 @@ public extension QRoom {
     }
     public var avatarURL:String{
         get{
+            if self.isInvalidated { return "" }
             if self.definedAvatarURL != "" {
                 return self.definedAvatarURL
             }else{
@@ -35,6 +38,7 @@ public extension QRoom {
     
     public var lastCommentGroup:QCommentGroup?{
         get{
+            if self.isInvalidated { return nil }
             if let group = self.comments.last {
                 return QCommentGroup.commentGroup(withId: group.id)
             }else{
@@ -44,6 +48,7 @@ public extension QRoom {
     }
     public var lastComment:QComment?{
         get{
+            if self.isInvalidated {return nil}
             if let comment = QComment.comment(withUniqueId: self.lastCommentUniqueId){
                 return comment
             }else{
@@ -69,16 +74,19 @@ public extension QRoom {
         }
     }
     public var commentsGroupCount:Int{
+        if self.isInvalidated {return 0}
         return self.comments.count
     }
     public var type:QRoomType {
         get{
+            if self.isInvalidated { return QRoomType(rawValue: 0)!}
             return QRoomType(rawValue: self.typeRaw)!
         }
     }
     
     public var listComment:[QComment]{
         get{
+            if self.isInvalidated { return [QComment]()}
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             var comments = [QComment]()
             let data =  realm.objects(QComment.self).filter("roomId == '\(self.id)'").sorted(byKeyPath: "createdAt", ascending: true)

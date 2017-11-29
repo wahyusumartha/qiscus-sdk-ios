@@ -47,6 +47,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
             Qiscus.connect(delegate: self)
             let rooms = QRoom.all()
             if rooms.count > 0 {
+                Qiscus.prepareView()
                 goToRoomList(rooms: rooms)
             }else{
                 goToFetch()

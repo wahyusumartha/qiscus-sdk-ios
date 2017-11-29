@@ -124,7 +124,13 @@ internal extension QRoom {
                 
                 DispatchQueue.main.async {
                     for channel in channels{
-                        Qiscus.shared.mqtt?.subscribe(channel)
+                        if Qiscus.realtimeConnected {
+                            Qiscus.shared.mqtt?.subscribe(channel)
+                        }else{
+                            if !Qiscus.realtimeChannel.contains(channel) {
+                                Qiscus.realtimeChannel.append(channel)
+                            }
+                        }
                     }
                 }
             }
@@ -139,13 +145,7 @@ internal extension QRoom {
                 channels.append("r/\(room.id)/\(room.id)/+/d")
                 channels.append("r/\(room.id)/\(room.id)/+/r")
                 channels.append("r/\(room.id)/\(room.id)/+/t")
-                
-                for participant in room.participants{
-                    if participant.email != QiscusMe.sharedInstance.email {
-                        channels.append(participant.email)
-                    }
-                }
-                
+                                
                 DispatchQueue.global().async {autoreleasepool{
                     for channel in channels{
                         Qiscus.shared.mqtt?.unsubscribe(channel)

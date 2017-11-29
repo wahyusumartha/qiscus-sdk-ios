@@ -454,7 +454,16 @@ public class QComment:Object {
             return nil
         }
     }
-    
+    public class func threadSaveComment(withUniqueId uniqueId:String)->QComment?{
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        
+        let comments = realm.objects(QComment.self).filter("uniqueId == '\(uniqueId)'")
+        if comments.count > 0 {
+            let comment = comments.first!
+            return comment
+        }
+        return nil
+    }
     public class func comment(withUniqueId uniqueId:String)->QComment?{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         if let comment = QComment.cache[uniqueId] {
@@ -838,6 +847,43 @@ public class QComment:Object {
             }
         }
         return nil
+    }
+    public func read(){
+        let uniqueId = self.uniqueId
+        QiscusDBThread.async {
+            if let comment = QComment.threadSaveComment(withUniqueId: uniqueId){
+                if let room = QRoom.threadSaveRoom(withId: comment.roomId) {
+                    if room.lastReadCommentId < comment.id {
+                        QRoom.publishStatus(roomId: room.id, commentId: comment.id, status: .read)
+                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        try! realm.write {
+                            room.lastReadCommentId = comment.id
+                        }
+                        if room.lastDeliveredCommentId < comment.id {
+                            try! realm.write {
+                                room.lastDeliveredCommentId = comment.id
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public func receive(){
+        let uniqueId = self.uniqueId
+        QiscusDBThread.async {
+            if let comment = QComment.threadSaveComment(withUniqueId: uniqueId){
+                if let room = QRoom.threadSaveRoom(withId: comment.roomId) {
+                    if room.lastDeliveredCommentId < comment.id {
+                        QRoom.publishStatus(roomId: room.id, commentId: comment.id, status: .delivered)
+                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        try! realm.write {
+                            room.lastDeliveredCommentId = comment.id
+                        }
+                    }
+                }
+            }
+        }
     }
     public func encodeDictionary()->[AnyHashable : Any]{
         var data = [AnyHashable : Any]()

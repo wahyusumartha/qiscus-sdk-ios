@@ -73,6 +73,7 @@ open class QiscusChatVC: UIViewController{
     let locationManager = CLLocationManager()
     var didFindLocation = true
     var topComment:QComment?
+    var prefetch:Bool = false 
     
     var replyData:QComment? = nil {
         didSet{
@@ -95,6 +96,8 @@ open class QiscusChatVC: UIViewController{
                 room.subscribeRealtimeStatus()
             }
             if oldValue == nil && self.chatRoom != nil {
+                let _ = self.view
+                self.collectionView.reloadData()
                 if Qiscus.shared.connected {
                     self.chatRoom?.sync()
                 }
@@ -379,11 +382,6 @@ open class QiscusChatVC: UIViewController{
         unreadIndexPath = [IndexPath]()
         bottomButton.isHidden = true
         
-        
-        if self.loadMoreControl.isRefreshing {
-            self.loadMoreControl.endRefreshing()
-        }
-        
         self.inputBarBottomMargin.constant = 0
         
         self.archievedNotifView.backgroundColor = QiscusColorConfiguration.sharedInstance.lockViewBgColor
@@ -434,6 +432,14 @@ open class QiscusChatVC: UIViewController{
         self.titleView.addSubview(self.roomAvatar)
         self.titleView.addSubview(self.roomAvatarLabel)
         
+        let center: NotificationCenter = NotificationCenter.default
+        center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        center.addObserver(self, selector: #selector(QiscusChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
+        center.addObserver(self, selector: #selector(QiscusChatVC.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
+        center.addObserver(self, selector: #selector(QiscusChatVC.commentDeleted(_:)), name: QiscusNotification.COMMENT_DELETE, object: nil)
+        center.addObserver(self, selector: #selector(QiscusChatVC.userPresenceChanged(_:)), name: QiscusNotification.USER_PRESENCE, object: nil)
+        center.addObserver(self, selector: #selector(QiscusChatVC.userTyping(_:)), name: QiscusNotification.USER_TYPING, object: nil)
+        center.addObserver(self, selector: #selector(QiscusChatVC.appDidEnterBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
     }
     open func setupTitleView(){
         
@@ -498,7 +504,9 @@ open class QiscusChatVC: UIViewController{
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+        if self.loadMoreControl.isRefreshing {
+            self.loadMoreControl.endRefreshing()
+        }
         if self.defaultBack {
             self.defaultBackButtonVisibility = self.navigationItem.hidesBackButton
         }
@@ -524,19 +532,13 @@ open class QiscusChatVC: UIViewController{
         
         self.clearAllNotification()
         
-        let center: NotificationCenter = NotificationCenter.default
-        center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
-        center.addObserver(self, selector: #selector(QiscusChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
-        center.addObserver(self, selector: #selector(QiscusChatVC.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
-        center.addObserver(self, selector: #selector(QiscusChatVC.commentDeleted(_:)), name: QiscusNotification.COMMENT_DELETE, object: nil)
-        center.addObserver(self, selector: #selector(QiscusChatVC.userPresenceChanged(_:)), name: QiscusNotification.USER_PRESENCE, object: nil)
-        center.addObserver(self, selector: #selector(QiscusChatVC.userTyping(_:)), name: QiscusNotification.USER_TYPING, object: nil)
-        center.addObserver(self, selector: #selector(QiscusChatVC.appDidEnterBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
         view.endEditing(true)
         if firstLoad {
             self.firstLoadSetup()
             self.collectionView.isHidden = true
-            self.showLoading("Load data ...")
+            if !self.prefetch {
+                self.showLoading("Load data ...") //wil be marked
+            }
         }
         if inputText.value == "" {
             sendButton.isEnabled = false
@@ -550,13 +552,16 @@ open class QiscusChatVC: UIViewController{
     
     override open func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        
         if self.chatRoom == nil {
             self.collectionView.isHidden = true
             self.loadData()
         }else if self.firstLoad {
             self.loadRoomView()
             if self.chatRoom!.commentsGroupCount == 0 {
-                self.showLoading("Load Data ...")
+                if !self.prefetch {
+                    self.showLoading("Load Data ...")
+                }
                 self.chatRoom!.sync()
             }else{
                 if let target = self.chatTarget {
@@ -602,9 +607,25 @@ open class QiscusChatVC: UIViewController{
             
             self.chatRoom!.sync()
         }
-        
-        self.isPresence = true
+        if !self.prefetch {
+            self.isPresence = true
+            if let room = self.chatRoom {
+                let roomId = room.id
+                QiscusBackgroundThread.async {
+                    if let dbRoom = QRoom.threadSaveRoom(withId: roomId){
+                        if dbRoom.comments.count > 0 {
+                            let group = dbRoom.comments[dbRoom.comments.count - 1]
+                            if group.comments.count > 0 {
+                                let comment = group.comments[group.comments.count - 1]
+                                comment.read()
+                            }
+                        }
+                    }
+                }
+            }
+        }
         self.firstLoad = false
+        self.prefetch = false
     }
     
     // MARK: - Memory Warning
@@ -719,8 +740,12 @@ open class QiscusChatVC: UIViewController{
         }else{
             let _ = self.navigationController?.popViewController(animated: true)
         }
+        
     }
-    
+    func unsubscribeNotificationCenter(){
+        let center: NotificationCenter = NotificationCenter.default
+        center.removeObserver(self)
+    }
     // MARK: - Button Action
     func appDidEnterBackground(){
         self.isPresence = false
@@ -847,8 +872,10 @@ open class QiscusChatVC: UIViewController{
             if let currentRoom = self.chatRoom {
                 if currentRoom.isInvalidated { return }
             }
-            if self.chatRoom!.id == room.id {
-                self.userTypingChanged(user: user, typing: typing)
+            if let currentRoom = self.chatRoom {
+                if currentRoom.id == room.id {
+                    self.userTypingChanged(user: user, typing: typing)
+                }
             }
         }
     }
@@ -858,7 +885,6 @@ open class QiscusChatVC: UIViewController{
                 QiscusNotification.publish(userTyping: user, room: room, typing: false )
             }
         }
-        
     }
     open func userTypingChanged(user: QUser, typing:Bool){
         if !processingTyping {
