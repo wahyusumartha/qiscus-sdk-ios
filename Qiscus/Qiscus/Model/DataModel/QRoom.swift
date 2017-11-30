@@ -609,20 +609,11 @@ public class QRoom:Object {
             try! realm.write {
                 self.storedName = name
             }
-            func execute(){
+            DispatchQueue.main.async {
                 if let room = QRoom.room(withId: id){
                     if room.definedname != "" {
                         QiscusNotification.publish(roomChange: room)
                         room.delegate?.room(didChangeName: room)
-                    }
-                }
-            }
-            if Thread.isMainThread {
-                execute()
-            }else{
-                DispatchQueue.main.sync {
-                    autoreleasepool{
-                        execute()
                     }
                 }
             }
@@ -641,7 +632,7 @@ public class QRoom:Object {
                         try! realm.write {
                             room.avatarData = nil
                         }
-                        DispatchQueue.main.sync { autoreleasepool {
+                        DispatchQueue.main.async { autoreleasepool {
                             if let cache = QRoom.room(withId: id){
                                 QiscusNotification.publish(roomChange: cache)
                                 cache.delegate?.room(didChangeAvatar: cache)
@@ -665,7 +656,7 @@ public class QRoom:Object {
         }}
     }
     public func setAvatar(url:String){
-        if self.avatarURL != url {
+        if self.definedAvatarURL != url {
             let id = self.id
             QiscusDBThread.async {
                 if let room = QRoom.threadSaveRoom(withId: id){
@@ -686,31 +677,28 @@ public class QRoom:Object {
     }
     public func setName(name:String){
         if name != self.definedname {
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            try! realm.write {
-                self.definedname = name
-            }
-            if self.type == .single {
-                for participant in participants {
-                    if participant.email != QiscusMe.sharedInstance.email {
-                        if let user = participant.user {
-                            user.setName(name: name)
+            let id = self.id
+            QiscusDBThread.async {
+                if let room = QRoom.threadSaveRoom(withId: id) {
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    try! realm.write {
+                        room.definedname = name
+                    }
+                    if room.type == .single {
+                        for participant in room.participants {
+                            if participant.email != QiscusMe.sharedInstance.email {
+                                if let user = participant.user {
+                                    user.setName(name: name)
+                                }
+                            }
                         }
                     }
-                }
-            }
-            let id = self.id
-            func execute(){
-                if let cache = QRoom.room(withId: id) {
-                    QiscusNotification.publish(roomChange: cache)
-                    cache.delegate?.room(didChangeName: cache)
-                }
-            }
-            if Thread.isMainThread {
-                execute()
-            }else{
-                DispatchQueue.main.sync {
-                    execute()
+                    DispatchQueue.main.async {
+                        if let cache = QRoom.room(withId: id) {
+                            QiscusNotification.publish(roomChange: cache)
+                            cache.delegate?.room(didChangeName: cache)
+                        }
+                    }
                 }
             }
         }
@@ -822,7 +810,7 @@ public class QRoom:Object {
                         try! realm.write {
                             room.avatarData = data
                         }
-                        DispatchQueue.main.sync { autoreleasepool {
+                        DispatchQueue.main.async { autoreleasepool {
                             if let cache = QRoom.room(withId: id){
                                 QiscusNotification.publish(roomChange: cache)
                                 cache.delegate?.room(didChangeAvatar: cache)

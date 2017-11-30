@@ -489,11 +489,21 @@ extension QiscusChatVC {
         self.titleAction()
     }
     func scrollToBottom(_ animated:Bool = false){
-        if self.chatRoom!.commentsGroupCount > 0 {
-            let section = self.chatRoom!.commentsGroupCount - 1
-            let row = self.chatRoom!.commentGroup(index:section)!.commentsCount - 1
-            let lastIndexPath = IndexPath(row: row, section: section)
-            self.collectionView.scrollToItem(at: lastIndexPath, at: .bottom, animated: animated)
+        if let room = self.chatRoom {
+            let roomId = room.id
+            QiscusBackgroundThread.async {
+                if let dbRoom = QRoom.threadSaveRoom(withId: roomId) {
+                    if dbRoom.comments.count > 0 {
+                        let section = dbRoom.comments.count - 1
+                        let group = dbRoom.comments[section]
+                        let item = group.comments.count - 1
+                        let lastIndexPath = IndexPath(row: item, section: section)
+                        DispatchQueue.main.async {
+                            self.collectionView.scrollToItem(at: lastIndexPath, at: .bottom, animated: animated)
+                        }
+                    }
+                }
+            }
         }
     }
     

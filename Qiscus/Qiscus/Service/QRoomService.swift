@@ -29,23 +29,33 @@ public class QRoomService:NSObject{
                 let results = json["results"]
                 let error = json["error"]
                 
-                if room.isInvalidated {
-                    return
-                }
+                
                 if results != JSON.null{
+                    print(results["room"])
                     let roomData = results["room"]
-                    room.syncRoomData(withJSON: roomData)
-                    let commentPayload = results["comments"].arrayValue
-                    for json in commentPayload {
-                        let commentId = json["id"].intValue
+                    let roomId = "\(roomData["id"])"
+                    if let r = QRoom.threadSaveRoom(withId: roomId){
+                        if r.isInvalidated {
+                            return
+                        }
+                        r.syncRoomData(withJSON: roomData)
                         
-                        if commentId <= QiscusMe.sharedInstance.lastCommentId {
-                            room.saveOldComment(fromJSON: json)
-                        }else{
-                            QChatService.syncProcess()
+                        let commentPayload = results["comments"].arrayValue
+                        for json in commentPayload {
+                            let commentId = json["id"].intValue
+                            
+                            if commentId <= QiscusMe.sharedInstance.lastCommentId {
+                                r.saveOldComment(fromJSON: json)
+                            }else{
+                                QChatService.syncProcess()
+                            }
+                        }
+                        DispatchQueue.main.async {
+                            if let mainRoom = QRoom.room(withId: roomId){
+                                mainRoom.delegate?.room(didFinishSync: room)
+                            }
                         }
                     }
-                    room.delegate?.room(didFinishSync: room)
                 }else if error != JSON.null{
                     Qiscus.printLog(text: "error getRoom")
                     
