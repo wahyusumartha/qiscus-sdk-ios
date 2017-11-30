@@ -290,8 +290,9 @@ extension QiscusChatVC {
 //            Qiscus.shared.mqtt?.unsubscribe(channel)
 //        }
     }
-    func iCloudOpen(){
+    func iCloudOpen(){        
         if Qiscus.sharedInstance.connected{
+            UINavigationBar.appearance().tintColor = UIColor.blue
             let documentPicker = UIDocumentPickerViewController(documentTypes: self.UTIs, in: UIDocumentPickerMode.import)
             documentPicker.delegate = self
             documentPicker.modalPresentationStyle = UIModalPresentationStyle.fullScreen

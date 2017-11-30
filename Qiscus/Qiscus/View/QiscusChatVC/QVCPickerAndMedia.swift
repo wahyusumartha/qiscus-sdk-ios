@@ -297,7 +297,7 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                     fileType = QiscusFileType.file
                 }
                 self.dismissLoading()
-                
+                UINavigationBar.appearance().tintColor = self.currentNavbarTint
                 if usePopup {
                     QPopUpView.showAlert(withTarget: self, image: thumb, message:popupText, isVideoImage: video,
                                          doneAction: {
@@ -315,12 +315,13 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                     uploader.room = self.chatRoom
                     self.navigationController?.pushViewController(uploader, animated: true)
                 }
-                
-                
             }catch _{
                 self.dismissLoading()
             }
         }
+    }
+    open func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        UINavigationBar.appearance().tintColor = self.currentNavbarTint
     }
 }
 // MARK: - AudioPlayer
