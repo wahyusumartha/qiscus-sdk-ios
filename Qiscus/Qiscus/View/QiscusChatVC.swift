@@ -73,7 +73,7 @@ open class QiscusChatVC: UIViewController{
     var didFindLocation = true
     var topComment:QComment?
     var prefetch:Bool = false 
-    var currentNavbarTint = UINavigationBar.appearance().tintColor
+    let currentNavbarTint = UINavigationBar.appearance().tintColor
     
     var replyData:QComment? = nil {
         didSet{
@@ -496,7 +496,6 @@ open class QiscusChatVC: UIViewController{
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.currentNavbarTint = UINavigationBar.appearance().tintColor
         if !self.prefetch {
             let center: NotificationCenter = NotificationCenter.default
             center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
