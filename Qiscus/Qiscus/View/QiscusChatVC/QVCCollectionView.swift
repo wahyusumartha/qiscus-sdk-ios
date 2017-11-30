@@ -100,7 +100,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     
     // MARK: CollectionView delegate
     open func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        if indexPath.section < self.chatRoom!.commentsGroupCount {
+        if indexPath.section < (self.chatRoom!.commentsGroupCount - 1 ) {
             let roomId = self.chatRoom!.id
             if let chatCell = cell as? QChatCell {
                 chatCell.willDisplayCell()
@@ -130,7 +130,6 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                     }
                 }
             }
-            
         }
     }
     
