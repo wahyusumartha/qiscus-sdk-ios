@@ -481,6 +481,9 @@ open class QiscusChatVC: UIViewController{
     }
     
     override open func viewWillDisappear(_ animated: Bool) {
+        if let room = self.chatRoom {
+            room.readAll()
+        }
         self.isPresence = false
         self.dataLoaded = false
         super.viewWillDisappear(animated)
@@ -943,7 +946,7 @@ open class QiscusChatVC: UIViewController{
         self.collectionView.reloadData()
         if self.isPresence{
             if let indexPath = self.chatRoom!.getIndexPath(ofComment: comment){
-                if self.isLastRowVisible || comment.senderEmail == QiscusMe.sharedInstance.email{
+                if self.isLastRowVisible || comment.senderEmail == QiscusMe.shared.email{
                     self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
                 }
             }
@@ -1062,7 +1065,7 @@ extension QiscusChatVC:QRoomDelegate{
     }
     public func room(didChangeUser room: QRoom, user: QUser) {
         if self.chatRoom!.type == .single {
-            if user.email != QiscusMe.sharedInstance.email && self.chatRoom!.typingUser == ""{
+            if user.email != QiscusMe.shared.email && self.chatRoom!.typingUser == ""{
                 self.loadSubtitle()
             }
         }

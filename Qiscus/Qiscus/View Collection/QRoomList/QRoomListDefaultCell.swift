@@ -36,34 +36,12 @@ class QRoomListDefaultCell: QRoomListCell {
             }
         }
     }
-   
     override func setupUI() {
-        self.avatarView.image = Qiscus.image(named: "avatar")
         self.typingUser = nil
-        if room != nil {
-            self.descriptionLabel.textColor = UIColor.black
-            if room!.unreadCount > 0 {
-                self.unreadLabel.text = "\(room!.unreadCount)"
-                if room!.unreadCount > 99 {
-                    self.unreadLabel.text = "99+"
-                }
-                self.unreadLabel.isHidden = false
-            }else{
-                self.unreadLabel.isHidden = true
-            }
-            self.titleLabel.text = room!.name
-            if let lastComment = room!.lastComment{
-                self.descriptionLabel.text = "\(lastComment.senderName): \(lastComment.text)"
-            }
-            
-            room!.loadAvatar(onSuccess: { (avatar) in
-                self.avatarView.image = avatar
-            }, onError: { (_) in
-                if let thisRoom = self.room {
-                    thisRoom.downloadRoomAvatar()
-                }
-            })
-        }
+        setupAvatar()
+        setupUnreadIndicator()
+        setupName()
+        setupLastComment()
     }
     override func searchTextChanged() {
         let boldAttr = [NSForegroundColorAttributeName: UIColor.red,
@@ -96,5 +74,65 @@ class QRoomListDefaultCell: QRoomListCell {
         super.setSelected(selected, animated: animated)
 
         // Configure the view for the selected state
+    }
+    func setupAvatar(){
+        self.avatarView.image = Qiscus.image(named: "avatar")
+        if let thisRoom = self.room{
+            thisRoom.loadAvatar(onSuccess: { (avatar) in
+                self.avatarView.image = avatar
+            }, onError: { (_) in
+                if let r = self.room {
+                    r.downloadRoomAvatar()
+                }
+            })
+        }
+    }
+    func setupUnreadIndicator(){
+        if let thisRoom = room {
+            if thisRoom.unreadCount > 0 {
+                self.unreadLabel.text = "\(thisRoom.unreadCount)"
+                if room!.unreadCount > 99 {
+                    self.unreadLabel.text = "99+"
+                }
+                self.unreadLabel.isHidden = false
+            }else{
+                self.unreadLabel.isHidden = true
+            }
+        }else{
+            self.unreadLabel.isHidden = true
+        }
+    }
+    func setupName(){
+        self.titleLabel.text = ""
+        if let r = room {
+            self.titleLabel.text = r.name
+        }
+    }
+    func setupLastComment(){
+        self.descriptionLabel.textColor = UIColor.black
+        if let r = room {
+            if let lastComment = r.lastComment{
+                self.descriptionLabel.text = "\(lastComment.senderName): \(lastComment.text)"
+            }else{
+                self.descriptionLabel.text = ""
+            }
+        }else{
+            self.descriptionLabel.text = ""
+        }
+    }
+    override func onRoomChange(room: QRoom) {}
+    override func gotNewComment(comment: QComment) {}
+    
+    override func roomUnreadCountChange() {
+        setupUnreadIndicator()
+    }
+    override func roomLastCommentChange() {
+        setupLastComment()
+    }
+    override func roomAvatarChange() {
+        setupAvatar()
+    }
+    override func roomNameChange() {
+        setupName()
     }
 }

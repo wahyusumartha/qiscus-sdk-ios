@@ -44,7 +44,7 @@ public class QRoomService:NSObject{
                         for json in commentPayload {
                             let commentId = json["id"].intValue
                             
-                            if commentId <= QiscusMe.sharedInstance.lastCommentId {
+                            if commentId <= QiscusMe.shared.lastCommentId {
                                 r.saveOldComment(fromJSON: json)
                             }else{
                                 QChatService.syncProcess()
@@ -183,7 +183,7 @@ public class QRoomService:NSObject{
             QiscusService.session.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                 if let response = responseData.result.value {
                     Qiscus.printLog(text: "publish message status result: \(response)")
-                    let savedParticipant = room.participants.filter("email == '\(QiscusMe.sharedInstance.email)'")
+                    let savedParticipant = room.participants.filter("email == '\(QiscusMe.shared.email)'")
                     if savedParticipant.count > 0 {
                         let participant = savedParticipant.first!
                         if status == .delivered {
@@ -454,7 +454,7 @@ public class QRoomService:NSObject{
                     
                     QiscusService.session.upload(multipartFormData: {formData in
                         formData.append(data, withName: "file", fileName: filename, mimeType: mimeType)
-                        formData.append(QiscusMe.sharedInstance.token.data(using: .utf8)! , withName: "token")
+                        formData.append(QiscusMe.shared.token.data(using: .utf8)! , withName: "token")
                     }, with: urlUpload, encodingCompletion: {
                         encodingResult in
                         switch encodingResult{

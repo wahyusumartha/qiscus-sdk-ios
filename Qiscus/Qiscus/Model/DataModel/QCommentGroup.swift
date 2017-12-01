@@ -71,6 +71,22 @@ public class QCommentGroup: Object{
             return nil
         }
     }
+    internal func calculateCommentPosition(){
+        var i = 0
+        for comment in self.comments {
+            var position = QCellPosition.first
+            if i == self.comments.count - 1 {
+                position = .last
+            }
+            else if i > 0 {
+                position = .middle
+            }
+            if comment.cellPos != position {
+                comment.updateCellPos(cellPos: position)
+            }
+            i += 1
+        }
+    }
     public func append(comment:QComment){
         if let group = QCommentGroup.commentGroup(withId: self.id){
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)

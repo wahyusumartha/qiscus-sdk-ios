@@ -80,4 +80,7 @@ public extension QRoom {
     public func loadAvatar(onSuccess:  @escaping (UIImage)->Void, onError:  @escaping (String)->Void){
         self.loadRoomAvatar(onSuccess: onSuccess, onError: onError)
     }
+    public func add(newComment comment:QComment){
+        self.addComment(newComment: comment)
+    }
 }

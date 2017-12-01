@@ -106,7 +106,7 @@ class QCellTextRight: QChatCell {
             }
             var username = replyData["replied_comment_sender_username"].stringValue
             let repliedEmail = replyData["replied_comment_sender_email"].stringValue
-            if repliedEmail == QiscusMe.sharedInstance.email {
+            if repliedEmail == QiscusMe.shared.email {
                 username = "You"
             }else{
                 if let user = QUser.user(withEmail: repliedEmail){

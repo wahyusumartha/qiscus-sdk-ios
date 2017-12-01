@@ -110,14 +110,18 @@ public class QUser:Object {
     public class func saveUser(withEmail email:String, id:Int? = nil ,fullname:String? = nil, avatarURL:String? = nil, lastSeen:Double? = nil)->QUser{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         var user = QUser()
-        if let savedUser = QUser.user(withEmail: email){
+        if let savedUser = QUser.getUser(email: email){
             user = savedUser
             if fullname != nil  && fullname! != user.storedName {
                 try! realm.write {
                     user.storedName = fullname!
                 }
                 if user.definedName != "" {
-                    user.delegate?.user?(didChangeName: fullname!)
+                    DispatchQueue.main.async {
+                        if let u = QUser.user(withEmail: email){
+                            u.delegate?.user?(didChangeName: fullname!)
+                        }
+                    }
                 }
             }
             if id != nil {
@@ -130,13 +134,23 @@ public class QUser:Object {
                     user.avatarURL = avatarURL!
                 }
                 user.downloadAvatar()
-                user.delegate?.user?(didChangeAvatarURL: avatarURL!)
+                
+                DispatchQueue.main.async {
+                    if let u = QUser.user(withEmail: email){
+                        u.delegate?.user?(didChangeAvatarURL: avatarURL!)
+                        QiscusNotification.publish(userAvatarChange: u)
+                    }
+                }
             }
             if lastSeen != nil && lastSeen! > user.lastSeen{
                 try! realm.write {
                     user.lastSeen = lastSeen!
                 }
-                user.delegate?.user?(didChangeLastSeen: lastSeen!)
+                DispatchQueue.main.async {
+                    if let u = QUser.user(withEmail: email){
+                        u.delegate?.user?(didChangeLastSeen: lastSeen!)
+                    }
+                }
             }
         }else{
             user.email = email
@@ -154,9 +168,6 @@ public class QUser:Object {
             }
             try! realm.write {
                 realm.add(user)
-            }
-            if Thread.isMainThread {
-                user.cacheObject()
             }
         }
         

@@ -351,7 +351,7 @@ extension QiscusChatVC {
                     if room.type == .group{
                         subtitleString = "You"
                         for participant in room.participants{
-                            if participant.email != QiscusMe.sharedInstance.email {
+                            if participant.email != QiscusMe.shared.email {
                                 if let user = participant.user {
                                     subtitleString += ", \(user.fullname)"
                                 }
@@ -360,7 +360,7 @@ extension QiscusChatVC {
                     }else{
                         if room.participants.count > 0 {
                             for participant in room.participants {
-                                if participant.email != QiscusMe.sharedInstance.email{
+                                if participant.email != QiscusMe.shared.email{
                                     if let user = participant.user{
                                         if user.presence == .offline{
                                             let lastSeenString = user.lastSeenString
@@ -490,19 +490,13 @@ extension QiscusChatVC {
         self.titleAction()
     }
     func scrollToBottom(_ animated:Bool = false){
-        if let room = self.chatRoom {
-            let roomId = room.id
-            QiscusBackgroundThread.async {
-                if let dbRoom = QRoom.threadSaveRoom(withId: roomId) {
-                    if dbRoom.comments.count > 0 {
-                        let section = dbRoom.comments.count - 1
-                        let group = dbRoom.comments[section]
-                        let item = group.comments.count - 1
-                        let lastIndexPath = IndexPath(row: item, section: section)
-                        DispatchQueue.main.async {
-                            self.collectionView.scrollToItem(at: lastIndexPath, at: .bottom, animated: animated)
-                        }
-                    }
+        if self.chatRoom != nil {
+            if self.collectionView.numberOfSections > 0 {
+                let section = self.collectionView.numberOfSections - 1
+                if self.collectionView.numberOfItems(inSection: section) > 0 {
+                    let item = self.collectionView.numberOfItems(inSection: section) - 1
+                    let lastIndexPath = IndexPath(row: item, section: section)
+                    self.collectionView.scrollToItem(at: lastIndexPath, at: .bottom, animated: animated)
                 }
             }
         }

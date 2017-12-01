@@ -83,7 +83,7 @@ open class QiscusCommentClient: NSObject {
                         if let result = response.result.value{
                             let json = JSON(result)
                             let success:Bool = (json["status"].intValue == 200)
-                            
+                            print("json login: \(json)")
                             if success {
                                 let userData = json["results"]["user"]
                                 let _ = QiscusMe.saveData(fromJson: userData, reconnect: reconnect)
@@ -196,10 +196,10 @@ open class QiscusCommentClient: NSObject {
         
     }
     private func reconnect(onSuccess:@escaping (()->Void)){
-        let email = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_param_email") as? String
-        let userKey = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_param_pass") as? String
-        let userName = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_param_username") as? String
-        let avatarURL = QiscusMe.sharedInstance.userData.value(forKey: "qiscus_param_avatar") as? String
+        let email = QiscusMe.shared.userData.value(forKey: "qiscus_param_email") as? String
+        let userKey = QiscusMe.shared.userData.value(forKey: "qiscus_param_pass") as? String
+        let userName = QiscusMe.shared.userData.value(forKey: "qiscus_param_username") as? String
+        let avatarURL = QiscusMe.shared.userData.value(forKey: "qiscus_param_avatar") as? String
         if email != nil && userKey != nil && userName != nil {
             QiscusCommentClient.sharedInstance.loginOrRegister(email!, password: userKey!, username: userName!, avatarURL: avatarURL, reconnect: true, onSuccess: onSuccess)
         }
@@ -207,10 +207,10 @@ open class QiscusCommentClient: NSObject {
     }
     // MARK: - Remove deviceToken
     public func unRegisterDevice(){
-        if QiscusMe.sharedInstance.deviceToken != "" {
+        if QiscusMe.shared.deviceToken != "" {
             let parameters:[String: AnyObject] = [
                 "token"  : qiscus.config.USER_TOKEN as AnyObject,
-                "device_token" : QiscusMe.sharedInstance.deviceToken as AnyObject,
+                "device_token" : QiscusMe.shared.deviceToken as AnyObject,
                 "device_platform" : "ios" as AnyObject
             ]
             
@@ -228,7 +228,7 @@ open class QiscusCommentClient: NSObject {
                                 if success {
                                     if let delegate = Qiscus.shared.delegate{
                                         delegate.qiscus?(didUnregisterPushNotification: true, error: nil)
-                                        QiscusMe.sharedInstance.deviceToken = ""
+                                        QiscusMe.shared.deviceToken = ""
                                     }
                                 }else{
                                     if let delegate = Qiscus.shared.delegate{

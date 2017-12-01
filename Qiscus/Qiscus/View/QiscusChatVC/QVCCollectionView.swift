@@ -65,7 +65,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             let commentGroup = self.chatRoom!.commentGroup(index: indexPath.section)!
             
             if kind == UICollectionElementKindSectionFooter{
-                if commentGroup.senderEmail == QiscusMe.sharedInstance.email{
+                if commentGroup.senderEmail == QiscusMe.shared.email{
                     let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterRight", for: indexPath) as! QChatFooterRight
                     return footerCell
                 }else{
@@ -81,18 +81,11 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             }
         }else{
             if kind == UICollectionElementKindSectionFooter{
-               // if commentGroup.senderEmail == QiscusMe.sharedInstance.email{
-                    let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "emptyFooter", for: indexPath) as! QChatEmptyFooter
-                    return footerCell
-//                }else{
-//                    let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterLeft", for: indexPath) as! QChatFooterLeft
-//                    footerCell.user = commentGroup.sender
-//                    return footerCell
-//                }
+                let footerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "emptyFooter", for: indexPath) as! QChatEmptyFooter
+                return footerCell
             }else{
                 let headerCell = self.collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "emptyHeader", for: indexPath) as! QChatEmptyHeaderCell
                 
-                //headerCell.dateString = commentGroup.date
                 return headerCell
             }
         }
@@ -100,16 +93,12 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     
     // MARK: CollectionView delegate
     open func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        if indexPath.section < (self.chatRoom!.commentsGroupCount - 1 ) {
-            let roomId = self.chatRoom!.id
-            if let chatCell = cell as? QChatCell {
-                chatCell.willDisplayCell()
-            }
-            QiscusBackgroundThread.async {
-                if let room = QRoom.threadSaveRoom(withId: roomId){
-                    let group = room.comments[indexPath.section]
-                    let comment = group.comments[indexPath.row]
-                    
+        if let room = self.chatRoom {
+            if room.commentsGroupCount > 0 {
+                if indexPath.section < room.commentsGroupCount {
+                    if let chatCell = cell as? QChatCell {
+                        chatCell.willDisplayCell()
+                    }
                     if let selectedIndex = self.selectedCellIndex {
                         if indexPath.section == selectedIndex.section && indexPath.item == selectedIndex.item{
                             DispatchQueue.main.async {
@@ -117,13 +106,16 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                             }
                         }
                     }
-                    
                     if indexPath.section == (room.commentsGroupCount - 1){
-                        if indexPath.row == group.commentsCount - 1{
-                            self.isLastRowVisible = true
-                            if self.isPresence {
-                                if comment.status != .failed && comment.status != .sending{
-                                    comment.read()
+                        if let group = room.commentGroup(index: indexPath.section) {
+                            if indexPath.row == group.commentsCount - 1{
+                                self.isLastRowVisible = true
+                                if self.isPresence {
+                                    if let comment = group.comment(index: indexPath.row){
+                                        if comment.status != .failed && comment.status != .sending{
+                                            comment.read()
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -228,7 +220,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             }
             break
         case "info":
-            if self.infoAction != nil && Qiscus.sharedInstance.connected && comment.type != .postback && comment.type != .account && comment.status != .failed && comment.type != .system && comment.status != .sending && comment.type != .card && self.chatRoom!.type == .group && comment.senderEmail == QiscusMe.sharedInstance.email{
+            if self.infoAction != nil && Qiscus.sharedInstance.connected && comment.type != .postback && comment.type != .account && comment.status != .failed && comment.type != .system && comment.status != .sending && comment.type != .card && self.chatRoom!.type == .group && comment.senderEmail == QiscusMe.shared.email{
                 show = true
             }
             break
@@ -284,7 +276,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         if let room = self.chatRoom {
             if section < room.commentsGroupCount {
                 let commentGroup = room.commentGroup(index: section)!
-                if commentGroup.senderEmail != QiscusMe.sharedInstance.email{
+                if commentGroup.senderEmail != QiscusMe.shared.email{
                     let firstComment = commentGroup.comment(index: 0)!
                     if firstComment.type != .system {
                         height = 44
@@ -299,7 +291,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         if let room = self.chatRoom {
             if section < room.commentsGroupCount {
                 let commentGroup = room.commentGroup(index: section)!
-                if commentGroup.senderEmail != QiscusMe.sharedInstance.email{
+                if commentGroup.senderEmail != QiscusMe.shared.email{
                     return UIEdgeInsets(top: 0, left: 6, bottom: -44, right: 0)
                 }else{
                     return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)

@@ -138,6 +138,8 @@ public class QComment:Object {
     public dynamic var isUploading = false
     public dynamic var progress = CGFloat(0)
     
+    // read mark
+    internal dynamic var isRead:Bool = false
     
     override public static func ignoredProperties() -> [String] {
         return ["displayImage","delegate"]
@@ -164,7 +166,7 @@ public class QComment:Object {
         get{
             var foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor
             var underlineColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor
-            if self.senderEmail == QiscusMe.sharedInstance.email{
+            if self.senderEmail == QiscusMe.shared.email{
                 foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor
                 underlineColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor
             }
@@ -241,7 +243,7 @@ public class QComment:Object {
     public var cellIdentifier:String{
         get{
             var position = "Left"
-            if self.senderEmail == QiscusMe.sharedInstance.email {
+            if self.senderEmail == QiscusMe.shared.email {
                 position = "Right"
             }
             switch self.type {
@@ -366,7 +368,7 @@ public class QComment:Object {
                 style.alignment = NSTextAlignment.left
                 let systemFont = UIFont.systemFont(ofSize: 14.0)
                 var foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
-                if self.senderEmail == QiscusMe.sharedInstance.email{
+                if self.senderEmail == QiscusMe.shared.email{
                     foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
                 }
                 
@@ -390,7 +392,7 @@ public class QComment:Object {
                 ]
             }else{
                 var foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
-                if self.senderEmail == QiscusMe.sharedInstance.email{
+                if self.senderEmail == QiscusMe.shared.email{
                     foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
                 }
                 return [
@@ -440,7 +442,7 @@ public class QComment:Object {
                 commentInfo.readUser = [QParticipant]()
                 commentInfo.undeliveredUser = [QParticipant]()
                 for participant in room.participants {
-                    if participant.email != QiscusMe.sharedInstance.email{
+                    if participant.email != QiscusMe.shared.email{
                         if participant.lastReadCommentId >= self.id {
                             commentInfo.readUser.append(participant)
                         }else if participant.lastDeliveredCommentId >= self.id{
@@ -578,8 +580,8 @@ public class QComment:Object {
         comment.roomId = roomId
         comment.text = self.text
         comment.createdAt = Double(Date().timeIntervalSince1970)
-        comment.senderEmail = QiscusMe.sharedInstance.email
-        comment.senderName = QiscusMe.sharedInstance.userName
+        comment.senderEmail = QiscusMe.shared.email
+        comment.senderName = QiscusMe.shared.userName
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.data = self.data
         comment.typeRaw = self.type.name()
@@ -595,7 +597,7 @@ public class QComment:Object {
             file!.id = uniqueID
             file!.roomId = roomId
             file!.url = fileRef.url
-            file!.senderEmail = QiscusMe.sharedInstance.email
+            file!.senderEmail = QiscusMe.shared.email
             file!.localPath = fileRef.localPath
             file!.mimeType = fileRef.mimeType
             file!.localThumbPath = fileRef.localThumbPath
@@ -854,21 +856,25 @@ public class QComment:Object {
     }
     public func read(){
         let uniqueId = self.uniqueId
+        if self.isRead {return}
         QiscusDBThread.async {
             if let comment = QComment.threadSaveComment(withUniqueId: uniqueId){
+                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                try! realm.write {
+                    comment.isRead = true
+                }
+                let data = realm.objects(QComment.self).filter("isRead == false AND createdAt < \(comment.createdAt) AND roomId == '\(comment.roomId)'")
+                for olderComment in data {
+                    try! realm.write {
+                        olderComment.isRead = true
+                    }
+                }
                 if let room = QRoom.threadSaveRoom(withId: comment.roomId) {
-                    if room.lastReadCommentId < comment.id {
-                        QRoom.publishStatus(roomId: room.id, commentId: comment.id, status: .read)
-                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-                        try! realm.write {
-                            room.lastReadCommentId = comment.id
-                        }
-                        if room.lastDeliveredCommentId < comment.id {
-                            try! realm.write {
-                                room.lastDeliveredCommentId = comment.id
-                            }
-                        }
-                        room.updateUnreadCommentCount()
+                    room.updateUnreadCommentCount()
+                    if comment.id > 0 {
+                        let roomId = room.id
+                        let commentId = comment.id
+                        QRoom.publishStatus(roomId: roomId, commentId: commentId, status: .read)
                     }
                 }
             }

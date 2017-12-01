@@ -67,9 +67,9 @@ public class QiscusNotification: NSObject {
         let notification = QiscusNotification.shared
         notification.roomOrderChange()
     }
-    public class func publish(roomChange room:QRoom){
+    public class func publish(roomChange room:QRoom, onProperty property:QRoomProperty){
         let notification = QiscusNotification.shared
-        notification.publish(roomChange: room)
+        notification.publish(roomChange: room, property: property)
     }
     public class func publish(roomDeleted roomId:String){
         let notification = QiscusNotification.shared
@@ -141,9 +141,12 @@ public class QiscusNotification: NSObject {
         let userInfo: [AnyHashable: Any] = ["room_id" : roomId]
         self.nc.post(name: QiscusNotification.ROOM_DELETED, object: nil, userInfo: userInfo)
     }
-    private func publish(roomChange room:QRoom){
+    private func publish(roomChange room:QRoom, property:QRoomProperty){
         if !room.isInvalidated {
-            let userInfo: [AnyHashable: Any] = ["room" : room]
+            let userInfo: [AnyHashable: Any] = [
+                "room"      : room,
+                "property"  : property
+            ]
             self.nc.post(name: QiscusNotification.ROOM_CHANGE, object: nil, userInfo: userInfo)
         }
     }
