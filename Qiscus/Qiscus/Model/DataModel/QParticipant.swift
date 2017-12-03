@@ -31,34 +31,38 @@ public class QParticipant:Object {
             return QUser.user(withEmail: self.email)
         }
     }
-//    public class func participant(inRoomWithId roomId:String, andEmail email: String)->QParticipant?{
-//        let id = "\(roomId)_\(email)"
-//        if let cache = QParticipant.cache[id] {
-//            if !cache.isInvalidated {
-//                return cache
-//            }
-//        }
-//        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-//        if let data = realm.object(ofType: QParticipant.self, forPrimaryKey: id) {
-//            QParticipant.cache[id] = data
-//            return data
-//        }
-//        
-//        return nil
-//    }
-    public func updateLastDeliveredId(commentId:Int){
+
+    internal func updateLastDeliveredId(commentId:Int){
         if !self.isInvalidated {
-            if commentId > self.lastDeliveredCommentId {
-                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-                try! realm.write {
-                    self.lastDeliveredCommentId = commentId
-                }
-                if let room = QRoom.room(withId: self.roomId){
-                    room.updateCommentStatus()
-                }
-                if let cache = QParticipant.cache[self.localId] {
-                    if !cache.isInvalidated {
-                        cache.delegate?.participant(didChange: cache)
+            let roomId = self.roomId
+            let email = self.email
+            QiscusDBThread.async {
+                if let room = QRoom.threadSaveRoom(withId: roomId){
+                    if room.lastDeliveredCommentId >= commentId {return}
+                    if let participant = room.participant(withEmail: email){
+                        if participant.lastDeliveredCommentId < commentId {
+                            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            try! realm.write {
+                                self.lastDeliveredCommentId = commentId
+                            }
+                        }
+                        var lastDeliveredId = 0
+                        for p in room.participants {
+                            if p.email != QiscusMe.shared.email {
+                                if lastDeliveredId == 0 {
+                                    lastDeliveredId = p.lastDeliveredCommentId
+                                }
+                                else if p.lastDeliveredCommentId < lastDeliveredId {
+                                    lastDeliveredId = p.lastDeliveredCommentId
+                                }
+                            }
+                        }
+                        for group in room.comments {
+                            let data = group.comments.filter("id != 0 AND id <= \(commentId) AND statusRaw < \(QCommentStatus.delivered.rawValue)")
+                            for c in data {
+                                c.updateStatus(status: .delivered)
+                            }
+                        }
                     }
                 }
             }

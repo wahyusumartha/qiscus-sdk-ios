@@ -1112,21 +1112,20 @@ extension Qiscus:CocoaMQTTDelegate{
                     }
                     break
                 case "d":
-                    let roomId = String(channelArr[2])
-                    let messageArr = messageData.split(separator: ":")
-                    let commentId = Int(String(messageArr[0]))!
-                    let userEmail = String(channelArr[3])
-                    if userEmail != QiscusMe.shared.email {
-                        DispatchQueue.main.async { autoreleasepool{
-                            if let room = QRoom.room(withId: roomId){
-                                let savedParticipant = room.participants.filter("email == '\(userEmail)'")
-                                if savedParticipant.count > 0 {
-                                    let participant = savedParticipant.first!
+                    QiscusBackgroundThread.async {
+                        let roomId = String(channelArr[2])
+                        let messageArr = messageData.split(separator: ":")
+                        let commentId = Int(String(messageArr[0]))!
+                        let userEmail = String(channelArr[3])
+                        if userEmail != QiscusMe.shared.email {
+                            if let room = QRoom.threadSaveRoom(withId: roomId){
+                                if let participant = room.participant(withEmail: userEmail) {
                                     participant.updateLastDeliveredId(commentId: commentId)
                                 }
                             }
-                        }}
+                        }
                     }
+                    
                     break
                 case "r":
                     let roomId = String(channelArr[2])

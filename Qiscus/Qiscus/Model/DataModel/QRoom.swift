@@ -770,6 +770,9 @@ public class QRoom:Object {
         }
     }
     
+    internal func loadRoomData(limit:Int = 20, offset:String?, onSuccess:@escaping (QRoom)->Void, onError:@escaping (String)->Void){
+        QRoomService.loadData(inRoom: self, limit: limit, offset: offset, onSuccess: onSuccess, onError: onError)
+    }
     public func loadComments(limit:Int, offset:String, onSuccess:@escaping ([QComment])->Void, onError:@escaping (String)->Void){
         if let commentId = Int(offset) {
             if commentId == 0 {
