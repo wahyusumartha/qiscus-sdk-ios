@@ -620,41 +620,19 @@ public class QComment:Object {
     
     // MARK : updater method
     public func updateStatus(status:QCommentStatus){
-        if self.status != status && (self.statusRaw < status.rawValue || self.status == .failed){
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            try! realm.write {
-                self.statusRaw = status.rawValue
-            }
-            let delay = 0.4 * Double(NSEC_PER_SEC)
-            
-            let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
-            let uniqueId = self.uniqueId
-            let roomId = self.roomId
-            
-            func update(){
-                if let room = QRoom.room(withId: roomId){
-                    if uniqueId == room.lastCommentUniqueId {
-                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-                        try! realm.write {
-                            room.lastCommentStatusRaw = status.rawValue
+        let uId = self.uniqueId
+        QiscusDBThread.async {
+            if let c = QComment.threadSaveComment(withUniqueId: uId){
+                if c.status != status {
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    try! realm.write {
+                        self.statusRaw = status.rawValue
+                    }
+                    DispatchQueue.main.async {
+                        if let comment = QComment.comment(withUniqueId: uId){
+                            QiscusNotification.publish(messageStatus: comment, status: status)
                         }
                     }
-                }
-                if let cache = QComment.cache[uniqueId] {
-                    if !cache.isInvalidated {
-                        cache.delegate?.comment(didChangeStatus: status)
-                    }
-                }
-                if let comment = QComment.comment(withUniqueId: uniqueId) {
-                    QiscusNotification.publish(messageStatus: comment, status: status)
-                }
-            }
-            
-            if Thread.isMainThread {
-                update()
-            }else{
-                DispatchQueue.main.sync {
-                    update()
                 }
             }
         }

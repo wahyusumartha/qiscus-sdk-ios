@@ -127,38 +127,52 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     
     open func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if let room = self.chatRoom {
-            if indexPath.section < (room.commentsGroupCount - 1 ){
+            if room.commentsGroupCount == 0 { return }
+            if indexPath.section < room.commentsGroupCount{
                 let roomId = room.id
                 QiscusBackgroundThread.async {
                     if let dbRoom = QRoom.threadSaveRoom(withId: roomId){
-                        if let commentGroup = dbRoom.commentGroup(index: indexPath.section) {
-                            if let selIndex = self.selectedCellIndex {
-                                if selIndex.section == indexPath.section && selIndex.item == indexPath.item{
-                                    DispatchQueue.main.async {
-                                        cell.backgroundColor = UIColor.clear
-                                    }
-                                    self.selectedCellIndex = nil
-                                }
-                            }
-                            if let chatCell = cell as? QChatCell {
+                        if dbRoom.comments.count == 0 { return }
+                        let group = dbRoom.comments[indexPath.section]
+                        
+                        if let selIndex = self.selectedCellIndex {
+                            if selIndex.section == indexPath.section && selIndex.item == indexPath.item{
                                 DispatchQueue.main.async {
-                                    chatCell.endDisplayingCell()
+                                    cell.backgroundColor = UIColor.clear
                                 }
+                                self.selectedCellIndex = nil
                             }
-                            if indexPath.section == (dbRoom.commentsGroupCount - 1){
-                                if indexPath.row == commentGroup.commentsCount - 1{
-                                    let visibleIndexPath = collectionView.indexPathsForVisibleItems
-                                    if visibleIndexPath.count > 0{
-                                        var visible = false
-                                        for visibleIndex in visibleIndexPath{
-                                            if visibleIndex.row == indexPath.row && visibleIndex.section == indexPath.section{
-                                                visible = true
-                                                break
-                                            }
+                        }
+                        if let chatCell = cell as? QChatCell {
+                            DispatchQueue.main.async {
+                                chatCell.endDisplayingCell()
+                            }
+                        }
+                        if indexPath.section == (dbRoom.comments.count - 1){
+                            if group.comments.count == 0 {return}
+                            if indexPath.row == group.comments.count - 1{
+                                var visibleIndexPath = [IndexPath]()
+                                DispatchQueue.main.sync {
+                                    visibleIndexPath = collectionView.indexPathsForVisibleItems
+                                }
+                                if visibleIndexPath.count > 0{
+                                    var visible = false
+                                    for visibleIndex in visibleIndexPath{
+                                        if visibleIndex.row == indexPath.row && visibleIndex.section == indexPath.section{
+                                            visible = true
+                                            break
                                         }
-                                        self.isLastRowVisible = visible
-                                    }else{
-                                        self.isLastRowVisible = true
+                                    }
+                                    if self.isLastRowVisible != visible {
+                                        DispatchQueue.main.async {
+                                            self.isLastRowVisible = visible
+                                        }
+                                    }
+                                }else{
+                                    if !self.isLastRowVisible {
+                                        DispatchQueue.main.async {
+                                            self.isLastRowVisible = true
+                                        }
                                     }
                                 }
                             }

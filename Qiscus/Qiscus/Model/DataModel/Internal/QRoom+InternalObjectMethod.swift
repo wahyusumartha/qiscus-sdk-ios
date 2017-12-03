@@ -733,4 +733,8 @@ internal extension QRoom {
         let service = QRoomService()
         service.publisComentStatus(onRoom: self, status: status)
     }
+    internal func getParticipant(withEmail email:String)->QParticipant?{
+        let data = self.participants.filter("email == '\(email)'")
+        return data.first
+    }
 }

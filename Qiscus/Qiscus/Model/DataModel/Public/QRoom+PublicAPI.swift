@@ -83,4 +83,7 @@ public extension QRoom {
     public func add(newComment comment:QComment){
         self.addComment(newComment: comment)
     }
+    public func loadData(limit:Int = 20, offset:String? = nil, onSuccess:@escaping (QRoom)->Void, onError:@escaping (String)->Void){
+        self.loadRoomData(limit: limit, offset: offset, onSuccess: onSuccess, onError: onError)
+    }
 }

@@ -98,9 +98,9 @@ open class QiscusChatVC: UIViewController{
             if oldValue == nil && self.chatRoom != nil {
                 let _ = self.view
                 self.collectionView.reloadData()
-                if Qiscus.shared.connected {
-                    self.chatRoom?.sync()
-                }
+//                if Qiscus.shared.connected {
+//                    self.chatRoom?.sync()
+//                }
                 //self.chatRoom!.delegate = self
                 let delay = 0.5 * Double(NSEC_PER_SEC)
                 let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
@@ -535,9 +535,11 @@ open class QiscusChatVC: UIViewController{
         view.endEditing(true)
         if firstLoad {
             self.firstLoadSetup()
-            self.collectionView.isHidden = true
-            if !self.prefetch {
-                self.showLoading("Load data ...") //wil be marked
+            if self.chatRoom == nil || self.chatRoom?.commentsGroupCount == 0 {
+                self.collectionView.isHidden = true
+                if !self.prefetch {
+                    self.showLoading("Load data ...") //wil be marked
+                }
             }
         }
         if inputText.value == "" {
@@ -573,7 +575,6 @@ open class QiscusChatVC: UIViewController{
                     self.chatTarget = nil
                 }
             }
-            
         }else{
             self.collectionView.reloadData()
             
@@ -593,6 +594,24 @@ open class QiscusChatVC: UIViewController{
         }
         if !self.prefetch {
             self.isPresence = true
+            if let room = self.chatRoom {
+                if room.commentsGroupCount == 0 {
+                    self.collectionView.isHidden = true
+                    self.showLoading("Load Data ...")
+                    room.loadData(onSuccess: { (room) in
+                        self.collectionView.isHidden = false
+                        self.collectionView.reloadData()
+                        self.collectionView.layoutIfNeeded()
+                        self.scrollToBottom()
+                    }, onError: { (error) in
+                        self.collectionView.isHidden = false
+                        self.collectionView.reloadData()
+                        self.collectionView.layoutIfNeeded()
+                        self.scrollToBottom()
+                        QToasterSwift.toast(target: self, text: "error", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+                    })
+                }
+            }
         }
         self.firstLoad = false
         self.prefetch = false
@@ -944,17 +963,10 @@ open class QiscusChatVC: UIViewController{
     open func gotNewComment(comment: QComment, room:QRoom) {
         self.chatRoom = room
         self.collectionView.reloadData()
-        if self.isPresence{
-            if let indexPath = self.chatRoom!.getIndexPath(ofComment: comment){
-                if self.isLastRowVisible || comment.senderEmail == QiscusMe.shared.email{
-                    self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
-                }
-            }
-        }else{
-            if self.chatRoom!.unreadCount > 0 {
-                self.collectionView.layoutIfNeeded()
-                self.scrollToBottom()
-            }
+        
+        if self.isLastRowVisible || QiscusMe.shared.email == comment.senderEmail{
+            self.collectionView.layoutIfNeeded()
+            self.scrollToBottom()
         }
     }
     open func postComment(comment : QComment) {
@@ -1221,7 +1233,7 @@ extension QiscusChatVC:QRoomDelegate{
                     self.sendButton.isHidden = false
                     self.recordButton.isHidden = true
                 })
-                }}
+            }}
         }
     }
 }

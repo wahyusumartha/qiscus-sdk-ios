@@ -569,6 +569,67 @@ public class QRoomService:NSObject{
             }}
         }
     }
+    internal class func loadData(inRoom room:QRoom, limit:Int = 20, offset:String?, onSuccess:@escaping (QRoom)->Void, onError:@escaping (String)->Void){
+        let id = room.id
+//        if QChatService.inSyncProcess { return }
+        QiscusRequestThread.async {
+            if let r = QRoom.threadSaveRoom(withId: id){
+                let loadURL = QiscusConfig.LOAD_URL
+                var parameters =  [
+                    "topic_id" : r.id as AnyObject,
+                    "token" : Qiscus.shared.config.USER_TOKEN as AnyObject,
+                    "limit" : limit as AnyObject,
+                ]
+                if offset == nil {
+                    if r.comments.count != 0 {
+                        parameters["last_comment_id"] = r.lastCommentId as AnyObject
+                    }
+                }else{
+                    parameters["last_comment_id"] = offset as AnyObject
+                }
+                
+                Qiscus.printLog(text: "request loadData: \(loadURL) \nparameters: \(parameters)")
+                
+                QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                    if let response = responseData.result.value{
+                        let json = JSON(response)
+                        let results = json["results"]
+                        let error = json["error"]
+                        if results != JSON.null{
+                            let comments = json["results"]["comments"].arrayValue
+                            var needSync = false
+                            for newComment in comments {
+                                let comment = QComment.tempComment(fromJSON: newComment)
+                                if comment.id <= QiscusMe.shared.lastCommentId {
+                                    if let rd = QRoom.threadSaveRoom(withId: comment.roomId){
+                                        rd.addComment(newComment: comment, onTop: true)
+                                    }
+                                }else{
+                                   needSync = true
+                                }
+                            }
+                            DispatchQueue.main.async {
+                                if let mainRoom = QRoom.room(withId: id) {
+                                    onSuccess(mainRoom)
+                                }
+                            }
+                            if needSync {
+                                QChatService.syncProcess()
+                            }
+                        }else if error != JSON.null{
+                            DispatchQueue.main.async {
+                                onError("fail to load data: \(error)")
+                            }
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            onError("fail to load data")
+                        }
+                    }
+                })
+            }
+        }
+    }
     internal class func loadComments(inRoom room:QRoom, limit:Int, offset:String, onSuccess:@escaping ([QComment])->Void, onError:@escaping (String)->Void){
         let loadURL = QiscusConfig.LOAD_URL
         let parameters =  [
