@@ -626,7 +626,7 @@ public class QComment:Object {
                 if c.status != status {
                     let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     try! realm.write {
-                        self.statusRaw = status.rawValue
+                        c.statusRaw = status.rawValue
                     }
                     DispatchQueue.main.async {
                         if let comment = QComment.comment(withUniqueId: uId){

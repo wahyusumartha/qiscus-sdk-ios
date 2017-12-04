@@ -181,17 +181,8 @@ public class QRoomService:NSObject{
                 parameters["last_comment_read_id"] = lastCommentId as AnyObject
             }
             QiscusService.session.request(loadURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
-                if let response = responseData.result.value {
-                    Qiscus.printLog(text: "publish message status result: \(response)")
-                    let savedParticipant = room.participants.filter("email == '\(QiscusMe.shared.email)'")
-                    if savedParticipant.count > 0 {
-                        let participant = savedParticipant.first!
-                        if status == .delivered {
-                            participant.updateLastDeliveredId(commentId: lastCommentId)
-                        }else{
-                            participant.updateLastReadId(commentId: lastCommentId)
-                        }
-                    }
+                if let _ = responseData.result.value {
+                    Qiscus.printLog(text: "success update message status on comment : \(lastCommentId) to \(status)")
                 }else{
                     Qiscus.printLog(text: "error update message status")
                 }

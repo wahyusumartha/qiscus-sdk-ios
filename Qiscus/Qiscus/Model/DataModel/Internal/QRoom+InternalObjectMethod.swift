@@ -197,29 +197,6 @@ internal extension QRoom {
             try! realm.write {
                 self.comments.append(commentGroup)
             }
-            
-//            QCommentGroup.cache["\(newComment.uniqueId)"] = commentGroup
-//            if !onTop {
-//                if Thread.isMainThread {
-//                    Qiscus.chatRooms[roomId]?.delegate?.room?(gotNewGroupComment: 0)
-//                }else{
-//                    DispatchQueue.main.sync {
-//                        Qiscus.chatRooms[roomId]?.delegate?.room?(gotNewGroupComment: 0)
-//                    }
-//                }
-//                // TODO: !!
-//                if Thread.isMainThread {
-//                    if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-//                        if !newComment.isInvalidated {
-//                            roomDelegate.gotNewComment(newComment)
-//                        }
-//                    }
-//                }
-//            }else{
-//                if self.lastCommentId < newComment.id || self.lastCommentCreatedAt < newComment.createdAt {
-//                    self.updateLastComentInfo(comment: newComment, triggerNotification: false)
-//                }
-//            }
         }
         else if onTop{
             let firstCommentGroup = self.comments.first!
@@ -447,7 +424,7 @@ internal extension QRoom {
                         }
                         participantString.append(participantEmail)
                     }
-                    room.updateCommentStatus()
+                    
                     var index = 0
                     for participant in room.participants{
                         if !participantString.contains(participant.email){
