@@ -560,9 +560,6 @@ open class QiscusChatVC: UIViewController{
         }else if self.firstLoad {
             self.loadRoomView()
             if self.chatRoom!.commentsGroupCount == 0 {
-                if !self.prefetch {
-                    self.showLoading("Load Data ...")
-                }
                 self.chatRoom!.sync()
             }else{
                 if let target = self.chatTarget {
@@ -603,12 +600,14 @@ open class QiscusChatVC: UIViewController{
                         self.collectionView.reloadData()
                         self.collectionView.layoutIfNeeded()
                         self.scrollToBottom()
+                        self.dismissLoading()
                     }, onError: { (error) in
                         self.collectionView.isHidden = false
                         self.collectionView.reloadData()
                         self.collectionView.layoutIfNeeded()
                         self.scrollToBottom()
                         QToasterSwift.toast(target: self, text: "error", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+                        self.dismissLoading()
                     })
                 }
             }
