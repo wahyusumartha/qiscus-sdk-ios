@@ -341,7 +341,36 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
         unkvc.allowsActions = false
         self.navigationController?.pushViewController(unkvc, animated: true)
     }
-    
+    func didTapFile(comment: QComment) {
+        if let file = comment.file {
+            if file.ext == "pdf" || file.ext == "pdf_" || file.ext == "doc" || file.ext == "docx" || file.ext == "ppt" || file.ext == "pptx" || file.ext == "xls" || file.ext == "xlsx" || file.ext == "txt" {
+                let url = file.url
+                let filename = file.filename
+                
+                let preview = ChatPreviewDocVC()
+                preview.fileName = filename
+                preview.url = url
+                preview.roomName = self.chatRoom!.name
+                let backButton = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+                self.navigationItem.backBarButtonItem = backButton
+                self.navigationController?.pushViewController(preview, animated: true)
+            }else{
+                if let url = URL(string: file.url){
+                    if #available(iOS 10.0, *) {
+                        UIApplication.shared.open(url, completionHandler: { success in
+                            if !success {
+                                Qiscus.printLog(text: "fail to open file")
+                            }
+                        })
+                    } else {
+                        UIApplication.shared.openURL(url)
+                    }
+                }else{
+                    Qiscus.printLog(text: "cant open file url")
+                }
+            }
+        }
+    }
 }
 extension QiscusChatVC: CNContactViewControllerDelegate{
 
