@@ -720,6 +720,121 @@ public class QChatService:NSObject {
         }
         load(onPage: 1)
     }
+    @objc internal class func backgroundSync(onSuccess:@escaping (()->Void),onError:@escaping ((String)->Void)){
+        if QiscusMe.shared.lastCommentId == 0 {
+            return
+        }
+        
+        func getTime()->String{
+            let date = Date()
+            let df = DateFormatter()
+            df.dateFormat = "y-MM-dd H:m:ss"
+            return df.string(from: date)
+        }
+        QiscusRequestThread.sync {
+            Qiscus.printLog(text: "Start background syncing on  \(getTime())")
+            let loadURL = QiscusConfig.SYNC_URL
+            let limit = 60
+            
+            let parameters:[String: AnyObject] =  [
+                "last_received_comment_id"  : QiscusMe.shared.lastCommentId as AnyObject,
+                "token" : qiscus.config.USER_TOKEN as AnyObject,
+                "order" : "asc" as AnyObject,
+                "limit" : limit as AnyObject
+            ]
+            QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                
+                if let response = responseData.result.value {
+                    let json = JSON(response)
+                    let results = json["results"]
+                    let error = json["error"]
+                    if results != JSON.null{
+                        let meta = json["results"]["meta"]
+                        let lastReceivedCommentId = meta["last_received_comment_id"].intValue
+                        let needClear = meta["need_clear"].boolValue
+                        Qiscus.printLog(text: "Background sync result on \(getTime()):\n\(results)")
+                        if needClear {
+                            QCommentGroup.clearAllMessage(onFinish: {
+                                QiscusMe.updateLastCommentId(commentId: lastReceivedCommentId)
+                            })
+                        }else{
+                            let comments = json["results"]["comments"].arrayValue
+                            var data = [String:[JSON]]()
+                            var needSyncRoom = [String]()
+                            if comments.count > 0 {
+                                QiscusBackgroundThread.async {
+                                    for newComment in comments.reversed() {
+                                        let roomId = "\(newComment["room_id"])"
+                                        let id = newComment["id"].intValue
+                                        let type = newComment["type"].string
+                                        
+                                        if id > QiscusMe.shared.lastCommentId {
+                                            if data[roomId] == nil {
+                                                data[roomId] = [JSON]()
+                                            }
+                                            data[roomId]?.append(newComment)
+                                            if type == "system_event" {
+                                                if !needSyncRoom.contains(roomId) {
+                                                    needSyncRoom.append(roomId)
+                                                }
+                                            }
+                                        }
+                                        QiscusMe.updateLastCommentId(commentId: id)
+                                    }
+                                    for (roomId,roomComments) in data {
+                                        if roomComments.count > 0 {
+                                            if let room = QRoom.threadSaveRoom(withId: roomId){
+                                                var unread = room.unreadCount
+                                                for commentData in roomComments {
+                                                    let email = commentData["email"].stringValue
+                                                    let beforeId = commentData["comment_before_id"].intValue
+                                                    
+                                                    if room.comments.count > 0 || beforeId == 0 {
+                                                        let temp = QComment.tempComment(fromJSON: commentData)
+                                                        room.addComment(newComment: temp)
+                                                    }else{
+                                                        DispatchQueue.main.async {
+                                                            if let r = QRoom.room(withId: roomId) {
+                                                                let c =  QComment.tempComment(fromJSON: commentData)
+                                                                QiscusNotification.publish(gotNewComment: c, room: r)
+                                                            }
+                                                        }
+                                                    }
+                                                    if email == QiscusMe.shared.email {
+                                                        unread = 0
+                                                    }else{
+                                                        unread += 1
+                                                    }
+                                                }
+                                                room.updateUnreadCommentCount(count: unread)
+                                                let lastComment = QComment.tempComment(fromJSON: roomComments.last!)
+                                                room.updateLastComentInfo(comment: lastComment)
+                                            }else{
+                                                QChatService.getRoom(withId: roomId)
+                                            }
+                                        }
+                                    }
+                                    
+                                }
+                            }
+                            
+                            
+                        }
+                        Qiscus.printLog(text: "background sync message succeded")
+                        onSuccess()
+                    }else if error != JSON.null{
+                        Qiscus.printLog(text: "error background sync message in : \(error) on [\(getTime())]")
+                        onError(error.stringValue)
+                    }
+                }
+                else{
+                    Qiscus.printLog(text: "error background sync message on [\(getTime())]")
+                    onError("error sbackgroundync message on [\(getTime())]")
+                    
+                }
+            })
+        }
+    }
     @objc internal class func syncProcess(first:Bool = true, cloud:Bool = false){
         if QiscusMe.shared.lastCommentId == 0 {
             return

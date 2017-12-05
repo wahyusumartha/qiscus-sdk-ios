@@ -590,8 +590,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             }}
     }
     
-    
-    
     func applicationDidBecomeActife(){
         Qiscus.checkDatabaseMigration()
         Qiscus.setupReachability()
@@ -1486,6 +1484,10 @@ extension Qiscus { // Public class API to get room
         } catch {
             Qiscus.printLog(text: "Could not clear Qiscus folder: \(error.localizedDescription)")
         }
+    }
+    
+    public class func backgroundSync(onSuccess:@escaping (()->Void),onError:@escaping ((String)->Void)){
+        QChatService.backgroundSync(onSuccess: onSuccess, onError: onError)
     }
 }
 
