@@ -919,7 +919,7 @@ open class QiscusChatVC: UIViewController{
             }else if (!beforeEmpty && self.typingUsers.count == 0) {
                 self.collectionView.reloadData()
             }
-            else if changed{
+            else if changed && self.typingUsers.count > 0{
                 let section = self.chatRoom!.commentsGroupCount
                 let indexPath = IndexPath(item: 0, section: section)
                 self.collectionView.reloadItems(at: [indexPath])
