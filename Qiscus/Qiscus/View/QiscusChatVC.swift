@@ -431,6 +431,7 @@ open class QiscusChatVC: UIViewController{
         center.addObserver(self, selector: #selector(QiscusChatVC.commentDeleted(_:)), name: QiscusNotification.COMMENT_DELETE, object: nil)
         center.addObserver(self, selector: #selector(QiscusChatVC.userPresenceChanged(_:)), name: QiscusNotification.USER_PRESENCE, object: nil)
         center.addObserver(self, selector: #selector(QiscusChatVC.userTyping(_:)), name: QiscusNotification.USER_TYPING, object: nil)
+        center.addObserver(self, selector: #selector(QiscusChatVC.roomChangeNotif(_:)), name: QiscusNotification.ROOM_CHANGE, object: nil)
         center.addObserver(self, selector: #selector(QiscusChatVC.appDidEnterBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
     }
     open func setupTitleView(){
@@ -836,7 +837,55 @@ open class QiscusChatVC: UIViewController{
             }
         }
     }
-    
+    // MARK: - roomChange handler
+    @objc private func roomChangeNotif(_ notification: Notification){
+        if let userInfo = notification.userInfo {
+            if let room = userInfo["room"] as? QRoom {
+                if let currentRoom = self.chatRoom {
+                    if currentRoom.isInvalidated || room.isInvalidated{ return}
+                    if currentRoom.id == room.id {
+                        if let property = userInfo["property"] as? QRoomProperty {
+                            switch property {
+                            case .name:
+                                DispatchQueue.main.async {
+                                    self.loadTitle()
+                                }
+                                break
+                            case .avatar:
+                                DispatchQueue.main.async {
+                                    self.loadTitle()
+                                }
+                                break
+                            case .participant:
+                                DispatchQueue.main.async {
+                                    self.loadSubtitle()
+                                }
+                                break
+                            case .unreadCount:
+                                var unreadText = "\(room.unreadCount)"
+                                if room.unreadCount > 99 {
+                                    unreadText = "99+"
+                                }
+                                DispatchQueue.main.async {
+                                    if room.unreadCount > 0 {
+                                        self.unreadIndicator.text = unreadText
+                                        self.unreadIndicator.isHidden = self.isLastRowVisible
+                                        self.bottomButton.isHidden = self.isLastRowVisible
+                                    }else{
+                                        self.unreadIndicator.text = ""
+                                        self.unreadIndicator.isHidden = true
+                                    }
+                                }
+                                break
+                            default:
+                                break
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     // MARK: - userTyping handler
     @objc private func userTyping(_ notification: Notification){
         if let userInfo = notification.userInfo {
@@ -963,7 +1012,7 @@ open class QiscusChatVC: UIViewController{
         self.chatRoom = room
         self.collectionView.reloadData()
         
-        if self.isLastRowVisible || QiscusMe.shared.email == comment.senderEmail{
+        if self.isLastRowVisible || QiscusMe.shared.email == comment.senderEmail || !self.isPresence{
             self.collectionView.layoutIfNeeded()
             self.scrollToBottom()
         }
@@ -1126,17 +1175,7 @@ extension QiscusChatVC:QRoomDelegate{
         }
     }
     public func room(didChangeUnread lastReadCommentId:Int, unreadCount:Int) {
-        if unreadCount > 0 {
-            var unreadText = "\(unreadCount)"
-            if unreadCount > 99 {
-                unreadText = "99+"
-            }
-            self.unreadIndicator.text = unreadText
-            self.unreadIndicator.isHidden = self.isLastRowVisible
-        }else{
-            self.unreadIndicator.text = ""
-            self.unreadIndicator.isHidden = true
-        }
+        
     }
     public func hideInputBar(){
         self.inputBarHeight.constant = 0
