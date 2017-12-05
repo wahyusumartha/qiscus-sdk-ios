@@ -122,7 +122,7 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
     }
     open func showFile(){
         if let c = self.comment {
-            self.delegate?.didTapCell(withData: c)
+            self.delegate?.didTapFile(comment: c)
         }
     }
     
