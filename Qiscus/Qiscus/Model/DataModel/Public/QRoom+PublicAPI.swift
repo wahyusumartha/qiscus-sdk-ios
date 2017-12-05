@@ -30,7 +30,7 @@ public extension QRoom {
             return nil
         }
     }
-    public class func addRoom(fromJSON json:JSON)->QRoom{
+    public class func room(fromJSON json:JSON)->QRoom{
         return QRoom.addNewRoom(json:json)
     }
     public class func deleteRoom(room:QRoom){

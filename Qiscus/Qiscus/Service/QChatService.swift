@@ -152,7 +152,7 @@ public class QChatService:NSObject {
                                 let commentPayload = results["comments"].arrayValue
                                 
                                 func execute(){
-                                    let room = QRoom.addRoom(fromJSON: roomData)
+                                    let room = QRoom.room(fromJSON: roomData)
                                     for json in commentPayload {
                                         let commentId = json["id"].intValue
                                         if commentId <= QiscusMe.shared.lastCommentId {
@@ -257,7 +257,7 @@ public class QChatService:NSObject {
                                 let commentPayload = results["comments"].arrayValue
                                 
                                 func execute(){
-                                    let room = QRoom.addRoom(fromJSON: roomData)
+                                    let room = QRoom.room(fromJSON: roomData)
                                     
                                     for json in commentPayload {
                                         let commentId = json["id"].intValue
@@ -348,7 +348,7 @@ public class QChatService:NSObject {
                                 let commentPayload = results["comments"].arrayValue
                                 
                                 func execute(){
-                                    let room = QRoom.addRoom(fromJSON: roomData)
+                                    let room = QRoom.room(fromJSON: roomData)
                                     for json in commentPayload {
                                         let commentId = json["id"].intValue
                                         if commentId <= QiscusMe.shared.lastCommentId {
@@ -449,7 +449,7 @@ public class QChatService:NSObject {
                                 let commentPayload = results["comments"].arrayValue
                                 
                                 func execute(){
-                                    let room = QRoom.addRoom(fromJSON: roomData)
+                                    let room = QRoom.room(fromJSON: roomData)
                                     for json in commentPayload {
                                         let commentId = json["id"].intValue
                                         if commentId <= QiscusMe.shared.lastCommentId {
@@ -562,7 +562,7 @@ public class QChatService:NSObject {
                                 let commentPayload = results["comments"].arrayValue
                                 
                                 func execute(){
-                                    let room = QRoom.addRoom(fromJSON: roomData)
+                                    let room = QRoom.room(fromJSON: roomData)
                                     for json in commentPayload {
                                         let commentId = json["id"].intValue
                                         
@@ -655,7 +655,7 @@ public class QChatService:NSObject {
                                 let roomData = results["room"]
                                 let commentPayload = results["comments"].arrayValue
                                 func saveRoom(){
-                                    let room = QRoom.addRoom(fromJSON: roomData)
+                                    let room = QRoom.room(fromJSON: roomData)
                                     for json in commentPayload {
                                         let commentId = json["id"].intValue
                                         
@@ -924,7 +924,7 @@ public class QChatService:NSObject {
                             let commentPayload = results["comments"].arrayValue
                             
                             func execute(){
-                                let room = QRoom.addRoom(fromJSON: roomData)
+                                let room = QRoom.room(fromJSON: roomData)
                                 for json in commentPayload {
                                     let commentId = json["id"].intValue
                                     
@@ -1014,7 +1014,7 @@ public class QChatService:NSObject {
                             let commentPayload = results["comments"].arrayValue
                             
                             func execute(){
-                                let room = QRoom.addRoom(fromJSON: roomData)
+                                let room = QRoom.room(fromJSON: roomData)
                                 for json in commentPayload {
                                     let commentId = json["id"].intValue
                                     
@@ -1285,7 +1285,7 @@ public class QChatService:NSObject {
                                             room.updateLastComentInfo(comment: lastComment)
                                             roomResult.append(room)
                                         }else{
-                                            let room = QRoom.addRoom(fromJSON: roomData)
+                                            let room = QRoom.room(fromJSON: roomData)
                                             room.updateUnreadCommentCount(count: unread)
                                             roomResult.append(room)
                                         }
@@ -1358,7 +1358,7 @@ public class QChatService:NSObject {
                                 }else{
                                     let lastCommentData = roomData["last_comment"]
                                     let lastComment = QComment.tempComment(fromJSON: lastCommentData)
-                                    let room = QRoom.addRoom(fromJSON: roomData)
+                                    let room = QRoom.room(fromJSON: roomData)
                                     if !room.isInvalidated {
                                         room.updateUnreadCommentCount(count: unread)
                                         room.updateLastComentInfo(comment: lastComment)
@@ -1417,7 +1417,7 @@ public class QChatService:NSObject {
                                             onFailed("room has been deleted")
                                         }
                                     }else{
-                                        let room = QRoom.addRoom(fromJSON: roomData)
+                                        let room = QRoom.room(fromJSON: roomData)
                                         if !room.isInvalidated {
                                             room.updateUnreadCommentCount(count: unread)
                                             onSuccess(room)
@@ -1513,7 +1513,7 @@ public class QChatService:NSObject {
                                             room.updateLastComentInfo(comment: lastComment)
                                             rooms.append(room)
                                         }else{
-                                            let room = QRoom.addRoom(fromJSON: roomData)
+                                            let room = QRoom.room(fromJSON: roomData)
                                             room.updateUnreadCommentCount(count: unread)
                                             rooms.append(room)
                                         }
@@ -1579,12 +1579,12 @@ public class QChatService:NSObject {
                                             room.updateLastComentInfo(comment: lastComment)
                                             onSuccess(room)
                                         }else{
-                                            let room = QRoom.addRoom(fromJSON: roomData)
+                                            let room = QRoom.room(fromJSON: roomData)
                                             room.updateUnreadCommentCount(count: unread)
                                             onSuccess(room)
                                         }
                                     }else{
-                                        let room = QRoom.addRoom(fromJSON: roomData)
+                                        let room = QRoom.room(fromJSON: roomData)
                                         room.updateUnreadCommentCount(count: unread)
                                         onSuccess(room)
                                     }
@@ -1649,7 +1649,7 @@ public class QChatService:NSObject {
                                             room.updateLastComentInfo(comment: lastComment)
                                             rooms.append(room)
                                         }else{
-                                            let room = QRoom.addRoom(fromJSON: roomData)
+                                            let room = QRoom.room(fromJSON: roomData)
                                             room.updateUnreadCommentCount(count: unread)
                                             rooms.append(room)
                                         }
