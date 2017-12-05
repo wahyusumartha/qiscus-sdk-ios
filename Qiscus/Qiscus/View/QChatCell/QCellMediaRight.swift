@@ -153,7 +153,7 @@ class QCellMediaRight: QChatCell {
                 }else{
                     self.videoPlay.isHidden = true
                     self.downloadButton.comment = self.comment!
-                    self.downloadButton.addTarget(self, action: #selector(QCellMediaLeft.downloadMedia(_:)), for: .touchUpInside)
+                    self.downloadButton.addTarget(self, action: #selector(QCellMediaRight.downloadMedia(_:)), for: .touchUpInside)
                     self.downloadButton.isHidden = false
                 }
             }else{
@@ -179,7 +179,7 @@ class QCellMediaRight: QChatCell {
         
     }
     
-    open func downloadMedia(_ sender: ChatFileButton){
+    @objc open func downloadMedia(_ sender: ChatFileButton){
         sender.isHidden = true
         if let room = QRoom.room(withId: comment!.roomId){
             room.downloadMedia(onComment: self.comment!)
@@ -274,7 +274,7 @@ class QCellMediaRight: QChatCell {
             }else{
                 self.videoPlay.isHidden = true
                 self.downloadButton.comment = self.comment!
-                self.downloadButton.addTarget(self, action: #selector(QCellMediaLeft.downloadMedia(_:)), for: .touchUpInside)
+                self.downloadButton.addTarget(self, action: #selector(QCellMediaRight.downloadMedia(_:)), for: .touchUpInside)
                 self.downloadButton.isHidden = false
             }
             self.progressView.isHidden = true

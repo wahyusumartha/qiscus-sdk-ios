@@ -181,7 +181,7 @@ class QCellMediaLeft: QChatCell {
         
     }
     
-    open func downloadMedia(_ sender: ChatFileButton){
+    @objc open func downloadMedia(_ sender: ChatFileButton){
         sender.isHidden = true
         if let room = QRoom.room(withId: comment!.roomId){
             room.downloadMedia(onComment: self.comment!)
