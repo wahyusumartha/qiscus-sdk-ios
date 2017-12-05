@@ -960,8 +960,15 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     // MARK: - register PushNotification
-    @objc class func registerDevice(withToken deviceToken: String){
+    @objc public class func registerDevice(withToken deviceToken: String){
+        Qiscus.qiscusDeviceToken = deviceToken
+        QiscusMe.shared.deviceToken = deviceToken
         QiscusCommentClient.sharedInstance.registerDevice(withToken: deviceToken)
+    }
+    @objc public class func unRegisterDevice(){
+        Qiscus.qiscusDeviceToken = ""
+        QiscusMe.shared.deviceToken = ""
+        QiscusCommentClient.sharedInstance.unRegisterDevice()
     }
 }
 extension Qiscus:CocoaMQTTDelegate{
@@ -1489,5 +1496,6 @@ extension Qiscus { // Public class API to get room
     public class func backgroundSync(onSuccess:@escaping (()->Void),onError:@escaping ((String)->Void)){
         QChatService.backgroundSync(onSuccess: onSuccess, onError: onError)
     }
+    
 }
 
