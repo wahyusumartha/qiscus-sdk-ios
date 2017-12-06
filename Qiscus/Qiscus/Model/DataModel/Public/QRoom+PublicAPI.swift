@@ -44,9 +44,6 @@ public extension QRoom {
     public func unpin(){
         self.unpinRoom()
     }
-    public func commentGroup(index:Int)->QCommentGroup?{
-        return self.getCommentGroup(index:index)
-    }
     public func update(roomName:String? = nil, roomAvatarURL:String? = nil, roomOptions:String? = nil, onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){
         self.updateRoom(roomName: roomName, roomAvatarURL: roomAvatarURL, roomOptions: roomOptions, onSuccess: onSuccess, onError: onError)
     }

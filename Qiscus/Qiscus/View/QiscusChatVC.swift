@@ -536,7 +536,8 @@ open class QiscusChatVC: UIViewController{
         view.endEditing(true)
         if firstLoad {
             self.firstLoadSetup()
-            if self.chatRoom == nil || self.chatRoom?.commentsGroupCount == 0 {
+            if self.chatRoom == nil || self.chatRoom?.comments.count
+                == 0 {
                 self.collectionView.isHidden = true
                 if !self.prefetch {
                     self.showLoading("Load data ...") //wil be marked
@@ -560,7 +561,7 @@ open class QiscusChatVC: UIViewController{
             self.loadData()
         }else if self.firstLoad {
             self.loadRoomView()
-            if self.chatRoom!.commentsGroupCount == 0 {
+            if self.chatRoom!.comments.count == 0 {
                 self.chatRoom!.sync()
             }else{
                 if let target = self.chatTarget {
@@ -593,7 +594,7 @@ open class QiscusChatVC: UIViewController{
         if !self.prefetch {
             self.isPresence = true
             if let room = self.chatRoom {
-                if room.commentsGroupCount == 0 {
+                if room.comments.count == 0 {
                     self.collectionView.isHidden = true
                     self.showLoading("Load Data ...")
                     room.loadData(onSuccess: { (room) in
@@ -764,16 +765,21 @@ open class QiscusChatVC: UIViewController{
         self.loadSubtitle()
         self.unreadIndicator.isHidden = true
         if firstLoad {
-            if self.chatRoom!.commentsGroupCount > 0 {
+            if self.chatRoom!.comments.count > 0 {
                 self.collectionView.reloadData()
-                let section = self.chatRoom!.commentsGroupCount - 1
-                let row = self.chatRoom!.commentGroup(index: section)!.commentsCount - 1
-                let indexPath = IndexPath(item: row, section: section)
-                DispatchQueue.main.async {
-                    self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
-                    self.dismissLoading()
-                    self.dataLoaded = true
-                    self.collectionView.isHidden = false
+                if self.chatRoom!.comments.count > 0 {
+                    let section = self.chatRoom!.comments.count - 1
+                    let group = self.chatRoom!.comments[section]
+                    if group.comments.count > 0 {
+                        let row = group.comments.count - 1
+                        let indexPath = IndexPath(item: row, section: section)
+                        DispatchQueue.main.async {
+                            self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
+                            self.dismissLoading()
+                            self.dataLoaded = true
+                            self.collectionView.isHidden = false
+                        }
+                    }
                 }
             }else{
                 self.dismissLoading()
@@ -781,21 +787,24 @@ open class QiscusChatVC: UIViewController{
                 self.collectionView.isHidden = false
             }
         }else{
-            if self.chatRoom!.commentsGroupCount > 0 {
+            if self.chatRoom!.comments.count > 0 {
                 let delay = 0.5 * Double(NSEC_PER_SEC)
                 let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
-                let section = self.chatRoom!.commentsGroupCount - 1
-                let group = self.chatRoom!.commentGroup(index: section)!
-                let row = group.commentsCount - 1
-                let indexPath = IndexPath(item: row, section: section)
-                self.collectionView.reloadData()
-                DispatchQueue.main.asyncAfter(deadline: time, execute: {
-                    self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
-                    self.dismissLoading()
-                    self.dataLoaded = true
-                    self.collectionView.isHidden = false
-                })
-                
+                if self.chatRoom!.comments.count > 0 {
+                    let section = self.chatRoom!.comments.count - 1
+                    let group = self.chatRoom!.comments[section]
+                    if group.comments.count > 0 {
+                        let row = group.comments.count - 1
+                        let indexPath = IndexPath(item: row, section: section)
+                        self.collectionView.reloadData()
+                        DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                            self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
+                            self.dismissLoading()
+                            self.dataLoaded = true
+                            self.collectionView.isHidden = false
+                        })
+                    }
+                }
             }else{
                 let delay = 0.5 * Double(NSEC_PER_SEC)
                 let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
@@ -949,17 +958,12 @@ open class QiscusChatVC: UIViewController{
             self.previewedTypingUsers = tempPreviewedUser
             func scroll(){
                 if self.isLastRowVisible{
-                    var item = 0
-                    var section = self.chatRoom!.commentsGroupCount - 1
-                    if self.typingUsers.count > 0 {
-                        section += 1
-                    }else{
-                        if let group = self.chatRoom!.commentGroup(index: section) {
-                            item = group.commentsCount - 1
-                        }
+                    if let room = self.chatRoom {
+                        let section = self.collectionView.numberOfSections - 1
+                        let item = self.collectionView.numberOfItems(inSection: section) - 1
+                        let indexPath = IndexPath(item: item, section: section)
+                        self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
                     }
-                    let indexPath = IndexPath(item: item, section: section)
-                    self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
                 }
             }
             if (beforeEmpty && self.typingUsers.count > 0) {
@@ -969,7 +973,7 @@ open class QiscusChatVC: UIViewController{
                 self.collectionView.reloadData()
             }
             else if changed && self.typingUsers.count > 0{
-                let section = self.chatRoom!.commentsGroupCount
+                let section = self.chatRoom!.comments.count
                 let indexPath = IndexPath(item: 0, section: section)
                 self.collectionView.reloadItems(at: [indexPath])
                 scroll()
@@ -1166,10 +1170,17 @@ extension QiscusChatVC:QRoomDelegate{
                     self.collectionView.scrollToItem(at: indexPath, at: .top, animated: false)
                 }
             }else{
-                let section = self.chatRoom!.commentsGroupCount - 1
-                let item = self.chatRoom!.commentGroup(index: section)!.commentsCount - 1
-                let indexPath = IndexPath(item: item, section: section)
-                self.collectionView.scrollToItem(at: indexPath, at: .top, animated: false)
+                if let room = self.chatRoom {
+                    if room.comments.count > 0 {
+                        let section = room.comments.count - 1
+                        let group = room.comments[section]
+                        if group.comments.count > 0 {
+                            let item = group.comments.count - 1
+                            let indexPath = IndexPath(item: item, section: section)
+                            self.collectionView.scrollToItem(at: indexPath, at: .top, animated: false)
+                        }
+                    }
+                }
             }
             self.topComment = nil
         }

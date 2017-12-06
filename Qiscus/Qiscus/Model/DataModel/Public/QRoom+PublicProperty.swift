@@ -85,10 +85,7 @@ public extension QRoom {
             return nil
         }
     }
-    public var commentsGroupCount:Int{
-        if self.isInvalidated {return 0}
-        return self.comments.count
-    }
+
     public var type:QRoomType {
         get{
             if self.isInvalidated { return QRoomType(rawValue: 0)!}

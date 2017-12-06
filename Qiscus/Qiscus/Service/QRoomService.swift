@@ -73,7 +73,7 @@ public class QRoomService:NSObject{
             "topic_id" : room.id as AnyObject,
             "token" : Qiscus.shared.config.USER_TOKEN as AnyObject
         ]
-        if room.commentsGroupCount > 0 {
+        if room.comments.count > 0 {
             let firstComment = room.comments[0].comments[0]
             parameters["last_comment_id"] = firstComment.id as AnyObject
         }
@@ -167,7 +167,7 @@ public class QRoomService:NSObject{
         }
     }
     public func publisComentStatus(onRoom room:QRoom, status:QCommentStatus){
-        if (status == QCommentStatus.delivered || status == QCommentStatus.read) && (room.commentsGroupCount > 0){
+        if (status == QCommentStatus.delivered || status == QCommentStatus.read) && (room.comments.count > 0){
             let loadURL = QiscusConfig.UPDATE_COMMENT_STATUS_URL
             let lastCommentId = room.lastComment!.id
             var parameters:[String : AnyObject] =  [

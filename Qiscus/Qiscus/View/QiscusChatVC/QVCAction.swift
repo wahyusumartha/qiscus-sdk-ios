@@ -17,8 +17,9 @@ extension QiscusChatVC:CNContactPickerDelegate{
     public func contactPicker(_ picker: CNContactPickerViewController, didSelect contact: CNContact) {
         func share(name:String, value:String){
             let newComment = self.chatRoom!.newContactComment(name: name, value: value)
-            let section = self.chatRoom!.commentsGroupCount - 1
-            let item = self.chatRoom!.commentGroup(index: section)!.commentsCount - 1
+            let section = self.chatRoom!.comments.count - 1
+            let group = self.chatRoom!.comments[section]
+            let item = group.comments.count - 1
             self.collectionView.reloadData()
             self.postComment(comment: newComment)
             
@@ -844,7 +845,7 @@ extension QiscusChatVC {
     // MARK: - Load More Control
     func loadMore(){
         if let room = self.chatRoom {
-            if room.commentsGroupCount > 0 {
+            if room.comments.count > 0 {
                 let indexPath = IndexPath(item: 0, section: 0)
                 self.topComment = room.comment(onIndexPath: indexPath)
             }
