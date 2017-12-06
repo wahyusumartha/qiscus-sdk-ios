@@ -497,6 +497,9 @@ extension QiscusChatVC {
                     let item = self.collectionView.numberOfItems(inSection: section) - 1
                     let lastIndexPath = IndexPath(row: item, section: section)
                     self.collectionView.scrollToItem(at: lastIndexPath, at: .bottom, animated: animated)
+                    if self.isPresence {
+                        self.chatRoom!.readAll()
+                    }
                 }
             }
         }
