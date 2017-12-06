@@ -169,6 +169,7 @@ public class QUser:Object {
             try! realm.write {
                 realm.add(user)
             }
+            user.downloadAvatar()
         }
         
         return user

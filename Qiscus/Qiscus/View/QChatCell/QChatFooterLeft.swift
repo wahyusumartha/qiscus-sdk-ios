@@ -63,6 +63,8 @@ class QChatFooterLeft: UICollectionReusableView {
                                 DispatchQueue.main.async {
                                     self.avatarImage.image = avatar
                                 }
+                            }else{
+                                thisUser.downloadAvatar()
                             }
                         }
                     }
