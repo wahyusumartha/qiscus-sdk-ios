@@ -16,7 +16,6 @@ class QChatFooterLeft: UICollectionReusableView {
         didSet{
             if let sender = self.user{
                 sender.delegate = self
-                avatarImage.image = Qiscus.image(named: "avatar")
                 let email = sender.email
                 QiscusBackgroundThread.async {
                     if let userData = QUser.getUser(email: email) {
@@ -28,7 +27,14 @@ class QChatFooterLeft: UICollectionReusableView {
                                 }
                             }
                         }else{
+                            DispatchQueue.main.async {
+                                self.avatarImage.image = Qiscus.image(named: "avatar")
+                            }
                             userData.downloadAvatar()
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            self.avatarImage.image = Qiscus.image(named: "avatar")
                         }
                     }
                 }

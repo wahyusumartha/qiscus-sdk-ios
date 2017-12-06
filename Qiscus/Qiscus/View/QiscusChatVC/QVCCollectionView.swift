@@ -95,8 +95,8 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     // MARK: CollectionView delegate
     open func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if let room = self.chatRoom {
-            if room.commentsGroupCount > 0 {
-                if indexPath.section < room.commentsGroupCount {
+            if room.comments.count > 0 {
+                if indexPath.section < room.comments.count {
                     if let chatCell = cell as? QChatCell {
                         chatCell.willDisplayCell()
                     }
@@ -107,17 +107,20 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                             }
                         }
                     }
-                    if indexPath.section == (room.commentsGroupCount - 1){
-                        if let group = room.commentGroup(index: indexPath.section) {
-                            if indexPath.row == group.commentsCount - 1{
+                }
+            }
+            if self.isPresence {
+                if room.comments.count > 0 {
+                    let lastCommentSection = room.comments.count - 1
+                    if indexPath.section >= lastCommentSection {
+                        if indexPath.section > lastCommentSection {
+                            self.isLastRowVisible = true
+                            room.readAll()
+                        }else{
+                            let item = self.collectionView.numberOfItems(inSection: lastCommentSection) - 1
+                            if indexPath.row == item {
                                 self.isLastRowVisible = true
-                                if self.isPresence {
-                                    if let comment = group.comment(index: indexPath.row){
-                                        if comment.status != .failed && comment.status != .sending{
-                                            comment.read()
-                                        }
-                                    }
-                                }
+                                room.readAll()
                             }
                         }
                     }
