@@ -18,9 +18,6 @@ public class QCommentGroup: Object{
     public dynamic var senderName: String = ""
     internal let comments = List<QComment>()
     
-    public var commentsCount:Int{
-        return self.comments.count
-    }
     public var lastComment:QComment?{
         get{
             if Thread.isMainThread {

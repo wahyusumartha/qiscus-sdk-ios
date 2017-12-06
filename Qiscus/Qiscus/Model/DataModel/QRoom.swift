@@ -435,9 +435,9 @@ public class QRoom:Object {
             }else{
                 DispatchQueue.main.sync { autoreleasepool {
                     QComment.cache[commentUniqueId] = nil
-                    }}
+                }}
             }
-            if self.comments[commentIndex.section].commentsCount > 1{
+            if commentGroup.comments.count > 1{
                 try! realm.write { realm.delete(comment) }
                 let roomId = self.id
                 if Thread.isMainThread {
@@ -736,12 +736,13 @@ public class QRoom:Object {
     }
     
     public func comment(onIndexPath indexPath:IndexPath)->QComment?{
-        if self.comments.count > indexPath.section && self.comments[indexPath.section].commentsCount > indexPath.row{
-            let comment = self.comments[indexPath.section].comments[indexPath.row]
-            return QComment.comment(withUniqueId: comment.uniqueId)
-        }else{
-            return nil
+        if self.comments.count > indexPath.section {
+            let group = self.comments[indexPath.section]
+            if indexPath.row < group.comments.count {
+                return group.comments[indexPath.row]
+            }
         }
+        return nil
     }
     internal func cache(){
         let roomTS = ThreadSafeReference(to:self)

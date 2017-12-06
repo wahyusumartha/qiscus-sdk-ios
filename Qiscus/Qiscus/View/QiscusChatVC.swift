@@ -958,7 +958,7 @@ open class QiscusChatVC: UIViewController{
             self.previewedTypingUsers = tempPreviewedUser
             func scroll(){
                 if self.isLastRowVisible{
-                    if let room = self.chatRoom {
+                    if self.chatRoom != nil{
                         let section = self.collectionView.numberOfSections - 1
                         let item = self.collectionView.numberOfItems(inSection: section) - 1
                         let indexPath = IndexPath(item: item, section: section)
