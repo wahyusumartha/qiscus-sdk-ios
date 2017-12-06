@@ -25,13 +25,7 @@ internal extension QRoom {
     }
     internal func getCommentGroup(index:Int)->QCommentGroup?{
         if self.comments.count > index {
-            let commentGroup = self.comments[index]
-            if let cachedData = QCommentGroup.commentGroup(withId: commentGroup.id){
-                return cachedData
-            }else{
-                QCommentGroup.cache[commentGroup.id] = commentGroup
-                return commentGroup
-            }
+            return self.comments[index]
         }else{
             return nil
         }

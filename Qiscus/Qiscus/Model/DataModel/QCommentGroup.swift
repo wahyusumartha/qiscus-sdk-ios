@@ -16,7 +16,7 @@ public class QCommentGroup: Object{
     public dynamic var createdAt: Double = 0
     public dynamic var senderEmail: String = ""
     public dynamic var senderName: String = ""
-    internal let comments = List<QComment>()
+    public let comments = List<QComment>()
     
     public var lastComment:QComment?{
         get{
@@ -43,23 +43,6 @@ public class QCommentGroup: Object{
             return dateString
         }
     }
-    
-    public class func commentGroup(withId id:String)->QCommentGroup?{
-        if let cachedData = QCommentGroup.cache[id] {
-            if !cachedData.isInvalidated{
-                return cachedData
-            }
-        }
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let groups = realm.objects(QCommentGroup.self).filter("id == '\(id)'")
-        if groups.count > 0 {
-            let cacheData = groups.first!
-            QCommentGroup.cache[id] = cacheData
-            return cacheData
-        }
-        
-        return nil
-    }
     public func comment(index:Int)->QComment?{
         if self.comments.count > index {
             let comment = self.comments[index]
@@ -82,32 +65,6 @@ public class QCommentGroup: Object{
                 comment.updateCellPos(cellPos: position)
             }
             i += 1
-        }
-    }
-    public func append(comment:QComment){
-        if let group = QCommentGroup.commentGroup(withId: self.id){
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            try! realm.write {
-                group.comments.append(comment)
-            }
-        }else{
-            self.comments.append(comment)
-        }
-        if QComment.cache[comment.uniqueId] == nil {
-            QComment.cache[comment.uniqueId] = comment
-        }
-    }
-    public func insert(comment:QComment, at:Int){
-        if let group = QCommentGroup.commentGroup(withId: self.id){
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            try! realm.write {
-                group.comments.insert(comment, at: at)
-            }
-        }else{
-            self.comments.insert(comment, at: at)
-        }
-        if QComment.cache[comment.uniqueId] == nil {
-            QComment.cache[comment.uniqueId] = comment
         }
     }
     public class func all() -> [QCommentGroup]{

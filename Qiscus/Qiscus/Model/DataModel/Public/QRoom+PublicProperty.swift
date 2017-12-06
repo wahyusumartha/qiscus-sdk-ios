@@ -49,11 +49,7 @@ public extension QRoom {
     public var lastCommentGroup:QCommentGroup?{
         get{
             if self.isInvalidated { return nil }
-            if let group = self.comments.last {
-                return QCommentGroup.commentGroup(withId: group.id)
-            }else{
-                return nil
-            }
+            return self.comments.last
         }
     }
     public var lastComment:QComment?{
