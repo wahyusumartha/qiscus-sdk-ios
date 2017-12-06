@@ -855,10 +855,10 @@ extension QiscusChatVC {
         let backIcon = UIImageView()
         backIcon.contentMode = .scaleAspectFit
         
-        let image = Qiscus.image(named: "ic_back")
+        let image = Qiscus.image(named: "ic_back")?.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
         backIcon.image = image
-        
-        //let backButtons = UIBarButtonItem(barButtonSystemItem: , target: <#T##Any?#>, action: <#T##Selector?#>)
+        backIcon.tintColor = UINavigationBar.appearance().tintColor
+
         if UIApplication.shared.userInterfaceLayoutDirection == .leftToRight {
             backIcon.frame = CGRect(x: 0,y: 11,width: 13,height: 22)
         }else{
