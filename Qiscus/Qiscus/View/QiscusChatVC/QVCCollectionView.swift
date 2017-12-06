@@ -15,8 +15,9 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         var itemNumber = 0
         
         if let room = self.chatRoom {
-            if section < room.commentsGroupCount {
-                itemNumber = room.commentGroup(index: section)!.commentsCount
+            if section < room.comments.count {
+                let group = room.comments[section]
+                itemNumber = group.comments.count
             }else{
                 return 1
             }
