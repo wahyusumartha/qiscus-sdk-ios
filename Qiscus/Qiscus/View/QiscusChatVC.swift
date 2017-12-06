@@ -1015,6 +1015,7 @@ open class QiscusChatVC: UIViewController{
         if self.isLastRowVisible || QiscusMe.shared.email == comment.senderEmail || !self.isPresence{
             self.collectionView.layoutIfNeeded()
             self.scrollToBottom()
+            comment.read()
         }
     }
     open func postComment(comment : QComment) {
