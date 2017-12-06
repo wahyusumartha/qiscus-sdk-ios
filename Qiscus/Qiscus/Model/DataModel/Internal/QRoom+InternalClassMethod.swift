@@ -187,11 +187,22 @@ internal extension QRoom {
                     }
                     room.updateCommentStatus()
                     var index = 0
+                    var participantRemoved = false
                     for participant in room.participants{
                         if !participantString.contains(participant.email){
                             room.participants.remove(objectAtIndex: index)
+                            participantRemoved = true
                         }
                         index += 1
+                    }
+                    if participantRemoved {
+                        let rId = room.id
+                        room.checkCommentStatus()
+                        DispatchQueue.main.async {
+                            if let r = QRoom.threadSaveRoom(withId: rId){
+                                QiscusNotification.publish(roomChange: r, onProperty: .participant)
+                            }
+                        }
                     }
                 }
             }

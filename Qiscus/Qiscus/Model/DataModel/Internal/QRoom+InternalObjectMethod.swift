@@ -87,7 +87,73 @@ internal extension QRoom {
             self.typingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(self.publishStopTyping), userInfo: nil, repeats: false)
         }
     }
-    
+    internal func checkCommentStatus(){
+        let id = self.id
+        QiscusDBThread.async {
+            if let room = QRoom.threadSaveRoom(withId: id){
+                var lastReadId = 0
+                var lastDeliveredId = 0
+                for participant in room.participants {
+                    if lastReadId == 0 || lastReadId > participant.lastReadCommentId{
+                        lastReadId = participant.lastReadCommentId
+                    }
+                    if lastDeliveredId == 0 || lastDeliveredId > participant.lastDeliveredCommentId{
+                        lastDeliveredId = participant.lastDeliveredCommentId
+                    }
+                }
+                if lastReadId > 0 && lastDeliveredId > 0 {
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    if lastReadId != room.lastReadCommentId {
+                        try! realm.write {
+                            room.lastReadCommentId = lastReadId
+                        }
+                    }
+                    if lastDeliveredId != room.lastDeliveredCommentId {
+                        try! realm.write {
+                            room.lastDeliveredCommentId = lastDeliveredId
+                        }
+                    }
+                    let filteredGroup = room.comments.filter("senderEmail == '\(QiscusMe.shared.email)'")
+                    for group in filteredGroup {
+                        let deliveredData = group.comments.filter("id != 0 AND id <= \(room.lastDeliveredCommentId) AND statusRaw < \(QCommentStatus.delivered.rawValue) ")
+                        let readData = group.comments.filter("id != 0 AND id <= \(room.lastReadCommentId) AND statusRaw < \(QCommentStatus.read.rawValue) ")
+                        for c in deliveredData {
+                            c.updateStatus(status: .delivered)
+                            if c.id == room.lastCommentId {
+                                if room.lastCommentStatusRaw != QCommentStatus.delivered.rawValue{
+                                    try! realm.write {
+                                        room.lastCommentStatusRaw = QCommentStatus.delivered.rawValue
+                                    }
+                                    let rId = room.id
+                                    DispatchQueue.main.async {
+                                        if let r = QRoom.room(withId: rId){
+                                            QiscusNotification.publish(roomChange: r, onProperty: .lastComment)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        for c in readData {
+                            c.updateStatus(status: .read)
+                            if c.id == room.lastCommentId {
+                                if room.lastCommentStatusRaw != QCommentStatus.read.rawValue{
+                                    try! realm.write {
+                                        room.lastCommentStatusRaw = QCommentStatus.read.rawValue
+                                    }
+                                    let rId = room.id
+                                    DispatchQueue.main.async {
+                                        if let r = QRoom.room(withId: rId){
+                                            QiscusNotification.publish(roomChange: r, onProperty: .lastComment)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     internal func subscribeRoomChannel(){
         let id = self.id
         QiscusBackgroundThread.async {
@@ -426,10 +492,12 @@ internal extension QRoom {
                     }
                     
                     var index = 0
+                    var participantRemoved = false
                     for participant in room.participants{
                         if !participantString.contains(participant.email){
                             try! realm.write {
                                 room.participants.remove(objectAtIndex: index)
+                                participantRemoved = true
                             }
                             participantChanged = true
                         }
@@ -442,6 +510,9 @@ internal extension QRoom {
                                 QiscusNotification.publish(roomChange: cache, onProperty: .participant)
                             }
                         }
+                    }
+                    if participantRemoved {
+                        room.checkCommentStatus()
                     }
                 }
             }
@@ -466,22 +537,22 @@ internal extension QRoom {
 
         let _ = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL)
         
-        let savedParticipant = self.participants.filter("email == '\(senderEmail)'")
-        if savedParticipant.count > 0 {
-            let participant = savedParticipant.first!
-            if !participant.isInvalidated {
-                if participant.lastReadCommentId < commentId {
-                    try! realm.write {
-                        participant.lastReadCommentId = commentId
-                        participant.lastDeliveredCommentId = commentId
-                    }
-                }else if participant.lastDeliveredCommentId < commentId{
-                    try! realm.write {
-                        participant.lastDeliveredCommentId = commentId
-                    }
-                }
-            }
-        }
+//        let savedParticipant = self.participants.filter("email == '\(senderEmail)'")
+//        if savedParticipant.count > 0 {
+//            let participant = savedParticipant.first!
+//            if !participant.isInvalidated {
+//                if participant.lastReadCommentId < commentId {
+//                    try! realm.write {
+//                        participant.lastReadCommentId = commentId
+//                        participant.lastDeliveredCommentId = commentId
+//                    }
+//                }else if participant.lastDeliveredCommentId < commentId{
+//                    try! realm.write {
+//                        participant.lastDeliveredCommentId = commentId
+//                    }
+//                }
+//            }
+//        }
         
         let newComment = QComment()
         newComment.uniqueId = commentUniqueId

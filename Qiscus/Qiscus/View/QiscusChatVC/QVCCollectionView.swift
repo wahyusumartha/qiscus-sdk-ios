@@ -12,18 +12,12 @@ import UIKit
 extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
     // MARK: CollectionView Data source
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        var itemNumber = 0
-        
-        if let room = self.chatRoom {
-            if section < room.comments.count {
-                let group = room.comments[section]
-                itemNumber = group.comments.count
-            }else{
-                return 1
-            }
+        if self.chatRoom == nil {return 0}
+        if section < self.chatRoom!.comments.count {
+            return self.chatRoom!.comments[section].comments.count
+        }else{
+            return 1
         }
-        
-        return itemNumber
     }
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
         var sectionNumber = 0
@@ -43,8 +37,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     }
     open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if indexPath.section < self.chatRoom!.comments.count {
-            let group = self.chatRoom!.comments[indexPath.section]
-            let comment = group.comments[indexPath.row]
+            let comment = self.chatRoom!.comments[indexPath.section].comments[indexPath.row]
             var cell = collectionView.dequeueReusableCell(withReuseIdentifier: comment.cellIdentifier, for: indexPath) as! QChatCell
             cell.clipsToBounds = true
             cell.comment = comment

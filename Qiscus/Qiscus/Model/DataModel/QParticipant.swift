@@ -126,8 +126,16 @@ public class QParticipant:Object {
                                 for c in data {
                                     c.updateStatus(status: .delivered)
                                     if c.id == room.lastCommentId {
-                                        try! realm.write {
-                                            room.lastCommentStatusRaw = QCommentStatus.delivered.rawValue
+                                        if room.lastCommentStatusRaw != QCommentStatus.delivered.rawValue{
+                                            try! realm.write {
+                                                room.lastCommentStatusRaw = QCommentStatus.delivered.rawValue
+                                            }
+                                            let rId = room.id
+                                            DispatchQueue.main.async {
+                                                if let r = QRoom.room(withId: rId){
+                                                    QiscusNotification.publish(roomChange: r, onProperty: .lastComment)
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -143,8 +151,16 @@ public class QParticipant:Object {
                                 for c in data {
                                     c.updateStatus(status: .read)
                                     if c.id == room.lastCommentId {
-                                        try! realm.write {
-                                            room.lastCommentStatusRaw = QCommentStatus.read.rawValue
+                                        if room.lastCommentStatusRaw != QCommentStatus.read.rawValue {
+                                            try! realm.write {
+                                                room.lastCommentStatusRaw = QCommentStatus.read.rawValue
+                                            }
+                                            let rId = room.id
+                                            DispatchQueue.main.async {
+                                                if let r = QRoom.room(withId: rId){
+                                                    QiscusNotification.publish(roomChange: r, onProperty: .lastComment)
+                                                }
+                                            }
                                         }
                                     }
                                 }
