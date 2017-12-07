@@ -57,7 +57,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
             }else{
                 goToFetch()
             }
-//        }
+        }
         
         return true
     }
