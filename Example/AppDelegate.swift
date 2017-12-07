@@ -41,14 +41,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, QiscusConfigDelegate {
         Qiscus.saveLog = true
         window?.makeKeyAndVisible()
         
-        Qiscus.setBaseURL(withURL: "https://kiwari-prod.qiscus.com")
-        QiscusMe.shared.email = "userid_201_6285877700050@kiwari-prod.com"
-        QiscusMe.shared.appId = "kiwari-prod"
-        QiscusMe.shared.token = "DykfFX1HYiNQclcz2pDK"
+//        Qiscus.setBaseURL(withURL: "https://kiwari-prod.qiscus.com")
+//        QiscusMe.shared.email = "userid_201_6285877700050@kiwari-prod.com"
+//        QiscusMe.shared.appId = "kiwari-prod"
+//        QiscusMe.shared.token = "DykfFX1HYiNQclcz2pDK"
         
-//        if !Qiscus.isLoggedIn{
-//            goToLoginView()
-//        }else{
+        if !Qiscus.isLoggedIn{
+            goToLoginView()
+        }else{
             Qiscus.connect(delegate: self)
             let rooms = QRoom.all()
             if rooms.count > 0 {
