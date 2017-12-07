@@ -971,11 +971,16 @@ open class QiscusChatVC: UIViewController{
                 scroll()
             }else if (!beforeEmpty && self.typingUsers.count == 0) {
                 self.collectionView.reloadData()
+                scroll()
             }
             else if changed && self.typingUsers.count > 0{
                 let section = self.chatRoom!.comments.count
-                let indexPath = IndexPath(item: 0, section: section)
-                self.collectionView.reloadItems(at: [indexPath])
+                if section == self.collectionView.numberOfSections {
+                    let indexPath = IndexPath(item: 0, section: section)
+                    self.collectionView.reloadItems(at: [indexPath])
+                }else{
+                    self.collectionView.reloadData()
+                }
                 scroll()
             }
             self.processingTyping = false
