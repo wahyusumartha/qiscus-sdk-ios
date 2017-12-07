@@ -206,6 +206,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         if delegate != nil {
             Qiscus.shared.delegate = delegate
         }
+        Qiscus.setupReachability()
         QChatService.syncProcess()
     }
     @objc public class func setBaseURL(withURL url:String){
@@ -587,7 +588,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             } catch {
                 Qiscus.printLog(text: "Unable to start network notifier")
             }
-            }}
+        }}
     }
     
     func applicationDidBecomeActife(){
