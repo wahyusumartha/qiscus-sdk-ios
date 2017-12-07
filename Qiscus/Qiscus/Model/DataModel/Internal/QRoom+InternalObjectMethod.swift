@@ -321,9 +321,12 @@ internal extension QRoom {
             }
         }
         if !onTop {
+            let rts = ThreadSafeReference(to: self)
+            let cts = ThreadSafeReference(to: newComment)
             DispatchQueue.main.async {
-                if let r = QRoom.room(withId: roomId){
-                    if let c = r.getComment(withUniqueId: cUniqueId){
+                let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                if let r = mainRealm.resolve(rts){
+                    if let c = mainRealm.resolve(cts){
                         QiscusNotification.publish(gotNewComment: c, room: r)
                     }
                 }
