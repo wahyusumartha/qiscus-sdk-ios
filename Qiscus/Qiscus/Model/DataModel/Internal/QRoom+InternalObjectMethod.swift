@@ -254,9 +254,10 @@ internal extension QRoom {
             commentGroup.senderName = newComment.senderName
             commentGroup.createdAt = newComment.createdAt
             commentGroup.id = "\(newComment.uniqueId)"
-            commentGroup.comments.append(newComment)
+            
             try! realm.write {
                 self.comments.append(commentGroup)
+                commentGroup.comments.append(newComment)
             }
         }
         else if onTop{
@@ -282,9 +283,9 @@ internal extension QRoom {
                 commentGroup.createdAt = newComment.createdAt
                 commentGroup.id = "\(cUniqueId)"
                 newComment.cellPosRaw = QCellPosition.single.rawValue
-                commentGroup.comments.append(newComment)
                 try! realm.write {
                     self.comments.insert(commentGroup, at: 0)
+                    commentGroup.comments.append(newComment)
                 }
             }
             if self.lastComment == nil {
@@ -313,9 +314,9 @@ internal extension QRoom {
                 commentGroup.createdAt = newComment.createdAt
                 commentGroup.id = "\(newComment.uniqueId)"
                 newComment.cellPosRaw = QCellPosition.single.rawValue
-                commentGroup.comments.append(newComment)
                 try! realm.write {
                     self.comments.append(commentGroup)
+                    commentGroup.comments.append(newComment)
                 }
             }
         }
