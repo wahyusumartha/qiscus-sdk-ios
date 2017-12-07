@@ -248,6 +248,7 @@ internal extension QRoom {
         }
         
         if self.comments.count == 0 {
+            newComment.cellPosRaw = QCellPosition.single.rawValue
             let commentGroup = QCommentGroup()
             commentGroup.senderEmail = newComment.senderEmail
             commentGroup.senderName = newComment.senderName
@@ -280,7 +281,7 @@ internal extension QRoom {
                 commentGroup.senderName = newComment.senderName
                 commentGroup.createdAt = newComment.createdAt
                 commentGroup.id = "\(cUniqueId)"
-                newComment.cellPosRaw = QCellPosition.first.rawValue
+                newComment.cellPosRaw = QCellPosition.single.rawValue
                 commentGroup.comments.append(newComment)
                 try! realm.write {
                     self.comments.insert(commentGroup, at: 0)
@@ -311,7 +312,7 @@ internal extension QRoom {
                 commentGroup.senderName = newComment.senderName
                 commentGroup.createdAt = newComment.createdAt
                 commentGroup.id = "\(newComment.uniqueId)"
-                newComment.cellPosRaw = QCellPosition.first.rawValue
+                newComment.cellPosRaw = QCellPosition.single.rawValue
                 commentGroup.comments.append(newComment)
                 try! realm.write {
                     self.comments.append(commentGroup)
