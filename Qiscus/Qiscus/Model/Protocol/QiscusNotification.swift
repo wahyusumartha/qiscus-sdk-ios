@@ -90,6 +90,9 @@ public class QiscusNotification: NSObject {
             let notification = QiscusNotification.shared
             notification.publish(gotNewComment: comment, room: room)
             notification.roomOrderChange()
+            if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                roomDelegate.gotNewComment(comment)
+            }
         }
     }
     public class func publish(commentDeleteOnRoom room:QRoom){

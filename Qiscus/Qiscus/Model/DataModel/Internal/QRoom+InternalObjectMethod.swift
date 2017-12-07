@@ -325,9 +325,6 @@ internal extension QRoom {
                 if let r = QRoom.room(withId: roomId){
                     if let c = r.getComment(withUniqueId: cUniqueId){
                         QiscusNotification.publish(gotNewComment: c, room: r)
-                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                            roomDelegate.gotNewComment(c)
-                        }
                     }
                 }
             }
@@ -368,8 +365,12 @@ internal extension QRoom {
                         DispatchQueue.main.async {
                             if let cache = QRoom.room(withId: id){
                                 if let c = cache.lastComment {
-                                    QiscusNotification.publish(gotNewComment: c, room: cache)
+                                    if cache.comments.count == 0 {
+                                        QiscusNotification.publish(gotNewComment: c, room: cache)
+                                    }
+                                    QiscusNotification.publish(roomChange: cache, onProperty: .lastComment)
                                 }
+                                
                             }
                         }
                     }
