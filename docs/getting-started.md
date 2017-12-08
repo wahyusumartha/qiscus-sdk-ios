@@ -240,7 +240,6 @@ The returned data above provide you several information such as room id, room na
 As explained in the previous section, we know how to obtain a roomID by calling `roomList()` method. To enter to a specific room, you need to pass the roomID to` chatView()` method. Here is how you can do: 
 When you already know your chat room id, you can easily go to that room. Just call
 
-Swift 3.0
 
 ```swift
 
@@ -252,7 +251,7 @@ class ViewController: UIViewController {
   .....
 
   func goToChat(){
-          let roomId = Int(targetField.text!)
+          let roomId = targetField.text!
           let view = Qiscus.chatView(withRoomId: roomId)
           self.navigationController?.pushViewController(view, animated: true)
   }
