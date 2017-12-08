@@ -74,14 +74,14 @@ You can explore the sample dashboard http://dashboard-sample.herokuapp.com/ to t
 To start trying the sample dashboard on your end, you should carry out the following steps:
 Clone sample dashboard in our github (https://github.com/qiscus/dashboard-sample), or just copy the following code.
 
-```
+```cmd
 git clone https://github.com/qiscus/dashboard-sample.git
 cd dashboard-sample
 ```
 
 Before running the sample app on your local, first, you need to install composer. 
 
-```
+```cmd
 composer install
 php -S localhost:8000
 ```
