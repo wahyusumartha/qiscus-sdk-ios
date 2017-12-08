@@ -98,6 +98,15 @@ public enum QReplyType:Int{
     @objc optional func comment(didUpload uploading:Bool)
     @objc optional func comment(didChangeProgress progress:CGFloat)
 }
+@objc public enum QCommentProperty:Int{
+    case status
+    case uploading
+    case downloading
+    case uploadProgress
+    case downloadProgress
+    case cellPosition
+    case cellSize
+}
 public class QComment:Object {
     static var cache = [String: QComment]()
     
