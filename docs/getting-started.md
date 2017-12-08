@@ -135,7 +135,7 @@ You can learn from the figure below to understand what really happened when call
 ![set user](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/set-user.png)
 
 
-## Updating a User Profile and Avatar
+### Updating a User Profile and Avatar
 
 After your user account is created, sometimes you may need to update a user information, such as changing user avatar. You can use method `Qiscus.updateProfile()` to make changes to your account.
 
@@ -147,7 +147,7 @@ Qiscus.updateProfile(username: "Your Name", avatarURL: "https://myimage.com/myNe
 }
 ```
 
-## Clear User Data and disconnect
+### Clear User Data and disconnect
 
 As mentioned in previous section, when you did `Qiscus.setup()` user, user's data will be stored locally. When user need to disconnect from Qiscus Chat SDK service, you need to clear the user data that is related to Qiscus Chat SDK, such as token, profile, messages,rooms, etc, from local device. You can do this by calling `Qiscus.clear()` method :
 
