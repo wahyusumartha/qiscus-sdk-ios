@@ -1,6 +1,6 @@
 # Getting Started
 
-## Requuirement
+## Requirement
 
 To install qiscus chat sdk you need to have CocoaPods installed. You can skip this part if you already installed CocoaPods.
 
@@ -36,6 +36,55 @@ $ pod install
 ```
  >Please be noted that by default, Qiscus Chat SDK uses Swift 3. If your Xcode version is 9 or latest, you need to adjust your Xcode to Swift 3.
 
+###Setting Permission
+Before to start, you need to enable some permission by implementing few line of codes inside Info.plist file, to allow your app accessing phone camera for sending images, enable sharing location on your device, and many other functionalities. You can do that by right clicking on your Info.plist file → Open As → Source Code, then add the following codes:
+
+```swift
+<key>NSCameraUsageDescription</key>
+<string>Need camera access for uploading Images</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Need library access for uploading Images</string>
+<key>NSContactsUsageDescription</key>
+<string>Need access for share contact</string>
+<key>NSLocationAlwaysUsageDescription</key>
+<string>$(PRODUCT_NAME) location use</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>$(PRODUCT_NAME) location use</string>
+```
+
+There are several features of your phone that you can enable your app to access them : 
+
+* **Camera**: to allow user upload image using his camera.
+* **Gallery**: to allow user upload image from gallery/ file manager.
+* **iCloud**: to allow user share his file from iCloud.
+* **Contact**: to allow user share his contact.
+* **Location**: to allow user share his location currently live.
+
+To enable the features listed above, you need to add some code below, and set it to True :
+
+```swift
+Qiscus.shared.cameraUpload = true
+Qiscus.shared.galeryUpload = true
+Qiscus.shared.iCloudUpload = true
+Qiscus.shared.contactShare = true
+Qiscus.shared.locationShare = true
+```
+
+
+Specially for iCloud feature, you need to do some steps before you can share files from iCloud to your app :
+
+
+* Make sure you already have IOS Certificate with iCloud ON. You can check it at your [Account Apple Developer](https://developer.apple.com/account) and going to **Certificates, Identifiers & Profiles** menu, select **App IDs**, find your target application, and click the **Edit** Button and make sure **Service iCloud** have you set as Enable
+![apple app ids](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-app-ids.png)
+
+* Open **Project** → **Capabilities** → **iCloud**. Set iCloud to be ON
+* On Service menu, make sure **Key-value storage** & **iCloud Documents** is checked
+![apple app ids](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-icloud-enable.png)
+
+* Add the following code on your project :
+```swift
+Qiscus.shared.iCloudUpload = true
+```
 
 ## Get Your App Id
 
@@ -113,55 +162,6 @@ Qiscus.clear()
 ## Create Chat Room
 
 **Chat Room** is a place where 2 or more users can chat each other. There are 2 type of Chat Room that can be created using Qiscus Chat SDK: 1-on-1 Chat Room and Group Chat Room. For some cases, a room can be identified by room unique id or room name. All activities under Qiscus Chat SDK is inside this Chat Room. You can do whatever you need with the available chat features.
-
-Before to start, you need to enable some permission by implementing few line of codes inside Info.plist file, to allow your app accessing phone camera for sending images, enable sharing location on your device, and many other functionalities. You can do that by right clicking on your Info.plist file → Open As → Source Code, then add the following codes:
-
-```swift
-<key>NSCameraUsageDescription</key>
-<string>Need camera access for uploading Images</string>
-<key>NSPhotoLibraryUsageDescription</key>
-<string>Need library access for uploading Images</string>
-<key>NSContactsUsageDescription</key>
-<string>Need access for share contact</string>
-<key>NSLocationAlwaysUsageDescription</key>
-<string>$(PRODUCT_NAME) location use</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>$(PRODUCT_NAME) location use</string>
-```
-
-There are several features of your phone that you can enable your app to access them : 
-
-* **Camera**: to allow user upload image using his camera.
-* **Gallery**: to allow user upload image from gallery/ file manager.
-* **iCloud**: to allow user share his file from iCloud.
-* **Contact**: to allow user share his contact.
-* **Location**: to allow user share his location currently live.
-
-To enable the features listed above, you need to add some code below, and set it to True :
-
-```swift
-Qiscus.shared.cameraUpload = true
-Qiscus.shared.galeryUpload = true
-Qiscus.shared.iCloudUpload = true
-Qiscus.shared.contactShare = true
-Qiscus.shared.locationShare = true
-```
-
-
-Specially for iCloud feature, you need to do some steps before you can share files from iCloud to your app :
-
-
-* Make sure you already have IOS Certificate with iCloud ON. You can check it at your [Account Apple Developer](https://developer.apple.com/account) and going to **Certificates, Identifiers & Profiles** menu, select **App IDs**, find your target application, and click the **Edit** Button and make sure **Service iCloud** have you set as Enable
-![apple app ids](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-app-ids.png)
-
-* Open **Project** → **Capabilities** → **iCloud**. Set iCloud to be ON
-* On Service menu, make sure **Key-value storage** & **iCloud Documents** is checked
-![apple app ids](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-icloud-enable.png)
-
-* Add the following code on your project :
-```swift
-Qiscus.shared.iCloudUpload = true
-```
 
 ## Creating 1-on-1 Chat Room
 
