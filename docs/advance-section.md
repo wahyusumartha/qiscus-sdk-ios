@@ -89,7 +89,7 @@ When your backend returns a JWT after receiving Nonce from your client app, the 
 ```
 
 
-## UI Costomization
+## UI Customization
 
 Qiscus Chat SDK enable you to customize Chat UI as you like. You can modify colors, change bubble chat design, modify Chat Header, and many more. All customization method are inside `Qiscus.style()`. By calling it, you can simply look at the autocomplete suggestion in your IDE to see lots of methods to modify your Chat Interface.
 
