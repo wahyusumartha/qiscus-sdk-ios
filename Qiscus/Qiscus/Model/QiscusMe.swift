@@ -171,7 +171,6 @@ open class QiscusMe: NSObject {
         QiscusMe.shared.rtKey = ""
         QiscusMe.shared.token = ""
         QiscusMe.shared.lastCommentId = 0
-        QiscusMe.shared.appId = ""
         
         QiscusMe.shared.userData.removeObject(forKey: "qiscus_id")
         QiscusMe.shared.userData.removeObject(forKey: "qiscus_email")
@@ -181,6 +180,5 @@ open class QiscusMe: NSObject {
         QiscusMe.shared.userData.removeObject(forKey: "qiscus_token")
         QiscusMe.shared.userData.removeObject(forKey: "qiscus_lastComment_id")
         QiscusMe.shared.userData.removeObject(forKey: "qiscus_lastKnownComment_id")
-        QiscusMe.shared.userData.removeObject(forKey: "qiscus_appId")
     }
 }
