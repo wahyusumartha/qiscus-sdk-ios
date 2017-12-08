@@ -1,24 +1,14 @@
 # Getting Started
 
-## Get Your App Id
+## Requirement
 
-To start building app using Qiscus Web Chat SDK you need a key called APP ID. This APP ID acts as identifier of your Application so that Qiscus can connect user to other users on the sample APP ID. You can get your APP ID [here](https://www.qiscus.com/dashboard/register).
-You can find your APP ID on your Qiscus app dashboard. Here you can see the picture as a reference.
-
-
-> All users within the same APP ID are able to communicate with each other, across all platforms. This means users using iOS, Android, Web clients, etc. can all chat with one another. However, users in different Qiscus applications cannot talk to each other.
-
-## Configuration
-
-To configure Qiscus Chat SDK you need to have CocoaPods installed. You can skip this part if you already installed CocoaPods.
+To install Qiscus Chat SDK you need to have CocoaPods installed. You can skip this part if you already installed CocoaPods.
 
 [CocoaPods](http://cocoapods.org/) is a dependency manager for Cocoa projects and it is available for Swift or Objective-C. Here is how to install CocoaPods :
 
 ```cmd
 $ gem install cocoapods
 ```
-
-## Install Qiscus SDK
 
 To install Qiscus Chat SDK, you need to initiate pod to generate Podfile. You can do that by going to your app project and type the commend below:
 
@@ -46,75 +36,7 @@ Install Qiscus through CocoaPods
 ```cmd
 $ pod install
 ```
-
-
-## Authentication
-
-To authenticate to SDK server, app needs to have user credential locally stored for further requests. The credential consists of a token that will identify a user in SDK server.
-When you want to disconnect from SDK server,  terminating authentication will be done by clearing the stored credential. You can learn more about disconnecting from Qiscus Chat SDK in the next section.
-Qiscus SDK authentication can be done separately with your main app authentication, especially if your main app has functionality before the messaging features.
-To initiate Qiscus SDK, you need to import Qiscus, then call `Qiscus.setup()` method to define your App Id, along with your user credentials such as userEmail, userKey, username and avatarURL. Here is how you can do :
-
-```swift
-  import Qiscus
-
-  Qiscus.setup( withAppId: YOUR_APP_ID,
-                userEmail: CURRENT_USER_EMAIL, 
-                userKey: CURRENT_USER_PASSWORD, 
-                username: CURRENT_USER_USERNAME, 
-                avatarURL: CURRENT_USER_AVATAR_URL, 
-                delegate: self
-              )
-```
-
-**Using the SDK in Objective-C**
-
-```objective-c
-import Qiscus
-
-[Qiscus setupWithAppId:<YOUR_APP_ID> 
-        userEmail:<USER_EMAIL> 
-        userKey:<USER_KEY> 
-        username:<USER_NAME> 
-        avatarURL:<USER_AVATAR_URL> 
-        delegate:self 
-        secureURl:<true|false>];
-```
-Here are the explanation for the parameters on user setup:
-
-* **userEmail** (string, unique): A User identifier that will be used to identify a user and used whenever another user need to chat with this user. It can be anything, wheter is is user's email, your user database index, etc. As long as it is unique and a string.
-* **userKey** (string): userKey is used as for authentication purpose, so even if a stranger knows your userId, he cannot access the user data.
-* **username** (string): Username is used as a display name inside chat room.
-* **avatarURL** (string, optional): used to display user's avatar, fallback to default avatar if not provided.
-
-You can learn from the figure below to understand what really happened when calling `Qiscus.setup()` function:
-![set user](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/set-user.png)
-
-
-## Updating a User Profile and Avatar
-
-After your user account is created, sometimes you may need to update a user information, such as changing user avatar. You can use method `Qiscus.updateProfile()` to make changes to your account.
-
-```swift
-Qiscus.updateProfile(username: "Your Name", avatarURL: "https://myimage.com/myNewIma...", onSuccess: {
-  //  if success, do anything here
-}) { (error) in
-  // if error, do anything here
-}
-```
-
-## Clear User Data and disconnect
-
-As mentioned in previous section, when you did `Qiscus.setup()` user, user's data will be stored locally. When user need to disconnect from Qiscus Chat SDK service, you need to clear the user data that is related to Qiscus Chat SDK, such as token, profile, messages,rooms, etc, from local device. You can do this by calling `Qiscus.clear()` method :
-
-```swift
-Qiscus.clear()
-```
-
-
-## Create Chat Room
-
-**Chat Room** is a place where 2 or more users can chat each other. There are 2 type of Chat Room that can be created using Qiscus Chat SDK: 1-on-1 Chat Room and Group Chat Room. For some cases, a room can be identified by room unique id or room name. All activities under Qiscus Chat SDK is inside this Chat Room. You can do whatever you need with the available chat features.
+### Setting Permission
 
 Before to start, you need to enable some permission by implementing few line of codes inside Info.plist file, to allow your app accessing phone camera for sending images, enable sharing location on your device, and many other functionalities. You can do that by right clicking on your Info.plist file → Open As → Source Code, then add the following codes:
 
@@ -149,7 +71,95 @@ Qiscus.shared.contactShare = true
 Qiscus.shared.locationShare = true
 ```
 
-## Creating 1-on-1 Chat Room
+### Enable iCloud Feature
+Specially for iCloud feature, you need to do some steps before you can share files from iCloud to your app :
+
+
+* Make sure you already have IOS Certificate with iCloud ON. You can check it at your [Account Apple Developer](https://developer.apple.com/account) and going to **Certificates, Identifiers & Profiles** menu, select **App IDs**, find your target application, and click the **Edit** Button and make sure **Service iCloud** have you set as Enable
+![apple app ids](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-app-ids.png)
+
+* Open **Project** → **Capabilities** → **iCloud**. Set iCloud to be ON
+* On Service menu, make sure **Key-value storage** & **iCloud Documents** is checked
+![apple app ids](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-icloud-enable.png)
+
+* Add the following code on your project :
+```swift
+Qiscus.shared.iCloudUpload = true
+```
+
+## Get Your App Id
+
+To start building app using Qiscus Web Chat SDK you need a key called APP ID. This APP ID acts as identifier of your Application so that Qiscus can connect user to other users on the sample APP ID. You can get your APP ID [here](https://www.qiscus.com/dashboard/register).
+You can find your APP ID on your Qiscus app dashboard. Here you can see the picture as a reference.
+
+![App ID Location](https://cdn.rawgit.com/qiscus/qiscus-sdk-web/feature/docs/docs/images/app-id.png "Your APP ID location")
+
+> *All users within the same APP ID are able to communicate with each other, across all platforms. This means users using iOS, Android, Web clients, etc. can all chat with one another. However, users in different Qiscus applications cannot talk to each other.*
+
+## Authentication
+
+To authenticate to SDK server, app needs to have user credential locally stored for further requests. The credential consists of a token that will identify a user in SDK server.
+When you want to disconnect from SDK server,  terminating authentication will be done by clearing the stored credential. You can learn more about disconnecting from Qiscus Chat SDK in the next section.
+Qiscus SDK authentication can be done separately with your main app authentication, especially if your main app has functionality before the messaging features.
+
+There are 2 type of authentication that you can opt to use: Client Authentication and Server Authentication.
+Here some comparison to help you decide between the two options:
+
+* Client Authentication can be done simply by providing userID and userKey through your client app. On the other hand, Server Authentication, the credential information is provided by your Server App. In this case, you need o prepare your own Backend. 
+* The Client Authentication is easier to implement but Server Authentication is more secure.
+
+### Client Authentication
+
+Before authentication, you need to first initiate Qiscus SDK. In Qiscus IOS Chat SDK, the initiation is conducted along with setup user account. You need to import Qiscus, then call `Qiscus.setup()` method to define your App Id, along with your user credentials such as userEmail, userKey, username and avatarURL. Here is how you can do :
+
+```swift
+  import Qiscus
+
+  Qiscus.setup( withAppId: YOUR_APP_ID,
+                userEmail: CURRENT_USER_EMAIL, 
+                userKey: CURRENT_USER_PASSWORD, 
+                username: CURRENT_USER_USERNAME, 
+                avatarURL: CURRENT_USER_AVATAR_URL, 
+                delegate: self
+              )
+```
+
+Here are the explanation for the parameters on user setup:
+
+* **userEmail** (string, unique): A User identifier that will be used to identify a user and used whenever another user need to chat with this user. It can be anything, wheter is is user's email, your user database index, etc. As long as it is unique and a string.
+* **userKey** (string): userKey is used as for authentication purpose, so even if a stranger knows your userId, he cannot access the user data.
+* **username** (string): Username is used as a display name inside chat room.
+* **avatarURL** (string, optional): used to display user's avatar, fallback to default avatar if not provided.
+
+You can learn from the figure below to understand what really happened when calling `Qiscus.setup()` function:
+![set user](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/set-user.png)
+
+
+## Updating a User Profile and Avatar
+
+After your user account is created, sometimes you may need to update a user information, such as changing user avatar. You can use method `Qiscus.updateProfile()` to make changes to your account.
+
+```swift
+Qiscus.updateProfile(username: "Your Name", avatarURL: "https://myimage.com/myNewIma...", onSuccess: {
+  //  if success, do anything here
+}) { (error) in
+  // if error, do anything here
+}
+```
+
+## Clear User Data and disconnect
+
+As mentioned in previous section, when you did `Qiscus.setup()` user, user's data will be stored locally. When user need to disconnect from Qiscus Chat SDK service, you need to clear the user data that is related to Qiscus Chat SDK, such as token, profile, messages,rooms, etc, from local device. You can do this by calling `Qiscus.clear()` method :
+
+```swift
+Qiscus.clear()
+```
+
+## Create Chat Room
+
+**Chat Room** is a place where 2 or more users can chat each other. There are 2 type of Chat Room that can be created using Qiscus Chat SDK: 1-on-1 Chat Room and Group Chat Room. For some cases, a room can be identified by room unique id or room name. All activities under Qiscus Chat SDK is inside this Chat Room. You can do whatever you need with the available chat features.
+
+## 1-on-1 Chat Room
 
 We assume that you already know a targeted user you want to chat with. Make sure that your targeted user has been registered in Qiscus Chat SDK through setup() method, as explained in the previous section. To start a conversation with your targeted user, it can be done with  `Qiscus.chatView(withUsers: [email])` method. Qiscus Chat SDK, then, will serve you a new Chat Room, asynchronously. When the room is succesfully created.
 
@@ -161,7 +171,7 @@ let view = Qiscus.chatView(withUsers: [email])
 self.navigationController?.pushViewController(view, animated: true)
 ```
 
-## Creating Group Chat Room
+## Group Chat Room
 
 When you want your many users to chat together in a single room, you need to create Group Room. Basically Group Room has the same concept as 1-on-1 Chat Room, but the different is that Group Room will target array of users in a single method. You can create Group Room by calling `Qiscus.createChatView()` method. Here how you can create Group Room :
 
@@ -187,8 +197,8 @@ class ViewController: UIViewController {
 After successfully created your room, you may need to do advance development for your chat app. This may include invite more participant to your room, enter to a specific room without invitation, and so forth. Hence, in this section you will learn about the following things :
 
 1. **Get Room List**, to get data of your user list, so that you can use that data to load specific room or many more.
-2. **Get Room ID**, to enable you to open a room that you already created by passing room ID that is obtained by Get Room List.
-3. **Room Participant**, to educate you about adding more participant to your room or managing your user in your room.
+2. **Enter to Existing Room**, to enable you to open a room that you already created by passing room ID that is obtained by Get Room List.
+3. **Participant Management**, to educate you about adding more participant to your room or managing your user in your room.
 
 ## Get Rooms List
 
@@ -219,11 +229,9 @@ participants = []
 
 The returned data above provide you several information such as room id, room name,  how many participant in a room and many more.
 
-## Get a room by id
+## Enter to Existing Room
 
-As explained in the previous section, we know how to obtain a roomID by calling `roomList()` method. To enter to a specific room, you need to pass the roomID to` chatView()` method. Here is how you can do: 
-When you already know your chat room id, you can easily go to that room. Just call
-
+After successfully getting your room list, you may want to enter an existing room. Remember that there are 2 type of rooms, 1-on-1 Chat Room and Group Room. To enter to a specific room, you need to pass the roomID to` chatView()` method. Here is how you can do: 
 
 ```swift
 
@@ -245,13 +253,12 @@ class ViewController: UIViewController {
 
 ```
 
+## Participant Management
 
-## Room Participant Management
-
-In some cases, you may need to add additional participants into your room chat or even removing any participant. Currently, Qiscus Chat SDK only allow you to manage your users server to server. You cannot do it on your client app side. Hence, we recommend to invite and remove user out of specific room through our SERVER API for simplicity and security reason. You can learn how to use Server API [here](https://www.qiscus.com/docs/restapi). 
+In some cases, you may need to add additional participants into your room chat or even removing any participant. Currently, Qiscus Chat SDK only allow you to manage your users server to server. You cannot do it on your client app side. Hence, we recommend to invite and remove user out of specific room through our SERVER API for simplicity and security reason. You can learn how to use [Server API](https://www.qiscus.com/docs/restapi). 
 
 
-## Enable Push Notifications
+## Enable Push Notification
 
 Typically, you might want users to receive message when user not opening you app. With Qiscus Chat SDK, to enable Push Notification, you need to activate Apple Push Notification service by following the steps below :
 
@@ -334,19 +341,3 @@ func application(_ application: UIApplication, didReceiveRemoteNotification user
 ```
 
 Once your app is up and running, you will receive push notification of your chat app. 
-
-## Enable iCloud Feature
-Specially for iCloud feature, you need to do some steps before you can share files from iCloud to your app :
-
-
-* Make sure you already have IOS Certificate with iCloud ON. You can check it at your [Account Apple Developer](https://developer.apple.com/account) and going to **Certificates, Identifiers & Profiles** menu, select **App IDs**, find your target application, and click the **Edit** Button and make sure **Service iCloud** have you set as Enable
-![apple app ids](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-app-ids.png)
-
-* Open **Project** → **Capabilities** → **iCloud**. Set iCloud to be ON
-* On Service menu, make sure **Key-value storage** & **iCloud Documents** is checked
-![apple app ids](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-icloud-enable.png)
-
-* Add the following code on your project :
-```swift
-Qiscus.shared.iCloudUpload = true
-```
