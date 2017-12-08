@@ -25,13 +25,12 @@ protocol ChatCellDelegate {
 class QChatCell: UICollectionViewCell, QCommentDelegate {
     
     var delegate: ChatCellDelegate?
-
-    var comment:QComment?{
-        didSet{
-            if comment != nil {
-                self.comment?.delegate = self
-                self.commentChanged()
-            }
+    
+    private var commentRaw:QComment?
+        
+    public var comment:QComment?{
+        get{
+            return self.commentRaw
         }
     }
     var linkTextAttributes:[String: Any]{
@@ -191,6 +190,29 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
             data.delegate = nil
         }
     }
+    public func setData(comment:QComment){
+        var oldUid = ""
+        if let c = self.commentRaw {
+            oldUid = c.uniqueId
+        }
+        let uid = comment.uniqueId
+        
+        if oldUid != ""{
+            self.commentRaw!.delegate = nil
+        }
+        
+        if oldUid != uid {
+            if let c = QComment.cache[uid] {
+                self.commentRaw = c
+            }else{
+                QComment.cache[uid] = comment
+                self.commentRaw = QComment.cache[uid]
+            }
+            self.commentRaw!.delegate = self
+            self.commentChanged()
+        }
+    }
+    
     // MARK: - commentDelegate
     func comment(didChangeStatus status:QCommentStatus){
         self.updateStatus(toStatus: status)

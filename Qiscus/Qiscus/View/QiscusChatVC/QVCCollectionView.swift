@@ -40,7 +40,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             let comment = self.chatRoom!.comments[indexPath.section].comments[indexPath.row]
             var cell = collectionView.dequeueReusableCell(withReuseIdentifier: comment.cellIdentifier, for: indexPath) as! QChatCell
             cell.clipsToBounds = true
-            cell.comment = comment
+            cell.setData(comment: comment)
             cell.delegate = self
             if let audioCell = cell as? QCellAudio{
                 audioCell.audioCellDelegate = self
@@ -124,55 +124,43 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     }
     
     open func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if let chatCell = cell as? QChatCell {
+            DispatchQueue.main.async {
+                chatCell.endDisplayingCell()
+            }
+        }
         if let room = self.chatRoom {
-            if room.comments.count == 0 { return }
-            if indexPath.section < room.comments.count{
-                let roomId = room.id
+            if room.comments.count > 0 {
                 QiscusBackgroundThread.async {
-                    if let dbRoom = QRoom.threadSaveRoom(withId: roomId){
-                        if dbRoom.comments.count == 0 { return }
-                        let group = dbRoom.comments[indexPath.section]
-                        
-                        if let selIndex = self.selectedCellIndex {
-                            if selIndex.section == indexPath.section && selIndex.item == indexPath.item{
-                                DispatchQueue.main.async {
-                                    cell.backgroundColor = UIColor.clear
-                                }
-                                self.selectedCellIndex = nil
-                            }
-                        }
-                        if let chatCell = cell as? QChatCell {
+                    if let selIndex = self.selectedCellIndex {
+                        if selIndex.section == indexPath.section && selIndex.item == indexPath.item{
                             DispatchQueue.main.async {
-                                chatCell.endDisplayingCell()
+                                cell.backgroundColor = UIColor.clear
+                            }
+                            self.selectedCellIndex = nil
+                        }
+                        
+                    }
+                }
+                let lastMessageSection = room.comments.count - 1
+                let lastgroup = room.comments[lastMessageSection]
+                let lastMessageRow = lastgroup.comments.count - 1
+                QiscusBackgroundThread.async {
+                    if indexPath.section >= lastMessageSection {
+                        var visibleIndexPath = [IndexPath]()
+                        DispatchQueue.main.sync {
+                            visibleIndexPath = collectionView.indexPathsForVisibleItems
+                        }
+                        var visible = false
+                        for visibleIndex in visibleIndexPath{
+                            if visibleIndex.row == lastMessageRow && visibleIndex.section == lastMessageSection{
+                                visible = true
+                                break
                             }
                         }
-                        if indexPath.section == (dbRoom.comments.count - 1){
-                            if group.comments.count == 0 {return}
-                            if indexPath.row == group.comments.count - 1{
-                                var visibleIndexPath = [IndexPath]()
-                                DispatchQueue.main.sync {
-                                    visibleIndexPath = collectionView.indexPathsForVisibleItems
-                                }
-                                if visibleIndexPath.count > 0{
-                                    var visible = false
-                                    for visibleIndex in visibleIndexPath{
-                                        if visibleIndex.row == indexPath.row && visibleIndex.section == indexPath.section{
-                                            visible = true
-                                            break
-                                        }
-                                    }
-                                    if self.isLastRowVisible != visible {
-                                        DispatchQueue.main.async {
-                                            self.isLastRowVisible = visible
-                                        }
-                                    }
-                                }else{
-                                    if !self.isLastRowVisible {
-                                        DispatchQueue.main.async {
-                                            self.isLastRowVisible = true
-                                        }
-                                    }
-                                }
+                        if self.isLastRowVisible != visible {
+                            DispatchQueue.main.async {
+                                self.isLastRowVisible = visible
                             }
                         }
                     }

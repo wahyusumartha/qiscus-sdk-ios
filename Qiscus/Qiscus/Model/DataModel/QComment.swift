@@ -143,15 +143,15 @@ public class QComment:Object {
     public dynamic var seekTimeLabel = "00:00"
     public dynamic var audioIsPlaying = false
     // file variable
-    public dynamic var isDownloading = false
-    public dynamic var isUploading = false
-    public dynamic var progress = CGFloat(0)
+    public var isDownloading = false
+    public var isUploading = false
+    public var progress = CGFloat(0)
     
     // read mark
     internal dynamic var isRead:Bool = false
     
     override public static func ignoredProperties() -> [String] {
-        return ["displayImage","delegate"]
+        return ["displayImage","delegate", "isDownloading","isUploading","progress"]
     }
     
     //MARK : - Getter variable
@@ -743,57 +743,33 @@ public class QComment:Object {
     }
     public func updateUploading(uploading:Bool){
         let uId = self.uniqueId
-        if self.isUploading != uploading {
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            try! realm.write {
-                self.isUploading = uploading
-            }
-            func execute(){
-                QComment.cache[uId]?.delegate?.comment?(didUpload: uploading)
-            }
-            if Thread.isMainThread{
-                execute()
-            }else{
-                DispatchQueue.main.sync {
-                    execute()
+        DispatchQueue.main.async {
+            if let comment = QComment.cache[uId] {
+                if comment.isUploading != uploading {
+                    comment.isUploading = uploading
+                    comment.delegate?.comment?(didUpload: uploading)
                 }
             }
         }
     }
     public func updateDownloading(downloading:Bool){
         let uId = self.uniqueId
-        if self.isDownloading != downloading {
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            try! realm.write {
-                self.isDownloading = downloading
-            }
-            func execute(){
-                QComment.cache[uId]?.delegate?.comment?(didDownload: downloading)
-            }
-            if Thread.isMainThread{
-                execute()
-            }else{
-                DispatchQueue.main.sync {
-                    execute()
+        DispatchQueue.main.async {
+            if let comment = QComment.cache[uId] {
+                if comment.isDownloading != downloading {
+                    comment.isDownloading = downloading
+                    comment.delegate?.comment?(didDownload: downloading)
                 }
             }
         }
     }
     public func updateProgress(progress:CGFloat){
         let uId = self.uniqueId
-        if self.progress != progress {
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            try! realm.write {
-                self.progress = progress
-            }
-            func execute() {
-                QComment.cache[uId]?.delegate?.comment?(didChangeProgress: progress)
-            }
-            if Thread.isMainThread{
-                execute()
-            }else{
-                DispatchQueue.main.sync {
-                    execute()
+        DispatchQueue.main.async {
+            if let comment = QComment.cache[uId] {
+                if comment.progress != progress {
+                    comment.progress = progress
+                    comment.delegate?.comment?(didChangeProgress: progress)
                 }
             }
         }
