@@ -149,22 +149,6 @@ Qiscus.shared.contactShare = true
 Qiscus.shared.locationShare = true
 ```
 
-
-Specially for iCloud feature, you need to do some steps before you can share files from iCloud to your app :
-
-
-* Make sure you already have IOS Certificate with iCloud ON. You can check it at your [Account Apple Developer](https://developer.apple.com/account) and going to **Certificates, Identifiers & Profiles** menu, select **App IDs**, find your target application, and click the **Edit** Button and make sure **Service iCloud** have you set as Enable
-![apple app ids](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-app-ids.png)
-
-* Open **Project** → **Capabilities** → **iCloud**. Set iCloud to be ON
-* On Service menu, make sure **Key-value storage** & **iCloud Documents** is checked
-![apple app ids](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-icloud-enable.png)
-
-* Add the following code on your project :
-```swift
-Qiscus.shared.iCloudUpload = true
-```
-
 ## Creating 1-on-1 Chat Room
 
 We assume that you already know a targeted user you want to chat with. Make sure that your targeted user has been registered in Qiscus Chat SDK through setup() method, as explained in the previous section. To start a conversation with your targeted user, it can be done with  `Qiscus.chatView(withUsers: [email])` method. Qiscus Chat SDK, then, will serve you a new Chat Room, asynchronously. When the room is succesfully created.
@@ -350,3 +334,19 @@ func application(_ application: UIApplication, didReceiveRemoteNotification user
 ```
 
 Once your app is up and running, you will receive push notification of your chat app. 
+
+## Enable iCloud Feature
+Specially for iCloud feature, you need to do some steps before you can share files from iCloud to your app :
+
+
+* Make sure you already have IOS Certificate with iCloud ON. You can check it at your [Account Apple Developer](https://developer.apple.com/account) and going to **Certificates, Identifiers & Profiles** menu, select **App IDs**, find your target application, and click the **Edit** Button and make sure **Service iCloud** have you set as Enable
+![apple app ids](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-app-ids.png)
+
+* Open **Project** → **Capabilities** → **iCloud**. Set iCloud to be ON
+* On Service menu, make sure **Key-value storage** & **iCloud Documents** is checked
+![apple app ids](https://raw.githubusercontent.com/qiscus/qiscus-sdk-ios/develop/screenshots/apple-icloud-enable.png)
+
+* Add the following code on your project :
+```swift
+Qiscus.shared.iCloudUpload = true
+```
