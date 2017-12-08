@@ -124,8 +124,16 @@ internal extension QRoom {
                 lastComment = QComment.tempComment(fromJSON: commentData)
             }
             
-            func cache(roomId:String){
+            func cache(room:QRoom){
+                let rts = ThreadSafeReference(to:room)
+                let rId = room.id
                 DispatchQueue.main.async {
+                    let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    if Qiscus.chatRooms[rId] == nil {
+                        if let r = mainRealm.resolve(rts) {
+                            Qiscus.chatRooms[rId] = r
+                        }
+                    }
                     if let r = QRoom.getRoom(withId: roomId){
                         if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                             if !r.isInvalidated {
@@ -198,8 +206,15 @@ internal extension QRoom {
                     if participantRemoved {
                         let rId = room.id
                         room.checkCommentStatus()
+                        let rts = ThreadSafeReference(to:room)
                         DispatchQueue.main.async {
-                            if let r = QRoom.threadSaveRoom(withId: rId){
+                            let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            if Qiscus.chatRooms[rId] == nil {
+                                if let r = mainRealm.resolve(rts) {
+                                    Qiscus.chatRooms[rId] = r
+                                }
+                            }
+                            if let r = QRoom.room(withId: rId){
                                 QiscusNotification.publish(roomChange: r, onProperty: .participant)
                             }
                         }
@@ -225,7 +240,7 @@ internal extension QRoom {
                     }
                 }
                 checkParticipants(room: savedRoom)
-                cache(roomId: roomId)
+                cache(room: savedRoom)
                 
                 return savedRoom
             }else{
@@ -255,7 +270,7 @@ internal extension QRoom {
                     realm.add(room)
                 }
                 checkParticipants(room: room)
-                cache(roomId: roomId)
+                cache(room: room)
                 
                 return room
             }

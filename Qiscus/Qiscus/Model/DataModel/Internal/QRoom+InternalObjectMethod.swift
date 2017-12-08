@@ -39,16 +39,9 @@ internal extension QRoom {
         QiscusBackgroundThread.async { autoreleasepool{
             let message: String = "0";
             let channel = "r/\(roomId)/\(roomId)/\(QiscusMe.shared.email)/t"
-//            func execute(){
-                Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
-//            }
             
-//            DispatchQueue.main.async {
-//                autoreleasepool {
-//                    execute()
-//                }
-//            }
-            }}
+            Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
+        }}
         if self.selfTypingTimer != nil {
             if self.typingTimer!.isValid {
                 self.typingTimer!.invalidate()
@@ -61,16 +54,8 @@ internal extension QRoom {
         QiscusBackgroundThread.async { autoreleasepool{
             let message: String = "1";
             let channel = "r/\(roomId)/\(roomId)/\(QiscusMe.shared.email)/t"
-            //func execute(){
-                Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
-            //}
-            
-//            DispatchQueue.main.async {
-//                autoreleasepool{
-//                    execute()
-//                }
-//            }
-            }}
+            Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
+        }}
         if self.typingTimer != nil {
             if self.typingTimer!.isValid {
                 self.typingTimer!.invalidate()
@@ -119,7 +104,14 @@ internal extension QRoom {
                                         room.lastCommentStatusRaw = QCommentStatus.delivered.rawValue
                                     }
                                     let rId = room.id
+                                    let rts = ThreadSafeReference(to: room)
                                     DispatchQueue.main.async {
+                                        let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                                        if Qiscus.chatRooms[rId] == nil {
+                                            if let r = mainRealm.resolve(rts) {
+                                                Qiscus.chatRooms[rId] = r
+                                            }
+                                        }
                                         if let r = QRoom.room(withId: rId){
                                             QiscusNotification.publish(roomChange: r, onProperty: .lastComment)
                                         }
@@ -135,8 +127,15 @@ internal extension QRoom {
                                         room.lastCommentStatusRaw = QCommentStatus.read.rawValue
                                     }
                                     let rId = room.id
+                                    let rts = ThreadSafeReference(to:room)
                                     DispatchQueue.main.async {
-                                        if let r = QRoom.room(withId: rId){
+                                        let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                                        if Qiscus.chatRooms[rId] == nil {
+                                            if let r = mainRealm.resolve(rts) {
+                                                Qiscus.chatRooms[rId] = r
+                                            }
+                                        }
+                                        if let r = QRoom.getRoom(withId: rId){
                                             QiscusNotification.publish(roomChange: r, onProperty: .lastComment)
                                         }
                                     }
@@ -227,7 +226,6 @@ internal extension QRoom {
     }
     
     internal func addComment(newComment:QComment, onTop:Bool = false){
-        let roomId = self.id
         let cUniqueId = newComment.uniqueId
         
         if self.getComment(withUniqueId: cUniqueId) != nil {
@@ -321,11 +319,17 @@ internal extension QRoom {
             }
         }
         if !onTop {
+            let rId = self.id
             let rts = ThreadSafeReference(to: self)
             let cts = ThreadSafeReference(to: newComment)
             DispatchQueue.main.async {
                 let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
-                if let r = mainRealm.resolve(rts){
+                if Qiscus.chatRooms[rId] == nil {
+                    if let r = mainRealm.resolve(rts) {
+                        Qiscus.chatRooms[rId] = r
+                    }
+                }
+                if let r = QRoom.getRoom(withId: rId){
                     if let c = mainRealm.resolve(cts){
                         QiscusNotification.publish(gotNewComment: c, room: r)
                     }
@@ -365,7 +369,14 @@ internal extension QRoom {
                             room.lastCommentData = cData
                             room.lastCommentRawExtras = cRawExtras
                         }
+                        let rts = ThreadSafeReference(to:room)
                         DispatchQueue.main.async {
+                            let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            if Qiscus.chatRooms[id] == nil {
+                                if let r = mainRealm.resolve(rts) {
+                                    Qiscus.chatRooms[id] = r
+                                }
+                            }
                             if let cache = QRoom.room(withId: id){
                                 if let c = cache.lastComment {
                                     if cache.comments.count == 0 {
@@ -392,7 +403,14 @@ internal extension QRoom {
                         try! realm.write {
                             room.data = option
                         }
+                        let rts = ThreadSafeReference(to:room)
                         DispatchQueue.main.async {
+                            let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            if Qiscus.chatRooms[id] == nil {
+                                if let r = mainRealm.resolve(rts) {
+                                    Qiscus.chatRooms[id] = r
+                                }
+                            }
                             if let cache = QRoom.room(withId: id) {
                                 QiscusNotification.publish(roomChange: cache, onProperty: .data)
                             }
@@ -404,8 +422,15 @@ internal extension QRoom {
                         try! realm.write {
                             room.unreadCount = unread
                         }
+                        let rts = ThreadSafeReference(to: room)
                         DispatchQueue.main.async {
-                            if let cache = QRoom.room(withId: id) {
+                            let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            if Qiscus.chatRooms[id] == nil {
+                                if let r = mainRealm.resolve(rts) {
+                                    Qiscus.chatRooms[id] = r
+                                }
+                            }
+                            if let cache = QRoom.getRoom(withId: id) {
                                 QiscusNotification.publish(roomChange: cache, onProperty: .unreadCount)
                             }
                         }
@@ -417,7 +442,14 @@ internal extension QRoom {
                             room.storedName = roomName
                         }
                         if room.definedname == "" {
+                            let rts = ThreadSafeReference(to: room)
                             DispatchQueue.main.async {
+                                let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                                if Qiscus.chatRooms[id] == nil {
+                                    if let r = mainRealm.resolve(rts) {
+                                        Qiscus.chatRooms[id] = r
+                                    }
+                                }
                                 if let cache = QRoom.room(withId: id) {
                                     QiscusNotification.publish(roomChange: cache, onProperty: .name)
                                 }
@@ -444,7 +476,14 @@ internal extension QRoom {
                             room.lastCommentTypeRaw = comment.typeRaw
                             room.lastCommentData = comment.data
                         }
+                        let rts = ThreadSafeReference(to: room)
                         DispatchQueue.main.async {
+                            let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            if Qiscus.chatRooms[id] == nil {
+                                if let r = mainRealm.resolve(rts) {
+                                    Qiscus.chatRooms[id] = r
+                                }
+                            }
                             if let cache = QRoom.room(withId: id) {
                                 QiscusNotification.publish(roomChange: cache, onProperty: .lastComment)
                             }
@@ -504,7 +543,14 @@ internal extension QRoom {
                         index += 1
                     }
                     if participantChanged {
+                        let rts = ThreadSafeReference(to: room)
                         DispatchQueue.main.async {
+                            let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            if Qiscus.chatRooms[id] == nil {
+                                if let r = mainRealm.resolve(rts) {
+                                    Qiscus.chatRooms[id] = r
+                                }
+                            }
                             if let cache = QRoom.room(withId: id) {
                                 cache.delegate?.room(didChangeParticipant: cache)
                                 QiscusNotification.publish(roomChange: cache, onProperty: .participant)

@@ -931,19 +931,15 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     func publishOnlineStatus(){
         let channel = "u/\(QiscusMe.shared.email)/s"
-        //DispatchQueue.main.async {
-            let isActive = (Qiscus.sharedInstance.application.applicationState == UIApplicationState.active)
-            if isActive {
-                self.mqtt?.publish(channel, withString: "1", qos: .qos1, retained: true)
-            }
-        //}
+        let isActive = (Qiscus.sharedInstance.application.applicationState == UIApplicationState.active)
+        if isActive {
+            self.mqtt?.publish(channel, withString: "1", qos: .qos1, retained: true)
+        }
     }
     func stopPublishOnlineStatus(){
         let channel = "u/\(QiscusMe.shared.email)/s"
-        //DispatchQueue.main.async {
-            self.userStatusTimer?.invalidate()
-            self.mqtt?.publish(channel, withString: "0", qos: .qos1, retained: true)
-        //}
+        self.userStatusTimer?.invalidate()
+        self.mqtt?.publish(channel, withString: "0", qos: .qos1, retained: true)
     }
     func goToBackgroundMode(){
         for (_,chatView) in self.chatViews {
