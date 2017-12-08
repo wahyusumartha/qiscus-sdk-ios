@@ -18,7 +18,6 @@ public class QiscusNotification: NSObject {
     
     
     public static let COMMENT_DELETE = NSNotification.Name("qiscus_commentDelete")
-    public static let COMMENT_CHANGE = NSNotification.Name("qiscus_commentChange")
     public static let MESSAGE_STATUS = NSNotification.Name("qiscus_messageStatus")
     
     public static let USER_PRESENCE = NSNotification.Name("quscys_userPresence")
