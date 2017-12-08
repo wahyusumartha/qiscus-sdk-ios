@@ -33,7 +33,18 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     static let uiThread = DispatchQueue.main
     
     static var qiscusDeviceToken: String = ""
-    static var dbConfiguration = Realm.Configuration.defaultConfiguration
+    private static var dbConfigurationRaw:Realm.Configuration? = nil
+    static var dbConfiguration:Realm.Configuration{
+        get{
+            if let conf = Qiscus.dbConfigurationRaw {
+                return conf
+            }else{
+                let conf = Qiscus.getConfiguration()
+                Qiscus.dbConfigurationRaw = conf
+                return conf
+            }
+        }
+    }
     
     static var chatRooms = [String : QRoom]()
     static var qiscusDownload:[String] = [String]()
@@ -168,8 +179,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         QComment.cache = [String : QComment]()
         QUser.cache = [String: QUser]()
         Qiscus.shared.chatViews = [String:QiscusChatVC]()
-        Qiscus.dbConfiguration.deleteRealmIfMigrationNeeded = true
-        Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
         Qiscus.realtimeChannel = [String]()
     }
     @objc public class func unRegisterPN(){
@@ -201,7 +210,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }
     }
     public class func connect(delegate:QiscusConfigDelegate? = nil){
-        Qiscus.checkDatabaseMigration()
         Qiscus.shared.RealtimeConnect()
         if delegate != nil {
             Qiscus.shared.delegate = delegate
@@ -229,7 +237,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         QChatService.updateProfil(userName: username, userAvatarURL: avatarURL, onSuccess: onSuccess, onError: onFailed)
     }
     @objc public class func setup(withAppId appId:String, userEmail:String, userKey:String, username:String, avatarURL:String? = nil, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true){
-        Qiscus.checkDatabaseMigration(force:true)
         var requestProtocol = "https"
         if !secureURl {
             requestProtocol = "http"
@@ -289,7 +296,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
      - parameter subtitle: **String** text to show as chat subtitle (Optional), Default value : "" (empty string).
      */
     //    @objc public class func chatVC(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
-    //        Qiscus.checkDatabaseMigration()
     //        if !Qiscus.sharedInstance.connected {
     //            Qiscus.setupReachability()
     //        }
@@ -336,7 +342,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
      */
     
     @objc public class func chat(withRoomId roomId:String, target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
-        //        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -369,7 +374,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         UIApplication.shared.keyWindow?.rootViewController?.present(navController, animated: true, completion: nil)
     }
     @objc public class func chat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
-        //        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -409,7 +413,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         if let room = QRoom.room(withUser: users.first!) {
             return Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
         }else{
-            //            Qiscus.checkDatabaseMigration()
             if !Qiscus.sharedInstance.connected {
                 Qiscus.setupReachability()
             }
@@ -436,7 +439,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         if let room = QRoom.room(withUniqueId: uniqueId){
             return Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
         }else{
-            //            Qiscus.checkDatabaseMigration()
             if !Qiscus.sharedInstance.connected {
                 Qiscus.setupReachability()
             }
@@ -458,7 +460,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }
     }
     @objc public class func chatView(withRoomId roomId:String, readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
-        //        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -592,7 +593,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     func applicationDidBecomeActife(){
-        Qiscus.checkDatabaseMigration()
         Qiscus.setupReachability()
         if Qiscus.isLoggedIn{
             Qiscus.sharedInstance.RealtimeConnect()
@@ -636,24 +636,22 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     // MARK: - local DB
-    class func checkDatabaseMigration(force:Bool = false){
-        if Qiscus.dbConfiguration.fileURL?.lastPathComponent != "Qiscus.realm" {
-            Qiscus.dbConfiguration = Realm.Configuration.defaultConfiguration
-            var realmURL = Qiscus.dbConfiguration.fileURL!
-            realmURL.deleteLastPathComponent()
-            realmURL.appendPathComponent("Qiscus.realm")
-            Qiscus.dbConfiguration.fileURL = realmURL
-            Qiscus.dbConfiguration.deleteRealmIfMigrationNeeded = true
-        }
-        Qiscus.dbConfiguration.schemaVersion = Qiscus.shared.config.dbSchemaVersion
+    private class func getConfiguration()->Realm.Configuration{
+        var conf = Realm.Configuration.defaultConfiguration
         
-        let _ = try! Realm(configuration: Qiscus.dbConfiguration)
-        //Qiscus.printLog(text:"realmURL \(Qiscus.dbConfiguration.fileURL!)")
+        var realmURL = conf.fileURL!
+        realmURL.deleteLastPathComponent()
+        realmURL.appendPathComponent("Qiscus.realm")
+        
+        conf.fileURL = realmURL
+        conf.deleteRealmIfMigrationNeeded = true
+        conf.schemaVersion = Qiscus.shared.config.dbSchemaVersion
+        
+        return conf
     }
     
     // MARK: - Create NEW Chat
     @objc public class func createChatView(withUsers users:[String], readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
-        //        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -676,7 +674,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         return chatVC
     }
     @objc public class func createChat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil){
-        //        Qiscus.checkDatabaseMigration()
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
         }
@@ -1237,7 +1234,6 @@ extension Qiscus:CocoaMQTTDelegate{
         return controller
     }
     public class func cacheData(){
-        Qiscus.checkDatabaseMigration()
         QRoom.cacheAll()
         QCommentGroup.cacheAll()
         QComment.cacheAll()
@@ -1245,14 +1241,12 @@ extension Qiscus:CocoaMQTTDelegate{
         QParticipant.cacheAll()
     }
     @objc public class func getNonce(withAppId appId:String, onSuccess:@escaping ((String)->Void), onFailed:@escaping ((String)->Void), secureURL:Bool = true){
-        Qiscus.checkDatabaseMigration(force:true)
         QChatService.getNonce(withAppId: appId, onSuccess: onSuccess, onFailed: onFailed)
     }
     @objc public class func setup(withUserIdentityToken uidToken:String, delegate: QiscusConfigDelegate? = nil){
         if delegate != nil {
             Qiscus.shared.delegate = delegate
         }
-        Qiscus.checkDatabaseMigration(force:true)
         QChatService.setup(withuserIdentityToken: uidToken)
         Qiscus.setupReachability()
         Qiscus.sharedInstance.RealtimeConnect()
