@@ -200,7 +200,7 @@ After successfully created your room, you may need to do advance development for
 2. **Enter to Existing Room**, to enable you to open a room that you already created by passing room ID that is obtained by Get Room List.
 3. **Participant Management**, to educate you about adding more participant to your room or managing your user in your room.
 
-## Get Rooms List
+### Get Rooms List
 
 When a user is having conversation with many other users, either in 1-1 Chat Room or in Group Room, a user may have involved into many rooms and he may want to leave the room and enter it again later. In this case, you need to display list of room the user involved in your app. Please Keep in mind that Qiscus does not provide the UI of list rooms. However, we provide the information the get the list of room. Using `QChatService.roomList()` method, you can obtain list of room information where your user entered to. This method will return some data that you can benefit to make further modification in your app, for example displaying user rooms.
 
@@ -229,7 +229,7 @@ participants = []
 
 The returned data above provide you several information such as room id, room name,  how many participant in a room and many more.
 
-## Enter to Existing Room
+### Enter to Existing Room
 
 After successfully getting your room list, you may want to enter an existing room. Remember that there are 2 type of rooms, 1-on-1 Chat Room and Group Room. To enter to a specific room, you need to pass the roomID to` chatView()` method. Here is how you can do: 
 
@@ -253,7 +253,7 @@ class ViewController: UIViewController {
 
 ```
 
-## Participant Management
+### Participant Management
 
 In some cases, you may need to add additional participants into your room chat or even removing any participant. Currently, Qiscus Chat SDK only allow you to manage your users server to server. You cannot do it on your client app side. Hence, we recommend to invite and remove user out of specific room through our SERVER API for simplicity and security reason. You can learn how to use [Server API](https://www.qiscus.com/docs/restapi). 
 
