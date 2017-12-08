@@ -1,28 +1,17 @@
 # Getting Started
 
-## Get Your App Id
+## Requuirement
 
-To start building app using Qiscus Web Chat SDK you need a key called APP ID. This APP ID acts as identifier of your Application so that Qiscus can connect user to other users on the sample APP ID. You can get your APP ID [here](https://www.qiscus.com/dashboard/register).
-You can find your APP ID on your Qiscus app dashboard. Here you can see the picture as a reference.
+To install qiscus chat sdk you need to have CocoaPods installed. You can skip this part if you already installed CocoaPods.
 
-
-> All users within the same APP ID are able to communicate with each other, across all platforms. This means users using iOS, Android, Web clients, etc. can all chat with one another. However, users in different Qiscus applications cannot talk to each other.
-
-## Configuration
-
-To configure Qiscus Chat SDK you need to have CocoaPods installed. You can skip this part if you already installed CocoaPods.
-
-[CocoaPods](http://cocoapods.org/) is a dependency manager for Cocoa projects and it is available for Swift or Objective-C. Here is how to install CocoaPods :
+CocoaPods (http://cocoapods.org/) is a dependency manager for Cocoa projects and it is available for Swift or Objective-C. Here is how to install CocoaPods :
 
 ```cmd
-$ gem install cocoapods
+$ gem install cocoapods.
 ```
 
-## Install Qiscus SDK
-
 To install Qiscus Chat SDK, you need to initiate pod to generate Podfile. You can do that by going to your app project and type the commend below:
-
-```cmd
+```cmd 
 $ pod init
 ```
 
@@ -42,11 +31,20 @@ end
 ```
 
 Install Qiscus through CocoaPods
-
 ```cmd
 $ pod install
 ```
+ >Please be noted that by default, Qiscus Chat SDK uses Swift 3. If your Xcode version is 9 or latest, you need to adjust your Xcode to Swift 3.
 
+
+## Get Your App Id
+
+To start building app using Qiscus Web Chat SDK you need a key called APP ID. This APP ID acts as identifier of your Application so that Qiscus can connect user to other users on the sample APP ID. You can get your APP ID [here](https://www.qiscus.com/dashboard/register).
+You can find your APP ID on your Qiscus app dashboard. Here you can see the picture as a reference.
+
+![App ID Location](https://cdn.rawgit.com/qiscus/qiscus-sdk-web/feature/docs/docs/images/app-id.png "Your APP ID location")
+
+> All users within the same APP ID are able to communicate with each other, across all platforms. This means users using iOS, Android, Web clients, etc. can all chat with one another. However, users in different Qiscus applications cannot talk to each other.
 
 ## Authentication
 
@@ -252,7 +250,7 @@ class ViewController: UIViewController {
   .....
 
   func goToChat(){
-          let roomId = Int(targetField.text!)
+          let roomId = String(targetField.text!)
           let view = Qiscus.chatView(withRoomId: roomId)
           self.navigationController?.pushViewController(view, animated: true)
   }
