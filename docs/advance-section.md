@@ -62,7 +62,7 @@ Qiscus.getNonce(withAppId: YOUR_APP_ID, onSuccess: { (nonce) in
     print("error : \(error)")
 })
 ```
-##setting jose header and jwt claim set in your backend
+##Setting JOSE header and JWT Claim Set in your backend
 
 When your backend returns a JWT after receiving Nonce from your client app, the JWT will be caught by client app and will be forwarded to Qiscus Chat SDK Server. In this phase, Qiscus Chat SDK Server will verify the JWT before returning Qiscus Account for your user. To allow Qiscus Chat SDK Server successfully recognize the JWT, you need to setup Jose Header and JWT claim set in your backend as follow :
 
