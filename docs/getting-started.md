@@ -7,13 +7,13 @@ To install Qiscus Chat SDK you need to have CocoaPods installed. You can skip th
 [CocoaPods](http://cocoapods.org/) is a dependency manager for Cocoa projects and it is available for Swift or Objective-C. Here is how to install CocoaPods :
 
 ```cmd
-$ gem install cocoapods
+ gem install cocoapods
 ```
 
 To install Qiscus Chat SDK, you need to initiate pod to generate Podfile. You can do that by going to your app project and type the commend below:
 
 ```cmd
-$ pod init
+ pod init
 ```
 
 After Podfile is initialized, open it and type 'Qiscus' in the pod section
@@ -34,7 +34,7 @@ end
 Install Qiscus through CocoaPods
 
 ```cmd
-$ pod install
+ pod install
 ```
 ### Setting Permission
 
