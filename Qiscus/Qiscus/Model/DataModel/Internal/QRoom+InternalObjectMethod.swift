@@ -216,19 +216,11 @@ internal extension QRoom {
             }
         }
     }
-    internal func getComment(withUniqueId uniqueId:String)->QComment?{
-        let groupData = self.comments.filter("id CONTAINS '\(uniqueId)'")
-        if let group = groupData.first {
-            let commentData = group.comments.filter("uniqueId == '\(uniqueId)'")
-            return commentData.first
-        }
-        return nil
-    }
     
     internal func addComment(newComment:QComment, onTop:Bool = false){
         let cUniqueId = newComment.uniqueId
         
-        if self.getComment(withUniqueId: cUniqueId) != nil {
+        if QComment.threadSaveComment(withUniqueId: cUniqueId) != nil{
             Qiscus.printLog(text: "fail to add newComment, comment with same uniqueId already exist")
             return
         }
