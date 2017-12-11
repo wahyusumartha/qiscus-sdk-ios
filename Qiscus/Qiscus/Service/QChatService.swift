@@ -789,7 +789,7 @@ public class QChatService:NSObject {
                                                     let beforeId = commentData["comment_before_id"].intValue
                                                     
                                                     if room.comments.count > 0 || beforeId == 0 {
-                                                        let temp = QComment.tempComment(fromJSON: commentData)
+                                                        let temp = room.createComment(withJSON: commentData)
                                                         room.addComment(newComment: temp)
                                                     }else{
                                                         DispatchQueue.main.async {
@@ -911,7 +911,7 @@ public class QChatService:NSObject {
                                                     let beforeId = commentData["comment_before_id"].intValue
                                                     
                                                     if room.comments.count > 0 || beforeId == 0 {
-                                                        let temp = QComment.tempComment(fromJSON: commentData)
+                                                        let temp = room.createComment(withJSON: commentData)
                                                         room.addComment(newComment: temp)
                                                     }else{
                                                         DispatchQueue.main.async {
