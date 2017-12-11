@@ -125,10 +125,7 @@ internal extension QRoom {
             }
             
             func cache(room:QRoom){
-                let rts = ThreadSafeReference(to:room)
-                let rId = room.id
                 DispatchQueue.main.async {
-                    let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
                     if let r = QRoom.getRoom(withId: roomId){
                         if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                             if !r.isInvalidated {

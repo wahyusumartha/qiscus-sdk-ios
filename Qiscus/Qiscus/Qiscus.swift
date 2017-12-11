@@ -1144,14 +1144,10 @@ extension Qiscus:CocoaMQTTDelegate{
                         }}
                     }else{
                         QiscusBackgroundThread.async { autoreleasepool{
-                            if let room = QRoom.threadSaveRoom(withId: roomId) {
-                                if !room.isInvalidated {
-                                    if let substring = messageArr.last {
-                                        let uniqueId = String(substring)
-                                        if let c = room.getComment(withUniqueId: uniqueId){
-                                            c.read()
-                                        }
-                                    }
+                            if let substring = messageArr.last {
+                                let uniqueId = String(substring)
+                                if let c = QComment.threadSaveComment(withUniqueId: uniqueId){
+                                    c.read()
                                 }
                             }
                         }}
