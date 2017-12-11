@@ -67,43 +67,73 @@ public class QRoomService:NSObject{
         })
     }
     public func loadMore(onRoom room:QRoom){
-        let loadURL = QiscusConfig.LOAD_URL
-        var parameters =  [
-            "topic_id" : room.id as AnyObject,
-            "token" : Qiscus.shared.config.USER_TOKEN as AnyObject
-        ]
-        if room.comments.count > 0 {
-            let firstComment = room.comments[0].comments[0]
-            parameters["last_comment_id"] = firstComment.id as AnyObject
-        }
-        Qiscus.printLog(text: "request loadMore parameters: \(parameters)")
-        Qiscus.printLog(text: "request loadMore url \(loadURL)")
-        
-        QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
-            Qiscus.printLog(text: "loadMore result: \(responseData)")
-            if let response = responseData.result.value{
-                let json = JSON(response)
-                let results = json["results"]
-                let error = json["error"]
-                if results != JSON.null{
-                    let comments = json["results"]["comments"].arrayValue
-                    if comments.count > 0 {
-                        for newComment in comments {
-                            room.saveOldComment(fromJSON: newComment)
-                        }
-                        room.delegate?.room(didFinishLoadMore: room, success: true, gotNewComment: true)
-                    }else{
-                        room.delegate?.room(didFinishLoadMore: room, success: true, gotNewComment: false)
-                    }
-                }else if error != JSON.null{
-                    room.delegate?.room(didFinishLoadMore: room, success: false, gotNewComment: false)
-                    Qiscus.printLog(text: "error loadMore: \(error)")
+        let id = room.id
+        QiscusBackgroundThread.async {
+            if let r = QRoom.threadSaveRoom(withId: id) {
+                let loadURL = QiscusConfig.LOAD_URL
+                var parameters =  [
+                    "topic_id" : r.id as AnyObject,
+                    "token" : Qiscus.shared.config.USER_TOKEN as AnyObject
+                ]
+                if r.comments.count > 0 {
+                    let firstComment = r.comments[0].comments[0]
+                    parameters["last_comment_id"] = firstComment.id as AnyObject
                 }
-            }else{
-                room.delegate?.room(didFinishLoadMore: room, success: false, gotNewComment: false)
-                Qiscus.printLog(text: "fail to LoadMore Data")
+                Qiscus.printLog(text: "request loadMore parameters: \(parameters)")
+                Qiscus.printLog(text: "request loadMore url \(loadURL)")
+                
+                QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                    Qiscus.printLog(text: "loadMore result: \(responseData)")
+                    if let response = responseData.result.value{
+                        let json = JSON(response)
+                        let results = json["results"]
+                        let error = json["error"]
+                        guard let savedRoom = QRoom.threadSaveRoom(withId: id) else {
+                            DispatchQueue.main.async {
+                                if let cache = QRoom.room(withId: id){
+                                    cache.delegate?.room(didFinishLoadMore: cache, success: false, gotNewComment: false)
+                                    Qiscus.printLog(text: "error loadMore: \(error)")
+                                }
+                            }
+                            return
+                        }
+                        if results != JSON.null{
+                            let comments = json["results"]["comments"].arrayValue
+                            if comments.count > 0 {
+                                for newComment in comments {
+                                    savedRoom.saveOldComment(fromJSON: newComment)
+                                }
+                                DispatchQueue.main.async {
+                                    if let cache = QRoom.room(withId: id){
+                                        cache.delegate?.room(didFinishLoadMore: cache, success: true, gotNewComment: true)
+                                    }
+                                }
+                            }else{
+                                DispatchQueue.main.async {
+                                    if let cache = QRoom.room(withId: id){
+                                        cache.delegate?.room(didFinishLoadMore: cache, success: true, gotNewComment: false)
+                                    }
+                                }
+                            }
+                        }else if error != JSON.null{
+                            DispatchQueue.main.async {
+                                if let cache = QRoom.room(withId: id){
+                                    cache.delegate?.room(didFinishLoadMore: cache, success: false, gotNewComment: false)
+                                    Qiscus.printLog(text: "error loadMore: \(error)")
+                                }
+                            }
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            if let cache = QRoom.room(withId: id){
+                                cache.delegate?.room(didFinishLoadMore: cache, success: false, gotNewComment: false)
+                                Qiscus.printLog(text: "fail to LoadMore Data")
+                            }
+                        }
+                    }
+                })
             }
-        })
+        }
     }
     internal func updateRoom(onRoom room:QRoom, roomName:String? = nil, roomAvatarURL:String? = nil, roomOptions:String? = nil, onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){
         if Qiscus.isLoggedIn{
