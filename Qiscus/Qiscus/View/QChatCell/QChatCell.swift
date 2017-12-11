@@ -51,8 +51,8 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
     }
     override func awakeFromNib() {
         super.awakeFromNib()
-        let center: NotificationCenter = NotificationCenter.default
-        center.addObserver(self, selector: #selector(QChatCell.messageStatusNotif(_:)), name: QiscusNotification.MESSAGE_STATUS, object: nil)
+//        let center: NotificationCenter = NotificationCenter.default
+//        center.addObserver(self, selector: #selector(QChatCell.messageStatusNotif(_:)), name: QiscusNotification.MESSAGE_STATUS, object: nil)
     }
     @objc private func messageStatusNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
@@ -197,18 +197,15 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
         }
         let uid = comment.uniqueId
         
-        if oldUid != ""{
-            self.commentRaw!.delegate = nil
-        }
-        
         if oldUid != uid {
+            self.commentRaw?.delegate = nil
             if let c = QComment.cache[uid] {
                 self.commentRaw = c
             }else{
                 QComment.cache[uid] = comment
-                self.commentRaw = QComment.cache[uid]
+                self.commentRaw = comment
             }
-            self.commentRaw!.delegate = self
+            QComment.cache[uid]!.delegate = self
             self.commentChanged()
         }
     }
@@ -226,7 +223,9 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
     func comment(didChangeAudioPlaying playing:Bool){}
     
     // File comment delegate
-    func comment(didDownload downloading:Bool){}
+    func comment(didDownload downloading:Bool){
+        
+    }
     func comment(didUpload uploading:Bool){}
     func comment(didChangeProgress progress:CGFloat){}
     

@@ -181,6 +181,7 @@ class QCellMediaRight: QChatCell {
     
     @objc open func downloadMedia(_ sender: ChatFileButton){
         sender.isHidden = true
+//        self.comment?.delegate = self
         if let room = QRoom.room(withId: comment!.roomId){
             room.downloadMedia(onComment: self.comment!)
         }
@@ -351,7 +352,11 @@ class QCellMediaRight: QChatCell {
         self.balloonView.image = self.getBallon()
     }
     public override func comment(didDownload downloading:Bool){
-        self.downloadFinished()
+        if !downloading {
+            self.downloadFinished()
+        }else{
+            self.downloadingMedia()
+        }
     }
     public override func comment(didUpload uploading:Bool){
         self.uploadFinished()

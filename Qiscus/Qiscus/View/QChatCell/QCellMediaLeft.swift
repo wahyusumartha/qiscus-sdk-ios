@@ -71,6 +71,26 @@ class QCellMediaLeft: QChatCell {
         mediaCaption.isHidden = true
         captionHeight.constant = 0
         containerHeight.constant = 130
+        
+        dateLabel.text = self.comment!.time.lowercased()
+        progressLabel.isHidden = true
+        dateLabel.textColor = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
+        if self.comment!.cellPos == .first || self.comment!.cellPos == .single{
+            if let sender = self.comment?.sender {
+                self.userNameLabel.text = sender.fullname.capitalized
+            }else{
+                self.userNameLabel.text = self.comment?.senderName.capitalized
+            }
+            self.userNameLabel.isHidden = false
+            self.topMargin.constant = 20
+            self.cellHeight.constant = 20
+        }else{
+            self.userNameLabel.text = ""
+            self.userNameLabel.isHidden = true
+            self.topMargin.constant = 0
+            self.cellHeight.constant = 0
+        }
+        
         if self.comment!.data != "" {
             let payload = JSON(parseJSON: self.comment!.data)
             let caption = payload["caption"].stringValue
@@ -107,21 +127,6 @@ class QCellMediaLeft: QChatCell {
                 imageDisplay.removeGestureRecognizer(self.tapRecognizer!)
                 tapRecognizer = nil
             }
-            if self.comment!.cellPos == .first || self.comment!.cellPos == .single{
-                if let sender = self.comment?.sender {
-                    self.userNameLabel.text = sender.fullname.capitalized
-                }else{
-                    self.userNameLabel.text = self.comment?.senderName.capitalized
-                }
-                self.userNameLabel.isHidden = false
-                self.topMargin.constant = 20
-                self.cellHeight.constant = 20
-            }else{
-                self.userNameLabel.text = ""
-                self.userNameLabel.isHidden = true
-                self.topMargin.constant = 0
-                self.cellHeight.constant = 0
-            }
             
             if self.comment!.type == .video {
                 self.videoPlay.image = Qiscus.image(named: "play_button")
@@ -136,9 +141,7 @@ class QCellMediaLeft: QChatCell {
                 self.videoFrame.isHidden = true
             }
             
-            dateLabel.text = self.comment!.time.lowercased()
-            progressLabel.isHidden = true
-            dateLabel.textColor = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
+            
             
             self.downloadButton.removeTarget(nil, action: nil, for: .allEvents)
             

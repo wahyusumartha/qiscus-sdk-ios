@@ -83,7 +83,6 @@ open class QiscusCommentClient: NSObject {
                         if let result = response.result.value{
                             let json = JSON(result)
                             let success:Bool = (json["status"].intValue == 200)
-                            print("json login: \(json)")
                             if success {
                                 let userData = json["results"]["user"]
                                 let _ = QiscusMe.saveData(fromJson: userData, reconnect: reconnect)

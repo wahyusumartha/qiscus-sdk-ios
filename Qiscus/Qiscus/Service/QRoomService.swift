@@ -31,7 +31,6 @@ public class QRoomService:NSObject{
                 
                 
                 if results != JSON.null{
-                    print(results["room"])
                     let roomData = results["room"]
                     let roomId = "\(roomData["id"])"
                     if let r = QRoom.threadSaveRoom(withId: roomId){

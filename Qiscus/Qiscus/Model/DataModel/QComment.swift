@@ -638,8 +638,9 @@ public class QComment:Object {
                         c.statusRaw = status.rawValue
                     }
                     DispatchQueue.main.async {
-                        if let comment = QComment.comment(withUniqueId: uId){
-                            QiscusNotification.publish(messageStatus: comment, status: status)
+                        if let cache = QComment.cache[uId]{
+                            QiscusNotification.publish(messageStatus: cache, status: status)
+                            cache.delegate?.comment(didChangeStatus: status)
                         }
                     }
                 }
@@ -758,7 +759,9 @@ public class QComment:Object {
             if let comment = QComment.cache[uId] {
                 if comment.isDownloading != downloading {
                     comment.isDownloading = downloading
-                    comment.delegate?.comment?(didDownload: downloading)
+                    if let delegate = comment.delegate {
+                        delegate.comment?(didDownload: downloading)
+                    }
                 }
             }
         }
