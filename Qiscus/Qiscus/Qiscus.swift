@@ -1262,6 +1262,37 @@ extension Qiscus:CocoaMQTTDelegate{
 }
 
 extension Qiscus { // Public class API to get room
+    public class func prepareView(witCompletion completion: @escaping (([QiscusChatVC])->Void)){
+        if Thread.isMainThread {
+            let allRoom = QRoom.all()
+            var allView = [QiscusChatVC]()
+            for room in allRoom {
+                room.subscribeRoomChannel()
+                if Qiscus.chatRooms[room.id] == nil {
+                    Qiscus.chatRooms[room.id] = room
+                }
+                if Qiscus.shared.chatViews[room.id] == nil {
+                    let chatView = QiscusChatVC()
+                    chatView.chatRoom = room
+                    chatView.prefetch = true
+                    chatView.viewDidLoad()
+                    chatView.viewWillAppear(false)
+                    chatView.viewDidAppear(false)
+                    chatView.view.layoutSubviews()
+                    chatView.inputBar.layoutSubviews()
+                    chatView.inputText.commonInit()
+                    chatView.collectionView.layoutSubviews()
+                    chatView.scrollToBottom()
+                    
+                    Qiscus.shared.chatViews[room.id] = chatView
+                    allView.append(chatView)
+                }
+            }
+            completion(allView)
+        }else{
+            completion([QiscusChatVC]())
+        }
+    }
     public class func prepareView(){
         if Thread.isMainThread {
             let allRoom = QRoom.all()
