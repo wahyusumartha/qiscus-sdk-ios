@@ -129,11 +129,6 @@ internal extension QRoom {
                 let rId = room.id
                 DispatchQueue.main.async {
                     let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
-                    if Qiscus.chatRooms[rId] == nil {
-                        if let r = mainRealm.resolve(rts) {
-                            Qiscus.chatRooms[rId] = r
-                        }
-                    }
                     if let r = QRoom.getRoom(withId: roomId){
                         if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                             if !r.isInvalidated {
