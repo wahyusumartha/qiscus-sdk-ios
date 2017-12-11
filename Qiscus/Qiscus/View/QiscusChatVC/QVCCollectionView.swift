@@ -36,7 +36,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
         return sectionNumber
     }
     open func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if indexPath.section < self.chatRoom!.comments.count {
+        if indexPath.section < self.chatRoom!.comments.count && indexPath.row < self.chatRoom!.comments[indexPath.section].comments.count {
             let comment = self.chatRoom!.comments[indexPath.section].comments[indexPath.row]
             var cell = collectionView.dequeueReusableCell(withReuseIdentifier: comment.cellIdentifier, for: indexPath) as! QChatCell
             cell.clipsToBounds = true
