@@ -127,16 +127,6 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                 }
                 
                 if data != nil {
-    //                let text = QiscusTextConfiguration.sharedInstance.confirmationImageUploadText
-    //                let okText = QiscusTextConfiguration.sharedInstance.alertOkText
-    //                let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
-                    
-    //                QPopUpView.showAlert(withTarget: self, image: image, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
-    //                doneAction: {
-    //                    self.postFile(filename: imageName, data: data!, type: .image)
-    //                },
-    //                cancelAction: {}
-    //                )
                     let mediaSize = Double(data!.count) / 1024.0
                     if mediaSize > Qiscus.maxUploadSizeInKB {
                         picker.dismiss(animated: true, completion: {

@@ -90,7 +90,6 @@ public class QRoom:Object {
     internal var selfTypingTimer:Timer?
     
     
-    
     // MARK: - Unstored properties
     override public static func ignoredProperties() -> [String] {
         return ["typingTimer","delegate","selfTypingTimer"]
@@ -227,8 +226,11 @@ public class QRoom:Object {
         if fileName == "asset.jpg" || fileName == "asset.png" {
             fileName = "\(uniqueID).\(fileExt)"
         }
-        
-        let payload = "{\"url\":\"\(fileName)\", \"caption\": \"\(caption)\"}"
+        let payloadData:[AnyHashable : Any] = [
+            "url" : fileName,
+            "caption" : caption
+        ]
+        let payloadJSON = JSON(payloadData)
         
         comment.uniqueId = uniqueID
         comment.id = 0
@@ -241,7 +243,7 @@ public class QRoom:Object {
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.isUploading = true
         comment.progress = 0
-        comment.data = payload
+        comment.data = "\(payloadJSON)"
         comment.roomAvatar = self.avatarURL
         comment.roomName = self.name
         comment.roomTypeRaw = self.typeRaw

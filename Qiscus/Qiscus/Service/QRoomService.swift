@@ -496,8 +496,12 @@ public class QRoomService:NSObject{
                                             comment.updateStatus(status: .sent)
                                             let fileInfo = JSON(parseJSON: comment.data)
                                             let caption = fileInfo["caption"].stringValue
-                                            let newData = "{\"url\":\"\(url)\", \"caption\":\"\(caption)\"}"
-                                            comment.update(data: newData)
+                                            let newData:[AnyHashable:Any] = [
+                                                "url" : url,
+                                                "caption": caption
+                                            ]
+                                            let newDataJSON = JSON(newData)
+                                            comment.update(data: "\(newDataJSON)")
                                             onSuccess(room,comment)
                                         }}
                                     }
@@ -517,8 +521,12 @@ public class QRoomService:NSObject{
                                                     comment.updateStatus(status: .sent)
                                                     let fileInfo = JSON(parseJSON: comment.data)
                                                     let caption = fileInfo["caption"].stringValue
-                                                    let newData = "{\"url\":\"\(url)\", \"caption\":\"\(caption)\"}"
-                                                    comment.update(data: newData)
+                                                    let newData:[AnyHashable:Any] = [
+                                                        "url" : url,
+                                                        "caption": caption
+                                                    ]
+                                                    let newDataJSON = JSON(newData)
+                                                    comment.update(data: "\(newDataJSON)")
                                                     onSuccess(room,comment)
                                                 }}
                                             }
