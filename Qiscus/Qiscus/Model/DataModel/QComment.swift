@@ -468,7 +468,7 @@ public class QComment:Object {
     }
     public class func threadSaveComment(withUniqueId uniqueId:String)->QComment?{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        
+        realm.refresh()
         let comments = realm.objects(QComment.self).filter("uniqueId == '\(uniqueId)'")
         if comments.count > 0 {
             let comment = comments.first!

@@ -93,6 +93,7 @@ public extension QRoom {
         get{
             if self.isInvalidated { return [QComment]()}
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
             var comments = [QComment]()
             if Thread.isMainThread {
                 let data =  realm.objects(QComment.self).filter("roomId == '\(self.id)'").sorted(byKeyPath: "createdAt", ascending: true)

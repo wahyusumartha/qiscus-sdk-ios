@@ -12,6 +12,7 @@ import SwiftyJSON
 internal extension QRoom {
     internal class func allRoom()->[QRoom]{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         let data = realm.objects(QRoom.self).sorted(byKeyPath: "pinned", ascending: false).sorted(byKeyPath: "lastCommentCreatedAt", ascending: false)
         
         if data.count > 0 {
@@ -37,6 +38,7 @@ internal extension QRoom {
                 }
             }
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
             let rooms = realm.objects(QRoom.self).filter("id == '\(id)'")
             if rooms.count > 0 {
                 let room = rooms.first!
@@ -55,6 +57,7 @@ internal extension QRoom {
     }
     internal class func getRoom(withUniqueId uniqueId:String) -> QRoom? {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         let data =  realm.objects(QRoom.self).filter("uniqueId == '\(uniqueId)'")
         
         if data.count > 0{
@@ -78,6 +81,7 @@ internal extension QRoom {
     internal class func getSingleRoom(withUser user:String) -> QRoom? {
         if Thread.isMainThread {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
             let data =  realm.objects(QRoom.self).filter("singleUser == '\(user)'")
             
             if data.count > 0{
@@ -104,6 +108,8 @@ internal extension QRoom {
         
         if json["id"] != JSON.null {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
+            
             let roomId = "\(json["id"])"
             let option = json["options"].stringValue
             let roomUniqueId = json["unique_id"].stringValue
@@ -201,6 +207,7 @@ internal extension QRoom {
                         let rts = ThreadSafeReference(to:room)
                         DispatchQueue.main.async {
                             let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            mainRealm.refresh()
                             if Qiscus.chatRooms[rId] == nil {
                                 if let r = mainRealm.resolve(rts) {
                                     Qiscus.chatRooms[rId] = r
@@ -275,6 +282,7 @@ internal extension QRoom {
         QiscusDBThread.sync {autoreleasepool{
             if let r = QRoom.threadSaveRoom(withId: roomId){
                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                realm.refresh()
                 r.unsubscribeRoomChannel()
                 for group in r.comments {
                     for comment in group.comments{
@@ -311,6 +319,7 @@ internal extension QRoom {
     }
     internal class func threadSaveRoom(withId id:String) -> QRoom? {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         let rooms = realm.objects(QRoom.self).filter("id == '\(id)'")
         if rooms.count > 0 {
             return rooms.first!

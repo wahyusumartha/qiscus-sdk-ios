@@ -109,6 +109,7 @@ public class QUser:Object {
     }
     public class func saveUser(withEmail email:String, id:Int? = nil ,fullname:String? = nil, avatarURL:String? = nil, lastSeen:Double? = nil)->QUser{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         var user = QUser()
         if let savedUser = QUser.getUser(email: email){
             user = savedUser
