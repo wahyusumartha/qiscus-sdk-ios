@@ -229,7 +229,7 @@ public class QRoomService:NSObject{
             "disable_link_preview" : true as AnyObject,
             "token" : Qiscus.shared.config.USER_TOKEN as AnyObject
         ]
-        if comment.type == .image || comment.type == .video {
+        if comment.type == .image || comment.type == .video || comment.type == .audio || comment.type == .file{
             parameters["type"] = "file_attachment" as AnyObject
             parameters["payload"] = comment.data as AnyObject
         }
