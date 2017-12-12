@@ -210,6 +210,7 @@ public class QUser:Object {
         let email = self.email
         QiscusDBThread.async {
             if let user = QUser.getUser(email: email){
+                if user.isInvalidated { return }
                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                 realm.refresh()
                 try! realm.write {
