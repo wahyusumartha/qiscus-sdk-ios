@@ -104,6 +104,7 @@ public class QFile:Object{
     
     public class func file(withURL url:String) -> QFile?{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         var file:QFile? = nil
         let data =  realm.objects(QFile.self).filter("url == '\(url)'")
         
@@ -148,12 +149,14 @@ public class QFile:Object{
     }
     internal func updateLocalPath(path:String){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         try! realm.write {
             self.localPath = localPath
         }
     }
     public func saveFile(withData data:Data)->String{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         let localPath = QFileManager.saveFile(withData: data, fileName: self.filename, type: .comment)
         try! realm.write {
             self.localPath = localPath
@@ -162,6 +165,7 @@ public class QFile:Object{
     }
     public func saveThumbImage(withImage image:UIImage){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         var data = Data()
         if let imageData = UIImagePNGRepresentation(image){
             data = imageData
@@ -175,6 +179,7 @@ public class QFile:Object{
     }
     public func saveMiniThumbImage(withImage image:UIImage){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         var data = Data()
         if let imageData = UIImagePNGRepresentation(image){
             data = imageData
@@ -189,6 +194,7 @@ public class QFile:Object{
     internal func update(fileURL:String){
         if self.url != fileURL {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
             try! realm.write {
                 self.url = fileURL
             }
