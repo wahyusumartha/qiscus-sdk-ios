@@ -71,6 +71,7 @@ public class QCommentGroup: Object{
     }
     public class func all() -> [QCommentGroup]{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         let data = realm.objects(QCommentGroup.self)
         
         if data.count > 0 {
@@ -93,6 +94,7 @@ public class QCommentGroup: Object{
     internal class func clearAllMessage(onFinish: (()->Void)? = nil){
         //let all = QCommentGroup.all()
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         let groups = realm.objects(QCommentGroup.self)
         let comments = realm.objects(QComment.self)
         let files = realm.objects(QFile.self)
