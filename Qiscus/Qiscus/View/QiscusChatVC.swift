@@ -453,18 +453,11 @@ open class QiscusChatVC: UIViewController{
         let resendMenuItem: UIMenuItem = UIMenuItem(title: "Resend", action: #selector(QChatCell.resend))
         let deleteMenuItem: UIMenuItem = UIMenuItem(title: "Delete", action: #selector(QChatCell.deleteComment))
         let replyMenuItem: UIMenuItem = UIMenuItem(title: "Reply", action: #selector(QChatCell.reply))
-        
-        var menuItems:[UIMenuItem] = [resendMenuItem,deleteMenuItem,replyMenuItem]
-        if self.forwardAction != nil {
-            let forwardMenuItem: UIMenuItem = UIMenuItem(title: "Forward", action: #selector(QChatCell.forward))
-            menuItems.append(forwardMenuItem)
-        }
-        if self.infoAction != nil {
-            let infoMenuItem: UIMenuItem = UIMenuItem(title: "Info", action: #selector(QChatCell.info))
-            menuItems.append(infoMenuItem)
-        }
+        let forwardMenuItem: UIMenuItem = UIMenuItem(title: "Forward", action: #selector(QChatCell.forward))
         let shareMenuItem: UIMenuItem = UIMenuItem(title: "Share", action: #selector(QChatCell.share))
-        menuItems.append(shareMenuItem)
+        let infoMenuItem: UIMenuItem = UIMenuItem(title: "Info", action: #selector(QChatCell.info))
+        
+        let menuItems:[UIMenuItem] = [resendMenuItem,deleteMenuItem,replyMenuItem,forwardMenuItem,shareMenuItem,infoMenuItem]
 
         UIMenuController.shared.menuItems = menuItems
         
