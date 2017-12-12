@@ -101,7 +101,8 @@ open class QiscusChatVC: UIViewController{
 //                if Qiscus.shared.connected {
 //                    self.chatRoom?.sync()
 //                }
-                //self.chatRoom!.delegate = self
+                Qiscus.chatRooms[self.chatRoom!.uniqueId] = self.chatRoom
+                self.chatRoom!.delegate = self
                 let delay = 0.5 * Double(NSEC_PER_SEC)
                 let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
                 DispatchQueue.main.asyncAfter(deadline: time, execute: {
