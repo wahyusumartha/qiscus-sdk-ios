@@ -42,6 +42,7 @@ public class QParticipant:Object {
                     
                     if let participant = room.participant(withEmail: email){
                         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        realm.refresh()
                         if participant.lastDeliveredCommentId < commentId {
                             try! realm.write {
                                 participant.lastDeliveredCommentId = commentId
@@ -90,6 +91,7 @@ public class QParticipant:Object {
                     
                     if let participant = room.participant(withEmail: email){
                         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        realm.refresh()
                         if participant.lastReadCommentId < commentId {
                             try! realm.write {
                                 participant.lastReadCommentId = commentId
@@ -174,6 +176,7 @@ public class QParticipant:Object {
     public class func all(withEmail email:String)->[QParticipant]{
         var participants = [QParticipant]()
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         let data =  realm.objects(QParticipant.self).filter("email == '\(email)'")
         for participant in data {
             participants.append(participant)
@@ -182,6 +185,7 @@ public class QParticipant:Object {
     }
     public class func updateLastDeliveredId(forUser email:String, commentId:Int){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         let data =  realm.objects(QParticipant.self).filter("email == '\(email)'")
         
         for participant in data {
@@ -190,6 +194,7 @@ public class QParticipant:Object {
     }
     public class func all() -> [QParticipant]{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         let data = realm.objects(QParticipant.self)
         
         if data.count > 0 {
