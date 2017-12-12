@@ -215,6 +215,7 @@ public class QRoom:Object {
     }
     public func newFileComment(type:QiscusFileType, filename:String = "", caption:String = "", data:Data? = nil, thumbImage:UIImage? = nil)->QComment{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         let comment = QComment()
         let time = Double(Date().timeIntervalSince1970)
         let timeToken = UInt64(time * 10000)
@@ -401,6 +402,7 @@ public class QRoom:Object {
     public func updateUserTyping(userEmail: String){
         if !self.isInvalidated {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
             if userEmail != self.typingUser {
                 try! realm.write {
                     self.typingUser = userEmail
@@ -425,6 +427,7 @@ public class QRoom:Object {
     }
     public func deleteComment(comment:QComment){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         let id = self.id
         if let commentIndex = self.getIndexPath(ofComment: comment) {
             let commentGroup = self.comments[commentIndex.section]
@@ -489,6 +492,7 @@ public class QRoom:Object {
     }
     public func updateLastReadId(commentId:Int){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         if self.lastReadCommentId < commentId {
             try! realm.write {
                 self.lastReadCommentId = commentId
@@ -507,6 +511,7 @@ public class QRoom:Object {
             if let room = QRoom.threadSaveRoom(withId: id){
                 if room.unreadCount != count {
                     let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    realm.refresh()
                     try! realm.write {
                         room.unreadCount = count
                     }
@@ -523,6 +528,7 @@ public class QRoom:Object {
         let id = self.id
         QiscusDBThread.async {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
             let unreadData =  realm.objects(QComment.self).filter("roomId == '\(id)' AND isRead ==  false").sorted(byKeyPath: "createdAt", ascending: true)
             
             if let last = unreadData.last {
@@ -592,6 +598,7 @@ public class QRoom:Object {
                         section += 1
                     }
                     let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    realm.refresh()
                     try! realm.write {
                         room.lastParticipantsReadId = readId
                         room.lastParticipantsDeliveredId = readId
@@ -619,6 +626,7 @@ public class QRoom:Object {
                         section += 1
                     }
                     let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    realm.refresh()
                     try! realm.write {
                         room.lastParticipantsDeliveredId = deliveredId
                     }
@@ -637,6 +645,7 @@ public class QRoom:Object {
         let id = self.id
         if self.storedName != name {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
             try! realm.write {
                 self.storedName = name
             }
@@ -656,6 +665,7 @@ public class QRoom:Object {
             QiscusDBThread.async {
                 if let room = QRoom.threadSaveRoom(withId: id){
                     let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    realm.refresh()
                     try! realm.write {
                         room.storedAvatarURL = avatarURL
                     }
@@ -678,6 +688,7 @@ public class QRoom:Object {
         let roomTS = ThreadSafeReference(to: self)
         QiscusDBThread.sync { autoreleasepool {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
             guard let r = realm.resolve(roomTS) else { return }
             if r.data != data {
                 try! realm.write {
@@ -692,6 +703,7 @@ public class QRoom:Object {
             QiscusDBThread.async {
                 if let room = QRoom.threadSaveRoom(withId: id){
                     let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    realm.refresh()
                     try! realm.write {
                         room.definedAvatarURL = url
                         room.avatarData = nil
@@ -712,6 +724,7 @@ public class QRoom:Object {
             QiscusDBThread.async {
                 if let room = QRoom.threadSaveRoom(withId: id) {
                     let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    realm.refresh()
                     try! realm.write {
                         room.definedname = name
                     }
@@ -758,6 +771,7 @@ public class QRoom:Object {
         }else{
             DispatchQueue.main.sync {
                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                realm.refresh()
                 guard let room = realm.resolve(roomTS) else { return }
                 if Qiscus.chatRooms[room.id] == nil {
                     Qiscus.chatRooms[room.id] = room
@@ -781,6 +795,7 @@ public class QRoom:Object {
                 return
             }
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
             let data =  realm.objects(QComment.self).filter("roomId == '\(self.id)' AND id > \(commentId)").sorted(byKeyPath: "createdAt", ascending: true)
             if data.count >= limit {
                 var comments = [QComment]()
@@ -811,6 +826,7 @@ public class QRoom:Object {
                 return
             }
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
             let data =  realm.objects(QComment.self).filter("roomId == '\(self.id)' AND id < \(commentId)").sorted(byKeyPath: "createdAt", ascending: true)
             if data.count >= limit {
                 var comments = [QComment]()
@@ -842,6 +858,7 @@ public class QRoom:Object {
                 QiscusDBThread.async {
                     if let room = QRoom.threadSaveRoom(withId: id){
                         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        realm.refresh()
                         try! realm.write {
                             room.avatarData = data
                         }

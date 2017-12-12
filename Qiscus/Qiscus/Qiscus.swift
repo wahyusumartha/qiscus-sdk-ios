@@ -169,6 +169,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.cancellAllRequest()
         Qiscus.removeAllFile()
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         try! realm.write {
             realm.deleteAll()
         }
