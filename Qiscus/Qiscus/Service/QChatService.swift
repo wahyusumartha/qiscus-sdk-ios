@@ -721,9 +721,16 @@ public class QChatService:NSObject {
         load(onPage: 1)
     }
     @objc internal class func backgroundSync(onSuccess:@escaping (()->Void),onError:@escaping ((String)->Void)){
+        if QiscusMe.inBackgroundSync {
+            QiscusMe.needBackgroundSync = true
+            return
+        }
         if QiscusMe.shared.lastCommentId == 0 {
             return
         }
+        
+        
+        QiscusMe.inBackgroundSync = true
         
         func getTime()->String{
             let date = Date()
@@ -744,18 +751,27 @@ public class QChatService:NSObject {
             ]
             QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                 
+                func finishBackgroundSync(){
+                    QiscusMe.inBackgroundSync = false
+                    if QiscusMe.needBackgroundSync {
+                        QiscusMe.needBackgroundSync = false
+                        QChatService.backgroundSync(onSuccess: onSuccess, onError: onError)
+                    }
+                }
+                
                 if let response = responseData.result.value {
                     let json = JSON(response)
                     let results = json["results"]
                     let error = json["error"]
+                    
                     if results != JSON.null{
                         let meta = json["results"]["meta"]
                         let lastReceivedCommentId = meta["last_received_comment_id"].intValue
                         let needClear = meta["need_clear"].boolValue
-                        Qiscus.printLog(text: "Background sync result on \(getTime()):\n\(results)")
                         if needClear {
                             QCommentGroup.clearAllMessage(onFinish: {
                                 QiscusMe.updateLastCommentId(commentId: lastReceivedCommentId)
+                                finishBackgroundSync()
                             })
                         }else{
                             let comments = json["results"]["comments"].arrayValue
@@ -814,7 +830,10 @@ public class QChatService:NSObject {
                                         }
                                     }
                                     QiscusMe.updateLastCommentId(commentId: lastReceivedCommentId)
+                                    finishBackgroundSync()
                                 }
+                            }else{
+                                finishBackgroundSync()
                             }
                         }
                         Qiscus.printLog(text: "background sync message succeded")
@@ -822,12 +841,13 @@ public class QChatService:NSObject {
                     }else if error != JSON.null{
                         Qiscus.printLog(text: "error background sync message in : \(error) on [\(getTime())]")
                         onError(error.stringValue)
+                        finishBackgroundSync()
                     }
                 }
                 else{
                     Qiscus.printLog(text: "error background sync message on [\(getTime())]")
                     onError("error sbackgroundync message on [\(getTime())]")
-                    
+                    finishBackgroundSync()
                 }
             })
         }
@@ -1881,4 +1901,3 @@ public class QChatService:NSObject {
         }
     }
 }
-

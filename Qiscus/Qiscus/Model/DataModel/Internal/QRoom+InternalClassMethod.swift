@@ -29,6 +29,8 @@ internal extension QRoom {
     }
     internal class func getRoom(withId id:String) -> QRoom?{
         if Thread.isMainThread {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
             if let cache = Qiscus.chatRooms[id] {
                 if !cache.isInvalidated {
                     cache.subscribeRoomChannel()
@@ -37,8 +39,7 @@ internal extension QRoom {
                     Qiscus.chatRooms[id] = nil
                 }
             }
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            realm.refresh()
+            
             let rooms = realm.objects(QRoom.self).filter("id == '\(id)'")
             if rooms.count > 0 {
                 let room = rooms.first!
@@ -308,7 +309,7 @@ internal extension QRoom {
                     realm.delete(r)
                 }
             }
-        }}
+            }}
     }
     
     internal class func cacheAll(){
@@ -327,3 +328,4 @@ internal extension QRoom {
         return nil
     }
 }
+

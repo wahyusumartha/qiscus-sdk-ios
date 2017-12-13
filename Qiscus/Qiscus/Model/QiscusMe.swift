@@ -10,6 +10,34 @@ import UIKit
 import SwiftyJSON
 
 open class QiscusMe: NSObject {
+    
+    public static var inBackgroundSync:Bool{
+        set{
+            let userData = UserDefaults.standard
+            userData.set(inBackgroundSync, forKey: "qiscus_in_backgroundSync")
+        }
+        get{
+            let userData = UserDefaults.standard
+            if let inBackgroundSync = userData.value(forKey: "qiscus_in_backgroundSync") as? Bool {
+                return inBackgroundSync
+            }
+            return false
+        }
+    }
+    public static var needBackgroundSync:Bool{
+        set{
+            let userData = UserDefaults.standard
+            userData.set(needBackgroundSync, forKey: "qiscus_needBackgroundSync")
+        }
+        get{
+            let userData = UserDefaults.standard
+            if let needBackgroundSync = userData.value(forKey: "qiscus_needBackgroundSync") as? Bool {
+                return needBackgroundSync
+            }
+            return false
+        }
+    }
+    
     open static let shared = QiscusMe()
     
     let userData = UserDefaults.standard
@@ -182,3 +210,4 @@ open class QiscusMe: NSObject {
         QiscusMe.shared.userData.removeObject(forKey: "qiscus_lastKnownComment_id")
     }
 }
+

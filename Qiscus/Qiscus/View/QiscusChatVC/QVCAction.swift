@@ -348,6 +348,7 @@ extension QiscusChatVC {
             }
             if self.chatSubtitle == nil || self.chatSubtitle == ""{
                 if let room = self.chatRoom {
+                    if room.isInvalidated { return }
                     var subtitleString = ""
                     if room.type == .group{
                         subtitleString = "You"
