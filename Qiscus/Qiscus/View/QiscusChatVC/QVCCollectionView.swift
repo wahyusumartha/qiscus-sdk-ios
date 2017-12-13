@@ -218,12 +218,12 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             }
             break
         case "share":
-            if Qiscus.sharedInstance.connected && ( comment.type == .image || comment.type == .video || comment.type == .audio || comment.type == .text) {
+            if Qiscus.sharedInstance.connected && ( comment.type == .image || comment.type == .video || comment.type == .audio || comment.type == .text || comment.type == .file) {
                 if comment.type == .text {
                     return true
                 }
                 if let file = comment.file {
-                    if QFileManager.isFileExist(inLocalPath: file.localPath){
+                    if NSURL(string: file.url) != nil{
                         show = true
                     }
                 }

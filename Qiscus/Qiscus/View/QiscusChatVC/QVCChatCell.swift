@@ -114,7 +114,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
     // MARK: ChatCellDelegate
     func didShare(comment: QComment) {
         switch comment.type {
-        case .image, .video, .audio:
+        case .image, .video, .audio, .file:
             if let file = comment.file {
                 if QFileManager.isFileExist(inLocalPath: file.localPath){
                     var items:[Any] = [Any]()
@@ -138,7 +138,15 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                     
                     activityViewController.popoverPresentationController?.sourceView = self.view
                     self.present(activityViewController, animated: true, completion: nil)
+                }else{
                     
+                    if let fileURL = NSURL(string: file.url) {
+                        let items:[Any] = [fileURL]
+                        let activityViewController = UIActivityViewController(activityItems: items, applicationActivities: nil)
+                        
+                        activityViewController.popoverPresentationController?.sourceView = self.view
+                        self.present(activityViewController, animated: true, completion: nil)
+                    }
                 }
             }
             break
@@ -149,7 +157,6 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
             self.present(activityViewController, animated: true, completion: nil)
             break
         default:
-            
             break
         }
     }
