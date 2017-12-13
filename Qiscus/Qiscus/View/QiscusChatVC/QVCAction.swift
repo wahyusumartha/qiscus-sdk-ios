@@ -367,7 +367,7 @@ extension QiscusChatVC {
                                         if user.presence == .offline{
                                             let lastSeenString = user.lastSeenString
                                             if lastSeenString != "" {
-                                                subtitleString = "lastSeen: \(user.lastSeenString)"
+                                                subtitleString = "last seen: \(user.lastSeenString)"
                                             }
                                         }else{
                                             subtitleString = "online"
