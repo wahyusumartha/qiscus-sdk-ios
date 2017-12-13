@@ -283,7 +283,7 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                     fileType = QiscusFileType.file
                 }
                 self.dismissLoading()
-                UINavigationBar.appearance().tintColor = self.currentNavbarTint
+//                UINavigationBar.appearance().tintColor = self.currentNavbarTint
                 if usePopup {
                     QPopUpView.showAlert(withTarget: self, image: thumb, message:popupText, isVideoImage: video,
                                          doneAction: {
@@ -306,9 +306,11 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
             }
         }
     }
-    open func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-        UINavigationBar.appearance().tintColor = self.currentNavbarTint
-    }
+    
+//    open func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+//        print("before icloud appear = \(String(describing: self.currentNavbarTint))")
+//        UINavigationBar.appearance().tintColor = self.currentNavbarTint
+//    }
 }
 // MARK: - AudioPlayer
 extension QiscusChatVC:AVAudioPlayerDelegate{
