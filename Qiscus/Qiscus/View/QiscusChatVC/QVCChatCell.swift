@@ -123,15 +123,9 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                         let image = UIImage(contentsOfFile: file.localPath)!
                         items.append(image)
                         break
-                    case.video:
-                        let videoLink = NSURL(fileURLWithPath: file.localPath)
-                        items.append(videoLink)
-                        break
-                    case.audio:
-                        let audioLink = NSURL(fileURLWithPath: file.localPath)
-                        items.append(audioLink)
-                        break
                     default:
+                        let localURL = NSURL(fileURLWithPath: file.localPath)
+                        items.append(localURL)
                         break
                     }
                     let activityViewController = UIActivityViewController(activityItems: items, applicationActivities: nil)
@@ -355,6 +349,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                 let filename = file.filename
                 
                 let preview = ChatPreviewDocVC()
+                preview.file = file
                 preview.fileName = filename
                 preview.url = url
                 preview.roomName = self.chatRoom!.name

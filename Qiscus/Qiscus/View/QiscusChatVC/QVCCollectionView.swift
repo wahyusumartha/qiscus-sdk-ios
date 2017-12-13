@@ -223,8 +223,10 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                     return true
                 }
                 if let file = comment.file {
-                    if NSURL(string: file.url) != nil{
-                        show = true
+                    if QFileManager.isFileExist(inLocalPath: file.localPath){
+                        return true
+                    }else if NSURL(string: file.url) != nil {
+                        return true
                     }
                 }
             }
