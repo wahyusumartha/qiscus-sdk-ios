@@ -120,7 +120,7 @@ extension QiscusChatVC {
         }
         
         if Qiscus.sharedInstance.iCloudUpload {
-            let iCloudActionButton = UIAlertAction(title: "iCloud", style: .default) { action -> Void in
+            let iCloudActionButton = UIAlertAction(title: "Document", style: .default) { action -> Void in
                 self.iCloudOpen()
             }
             actionSheetController.addAction(iCloudActionButton)
