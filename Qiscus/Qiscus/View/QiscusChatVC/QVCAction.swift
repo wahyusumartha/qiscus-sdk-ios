@@ -847,10 +847,20 @@ extension QiscusChatVC {
     func loadMore(){
         if let room = self.chatRoom {
             if room.comments.count > 0 {
-                let indexPath = IndexPath(item: 0, section: 0)
-                self.topComment = room.comment(onIndexPath: indexPath)
+                if let firstGroup = room.comments.first {
+                    if let firstComment = firstGroup.comments.first {
+                        if firstComment.id > 0 && firstComment.beforeId == 0 {
+                            self.loadMoreControl.endRefreshing()
+                            self.loadMoreControl.removeFromSuperview()
+                            return
+                        }
+                        self.topComment = firstComment
+                    }
+                }
             }
             room.loadMore()
+        }else{
+            self.loadMoreControl.endRefreshing()
         }
     }
     
