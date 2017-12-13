@@ -348,30 +348,38 @@ class QCellMediaRight: QChatCell {
             self.userNameLabel.text = self.comment?.senderName
         }
     }
-    public override func comment(didChangePosition position: QCellPosition) {
-        self.balloonView.image = self.getBallon()
-    }
-    public override func comment(didDownload downloading:Bool){
-        if !downloading {
-            self.downloadFinished()
-        }else{
-            self.downloadingMedia()
+    public override func comment(didChangePosition comment:QComment, position: QCellPosition) {
+        if self.comment?.uniqueId == comment.uniqueId {
+            self.balloonView.image = self.getBallon()
         }
     }
-    public override func comment(didUpload uploading:Bool){
-        self.uploadFinished()
+    public override func comment(didDownload comment:QComment, downloading:Bool){
+        if self.comment?.uniqueId == comment.uniqueId {
+            if !downloading {
+                self.downloadFinished()
+            }else{
+                self.downloadingMedia()
+            }
+        }
     }
-    public override func comment(didChangeProgress progress:CGFloat){
-        self.downloadButton.isHidden = true
-        self.progressLabel.text = "\(Int(progress * 100)) %"
-        self.progressLabel.isHidden = false
-        self.progressContainer.isHidden = false
-        self.progressView.isHidden = false
-        
-        let newHeight = progress * maxProgressHeight
-        self.progressHeight.constant = newHeight
-        UIView.animate(withDuration: 0.65, animations: {
-            self.progressView.layoutIfNeeded()
-        })
+    public override func comment(didUpload comment:QComment, uploading:Bool){
+        if self.comment?.uniqueId == comment.uniqueId {
+            self.uploadFinished()
+        }
+    }
+    public override func comment(didChangeProgress comment:QComment, progress:CGFloat){
+        if self.comment?.uniqueId == comment.uniqueId {
+            self.downloadButton.isHidden = true
+            self.progressLabel.text = "\(Int(progress * 100)) %"
+            self.progressLabel.isHidden = false
+            self.progressContainer.isHidden = false
+            self.progressView.isHidden = false
+            
+            let newHeight = progress * maxProgressHeight
+            self.progressHeight.constant = newHeight
+            UIView.animate(withDuration: 0.65, animations: {
+                self.progressView.layoutIfNeeded()
+            })
+        }
     }
 }

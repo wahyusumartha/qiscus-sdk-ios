@@ -84,19 +84,19 @@ public enum QReplyType:Int{
     case failed
 }
 @objc public protocol QCommentDelegate {
-    func comment(didChangeStatus status:QCommentStatus)
-    func comment(didChangePosition position:QCellPosition)
+    func comment(didChangeStatus comment:QComment, status:QCommentStatus)
+    func comment(didChangePosition comment:QComment, position:QCellPosition)
     
     // Audio comment delegate
-    @objc optional func comment(didChangeDurationLabel label:String)
-    @objc optional func comment(didChangeCurrentTimeSlider value:Float)
-    @objc optional func comment(didChangeSeekTimeLabel label:String)
-    @objc optional func comment(didChangeAudioPlaying playing:Bool)
+    @objc optional func comment(didChangeDurationLabel comment:QComment, label:String)
+    @objc optional func comment(didChangeCurrentTimeSlider comment:QComment, value:Float)
+    @objc optional func comment(didChangeSeekTimeLabel comment:QComment, label:String)
+    @objc optional func comment(didChangeAudioPlaying comment:QComment, playing:Bool)
     
     // File comment delegate
-    @objc optional func comment(didDownload downloading:Bool)
-    @objc optional func comment(didUpload uploading:Bool)
-    @objc optional func comment(didChangeProgress progress:CGFloat)
+    @objc optional func comment(didDownload comment:QComment, downloading:Bool)
+    @objc optional func comment(didUpload comment:QComment, uploading:Bool)
+    @objc optional func comment(didChangeProgress comment:QComment, progress:CGFloat)
 }
 @objc public enum QCommentProperty:Int{
     case status
@@ -648,7 +648,7 @@ public class QComment:Object {
                     DispatchQueue.main.async {
                         if let cache = QComment.cache[uId]{
                             QiscusNotification.publish(messageStatus: cache, status: status)
-                            cache.delegate?.comment(didChangeStatus: status)
+                            cache.delegate?.comment(didChangeStatus: cache, status: status)
                         }
                     }
                 }
@@ -664,7 +664,9 @@ public class QComment:Object {
                 self.cellPosRaw = cellPos.rawValue
             }
             func execute(){
-                QComment.cache[uId]?.delegate?.comment(didChangePosition: cellPos)
+                if let cache = QComment.cache[uId] {
+                    cache.delegate?.comment(didChangePosition: cache, position: cellPos)
+                }
             }
             if Thread.isMainThread{
                 execute()
@@ -684,7 +686,9 @@ public class QComment:Object {
                 self.durationLabel = label
             }
             func execute(){
-                QComment.cache[uId]?.delegate?.comment?(didChangeDurationLabel: label)
+                if let cache = QComment.cache[uId] {
+                    cache.delegate?.comment?(didChangeDurationLabel: cache, label: label)
+                }
             }
             if Thread.isMainThread{
                 execute()
@@ -704,7 +708,9 @@ public class QComment:Object {
                 self.currentTimeSlider = value
             }
             func execute(){
-                QComment.cache[uId]?.delegate?.comment?(didChangeCurrentTimeSlider: value)
+                if let cache = QComment.cache[uId] {
+                    cache.delegate?.comment?(didChangeCurrentTimeSlider: cache, value: value)
+                }
             }
             if Thread.isMainThread{
                 execute()
@@ -724,7 +730,9 @@ public class QComment:Object {
                 self.seekTimeLabel = label
             }
             func execute(){
-                QComment.cache[uId]?.delegate?.comment?(didChangeSeekTimeLabel: label)
+                if let cache = QComment.cache[uId] {
+                    cache.delegate?.comment?(didChangeSeekTimeLabel: cache, label: label)
+                }
             }
             if Thread.isMainThread{
                 execute()
@@ -744,7 +752,9 @@ public class QComment:Object {
                 self.audioIsPlaying = playing
             }
             func execute(){
-                QComment.cache[uId]?.delegate?.comment?(didChangeAudioPlaying: playing)
+                if let cache = QComment.cache[uId] {
+                    cache.delegate?.comment?(didChangeAudioPlaying: cache, playing: playing)
+                }
             }
             if Thread.isMainThread{
                 execute()
@@ -761,7 +771,7 @@ public class QComment:Object {
             if let comment = QComment.cache[uId] {
                 if comment.isUploading != uploading {
                     comment.isUploading = uploading
-                    comment.delegate?.comment?(didUpload: uploading)
+                    comment.delegate?.comment?(didUpload: comment, uploading: uploading)
                 }
             }
         }
@@ -773,7 +783,7 @@ public class QComment:Object {
                 if comment.isDownloading != downloading {
                     comment.isDownloading = downloading
                     if let delegate = comment.delegate {
-                        delegate.comment?(didDownload: downloading)
+                        delegate.comment?(didDownload: comment, downloading: downloading)
                     }
                 }
             }
@@ -785,7 +795,7 @@ public class QComment:Object {
             if let comment = QComment.cache[uId] {
                 if comment.progress != progress {
                     comment.progress = progress
-                    comment.delegate?.comment?(didChangeProgress: progress)
+                    comment.delegate?.comment?(didChangeProgress: comment, progress: progress)
                 }
             }
         }

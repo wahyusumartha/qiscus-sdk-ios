@@ -211,23 +211,25 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
     }
     
     // MARK: - commentDelegate
-    func comment(didChangeStatus status:QCommentStatus){
-        self.updateStatus(toStatus: status)
+    func comment(didChangeStatus comment:QComment, status:QCommentStatus){
+        if comment.uniqueId == self.comment?.uniqueId{
+            self.updateStatus(toStatus: status)
+        }
     }
-    func comment(didChangePosition position:QCellPosition){}
+    func comment(didChangePosition comment:QComment, position:QCellPosition){}
     
     // Audio comment delegate
-    func comment(didChangeDurationLabel label:String){}
-    func comment(didChangeCurrentTimeSlider value:Float){}
-    func comment(didChangeSeekTimeLabel label:String){}
-    func comment(didChangeAudioPlaying playing:Bool){}
+    func comment(didChangeDurationLabel comment:QComment, label:String){}
+    func comment(didChangeCurrentTimeSlider comment:QComment, value:Float){}
+    func comment(didChangeSeekTimeLabel comment:QComment, label:String){}
+    func comment(didChangeAudioPlaying comment:QComment, playing:Bool){}
     
     // File comment delegate
-    func comment(didDownload downloading:Bool){
+    func comment(didDownload comment:QComment, downloading:Bool){
         
     }
-    func comment(didUpload uploading:Bool){}
-    func comment(didChangeProgress progress:CGFloat){}
+    func comment(didUpload comment:QComment, uploading:Bool){}
+    func comment(didChangeProgress comment:QComment, progress:CGFloat){}
     
     
 }

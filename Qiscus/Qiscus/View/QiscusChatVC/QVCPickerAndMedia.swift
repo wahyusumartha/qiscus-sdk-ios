@@ -72,14 +72,23 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                     let imageExt:String = String(imageNameArr.last!).lowercased()
                     
                     let gif:Bool = (imageExt == "gif" || imageExt == "gif_")
-                    let jpeg:Bool = (imageExt == "jpg" || imageExt == "jpg_")
                     let png:Bool = (imageExt == "png" || imageExt == "png_")
-                    let tif:Bool = (imageExt == "tif" || imageExt == "tif_")
                     
-                    if jpeg || tif{
-                        if tif {
-                            imageName = "\(timeToken).jpg"
+                    if png{
+                        data = UIImagePNGRepresentation(image)!
+                    }else if gif{
+                        let asset = PHAsset.fetchAssets(withALAssetURLs: [imageURL], options: nil)
+                        if let phAsset = asset.firstObject {
+                            let option = PHImageRequestOptions()
+                            option.isSynchronous = true
+                            option.isNetworkAccessAllowed = true
+                            PHImageManager.default().requestImageData(for: phAsset, options: option) {
+                                (gifData, dataURI, orientation, info) -> Void in
+                                data = gifData
+                            }
                         }
+                    }else{
+                        imageName = "\(timeToken).jpg"
                         let imageSize = image.size
                         var bigPart = CGFloat(0)
                         if(imageSize.width > imageSize.height){
@@ -94,19 +103,6 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                         }
                         
                         data = UIImageJPEGRepresentation(image, compressVal)!
-                    }else if png{
-                        data = UIImagePNGRepresentation(image)!
-                    }else if gif{
-                        let asset = PHAsset.fetchAssets(withALAssetURLs: [imageURL], options: nil)
-                        if let phAsset = asset.firstObject {
-                            let option = PHImageRequestOptions()
-                            option.isSynchronous = true
-                            option.isNetworkAccessAllowed = true
-                            PHImageManager.default().requestImageData(for: phAsset, options: option) {
-                                (gifData, dataURI, orientation, info) -> Void in
-                                data = gifData
-                            }
-                        }
                     }
                 }else{
                     imageName = "\(timeToken).jpg"

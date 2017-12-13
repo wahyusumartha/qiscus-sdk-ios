@@ -285,22 +285,30 @@ class QCellAudioLeft: QCellAudio {
             self.userNameLabel.text = self.comment?.senderName
         }
     }
-    public override func comment(didChangePosition position: QCellPosition) {
-        self.balloonView.image = self.getBallon()
+    public override func comment(didChangePosition comment:QComment, position: QCellPosition) {
+        if comment.uniqueId == self.comment?.uniqueId {
+            self.balloonView.image = self.getBallon()
+        }
     }
-    public override func comment(didDownload downloading:Bool){
-            self.downloadFinished()
+    public override func comment(didDownload comment:QComment, downloading:Bool){
+        if comment.uniqueId == self.comment?.uniqueId {
+            if downloading {
+                self.downloadingMedia()
+            }else{
+                self.downloadFinished()
+            }
+        }
     }
-    public override func comment(didUpload uploading:Bool){
-            self.uploadFinished()
-    }
-    public override func comment(didChangeProgress progress:CGFloat){
-        self.progressContainer.isHidden = false
-        self.progressHeight.constant = progress * 30
-        let percentage = Int(progress * 100)
-        self.dateLabel.text = "Downloading \(QChatCellHelper.getFormattedStringFromInt(percentage)) %"
-        UIView.animate(withDuration: 0.65, animations: {
-            self.progressView.layoutIfNeeded()
-        })
+
+    public override func comment(didChangeProgress comment:QComment, progress:CGFloat){
+        if comment.uniqueId == self.comment?.uniqueId {
+            self.progressContainer.isHidden = false
+            self.progressHeight.constant = progress * 30
+            let percentage = Int(progress * 100)
+            self.dateLabel.text = "Downloading \(QChatCellHelper.getFormattedStringFromInt(percentage)) %"
+            UIView.animate(withDuration: 0.65, animations: {
+                self.progressView.layoutIfNeeded()
+            })
+        }
     }
 }

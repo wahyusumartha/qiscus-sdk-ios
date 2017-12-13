@@ -299,7 +299,9 @@ class QCellTextRight: QChatCell {
             self.userNameLabel.text = self.comment?.senderName
         }
     }
-    public override func comment(didChangePosition position: QCellPosition) {
-        self.balloonView.image = self.getBallon()
+    public override func comment(didChangePosition comment:QComment, position: QCellPosition) {
+        if comment.uniqueId == self.comment?.uniqueId {
+            self.balloonView.image = self.getBallon()
+        }
     }
 }
