@@ -25,6 +25,7 @@ class QCellSystem: QChatCell {
         self.containerView.backgroundColor = Qiscus.style.color.systemBalloonColor
     }
     public override func commentChanged() {
+        self.comment!.delegate = self
         if self.comment!.text == "" {
             self.containerView.isHidden = true
         }else{

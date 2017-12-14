@@ -70,6 +70,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
     }
 
     public override func commentChanged() {
+        self.comment!.delegate = self
         self.textView.comment = self.comment
         
         self.balloonView.image = self.getBallon()

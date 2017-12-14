@@ -37,6 +37,7 @@ class QCellPostbackLeft: QChatCell {
         textView.contentInset = UIEdgeInsets.zero
     }
     public override func commentChanged() {
+        self.comment!.delegate = self
         self.textView.attributedText = self.comment?.attributedText
         self.textView.linkTextAttributes = self.linkTextAttributes
         balloonView.image = getBallon()

@@ -30,6 +30,7 @@ class QCellFileLeft: QChatCell {
         fileIcon.contentMode = .scaleAspectFit
     }
     public override func commentChanged() {
+        self.comment!.delegate = self
         userNameLabel.isHidden = true
         topMargin.constant = 0
         cellHeight.constant = 0
