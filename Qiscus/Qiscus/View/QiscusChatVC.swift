@@ -300,6 +300,8 @@ open class QiscusChatVC: UIViewController{
         self.collectionView.register(UINib(nibName: "QChatFooterRight",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: "cellFooterRight")
         self.collectionView.register(UINib(nibName: "QCellSystem",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellSystem")
         self.collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "EmptyCell")
+        self.collectionView.register(UINib(nibName: "QCellDocLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellDocLeft")
+        self.collectionView.register(UINib(nibName: "QCellDocRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellDocRight")
         self.collectionView.register(UINib(nibName: "QCellCardLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellCardLeft")
         self.collectionView.register(UINib(nibName: "QCellCardRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellCardRight")
         self.collectionView.register(UINib(nibName: "QCellTextLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellTextLeft")
@@ -1058,6 +1060,7 @@ open class QiscusChatVC: UIViewController{
         case .reply             : retHeight += 88 ; break
         case .system            : retHeight += 46 ; break
         case .text              : retHeight += 15 ; break
+        case .document          : retHeight += 7; break
         default                 : retHeight += 20 ; break
         }
         

@@ -218,7 +218,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
             }
             break
         case "share":
-            if Qiscus.sharedInstance.connected && ( comment.type == .image || comment.type == .video || comment.type == .audio || comment.type == .text || comment.type == .file) {
+            if Qiscus.sharedInstance.connected && ( comment.type == .image || comment.type == .video || comment.type == .audio || comment.type == .text || comment.type == .file || comment.type == .document) {
                 if comment.type == .text {
                     return true
                 }
@@ -301,14 +301,14 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     }
     open func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if indexPath.section < self.chatRoom!.comments.count {
-        let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
-        var size = comment.textSize
-        let firstInSection = indexPath.row == 0
-        
-        size.width = QiscusHelper.screenWidth() - 16
-        size.height = self.qiscusChatView(cellHeightForComment: comment, defaultHeight: size.height, firstInSection: firstInSection)
-        
-        return size
+            let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
+            var size = comment.textSize
+            let firstInSection = indexPath.row == 0
+            
+            size.width = QiscusHelper.screenWidth() - 16
+            size.height = self.qiscusChatView(cellHeightForComment: comment, defaultHeight: size.height, firstInSection: firstInSection)
+            
+            return size
         }else{
             return CGSize(width: QiscusHelper.screenWidth() - 16, height: CGFloat(54))
         }

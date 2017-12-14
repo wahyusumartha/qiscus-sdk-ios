@@ -321,14 +321,15 @@ public class QRoomService:NSObject{
             comment.updateProgress(progress: 0)
             let fileURL = file.url.replacingOccurrences(of: " ", with: "%20")
             let ext = file.ext
-            
+            let type = file.type
             QiscusRequestThread.async {
                 QiscusService.session.request(fileURL, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil).responseData(completionHandler: { response in
                     Qiscus.printLog(text: "download result: \(response)")
                     switch response.result {
                     case .success:
                         if let imageData = response.data {
-                            if !isAudioFile{
+                            switch type {
+                            case .image:
                                 if let image = UIImage(data: imageData) {
                                     var thumbImage = UIImage()
                                     if !(ext == "gif" || ext == "gif_"){
@@ -352,41 +353,81 @@ public class QRoomService:NSObject{
                                         comment.updateDownloading(downloading: false)
                                         comment.updateProgress(progress: 1)
                                         comment.displayImage = thumbImage
-                                    }}
-                                }else{
-                                    DispatchQueue.main.async { autoreleasepool{
-                                        let path = file.saveFile(withData: imageData)
-                                        let assetMedia = AVURLAsset(url: URL(fileURLWithPath: "\(path)"))
-                                        let thumbGenerator = AVAssetImageGenerator(asset: assetMedia)
-                                        thumbGenerator.appliesPreferredTrackTransform = true
-                                        
-                                        let thumbTime = CMTimeMakeWithSeconds(0, 30)
-                                        let maxSize = CGSize(width: QiscusHelper.screenWidth(), height: QiscusHelper.screenWidth())
-                                        thumbGenerator.maximumSize = maxSize
-                                        var thumbImage:UIImage?
-                                        
-                                        do{
-                                            let thumbRef = try thumbGenerator.copyCGImage(at: thumbTime, actualTime: nil)
-                                            thumbImage = UIImage(cgImage: thumbRef)
-                                        }catch let error as NSError{
-                                            Qiscus.printLog(text: "error creating thumb image: \(error.localizedDescription)")
-                                        }
-                                        if thumbImage != nil {
-                                            file.saveThumbImage(withImage: thumbImage!)
-                                        }
-                                        comment.updateProgress(progress: 1)
-                                        comment.updateDownloading(downloading: false)
-                                    }}
+                                        }}
                                 }
-                            }
-                            else{
+                                break
+                            case .audio:
                                 DispatchQueue.main.async { autoreleasepool{
                                     let _ = file.saveFile(withData: imageData)
                                     comment.updateDownloading(downloading: false)
                                     comment.updateProgress(progress: 1)
-                                    
                                 }}
+                                break
+                            case .document:
+                                var pageNumber = 0
+                                var size = Double(imageData.count) / (Double(1024 * 1024))
+                                size = Double(round(100 * size)/100)
+                                var pdfImage:UIImage?
+                                if let provider = CGDataProvider(data: imageData as NSData) {
+                                    if let pdfDoc = CGPDFDocument(provider) {
+                                        pageNumber = pdfDoc.numberOfPages
+                                        if let pdfPage:CGPDFPage = pdfDoc.page(at: 1) {
+                                            var pageRect:CGRect = pdfPage.getBoxRect(.mediaBox)
+                                            pageRect.size = CGSize(width:pageRect.size.width, height:pageRect.size.height)
+                                            UIGraphicsBeginImageContext(pageRect.size)
+                                            if let context:CGContext = UIGraphicsGetCurrentContext(){
+                                                context.saveGState()
+                                                context.translateBy(x: 0.0, y: pageRect.size.height)
+                                                context.scaleBy(x: 1.0, y: -1.0)
+                                                context.concatenate(pdfPage.getDrawingTransform(.mediaBox, rect: pageRect, rotate: 0, preserveAspectRatio: true))
+                                                context.drawPDFPage(pdfPage)
+                                                context.restoreGState()
+                                                pdfImage = UIGraphicsGetImageFromCurrentImageContext()
+                                            }
+                                            UIGraphicsEndImageContext()
+                                        }
+                                    }
+                                }
+                                DispatchQueue.main.async { autoreleasepool{
+                                    let _ = file.saveFile(withData: imageData)
+                                    if let thumb = pdfImage {
+                                        file.saveThumbImage(withImage: thumb)
+                                    }
+                                    file.updateSize(withSize: size)
+                                    file.updatePages(withTotalPage: pageNumber)
+                                    comment.updateDownloading(downloading: false)
+                                    comment.updateProgress(progress: 1)
+                                }}
+                                break
+                            case .video:
+                                DispatchQueue.main.async { autoreleasepool{
+                                    let path = file.saveFile(withData: imageData)
+                                    let assetMedia = AVURLAsset(url: URL(fileURLWithPath: "\(path)"))
+                                    let thumbGenerator = AVAssetImageGenerator(asset: assetMedia)
+                                    thumbGenerator.appliesPreferredTrackTransform = true
+                                    
+                                    let thumbTime = CMTimeMakeWithSeconds(0, 30)
+                                    let maxSize = CGSize(width: QiscusHelper.screenWidth(), height: QiscusHelper.screenWidth())
+                                    thumbGenerator.maximumSize = maxSize
+                                    var thumbImage:UIImage?
+                                    
+                                    do{
+                                        let thumbRef = try thumbGenerator.copyCGImage(at: thumbTime, actualTime: nil)
+                                        thumbImage = UIImage(cgImage: thumbRef)
+                                    }catch let error as NSError{
+                                        Qiscus.printLog(text: "error creating thumb image: \(error.localizedDescription)")
+                                    }
+                                    if thumbImage != nil {
+                                        file.saveThumbImage(withImage: thumbImage!)
+                                    }
+                                    comment.updateProgress(progress: 1)
+                                    comment.updateDownloading(downloading: false)
+                                }}
+                                break
+                            default:
+                                break
                             }
+                            
                             DispatchQueue.main.async { autoreleasepool{
                                 onSuccess?(comment)
                             }}

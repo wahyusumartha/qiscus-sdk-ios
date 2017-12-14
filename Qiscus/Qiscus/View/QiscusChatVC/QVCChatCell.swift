@@ -344,7 +344,7 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
     }
     func didTapFile(comment: QComment) {
         if let file = comment.file {
-            if file.ext == "pdf" || file.ext == "pdf_" || file.ext == "doc" || file.ext == "docx" || file.ext == "ppt" || file.ext == "pptx" || file.ext == "xls" || file.ext == "xlsx" || file.ext == "txt" {
+            if file.ext == "doc" || file.ext == "docx" || file.ext == "ppt" || file.ext == "pptx" || file.ext == "xls" || file.ext == "xlsx" || file.ext == "txt" {
                 let url = file.url
                 let filename = file.filename
                 
@@ -356,7 +356,18 @@ extension QiscusChatVC: ChatCellDelegate, ChatCellAudioDelegate{
                 let backButton = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
                 self.navigationItem.backBarButtonItem = backButton
                 self.navigationController?.pushViewController(preview, animated: true)
-            }else{
+            }
+            else if file.ext == "pdf" || file.ext == "pdf_" {
+                if QFileManager.isFileExist(inLocalPath: file.localPath){
+                    let preview = ChatPreviewDocVC()
+                    preview.file = file
+                    preview.roomName = self.chatRoom!.name
+                    let backButton = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+                    self.navigationItem.backBarButtonItem = backButton
+                    self.navigationController?.pushViewController(preview, animated: true)
+                }
+            }
+            else{
                 if let url = URL(string: file.url){
                     if #available(iOS 10.0, *) {
                         UIApplication.shared.open(url, completionHandler: { success in

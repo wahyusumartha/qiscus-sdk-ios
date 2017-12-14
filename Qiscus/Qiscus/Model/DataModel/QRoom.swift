@@ -263,6 +263,9 @@ public class QRoom:Object {
         switch type {
         case .audio:
             comment.typeRaw = QCommentType.audio.name()
+            var size = Double(data!.count) / (Double(1024 * 1024))
+            size = Double(round(100 * size)/100)
+            file.size = size
             file.localPath = QFile.saveFile(data!, fileName: fileName)
             break
         case .image:
@@ -287,6 +290,39 @@ public class QRoom:Object {
             }
             
             comment.typeRaw = QCommentType.image.name()
+            var size = Double(data!.count) / (Double(1024 * 1024))
+            size = Double(round(100 * size)/100)
+            file.size = size
+            file.localPath = QFile.saveFile(data!, fileName: fileName)
+            break
+        case .document:
+            if let provider = CGDataProvider(data: data! as NSData) {
+                if let pdfDoc = CGPDFDocument(provider) {
+                    file.pages = pdfDoc.numberOfPages
+                    if let pdfImage = thumbImage {
+                        let imageSize = pdfImage.size
+                        var bigPart = CGFloat(0)
+                        if(imageSize.width > imageSize.height){
+                            bigPart = imageSize.width
+                        }else{
+                            bigPart = imageSize.height
+                        }
+                        
+                        var compressVal = CGFloat(1)
+                        if(bigPart > 2000){
+                            compressVal = 2000 / bigPart
+                        }
+                        
+                        if let thumbData = UIImageJPEGRepresentation(pdfImage, compressVal) {
+                            file.localThumbPath = QFile.saveFile(thumbData, fileName: "thumb-\(fileName).jpg")
+                        }
+                    }
+                }
+            }
+            comment.typeRaw = QCommentType.document.name()
+            var size = Double(data!.count) / (Double(1024 * 1024))
+            size = Double(round(100 * size)/100)
+            file.size = size
             file.localPath = QFile.saveFile(data!, fileName: fileName)
             break
         case .video:
@@ -301,9 +337,15 @@ public class QRoom:Object {
             let thumbData = UIImagePNGRepresentation(thumbImage!)
             file.localThumbPath = QFile.saveFile(thumbData!, fileName: "thumb-\(fileNameOnly).png")
             comment.typeRaw = QCommentType.video.name()
+            var size = Double(data!.count) / (Double(1024 * 1024))
+            size = Double(round(100 * size)/100)
+            file.size = size
             file.localPath = QFile.saveFile(data!, fileName: fileName)
             break
         default:
+            var size = Double(data!.count) / (Double(1024 * 1024))
+            size = Double(round(100 * size)/100)
+            file.size = size
             file.localPath = QFile.saveFile(data!, fileName: fileName)
             comment.typeRaw = QCommentType.file.name()
             break

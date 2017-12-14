@@ -52,7 +52,7 @@ class QCellFileLeft: QChatCell {
         
         if let file = self.comment!.file {
             fileNameLabel.text = file.filename
-            if file.ext == "pdf" || file.ext == "pdf_" || file.ext == "doc" || file.ext == "docx" || file.ext == "ppt" || file.ext == "pptx" || file.ext == "xls" || file.ext == "xlsx" || file.ext == "txt" {
+            if file.ext == "doc" || file.ext == "docx" || file.ext == "ppt" || file.ext == "pptx" || file.ext == "xls" || file.ext == "xlsx" || file.ext == "txt" {
                 fileTypeLabel.text = "\(file.ext.uppercased()) File"
             }else{
                 fileTypeLabel.text = "Unknown File"

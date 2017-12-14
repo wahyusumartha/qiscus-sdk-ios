@@ -18,6 +18,7 @@ public enum QReplyType:Int{
     case document
     case location
     case contact
+    case file
     case other
 }
 @objc public enum QCellPosition:Int {
@@ -37,6 +38,7 @@ public enum QReplyType:Int{
     case contact
     case location
     case custom
+    case document
     
     static let all = [text.name(), image.name(), video.name(), audio.name(),file.name(),postback.name(),account.name(), reply.name(), system.name(), card.name(), contact.name(), location.name(), custom.name()]
     
@@ -53,8 +55,9 @@ public enum QReplyType:Int{
             case .system    : return "system"
             case .card      : return "card"
             case .contact   : return "contact_person"
-            case .location : return "location"
+            case .location  : return "location"
             case .custom    : return "custom"
+            case .document  : return "document"
         }
     }
     init(name:String) {
@@ -71,6 +74,7 @@ public enum QReplyType:Int{
             case "card"             : self = .card ; break
             case "contact_person"   : self = .contact ; break
             case "location"         : self = .location; break
+            case "document"         : self = .document; break
             default                 : self = .custom ; break
         }
     }
@@ -273,6 +277,8 @@ public class QComment:Object {
                 return "cellContact\(position)"
             case .location:
                 return "cellLocation\(position)"
+            case .document:
+                return "cellDoc\(position)"
             default:
                 return "cellText\(position)"
             }
@@ -343,6 +349,9 @@ public class QComment:Object {
                     }
                 }
                 size.height = height
+                break
+            case .document :
+                size.height = 200
                 break
             default:
                 break
@@ -576,8 +585,10 @@ public class QComment:Object {
                 return .audio
             case "mov","mov_","mp4","mp4_":
                 return .video
-            case "pdf","pdf_","doc","docx","ppt","pptx","xls","xlsx","txt":
+            case "pdf","pdf_":
                 return .document
+            case "doc","docx","ppt","pptx","xls","xlsx","txt":
+                return .file
             default:
                 return .other
             }
@@ -1012,6 +1023,9 @@ public class QComment:Object {
             case .audio:
                 temp.typeRaw = QCommentType.audio.name()
                 break
+            case .document:
+                temp.typeRaw = QCommentType.document.name()
+                break
             default:
                 temp.typeRaw = QCommentType.file.name()
                 break
@@ -1037,6 +1051,9 @@ public class QComment:Object {
                     break
                 case .audio:
                     temp.typeRaw = QCommentType.audio.name()
+                    break
+                case .document:
+                    temp.typeRaw = QCommentType.document.name()
                     break
                 default:
                     temp.typeRaw = QCommentType.file.name()

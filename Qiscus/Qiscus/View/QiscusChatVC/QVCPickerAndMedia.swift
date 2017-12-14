@@ -198,6 +198,9 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
             do{
                 var data:Data = try Data(contentsOf: dataURL, options: NSData.ReadingOptions.mappedIfSafe)
                 let mediaSize = Double(data.count) / 1024.0
+                let time = Double(Date().timeIntervalSince1970)
+                let timeToken = UInt64(time * 10000)
+                
                 if mediaSize > Qiscus.maxUploadSizeInKB {
                     self.processingFile = false
                     self.dismissLoading()
@@ -215,13 +218,23 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                 let ext = String(fileNameArr.last!).lowercased()
                 
                 let gif = (ext == "gif" || ext == "gif_")
-                let jpeg = (ext == "jpg" || ext == "jpg_")
-                let png = (ext == "png" || ext == "png_")
                 let video = (ext == "mp4" || ext == "mp4_" || ext == "mov" || ext == "mov_")
-                
+                let isImage = (ext == "jpg" || ext == "jpg_" || ext == "tif" || ext == "heic" || ext == "png" || ext == "png_")
+                let isPDF = (ext == "pdf" || ext == "pdf_")
                 var usePopup = false
                 
-                if jpeg{
+                if isImage{
+                    var i = 0
+                    for n in fileNameArr{
+                        if i == 0 {
+                            fileName = String(n)
+                        }else if i == fileNameArr.count - 1 {
+                            fileName = "\(fileName).jpg"
+                        }else{
+                            fileName = "\(fileName).\(String(n))"
+                        }
+                        i += 1
+                    }
                     let image = UIImage(data: data)!
                     let imageSize = image.size
                     var bigPart = CGFloat(0)
@@ -237,11 +250,33 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                     }
                     data = UIImageJPEGRepresentation(image, compressVal)!
                     thumb = UIImage(data: data)
-                }else if png{
-                    let image = UIImage(data: data)!
-                    thumb = image
-                    data = UIImagePNGRepresentation(image)!
-                }else if gif{
+                }else if isPDF{
+                    usePopup = true
+                    popupText = "Are you sure to send this document?"
+                    fileType = QiscusFileType.document
+                    if let provider = CGDataProvider(data: data as NSData) {
+                        if let pdfDoc = CGPDFDocument(provider) {
+                            if let pdfPage:CGPDFPage = pdfDoc.page(at: 1) {
+                                var pageRect:CGRect = pdfPage.getBoxRect(.mediaBox)
+                                pageRect.size = CGSize(width:pageRect.size.width, height:pageRect.size.height)
+                                UIGraphicsBeginImageContext(pageRect.size)
+                                if let context:CGContext = UIGraphicsGetCurrentContext(){
+                                    context.saveGState()
+                                    context.translateBy(x: 0.0, y: pageRect.size.height)
+                                    context.scaleBy(x: 1.0, y: -1.0)
+                                    context.concatenate(pdfPage.getDrawingTransform(.mediaBox, rect: pageRect, rotate: 0, preserveAspectRatio: true))
+                                    context.drawPDFPage(pdfPage)
+                                    context.restoreGState()
+                                    if let pdfImage:UIImage = UIGraphicsGetImageFromCurrentImageContext() {
+                                        thumb = pdfImage
+                                    }
+                                }
+                                UIGraphicsEndImageContext()
+                            }
+                        }
+                    }
+                }
+                else if gif{
                     let image = UIImage(data: data)!
                     thumb = image
                     let asset = PHAsset.fetchAssets(withALAssetURLs: [dataURL], options: nil)
@@ -254,6 +289,7 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                             data = gifData!
                         }
                     }
+                    popupText = "Are you sure to send this image?"
                     usePopup = true
                 }else if video {
                     fileType = .video

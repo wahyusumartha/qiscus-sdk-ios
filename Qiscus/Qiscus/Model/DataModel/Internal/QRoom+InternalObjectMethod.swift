@@ -621,23 +621,6 @@ internal extension QRoom {
         
         let _ = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL)
         
-        //        let savedParticipant = self.participants.filter("email == '\(senderEmail)'")
-        //        if savedParticipant.count > 0 {
-        //            let participant = savedParticipant.first!
-        //            if !participant.isInvalidated {
-        //                if participant.lastReadCommentId < commentId {
-        //                    try! realm.write {
-        //                        participant.lastReadCommentId = commentId
-        //                        participant.lastDeliveredCommentId = commentId
-        //                    }
-        //                }else if participant.lastDeliveredCommentId < commentId{
-        //                    try! realm.write {
-        //                        participant.lastDeliveredCommentId = commentId
-        //                    }
-        //                }
-        //            }
-        //        }
-        
         let newComment = QComment()
         newComment.uniqueId = commentUniqueId
         newComment.id = commentId
@@ -728,6 +711,9 @@ internal extension QRoom {
             case .audio:
                 newComment.typeRaw = QCommentType.audio.name()
                 break
+            case .document:
+                newComment.typeRaw = QCommentType.document.name()
+                break
             default:
                 newComment.typeRaw = QCommentType.file.name()
                 break
@@ -761,6 +747,9 @@ internal extension QRoom {
                     break
                 case .audio:
                     newComment.typeRaw = QCommentType.audio.name()
+                    break
+                case .document:
+                    newComment.typeRaw = QCommentType.document.name()
                     break
                 default:
                     newComment.typeRaw = QCommentType.file.name()

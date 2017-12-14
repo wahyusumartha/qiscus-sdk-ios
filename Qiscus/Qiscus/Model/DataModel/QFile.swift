@@ -13,6 +13,7 @@ import RealmSwift
     case image
     case video
     case audio
+    case document
     case file
 }
 
@@ -25,6 +26,8 @@ public class QFile:Object{
     public dynamic var roomId:String = ""
     public dynamic var mimeType:String = ""
     public dynamic var senderEmail:String = ""
+    public dynamic var size:Double = 0
+    public dynamic var pages:Int = 0
     
     var uploadProgress:Double = 0
     var downloadProgress:Double = 0
@@ -96,6 +99,8 @@ public class QFile:Object{
                 return .video
             case "m4a","m4a_","aac","aac_","mp3","mp3_":
                 return .audio
+            case "pdf","pdf_":
+                return .document
             default:
                 return .file
             }
@@ -163,16 +168,52 @@ public class QFile:Object{
         }
         return localPath
     }
+    public func updatePages(withTotalPage pages:Int){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
+        
+        if self.pages != pages {
+            try! realm.write {
+                self.pages = pages
+            }
+        }
+    }
+    public func updateSize(withSize size:Double){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
+        
+        if self.size != size {
+            try! realm.write {
+                self.size = size
+            }
+        }
+    }
     public func saveThumbImage(withImage image:UIImage){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         realm.refresh()
         var data = Data()
-        if let imageData = UIImagePNGRepresentation(image){
+        var ext = "jpg"
+        let imageSize = image.size
+        var bigPart = CGFloat(0)
+        if(imageSize.width > imageSize.height){
+            bigPart = imageSize.width
+        }else{
+            bigPart = imageSize.height
+        }
+        
+        var compressVal = CGFloat(1)
+        
+        if(bigPart > 2000){
+            compressVal = 2000 / bigPart
+        }
+        if let imageData = UIImageJPEGRepresentation(image, compressVal) {
             data = imageData
         }else{
-            data = UIImageJPEGRepresentation(image, 1)!
+            data = UIImagePNGRepresentation(image)!
+            ext = "png"
         }
-        let localPath = QFileManager.saveFile(withData: data, fileName: "thumb-\(self.filename)", type: .comment)
+        
+        let localPath = QFileManager.saveFile(withData: data, fileName: "thumb-\(self.filename).\(ext)", type: .comment)
         try! realm.write {
             self.localThumbPath = localPath
         }
