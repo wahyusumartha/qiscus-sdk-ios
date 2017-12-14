@@ -168,6 +168,15 @@ open class QiscusMe: NSObject {
         }
         if let lastComment = QiscusMe.shared.userData.value(forKey: "qiscus_lastComment_id") as? Int{
             QiscusMe.shared.lastCommentId = lastComment
+            if lastComment == 0 {
+                QiscusMe.shared.lastCommentId = json["last_comment_id"].intValue
+                QiscusMe.shared.userData.set(json["last_comment_id"].intValue, forKey: "qiscus_lastComment_id")
+                QiscusMe.shared.userData.set(json["last_comment_id"].intValue, forKey: "qiscus_lastKnownComment_id")
+            }
+        }else{
+            QiscusMe.shared.lastCommentId = json["last_comment_id"].intValue
+            QiscusMe.shared.userData.set(json["last_comment_id"].intValue, forKey: "qiscus_lastComment_id")
+            QiscusMe.shared.userData.set(json["last_comment_id"].intValue, forKey: "qiscus_lastKnownComment_id")
         }
         if let lastComment = QiscusMe.shared.userData.value(forKey: "qiscus_lastKnownComment_id") as? Int{
             QiscusMe.shared.lastKnownCommentId = lastComment
