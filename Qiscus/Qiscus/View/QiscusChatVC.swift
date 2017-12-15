@@ -1018,11 +1018,11 @@ open class QiscusChatVC: UIViewController{
     }
     
     open func gotNewComment(comment: QComment, room:QRoom) {
-        self.chatRoom = room
+//        self.chatRoom = room
         self.collectionView.reloadData()
         
         if self.isLastRowVisible || QiscusMe.shared.email == comment.senderEmail || !self.isPresence{
-            self.collectionView.layoutIfNeeded()
+//            self.collectionView.layoutIfNeeded()
             self.scrollToBottom()
         }
     }

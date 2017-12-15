@@ -142,7 +142,7 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
                         if indexPath.section >= lastCommentSection {
                             if indexPath.section > lastCommentSection {
                                 self.isLastRowVisible = true
-                                room.readAll()
+                                r.readAll()
                             }else{
                                 let item = r.comments[lastCommentSection].comments.count - 1
                                 if indexPath.row == item {
