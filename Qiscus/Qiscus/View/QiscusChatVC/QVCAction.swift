@@ -846,23 +846,30 @@ extension QiscusChatVC {
     // MARK: - Load More Control
     func loadMore(){
         if let room = self.chatRoom {
-            Qiscus.chatRooms[room.id] = room
-            room.delegate = self
-            if room.comments.count > 0 {
-                if let firstGroup = room.comments.first {
-                    if let firstComment = firstGroup.comments.first {
-                        if firstComment.id > 0 && firstComment.beforeId == 0 {
-                            self.loadMoreControl.endRefreshing()
-                            self.loadMoreControl.removeFromSuperview()
-                            return
-                        }
-                        self.topComment = firstComment
+            let id = room.id
+            self.loadMoreComment(roomId: id)
+        }
+    }
+    func loadMoreComment(roomId:String){
+        QiscusBackgroundThread.async {
+            if self.loadingMore { return }
+            self.loadingMore = true
+            if let r = QRoom.threadSaveRoom(withId: roomId){
+                if r.canLoadMore{
+                    r.loadMore()
+                }else{
+                    self.loadingMore = false
+                    DispatchQueue.main.async {
+                        self.loadMoreControl.endRefreshing()
+                        self.loadMoreControl.removeFromSuperview()
                     }
                 }
+            }else{
+                self.loadingMore = false
+                DispatchQueue.main.async {
+                    self.loadMoreControl.endRefreshing()
+                }
             }
-            room.loadMore()
-        }else{
-            self.loadMoreControl.endRefreshing()
         }
     }
     

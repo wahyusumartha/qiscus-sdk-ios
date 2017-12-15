@@ -194,9 +194,12 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
         if let oldComment = self.comment {
             oldComment.delegate = nil
         }
-        QComment.cache[comment.uniqueId] = comment
-        self.commentRaw = QComment.cache[comment.uniqueId]
-        QComment.cache[self.comment!.uniqueId]?.delegate = self
+        if let cache = QComment.cache[comment.uniqueId]{
+            self.commentRaw = cache
+        }else{
+            QComment.cache[comment.uniqueId] = comment
+            self.commentRaw = comment
+        }
         self.comment!.delegate = self
         self.commentChanged()
     }

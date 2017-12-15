@@ -262,6 +262,25 @@ internal extension QRoom {
                 if QUser.getUser(email: senderEmail) == nil {
                     let _ = QUser.saveUser(withEmail: senderEmail, fullname: senderName, avatarURL: avatarURL)
                 }
+                func gotNewLoadMoreComment(comment:QComment, newGroup:Bool){
+                    if Thread.isMainThread{
+                        realm.refresh()
+                        if let cache = QRoom.room(withId: id) {
+                            cache.delegate?.room?(gotNewLoadMoreComment: comment, newGroup: newGroup)
+                        }
+                    }else{
+                        let cts = ThreadSafeReference(to:comment)
+                        DispatchQueue.main.sync {
+                            let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            mainRealm.refresh()
+                            if let c = mainRealm.resolve(cts){
+                                if let cache = QRoom.room(withId: id) {
+                                    cache.delegate?.room?(gotNewLoadMoreComment: c, newGroup: newGroup)
+                                }
+                            }
+                        }
+                    }
+                }
                 if room.comments.count == 0 {
                     newComment.cellPosRaw = QCellPosition.single.rawValue
                     let commentGroup = QCommentGroup()
@@ -275,24 +294,38 @@ internal extension QRoom {
                         realm.add(newComment, update: true)
                         commentGroup.comments.append(newComment)
                     }
+                    if onTop{
+                        let cts = ThreadSafeReference(to:newComment)
+                        gotNewLoadMoreComment(comment: newComment, newGroup: true)
+                    }
                 }
                 else if onTop{
                     let firstCommentGroup = room.comments.first!
                     if firstCommentGroup.date == newComment.date && firstCommentGroup.senderEmail == newComment.senderEmail && newComment.type != .system {
                         newComment.cellPosRaw = QCellPosition.first.rawValue
-                        try! realm.write {
-                            firstCommentGroup.createdAt = newComment.createdAt
-                            firstCommentGroup.senderName = newComment.senderName
-                            realm.add(newComment, update: true)
-                            firstCommentGroup.comments.insert(newComment, at: 0)
-                        }
-                        if !firstCommentGroup.id.contains(cUniqueId){
-                            let newId = "\(firstCommentGroup.id)   \(cUniqueId)"
+                        let predicate = NSPredicate(format: "uniqueId = %@", newComment.uniqueId)
+                        realm.refresh()
+                        if firstCommentGroup.comments.filter(predicate).count == 0 {
                             try! realm.write {
-                                firstCommentGroup.id = newId
+                                firstCommentGroup.createdAt = newComment.createdAt
+                                firstCommentGroup.senderName = newComment.senderName
+                                realm.add(newComment, update: true)
+                                firstCommentGroup.comments.insert(newComment, at: 0)
+                            }
+                            gotNewLoadMoreComment(comment: newComment, newGroup: false)
+                            let changedComment = firstCommentGroup.comments[1]
+                            if changedComment.cellPos == .single {
+                                changedComment.updateCellPos(cellPos: .last)
+                            }else if changedComment.cellPos == .first {
+                                changedComment.updateCellPos(cellPos: .middle)
+                            }
+                            if !firstCommentGroup.id.contains(cUniqueId){
+                                let newId = "\(firstCommentGroup.id)   \(cUniqueId)"
+                                try! realm.write {
+                                    firstCommentGroup.id = newId
+                                }
                             }
                         }
-                        firstCommentGroup.calculateCommentPosition()
                     }else{
                         let commentGroup = QCommentGroup()
                         commentGroup.senderEmail = newComment.senderEmail
@@ -305,6 +338,7 @@ internal extension QRoom {
                             realm.add(newComment, update: true)
                             commentGroup.comments.append(newComment)
                         }
+                        gotNewLoadMoreComment(comment: newComment, newGroup: true)
                     }
                     if room.lastComment == nil {
                         room.updateLastComentInfo(comment: newComment)
@@ -315,17 +349,22 @@ internal extension QRoom {
                     let lastComment = lastGroup.comments[lastGroup.comments.count - 1]
                     if lastGroup.date == newComment.date && lastGroup.senderEmail == newComment.senderEmail && newComment.type != .system && lastComment.type != .system{
                         newComment.cellPosRaw = QCellPosition.last.rawValue
-                        try! realm.write {
-                            realm.add(newComment, update: true)
-                            lastGroup.comments.append(newComment)
-                        }
-                        if !lastGroup.id.contains(cUniqueId){
-                            let newId = "\(lastGroup.id)   \(cUniqueId)"
+                        let predicate = NSPredicate(format: "uniqueId = %@", newComment.uniqueId)
+                        realm.refresh()
+                        
+                        if lastGroup.comments.filter(predicate).count == 0 {
                             try! realm.write {
-                                lastGroup.id = newId
+                                realm.add(newComment, update: true)
+                                lastGroup.comments.append(newComment)
                             }
+                            if !lastGroup.id.contains(cUniqueId){
+                                let newId = "\(lastGroup.id)   \(cUniqueId)"
+                                try! realm.write {
+                                    lastGroup.id = newId
+                                }
+                            }
+                            lastGroup.calculateCommentPosition()
                         }
-                        lastGroup.calculateCommentPosition()
                     }else{
                         let commentGroup = QCommentGroup()
                         commentGroup.senderEmail = newComment.senderEmail

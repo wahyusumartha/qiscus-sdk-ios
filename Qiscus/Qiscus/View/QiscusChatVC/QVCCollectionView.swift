@@ -89,36 +89,72 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     // MARK: CollectionView delegate
     open func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if let room = self.chatRoom {
-            if room.comments.count > 0 {
-                if indexPath.section < room.comments.count {
-                    if let chatCell = cell as? QChatCell {
-                        chatCell.willDisplayCell()
-                    }
-                    if let selectedIndex = self.selectedCellIndex {
-                        if indexPath.section == selectedIndex.section && indexPath.item == selectedIndex.item{
-                            DispatchQueue.main.async {
-                                cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
+            let roomId = room.id
+            QiscusBackgroundThread.async {
+                if let r = QRoom.threadSaveRoom(withId: roomId) {
+                    if r.comments.count > 0 {
+                        if indexPath.section < r.comments.count {
+                            if let chatCell = cell as? QChatCell {
+                                DispatchQueue.main.async {
+                                    chatCell.willDisplayCell()
+                                }
+                            }
+                            if let selectedIndex = self.selectedCellIndex {
+                                if indexPath.section == selectedIndex.section && indexPath.item == selectedIndex.item{
+                                    DispatchQueue.main.async {
+                                        cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
+                                    }
+                                }
+                            }
+                        }
+//                        if !self.prefetch && self.isPresence && !self.loadingMore {
+//                            if let r = QRoom.threadSaveRoom(withId: roomId){
+//                                if r.comments.count > 0 {
+//                                    var i = 0
+//                                    var section = 0
+//                                    var item = 0
+//                                    var found = false
+//                                    for group in r.comments {
+//                                        item = 0
+//                                        for _ in group.comments {
+//                                            i += 1
+//                                            if i == 10 {
+//                                                found = true
+//                                                break
+//                                            }
+//                                            item += 1
+//                                        }
+//                                        if found {
+//                                            break
+//                                        }else{
+//                                            section += 1
+//                                        }
+//                                    }
+//                                    if indexPath.section == section && indexPath.item == item && found {
+//                                        self.loadMoreComment(roomId: roomId)
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+                    if self.isPresence {
+                        let lastCommentSection = r.comments.count - 1
+                        if indexPath.section >= lastCommentSection {
+                            if indexPath.section > lastCommentSection {
+                                self.isLastRowVisible = true
+                                room.readAll()
+                            }else{
+                                let item = r.comments[lastCommentSection].comments.count - 1
+                                if indexPath.row == item {
+                                    self.isLastRowVisible = true
+                                    r.readAll()
+                                }
                             }
                         }
                     }
                 }
             }
-            if self.isPresence {
-                if room.comments.count > 0 {
-                    let lastCommentSection = room.comments.count - 1
-                    if indexPath.section >= lastCommentSection {
-                        if indexPath.section > lastCommentSection {
-                            self.isLastRowVisible = true
-                            room.readAll()
-                        }else{
-                            let item = self.collectionView.numberOfItems(inSection: lastCommentSection) - 1
-                            if indexPath.row == item {
-                                self.isLastRowVisible = true
-                                room.readAll()
-                            }
-                        }
-                    }
-                }
+        
             }
         }
     }
@@ -301,14 +337,15 @@ extension QiscusChatVC: UICollectionViewDelegate, UICollectionViewDataSource, UI
     }
     open func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if indexPath.section < self.chatRoom!.comments.count {
-            let comment = self.chatRoom!.comment(onIndexPath: indexPath)!
-            var size = comment.textSize
-            let firstInSection = indexPath.row == 0
-            
-            size.width = QiscusHelper.screenWidth() - 16
-            size.height = self.qiscusChatView(cellHeightForComment: comment, defaultHeight: size.height, firstInSection: firstInSection)
-            
-            return size
+            if let comment = self.chatRoom!.comment(onIndexPath: indexPath){
+                var size = comment.textSize
+                let firstInSection = indexPath.row == 0
+                
+                size.width = QiscusHelper.screenWidth() - 16
+                size.height = self.qiscusChatView(cellHeightForComment: comment, defaultHeight: size.height, firstInSection: firstInSection)
+                return size
+            }
+            return CGSize.zero
         }else{
             return CGSize(width: QiscusHelper.screenWidth() - 16, height: CGFloat(54))
         }

@@ -88,6 +88,7 @@ open class QiscusChatVC: UIViewController{
     var loadMoreControl = UIRefreshControl()
     var processingFile = false
     var processingAudio = false
+    var loadingMore = false
     
     // MARK: -  Data load configuration
     public var chatRoom:QRoom?{
@@ -1170,32 +1171,20 @@ extension QiscusChatVC:QRoomDelegate{
     public func room(didDeleteGroupComment section: Int) {
         self.collectionView.reloadData()
     }
+    public func room(gotNewLoadMoreComment comment: QComment, newGroup: Bool) {
+        let contentHeight = self.collectionView!.contentSize.height
+        let offsetY = self.collectionView!.contentOffset.y
+        let bottomOffset = contentHeight - offsetY
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        self.collectionView.reloadData()
+        self.collectionView.layoutIfNeeded()
+        self.collectionView!.contentOffset = CGPoint(x: 0, y: self.collectionView!.contentSize.height - bottomOffset)
+        CATransaction.commit()
+    }
     public func room(didFinishLoadMore inRoom: QRoom, success: Bool, gotNewComment: Bool) {
         self.loadMoreControl.endRefreshing()
-        
-        if success && gotNewComment {
-//            var visible = false
-            self.chatRoom = inRoom
-            Qiscus.chatRooms[inRoom.id] = self.chatRoom
-            Qiscus.chatRooms[inRoom.id]?.delegate = self
-            self.collectionView.reloadData()
-//            if let targetComment = self.topComment {
-//                if let indexPath = inRoom.getIndexPath(ofComment: targetComment){
-//                    var visibleIndexPath = [IndexPath]()
-//                    visibleIndexPath = self.collectionView.indexPathsForVisibleItems
-//                    for visibleIndex in visibleIndexPath{
-//                        if visibleIndex.row == indexPath.row && visibleIndex.section == indexPath.section{
-//                            visible = true
-//                            break
-//                        }
-//                    }
-//                    if visible {
-//                        self.collectionView.scrollToItem(at: indexPath, at: .top, animated: false)
-//                    }
-//                }
-//            }
-            self.topComment = nil
-        }
+        self.loadingMore = false
     }
     public func room(didChangeUnread lastReadCommentId:Int, unreadCount:Int) {
         

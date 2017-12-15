@@ -37,6 +37,7 @@ import AVFoundation
     @objc optional func room(gotNewGroupComment onIndex:Int)
     @objc optional func room(gotNewCommentOn groupIndex:Int, withCommentIndex index:Int)
     @objc optional func room(gotNewComment comment:QComment)
+    @objc optional func room(gotNewLoadMoreComment comment:QComment, newGroup:Bool)
     func room(didFailUpdate error:String)
     
     func room(userDidTyping userEmail:String)
