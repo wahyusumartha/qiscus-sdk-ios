@@ -846,6 +846,8 @@ extension QiscusChatVC {
     // MARK: - Load More Control
     func loadMore(){
         if let room = self.chatRoom {
+            Qiscus.chatRooms[room.id] = room
+            room.delegate = self
             if room.comments.count > 0 {
                 if let firstGroup = room.comments.first {
                     if let firstComment = firstGroup.comments.first {

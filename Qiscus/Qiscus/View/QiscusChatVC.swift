@@ -1166,25 +1166,28 @@ extension QiscusChatVC:QRoomDelegate{
     }
     public func room(didFinishLoadMore inRoom: QRoom, success: Bool, gotNewComment: Bool) {
         self.loadMoreControl.endRefreshing()
+        
         if success && gotNewComment {
+//            var visible = false
+            self.chatRoom = inRoom
+            Qiscus.chatRooms[inRoom.id] = self.chatRoom
+            Qiscus.chatRooms[inRoom.id]?.delegate = self
             self.collectionView.reloadData()
-            if let targetComment = self.topComment {
-                if let indexPath = self.chatRoom!.getIndexPath(ofComment: targetComment){
-                    self.collectionView.scrollToItem(at: indexPath, at: .top, animated: false)
-                }
-            }else{
-                if let room = self.chatRoom {
-                    if room.comments.count > 0 {
-                        let section = room.comments.count - 1
-                        let group = room.comments[section]
-                        if group.comments.count > 0 {
-                            let item = group.comments.count - 1
-                            let indexPath = IndexPath(item: item, section: section)
-                            self.collectionView.scrollToItem(at: indexPath, at: .top, animated: false)
-                        }
-                    }
-                }
-            }
+//            if let targetComment = self.topComment {
+//                if let indexPath = inRoom.getIndexPath(ofComment: targetComment){
+//                    var visibleIndexPath = [IndexPath]()
+//                    visibleIndexPath = self.collectionView.indexPathsForVisibleItems
+//                    for visibleIndex in visibleIndexPath{
+//                        if visibleIndex.row == indexPath.row && visibleIndex.section == indexPath.section{
+//                            visible = true
+//                            break
+//                        }
+//                    }
+//                    if visible {
+//                        self.collectionView.scrollToItem(at: indexPath, at: .top, animated: false)
+//                    }
+//                }
+//            }
             self.topComment = nil
         }
     }

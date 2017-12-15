@@ -84,50 +84,52 @@ public class QRoomService:NSObject{
                 
                 QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
                     Qiscus.printLog(text: "loadMore result: \(responseData)")
-                    if let response = responseData.result.value{
-                        let json = JSON(response)
-                        let results = json["results"]
-                        let error = json["error"]
-                        guard let savedRoom = QRoom.threadSaveRoom(withId: id) else {
-                            DispatchQueue.main.async {
-                                if let cache = QRoom.room(withId: id){
-                                    cache.delegate?.room(didFinishLoadMore: cache, success: false, gotNewComment: false)
-                                    Qiscus.printLog(text: "error loadMore: \(error)")
-                                }
-                            }
-                            return
-                        }
-                        if results != JSON.null{
-                            let comments = json["results"]["comments"].arrayValue
-                            if comments.count > 0 {
-                                for newComment in comments {
-                                    savedRoom.saveOldComment(fromJSON: newComment)
-                                }
-                                DispatchQueue.main.async {
-                                    if let cache = QRoom.room(withId: id){
-                                        cache.delegate?.room(didFinishLoadMore: cache, success: true, gotNewComment: true)
+                    QiscusBackgroundThread.async {
+                        if let savedRoom = QRoom.threadSaveRoom(withId: id){
+                            if let response = responseData.result.value{
+                                let json = JSON(response)
+                                let results = json["results"]
+                                //let error = json["error"]
+                                if results != JSON.null{
+                                    let comments = json["results"]["comments"].arrayValue
+                                    if comments.count > 0 {
+                                        for newComment in comments {
+                                            savedRoom.saveOldComment(fromJSON: newComment)
+                                        }
+                                        DispatchQueue.main.async {
+                                            if let cache = QRoom.room(withId: id){
+                                                cache.delegate?.room(didFinishLoadMore: cache, success: true, gotNewComment: true)
+                                            }
+                                        }
+                                    }else{
+                                        DispatchQueue.main.async {
+                                            if let cache = QRoom.room(withId: id){
+                                                cache.delegate?.room(didFinishLoadMore: cache, success: true, gotNewComment: false)
+                                            }
+                                        }
+                                    }
+                                }else{
+                                    DispatchQueue.main.async {
+                                        if let cache = QRoom.room(withId: id){
+                                            cache.delegate?.room(didFinishLoadMore: cache, success: false, gotNewComment: false)
+                                            Qiscus.printLog(text: "error loadMore: null response")
+                                        }
                                     }
                                 }
                             }else{
                                 DispatchQueue.main.async {
                                     if let cache = QRoom.room(withId: id){
-                                        cache.delegate?.room(didFinishLoadMore: cache, success: true, gotNewComment: false)
+                                        cache.delegate?.room(didFinishLoadMore: cache, success: false, gotNewComment: false)
+                                        Qiscus.printLog(text: "error loadMore: cant get response from server")
                                     }
                                 }
                             }
-                        }else if error != JSON.null{
+                        }else{
                             DispatchQueue.main.async {
                                 if let cache = QRoom.room(withId: id){
                                     cache.delegate?.room(didFinishLoadMore: cache, success: false, gotNewComment: false)
-                                    Qiscus.printLog(text: "error loadMore: \(error)")
+                                    Qiscus.printLog(text: "error loadMore: room not found")
                                 }
-                            }
-                        }
-                    }else{
-                        DispatchQueue.main.async {
-                            if let cache = QRoom.room(withId: id){
-                                cache.delegate?.room(didFinishLoadMore: cache, success: false, gotNewComment: false)
-                                Qiscus.printLog(text: "fail to LoadMore Data")
                             }
                         }
                     }
