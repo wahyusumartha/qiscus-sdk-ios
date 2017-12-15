@@ -272,6 +272,7 @@ internal extension QRoom {
                     
                     try! realm.write {
                         room.comments.append(commentGroup)
+                        realm.add(newComment, update: true)
                         commentGroup.comments.append(newComment)
                     }
                 }
@@ -282,6 +283,7 @@ internal extension QRoom {
                         try! realm.write {
                             firstCommentGroup.createdAt = newComment.createdAt
                             firstCommentGroup.senderName = newComment.senderName
+                            realm.add(newComment, update: true)
                             firstCommentGroup.comments.insert(newComment, at: 0)
                         }
                         if !firstCommentGroup.id.contains(cUniqueId){
@@ -300,6 +302,7 @@ internal extension QRoom {
                         newComment.cellPosRaw = QCellPosition.single.rawValue
                         try! realm.write {
                             self.comments.insert(commentGroup, at: 0)
+                            realm.add(newComment, update: true)
                             commentGroup.comments.append(newComment)
                         }
                     }
@@ -313,6 +316,7 @@ internal extension QRoom {
                     if lastGroup.date == newComment.date && lastGroup.senderEmail == newComment.senderEmail && newComment.type != .system && lastComment.type != .system{
                         newComment.cellPosRaw = QCellPosition.last.rawValue
                         try! realm.write {
+                            realm.add(newComment, update: true)
                             lastGroup.comments.append(newComment)
                         }
                         if !lastGroup.id.contains(cUniqueId){
@@ -331,6 +335,7 @@ internal extension QRoom {
                         newComment.cellPosRaw = QCellPosition.single.rawValue
                         try! realm.write {
                             room.comments.append(commentGroup)
+                            realm.add(newComment, update: true)
                             commentGroup.comments.append(newComment)
                         }
                     }
@@ -692,7 +697,7 @@ internal extension QRoom {
                 file.url = fileURL
                 file.senderEmail = newComment.senderEmail
                 try! realm.write {
-                    realm.add(file)
+                    realm.add(file, update:true)
                 }
                 type = file.type
             }else{
@@ -729,7 +734,7 @@ internal extension QRoom {
                     file.url = fileURL
                     file.senderEmail = newComment.senderEmail
                     try! realm.write {
-                        realm.add(file)
+                        realm.add(file, update:true)
                     }
                     type = file.type
                 }else{

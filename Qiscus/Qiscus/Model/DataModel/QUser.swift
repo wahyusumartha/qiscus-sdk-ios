@@ -30,6 +30,10 @@ public class QUser:Object {
     internal dynamic var rawPresence:Int = 0
     internal dynamic var avatarData:Data?
     
+    override public static func primaryKey() -> String? {
+        return "email"
+    }
+    
     public var fullname:String{
         if self.definedName != "" {
             return self.definedName
@@ -168,7 +172,7 @@ public class QUser:Object {
                 user.id = id!
             }
             try! realm.write {
-                realm.add(user)
+                realm.add(user, update:true)
             }
             user.downloadAvatar()
         }

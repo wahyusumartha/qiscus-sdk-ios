@@ -32,6 +32,9 @@ public class QFile:Object{
     var uploadProgress:Double = 0
     var downloadProgress:Double = 0
     
+    override public static func primaryKey() -> String? {
+        return "id"
+    }
     override public static func ignoredProperties() -> [String] {
         return ["uploadProgress","downloadProgress"]
     }

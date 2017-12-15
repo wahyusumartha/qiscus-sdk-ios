@@ -90,6 +90,9 @@ public class QRoom:Object {
     internal var selfTypingTimer:Timer?
     
     
+    override public static func primaryKey() -> String? {
+        return "id"
+    }
     // MARK: - Unstored properties
     override public static func ignoredProperties() -> [String] {
         return ["typingTimer","delegate","selfTypingTimer"]
@@ -352,7 +355,7 @@ public class QRoom:Object {
         }
         
         try! realm.write {
-            realm.add(file)
+            realm.add(file, update:true)
         }
         self.addComment(newComment: comment)
         return comment

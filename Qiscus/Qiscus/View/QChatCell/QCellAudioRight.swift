@@ -76,7 +76,6 @@ class QCellAudioRight: QCellAudio {
         fileContainer.layer.cornerRadius = 10
     }
     public override func commentChanged() {
-        self.comment!.delegate = self
         self.progressHeight.constant = 0
         self.progressContainer.isHidden = true
         self.currentTimeSlider.setValue(self.comment!.currentTimeSlider, animated: true)

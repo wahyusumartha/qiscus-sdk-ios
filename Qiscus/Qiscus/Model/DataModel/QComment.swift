@@ -151,9 +151,13 @@ public class QComment:Object {
     public var isUploading = false
     public var progress = CGFloat(0)
     
+    
     // read mark
     internal dynamic var isRead:Bool = false
     
+    override public static func primaryKey() -> String? {
+        return "uniqueId"
+    }
     override public static func ignoredProperties() -> [String] {
         return ["displayImage","delegate", "isDownloading","isUploading","progress"]
     }
@@ -635,7 +639,7 @@ public class QComment:Object {
             realm.refresh()
             if file != nil {
                 try! realm.write {
-                    realm.add(file!)
+                    realm.add(file!, update:true)
                 }
             }
             room.addComment(newComment: comment)

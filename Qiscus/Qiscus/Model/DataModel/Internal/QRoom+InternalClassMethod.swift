@@ -267,7 +267,7 @@ internal extension QRoom {
                 }
                 
                 try! realm.write {
-                    realm.add(room)
+                    realm.add(room, update: true)
                 }
                 checkParticipants(room: room)
                 cache(room: room)
