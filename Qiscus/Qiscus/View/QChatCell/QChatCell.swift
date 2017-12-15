@@ -191,8 +191,10 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
         }
     }
     public func setData(comment:QComment){
+        var oldUniqueId:String?
         if let oldComment = self.comment {
             oldComment.delegate = nil
+            oldUniqueId = oldComment.uniqueId
         }
         if let cache = QComment.cache[comment.uniqueId]{
             self.commentRaw = cache
@@ -201,7 +203,13 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
             self.commentRaw = comment
         }
         self.comment!.delegate = self
-        self.commentChanged()
+        if let uId = oldUniqueId {
+            if uId != comment.uniqueId {
+                self.commentChanged()
+            }
+        }else{
+            self.commentChanged()
+        }
     }
     
     // MARK: - commentDelegate

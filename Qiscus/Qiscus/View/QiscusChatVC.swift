@@ -1172,6 +1172,7 @@ extension QiscusChatVC:QRoomDelegate{
         self.collectionView.reloadData()
     }
     public func room(gotNewLoadMoreComment comment: QComment, newGroup: Bool) {
+        self.loadMoreControl.endRefreshing()
         let contentHeight = self.collectionView!.contentSize.height
         let offsetY = self.collectionView!.contentOffset.y
         let bottomOffset = contentHeight - offsetY
