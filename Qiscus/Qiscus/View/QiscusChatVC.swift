@@ -559,6 +559,8 @@ open class QiscusChatVC: UIViewController{
         }else if self.firstLoad {
             self.loadRoomView()
             if self.chatRoom!.comments.count == 0 {
+                Qiscus.chatRooms[self.chatRoom!.id] = self.chatRoom
+                Qiscus.chatRooms[self.chatRoom!.id]?.delegate = self
                 self.chatRoom!.sync()
             }else{
                 if let target = self.chatTarget {
@@ -1108,6 +1110,10 @@ extension QiscusChatVC:QRoomDelegate{
         let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
         DispatchQueue.main.asyncAfter(deadline: time, execute: {
             self.dismissLoading()
+            if self.chatRoom!.comments.count > 0 {
+                self.collectionView.isHidden = false
+                self.collectionView.reloadData()
+            }
             if let target = self.chatTarget {
                 if let indexPath = self.chatRoom?.getIndexPath(ofComment: target){
                     self.selectedCellIndex = indexPath
