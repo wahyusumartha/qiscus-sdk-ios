@@ -9,6 +9,11 @@
 import RealmSwift
 
 public extension QRoom {
+    public var grouppedComments:[[QComment]]{
+        get{
+            return self.getGrouppedComments()
+        }
+    }
     public var canLoadMore:Bool{
         get{
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)

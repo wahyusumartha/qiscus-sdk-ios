@@ -262,25 +262,7 @@ internal extension QRoom {
                 if QUser.getUser(email: senderEmail) == nil {
                     let _ = QUser.saveUser(withEmail: senderEmail, fullname: senderName, avatarURL: avatarURL)
                 }
-                func gotNewLoadMoreComment(comment:QComment, newGroup:Bool){
-                    if Thread.isMainThread{
-                        realm.refresh()
-                        if let cache = QRoom.room(withId: id) {
-                            cache.delegate?.room?(gotNewLoadMoreComment: comment, newGroup: newGroup)
-                        }
-                    }else{
-                        let cts = ThreadSafeReference(to:comment)
-                        DispatchQueue.main.sync {
-                            let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
-                            mainRealm.refresh()
-                            if let c = mainRealm.resolve(cts){
-                                if let cache = QRoom.room(withId: id) {
-                                    cache.delegate?.room?(gotNewLoadMoreComment: c, newGroup: newGroup)
-                                }
-                            }
-                        }
-                    }
-                }
+                
                 if room.comments.count == 0 {
                     newComment.cellPosRaw = QCellPosition.single.rawValue
                     let commentGroup = QCommentGroup()
@@ -293,10 +275,6 @@ internal extension QRoom {
                         room.comments.append(commentGroup)
                         realm.add(newComment, update: true)
                         commentGroup.comments.append(newComment)
-                    }
-                    if onTop{
-                        let cts = ThreadSafeReference(to:newComment)
-                        gotNewLoadMoreComment(comment: newComment, newGroup: true)
                     }
                 }
                 else if onTop{
@@ -312,7 +290,6 @@ internal extension QRoom {
                                 realm.add(newComment, update: true)
                                 firstCommentGroup.comments.insert(newComment, at: 0)
                             }
-                            gotNewLoadMoreComment(comment: newComment, newGroup: false)
                             let changedComment = firstCommentGroup.comments[1]
                             if changedComment.cellPos == .single {
                                 changedComment.updateCellPos(cellPos: .last)
@@ -338,7 +315,6 @@ internal extension QRoom {
                             realm.add(newComment, update: true)
                             commentGroup.comments.append(newComment)
                         }
-                        gotNewLoadMoreComment(comment: newComment, newGroup: true)
                     }
                     if room.lastComment == nil {
                         room.updateLastComentInfo(comment: newComment)
@@ -511,6 +487,7 @@ internal extension QRoom {
                             }
                             if let cache = QRoom.getRoom(withId: id) {
                                 QiscusNotification.publish(roomChange: cache, onProperty: .unreadCount)
+                                cache.delegate?.room?(didChangeUnread: cache)
                             }
                         }
                     }
@@ -634,7 +611,7 @@ internal extension QRoom {
                                 }
                             }
                             if let cache = QRoom.room(withId: id) {
-                                cache.delegate?.room(didChangeParticipant: cache)
+                                cache.delegate?.room?(didChangeParticipant: cache)
                                 QiscusNotification.publish(roomChange: cache, onProperty: .participant)
                             }
                         }
@@ -903,6 +880,17 @@ internal extension QRoom {
     internal func getParticipant(withEmail email:String)->QParticipant?{
         let data = self.participants.filter("email == '\(email)'")
         return data.first
+    }
+    internal func getGrouppedComments()->[[QComment]]{
+        var retVal = [[QComment]]()
+        for commentGroup in self.comments {
+            var group = [QComment]()
+            for comment in commentGroup.comments {
+                group.append(comment)
+            }
+            retVal.append(group)
+        }
+        return retVal
     }
 }
 

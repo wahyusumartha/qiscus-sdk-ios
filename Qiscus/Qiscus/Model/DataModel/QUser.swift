@@ -241,7 +241,7 @@ public class QUser:Object {
                     DispatchQueue.main.async {
                         if let room = QRoom.room(withUser: email) {
                             if let mainUser = QUser.user(withEmail: email){
-                                room.delegate?.room(didChangeUser: room, user: mainUser)
+                                room.delegate?.room?(didChangeUser: room, user: mainUser)
                             }
                         }
                     }

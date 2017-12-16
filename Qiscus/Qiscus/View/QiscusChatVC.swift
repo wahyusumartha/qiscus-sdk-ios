@@ -1134,9 +1134,7 @@ extension QiscusChatVC:QRoomDelegate{
             room.downloadAvatar()
         }
     }
-    public func room(didFailUpdate error: String) {
-        
-    }
+    
     public func room(didChangeUser room: QRoom, user: QUser) {
         if self.chatRoom!.type == .single {
             if user.email != QiscusMe.shared.email && self.chatRoom!.typingUser == ""{
@@ -1149,45 +1147,23 @@ extension QiscusChatVC:QRoomDelegate{
             self.loadSubtitle()
         }
     }
-    public func room(didChangeGroupComment section: Int) {
-        if let firstCell = self.collectionView.cellForItem(at: IndexPath(item: 0, section: section)) as? QChatCell {
-            firstCell.updateUserName()
-        }
-    }
-    public func room(didChangeComment section: Int, row: Int, action: String) {
-        
-    }
     
     public func room(gotNewComment comment: QComment) {
 
     }
     
-    public func room(userDidTyping userEmail: String) {
-
-    }
-    public func room(didDeleteComment section: Int, row: Int) {
+    public func room(didDeleteComment room:QRoom) {
         self.collectionView.reloadData()
     }
     public func room(didDeleteGroupComment section: Int) {
         self.collectionView.reloadData()
     }
-    public func room(gotNewLoadMoreComment comment: QComment, newGroup: Bool) {
-        self.loadMoreControl.endRefreshing()
-        let contentHeight = self.collectionView!.contentSize.height
-        let offsetY = self.collectionView!.contentOffset.y
-        let bottomOffset = contentHeight - offsetY
-        CATransaction.begin()
-        CATransaction.setDisableActions(true)
-        self.collectionView.reloadData()
-        self.collectionView.layoutIfNeeded()
-        self.collectionView!.contentOffset = CGPoint(x: 0, y: self.collectionView!.contentSize.height - bottomOffset)
-        CATransaction.commit()
-    }
+    
     public func room(didFinishLoadMore inRoom: QRoom, success: Bool, gotNewComment: Bool) {
         self.loadMoreControl.endRefreshing()
         self.loadingMore = false
     }
-    public func room(didChangeUnread lastReadCommentId:Int, unreadCount:Int) {
+    public func room(didChangeUnread inRoom:QRoom) {
         
     }
     public func hideInputBar(){

@@ -51,7 +51,7 @@ public class QRoomService:NSObject{
                         }
                         DispatchQueue.main.async {
                             if let mainRoom = QRoom.room(withId: roomId){
-                                mainRoom.delegate?.room(didFinishSync: room)
+                                mainRoom.delegate?.room?(didFinishSync: room)
                             }
                         }
                     }
@@ -98,20 +98,20 @@ public class QRoomService:NSObject{
                                         }
                                         DispatchQueue.main.async {
                                             if let cache = QRoom.room(withId: id){
-                                                cache.delegate?.room(didFinishLoadMore: cache, success: true, gotNewComment: true)
+                                                cache.delegate?.room?(didFinishLoadMore: cache, success: true, gotNewComment: true)
                                             }
                                         }
                                     }else{
                                         DispatchQueue.main.async {
                                             if let cache = QRoom.room(withId: id){
-                                                cache.delegate?.room(didFinishLoadMore: cache, success: true, gotNewComment: false)
+                                                cache.delegate?.room?(didFinishLoadMore: cache, success: true, gotNewComment: false)
                                             }
                                         }
                                     }
                                 }else{
                                     DispatchQueue.main.async {
                                         if let cache = QRoom.room(withId: id){
-                                            cache.delegate?.room(didFinishLoadMore: cache, success: false, gotNewComment: false)
+                                            cache.delegate?.room?(didFinishLoadMore: cache, success: false, gotNewComment: false)
                                             Qiscus.printLog(text: "error loadMore: null response")
                                         }
                                     }
@@ -119,7 +119,7 @@ public class QRoomService:NSObject{
                             }else{
                                 DispatchQueue.main.async {
                                     if let cache = QRoom.room(withId: id){
-                                        cache.delegate?.room(didFinishLoadMore: cache, success: false, gotNewComment: false)
+                                        cache.delegate?.room?(didFinishLoadMore: cache, success: false, gotNewComment: false)
                                         Qiscus.printLog(text: "error loadMore: cant get response from server")
                                     }
                                 }
@@ -127,7 +127,7 @@ public class QRoomService:NSObject{
                         }else{
                             DispatchQueue.main.async {
                                 if let cache = QRoom.room(withId: id){
-                                    cache.delegate?.room(didFinishLoadMore: cache, success: false, gotNewComment: false)
+                                    cache.delegate?.room?(didFinishLoadMore: cache, success: false, gotNewComment: false)
                                     Qiscus.printLog(text: "error loadMore: room not found")
                                 }
                             }
@@ -498,7 +498,6 @@ public class QRoomService:NSObject{
         }
         if let file = comment.file {
             let localPath = file.localPath
-            let indexPath = room.getIndexPath(ofComment: comment)!
             let filename = file.filename
             let mimeType = file.mimeType
             
@@ -582,7 +581,6 @@ public class QRoomService:NSObject{
                                             comment.updateUploading(uploading: false)
                                             comment.updateProgress(progress: 0)
                                             comment.updateStatus(status: .failed)
-                                            room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
                                         }}
                                         onError(room,comment,"Fail to upload file, no readable response")
                                     }
@@ -594,7 +592,6 @@ public class QRoomService:NSObject{
                                         comment.updateUploading(uploading: false)
                                         comment.updateProgress(progress: 0)
                                         comment.updateStatus(status: .failed)
-                                        room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
                                     }}
                                     onError(room,comment,"Fail to upload file, no readable response")
                                 }
@@ -619,7 +616,6 @@ public class QRoomService:NSObject{
                                 comment.updateUploading(uploading: false)
                                 comment.updateProgress(progress: 0)
                                 comment.updateStatus(status: .failed)
-                                room.delegate?.room(didChangeComment: indexPath.section, row: indexPath.item, action: "status")
                             }}
                             onError(room,comment,"Fail to upload file, \(error)")
                             break

@@ -7,33 +7,64 @@
 //
 
 import UIKit
-@objc public protocol QConversationCollectionViewDelegate{
-    @objc optional func conversationCollectionView(lastRowVisibilityChange visibility:Bool)
-}
+
+
 public class QConversationCollectionView: UICollectionView {
-    public var room:QRoom?
+    public var room:QRoom? {
+        didSet{
+            if let oldRoom = oldValue {
+                oldRoom.delegate = self
+            }
+            if let r = room {
+                Qiscus.chatRooms[r.id] = r
+                r.delegate = self
+            }
+        }
+    }
     public var typingUsers = [String:QUser]()
-    public var conversationDelegate:QConversationCollectionViewDelegate?
+    
+    public var viewDelegate:QConversationViewDelegate?
+    public var roomDelegate:QConversationViewRoomDelegate?
+    public var cellDelegate:QConversationViewCellDelegate?
+    public var dataDelegate:QConversationViewDataDelegate?
+    
     public var typingUserTimer = [String:Timer]()
     
     public var processingTyping = false
     public var previewedTypingUsers = [String]()
     public var isPresence = false
     
-    var isLastRowVisible: Bool = false {
-        didSet{
-            if oldValue != isLastRowVisible{
-                self.conversationDelegate?.conversationCollectionView?(lastRowVisibilityChange: self.isLastRowVisible)
+    public var forwardAction:((QComment)->Void)? = nil
+    public var infoAction:((QComment)->Void)? = nil
+    
+    internal var messages = [[QComment]]()
+        
+    var isLastRowVisible: Bool {
+        get{
+            if self.messages.count > 0 {
+                let lastSection = self.messages.count - 1
+                let lastItem = self.messages[lastSection].count - 1
+                for visibleIndex in self.indexPathsForVisibleItems{
+                    if visibleIndex.section == lastSection && visibleIndex.item == lastItem{
+                        return true
+                    }
+                }
+                return false
+            }else{
+                return true
             }
         }
     }
     
-    // Only override draw() if you perform custom drawing.
-    // An empty implementation adversely affects performance during animation.
+    // Overrided method
+    @objc public var registerCustomCell:(()->Void)? = nil
+    
     override public func draw(_ rect: CGRect) {
         super.draw(rect)
         self.delegate = self
         self.dataSource = self
+        self.registerCell()
+        self.subscribeEvent()
     }
  
     open func registerCell(){
@@ -60,10 +91,11 @@ public class QConversationCollectionView: UICollectionView {
         self.register(UINib(nibName: "QCellContactLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellContactLeft")
         self.register(UINib(nibName: "QCellLocationRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellLocationRight")
         self.register(UINib(nibName: "QCellLocationLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellLocationLeft")
+        self.registerCustomCell?()
     }
     public func subscribeEvent(){
         let center: NotificationCenter = NotificationCenter.default
-        center.addObserver(self, selector: #selector(QConversationCollectionView.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
+
         center.addObserver(self, selector: #selector(QConversationCollectionView.commentDeleted(_:)), name: QiscusNotification.COMMENT_DELETE, object: nil)
         center.addObserver(self, selector: #selector(QConversationCollectionView.userTyping(_:)), name: QiscusNotification.USER_TYPING, object: nil)
     }
@@ -214,74 +246,102 @@ public class QConversationCollectionView: UICollectionView {
             }
         }
     }
-}
-extension QConversationCollectionView:UICollectionViewDelegate{
-    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    
+    open func cellHeightForComment (comment:QComment, defaultHeight height:CGFloat, firstInSection first:Bool)->CGFloat{
+        var retHeight = height
         
-    }
-    public func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        
-    }
-    public func collectionView(_ collectionView: UICollectionView, shouldShowMenuForItemAt indexPath: IndexPath) -> Bool {
-        return false
-    }
-    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        
-    }
-    public func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        
-    }
-    public func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
-        return false
-    }
-    public func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
-        
-    }
-    public func collectionView(_ collectionView: UICollectionView, willDisplaySupplementaryView view: UICollectionReusableView, forElementKind elementKind: String, at indexPath: IndexPath) {
-        
-    }
-    public func collectionView(_ collectionView: UICollectionView, didEndDisplayingSupplementaryView view: UICollectionReusableView, forElementOfKind elementKind: String, at indexPath: IndexPath) {
-        
-    }
-}
-extension QConversationCollectionView:UICollectionViewDataSource{
-    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        return UICollectionViewCell()
-    }
-    public func numberOfSections(in collectionView: UICollectionView) -> Int {
-        var sectionNumber = 0
-        
-        if let r = self.room {
-            sectionNumber = r.comments.count
-        }
-        if self.typingUsers.count > 0 {
-            sectionNumber += 1
-        }
-        return sectionNumber
-    }
-    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        var itemNumber = 0
-        
-        if let room = self.room {
-            if section < room.comments.count {
-                let group = room.comments[section]
-                itemNumber = group.comments.count
+        switch comment.type {
+        case .card, .contact    : break
+        case .video, .image     :
+            if retHeight > 0 {
+                retHeight += 151 ;
             }else{
-                return 1
+                retHeight = 140
             }
+            break
+        case .audio             : retHeight = 83 ; break
+        case .file              : retHeight = 67  ; break
+        case .reply             : retHeight += 88 ; break
+        case .system            : retHeight += 46 ; break
+        case .text              : retHeight += 15 ; break
+        case .document          : retHeight += 7; break
+        default                 : retHeight += 20 ; break
         }
         
-        return itemNumber
+        if (comment.type != .system && first) {
+            retHeight += 20
+        }
+        return retHeight
     }
 }
-extension QConversationCollectionView:UICollectionViewDelegateFlowLayout{
-    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize.zero
-    }
-    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
-        return CGSize.zero
-    }
-    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize.zero
-    }
-}
+//extension QConversationCollectionView:UICollectionViewDelegate{
+//    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+//        
+//    }
+//    public func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+//        
+//    }
+//    public func collectionView(_ collectionView: UICollectionView, shouldShowMenuForItemAt indexPath: IndexPath) -> Bool {
+//        return false
+//    }
+//    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+//        
+//    }
+//    public func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+//        
+//    }
+//    public func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
+//        return false
+//    }
+//    public func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
+//        
+//    }
+//    public func collectionView(_ collectionView: UICollectionView, willDisplaySupplementaryView view: UICollectionReusableView, forElementKind elementKind: String, at indexPath: IndexPath) {
+//        
+//    }
+//    public func collectionView(_ collectionView: UICollectionView, didEndDisplayingSupplementaryView view: UICollectionReusableView, forElementOfKind elementKind: String, at indexPath: IndexPath) {
+//        
+//    }
+//}
+//extension QConversationCollectionView:UICollectionViewDataSource{
+//    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+//        return UICollectionViewCell()
+//    }
+//    public func numberOfSections(in collectionView: UICollectionView) -> Int {
+//        var sectionNumber = 0
+//        
+//        if let r = self.room {
+//            sectionNumber = r.comments.count
+//        }
+//        if self.typingUsers.count > 0 {
+//            sectionNumber += 1
+//        }
+//        return sectionNumber
+//    }
+//    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+//        var itemNumber = 0
+//        
+//        if let room = self.room {
+//            if section < room.comments.count {
+//                let group = room.comments[section]
+//                itemNumber = group.comments.count
+//            }else{
+//                return 1
+//            }
+//        }
+//        
+//        return itemNumber
+//    }
+//}
+//extension QConversationCollectionView:UICollectionViewDelegateFlowLayout{
+//    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+//        return CGSize.zero
+//    }
+//    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
+//        return CGSize.zero
+//    }
+//    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+//        return CGSize.zero
+//    }
+//}
+

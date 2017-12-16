@@ -198,8 +198,6 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
             do{
                 var data:Data = try Data(contentsOf: dataURL, options: NSData.ReadingOptions.mappedIfSafe)
                 let mediaSize = Double(data.count) / 1024.0
-                let time = Double(Date().timeIntervalSince1970)
-                let timeToken = UInt64(time * 10000)
                 
                 if mediaSize > Qiscus.maxUploadSizeInKB {
                     self.processingFile = false

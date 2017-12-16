@@ -22,7 +22,7 @@ protocol ChatCellDelegate {
     func getInfo(comment:QComment)
     func didTapFile(comment:QComment)
 }
-class QChatCell: UICollectionViewCell, QCommentDelegate {
+public class QChatCell: UICollectionViewCell, QCommentDelegate {
     
     var delegate: ChatCellDelegate?
     
@@ -49,10 +49,8 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
             ]
         }
     }
-    override func awakeFromNib() {
+    override public func awakeFromNib() {
         super.awakeFromNib()
-//        let center: NotificationCenter = NotificationCenter.default
-//        center.addObserver(self, selector: #selector(QChatCell.messageStatusNotif(_:)), name: QiscusNotification.MESSAGE_STATUS, object: nil)
     }
     @objc private func messageStatusNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
@@ -213,25 +211,25 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
     }
     
     // MARK: - commentDelegate
-    func comment(didChangeStatus comment:QComment, status:QCommentStatus){
+    public func comment(didChangeStatus comment:QComment, status:QCommentStatus){
         if comment.uniqueId == self.comment?.uniqueId{
             self.updateStatus(toStatus: status)
         }
     }
-    func comment(didChangePosition comment:QComment, position:QCellPosition){}
+    public func comment(didChangePosition comment:QComment, position:QCellPosition){}
     
     // Audio comment delegate
-    func comment(didChangeDurationLabel comment:QComment, label:String){}
-    func comment(didChangeCurrentTimeSlider comment:QComment, value:Float){}
-    func comment(didChangeSeekTimeLabel comment:QComment, label:String){}
-    func comment(didChangeAudioPlaying comment:QComment, playing:Bool){}
+    public func comment(didChangeDurationLabel comment:QComment, label:String){}
+    public func comment(didChangeCurrentTimeSlider comment:QComment, value:Float){}
+    public func comment(didChangeSeekTimeLabel comment:QComment, label:String){}
+    public func comment(didChangeAudioPlaying comment:QComment, playing:Bool){}
     
     // File comment delegate
-    func comment(didDownload comment:QComment, downloading:Bool){
+    public func comment(didDownload comment:QComment, downloading:Bool){
         
     }
-    func comment(didUpload comment:QComment, uploading:Bool){}
-    func comment(didChangeProgress comment:QComment, progress:CGFloat){}
+    public func comment(didUpload comment:QComment, uploading:Bool){}
+    public func comment(didChangeProgress comment:QComment, progress:CGFloat){}
     
     
 }
