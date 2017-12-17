@@ -622,11 +622,13 @@ public class QComment:Object {
         }
         
         var file:QFile? = nil
+        
         if let fileRef = self.file {
             file = QFile()
             file!.id = uniqueID
             file!.roomId = roomId
             file!.url = fileRef.url
+            file!.filename = fileRef.filename
             file!.senderEmail = QiscusMe.shared.email
             file!.localPath = fileRef.localPath
             file!.mimeType = fileRef.mimeType
@@ -1010,10 +1012,25 @@ public class QComment:Object {
             temp.data = "\(json["payload"])"
             var type = QiscusFileType.file
             let fileURL = json["payload"]["url"].stringValue
+            var filename = temp.fileName(text: fileURL)
+            
+            if filename.contains("-"){
+                let nameArr = filename.split(separator: "-")
+                var i = 0
+                for comp in nameArr {
+                    switch i {
+                    case 0 : filename = "" ; break
+                    case 1 : filename = "\(String(comp))"
+                    default: filename = "\(filename)-\(comp)"
+                    }
+                    i += 1
+                }
+            }
             if temp.file == nil {
                 let file = QFile()
                 file.id = temp.uniqueId
                 file.url = fileURL
+                file.filename = filename
                 file.senderEmail = temp.senderEmail
                 type = file.type
             }
@@ -1039,11 +1056,26 @@ public class QComment:Object {
             if temp.text.hasPrefix("[file]"){
                 var type = QiscusFileType.file
                 let fileURL = QFile.getURL(fromString: temp.text)
+                var filename = temp.fileName(text: fileURL)
+                
+                if filename.contains("-"){
+                    let nameArr = filename.split(separator: "-")
+                    var i = 0
+                    for comp in nameArr {
+                        switch i {
+                        case 0 : filename = "" ; break
+                        case 1 : filename = "\(String(comp))"
+                        default: filename = "\(filename)-\(comp)"
+                        }
+                        i += 1
+                    }
+                }
                 if temp.file == nil {
                     let file = QFile()
                     file.id = temp.uniqueId
                     file.url = fileURL
                     file.senderEmail = temp.senderEmail
+                    file.filename = filename
                     type = file.type
                 }
                 switch type {

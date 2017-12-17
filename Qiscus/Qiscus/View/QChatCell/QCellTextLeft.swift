@@ -62,7 +62,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         LinkContainer.isHidden = true
     }
     func openLink(){
-        self.delegate?.didTouchLink(onCell: self)
+        self.delegate?.didTouchLink(onComment: self.comment!)
     }
     
     func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange) -> Bool {

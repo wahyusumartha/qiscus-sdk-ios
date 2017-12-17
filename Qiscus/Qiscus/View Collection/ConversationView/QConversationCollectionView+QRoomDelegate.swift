@@ -21,9 +21,15 @@ extension QConversationCollectionView: QRoomDelegate {
     public func room(didFinishSync room: QRoom) {
         if let r = self.room {
             if r.id == room.id {
-                self.messages = r.grouppedComments
-                self.reloadData()
-                self.roomDelegate?.roomDelegate?(didFinishSync: r)
+                let rid = r.id
+                QiscusBackgroundThread.async {
+                    if let rts = QRoom.threadSaveRoom(withId: rid){
+                        self.messagesId = rts.grouppedCommentsUID
+                        DispatchQueue.main.async {
+                            self.roomDelegate?.roomDelegate?(didFinishSync: r)
+                        }
+                    }
+                }
             }
         }
     }
@@ -65,10 +71,16 @@ extension QConversationCollectionView: QRoomDelegate {
     public func room(gotNewComment comment: QComment) {
         if let r = self.room {
             if r.id == comment.roomId {
-                self.messages = r.grouppedComments
-                self.reloadData()
-                if comment.senderEmail == QiscusMe.shared.email {
-                    self.scrollToBottom(true)
+                let rid = r.id
+                QiscusBackgroundThread.async {
+                    if let rts = QRoom.threadSaveRoom(withId: rid){
+                        self.messagesId = rts.grouppedCommentsUID
+                        DispatchQueue.main.async {
+                            if comment.senderEmail == QiscusMe.shared.email || self.isLastRowVisible {
+                                self.scrollToBottom(true)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -77,8 +89,12 @@ extension QConversationCollectionView: QRoomDelegate {
     public func room(didDeleteComment room:QRoom) {
         if let r = self.room {
             if r.id == room.id {
-                self.messages = r.grouppedComments
-                self.reloadData()
+                let rid = r.id
+                QiscusBackgroundThread.async {
+                    if let rts = QRoom.threadSaveRoom(withId: rid){
+                        self.messagesId = rts.grouppedCommentsUID
+                    }
+                }
             }
         }
     }
@@ -86,19 +102,41 @@ extension QConversationCollectionView: QRoomDelegate {
     public func room(didFinishLoadMore inRoom: QRoom, success: Bool, gotNewComment: Bool) {
         if let r = self.room {
             if r.id == inRoom.id {
+                self.loadMoreControl.endRefreshing()
                 if success && gotNewComment {
-                    self.messages = r.grouppedComments
+                    let rid = r.id
                     let contentHeight = self.contentSize.height
                     let offsetY = self.contentOffset.y
                     let bottomOffset = contentHeight - offsetY
-                    CATransaction.begin()
-                    CATransaction.setDisableActions(true)
-                    self.reloadData()
-                    self.layoutIfNeeded()
-                    self.contentOffset = CGPoint(x: 0, y: self.contentSize.height - bottomOffset)
-                    CATransaction.commit()
+                    QiscusBackgroundThread.async {
+                        if let rts = QRoom.threadSaveRoom(withId: rid){
+                            let newmessages = rts.grouppedCommentsUID
+                            DispatchQueue.main.async {
+                                CATransaction.begin()
+                                CATransaction.setDisableActions(true)
+                                self.messagesId = newmessages
+                                self.contentOffset = CGPoint(x: 0, y: self.contentSize.height - bottomOffset)
+                                CATransaction.commit()
+                                self.loadMoreControl.endRefreshing()
+                                self.loadMoreControl.removeFromSuperview()
+                                if !r.canLoadMore {
+                                    self.loadMoreControl.endRefreshing()
+                                }
+                            }
+                        }
+                        self.loadingMore = false
+                    }
+                }else{
+                    self.loadMoreControl.endRefreshing()
+                     self.loadingMore = false
                 }
+            }else{
+                self.loadMoreControl.endRefreshing()
+                 self.loadingMore = false
             }
+        }else{
+            self.loadMoreControl.endRefreshing()
+            self.loadingMore = false
         }
     }
     public func room(didChangeUnread inRoom:QRoom) {

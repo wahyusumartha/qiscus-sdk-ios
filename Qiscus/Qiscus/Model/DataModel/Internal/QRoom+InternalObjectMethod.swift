@@ -705,13 +705,28 @@ internal extension QRoom {
             break
         case "file_attachment":
             newComment.data = "\(json["payload"])"
-            var type = QiscusFileType.file
             let fileURL = json["payload"]["url"].stringValue
+            var filename = newComment.fileName(text: fileURL)
+            
+            if filename.contains("-"){
+                let nameArr = filename.split(separator: "-")
+                var i = 0
+                for comp in nameArr {
+                    switch i {
+                    case 0 : filename = "" ; break
+                    case 1 : filename = "\(String(comp))"
+                    default: filename = "\(filename)-\(comp)"
+                    }
+                    i += 1
+                }
+            }
+            var type = QiscusFileType.file
             if newComment.file == nil {
                 let file = QFile()
                 file.id = newComment.uniqueId
                 file.url = fileURL
                 file.senderEmail = newComment.senderEmail
+                file.filename = filename
                 try! realm.write {
                     realm.add(file, update:true)
                 }
@@ -744,10 +759,25 @@ internal extension QRoom {
             if newComment.text.hasPrefix("[file]"){
                 var type = QiscusFileType.file
                 let fileURL = QFile.getURL(fromString: newComment.text)
+                var filename = newComment.fileName(text: fileURL)
+                
+                if filename.contains("-"){
+                    let nameArr = filename.split(separator: "-")
+                    var i = 0
+                    for comp in nameArr {
+                        switch i {
+                        case 0 : filename = "" ; break
+                        case 1 : filename = "\(String(comp))"
+                        default: filename = "\(filename)-\(comp)"
+                        }
+                        i += 1
+                    }
+                }
                 if newComment.file == nil {
                     let file = QFile()
                     file.id = newComment.uniqueId
                     file.url = fileURL
+                    file.filename = filename
                     file.senderEmail = newComment.senderEmail
                     try! realm.write {
                         realm.add(file, update:true)
@@ -885,8 +915,25 @@ internal extension QRoom {
         var retVal = [[QComment]]()
         for commentGroup in self.comments {
             var group = [QComment]()
+            var uidCollection = [String]()
             for comment in commentGroup.comments {
-                group.append(comment)
+                if !uidCollection.contains(comment.uniqueId){
+                    uidCollection.append(comment.uniqueId)
+                    group.append(comment)
+                }
+            }
+            retVal.append(group)
+        }
+        return retVal
+    }
+    internal func getGrouppedCommentsUID()->[[String]]{
+        var retVal = [[String]]()
+        for commentGroup in self.comments {
+            var group = [String]()
+            for comment in commentGroup.comments {
+                if !group.contains(comment.uniqueId) {
+                    group.append(comment.uniqueId)
+                }
             }
             retVal.append(group)
         }

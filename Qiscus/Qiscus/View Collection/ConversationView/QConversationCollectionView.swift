@@ -7,7 +7,8 @@
 //
 
 import UIKit
-
+import MobileCoreServices
+import AVFoundation
 
 public class QConversationCollectionView: UICollectionView {
     public var room:QRoom? {
@@ -16,8 +17,20 @@ public class QConversationCollectionView: UICollectionView {
                 oldRoom.delegate = self
             }
             if let r = room {
+                let rid = r.id
                 Qiscus.chatRooms[r.id] = r
                 r.delegate = self
+                self.registerCell()
+                self.unsubscribeEvent()
+                self.subscribeEvent()
+                self.delegate = self
+                self.dataSource = self
+                QiscusBackgroundThread.async {
+                    if let rts = QRoom.threadSaveRoom(withId: rid){
+                        self.messagesId = rts.grouppedCommentsUID
+                    }
+                }
+                
             }
         }
     }
@@ -26,7 +39,6 @@ public class QConversationCollectionView: UICollectionView {
     public var viewDelegate:QConversationViewDelegate?
     public var roomDelegate:QConversationViewRoomDelegate?
     public var cellDelegate:QConversationViewCellDelegate?
-    public var dataDelegate:QConversationViewDataDelegate?
     
     public var typingUserTimer = [String:Timer]()
     
@@ -37,36 +49,54 @@ public class QConversationCollectionView: UICollectionView {
     public var forwardAction:((QComment)->Void)? = nil
     public var infoAction:((QComment)->Void)? = nil
     
-    internal var messages = [[QComment]]()
-        
-    var isLastRowVisible: Bool {
-        get{
-            if self.messages.count > 0 {
-                let lastSection = self.messages.count - 1
-                let lastItem = self.messages[lastSection].count - 1
-                for visibleIndex in self.indexPathsForVisibleItems{
-                    if visibleIndex.section == lastSection && visibleIndex.item == lastItem{
-                        return true
-                    }
+    internal var messagesId = [[String]](){
+        didSet{
+            DispatchQueue.main.async {
+                self.reloadData()
+                if oldValue.count == 0 {
+                    self.layoutSubviews()
+                    self.layoutIfNeeded()
+                    self.scrollToBottom()
                 }
-                return false
-            }else{
-                return true
             }
         }
     }
+    internal var loadingMore = false
+    
+    var isLastRowVisible: Bool = false
+    
+    // MARK: Audio Variable
+    var audioPlayer: AVAudioPlayer?
+    var audioTimer: Timer?
+    var activeAudioCell: QCellAudio?
     
     // Overrided method
     @objc public var registerCustomCell:(()->Void)? = nil
     
+    var loadMoreControl = UIRefreshControl()
+    public var targetComment:QComment?
+    
     override public func draw(_ rect: CGRect) {
-        super.draw(rect)
-        self.delegate = self
-        self.dataSource = self
-        self.registerCell()
-        self.subscribeEvent()
+//        super.draw(rect)
+//        self.delegate = self
+//        self.dataSource = self
+//        self.registerCell()
+//        self.unsubscribeEvent()
+//        self.subscribeEvent()
+        self.scrollsToTop = false
+        if self.viewWithTag(1721) == nil {
+            self.loadMoreControl.addTarget(self, action: #selector(self.loadMore), for: UIControlEvents.valueChanged)
+            self.loadMoreControl.tag = 1721
+            self.addSubview(self.loadMoreControl)
+        }
+        let layout = self.collectionViewLayout as? UICollectionViewFlowLayout
+        layout?.sectionHeadersPinToVisibleBounds = true
+        layout?.sectionFootersPinToVisibleBounds = true
+        self.decelerationRate = UIScrollViewDecelerationRateNormal
+        
+        
     }
- 
+    
     open func registerCell(){
         self.register(UINib(nibName: "QCellTypingLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellTypingLeft")
         self.register(UINib(nibName: "QChatEmptyFooter",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: "emptyFooter")
@@ -75,7 +105,8 @@ public class QConversationCollectionView: UICollectionView {
         self.register(UINib(nibName: "QChatFooterLeft",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: "cellFooterLeft")
         self.register(UINib(nibName: "QChatFooterRight",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: "cellFooterRight")
         self.register(UINib(nibName: "QCellSystem",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellSystem")
-        self.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "EmptyCell")
+        self.register(UINib(nibName: "QCellDocLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellDocLeft")
+        self.register(UINib(nibName: "QCellDocRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellDocRight")
         self.register(UINib(nibName: "QCellCardLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellCardLeft")
         self.register(UINib(nibName: "QCellCardRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellCardRight")
         self.register(UINib(nibName: "QCellTextLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellTextLeft")
@@ -154,10 +185,10 @@ public class QConversationCollectionView: UICollectionView {
         self.previewedTypingUsers = tempPreviewedUser
         func scroll(){
             if self.isLastRowVisible{
-                let section = self.numberOfSections - 1
-                let item = self.numberOfItems(inSection: section)
-                let indexPath = IndexPath(item: item, section: section)
-                self.scrollToItem(at: indexPath, at: .bottom, animated: true)
+                CATransaction.begin()
+                CATransaction.setDisableActions(true)
+                self.contentOffset = CGPoint(x: 0, y: self.contentSize.height)
+                CATransaction.commit()
             }
         }
         if (beforeEmpty && self.typingUsers.count > 0) {
@@ -236,12 +267,18 @@ public class QConversationCollectionView: UICollectionView {
     // MARK: public Method
     func scrollToBottom(_ animated:Bool = false){
         if self.room != nil {
-            if self.numberOfSections > 0 {
-                let section = self.numberOfSections - 1
-                if self.numberOfItems(inSection: section) > 0 {
-                    let item = self.numberOfItems(inSection: section) - 1
-                    let lastIndexPath = IndexPath(row: item, section: section)
-                    self.scrollToItem(at: lastIndexPath, at: .bottom, animated: animated)
+            if self.messagesId.count > 0 {
+                var lastSection = self.messagesId.count - 1
+                var lastItem = self.messagesId[lastSection].count - 1
+                
+                if self.typingUsers.count > 0 {
+                    lastSection += 1
+                    lastItem = 0
+                }
+                if lastSection >= 0 && lastItem >= 0 {
+                    let indexPath = IndexPath(item: lastItem, section: lastSection)
+                    self.layoutIfNeeded()
+                    self.scrollToItem(at: indexPath, at: .bottom, animated: animated)
                 }
             }
         }
@@ -273,75 +310,87 @@ public class QConversationCollectionView: UICollectionView {
         }
         return retHeight
     }
+    
+    func loadMore(){
+        if let room = self.room {
+            let id = room.id
+            self.loadMoreComment(roomId: id)
+        }
+    }
+    func loadMoreComment(roomId:String){
+        QiscusBackgroundThread.async {
+            if self.loadingMore { return }
+            self.loadingMore = true
+            if let r = QRoom.threadSaveRoom(withId: roomId){
+                if r.canLoadMore{
+                    r.loadMore()
+                }else{
+                    self.loadingMore = false
+                    DispatchQueue.main.async {
+                        self.loadMoreControl.endRefreshing()
+                        self.loadMoreControl.removeFromSuperview()
+                    }
+                }
+            }else{
+                self.loadingMore = false
+                DispatchQueue.main.async {
+                    self.loadMoreControl.endRefreshing()
+                }
+            }
+        }
+    }
+    func scrollToComment(comment:QComment, completion:@escaping ((QChatCell)->Void)){
+        if let room = self.room {
+            let roomId = room.id
+            let uniqueId = comment.uniqueId
+            QiscusBackgroundThread.async {
+                if let rts = QRoom.threadSaveRoom(withId: roomId){
+                    var section = 0
+                    var found = false
+                    for group in rts.comments{
+                        var item = 0
+                        if group.id.contains("\(uniqueId)"){
+                            for c in group.comments {
+                                if c.uniqueId == uniqueId {
+                                    found = true
+                                    break
+                                }else{
+                                    item += 1
+                                }
+                            }
+                        }
+                        if found {
+                            break
+                        }else{
+                            section += 1
+                        }
+                        let targetIndexPath = IndexPath(item: item, section: section)
+                        DispatchQueue.main.async {
+                            self.layoutIfNeeded()
+                            self.scrollToItem(at: targetIndexPath, at: .top, animated: true)
+                            if let cell = self.cellForItem(at: targetIndexPath) as? QChatCell {
+                                completion(cell)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    public func refreshData(){
+        if let room = self.room {
+            let rid = room.id
+            QiscusBackgroundThread.async {
+                if let rts = QRoom.threadSaveRoom(withId: rid){
+                    self.messagesId = rts.grouppedCommentsUID
+                }
+            }
+        }
+    }
+//    override public func reloadData() {
+////        if let r = self.room {
+////            self.messages = r.grouppedComments
+////        }
+//        super.reloadData()
+//    }
 }
-//extension QConversationCollectionView:UICollectionViewDelegate{
-//    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-//        
-//    }
-//    public func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-//        
-//    }
-//    public func collectionView(_ collectionView: UICollectionView, shouldShowMenuForItemAt indexPath: IndexPath) -> Bool {
-//        return false
-//    }
-//    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-//        
-//    }
-//    public func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-//        
-//    }
-//    public func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
-//        return false
-//    }
-//    public func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
-//        
-//    }
-//    public func collectionView(_ collectionView: UICollectionView, willDisplaySupplementaryView view: UICollectionReusableView, forElementKind elementKind: String, at indexPath: IndexPath) {
-//        
-//    }
-//    public func collectionView(_ collectionView: UICollectionView, didEndDisplayingSupplementaryView view: UICollectionReusableView, forElementOfKind elementKind: String, at indexPath: IndexPath) {
-//        
-//    }
-//}
-//extension QConversationCollectionView:UICollectionViewDataSource{
-//    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-//        return UICollectionViewCell()
-//    }
-//    public func numberOfSections(in collectionView: UICollectionView) -> Int {
-//        var sectionNumber = 0
-//        
-//        if let r = self.room {
-//            sectionNumber = r.comments.count
-//        }
-//        if self.typingUsers.count > 0 {
-//            sectionNumber += 1
-//        }
-//        return sectionNumber
-//    }
-//    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-//        var itemNumber = 0
-//        
-//        if let room = self.room {
-//            if section < room.comments.count {
-//                let group = room.comments[section]
-//                itemNumber = group.comments.count
-//            }else{
-//                return 1
-//            }
-//        }
-//        
-//        return itemNumber
-//    }
-//}
-//extension QConversationCollectionView:UICollectionViewDelegateFlowLayout{
-//    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-//        return CGSize.zero
-//    }
-//    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
-//        return CGSize.zero
-//    }
-//    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-//        return CGSize.zero
-//    }
-//}
-

@@ -43,6 +43,7 @@ public class QParticipant:Object {
                     if let participant = room.participant(withEmail: email){
                         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                         realm.refresh()
+                        if room.isInvalidated {return}
                         if participant.lastDeliveredCommentId < commentId {
                             try! realm.write {
                                 participant.lastDeliveredCommentId = commentId

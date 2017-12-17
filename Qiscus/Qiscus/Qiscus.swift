@@ -1278,8 +1278,6 @@ extension Qiscus { // Public class API to get room
                     chatView.view.layoutSubviews()
                     chatView.inputBar.layoutSubviews()
                     chatView.inputText.commonInit()
-                    chatView.collectionView.layoutSubviews()
-                    chatView.scrollToBottom()
                     
                     Qiscus.shared.chatViews[room.id] = chatView
                     allView.append(chatView)
@@ -1308,8 +1306,7 @@ extension Qiscus { // Public class API to get room
                     chatView.view.layoutSubviews()
                     chatView.inputBar.layoutSubviews()
                     chatView.inputText.commonInit()
-                    chatView.collectionView.layoutSubviews()
-                    chatView.scrollToBottom()
+                    
 
                     Qiscus.shared.chatViews[room.id] = chatView
                 }

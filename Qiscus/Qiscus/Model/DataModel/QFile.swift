@@ -28,6 +28,7 @@ public class QFile:Object{
     public dynamic var senderEmail:String = ""
     public dynamic var size:Double = 0
     public dynamic var pages:Int = 0
+    public dynamic var filename:String = ""
     
     var uploadProgress:Double = 0
     var downloadProgress:Double = 0
@@ -40,6 +41,7 @@ public class QFile:Object{
     }
     
     // MARK: - Getter Variable
+    
     public var thumbURL:String{
         get{
             var thumbURL = self.url.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/").replacingOccurrences(of: " ", with: "%20")
@@ -66,22 +68,7 @@ public class QFile:Object{
             return QUser.user(withEmail: self.senderEmail)
         }
     }
-    public var filename:String {
-        get {
-            var mediaURL:URL?
-            var fileName:String = ""
-            if(self.localPath == ""){
-                let remoteURL = self.url.replacingOccurrences(of: " ", with: "%20")
-                mediaURL = URL(string: remoteURL)!
-                fileName = mediaURL!.lastPathComponent.replacingOccurrences(of: "%20", with: "_")
-            }else if self.localPath.range(of: "/") == nil{
-                fileName = self.localPath as String
-            }else{
-                fileName = String(self.localPath.split(separator: "/").last!)
-            }
-            return fileName
-        }
-    }
+    
     public var ext:String {
         get{
             var ext = ""

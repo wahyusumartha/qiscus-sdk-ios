@@ -14,6 +14,11 @@ public extension QRoom {
             return self.getGrouppedComments()
         }
     }
+    public var grouppedCommentsUID:[[String]]{
+        get{
+            return self.getGrouppedCommentsUID()
+        }
+    }
     public var canLoadMore:Bool{
         get{
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)

@@ -32,7 +32,6 @@ import AVFoundation
     @objc optional func room(didChangeUser room:QRoom, user:QUser)
     @objc optional func room(didFinishSync room:QRoom)
     @objc optional func room(gotNewGroupComment onIndex:Int)
-    @objc optional func room(gotNewCommentOn groupIndex:Int, withCommentIndex index:Int)
     @objc optional func room(gotNewComment comment:QComment)
     
     @objc optional func room(didFinishLoadMore inRoom:QRoom, success:Bool, gotNewComment:Bool)
@@ -252,6 +251,7 @@ public class QRoom:Object {
         file.roomId = self.id
         file.url = fileName
         file.senderEmail = QiscusMe.shared.email
+        file.filename = filename
         
         
         if let mime = QiscusFileHelper.mimeTypes["\(fileExt)"] {

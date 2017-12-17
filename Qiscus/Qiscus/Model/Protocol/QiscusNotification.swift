@@ -97,6 +97,15 @@ public class QiscusNotification: NSObject {
             if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
                 roomDelegate.gotNewComment(comment)
             }
+            let id = room.id
+            let uid = comment.uniqueId
+            DispatchQueue.main.async {
+                if let mainRoom = QRoom.room(withId: id){
+                    if let c = QComment.comment(withUniqueId: uid){
+                        mainRoom.delegate?.room?(gotNewComment: c)
+                    }
+                }
+            }
         }
     }
     public class func publish(commentDeleteOnRoom room:QRoom){

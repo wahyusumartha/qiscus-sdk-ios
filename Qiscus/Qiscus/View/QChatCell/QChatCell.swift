@@ -10,12 +10,12 @@ import UIKit
 import SwiftyJSON
 
 protocol ChatCellDelegate {
-    func didChangeSize(onCell cell:QChatCell)
-    func didTapCell(withData data:QComment)
-    func didTouchLink(onCell cell:QChatCell)
-    func didTapPostbackButton(withData data: JSON)
-    func didTapAccountLinking(withData data: JSON)
-    func didTapSaveContact(withData data:QComment)
+    func didTapCell(onComment comment: QComment)
+    func didTouchLink(onComment comment: QComment)
+    func didTapPostbackButton(onComment comment: QComment, index:Int)
+    func didTapAccountLinking(onComment comment: QComment)
+    func didTapSaveContact(onComment comment: QComment)
+    func didTapCardButton(onComment comment:QComment, index:Int)
     func didShare(comment: QComment)
     func didForward(comment: QComment)
     func didReply(comment:QComment)
@@ -51,6 +51,16 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
     }
     override public func awakeFromNib() {
         super.awakeFromNib()
+        let resendMenuItem: UIMenuItem = UIMenuItem(title: "Resend", action: #selector(QChatCell.resend))
+        let deleteMenuItem: UIMenuItem = UIMenuItem(title: "Delete", action: #selector(QChatCell.deleteComment))
+        let replyMenuItem: UIMenuItem = UIMenuItem(title: "Reply", action: #selector(QChatCell.reply))
+        let forwardMenuItem: UIMenuItem = UIMenuItem(title: "Forward", action: #selector(QChatCell.forward))
+        let shareMenuItem: UIMenuItem = UIMenuItem(title: "Share", action: #selector(QChatCell.share))
+        let infoMenuItem: UIMenuItem = UIMenuItem(title: "Info", action: #selector(QChatCell.info))
+        
+        let menuItems:[UIMenuItem] = [resendMenuItem,deleteMenuItem,replyMenuItem,forwardMenuItem,shareMenuItem,infoMenuItem]
+        
+        UIMenuController.shared.menuItems = menuItems
     }
     @objc private func messageStatusNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
