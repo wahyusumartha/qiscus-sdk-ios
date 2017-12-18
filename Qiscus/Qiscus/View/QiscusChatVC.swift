@@ -22,10 +22,19 @@ import RealmSwift
     func chatVC(enableForwardAction viewController:QiscusChatVC)->Bool
     func chatVC(enableInfoAction viewController:QiscusChatVC)->Bool
     func chatVC(overrideBackAction viewController:QiscusChatVC)->Bool
+    
     @objc optional func chatVC(backAction viewController:QiscusChatVC, room:QRoom?, data:Any?)
     @objc optional func chatVC(titleAction viewController:QiscusChatVC, room:QRoom?, data:Any?)
     @objc optional func chatVC(viewController:QiscusChatVC, onForwardComment comment:QComment, data:Any?)
     @objc optional func chatVC(viewController:QiscusChatVC, infoActionComment comment:QComment,data:Any?)
+    
+    @objc optional func chatVC(viewController:QiscusChatVC, willAppear animated:Bool)
+    @objc optional func chatVC(viewController:QiscusChatVC, willDisappear animated:Bool)
+    
+    @objc optional func chatVC(viewController:QiscusChatVC, willPostComment comment:QComment, room:QRoom?, data:Any?)->QComment?
+    
+    @objc optional func chatVC(viewController:QiscusChatVC, cellForComment comment:QComment)->QChatCell?
+    @objc optional func chatVC(viewController:QiscusChatVC, heightForComment comment:QComment)->QChatCellHeight?
 }
 
 open class QiscusChatVC: UIViewController{
@@ -230,37 +239,9 @@ open class QiscusChatVC: UIViewController{
         }
     }
     
-    var unreadIndexPath = [IndexPath](){
-        didSet{
-            if unreadIndexPath.count > 99 {
-                unreadIndicator.text = "99+"
-            }else{
-                unreadIndicator.text = "\(unreadIndexPath.count)"
-            }
-            if unreadIndexPath.count == 0 {
-                unreadIndicator.isHidden = true
-            }else{
-                unreadIndicator.isHidden = isLastRowVisible
-            }
-        }
-    }
-    
     var bundle:Bundle {
         get{
             return Qiscus.bundle
-        }
-    }
-    
-    var isLastRowVisible: Bool = false {
-        didSet{
-            DispatchQueue.main.async {
-//                self.bottomButton.isHidden = !self.isLastRowVisible
-//                if self.chatRoom!.unreadCount > 0 {
-//                    self.unreadIndicator.isHidden = !self.isLastRowVisible
-//                }else{
-//                    self.unreadIndicator.isHidden = true
-//                }
-            }
         }
     }
     
@@ -362,7 +343,6 @@ open class QiscusChatVC: UIViewController{
         // Keyboard stuff.
         self.qiscusAutoHideKeyboard()
         
-        unreadIndexPath = [IndexPath]()
         bottomButton.isHidden = true
         
         self.inputBarBottomMargin.constant = 0
@@ -454,6 +434,9 @@ open class QiscusChatVC: UIViewController{
         view.endEditing(true)
         
         self.dismissLoading()
+        if let delegate = self.delegate {
+            delegate.chatVC?(viewController: self, willDisappear: animated)
+        }
     }
     override open func viewDidDisappear(_ animated: Bool) {
         //self.scrollToBottom()
@@ -516,6 +499,9 @@ open class QiscusChatVC: UIViewController{
             recordButton.isHidden = false
         }else{
             sendButton.isEnabled = true
+        }
+        if let delegate = self.delegate {
+            delegate.chatVC?(viewController: self, willAppear: animated)
         }
     }
     
@@ -793,143 +779,22 @@ open class QiscusChatVC: UIViewController{
             self.chatMessage = nil
         }
     }
-    // MARK: - userPresence Handler
-//    @objc private func userPresenceChanged(_ notification: Notification) {
-//        if let room = self.chatRoom {
-//            if let userInfo = notification.userInfo {
-//                let user = userInfo["user"] as! QUser
-//                if room.isInvalidated || user.isInvalidated {
-//                    self.goBack()
-//                    return
-//                }
-//                if let participantData = room.participant(withEmail: user.email){
-//                    if let participant = participantData.user {
-//                        self.participantPresenceChanged(participant: participant)
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    open func participantPresenceChanged(participant: QUser){
-//        if let room = self.chatRoom {
-//            if room.type == .single {
-//                self.loadSubtitle()
-//            }
-//        }
-//    }
-    
-    // MARK: - userTyping handler
-//    @objc private func userTyping(_ notification: Notification){
-//        if let userInfo = notification.userInfo {
-//            let user = userInfo["user"] as! QUser
-//            let typing = userInfo["typing"] as! Bool
-//            let room = userInfo["room"] as! QRoom
-//            if room.isInvalidated || user.isInvalidated {
-//                return
-//            }
-//            if let currentRoom = self.chatRoom {
-//                if currentRoom.isInvalidated { return }
-//            }
-//            if let currentRoom = self.chatRoom {
-//                if currentRoom.id == room.id {
-//                    self.userTypingChanged(user: user, typing: typing)
-//                }
-//            }
-//        }
-//    }
-//    @objc private func publishStopTyping(timer:Timer){
-//        if let user = timer.userInfo as? QUser {
-//            if let room = self.chatRoom {
-//                QiscusNotification.publish(userTyping: user, room: room, typing: false )
-//            }
-//        }
-//    }
-//    open func userTypingChanged(user: QUser, typing:Bool){
-//        if !processingTyping {
-//            self.processingTyping = true
-//            if user.isInvalidated {return}
-//            let beforeEmpty = self.typingUsers.count == 0
-//            if !typing {
-//                if self.typingUsers[user.email] != nil {
-//                    self.typingUsers[user.email] = nil
-//                }
-//                if let timer = self.typingUserTimer[user.email] {
-//                    timer.invalidate()
-//                    self.typingUserTimer[user.email] = nil
-//                }
-//            }else{
-//                if self.typingUsers[user.email] == nil {
-//                    self.typingUsers[user.email] = user
-//                    if let timer = self.typingUserTimer[user.email] {
-//                        timer.invalidate()
-//                    }
-//                    self.typingUserTimer[user.email] = Timer.scheduledTimer(timeInterval: 7.0, target: self, selector: #selector(QiscusChatVC.publishStopTyping(timer:)), userInfo: user, repeats: false)
-//                }
-//            }
-//            var tempPreviewedUser = [String]()
-//            var i = 0
-//            var changed = false
-//            for (key, _) in self.typingUsers.reversed() {
-//                if i < 3 {
-//                    if !self.previewedTypingUsers.contains(key){
-//                        changed = true
-//                    }
-//                    tempPreviewedUser.append(key)
-//                }
-//                i += 1
-//            }
-//            self.previewedTypingUsers = tempPreviewedUser
-//            func scroll(){
-//                if self.isLastRowVisible{
-//                    if self.chatRoom != nil{
-//                        let section = self.collectionView.numberOfSections - 1
-//                        let item = self.collectionView.numberOfItems(inSection: section) - 1
-//                        let indexPath = IndexPath(item: item, section: section)
-//                        self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
-//                    }
-//                }
-//            }
-//            if (beforeEmpty && self.typingUsers.count > 0) {
-//                self.collectionView.reloadData()
-//                scroll()
-//            }else if (!beforeEmpty && self.typingUsers.count == 0) {
-//                self.collectionView.reloadData()
-//                scroll()
-//            }
-//            else if changed && self.typingUsers.count > 0{
-//                let section = self.chatRoom!.comments.count
-//                if section == self.collectionView.numberOfSections {
-//                    let indexPath = IndexPath(item: 0, section: section)
-//                    self.collectionView.reloadItems(at: [indexPath])
-//                }else{
-//                    self.collectionView.reloadData()
-//                }
-//                scroll()
-//            }
-//            self.processingTyping = false
-//        }
-//    }
-    
-    // MARK: - New Comment Handler
+
  
     open func postComment(comment : QComment) {
-//        let extraData : [String: Any] = [
-//            "key1":"value1",
-//            "key2":2,
-//            "key3":true,
-//            "key4": [
-//                "subKey 1": 1,
-//                "subKey 2": "value subkey2"
-//            ]
-//        ]
-//        comment.set(extras: extraData, onSuccess: { (comment) in
-//            self.chatRoom?.post(comment: comment)
-//        }) { (_, error) in
-//            comment.updateStatus(status: .failed)
-//            print(error)
-//        }
-
-        chatRoom?.post(comment: comment)
+        var postedComment = comment
+        if let delegate = self.delegate {
+            if let temp = delegate.chatVC?(viewController: self, willPostComment: postedComment, room: self.chatRoom, data: self.data){
+                postedComment = temp
+            }
+        }
+        chatRoom?.post(comment: postedComment)
+    }
+    public func register(_ nib: UINib?, forChatCellWithReuseIdentifier identifier: String) {
+        self.collectionView.register(nib, forCellWithReuseIdentifier: identifier)
+    }
+    public func register(_ chatCellClass: AnyClass?, forCellWithReuseIdentifier identifier: String) {
+        self.collectionView.register(chatCellClass, forCellWithReuseIdentifier: identifier)
     }
 }
 

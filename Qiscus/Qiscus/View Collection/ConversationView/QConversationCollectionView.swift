@@ -384,10 +384,4 @@ public class QConversationCollectionView: UICollectionView {
             }
         }
     }
-//    override public func reloadData() {
-////        if let r = self.room {
-////            self.messages = r.grouppedComments
-////        }
-//        super.reloadData()
-//    }
 }

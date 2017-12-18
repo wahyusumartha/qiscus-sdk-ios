@@ -27,9 +27,19 @@ extension QiscusChatVC: QConversationViewDelegate {
         return false
     }
     open func viewDelegate(view:QConversationCollectionView, cellForComment comment:QComment)->QChatCell?{
+        if let delegate = self.delegate {
+            if let cell = delegate.chatVC?(viewController: self, cellForComment: comment){
+                return cell
+            }
+        }
         return nil
     }
     open func viewDelegate(view:QConversationCollectionView, heightForComment comment:QComment)->QChatCellHeight?{
+        if let delegate = self.delegate {
+            if let height = delegate.chatVC?(viewController: self, heightForComment: comment){
+                return height
+            }
+        }
         return nil
     }
     open func viewDelegate(view:QConversationCollectionView, willDisplayCellForComment comment:QComment, cell:QChatCell, indexPath: IndexPath){
