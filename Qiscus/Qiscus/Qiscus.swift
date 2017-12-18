@@ -367,8 +367,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             chatVC.goBack()
         }
         
-        chatVC.backAction = nil
-        
         let navController = UINavigationController()
         navController.viewControllers = [chatVC]
         
@@ -399,7 +397,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         if chatVC.isPresence {
             chatVC.goBack()
         }
-        chatVC.backAction = nil
         
         let navController = UINavigationController()
         navController.viewControllers = [chatVC]
@@ -426,7 +423,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             chatVC.chatSubtitle = subtitle
             chatVC.archived = readOnly
             chatVC.chatMessage = withMessage
-            chatVC.backAction = nil
             if chatVC.isPresence {
                 chatVC.goBack()
             }
@@ -455,7 +451,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             if chatVC.isPresence {
                 chatVC.goBack()
             }
-            chatVC.backAction = nil
             chatVC.archived = readOnly
             return chatVC
         }
@@ -476,7 +471,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         chatVC.chatSubtitle = subtitle
         chatVC.archived = readOnly
         chatVC.chatMessage = withMessage
-        chatVC.backAction = nil
         
         return chatVC
     }

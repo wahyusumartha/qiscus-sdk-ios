@@ -17,6 +17,9 @@ import UIKit
     }
 }
 @objc public protocol QConversationViewDelegate{
+    func viewDelegate(enableForwardAction view:QConversationCollectionView)->Bool
+    func viewDelegate(enableInfoAction view:QConversationCollectionView)->Bool
+    
     @objc optional func viewDelegate(view:QConversationCollectionView, cellForComment comment:QComment)->QChatCell?
     @objc optional func viewDelegate(view:QConversationCollectionView, heightForComment comment:QComment)->QChatCellHeight?
     @objc optional func viewDelegate(view:QConversationCollectionView, willDisplayCellForComment comment:QComment, cell:QChatCell, indexPath:IndexPath)

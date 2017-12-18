@@ -17,6 +17,17 @@ import CoreLocation
 
 //
 import RealmSwift
+
+@objc public protocol QiscusChatVCDelegate{
+    func chatVC(enableForwardAction viewController:QiscusChatVC)->Bool
+    func chatVC(enableInfoAction viewController:QiscusChatVC)->Bool
+    func chatVC(overrideBackAction viewController:QiscusChatVC)->Bool
+    @objc optional func chatVC(backAction viewController:QiscusChatVC, room:QRoom?)
+    @objc optional func chatVC(titleAction viewController:QiscusChatVC, room:QRoom?)
+    @objc optional func chatVC(viewController:QiscusChatVC, onForwardComment comment:QComment)
+    @objc optional func chatVC(viewController:QiscusChatVC, infoActionComment comment:QComment)
+}
+
 open class QiscusChatVC: UIViewController{
     
     @IBOutlet weak var inputBarHeight: NSLayoutConstraint!
@@ -55,6 +66,7 @@ open class QiscusChatVC: UIViewController{
     @IBOutlet weak var linkImageWidth: NSLayoutConstraint!
     @IBOutlet public weak var collectionViewTopMargin: NSLayoutConstraint!
     
+    var delegate:QiscusChatVCDelegate?
     var isPresence:Bool = false
     public var titleLabel = UILabel()
     public var subtitleLabel = UILabel()
@@ -154,10 +166,6 @@ open class QiscusChatVC: UIViewController{
     
     //MARK: - external action
     @objc public var unlockAction:(()->Void) = {}
-    @objc public var titleAction:(()->Void) = {}
-    @objc public var backAction:(()->Void)? = nil
-    @objc public var forwardAction:((QComment)->Void)? = nil
-    @objc public var infoAction:((QComment)->Void)? = nil
     
     var audioPlayer: AVAudioPlayer?
     var audioTimer: Timer?
@@ -665,18 +673,15 @@ open class QiscusChatVC: UIViewController{
     func goBack() {
         self.isPresence = false
         view.endEditing(true)
-        if let room = self.chatRoom {
-            room.delegate = nil
-        }
-//        audioPlayer?.pause()
-//        stopTimer()
-//        updateAudioDisplay()
-        if self.backAction != nil{
-            self.backAction!()
+        if let delegate = self.delegate{
+            if delegate.chatVC(overrideBackAction: self){
+                delegate.chatVC?(backAction: self, room: self.chatRoom)
+            }else{
+                let _ = self.navigationController?.popViewController(animated: true)
+            }
         }else{
             let _ = self.navigationController?.popViewController(animated: true)
         }
-        
     }
     func unsubscribeNotificationCenter(){
         let center: NotificationCenter = NotificationCenter.default

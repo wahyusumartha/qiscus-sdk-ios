@@ -87,29 +87,27 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
     
     // MARK: CollectionView delegate
     open func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        if let room = self.room {
-            QiscusBackgroundThread.async {
-                if self.messagesId.count > indexPath.section {
-                    let group = self.messagesId[indexPath.section]
-                    if group.count > indexPath.item {
-                        let uid = group[indexPath.item]
-                        if let chatCell = cell as? QChatCell {
-                            var isLastItem = false
-                            let lastSection = self.messagesId.count - 1
-                            if indexPath.section == lastSection {
-                                let lastItem = self.messagesId[lastSection].count - 1
-                                if indexPath.item == lastItem {
-                                    isLastItem = true
-                                }
+        QiscusBackgroundThread.async {
+            if self.messagesId.count > indexPath.section {
+                let group = self.messagesId[indexPath.section]
+                if group.count > indexPath.item {
+                    let uid = group[indexPath.item]
+                    if let chatCell = cell as? QChatCell {
+                        var isLastItem = false
+                        let lastSection = self.messagesId.count - 1
+                        if indexPath.section == lastSection {
+                            let lastItem = self.messagesId[lastSection].count - 1
+                            if indexPath.item == lastItem {
+                                isLastItem = true
                             }
-                            DispatchQueue.main.async {
-                                chatCell.willDisplayCell()
-                                let message = QComment.comment(withUniqueId: uid)!
-                                self.viewDelegate?.viewDelegate?(view: self, willDisplayCellForComment: message, cell: chatCell, indexPath: indexPath)
-                                if isLastItem {
-                                    self.viewDelegate?.viewDelegate?(willDisplayLastMessage: self, comment: message)
-                                    self.isLastRowVisible = true
-                                }
+                        }
+                        DispatchQueue.main.async {
+                            chatCell.willDisplayCell()
+                            let message = QComment.comment(withUniqueId: uid)!
+                            self.viewDelegate?.viewDelegate?(view: self, willDisplayCellForComment: message, cell: chatCell, indexPath: indexPath)
+                            if isLastItem {
+                                self.viewDelegate?.viewDelegate?(willDisplayLastMessage: self, comment: message)
+                                self.isLastRowVisible = true
                             }
                         }
                     }
@@ -160,50 +158,82 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
         if indexPath.section < self.messagesId.count {
             let uid = self.messagesId[indexPath.section][indexPath.item]
             let comment = QComment.comment(withUniqueId: uid)!
-            var show = false
             switch action.description {
             case "copy:":
-                if comment.type == .text{
-                    show = true
-                }
-                break
+                if comment.type == .text{ return true }
+                return false
             case "resend":
-                if comment.status == .failed && Qiscus.sharedInstance.connected {
-                    if comment.type == .text{
-                        show = true
-                    }else if comment.type == .video || comment.type == .image || comment.type == .audio || comment.type == .file {
+                if !Qiscus.sharedInstance.connected || comment.status != .failed {
+                    return false
+                }else{
+                    switch comment.type {
+                    case .video,.image,.audio,.file,.document:
                         if let file = comment.file {
                             if QFileManager.isFileExist(inLocalPath: file.localPath){
-                                show = true
+                                return true
+                            }
+                        }
+                        return false
+                    default:
+                        return true
+                    }
+                }
+            case "deleteComment":
+                if comment.status == .failed  {  return true  }
+                return false
+            case "reply":
+                if Qiscus.sharedInstance.connected{
+                    switch comment.status {
+                    case .failed, .sending, .pending :
+                        return false
+                    default:
+                        switch comment.type {
+                        case .postback,.account,.system,.card:
+                            return false
+                        default:
+                            return true
+                        }
+                    }
+                }
+                return false
+            case "forward":
+                if let viewDelegate = self.viewDelegate{
+                    if !Qiscus.sharedInstance.connected || !viewDelegate.viewDelegate(enableForwardAction: self){
+                        return false
+                    }else {
+                        switch comment.status {
+                        case .failed, .sending, .pending: return false
+                        default:
+                            switch comment.type {
+                            case .postback, .account,.system:
+                                return false
+                            default:
+                                return true
                             }
                         }
                     }
                 }
-                break
-            case "deleteComment":
-                if comment.status == .failed  {
-                    show = true
-                }
-                break
-            case "reply":
-                if Qiscus.sharedInstance.connected && comment.type != .postback && comment.type != .account && comment.status != .failed && comment.type != .system && comment.status != .sending && comment.type != .card {
-                    show = true
-                }
-                break
-            case "forward":
-                if self.forwardAction != nil && Qiscus.sharedInstance.connected && comment.type != .postback && comment.type != .account && comment.status != .failed && comment.type != .system && comment.status != .sending{
-                    show = true
-                }
-                break
+                return false
             case "info":
-                if self.infoAction != nil {
-                    if self.room?.type == .group {
-                        if comment.senderEmail == QiscusMe.shared.email && Qiscus.sharedInstance.connected && comment.type != .postback && comment.type != .account && comment.status != .failed && comment.type != .system && comment.status != .sending && comment.type != .card{
-                            show = true
+                if let viewDelegate = self.viewDelegate {
+                    if  !Qiscus.sharedInstance.connected ||
+                        !viewDelegate.viewDelegate(enableInfoAction: self) ||
+                        self.room!.type == .single{
+                        return false
+                    }else {
+                        switch comment.status {
+                        case .failed, .sending, .pending: return false
+                        default:
+                            switch comment.type {
+                            case .postback, .account,.system:
+                                return false
+                            default:
+                                return true
+                            }
                         }
                     }
                 }
-                break
+                return false
             case "share":
                 if Qiscus.sharedInstance.connected && ( comment.type == .image || comment.type == .video || comment.type == .audio || comment.type == .text || comment.type == .file || comment.type == .document) {
                     if let file = comment.file {
@@ -223,12 +253,10 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                         }
                     }
                 }
-                break
+                return false
             default:
-                break
+                return false
             }
-            
-            return show
         }else{
             return false
         }

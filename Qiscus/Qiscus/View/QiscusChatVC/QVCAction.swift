@@ -253,9 +253,6 @@ extension QiscusChatVC {
         QToasterSwift.toast(target: self, text: QiscusTextConfiguration.sharedInstance.noConnectionText, backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
     }
     // MARK: - Overriding back action
-    public func setBackButton(withAction action:@escaping (()->Void)){
-        self.backAction = action
-    }
     
     func setTitle(title:String = "", withSubtitle:String? = nil){
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
@@ -489,7 +486,9 @@ extension QiscusChatVC {
     func goToTitleAction(){
         self.inputBarBottomMargin.constant = 0
         self.view.layoutIfNeeded()
-        self.titleAction()
+        if let delegate = self.delegate {
+            delegate.chatVC?(titleAction: self, room: self.chatRoom)
+        }
     }
 //    func scrollToBottom(_ animated:Bool = false){
 //        self.collectionView.scrollToBottom()
@@ -930,13 +929,13 @@ extension QiscusChatVC {
         }
     }
     func forward(comment:QComment){
-        if self.forwardAction != nil {
-            self.forwardAction!(comment)
+        if let delegate = self.delegate {
+            delegate.chatVC?(viewController: self, onForwardComment: comment)
         }
     }
     func info(comment:QComment){
-        if self.infoAction != nil {
-            self.infoAction!(comment)
+        if let delegate = self.delegate {
+            delegate.chatVC?(viewController: self, infoActionComment: comment)
         }
     }
     public func hideInputBar(){
@@ -985,7 +984,7 @@ extension QiscusChatVC {
                             })
                         }
                         self.linkImageWidth.constant = 55
-                        var description = "\(file.filename) File"
+                        var description = "\(file.filename)\nPDF File"
                         if file.pages > 0 {
                             description = "\(description), \(file.pages) page"
                         }
@@ -993,13 +992,6 @@ extension QiscusChatVC {
                             description = "\(description), \(file.size) Mb"
                         }
                         self.linkDescription.text = description
-                        var title = ""
-                        if let user = self.replyData!.sender {
-                            title = user.fullname
-                        }else{
-                            title = comment!.senderName
-                        }
-                        title = "\(title): \(file.filename)"
                     }
                     break
                 case .video, .image:
@@ -1023,7 +1015,33 @@ extension QiscusChatVC {
                             }
                             self.linkImageWidth.constant = 55
                         }
+                        var description = "\(file.filename)\n"
+                        if file.size > 0 {
+                            description = "\(description), \(file.size) Mb"
+                        }
                         self.linkDescription.text = file.filename
+                    }
+                    break
+                case .audio:
+                    self.linkImageWidth.constant = 0
+                    if let file = comment!.file {
+                        var description = "\(file.filename)\nAUDIO FILE"
+                        
+                        if file.size > 0 {
+                            description = "\(description), \(file.size) Mb"
+                        }
+                        self.linkDescription.text = description
+                    }
+                    break
+                case .file:
+                    self.linkImageWidth.constant = 0
+                    if let file = comment!.file {
+                        var description = "\(file.filename)\n\(file.ext.uppercased()) FILE"
+                        
+                        if file.size > 0 {
+                            description = "\(description), \(file.size) Mb"
+                        }
+                        self.linkDescription.text = description
                     }
                     break
                 case .location:

@@ -13,6 +13,19 @@ import UIKit
 //    
 //}
 extension QiscusChatVC: QConversationViewDelegate {
+    public func viewDelegate(enableInfoAction view: QConversationCollectionView) -> Bool {
+        if let delegate = self.delegate {
+            return delegate.chatVC(enableInfoAction: self)
+        }else{
+            return false
+        }
+    }
+    public func viewDelegate(enableForwardAction view: QConversationCollectionView) -> Bool {
+        if let delegate = self.delegate{
+            return delegate.chatVC(enableForwardAction: self)
+        }
+        return false
+    }
     open func viewDelegate(view:QConversationCollectionView, cellForComment comment:QComment)->QChatCell?{
         return nil
     }

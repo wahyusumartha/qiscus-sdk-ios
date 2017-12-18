@@ -45,10 +45,7 @@ public class QConversationCollectionView: UICollectionView {
     public var processingTyping = false
     public var previewedTypingUsers = [String]()
     public var isPresence = false
-    
-    public var forwardAction:((QComment)->Void)? = nil
-    public var infoAction:((QComment)->Void)? = nil
-    
+        
     internal var messagesId = [[String]](){
         didSet{
             DispatchQueue.main.async {
