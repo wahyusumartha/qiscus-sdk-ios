@@ -22,10 +22,10 @@ import RealmSwift
     func chatVC(enableForwardAction viewController:QiscusChatVC)->Bool
     func chatVC(enableInfoAction viewController:QiscusChatVC)->Bool
     func chatVC(overrideBackAction viewController:QiscusChatVC)->Bool
-    @objc optional func chatVC(backAction viewController:QiscusChatVC, room:QRoom?)
-    @objc optional func chatVC(titleAction viewController:QiscusChatVC, room:QRoom?)
-    @objc optional func chatVC(viewController:QiscusChatVC, onForwardComment comment:QComment)
-    @objc optional func chatVC(viewController:QiscusChatVC, infoActionComment comment:QComment)
+    @objc optional func chatVC(backAction viewController:QiscusChatVC, room:QRoom?, data:Any?)
+    @objc optional func chatVC(titleAction viewController:QiscusChatVC, room:QRoom?, data:Any?)
+    @objc optional func chatVC(viewController:QiscusChatVC, onForwardComment comment:QComment, data:Any?)
+    @objc optional func chatVC(viewController:QiscusChatVC, infoActionComment comment:QComment,data:Any?)
 }
 
 open class QiscusChatVC: UIViewController{
@@ -67,6 +67,8 @@ open class QiscusChatVC: UIViewController{
     @IBOutlet public weak var collectionViewTopMargin: NSLayoutConstraint!
     
     public var delegate:QiscusChatVCDelegate?
+    public var data:Any?
+    
     var isPresence:Bool = false
     public var titleLabel = UILabel()
     public var subtitleLabel = UILabel()
@@ -675,7 +677,7 @@ open class QiscusChatVC: UIViewController{
         view.endEditing(true)
         if let delegate = self.delegate{
             if delegate.chatVC(overrideBackAction: self){
-                delegate.chatVC?(backAction: self, room: self.chatRoom)
+                delegate.chatVC?(backAction: self, room: self.chatRoom, data:data)
             }else{
                 let _ = self.navigationController?.popViewController(animated: true)
             }

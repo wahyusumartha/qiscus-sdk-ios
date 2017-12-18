@@ -487,7 +487,7 @@ extension QiscusChatVC {
         self.inputBarBottomMargin.constant = 0
         self.view.layoutIfNeeded()
         if let delegate = self.delegate {
-            delegate.chatVC?(titleAction: self, room: self.chatRoom)
+            delegate.chatVC?(titleAction: self, room: self.chatRoom, data:self.data)
         }
     }
 //    func scrollToBottom(_ animated:Bool = false){
@@ -930,12 +930,12 @@ extension QiscusChatVC {
     }
     func forward(comment:QComment){
         if let delegate = self.delegate {
-            delegate.chatVC?(viewController: self, onForwardComment: comment)
+            delegate.chatVC?(viewController: self, onForwardComment: comment, data:self.data)
         }
     }
     func info(comment:QComment){
         if let delegate = self.delegate {
-            delegate.chatVC?(viewController: self, infoActionComment: comment)
+            delegate.chatVC?(viewController: self, infoActionComment: comment, data:self.data)
         }
     }
     public func hideInputBar(){
