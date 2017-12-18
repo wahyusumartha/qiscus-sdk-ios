@@ -110,9 +110,6 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
     }
     public func forward(){
         self.delegate?.didForward(comment: self.comment!)
-        if let chatView = Qiscus.shared.chatViews[self.comment!.roomId]{
-            chatView.forward(comment: self.comment!)
-        }
     }
     open func deleteComment(){
         if let room = QRoom.room(withId: self.comment!.roomId){
