@@ -66,7 +66,7 @@ open class QiscusChatVC: UIViewController{
     @IBOutlet weak var linkImageWidth: NSLayoutConstraint!
     @IBOutlet public weak var collectionViewTopMargin: NSLayoutConstraint!
     
-    var delegate:QiscusChatVCDelegate?
+    public var delegate:QiscusChatVCDelegate?
     var isPresence:Bool = false
     public var titleLabel = UILabel()
     public var subtitleLabel = UILabel()
