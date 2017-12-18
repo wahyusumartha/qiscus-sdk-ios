@@ -25,8 +25,8 @@ import RealmSwift
     
     @objc optional func chatVC(backAction viewController:QiscusChatVC, room:QRoom?, data:Any?)
     @objc optional func chatVC(titleAction viewController:QiscusChatVC, room:QRoom?, data:Any?)
-    @objc optional func chatVC(viewController:QiscusChatVC, onForwardComment comment:QComment, data:Any?, fromViewController currentVC:UIViewController?)
-    @objc optional func chatVC(viewController:QiscusChatVC, infoActionComment comment:QComment,data:Any?, fromViewController currentVC:UIViewController?)
+    @objc optional func chatVC(viewController:QiscusChatVC, onForwardComment comment:QComment, data:Any?)
+    @objc optional func chatVC(viewController:QiscusChatVC, infoActionComment comment:QComment,data:Any?)
     
     @objc optional func chatVC(onViewDidLoad viewController:QiscusChatVC)
     @objc optional func chatVC(viewController:QiscusChatVC, willAppear animated:Bool)
@@ -78,7 +78,6 @@ open class QiscusChatVC: UIViewController{
     
     public var delegate:QiscusChatVCDelegate?
     public var data:Any?
-    public var currentViewController:UIViewController?
     
     var isPresence:Bool = false
     public var titleLabel = UILabel()
