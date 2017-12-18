@@ -916,11 +916,18 @@ internal extension QRoom {
         for commentGroup in self.comments {
             var group = [QComment]()
             var uidCollection = [String]()
+            var i = 0
             for comment in commentGroup.comments {
                 if !uidCollection.contains(comment.uniqueId){
                     uidCollection.append(comment.uniqueId)
                     group.append(comment)
+                }else{
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    try! realm.write {
+                        commentGroup.comments.remove(objectAtIndex: i)
+                    }
                 }
+                i += 1
             }
             retVal.append(group)
         }
@@ -928,12 +935,20 @@ internal extension QRoom {
     }
     internal func getGrouppedCommentsUID()->[[String]]{
         var retVal = [[String]]()
+        
         for commentGroup in self.comments {
             var group = [String]()
+            var i = 0
             for comment in commentGroup.comments {
                 if !group.contains(comment.uniqueId) {
                     group.append(comment.uniqueId)
+                }else{
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    try! realm.write {
+                        commentGroup.comments.remove(objectAtIndex: i)
+                    }
                 }
+                i += 1
             }
             retVal.append(group)
         }

@@ -28,6 +28,7 @@ import RealmSwift
     @objc optional func chatVC(viewController:QiscusChatVC, onForwardComment comment:QComment, data:Any?)
     @objc optional func chatVC(viewController:QiscusChatVC, infoActionComment comment:QComment,data:Any?)
     
+    @objc optional func chatVC(onViewDidLoad viewController:QiscusChatVC)
     @objc optional func chatVC(viewController:QiscusChatVC, willAppear animated:Bool)
     @objc optional func chatVC(viewController:QiscusChatVC, willDisappear animated:Bool)
     
@@ -400,7 +401,9 @@ open class QiscusChatVC: UIViewController{
     // MARK: - UI Lifecycle
     override open func viewDidLoad() {
         super.viewDidLoad()
-        
+        if let delegate = self.delegate{
+            delegate.chatVC?(onViewDidLoad: self)
+        }
     }
     private func firstLoadSetup(){
         self.chatService.delegate = self
