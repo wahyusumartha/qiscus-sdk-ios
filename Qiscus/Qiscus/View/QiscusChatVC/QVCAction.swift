@@ -930,12 +930,12 @@ extension QiscusChatVC {
     }
     func forward(comment:QComment){
         if let delegate = self.delegate {
-            delegate.chatVC?(viewController: self, onForwardComment: comment, data:self.data)
+            delegate.chatVC?(viewController: self, onForwardComment: comment, data: self.data, fromViewController: self.currentViewController)
         }
     }
     func info(comment:QComment){
         if let delegate = self.delegate {
-            delegate.chatVC?(viewController: self, infoActionComment: comment, data:self.data)
+            delegate.chatVC?(viewController: self, infoActionComment: comment, data: self.data, fromViewController: self.currentViewController)
         }
     }
     public func hideInputBar(){
