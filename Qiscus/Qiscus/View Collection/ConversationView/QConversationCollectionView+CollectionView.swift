@@ -218,7 +218,7 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                 if let viewDelegate = self.viewDelegate {
                     if  !Qiscus.sharedInstance.connected ||
                         !viewDelegate.viewDelegate(enableInfoAction: self) ||
-                        self.room!.type == .single{
+                        self.room!.type == .single || comment.senderEmail != QiscusMe.shared.email{
                         return false
                     }else {
                         switch comment.status {
