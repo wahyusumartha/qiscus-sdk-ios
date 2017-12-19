@@ -118,9 +118,9 @@ extension QConversationCollectionView: QRoomDelegate {
                                 self.contentOffset = CGPoint(x: 0, y: self.contentSize.height - bottomOffset)
                                 CATransaction.commit()
                                 self.loadMoreControl.endRefreshing()
-                                self.loadMoreControl.removeFromSuperview()
+                                
                                 if !r.canLoadMore {
-                                    self.loadMoreControl.endRefreshing()
+                                    self.loadMoreControl.removeFromSuperview()
                                 }
                             }
                         }
