@@ -46,36 +46,36 @@ extension QiscusChatVC: QConversationViewDelegate {
         if let room = self.chatRoom {
             let roomId = room.id
             if !self.isPresence || self.prefetch { return }
-            QiscusBackgroundThread.async {
-                if let r = QRoom.threadSaveRoom(withId: roomId) {
-                    var count = 0
-                    var section = 0
-                    var item = 0
-                    var found = false
-                    for group in r.comments {
-                        item = 0
-                        for _ in group.comments{
-                            count += 1
-                            if count == 15 {
-                                found = true
-                                break
-                            }else{
-                                item += 1
-                            }
-                        }
-                        if found {
-                            break
-                        }else{
-                            section += 1
-                        }
-                    }
-                    if indexPath.section == section && indexPath.item == item {
-                        DispatchQueue.main.async {
-                            self.collectionView.loadMore()
-                        }
-                    }
-                }
-            }
+//            QiscusBackgroundThread.async {
+//                if let r = QRoom.threadSaveRoom(withId: roomId) {
+//                    var count = 0
+//                    var section = 0
+//                    var item = 0
+//                    var found = false
+//                    for group in r.comments {
+//                        item = 0
+//                        for _ in group.comments{
+//                            count += 1
+//                            if count == 15 {
+//                                found = true
+//                                break
+//                            }else{
+//                                item += 1
+//                            }
+//                        }
+//                        if found {
+//                            break
+//                        }else{
+//                            section += 1
+//                        }
+//                    }
+//                    if indexPath.section == section && indexPath.item == item {
+//                        DispatchQueue.main.async {
+//                            self.collectionView.loadMore()
+//                        }
+//                    }
+//                }
+//            }
         }
     }
     open func viewDelegate(view:QConversationCollectionView, didEndDisplayingCellForComment comment:QComment, cell:QChatCell, indexPath: IndexPath){
