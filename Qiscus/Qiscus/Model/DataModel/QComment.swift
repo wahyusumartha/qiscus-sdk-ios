@@ -1204,4 +1204,23 @@ public class QComment:Object {
             onError(self,"invalid json object")
         }
     }
+    public func set(extras data:[String:Any])->QComment?{
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
+        if let jsonData = try? JSONSerialization.data(withJSONObject: data as Any, options: []){
+            if let jsonString = String(data: jsonData,
+                                       encoding: .ascii){
+                try! realm.write {
+                    self.rawExtra = jsonString
+                }
+                return self
+            }else{
+                Qiscus.printLog(text: "cant parse object")
+                return nil
+            }
+        }else{
+            Qiscus.printLog(text: "invalid json object")
+            return nil
+        }
+    }
 }

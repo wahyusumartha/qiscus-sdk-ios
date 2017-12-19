@@ -129,7 +129,6 @@ public class QConversationCollectionView: UICollectionView {
     }
     public func unsubscribeEvent(){
         let center: NotificationCenter = NotificationCenter.default
-        center.removeObserver(self, name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
         center.removeObserver(self, name: QiscusNotification.COMMENT_DELETE, object: nil)
         center.removeObserver(self, name: QiscusNotification.USER_TYPING, object: nil)
     }
