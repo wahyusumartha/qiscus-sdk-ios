@@ -197,6 +197,7 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
     }
     public func setData(comment:QComment){
         var oldUniqueId:String?
+        self.clipsToBounds = true
         if let oldComment = self.comment {
             oldComment.delegate = nil
             oldUniqueId = oldComment.uniqueId
