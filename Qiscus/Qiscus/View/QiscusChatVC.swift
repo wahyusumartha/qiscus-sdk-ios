@@ -712,7 +712,6 @@ open class QiscusChatVC: UIViewController{
     @IBAction func doNothing(_ sender: Any) {}
     
     public func loadRoomView(){
-//        self.chatRoom?.delegate = self
         self.chatRoom!.subscribeRealtimeStatus()
         self.loadTitle()
         self.loadSubtitle()
@@ -723,21 +722,6 @@ open class QiscusChatVC: UIViewController{
                 self.collectionView.refreshData()
                 self.collectionView.isHidden = false
                 self.welcomeView.isHidden = true
-//                self.collectionView.reloadData()
-//                if self.chatRoom!.comments.count > 0 {
-//                    let section = self.chatRoom!.comments.count - 1
-//                    let group = self.chatRoom!.comments[section]
-//                    if group.comments.count > 0 {
-//                        let row = group.comments.count - 1
-//                        let indexPath = IndexPath(item: row, section: section)
-//                        DispatchQueue.main.async {
-//                            self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
-//                            self.dismissLoading()
-//                            self.dataLoaded = true
-//                            self.collectionView.isHidden = false
-//                        }
-//                    }
-//                }
             }else{
                 self.dismissLoading()
                 self.dataLoaded = true
@@ -748,23 +732,6 @@ open class QiscusChatVC: UIViewController{
                 self.collectionView.room = self.chatRoom
                 self.collectionView.isHidden = false
                 self.welcomeView.isHidden = true
-//                let delay = 0.5 * Double(NSEC_PER_SEC)
-//                let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
-//                if self.chatRoom!.comments.count > 0 {
-//                    let section = self.chatRoom!.comments.count - 1
-//                    let group = self.chatRoom!.comments[section]
-//                    if group.comments.count > 0 {
-//                        let row = group.comments.count - 1
-//                        let indexPath = IndexPath(item: row, section: section)
-//                        self.collectionView.reloadData()
-//                        DispatchQueue.main.asyncAfter(deadline: time, execute: {
-//                            self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
-//                            self.dismissLoading()
-//                            self.dataLoaded = true
-//                            self.collectionView.isHidden = false
-//                        })
-//                    }
-//                }
             }else{
                 let delay = 0.5 * Double(NSEC_PER_SEC)
                 let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
