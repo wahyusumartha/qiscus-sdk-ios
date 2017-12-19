@@ -881,7 +881,7 @@ extension QiscusChatVC {
         
         let image = Qiscus.image(named: "ic_back")?.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
         backIcon.image = image
-        backIcon.tintColor = UINavigationBar.appearance().tintColor
+        backIcon.tintColor = QiscusChatVC.currentNavbarTint
 
         if UIApplication.shared.userInterfaceLayoutDirection == .leftToRight {
             backIcon.frame = CGRect(x: 0,y: 11,width: 13,height: 22)

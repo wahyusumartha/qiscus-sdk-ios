@@ -97,8 +97,8 @@ open class QiscusChatVC: UIViewController{
     var didFindLocation = true
     var topComment:QComment?
     var prefetch:Bool = false 
-    let currentNavbarTint = UINavigationBar.appearance().tintColor
-    
+    internal let currentNavbarTint = UINavigationBar.appearance().tintColor
+    static let currentNavbarTint = UINavigationBar.appearance().tintColor
     var replyData:QComment? = nil {
         didSet{
             self.reply(toComment: replyData)
