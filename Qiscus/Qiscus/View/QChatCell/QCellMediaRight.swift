@@ -372,22 +372,30 @@ class QCellMediaRight: QChatCell {
     }
     public override func comment(didUpload comment:QComment, uploading:Bool){
         if self.comment?.uniqueId == comment.uniqueId {
-            self.uploadFinished()
+            if !uploading {
+                self.uploadFinished()
+            }else{
+                self.uploadingMedia()
+            }
         }
     }
     public override func comment(didChangeProgress comment:QComment, progress:CGFloat){
         if self.comment?.uniqueId == comment.uniqueId {
-            self.downloadButton.isHidden = true
-            self.progressLabel.text = "\(Int(progress * 100)) %"
-            self.progressLabel.isHidden = false
-            self.progressContainer.isHidden = false
-            self.progressView.isHidden = false
-            
-            let newHeight = progress * maxProgressHeight
-            self.progressHeight.constant = newHeight
-            UIView.animate(withDuration: 0.65, animations: {
-                self.progressView.layoutIfNeeded()
-            })
+            if self.comment!.isUploading || self.comment!.isDownloading {
+                self.downloadButton.isHidden = true
+                self.progressLabel.text = "\(Int(progress * 100)) %"
+                self.progressLabel.isHidden = false
+                self.progressContainer.isHidden = false
+                self.progressView.isHidden = false
+                
+                let newHeight = progress * maxProgressHeight
+                self.progressHeight.constant = newHeight
+                UIView.animate(withDuration: 0.65, animations: {
+                    self.progressView.layoutIfNeeded()
+                })
+            }
+        }else{
+            self.downloadFinished()
         }
     }
 }

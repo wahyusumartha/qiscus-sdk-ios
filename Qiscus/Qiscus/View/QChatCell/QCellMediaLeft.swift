@@ -279,9 +279,7 @@ class QCellMediaLeft: QChatCell {
             if downloading {
                 self.downloadingMedia()
             }else{
-                DispatchQueue.main.async {
-                    self.downloadFinished()
-                }
+                self.downloadFinished()
             }
         }
     }
@@ -304,6 +302,8 @@ class QCellMediaLeft: QChatCell {
                 UIView.animate(withDuration: 0.65, animations: {
                     self.progressView.layoutIfNeeded()
                 })
+            }else{
+                self.downloadFinished()
             }
         }
     }
