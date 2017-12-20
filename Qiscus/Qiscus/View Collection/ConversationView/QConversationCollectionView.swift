@@ -185,10 +185,7 @@ public class QConversationCollectionView: UICollectionView {
         self.previewedTypingUsers = tempPreviewedUser
         func scroll(){
             if self.isLastRowVisible{
-                CATransaction.begin()
-                CATransaction.setDisableActions(true)
-                self.contentOffset = CGPoint(x: 0, y: self.contentSize.height)
-                CATransaction.commit()
+                scrollToBottom()
             }
         }
         if (beforeEmpty && self.typingUsers.count > 0) {
@@ -200,9 +197,13 @@ public class QConversationCollectionView: UICollectionView {
         else if changed && self.typingUsers.count > 0{
             let section = self.numberOfSections - 1
             let item = self.numberOfItems(inSection: section) - 1
-            if item == 0 {
-                let indexPath = IndexPath(item: item, section: section)
-                self.reloadItems(at: [indexPath])
+            if section == self.messagesId.count {
+                if item == 0 {
+                    let indexPath = IndexPath(item: item, section: section)
+                    self.reloadItems(at: [indexPath])
+                }
+            }else{
+                self.reloadData()
             }
             scroll()
         }
