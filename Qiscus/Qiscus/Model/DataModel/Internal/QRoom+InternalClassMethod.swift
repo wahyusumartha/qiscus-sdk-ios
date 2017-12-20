@@ -285,17 +285,14 @@ internal extension QRoom {
                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                 realm.refresh()
                 r.unsubscribeRoomChannel()
-                for group in r.comments {
-                    for comment in group.comments{
-                        QComment.cache[comment.uniqueId] = nil
-                        try! realm.write {
-                            realm.delete(comment)
-                        }
-                    }
-                    QCommentGroup.cache[group.id] = nil
+                for comment in r.comments{
+                    QComment.cache[comment.uniqueId] = nil
                     try! realm.write {
-                        realm.delete(group)
+                        realm.delete(comment)
                     }
+                }
+                try! realm.write {
+                    r.comments.removeAll()
                 }
                 for participant in r.participants {
                     if !participant.isInvalidated {
@@ -309,7 +306,7 @@ internal extension QRoom {
                     realm.delete(r)
                 }
             }
-            }}
+        }}
     }
     
     internal class func cacheAll(){

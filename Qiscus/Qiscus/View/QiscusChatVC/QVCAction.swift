@@ -17,15 +17,8 @@ extension QiscusChatVC:CNContactPickerDelegate{
     public func contactPicker(_ picker: CNContactPickerViewController, didSelect contact: CNContact) {
         func share(name:String, value:String){
             let newComment = self.chatRoom!.newContactComment(name: name, value: value)
-            let section = self.chatRoom!.comments.count - 1
-            let group = self.chatRoom!.comments[section]
-            let item = group.comments.count - 1
-//            self.collectionView.reloadData()
             self.postComment(comment: newComment)
-            
             self.chatRoom!.post(comment: newComment)
-            let indexPath = IndexPath(item: item, section: section)
-            self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
         }
         let contactName = "\(contact.givenName) \(contact.familyName)".trimmingCharacters(in: .whitespacesAndNewlines)
         let contactSheetController = UIAlertController(title: contactName, message: "select contact you want to share", preferredStyle: .actionSheet)

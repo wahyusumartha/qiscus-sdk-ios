@@ -37,13 +37,6 @@ internal extension QRoom {
             }
         }
     }
-    internal func getCommentGroup(index:Int)->QCommentGroup?{
-        if self.comments.count > index {
-            return self.comments[index]
-        }else{
-            return nil
-        }
-    }
     internal func updateRoom(roomName:String? = nil, roomAvatarURL:String? = nil, roomOptions:String? = nil, onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){
         let service = QRoomService()
         service.updateRoom(onRoom: self, roomName: roomName, roomAvatarURL: roomAvatarURL, roomOptions: roomOptions, onSuccess: onSuccess, onError: onError)
@@ -107,54 +100,52 @@ internal extension QRoom {
                             room.lastDeliveredCommentId = lastDeliveredId
                         }
                     }
-                    let filteredGroup = room.comments.filter("senderEmail == '\(QiscusMe.shared.email)'")
-                    for group in filteredGroup {
-                        let deliveredData = group.comments.filter("id != 0 AND id <= \(room.lastDeliveredCommentId) AND statusRaw < \(QCommentStatus.delivered.rawValue) ")
-                        let readData = group.comments.filter("id != 0 AND id <= \(room.lastReadCommentId) AND statusRaw < \(QCommentStatus.read.rawValue) ")
-                        for c in deliveredData {
-                            c.updateStatus(status: .delivered)
-                            if c.id == room.lastCommentId {
-                                if room.lastCommentStatusRaw != QCommentStatus.delivered.rawValue{
-                                    try! realm.write {
-                                        room.lastCommentStatusRaw = QCommentStatus.delivered.rawValue
+                    let deliveredData = room.comments.filter("id != 0 AND id <= \(room.lastDeliveredCommentId) AND statusRaw < \(QCommentStatus.delivered.rawValue) ")
+                    let readData = room.comments.filter("id != 0 AND id <= \(room.lastReadCommentId) AND statusRaw < \(QCommentStatus.read.rawValue) ")
+                    
+                    for c in deliveredData {
+                        c.updateStatus(status: .delivered)
+                        if c.id == room.lastCommentId {
+                            if room.lastCommentStatusRaw != QCommentStatus.delivered.rawValue{
+                                try! realm.write {
+                                    room.lastCommentStatusRaw = QCommentStatus.delivered.rawValue
+                                }
+                                let rId = room.id
+                                let rts = ThreadSafeReference(to: room)
+                                DispatchQueue.main.async {
+                                    let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                                    mainRealm.refresh()
+                                    if Qiscus.chatRooms[rId] == nil {
+                                        if let r = mainRealm.resolve(rts) {
+                                            Qiscus.chatRooms[rId] = r
+                                        }
                                     }
-                                    let rId = room.id
-                                    let rts = ThreadSafeReference(to: room)
-                                    DispatchQueue.main.async {
-                                        let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
-                                        mainRealm.refresh()
-                                        if Qiscus.chatRooms[rId] == nil {
-                                            if let r = mainRealm.resolve(rts) {
-                                                Qiscus.chatRooms[rId] = r
-                                            }
-                                        }
-                                        if let r = QRoom.room(withId: rId){
-                                            QiscusNotification.publish(roomChange: r, onProperty: .lastComment)
-                                        }
+                                    if let r = QRoom.room(withId: rId){
+                                        QiscusNotification.publish(roomChange: r, onProperty: .lastComment)
                                     }
                                 }
                             }
                         }
-                        for c in readData {
-                            c.updateStatus(status: .read)
-                            if c.id == room.lastCommentId {
-                                if room.lastCommentStatusRaw != QCommentStatus.read.rawValue{
-                                    try! realm.write {
-                                        room.lastCommentStatusRaw = QCommentStatus.read.rawValue
+                    }
+                    for c in readData {
+                        c.updateStatus(status: .read)
+                        if c.id == room.lastCommentId {
+                            if room.lastCommentStatusRaw != QCommentStatus.read.rawValue{
+                                try! realm.write {
+                                    room.lastCommentStatusRaw = QCommentStatus.read.rawValue
+                                }
+                                let rId = room.id
+                                let rts = ThreadSafeReference(to:room)
+                                DispatchQueue.main.async {
+                                    let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                                    mainRealm.refresh()
+                                    if Qiscus.chatRooms[rId] == nil {
+                                        if let r = mainRealm.resolve(rts) {
+                                            Qiscus.chatRooms[rId] = r
+                                        }
                                     }
-                                    let rId = room.id
-                                    let rts = ThreadSafeReference(to:room)
-                                    DispatchQueue.main.async {
-                                        let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
-                                        mainRealm.refresh()
-                                        if Qiscus.chatRooms[rId] == nil {
-                                            if let r = mainRealm.resolve(rts) {
-                                                Qiscus.chatRooms[rId] = r
-                                            }
-                                        }
-                                        if let r = QRoom.getRoom(withId: rId){
-                                            QiscusNotification.publish(roomChange: r, onProperty: .lastComment)
-                                        }
+                                    if let r = QRoom.getRoom(withId: rId){
+                                        QiscusNotification.publish(roomChange: r, onProperty: .lastComment)
                                     }
                                 }
                             }
@@ -246,7 +237,7 @@ internal extension QRoom {
         
         QiscusDBThread.sync {
             if let room = QRoom.threadSaveRoom(withId: id) {
-                let predicate = NSPredicate(format: "id CONTAINS %@", cUniqueId)
+                let predicate = NSPredicate(format: "uniqueId = %@", cUniqueId)
                 if room.comments.filter(predicate).count > 0 {
                     Qiscus.printLog(text: "fail to add newComment, comment with same uniqueId already exist")
                     return
@@ -265,117 +256,41 @@ internal extension QRoom {
                 
                 if room.comments.count == 0 {
                     newComment.cellPosRaw = QCellPosition.single.rawValue
-                    let commentGroup = QCommentGroup()
-                    commentGroup.senderEmail = newComment.senderEmail
-                    commentGroup.senderName = newComment.senderName
-                    commentGroup.createdAt = newComment.createdAt
-                    commentGroup.id = "\(newComment.uniqueId)"
                     
                     try! realm.write {
-                        room.comments.append(commentGroup)
                         realm.add(newComment, update: true)
-                        commentGroup.comments.append(newComment)
+                        room.comments.append(newComment)
                     }
                 }
                 else if onTop{
-                    let firstCommentGroup = room.comments.first!
-                    if firstCommentGroup.date == newComment.date && firstCommentGroup.senderEmail == newComment.senderEmail && newComment.type != .system {
-                        newComment.cellPosRaw = QCellPosition.first.rawValue
-                        let predicate = NSPredicate(format: "uniqueId = %@", newComment.uniqueId)
-                        realm.refresh()
-                        if firstCommentGroup.comments.filter(predicate).count == 0 {
-                            try! realm.write {
-                                firstCommentGroup.createdAt = newComment.createdAt
-                                firstCommentGroup.senderName = newComment.senderName
-                                realm.add(newComment, update: true)
-                                firstCommentGroup.comments.insert(newComment, at: 0)
-                            }
-                            let changedComment = firstCommentGroup.comments[1]
-                            if changedComment.cellPos == .single {
-                                changedComment.updateCellPos(cellPos: .last)
-                            }else if changedComment.cellPos == .first {
-                                changedComment.updateCellPos(cellPos: .middle)
-                            }
-                            if !firstCommentGroup.id.contains(cUniqueId){
-                                let newId = "\(firstCommentGroup.id)   \(cUniqueId)"
-                                try! realm.write {
-                                    firstCommentGroup.id = newId
-                                }
-                            }
-                        }
-                    }else{
-                        let commentGroup = QCommentGroup()
-                        commentGroup.senderEmail = newComment.senderEmail
-                        commentGroup.senderName = newComment.senderName
-                        commentGroup.createdAt = newComment.createdAt
-                        commentGroup.id = "\(cUniqueId)"
-                        newComment.cellPosRaw = QCellPosition.single.rawValue
-                        try! realm.write {
-                            self.comments.insert(commentGroup, at: 0)
-                            realm.add(newComment, update: true)
-                            commentGroup.comments.append(newComment)
-                        }
+                    try! realm.write {
+                        realm.add(newComment, update: true)
+                        self.comments.insert(newComment, at: 0)
                     }
                     if room.lastComment == nil {
                         room.updateLastComentInfo(comment: newComment)
                     }
                 }
                 else{
-                    let lastGroup = room.comments[room.comments.count - 1]
-                    let lastComment = lastGroup.comments[lastGroup.comments.count - 1]
-                    if lastGroup.date == newComment.date && lastGroup.senderEmail == newComment.senderEmail && newComment.type != .system && lastComment.type != .system{
-                        newComment.cellPosRaw = QCellPosition.last.rawValue
-                        let predicate = NSPredicate(format: "uniqueId = %@", newComment.uniqueId)
-                        realm.refresh()
-                        
-                        if lastGroup.comments.filter(predicate).count == 0 {
-                            try! realm.write {
-                                realm.add(newComment, update: true)
-                                lastGroup.comments.append(newComment)
-                            }
-                            if !lastGroup.id.contains(cUniqueId){
-                                let newId = "\(lastGroup.id)   \(cUniqueId)"
-                                try! realm.write {
-                                    lastGroup.id = newId
-                                }
-                            }
-                            lastGroup.calculateCommentPosition()
-                        }
-                    }else{
-                        let commentGroup = QCommentGroup()
-                        commentGroup.senderEmail = newComment.senderEmail
-                        commentGroup.senderName = newComment.senderName
-                        commentGroup.createdAt = newComment.createdAt
-                        commentGroup.id = "\(newComment.uniqueId)"
-                        newComment.cellPosRaw = QCellPosition.single.rawValue
-                        try! realm.write {
-                            room.comments.append(commentGroup)
-                            realm.add(newComment, update: true)
-                            commentGroup.comments.append(newComment)
-                        }
+                    try! realm.write {
+                        realm.add(newComment, update: true)
+                        room.comments.append(newComment)
                     }
                 }
                 if !onTop {
                     let rId = self.id
+                    let uid = newComment.uniqueId
                     if Thread.isMainThread {
                         if let r = QRoom.getRoom(withId: rId){
-                            let groupPredicate = NSPredicate(format: "id CONTAINS %@", cUniqueId)
-                            if let group = r.comments.filter(groupPredicate).last{
-                                let cPredicate = NSPredicate(format: "uniqueId = %@", cUniqueId)
-                                if let c = group.comments.filter(cPredicate).first {
-                                    QiscusNotification.publish(gotNewComment: c, room: r)
-                                }
+                            if let c = QComment.comment(withUniqueId: uid){
+                                QiscusNotification.publish(gotNewComment: c, room: r)
                             }
                         }
                     }else{
                         DispatchQueue.main.sync {
                             if let r = QRoom.getRoom(withId: rId){
-                                let groupPredicate = NSPredicate(format: "id CONTAINS %@", cUniqueId)
-                                if let group = r.comments.filter(groupPredicate).last{
-                                    let cPredicate = NSPredicate(format: "uniqueId = %@", cUniqueId)
-                                    if let c = group.comments.filter(cPredicate).first {
-                                        QiscusNotification.publish(gotNewComment: c, room: r)
-                                    }
+                                if let c = QComment.comment(withUniqueId: uid){
+                                    QiscusNotification.publish(gotNewComment: c, room: r)
                                 }
                             }
                         }
@@ -911,46 +826,67 @@ internal extension QRoom {
         let data = self.participants.filter("email == '\(email)'")
         return data.first
     }
-    internal func getGrouppedComments()->[[QComment]]{
-        var retVal = [[QComment]]()
-        for commentGroup in self.comments {
-            var group = [QComment]()
-            var uidCollection = [String]()
-            var i = 0
-            for comment in commentGroup.comments {
-                if !uidCollection.contains(comment.uniqueId){
-                    uidCollection.append(comment.uniqueId)
-                    group.append(comment)
-                }else{
-                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-                    try! realm.write {
-                        commentGroup.comments.remove(objectAtIndex: i)
-                    }
-                }
-                i += 1
-            }
-            retVal.append(group)
-        }
-        return retVal
-    }
+    
     internal func getGrouppedCommentsUID()->[[String]]{
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         var retVal = [[String]]()
+        var uidList = [String]()
+        var s = 0
         
-        for commentGroup in self.comments {
-            var group = [String]()
-            var i = 0
-            for comment in commentGroup.comments {
-                if !group.contains(comment.uniqueId) {
-                    group.append(comment.uniqueId)
-                }else{
-                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-                    try! realm.write {
-                        commentGroup.comments.remove(objectAtIndex: i)
+        var prevComment:QComment?
+        var group = [String]()
+        var count = 0
+        func checkPosition(ids:[String]) {
+            var n = 0
+            for id in ids {
+                var position = QCellPosition.middle
+                if ids.count > 1 {
+                    switch n {
+                    case 0 :
+                        position = .first
+                        break
+                    case ids.count - 1 :
+                        position = .last
+                        break
+                    default:
+                        position = .middle
+                        break
                     }
+                }else{
+                    position = .single
                 }
-                i += 1
+                n += 1
+                if let c = QComment.threadSaveComment(withUniqueId: id){
+                    c.updateCellPos(cellPos: position)
+                }
             }
-            retVal.append(group)
+        }
+        for comment in self.comments {
+            if uidList.contains(comment.uniqueId) {
+                try! realm.write {
+                    self.comments.remove(objectAtIndex: count)
+                }
+            }else{
+                if let prev = prevComment{
+                    if prev.date == comment.date && prev.senderEmail == comment.senderEmail && comment.type != .system  {
+                        group.append(comment.uniqueId)
+                    }else{
+                        retVal.append(group)
+                        checkPosition(ids: group)
+                        group = [String]()
+                        group.append(comment.uniqueId)
+                    }
+                }else{
+                    group.append(comment.uniqueId)
+                }
+                if count == self.comments.count - 1  {
+                    retVal.append(group)
+                    checkPosition(ids: group)
+                }else{
+                    prevComment = comment
+                }
+            }
+            count += 1
         }
         return retVal
     }

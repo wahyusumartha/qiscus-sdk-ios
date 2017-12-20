@@ -38,9 +38,7 @@ extension QConversationCollectionView: ChatCellDelegate, ChatCellAudioDelegate {
             let replyData = JSON(parseJSON: comment.data)
             let commentId = replyData["replied_comment_id"].intValue
             if let targetComment = QComment.comment(withId: commentId){
-                self.scrollToComment(comment: targetComment, completion: { (cell) in
-                    cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
-                })
+                self.scrollToComment(comment: targetComment)
             }
             self.cellDelegate?.cellDelegate?(didTapCommentLink: comment)
         }

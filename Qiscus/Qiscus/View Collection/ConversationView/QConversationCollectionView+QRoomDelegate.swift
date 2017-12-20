@@ -26,6 +26,7 @@ extension QConversationCollectionView: QRoomDelegate {
                     if let rts = QRoom.threadSaveRoom(withId: rid){
                         self.messagesId = rts.grouppedCommentsUID
                         DispatchQueue.main.async {
+                            self.reloadData()
                             self.roomDelegate?.roomDelegate?(didFinishSync: r)
                         }
                     }
@@ -76,7 +77,9 @@ extension QConversationCollectionView: QRoomDelegate {
                     if let rts = QRoom.threadSaveRoom(withId: rid){
                         self.messagesId = rts.grouppedCommentsUID
                         DispatchQueue.main.async {
+                            self.reloadData()
                             if comment.senderEmail == QiscusMe.shared.email || self.isLastRowVisible {
+                                self.layoutIfNeeded()
                                 self.scrollToBottom(true)
                             }
                         }
@@ -93,6 +96,9 @@ extension QConversationCollectionView: QRoomDelegate {
                 QiscusBackgroundThread.async {
                     if let rts = QRoom.threadSaveRoom(withId: rid){
                         self.messagesId = rts.grouppedCommentsUID
+                        DispatchQueue.main.async {
+                            self.reloadData()
+                        }
                     }
                 }
             }
@@ -115,6 +121,8 @@ extension QConversationCollectionView: QRoomDelegate {
                                 CATransaction.begin()
                                 CATransaction.setDisableActions(true)
                                 self.messagesId = newmessages
+                                self.reloadData()
+                                self.layoutIfNeeded()
                                 self.contentOffset = CGPoint(x: 0, y: self.contentSize.height - bottomOffset)
                                 CATransaction.commit()
                                 self.loadMoreControl.endRefreshing()

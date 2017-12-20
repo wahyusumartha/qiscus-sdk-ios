@@ -86,47 +86,45 @@ extension QiscusChatVC: QConversationViewCellDelegate{
             let currentFile = comment.file!
             var totalIndex = 0
             var currentIndex = 0
-            for dataGroup in self.chatRoom!.comments {
-                for targetData in dataGroup.comments{
-                    if let file = targetData.file {
-                        if QFileManager.isFileExist(inLocalPath: file.localPath){
-                            if file.localPath == currentFile.localPath {
-                                currentIndex = totalIndex
-                            }
-                            let urlString = "file://\(file.localPath)"
-                            if let url = URL(string: urlString){
-                                if let imageData = try? Data(contentsOf: url) {
-                                    if file.type == .image {
-                                        if file.ext == "gif"{
-                                            if let image = UIImage.qiscusGIF(data: imageData){
-                                                let item = QiscusGalleryItem()
-                                                item.image = image
-                                                item.isVideo = false
-                                                self.galleryItems.append(item)
-                                                totalIndex += 1
-                                            }
-                                        }else{
-                                            if let image = UIImage(data: imageData) {
-                                                let item = QiscusGalleryItem()
-                                                item.image = image
-                                                item.isVideo = false
-                                                self.galleryItems.append(item)
-                                                totalIndex += 1
-                                            }
+            for targetData in self.chatRoom!.comments {
+                if let file = targetData.file {
+                    if QFileManager.isFileExist(inLocalPath: file.localPath){
+                        if file.localPath == currentFile.localPath {
+                            currentIndex = totalIndex
+                        }
+                        let urlString = "file://\(file.localPath)"
+                        if let url = URL(string: urlString){
+                            if let imageData = try? Data(contentsOf: url) {
+                                if file.type == .image {
+                                    if file.ext == "gif"{
+                                        if let image = UIImage.qiscusGIF(data: imageData){
+                                            let item = QiscusGalleryItem()
+                                            item.image = image
+                                            item.isVideo = false
+                                            self.galleryItems.append(item)
+                                            totalIndex += 1
                                         }
-                                    }else if file.type == .video{
-                                        let urlString = "file://\(file.localPath)"
-                                        let urlThumb = "file://\(file.localThumbPath)"
-                                        if let url = URL(string: urlThumb) {
-                                            if let data = try? Data(contentsOf: url) {
-                                                if let image = UIImage(data: data){
-                                                    let item = QiscusGalleryItem()
-                                                    item.image = image
-                                                    item.isVideo = true
-                                                    item.url = urlString
-                                                    self.galleryItems.append(item)
-                                                    totalIndex += 1
-                                                }
+                                    }else{
+                                        if let image = UIImage(data: imageData) {
+                                            let item = QiscusGalleryItem()
+                                            item.image = image
+                                            item.isVideo = false
+                                            self.galleryItems.append(item)
+                                            totalIndex += 1
+                                        }
+                                    }
+                                }else if file.type == .video{
+                                    let urlString = "file://\(file.localPath)"
+                                    let urlThumb = "file://\(file.localThumbPath)"
+                                    if let url = URL(string: urlThumb) {
+                                        if let data = try? Data(contentsOf: url) {
+                                            if let image = UIImage(data: data){
+                                                let item = QiscusGalleryItem()
+                                                item.image = image
+                                                item.isVideo = true
+                                                item.url = urlString
+                                                self.galleryItems.append(item)
+                                                totalIndex += 1
                                             }
                                         }
                                     }

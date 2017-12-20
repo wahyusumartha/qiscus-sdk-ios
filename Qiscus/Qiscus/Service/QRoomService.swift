@@ -76,7 +76,7 @@ public class QRoomService:NSObject{
                     "token" : Qiscus.shared.config.USER_TOKEN as AnyObject
                 ]
                 if r.comments.count > 0 {
-                    let firstComment = r.comments[0].comments[0]
+                    let firstComment = r.comments.first!
                     parameters["last_comment_id"] = firstComment.id as AnyObject
                 }
                 Qiscus.printLog(text: "request loadMore parameters: \(parameters)")

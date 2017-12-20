@@ -522,9 +522,8 @@ open class QiscusChatVC: UIViewController{
                 self.chatRoom!.sync()
             }else{
                 if let target = self.chatTarget {
-                    if let indexPath = self.chatRoom?.getIndexPath(ofComment: target){
-                        self.selectedCellIndex = indexPath
-                        self.collectionView.scrollToItem(at: indexPath, at: UICollectionViewScrollPosition.top, animated: true)
+                    if let commentTarget = QComment.comment(withUniqueId: target.uniqueId){
+                        self.collectionView.scrollToComment(comment: commentTarget)
                     }else{
                         QToasterSwift.toast(target: self, text: "Can't find message", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
                     }
@@ -532,12 +531,9 @@ open class QiscusChatVC: UIViewController{
                 }
             }
         }else{
-//            self.collectionView.reloadData()
-            
             if let target = self.chatTarget {
-                if let indexPath = self.chatRoom?.getIndexPath(ofComment: target){
-                    self.selectedCellIndex = indexPath
-                    self.collectionView.scrollToItem(at: indexPath, at: UICollectionViewScrollPosition.top, animated: true)
+                if let commentTarget = QComment.comment(withUniqueId: target.uniqueId){
+                    self.collectionView.scrollToComment(comment: commentTarget)
                 }else{
                     QToasterSwift.toast(target: self, text: "Can't find message", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
                 }
@@ -779,9 +775,7 @@ extension QiscusChatVC:QChatServiceDelegate{
             self.collectionView.isHidden = false
             self.welcomeView.isHidden = true
             if let target = self.chatTarget {
-                self.collectionView.scrollToComment(comment: target, completion: { (cell) in
-                    cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
-                })
+                self.collectionView.scrollToComment(comment: target)
                 self.chatTarget = nil
             }else{
                 self.collectionView.scrollToBottom()
@@ -813,9 +807,7 @@ extension QiscusChatVC:QConversationViewRoomDelegate{
             self.welcomeView.isHidden = true
             if let target = self.chatTarget {
                 self.collectionView.layoutIfNeeded()
-                self.collectionView.scrollToComment(comment: target, completion: { (cell) in
-                    cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
-                })
+                self.collectionView.scrollToComment(comment: target)
             }else{
                 self.collectionView.scrollToBottom()
             }

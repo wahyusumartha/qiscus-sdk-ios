@@ -9,11 +9,7 @@
 import RealmSwift
 
 public extension QRoom {
-    public var grouppedComments:[[QComment]]{
-        get{
-            return self.getGrouppedComments()
-        }
-    }
+    
     public var grouppedCommentsUID:[[String]]{
         get{
             return self.getGrouppedCommentsUID()
@@ -67,12 +63,6 @@ public extension QRoom {
         }
     }
     
-    public var lastCommentGroup:QCommentGroup?{
-        get{
-            if self.isInvalidated { return nil }
-            return self.comments.last
-        }
-    }
     public var lastComment:QComment?{
         get{
             if self.isInvalidated {return nil}

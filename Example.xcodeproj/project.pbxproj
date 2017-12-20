@@ -66,13 +66,11 @@
 		39E7544E1F67B5AD003C3302 /* QiscusUploaderVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E7544C1F67B5AD003C3302 /* QiscusUploaderVC.swift */; };
 		39E7544F1F67B5AD003C3302 /* QiscusUploaderVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39E7544D1F67B5AD003C3302 /* QiscusUploaderVC.xib */; };
 		39F1F6AD1D3B90E200FF1C8C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F1F6AC1D3B90E200FF1C8C /* AppDelegate.swift */; };
-		39F1F6B21D3B90E200FF1C8C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 39F1F6B01D3B90E200FF1C8C /* Main.storyboard */; };
 		39F1F6B71D3B90E200FF1C8C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 39F1F6B61D3B90E200FF1C8C /* Assets.xcassets */; };
 		39F1F6BA1D3B90E200FF1C8C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 39F1F6B81D3B90E200FF1C8C /* LaunchScreen.storyboard */; };
 		39F1F7491D3B932A00FF1C8C /* Qiscus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F1F7481D3B932A00FF1C8C /* Qiscus.swift */; };
 		39F1F7631D3CB12800FF1C8C /* Qiscus.swift in Headers */ = {isa = PBXBuildFile; fileRef = 39F1F7481D3B932A00FF1C8C /* Qiscus.swift */; settings = {ATTRIBUTES = (Public, ); }; };
 		39F70F681F3D56E100774D97 /* QComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F70F671F3D56E100774D97 /* QComment.swift */; };
-		39F70F6F1F3D56F400774D97 /* QCommentGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F70F691F3D56F400774D97 /* QCommentGroup.swift */; };
 		39F70F701F3D56F400774D97 /* QCommentInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F70F6A1F3D56F400774D97 /* QCommentInfo.swift */; };
 		39F70F711F3D56F400774D97 /* QFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F70F6B1F3D56F400774D97 /* QFile.swift */; };
 		39F70F721F3D56F400774D97 /* QParticipant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F70F6C1F3D56F400774D97 /* QParticipant.swift */; };
@@ -251,7 +249,6 @@
 		39E7544D1F67B5AD003C3302 /* QiscusUploaderVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = QiscusUploaderVC.xib; path = Qiscus/View/QiscusUploaderVC.xib; sourceTree = "<group>"; };
 		39F1F6A91D3B90E200FF1C8C /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		39F1F6AC1D3B90E200FF1C8C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		39F1F6B11D3B90E200FF1C8C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		39F1F6B61D3B90E200FF1C8C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		39F1F6B91D3B90E200FF1C8C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		39F1F6BB1D3B90E200FF1C8C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -259,7 +256,6 @@
 		39F1F7131D3B91E200FF1C8C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		39F1F7481D3B932A00FF1C8C /* Qiscus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Qiscus.swift; path = Qiscus/Qiscus.swift; sourceTree = "<group>"; };
 		39F70F671F3D56E100774D97 /* QComment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QComment.swift; path = Qiscus/Model/DataModel/QComment.swift; sourceTree = "<group>"; };
-		39F70F691F3D56F400774D97 /* QCommentGroup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QCommentGroup.swift; path = Qiscus/Model/DataModel/QCommentGroup.swift; sourceTree = "<group>"; };
 		39F70F6A1F3D56F400774D97 /* QCommentInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QCommentInfo.swift; path = Qiscus/Model/DataModel/QCommentInfo.swift; sourceTree = "<group>"; };
 		39F70F6B1F3D56F400774D97 /* QFile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QFile.swift; path = Qiscus/Model/DataModel/QFile.swift; sourceTree = "<group>"; };
 		39F70F6C1F3D56F400774D97 /* QParticipant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QParticipant.swift; path = Qiscus/Model/DataModel/QParticipant.swift; sourceTree = "<group>"; };
@@ -384,7 +380,6 @@
 				399BD7451FC3C14B00BCD069 /* Internal */,
 				399BD7441FC3C14100BCD069 /* Public */,
 				39F70F671F3D56E100774D97 /* QComment.swift */,
-				39F70F691F3D56F400774D97 /* QCommentGroup.swift */,
 				39F70F6A1F3D56F400774D97 /* QCommentInfo.swift */,
 				39F70F6B1F3D56F400774D97 /* QFile.swift */,
 				39F70F6C1F3D56F400774D97 /* QParticipant.swift */,
@@ -573,7 +568,6 @@
 				395291231E28559B004BD6B4 /* MainView.swift */,
 				395291241E28559B004BD6B4 /* MainView.xib */,
 				39F1F6AC1D3B90E200FF1C8C /* AppDelegate.swift */,
-				39F1F6B01D3B90E200FF1C8C /* Main.storyboard */,
 				39F1F6B61D3B90E200FF1C8C /* Assets.xcassets */,
 				39F1F6B81D3B90E200FF1C8C /* LaunchScreen.storyboard */,
 				39F1F6BB1D3B90E200FF1C8C /* Info.plist */,
@@ -863,7 +857,6 @@
 				395291261E28559B004BD6B4 /* goToChatVC.xib in Resources */,
 				39E754381F62226E003C3302 /* RoomListVC.xib in Resources */,
 				39F1F6B71D3B90E200FF1C8C /* Assets.xcassets in Resources */,
-				39F1F6B21D3B90E200FF1C8C /* Main.storyboard in Resources */,
 				39E754341F5E84B0003C3302 /* SearchCell.xib in Resources */,
 				39BD59171EB2F1A3001AFB7C /* Qiscus.podspec in Resources */,
 				39E7543C1F6222AB003C3302 /* RoomListCell.xib in Resources */,
@@ -1089,7 +1082,6 @@
 				39F70FE91F3D619900774D97 /* QCellContactRight.swift in Sources */,
 				394D7A9F1F4E735300E69E1C /* QCellLocationRight.swift in Sources */,
 				39F70F961F3D5BBD00774D97 /* ViewController.swift in Sources */,
-				39F70F6F1F3D56F400774D97 /* QCommentGroup.swift in Sources */,
 				399BD7431FC3BDE000BCD069 /* QRoom+PublicProperty.swift in Sources */,
 				39F710111F3D62FE00774D97 /* QiscusMe.swift in Sources */,
 				39F70FA41F3D5D6F00774D97 /* QiscusUIConfiguration.swift in Sources */,
@@ -1176,14 +1168,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		39F1F6B01D3B90E200FF1C8C /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				39F1F6B11D3B90E200FF1C8C /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		39F1F6B81D3B90E200FF1C8C /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (

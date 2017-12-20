@@ -28,6 +28,9 @@ public class QConversationCollectionView: UICollectionView {
                 QiscusBackgroundThread.async {
                     if let rts = QRoom.threadSaveRoom(withId: rid){
                         self.messagesId = rts.grouppedCommentsUID
+                        DispatchQueue.main.async {
+                            self.reloadData()
+                        }
                     }
                 }
                 
@@ -49,16 +52,15 @@ public class QConversationCollectionView: UICollectionView {
     internal var messagesId = [[String]](){
         didSet{
             DispatchQueue.main.async {
-                self.reloadData()
                 if oldValue.count == 0 {
-                    self.layoutSubviews()
                     self.layoutIfNeeded()
-                    self.scrollToBottom()
+//                    self.scrollToBottom()
                 }
             }
         }
     }
     internal var loadingMore = false
+    internal var targetIndexPath:IndexPath?
     
     var isLastRowVisible: Bool = false
     
@@ -264,13 +266,9 @@ public class QConversationCollectionView: UICollectionView {
     func scrollToBottom(_ animated:Bool = false){
         if self.room != nil {
             if self.messagesId.count > 0 {
-                var lastSection = self.messagesId.count - 1
-                var lastItem = self.messagesId[lastSection].count - 1
+                let lastSection = self.numberOfSections - 1
+                let lastItem = self.numberOfItems(inSection: lastSection) - 1
                 
-                if self.typingUsers.count > 0 {
-                    lastSection += 1
-                    lastItem = 0
-                }
                 if lastSection >= 0 && lastItem >= 0 {
                     let indexPath = IndexPath(item: lastItem, section: lastSection)
                     self.layoutIfNeeded()
@@ -335,7 +333,7 @@ public class QConversationCollectionView: UICollectionView {
             }
         }
     }
-    func scrollToComment(comment:QComment, completion:@escaping ((QChatCell)->Void)){
+    func scrollToComment(comment:QComment){
         if let room = self.room {
             let roomId = room.id
             let uniqueId = comment.uniqueId
@@ -343,11 +341,11 @@ public class QConversationCollectionView: UICollectionView {
                 if let rts = QRoom.threadSaveRoom(withId: roomId){
                     var section = 0
                     var found = false
-                    for group in rts.comments{
+                    for group in rts.grouppedCommentsUID{
                         var item = 0
-                        if group.id.contains("\(uniqueId)"){
-                            for c in group.comments {
-                                if c.uniqueId == uniqueId {
+                        if group.contains("\(uniqueId)"){
+                            for id in group {
+                                if id == uniqueId {
                                     found = true
                                     break
                                 }else{
@@ -360,13 +358,10 @@ public class QConversationCollectionView: UICollectionView {
                         }else{
                             section += 1
                         }
-                        let targetIndexPath = IndexPath(item: item, section: section)
+                        self.targetIndexPath = IndexPath(item: item, section: section)
                         DispatchQueue.main.async {
                             self.layoutIfNeeded()
-                            self.scrollToItem(at: targetIndexPath, at: .top, animated: true)
-                            if let cell = self.cellForItem(at: targetIndexPath) as? QChatCell {
-                                completion(cell)
-                            }
+                            self.scrollToItem(at: self.targetIndexPath!, at: .top, animated: true)
                         }
                     }
                 }
@@ -379,6 +374,9 @@ public class QConversationCollectionView: UICollectionView {
             QiscusBackgroundThread.async {
                 if let rts = QRoom.threadSaveRoom(withId: rid){
                     self.messagesId = rts.grouppedCommentsUID
+                    DispatchQueue.main.async {
+                        self.reloadData()
+                    }
                 }
             }
         }

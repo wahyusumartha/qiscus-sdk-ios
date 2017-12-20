@@ -101,6 +101,14 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                                 isLastItem = true
                             }
                         }
+                        if let target = self.targetIndexPath {
+                            if indexPath.section == target.section && indexPath.item == target.item {
+                                DispatchQueue.main.async {
+                                    cell.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.15)
+                                    self.targetIndexPath = nil
+                                }
+                            }
+                        }
                         DispatchQueue.main.async {
                             chatCell.willDisplayCell()
                             let message = QComment.comment(withUniqueId: uid)!
