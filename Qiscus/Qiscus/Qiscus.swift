@@ -176,7 +176,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.removeDB()
         Qiscus.chatRooms = [String : QRoom]()
         QParticipant.cache = [String : QParticipant]()
-        QCommentGroup.cache = [String : QCommentGroup]()
         QComment.cache = [String : QComment]()
         QUser.cache = [String: QUser]()
         Qiscus.shared.chatViews = [String:QiscusChatVC]()
@@ -1226,7 +1225,6 @@ extension Qiscus:CocoaMQTTDelegate{
     }
     public class func cacheData(){
         QRoom.cacheAll()
-        QCommentGroup.cacheAll()
         QComment.cacheAll()
         QUser.cacheAll()
         QParticipant.cacheAll()

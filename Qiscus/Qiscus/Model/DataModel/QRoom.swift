@@ -896,5 +896,25 @@ public class QRoom:Object {
             }
         }
     }
+    internal func clearMessage(){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
+        
+        try! realm.write {
+            self.comments.removeAll()
+        }
+    }
+    internal class func removeAllMessage(){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
+        for room in QRoom.all() {
+            room.clearMessage()
+        }
+        let comments = realm.objects(QComment.self)
+        try! realm.write {
+            realm.delete(comments)
+        }
+        QComment.cache = [String : QComment]()
+    }
 }
 

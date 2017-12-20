@@ -769,10 +769,11 @@ public class QChatService:NSObject {
                         let lastReceivedCommentId = meta["last_received_comment_id"].intValue
                         let needClear = meta["need_clear"].boolValue
                         if needClear {
-                            QCommentGroup.clearAllMessage(onFinish: {
+                            QiscusBackgroundThread.async {
+                                QRoom.removeAllMessage()
                                 QiscusMe.updateLastCommentId(commentId: lastReceivedCommentId)
                                 finishBackgroundSync()
-                            })
+                            }
                         }else{
                             let comments = json["results"]["comments"].arrayValue
                             var data = [String:[JSON]]()
@@ -896,9 +897,10 @@ public class QChatService:NSObject {
                         let lastReceivedCommentId = meta["last_received_comment_id"].intValue
                         let needClear = meta["need_clear"].boolValue
                         if needClear {
-                            QCommentGroup.clearAllMessage(onFinish: {
+                            QiscusBackgroundThread.async {
+                                QRoom.removeAllMessage()
                                 QiscusMe.updateLastCommentId(commentId: lastReceivedCommentId)
-                            })
+                            }
                         }else{
                             let comments = json["results"]["comments"].arrayValue
                             var data = [String:[JSON]]()
