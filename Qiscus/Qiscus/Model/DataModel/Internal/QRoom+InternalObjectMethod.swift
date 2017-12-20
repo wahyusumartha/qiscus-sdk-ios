@@ -869,15 +869,18 @@ internal extension QRoom {
             }else{
                 if let prev = prevComment{
                     if prev.date == comment.date && prev.senderEmail == comment.senderEmail && comment.type != .system  {
+                        uidList.append(comment.uniqueId)
                         group.append(comment.uniqueId)
                     }else{
                         retVal.append(group)
                         checkPosition(ids: group)
                         group = [String]()
                         group.append(comment.uniqueId)
+                        uidList.append(comment.uniqueId)
                     }
                 }else{
                     group.append(comment.uniqueId)
+                    uidList.append(comment.uniqueId)
                 }
                 if count == self.comments.count - 1  {
                     retVal.append(group)
