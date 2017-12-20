@@ -30,10 +30,12 @@ public class QConversationCollectionView: UICollectionView {
                         self.messagesId = rts.grouppedCommentsUID
                         DispatchQueue.main.async {
                             self.reloadData()
+                            if oldValue == nil {
+                                self.scrollToBottom()
+                            }
                         }
                     }
                 }
-                
             }
         }
     }
@@ -196,9 +198,12 @@ public class QConversationCollectionView: UICollectionView {
             self.reloadData()
         }
         else if changed && self.typingUsers.count > 0{
-            let section = self.room!.comments.count
-            let indexPath = IndexPath(item: 0, section: section)
-            self.reloadItems(at: [indexPath])
+            let section = self.numberOfSections - 1
+            let item = self.numberOfItems(inSection: section) - 1
+            if item == 0 {
+                let indexPath = IndexPath(item: item, section: section)
+                self.reloadItems(at: [indexPath])
+            }
             scroll()
         }
         self.processingTyping = false
