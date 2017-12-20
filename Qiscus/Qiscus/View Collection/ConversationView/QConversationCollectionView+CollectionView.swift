@@ -175,15 +175,19 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                     return false
                 }else{
                     switch comment.type {
+                    case .text, .contact:
+                        return true
                     case .video,.image,.audio,.file,.document:
                         if let file = comment.file {
                             if QFileManager.isFileExist(inLocalPath: file.localPath){
+                                return true
+                            }else if file.url.contains("http"){
                                 return true
                             }
                         }
                         return false
                     default:
-                        return true
+                        return false
                     }
                 }
             case "deleteComment":

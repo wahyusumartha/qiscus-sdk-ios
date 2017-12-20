@@ -83,23 +83,34 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
         // implementation will be overrided on child class
     }
     open func resend(){
-        if let room = QRoom.room(withId: self.comment!.roomId) {
-            if self.comment!.type == .text {
-                room.updateCommentStatus(inComment: self.comment!, status: .sending)
-                room.post(comment: self.comment!)
-            }else{
-                if let file = self.comment!.file {
-                    if file.url.contains("http") {
-                        room.updateCommentStatus(inComment: self.comment!, status: .sending)
-                        room.post(comment: self.comment!)
-                    }else{
-                        if QFileManager.isFileExist(inLocalPath: file.localPath) {
-                            room.upload(comment: self.comment!, onSuccess: { (roomTarget, commentTarget) in
-                                roomTarget.post(comment: commentTarget)
-                            }, onError: { (_, _, error) in
-                                Qiscus.printLog(text: "error reupload file")
-                            })
+        let roomId = self.comment!.roomId
+        let cUid = self.comment!.uniqueId
+        QiscusBackgroundThread.async {
+            if let room = QRoom.threadSaveRoom(withId: roomId){
+                if let c = QComment.threadSaveComment(withUniqueId: cUid){
+                    switch c.type{
+                    case .text,.contact:
+                        c.updateStatus(status: .sending)
+                        room.post(comment: c)
+                        break
+                    case .video,.image,.audio,.file,.document:
+                        if let file = c.file {
+                            if file.url.contains("http") {
+                                c.updateStatus(status: .sending)
+                                room.post(comment: c)
+                            }else{
+                                if QFileManager.isFileExist(inLocalPath: file.localPath) {
+                                    room.upload(comment: c, onSuccess: { (r, message) in
+                                        r.post(comment: message)
+                                    }, onError: { (_, _, error) in
+                                        Qiscus.printLog(text: "error reupload file")
+                                    })
+                                }
+                            }
                         }
+                        break
+                    default:
+                        break
                     }
                 }
             }
