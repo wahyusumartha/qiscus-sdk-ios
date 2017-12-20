@@ -217,14 +217,12 @@ class QCellMediaLeft: QChatCell {
                     self.comment!.displayImage = image
                 })
             }else{
-                self.videoPlay.isHidden = true
-                self.downloadButton.comment = self.comment!
-                self.downloadButton.addTarget(self, action: #selector(QCellMediaLeft.downloadMedia(_:)), for: .touchUpInside)
-                self.downloadButton.isHidden = false
+                imageDisplay.loadAsync(file.thumbURL, onLoaded: { (image, _) in
+                    self.imageDisplay.image = image
+                    self.comment!.displayImage = image
+                    file.saveMiniThumbImage(withImage: image)
+                })
             }
-            self.progressView.isHidden = true
-            self.progressContainer.isHidden = true
-            self.progressLabel.isHidden = true
             if self.comment!.type == .video {
                 self.videoPlay.image = Qiscus.image(named: "play_button")
                 self.videoFrame.isHidden = false
@@ -237,8 +235,18 @@ class QCellMediaLeft: QChatCell {
                 self.videoPlay.isHidden = true
                 self.videoFrame.isHidden = true
             }
-            self.tapRecognizer = UITapGestureRecognizer(target:self,action:#selector(self.didTapImage))
-            self.imageDisplay.addGestureRecognizer(tapRecognizer!)
+            if !QFileManager.isFileExist(inLocalPath: file.localPath) {
+                self.videoPlay.isHidden = true
+                self.downloadButton.comment = self.comment!
+                self.downloadButton.addTarget(self, action: #selector(QCellMediaLeft.downloadMedia(_:)), for: .touchUpInside)
+                self.downloadButton.isHidden = false
+            }else{
+                self.tapRecognizer = UITapGestureRecognizer(target:self,action:#selector(self.didTapImage))
+                self.imageDisplay.addGestureRecognizer(tapRecognizer!)
+            }
+            self.progressView.isHidden = true
+            self.progressContainer.isHidden = true
+            self.progressLabel.isHidden = true
         }
     }
     func didTapImage(){
@@ -268,7 +276,13 @@ class QCellMediaLeft: QChatCell {
     }
     public override func comment(didDownload comment:QComment, downloading:Bool){
         if comment.uniqueId == self.comment?.uniqueId {
-            self.downloadFinished()
+            if downloading {
+                self.downloadingMedia()
+            }else{
+                DispatchQueue.main.async {
+                    self.downloadFinished()
+                }
+            }
         }
     }
     public override func comment(didUpload comment:QComment, uploading:Bool){
@@ -278,17 +292,19 @@ class QCellMediaLeft: QChatCell {
     }
     public override func comment(didChangeProgress comment:QComment, progress:CGFloat){
         if comment.uniqueId == self.comment?.uniqueId {
-            self.downloadButton.isHidden = true
-            self.progressLabel.text = "\(Int(progress * 100)) %"
-            self.progressLabel.isHidden = false
-            self.progressContainer.isHidden = false
-            self.progressView.isHidden = false
+            if self.comment!.isUploading || self.comment!.isDownloading {
+                self.downloadButton.isHidden = true
+                self.progressLabel.text = "\(Int(progress * 100)) %"
+                self.progressLabel.isHidden = false
+                self.progressContainer.isHidden = false
+                self.progressView.isHidden = false
             
-            let newHeight = progress * maxProgressHeight
-            self.progressHeight.constant = newHeight
-            UIView.animate(withDuration: 0.65, animations: {
-                self.progressView.layoutIfNeeded()
-            })
+                let newHeight = progress * maxProgressHeight
+                self.progressHeight.constant = newHeight
+                UIView.animate(withDuration: 0.65, animations: {
+                    self.progressView.layoutIfNeeded()
+                })
+            }
         }
     }
 }

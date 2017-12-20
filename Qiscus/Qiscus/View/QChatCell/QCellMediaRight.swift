@@ -273,10 +273,11 @@ class QCellMediaRight: QChatCell {
                     self.comment!.displayImage = image
                 })
             }else{
-                self.videoPlay.isHidden = true
-                self.downloadButton.comment = self.comment!
-                self.downloadButton.addTarget(self, action: #selector(QCellMediaRight.downloadMedia(_:)), for: .touchUpInside)
-                self.downloadButton.isHidden = false
+                imageDisplay.loadAsync(file.thumbURL, onLoaded: { (image, _) in
+                    self.imageDisplay.image = image
+                    self.comment!.displayImage = image
+                    file.saveMiniThumbImage(withImage: image)
+                })
             }
             self.progressView.isHidden = true
             self.progressContainer.isHidden = true
@@ -293,8 +294,15 @@ class QCellMediaRight: QChatCell {
                 self.videoPlay.isHidden = true
                 self.videoFrame.isHidden = true
             }
-            self.tapRecognizer = UITapGestureRecognizer(target:self,action:#selector(self.didTapImage))
-            self.imageDisplay.addGestureRecognizer(tapRecognizer!)
+            if !QFileManager.isFileExist(inLocalPath: file.localPath){
+                self.videoPlay.isHidden = true
+                self.downloadButton.comment = self.comment!
+                self.downloadButton.addTarget(self, action: #selector(QCellMediaRight.downloadMedia(_:)), for: .touchUpInside)
+                self.downloadButton.isHidden = false
+            }else{
+                self.tapRecognizer = UITapGestureRecognizer(target:self,action:#selector(self.didTapImage))
+                self.imageDisplay.addGestureRecognizer(tapRecognizer!)
+            }
         }
     }
     func didTapImage(){
