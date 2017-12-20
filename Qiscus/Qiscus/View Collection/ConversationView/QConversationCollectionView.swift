@@ -188,23 +188,8 @@ public class QConversationCollectionView: UICollectionView {
                 scrollToBottom()
             }
         }
-        if (beforeEmpty && self.typingUsers.count > 0) {
-            self.reloadData()
-            scroll()
-        }else if (!beforeEmpty && self.typingUsers.count == 0) {
-            self.reloadData()
-        }
-        else if changed && self.typingUsers.count > 0{
-            let section = self.numberOfSections - 1
-            let item = self.numberOfItems(inSection: section) - 1
-            if section == self.messagesId.count {
-                if item == 0 {
-                    let indexPath = IndexPath(item: item, section: section)
-                    self.reloadItems(at: [indexPath])
-                }
-            }else{
-                self.reloadData()
-            }
+        self.reloadData()
+        if (beforeEmpty && self.typingUsers.count > 0) || (changed && self.typingUsers.count > 0){
             scroll()
         }
         self.processingTyping = false
