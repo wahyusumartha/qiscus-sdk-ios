@@ -30,9 +30,12 @@ public class QUser:Object {
     internal dynamic var rawPresence:Int = 0
     internal dynamic var avatarData:Data?
     
+    public var cachedAvatar:UIImage?
+    
     override public static func primaryKey() -> String? {
         return "email"
     }
+    
     
     public var fullname:String{
         if self.definedName != "" {
@@ -109,7 +112,7 @@ public class QUser:Object {
     
     // MARK: - Unstored properties
     override public static func ignoredProperties() -> [String] {
-        return ["avatar","delegate"]
+        return ["cachedAvatar","delegate"]
     }
     public class func saveUser(withEmail email:String, id:Int? = nil ,fullname:String? = nil, avatarURL:String? = nil, lastSeen:Double? = nil)->QUser{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
@@ -142,6 +145,7 @@ public class QUser:Object {
                 
                 DispatchQueue.main.async {
                     if let u = QUser.user(withEmail: email){
+                        u.cachedAvatar = nil
                         u.delegate?.user?(didChangeAvatarURL: avatarURL!)
                         QiscusNotification.publish(userAvatarChange: u)
                     }
