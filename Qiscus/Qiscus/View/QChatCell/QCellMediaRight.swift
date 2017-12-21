@@ -77,7 +77,7 @@ class QCellMediaRight: QChatCell {
             if caption != "" {
                 mediaCaption.attributedText = self.comment!.attributedText
                 captionHeight.constant = self.comment!.textSize.height
-                mediaCaption.sizeToFit()
+//                mediaCaption.sizeToFit()
                 mediaCaption.isHidden = false
                 containerHeight.constant = 140
             }
