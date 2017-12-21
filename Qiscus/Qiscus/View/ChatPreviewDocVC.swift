@@ -42,10 +42,6 @@ open class ChatPreviewDocVC: UIViewController, UIWebViewDelegate, WKNavigationDe
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        self.navigationController?.navigationBar.barStyle = UIBarStyle.black
-        self.navigationController?.navigationBar.isTranslucent = false
-        self.navigationController?.navigationBar.tintColor = UIColor.white
-        
         if !accountLinking {
             self.navigationItem.setTitleWithSubtitle(title: self.roomName, subtitle: self.fileName)
         }else{
@@ -183,11 +179,12 @@ open class ChatPreviewDocVC: UIViewController, UIWebViewDelegate, WKNavigationDe
         let backLabel = UILabel()
         
         backLabel.text = ""
-        backLabel.textColor = UIColor.white
+        backLabel.textColor = QiscusChatVC.currentNavbarTint
         backLabel.font = UIFont.systemFont(ofSize: 12)
         
-        let image = Qiscus.image(named: "ic_back")
+        let image = Qiscus.image(named: "ic_back")?.withRenderingMode(.alwaysTemplate)
         backIcon.image = image
+        backIcon.tintColor = QiscusChatVC.currentNavbarTint
         
         
         if UIApplication.shared.userInterfaceLayoutDirection == .leftToRight {

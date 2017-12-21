@@ -860,7 +860,7 @@ public class QComment:Object {
         }
         return nil
     }
-    public func read(){
+    public func read(check:Bool = true){
         let uniqueId = self.uniqueId
         if self.isRead {return}
         QiscusDBThread.async {
@@ -870,10 +870,12 @@ public class QComment:Object {
                 try! realm.write {
                     comment.isRead = true
                 }
-                let data = realm.objects(QComment.self).filter("isRead == false AND createdAt < \(comment.createdAt) AND roomId == '\(comment.roomId)'")
-                for olderComment in data {
-                    try! realm.write {
-                        olderComment.isRead = true
+                if check {
+                    let data = realm.objects(QComment.self).filter("isRead == false AND createdAt < \(comment.createdAt) AND roomId == '\(comment.roomId)'")
+                    for olderComment in data {
+                        try! realm.write {
+                            olderComment.isRead = true
+                        }
                     }
                 }
                 if let room = QRoom.threadSaveRoom(withId: comment.roomId) {

@@ -361,14 +361,14 @@ open class QiscusChatVC: UIViewController{
         
         titleLabel = UILabel(frame:CGRect(x: 40, y: 7, width: titleWidth, height: 17))
         titleLabel.backgroundColor = UIColor.clear
-        titleLabel.textColor = self.tintColor
+        titleLabel.textColor = QiscusChatVC.currentNavbarTint
         titleLabel.font = UIFont.boldSystemFont(ofSize: UIFont.systemFontSize)
         titleLabel.text = self.chatTitle
         titleLabel.textAlignment = .left
         
         subtitleLabel = UILabel(frame:CGRect(x: 40, y: 25, width: titleWidth, height: 13))
         subtitleLabel.backgroundColor = UIColor.clear
-        subtitleLabel.textColor = self.tintColor
+        subtitleLabel.textColor = QiscusChatVC.currentNavbarTint
         subtitleLabel.font = UIFont.systemFont(ofSize: 11)
         subtitleLabel.text = self.chatSubtitle
         subtitleLabel.textAlignment = .left

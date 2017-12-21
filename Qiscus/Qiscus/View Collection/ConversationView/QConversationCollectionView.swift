@@ -410,6 +410,7 @@ public class QConversationCollectionView: UICollectionView {
                         if let val = delegate.viewDelegate?(view: self, hideCellWith: comment){
                             if val {
                                 hiddenIndexPaths.append(IndexPath(item: item, section: section))
+                                comment.read(check: false)
                                 if !groupCheck.contains(section) {
                                     groupCheck.append(section)
                                 }
@@ -424,14 +425,36 @@ public class QConversationCollectionView: UICollectionView {
             for indexPath in hiddenIndexPaths.reversed(){
                 retVal[indexPath.section].remove(at: indexPath.item)
             }
+            
             for group in groupCheck.reversed(){
-                if retVal[group].count > 0 {
-                    self.checkMessagePos(inGroup: retVal[group])
-                }else{
+                if retVal[group].count == 0 {
                     retVal.remove(at: group)
                 }
             }
-            return retVal
+            var newGroup = [[String]]()
+            var prev:QComment?
+            var s = 0
+            for group in retVal {
+                let first = QComment.threadSaveComment(withUniqueId: group.first!)!
+                if prev == nil {
+                    newGroup.append(group)
+                    prev = first
+                }else{
+                    if prev!.date == first.date && prev!.senderEmail == first.senderEmail && first.type != .system {
+                        for uid in group {
+                            newGroup[s].append(uid)
+                        }
+                    }else{
+                        s += 1
+                        newGroup.append(group)
+                        prev = first
+                    }
+                }
+            }
+            for group in newGroup {
+                self.checkMessagePos(inGroup: group)
+            }
+            return newGroup
         }else{
             return retVal
         }
