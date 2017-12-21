@@ -861,10 +861,11 @@ internal extension QRoom {
                 }
             }
         }
+        var deletedIndex = [Int]()
         for comment in self.comments {
             if uidList.contains(comment.uniqueId) {
-                try! realm.write {
-                    self.comments.remove(objectAtIndex: count)
+                if !deletedIndex.contains(count) {
+                    deletedIndex.append(count)
                 }
             }else{
                 if let prev = prevComment{
@@ -890,6 +891,11 @@ internal extension QRoom {
                 }
             }
             count += 1
+        }
+        for index in deletedIndex.reversed(){
+            try! realm.write {
+                self.comments.remove(objectAtIndex: index)
+            }
         }
         return retVal
     }
