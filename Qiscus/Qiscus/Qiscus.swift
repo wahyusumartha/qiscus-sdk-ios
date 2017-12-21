@@ -151,11 +151,12 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     class func disconnectRealtime(){
         Qiscus.uiThread.async { autoreleasepool{
             Qiscus.sharedInstance.mqtt?.disconnect()
-        }}
+            }}
     }
     
     @objc public class func clear(){
-        Qiscus.clearData()
+        let path = "Qiscus-\(QiscusMe.shared.token)"
+        Qiscus.clearData(onPath: path)
         Qiscus.shared.stopPublishOnlineStatus()
         for channel in Qiscus.realtimeChannel {
             Qiscus.shared.mqtt?.unsubscribe(channel)
@@ -165,11 +166,12 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         QiscusMe.clear()
         Qiscus.removeLogFile()
     }
-    @objc public class func clearData(){
+    @objc public class func clearData(onPath path:String){
         Qiscus.cancellAllRequest()
         Qiscus.removeAllFile()
         
-        Qiscus.removeDB()
+        Qiscus.removeDB(withPath: path)
+        Qiscus.dbConfigurationRaw = nil
         Qiscus.chatRooms = [String : QRoom]()
         QParticipant.cache = [String : QParticipant]()
         QComment.cache = [String : QComment]()
@@ -277,7 +279,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                 Qiscus.uiThread.async { autoreleasepool{
                     delegate.qiscusConnected?()
                     delegate.qiscus?(didConnect: true, error: nil)
-                }}
+                    }}
             }
         }
         Qiscus.sharedInstance.RealtimeConnect()
@@ -579,7 +581,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             } catch {
                 Qiscus.printLog(text: "Unable to start network notifier")
             }
-        }}
+            }}
     }
     
     func applicationDidBecomeActife(){
@@ -629,9 +631,13 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     private class func getConfiguration()->Realm.Configuration{
         var conf = Realm.Configuration.defaultConfiguration
         
+        var path = "Qiscus"
+        if Qiscus.isLoggedIn {
+            path = "\(path)-\(QiscusMe.shared.token)"
+        }
         var realmURL = conf.fileURL!
         realmURL.deleteLastPathComponent()
-        realmURL.appendPathComponent("Qiscus.realm")
+        realmURL.appendPathComponent("path")
         
         conf.fileURL = realmURL
         conf.deleteRealmIfMigrationNeeded = true
@@ -989,10 +995,10 @@ extension Qiscus:CocoaMQTTDelegate{
                 Qiscus.shared.mqtt = mqtt
                 Qiscus.shared.startPublishOnlineStatus()
             }
-//            if self.syncTimer != nil {
-//                self.syncTimer?.invalidate()
-//                self.syncTimer = nil
-//            }
+            //            if self.syncTimer != nil {
+            //                self.syncTimer?.invalidate()
+            //                self.syncTimer = nil
+            //            }
         }
     }
     public func mqtt(_ mqtt: CocoaMQTT, didPublishMessage message: CocoaMQTTMessage, id: UInt16){
@@ -1047,7 +1053,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                             }
                                         }
                                         QiscusNotification.publish(roomDeleted: roomId)
-                                    }}
+                                        }}
                                 }
                                 else{
                                     syncData()
@@ -1068,7 +1074,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                     }
                                 }
                             }
-                        }}
+                            }}
                     }
                     if #available(iOS 10.0, *) {
                         if Qiscus.publishStatustimer != nil {
@@ -1097,7 +1103,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                 }
                                 room.updateUserTyping(userEmail: data)
                             }
-                        }}
+                            }}
                     }
                     break
                 case "d":
@@ -1131,7 +1137,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                     participant.updateLastReadId(commentId: commentId)
                                 }
                             }
-                        }}
+                            }}
                     }else{
                         QiscusBackgroundThread.async { autoreleasepool{
                             if let substring = messageArr.last {
@@ -1140,7 +1146,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                     c.read()
                                 }
                             }
-                        }}
+                            }}
                     }
                     break
                 case "s":
@@ -1166,7 +1172,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     break
                 }
             }
-        }}
+            }}
     }
     public func mqtt(_ mqtt: CocoaMQTT, didSubscribeTopic topic: String){
         if !Qiscus.realtimeChannel.contains(topic) {
@@ -1242,7 +1248,7 @@ extension Qiscus:CocoaMQTTDelegate{
             for room in rooms {
                 room.subscribeRealtimeStatus()
             }
-        }}
+            }}
     }
 }
 
@@ -1295,7 +1301,7 @@ extension Qiscus { // Public class API to get room
                     chatView.inputBar.layoutSubviews()
                     chatView.inputText.commonInit()
                     
-
+                    
                     Qiscus.shared.chatViews[room.id] = chatView
                 }
             }
@@ -1465,12 +1471,12 @@ extension Qiscus { // Public class API to get room
             })
         }
     }
-    public class func removeDB(){
+    public class func removeDB(withPath path:String){
         let filemanager = FileManager.default
         let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory,.userDomainMask,true)[0] as NSString
-        let destinationPaths = [documentsPath.appendingPathComponent("Qiscus.realm"),
-                                documentsPath.appendingPathComponent("Qiscus.realm.lock"),
-                                documentsPath.appendingPathComponent("Qiscus.realm.management")]
+        let destinationPaths = [documentsPath.appendingPathComponent("\(path).realm"),
+                                documentsPath.appendingPathComponent("\(path).realm.lock"),
+                                documentsPath.appendingPathComponent("\(path).realm.management")]
         
         for destination in destinationPaths {
             do {
@@ -1502,4 +1508,3 @@ extension Qiscus { // Public class API to get room
     }
     
 }
-
