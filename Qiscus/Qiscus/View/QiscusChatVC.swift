@@ -36,6 +36,7 @@ import RealmSwift
     
     @objc optional func chatVC(viewController:QiscusChatVC, cellForComment comment:QComment)->QChatCell?
     @objc optional func chatVC(viewController:QiscusChatVC, heightForComment comment:QComment)->QChatCellHeight?
+    @objc optional func chatVC(viewController:QiscusChatVC, hideCellWith comment:QComment)->Bool
 }
 
 open class QiscusChatVC: UIViewController{

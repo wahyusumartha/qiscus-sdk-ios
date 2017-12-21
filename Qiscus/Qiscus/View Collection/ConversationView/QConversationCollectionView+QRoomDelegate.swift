@@ -24,8 +24,10 @@ extension QConversationCollectionView: QRoomDelegate {
                 let rid = r.id
                 QiscusBackgroundThread.async {
                     if let rts = QRoom.threadSaveRoom(withId: rid){
-                        self.messagesId = rts.grouppedCommentsUID
+                        var messages = rts.grouppedCommentsUID
+                        messages = self.checkHiddenMessage(messages: messages)
                         DispatchQueue.main.async {
+                            self.messagesId = messages
                             self.reloadData()
                             self.roomDelegate?.roomDelegate?(didFinishSync: r)
                         }
@@ -75,8 +77,10 @@ extension QConversationCollectionView: QRoomDelegate {
                 let rid = r.id
                 QiscusBackgroundThread.async {
                     if let rts = QRoom.threadSaveRoom(withId: rid){
-                        self.messagesId = rts.grouppedCommentsUID
+                        var messages = rts.grouppedCommentsUID
+                        messages = self.checkHiddenMessage(messages: messages)
                         DispatchQueue.main.async {
+                            self.messagesId = messages
                             self.reloadData()
                             if comment.senderEmail == QiscusMe.shared.email || self.isLastRowVisible {
                                 self.layoutIfNeeded()
@@ -95,8 +99,10 @@ extension QConversationCollectionView: QRoomDelegate {
                 let rid = r.id
                 QiscusBackgroundThread.async {
                     if let rts = QRoom.threadSaveRoom(withId: rid){
-                        self.messagesId = rts.grouppedCommentsUID
+                        var messages = rts.grouppedCommentsUID
+                        messages = self.checkHiddenMessage(messages: messages)
                         DispatchQueue.main.async {
+                            self.messagesId = messages
                             self.reloadData()
                         }
                     }
@@ -116,11 +122,12 @@ extension QConversationCollectionView: QRoomDelegate {
                     let bottomOffset = contentHeight - offsetY
                     QiscusBackgroundThread.async {
                         if let rts = QRoom.threadSaveRoom(withId: rid){
-                            let newmessages = rts.grouppedCommentsUID
+                            var messages = rts.grouppedCommentsUID
+                            messages = self.checkHiddenMessage(messages: messages)
                             DispatchQueue.main.async {
                                 CATransaction.begin()
                                 CATransaction.setDisableActions(true)
-                                self.messagesId = newmessages
+                                self.messagesId = messages
                                 self.reloadData()
                                 self.layoutIfNeeded()
                                 self.contentOffset = CGPoint(x: 0, y: self.contentSize.height - bottomOffset)

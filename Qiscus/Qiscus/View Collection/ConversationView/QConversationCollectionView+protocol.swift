@@ -26,6 +26,7 @@ import UIKit
     @objc optional func viewDelegate(view:QConversationCollectionView, didEndDisplayingCellForComment comment:QComment, cell:QChatCell, indexPath:IndexPath)
     @objc optional func viewDelegate(didEndDisplayingLastMessage view:QConversationCollectionView, comment:QComment)
     @objc optional func viewDelegate(willDisplayLastMessage view:QConversationCollectionView, comment:QComment)
+    @objc optional func viewDelegate(view:QConversationCollectionView, hideCellWith comment:QComment)->Bool
 }
 @objc public protocol QConversationViewRoomDelegate{
     @objc optional func roomDelegate(didChangeName room: QRoom, name:String)

@@ -27,8 +27,11 @@ public class QConversationCollectionView: UICollectionView {
                 self.dataSource = self
                 QiscusBackgroundThread.async {
                     if let rts = QRoom.threadSaveRoom(withId: rid){
-                        self.messagesId = rts.grouppedCommentsUID
+                        var messages = rts.grouppedCommentsUID
+                        messages = self.checkHiddenMessage(messages: messages)
+                        
                         DispatchQueue.main.async {
+                            self.messagesId = messages
                             self.reloadData()
                             if oldValue == nil {
                                 self.scrollToBottom()
@@ -364,12 +367,73 @@ public class QConversationCollectionView: UICollectionView {
             let rid = room.id
             QiscusBackgroundThread.async {
                 if let rts = QRoom.threadSaveRoom(withId: rid){
-                    self.messagesId = rts.grouppedCommentsUID
+                    var messages = rts.grouppedCommentsUID
+                    messages = self.checkHiddenMessage(messages: messages)
                     DispatchQueue.main.async {
+                        self.messagesId = messages
                         self.reloadData()
                     }
                 }
             }
+        }
+    }
+    internal func checkMessagePos(inGroup group:[String]){
+        var item = 0
+        for i in group {
+            var position = QCellPosition.middle
+            if group.count == 1 {
+                position = .single
+            }else{
+                if item == 0 {
+                    position = .first
+                }else if item == group.count - 1 {
+                    position = .last
+                }
+            }
+            if let comment = QComment.threadSaveComment(withUniqueId: i){
+                comment.updateCellPos(cellPos: position)
+            }
+            item += 1
+        }
+    }
+    internal func checkHiddenMessage(messages:[[String]])->[[String]]{
+        var retVal = messages
+        if let delegate = self.viewDelegate {
+            var hiddenIndexPaths = [IndexPath]()
+            var groupCheck = [Int]()
+            var section = 0
+            
+            for s in retVal {
+                var item = 0
+                for i in s {
+                    if let comment = QComment.threadSaveComment(withUniqueId: i){
+                        if let val = delegate.viewDelegate?(view: self, hideCellWith: comment){
+                            if val {
+                                hiddenIndexPaths.append(IndexPath(item: item, section: section))
+                                if !groupCheck.contains(section) {
+                                    groupCheck.append(section)
+                                }
+                            }
+                        }
+                    }
+                    item += 1
+                }
+                section += 1
+            }
+            
+            for indexPath in hiddenIndexPaths.reversed(){
+                retVal[indexPath.section].remove(at: indexPath.item)
+            }
+            for group in groupCheck.reversed(){
+                if retVal[group].count > 0 {
+                    self.checkMessagePos(inGroup: retVal[group])
+                }else{
+                    retVal.remove(at: group)
+                }
+            }
+            return retVal
+        }else{
+            return retVal
         }
     }
 }

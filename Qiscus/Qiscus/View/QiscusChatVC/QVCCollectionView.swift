@@ -80,5 +80,15 @@ extension QiscusChatVC: QConversationViewDelegate {
             }
         }
     }
+    public func viewDelegate(view:QConversationCollectionView, hideCellWith comment:QComment)->Bool{
+        if let delegate = self.delegate {
+            if let hide = delegate.chatVC?(viewController: self, hideCellWith: comment) {
+                if hide {
+                    return true
+                }
+            }
+        }
+        return false
+    }
 }
 
