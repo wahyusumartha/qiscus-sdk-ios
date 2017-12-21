@@ -168,11 +168,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     @objc public class func clearData(){
         Qiscus.cancellAllRequest()
         Qiscus.removeAllFile()
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        realm.refresh()
-        try! realm.write {
-            realm.deleteAll()
-        }
+        
         Qiscus.removeDB()
         Qiscus.chatRooms = [String : QRoom]()
         QParticipant.cache = [String : QParticipant]()
