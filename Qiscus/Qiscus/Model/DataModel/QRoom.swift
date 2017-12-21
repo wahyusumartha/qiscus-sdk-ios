@@ -481,7 +481,7 @@ public class QRoom:Object {
                 for c in r.comments.reversed() {
                     if c.uniqueId == cUid {
                         try! realm.write {
-                            r.comments.remove(objectAtIndex: i)
+                            r.comments.remove(at: i)
                             realm.delete(c)
                         }
                         if Thread.isMainThread {

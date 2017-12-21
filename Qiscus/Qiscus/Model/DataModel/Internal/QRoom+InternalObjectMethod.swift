@@ -508,7 +508,7 @@ internal extension QRoom {
                     for participant in room.participants{
                         if !participantString.contains(participant.email){
                             try! realm.write {
-                                room.participants.remove(objectAtIndex: index)
+                                room.participants.remove(at: index)
                                 participantRemoved = true
                             }
                             participantChanged = true
@@ -894,7 +894,7 @@ internal extension QRoom {
         }
         for index in deletedIndex.reversed(){
             try! realm.write {
-                self.comments.remove(objectAtIndex: index)
+                self.comments.remove(at: index)
             }
         }
         return retVal
