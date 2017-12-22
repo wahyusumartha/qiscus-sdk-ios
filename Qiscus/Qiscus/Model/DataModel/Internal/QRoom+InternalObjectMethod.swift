@@ -869,8 +869,10 @@ internal extension QRoom {
             count += 1
         }
         for index in deletedIndex.reversed(){
-            try! realm.write {
-                self.comments.remove(at: index)
+            if index < self.comments.count {
+                try! realm.write {
+                    self.comments.remove(at: index)
+                }
             }
         }
         return retVal
