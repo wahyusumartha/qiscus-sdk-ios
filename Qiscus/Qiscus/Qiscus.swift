@@ -1468,6 +1468,11 @@ extension Qiscus { // Public class API to get room
         }
     }
     public class func removeDB(){
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
+        try! realm.write {
+            realm.deleteAll()
+        }
         let filemanager = FileManager.default
         do {
             try filemanager.removeItem(at: Qiscus.dbConfiguration.fileURL!)
