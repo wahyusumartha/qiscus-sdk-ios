@@ -447,6 +447,8 @@ open class QiscusChatVC: UIViewController{
     }
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        titleLabel.textColor = QiscusChatVC.currentNavbarTint
+        subtitleLabel.textColor = QiscusChatVC.currentNavbarTint
         
         self.collectionView.viewDelegate = self
         self.collectionView.roomDelegate = self
