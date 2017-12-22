@@ -868,10 +868,15 @@ internal extension QRoom {
             }
             count += 1
         }
-        for index in deletedIndex.reversed(){
-            if index < self.comments.count {
-                try! realm.write {
-                    self.comments.remove(at: index)
+        let id = self.id
+        QiscusBackgroundThread.async {
+            if let room = QRoom.threadSaveRoom(withId: id){
+                for index in deletedIndex.reversed(){
+                    if index < room.comments.count {
+                        try! realm.write {
+                            room.comments.remove(at: index)
+                        }
+                    }
                 }
             }
         }

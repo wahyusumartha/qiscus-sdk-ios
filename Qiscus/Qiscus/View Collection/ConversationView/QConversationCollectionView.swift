@@ -25,16 +25,27 @@ public class QConversationCollectionView: UICollectionView {
                 self.subscribeEvent()
                 self.delegate = self
                 self.dataSource = self
-                QiscusBackgroundThread.async {
-                    if let rts = QRoom.threadSaveRoom(withId: rid){
-                        var messages = rts.grouppedCommentsUID
-                        messages = self.checkHiddenMessage(messages: messages)
-                        
-                        DispatchQueue.main.async {
-                            self.messagesId = messages
-                            self.reloadData()
-                            if oldValue == nil {
-                                self.scrollToBottom()
+                if oldValue == nil {
+                    var messages = r.grouppedCommentsUID
+                    messages = self.checkHiddenMessage(messages: messages)
+                    
+                    self.messagesId = messages
+                    self.reloadData()
+                    if oldValue == nil {
+                        self.scrollToBottom()
+                    }
+                }else{
+                    QiscusBackgroundThread.async {
+                        if let rts = QRoom.threadSaveRoom(withId: rid){
+                            var messages = rts.grouppedCommentsUID
+                            messages = self.checkHiddenMessage(messages: messages)
+                            
+                            DispatchQueue.main.async {
+                                self.messagesId = messages
+                                self.reloadData()
+                                if oldValue == nil {
+                                    self.scrollToBottom()
+                                }
                             }
                         }
                     }
