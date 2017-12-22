@@ -155,8 +155,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     @objc public class func clear(){
-        let path = "Qiscus-\(QiscusMe.shared.token)"
-        Qiscus.clearData(onPath: path)
+        Qiscus.clearData()
         Qiscus.shared.stopPublishOnlineStatus()
         for channel in Qiscus.realtimeChannel {
             Qiscus.shared.mqtt?.unsubscribe(channel)
@@ -166,11 +165,11 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         QiscusMe.clear()
         Qiscus.removeLogFile()
     }
-    @objc public class func clearData(onPath path:String){
+    @objc public class func clearData(){
         Qiscus.cancellAllRequest()
         Qiscus.removeAllFile()
         
-        Qiscus.removeDB(withPath: path)
+        Qiscus.removeDB()
         Qiscus.dbConfigurationRaw = nil
         Qiscus.chatRooms = [String : QRoom]()
         QParticipant.cache = [String : QParticipant]()
@@ -631,13 +630,9 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     private class func getConfiguration()->Realm.Configuration{
         var conf = Realm.Configuration.defaultConfiguration
         
-        var path = "Qiscus"
-        if Qiscus.isLoggedIn {
-            path = "\(path)-\(QiscusMe.shared.token)"
-        }
         var realmURL = conf.fileURL!
         realmURL.deleteLastPathComponent()
-        realmURL.appendPathComponent("path")
+        realmURL.appendPathComponent("Qiscus.realm")
         
         conf.fileURL = realmURL
         conf.deleteRealmIfMigrationNeeded = true
@@ -1471,19 +1466,12 @@ extension Qiscus { // Public class API to get room
             })
         }
     }
-    public class func removeDB(withPath path:String){
+    public class func removeDB(){
         let filemanager = FileManager.default
-        let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory,.userDomainMask,true)[0] as NSString
-        let destinationPaths = [documentsPath.appendingPathComponent("\(path).realm"),
-                                documentsPath.appendingPathComponent("\(path).realm.lock"),
-                                documentsPath.appendingPathComponent("\(path).realm.management")]
-        
-        for destination in destinationPaths {
-            do {
-                try filemanager.removeItem(atPath: destination)
-            } catch {
-                Qiscus.printLog(text: "Could not clear Qiscus folder: \(error.localizedDescription)")
-            }
+        do {
+            try filemanager.removeItem(at: Qiscus.dbConfiguration.fileURL!)
+        } catch {
+            Qiscus.printLog(text: "Could not clear Qiscus folder: \(error.localizedDescription)")
         }
     }
     
