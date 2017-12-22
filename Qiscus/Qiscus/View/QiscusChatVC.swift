@@ -770,7 +770,6 @@ open class QiscusChatVC: UIViewController{
 extension QiscusChatVC:QChatServiceDelegate{
     public func chatService(didFinishLoadRoom inRoom: QRoom, withMessage message: String?) {
         self.chatRoom = inRoom
-        self.collectionView.room = inRoom
         self.loadRoomView()
         Qiscus.shared.chatViews[inRoom.id] = self
         if inRoom.comments.count > 0 {

@@ -45,7 +45,7 @@ open class QRoomListCell: UITableViewCell {
     }
     
     open func gotNewComment(comment:QComment){
-        self.room = comment.room!
+//        self.room = comment.room!
     }
     
     

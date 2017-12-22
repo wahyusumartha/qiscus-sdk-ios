@@ -869,7 +869,7 @@ internal extension QRoom {
             count += 1
         }
         let id = self.id
-        QiscusBackgroundThread.async {
+//        QiscusBackgroundThread.async {
             if let room = QRoom.threadSaveRoom(withId: id){
                 for index in deletedIndex.reversed(){
                     if index < room.comments.count {
@@ -879,7 +879,7 @@ internal extension QRoom {
                     }
                 }
             }
-        }
+//        }
         return retVal
     }
 }

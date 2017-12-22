@@ -31,9 +31,7 @@ public class QConversationCollectionView: UICollectionView {
                     
                     self.messagesId = messages
                     self.reloadData()
-                    if oldValue == nil {
-                        self.scrollToBottom()
-                    }
+                    self.scrollToBottom()
                 }else{
                     QiscusBackgroundThread.async {
                         if let rts = QRoom.threadSaveRoom(withId: rid){
@@ -43,9 +41,6 @@ public class QConversationCollectionView: UICollectionView {
                             DispatchQueue.main.async {
                                 self.messagesId = messages
                                 self.reloadData()
-                                if oldValue == nil {
-                                    self.scrollToBottom()
-                                }
                             }
                         }
                     }
@@ -161,9 +156,19 @@ public class QConversationCollectionView: UICollectionView {
         self.reloadData()
     }
     open func gotNewComment(comment: QComment, room:QRoom) {
-        self.room = room
-        self.reloadData()
-        
+        if let rid = self.room?.id {
+            QiscusBackgroundThread.async {
+                if let rts = QRoom.threadSaveRoom(withId: rid){
+                    var messages = rts.grouppedCommentsUID
+                    messages = self.checkHiddenMessage(messages: messages)
+                    
+                    DispatchQueue.main.async {
+                        self.messagesId = messages
+                        self.reloadData()
+                    }
+                }
+            }
+        }
         if self.isLastRowVisible || QiscusMe.shared.email == comment.senderEmail || !self.isPresence{
             self.layoutIfNeeded()
             self.scrollToBottom()
