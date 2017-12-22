@@ -321,9 +321,10 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
     open func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         if self.messagesId.count > section {
             let uid = self.messagesId[section].first!
-            let firstMessage = QComment.comment(withUniqueId: uid)!
-            if firstMessage.senderEmail != QiscusMe.shared.email {
-                return UIEdgeInsets(top: 0, left: 6, bottom: -44, right: 0)
+            if let firstMessage = QComment.comment(withUniqueId: uid) {
+                if firstMessage.senderEmail != QiscusMe.shared.email {
+                    return UIEdgeInsets(top: 0, left: 6, bottom: -44, right: 0)
+                }
             }
         }
         return UIEdgeInsets.zero

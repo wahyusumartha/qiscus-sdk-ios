@@ -204,32 +204,6 @@ internal extension QRoom {
         }
         
     }
-    internal func resetRoomComment(){
-        let id = self.id
-        QiscusDBThread.async {
-            if let room = QRoom.threadSaveRoom(withId: id){
-                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-                realm.refresh()
-                let data =  realm.objects(QComment.self).filter("roomId == '\(id)'")
-                
-                try! realm.write {
-                    room.typingUser = ""
-                }
-                for comment in data {
-                    try! realm.write {
-                        comment.durationLabel = ""
-                        comment.currentTimeSlider = Float(0)
-                        comment.seekTimeLabel = "00:00"
-                        comment.audioIsPlaying = false
-                        // file variable
-                        comment.isDownloading = false
-                        comment.isUploading = false
-                        comment.progress = 0
-                    }
-                }
-            }
-        }
-    }
     
     internal func addComment(newComment:QComment, onTop:Bool = false){
         let id = self.id
@@ -863,31 +837,33 @@ internal extension QRoom {
         }
         var deletedIndex = [Int]()
         for comment in self.comments {
-            if uidList.contains(comment.uniqueId) {
-                if !deletedIndex.contains(count) {
-                    deletedIndex.append(count)
-                }
-            }else{
-                if let prev = prevComment{
-                    if prev.date == comment.date && prev.senderEmail == comment.senderEmail && comment.type != .system  {
-                        uidList.append(comment.uniqueId)
-                        group.append(comment.uniqueId)
+            if !comment.isInvalidated {
+                if uidList.contains(comment.uniqueId) {
+                    if !deletedIndex.contains(count) {
+                        deletedIndex.append(count)
+                    }
+                }else{
+                    if let prev = prevComment{
+                        if prev.date == comment.date && prev.senderEmail == comment.senderEmail && comment.type != .system  {
+                            uidList.append(comment.uniqueId)
+                            group.append(comment.uniqueId)
+                        }else{
+                            retVal.append(group)
+                            checkPosition(ids: group)
+                            group = [String]()
+                            group.append(comment.uniqueId)
+                            uidList.append(comment.uniqueId)
+                        }
                     }else{
-                        retVal.append(group)
-                        checkPosition(ids: group)
-                        group = [String]()
                         group.append(comment.uniqueId)
                         uidList.append(comment.uniqueId)
                     }
-                }else{
-                    group.append(comment.uniqueId)
-                    uidList.append(comment.uniqueId)
-                }
-                if count == self.comments.count - 1  {
-                    retVal.append(group)
-                    checkPosition(ids: group)
-                }else{
-                    prevComment = comment
+                    if count == self.comments.count - 1  {
+                        retVal.append(group)
+                        checkPosition(ids: group)
+                    }else{
+                        prevComment = comment
+                    }
                 }
             }
             count += 1

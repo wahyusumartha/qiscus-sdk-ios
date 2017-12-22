@@ -29,8 +29,7 @@ internal extension QRoom {
     }
     internal class func getRoom(withId id:String) -> QRoom?{
         if Thread.isMainThread {
-            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-            realm.refresh()
+            
             if let cache = Qiscus.chatRooms[id] {
                 if !cache.isInvalidated {
                     cache.subscribeRoomChannel()
@@ -39,19 +38,21 @@ internal extension QRoom {
                     Qiscus.chatRooms[id] = nil
                 }
             }
-            
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
             let rooms = realm.objects(QRoom.self).filter("id == '\(id)'")
-            if rooms.count > 0 {
-                let room = rooms.first!
-                room.resetRoomComment()
-                Qiscus.chatRooms[room.id] = room
-                if Qiscus.shared.chatViews[room.id] ==  nil{
-                    let chatView = QiscusChatVC()
-                    chatView.chatRoom = Qiscus.chatRooms[room.id]
-                    Qiscus.shared.chatViews[room.id] = chatView
+            if let room = rooms.first {
+                if !room.isInvalidated {
+                    let room = rooms.first!
+                    Qiscus.chatRooms[room.id] = room
+                    if Qiscus.shared.chatViews[room.id] ==  nil{
+                        let chatView = QiscusChatVC()
+                        chatView.chatRoom = Qiscus.chatRooms[room.id]
+                        Qiscus.shared.chatViews[room.id] = chatView
+                    }
+                    room.subscribeRoomChannel()
+                    return room
                 }
-                room.subscribeRoomChannel()
-                return room
             }
         }
         return nil
@@ -66,7 +67,6 @@ internal extension QRoom {
             if let cachedRoom = Qiscus.chatRooms[room.id] {
                 return cachedRoom
             }else{
-                room.resetRoomComment()
                 Qiscus.chatRooms[room.id] = room
                 if Qiscus.shared.chatViews[room.id] ==  nil{
                     let chatView = QiscusChatVC()
@@ -90,7 +90,6 @@ internal extension QRoom {
                 if let cachedRoom = Qiscus.chatRooms[room.id] {
                     return cachedRoom
                 }else{
-                    room.resetRoomComment()
                     Qiscus.chatRooms[room.id] = room
                     if Qiscus.shared.chatViews[room.id] ==  nil{
                         let chatView = QiscusChatVC()

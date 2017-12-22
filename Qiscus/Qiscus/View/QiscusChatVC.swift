@@ -125,7 +125,6 @@ open class QiscusChatVC: UIViewController{
                 let _ = self.view
                 self.view.layoutSubviews()
                 self.view.layoutIfNeeded()
-                self.collectionView.room = self.chatRoom
                 Qiscus.chatRooms[self.chatRoom!.uniqueId] = self.chatRoom
                 let delay = 0.5 * Double(NSEC_PER_SEC)
                 let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
@@ -134,6 +133,7 @@ open class QiscusChatVC: UIViewController{
                     self.dataLoaded = true
                 })
             }
+            self.collectionView.room = self.chatRoom
         }
     }
     public var chatMessage:String?

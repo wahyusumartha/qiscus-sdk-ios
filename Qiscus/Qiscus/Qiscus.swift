@@ -1034,6 +1034,7 @@ extension Qiscus:CocoaMQTTDelegate{
                                         Qiscus.chatDelegate?.qiscusChat?(gotNewComment: comment)
                                         
                                         if let chatView = Qiscus.shared.chatViews[roomId] {
+                                            chatView.chatRoom = nil
                                             if chatView.isPresence {
                                                 chatView.goBack()
                                             }
@@ -1041,14 +1042,14 @@ extension Qiscus:CocoaMQTTDelegate{
                                         }
                                         Qiscus.chatRooms[roomId] = nil
                                         
-                                        if let room = QRoom.room(withId: roomId){
+                                        if let room = QRoom.threadSaveRoom(withId: roomId){
                                             if !room.isInvalidated {
                                                 room.unsubscribeRealtimeStatus()
                                                 QRoom.deleteRoom(room: room)
                                             }
                                         }
                                         QiscusNotification.publish(roomDeleted: roomId)
-                                        }}
+                                    }}
                                 }
                                 else{
                                     syncData()

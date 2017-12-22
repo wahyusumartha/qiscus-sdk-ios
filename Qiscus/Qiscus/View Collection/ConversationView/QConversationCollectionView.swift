@@ -14,7 +14,7 @@ public class QConversationCollectionView: UICollectionView {
     public var room:QRoom? {
         didSet{
             if let oldRoom = oldValue {
-                oldRoom.delegate = self
+                oldRoom.delegate = nil
             }
             if let r = room {
                 let rid = r.id
@@ -39,6 +39,12 @@ public class QConversationCollectionView: UICollectionView {
                         }
                     }
                 }
+            }else{
+                self.messagesId = [[String]]()
+                self.unsubscribeEvent()
+                self.delegate = self
+                self.dataSource = self
+                self.reloadData()
             }
         }
     }
