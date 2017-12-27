@@ -555,8 +555,6 @@ open class QiscusChatVC: UIViewController{
                     self.showLoading("Load Data ...")
                     room.loadData(onSuccess: { (room) in
                         if room.comments.count > 0 {
-                            self.collectionView.isHidden = false
-                            self.welcomeView.isHidden = true
                             self.collectionView.refreshData()
                         }
                         self.dismissLoading()
@@ -719,8 +717,6 @@ open class QiscusChatVC: UIViewController{
             if self.chatRoom!.comments.count > 0 {
                 self.collectionView.room = self.chatRoom
                 self.collectionView.refreshData()
-                self.collectionView.isHidden = false
-                self.welcomeView.isHidden = true
             }else{
                 self.dismissLoading()
                 self.dataLoaded = true
@@ -729,15 +725,12 @@ open class QiscusChatVC: UIViewController{
         }else{
             if self.chatRoom!.comments.count > 0 {
                 self.collectionView.room = self.chatRoom
-                self.collectionView.isHidden = false
-                self.welcomeView.isHidden = true
+                self.collectionView.refreshData()
             }else{
                 let delay = 0.5 * Double(NSEC_PER_SEC)
                 let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
                 DispatchQueue.main.asyncAfter(deadline: time, execute: {
-                    self.dismissLoading()
                     self.dataLoaded = true
-                    self.collectionView.isHidden = false
                 })
             }
         }
@@ -774,8 +767,6 @@ extension QiscusChatVC:QChatServiceDelegate{
         Qiscus.shared.chatViews[inRoom.id] = self
         if inRoom.comments.count > 0 {
             self.collectionView.refreshData()
-            self.collectionView.isHidden = false
-            self.welcomeView.isHidden = true
             if let target = self.chatTarget {
                 self.collectionView.scrollToComment(comment: target)
                 self.chatTarget = nil
@@ -805,8 +796,7 @@ extension QiscusChatVC:QConversationViewRoomDelegate{
     open func roomDelegate(didFinishSync room: QRoom){
         self.dismissLoading()
         if self.chatRoom!.comments.count > 0 {
-            self.collectionView.isHidden = false
-            self.welcomeView.isHidden = true
+            self.collectionView.refreshData()
             if let target = self.chatTarget {
                 self.collectionView.layoutIfNeeded()
                 self.collectionView.scrollToComment(comment: target)

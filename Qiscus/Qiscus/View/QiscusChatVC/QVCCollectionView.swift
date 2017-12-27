@@ -91,6 +91,7 @@ extension QiscusChatVC: QConversationViewDelegate {
         return false
     }
     public func viewDelegate(view: QConversationCollectionView, didLoadData messages: [[String]]) {
+        self.dismissLoading()
         if messages.count > 0 {
             self.welcomeView.isHidden = true
             self.collectionView.isHidden = false
