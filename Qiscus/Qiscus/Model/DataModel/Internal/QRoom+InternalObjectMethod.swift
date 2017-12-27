@@ -596,8 +596,29 @@ internal extension QRoom {
             newComment.data = "\(json["payload"])"
             let fileURL = json["payload"]["url"].stringValue
             var filename = newComment.fileName(text: fileURL)
+//            "url" : url,
+//            "caption": caption,
+//            "size": fileData["size"].intValue,
+//            "pages": fileData["pages"].intValue,
+//            "file_name": fileData["name"].stringValue
+            var fileSize = Double(0)
+            var filePages = 0
+            if let pages = json["payload"]["pages"].int {
+                if pages > 0 {
+                    filePages = pages
+                }
+            }
+            if let size = json["payload"]["size"].double {
+                if size > 0 {
+                    fileSize = size 
+                }
+            }
             
-            if filename.contains("-"){
+            if let name = json["payload"]["file_name"].string {
+                if name != "" {
+                    filename = name
+                }
+            }else if filename.contains("-"){
                 let nameArr = filename.split(separator: "-")
                 var i = 0
                 for comp in nameArr {
@@ -609,6 +630,7 @@ internal extension QRoom {
                     i += 1
                 }
             }
+            
             var type = QiscusFileType.file
             if newComment.file == nil {
                 let file = QFile()
@@ -616,6 +638,9 @@ internal extension QRoom {
                 file.url = fileURL
                 file.senderEmail = newComment.senderEmail
                 file.filename = filename
+                file.pages = filePages
+                file.size = Double(fileSize)
+                
                 try! realm.write {
                     realm.add(file, update:true)
                 }

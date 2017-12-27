@@ -75,8 +75,8 @@ class QCellDocLeft: QChatCell {
             if file.pages > 0 {
                 description = "\(description), \(file.pages) page"
             }
-            if file.size > 0 {
-                description = "\(description), \(file.size) Mb"
+            if file.sizeString != "" {
+                description = "\(description), \(file.sizeString)"
             }
             self.descriptionLabel.text = description
             if let image = self.comment?.displayImage{
@@ -145,8 +145,8 @@ class QCellDocLeft: QChatCell {
             if file.pages > 0 {
                 description = "\(description), \(file.pages) page"
             }
-            if file.size > 0 {
-                description = "\(description), \(file.size) Mb"
+            if file.sizeString != "" {
+                description = "\(description), \(file.sizeString)"
             }
             self.descriptionLabel.text = description
             if QFileManager.isFileExist(inLocalPath: file.localThumbPath){

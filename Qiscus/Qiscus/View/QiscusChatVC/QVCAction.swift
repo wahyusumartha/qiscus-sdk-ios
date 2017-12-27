@@ -981,8 +981,8 @@ extension QiscusChatVC {
                         if file.pages > 0 {
                             description = "\(description), \(file.pages) page"
                         }
-                        if file.size > 0 {
-                            description = "\(description), \(file.size) Mb"
+                        if file.sizeString != "" {
+                            description = "\(description), \(file.sizeString)"
                         }
                         self.linkDescription.text = description
                     }
@@ -1009,8 +1009,8 @@ extension QiscusChatVC {
                             self.linkImageWidth.constant = 55
                         }
                         var description = "\(file.filename)\n"
-                        if file.size > 0 {
-                            description = "\(description), \(file.size) Mb"
+                        if file.sizeString != "" {
+                            description = "\(description), \(file.sizeString)"
                         }
                         self.linkDescription.text = file.filename
                     }
@@ -1020,8 +1020,8 @@ extension QiscusChatVC {
                     if let file = comment!.file {
                         var description = "\(file.filename)\nAUDIO FILE"
                         
-                        if file.size > 0 {
-                            description = "\(description), \(file.size) Mb"
+                        if file.sizeString != "" {
+                            description = "\(description), \(file.sizeString)"
                         }
                         self.linkDescription.text = description
                     }
@@ -1031,8 +1031,8 @@ extension QiscusChatVC {
                     if let file = comment!.file {
                         var description = "\(file.filename)\n\(file.ext.uppercased()) FILE"
                         
-                        if file.size > 0 {
-                            description = "\(description), \(file.size) Mb"
+                        if file.sizeString != "" {
+                            description = "\(description), \(file.sizeString)"
                         }
                         self.linkDescription.text = description
                     }

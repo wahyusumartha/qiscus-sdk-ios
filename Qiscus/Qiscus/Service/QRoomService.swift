@@ -526,28 +526,7 @@ public class QRoomService:NSObject{
                                 Qiscus.printLog(text: "success upload: \(response)")
                                 if let jsonData = response.result.value {
                                     let json = JSON(jsonData)
-                                    if let url = json["url"].string {
-                                        DispatchQueue.main.async { autoreleasepool{
-                                            if file.isInvalidated || comment.isInvalidated || room.isInvalidated {
-                                                return
-                                            }
-                                            file.update(fileURL: url)
-                                            comment.update(text: "[file]\(url) [/file]")
-                                            comment.updateUploading(uploading: false)
-                                            comment.updateProgress(progress: 1)
-                                            comment.updateStatus(status: .sent)
-                                            let fileInfo = JSON(parseJSON: comment.data)
-                                            let caption = fileInfo["caption"].stringValue
-                                            let newData:[AnyHashable:Any] = [
-                                                "url" : url,
-                                                "caption": caption
-                                            ]
-                                            let newDataJSON = JSON(newData)
-                                            comment.update(data: "\(newDataJSON)")
-                                            onSuccess(room,comment)
-                                        }}
-                                    }
-                                    else if json["results"].count > 0 {
+                                    if json["results"].count > 0 {
                                         let jsonData = json["results"]
                                         if jsonData["file"].count > 0 {
                                             let fileData = jsonData["file"]
@@ -556,7 +535,9 @@ public class QRoomService:NSObject{
                                                     if file.isInvalidated || comment.isInvalidated || room.isInvalidated {
                                                         return
                                                     }
+                                                    let size = fileData["size"].intValue
                                                     file.update(fileURL: url)
+                                                    file.update(fileSize: Double(size))
                                                     comment.update(text: "[file]\(url) [/file]")
                                                     comment.updateUploading(uploading: false)
                                                     comment.updateProgress(progress: 1)
@@ -565,7 +546,10 @@ public class QRoomService:NSObject{
                                                     let caption = fileInfo["caption"].stringValue
                                                     let newData:[AnyHashable:Any] = [
                                                         "url" : url,
-                                                        "caption": caption
+                                                        "caption": caption,
+                                                        "size": size,
+                                                        "pages": fileData["pages"].intValue,
+                                                        "file_name": fileData["name"].stringValue
                                                     ]
                                                     let newDataJSON = JSON(newData)
                                                     comment.update(data: "\(newDataJSON)")

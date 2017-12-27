@@ -223,11 +223,10 @@ public class QRoom:Object {
         if fileName == "asset.jpg" || fileName == "asset.png" {
             fileName = "\(uniqueID).\(fileExt)"
         }
-        let payloadData:[AnyHashable : Any] = [
+        var payloadData:[AnyHashable : Any] = [
             "url" : fileName,
             "caption" : caption
         ]
-        let payloadJSON = JSON(payloadData)
         
         comment.uniqueId = uniqueID
         comment.id = 0
@@ -240,7 +239,6 @@ public class QRoom:Object {
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.isUploading = true
         comment.progress = 0
-        comment.data = "\(payloadJSON)"
         comment.roomAvatar = self.avatarURL
         comment.roomName = self.name
         comment.roomTypeRaw = self.typeRaw
@@ -253,6 +251,19 @@ public class QRoom:Object {
         file.senderEmail = QiscusMe.shared.email
         file.filename = filename
         
+        if let fileData = data {
+            let size = fileData.count
+            file.size = Double(size)
+            file.localPath = QFile.saveFile(data!, fileName: fileName)
+
+            payloadData = [
+                "url" : fileName,
+                "caption" : caption,
+                "size" : file.size,
+                "pages" : 0,
+                "file_name": filename
+            ]
+        }
         
         if let mime = QiscusFileHelper.mimeTypes["\(fileExt)"] {
             file.mimeType = mime
@@ -261,10 +272,6 @@ public class QRoom:Object {
         switch type {
         case .audio:
             comment.typeRaw = QCommentType.audio.name()
-            var size = Double(data!.count) / (Double(1024 * 1024))
-            size = Double(round(100 * size)/100)
-            file.size = size
-            file.localPath = QFile.saveFile(data!, fileName: fileName)
             break
         case .image:
             let image = UIImage(data: data!)
@@ -288,15 +295,12 @@ public class QRoom:Object {
             }
             
             comment.typeRaw = QCommentType.image.name()
-            var size = Double(data!.count) / (Double(1024 * 1024))
-            size = Double(round(100 * size)/100)
-            file.size = size
-            file.localPath = QFile.saveFile(data!, fileName: fileName)
             break
         case .document:
             if let provider = CGDataProvider(data: data! as NSData) {
                 if let pdfDoc = CGPDFDocument(provider) {
                     file.pages = pdfDoc.numberOfPages
+                    
                     if let pdfImage = thumbImage {
                         let imageSize = pdfImage.size
                         var bigPart = CGFloat(0)
@@ -318,10 +322,6 @@ public class QRoom:Object {
                 }
             }
             comment.typeRaw = QCommentType.document.name()
-            var size = Double(data!.count) / (Double(1024 * 1024))
-            size = Double(round(100 * size)/100)
-            file.size = size
-            file.localPath = QFile.saveFile(data!, fileName: fileName)
             break
         case .video:
             var fileNameOnly = String(fileNameArr.first!).lowercased()
@@ -335,20 +335,13 @@ public class QRoom:Object {
             let thumbData = UIImagePNGRepresentation(thumbImage!)
             file.localThumbPath = QFile.saveFile(thumbData!, fileName: "thumb-\(fileNameOnly).png")
             comment.typeRaw = QCommentType.video.name()
-            var size = Double(data!.count) / (Double(1024 * 1024))
-            size = Double(round(100 * size)/100)
-            file.size = size
-            file.localPath = QFile.saveFile(data!, fileName: fileName)
             break
         default:
-            var size = Double(data!.count) / (Double(1024 * 1024))
-            size = Double(round(100 * size)/100)
-            file.size = size
-            file.localPath = QFile.saveFile(data!, fileName: fileName)
             comment.typeRaw = QCommentType.file.name()
             break
         }
-        
+        let payloadJSON = JSON(payloadData)
+        comment.data = "\(payloadJSON)"
         try! realm.write {
             realm.add(file, update:true)
         }

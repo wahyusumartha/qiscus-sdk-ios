@@ -634,6 +634,8 @@ public class QComment:Object {
             file!.mimeType = fileRef.mimeType
             file!.localThumbPath = fileRef.localThumbPath
             file!.localMiniThumbPath = fileRef.localMiniThumbPath
+            file!.pages = fileRef.pages
+            file!.size = fileRef.size
         }
         
         if let room = QRoom.room(withId: roomId){

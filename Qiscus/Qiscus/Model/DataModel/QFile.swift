@@ -41,7 +41,26 @@ public class QFile:Object{
     }
     
     // MARK: - Getter Variable
-    
+    public var sizeString:String{
+        get{
+            if self.size > Double(1024 * 1024) {
+                var count = self.size / (Double(1024 * 1024))
+                count = Double(round(100 * count)/100)
+
+                return "\(count) MB"
+            }else if self.size > Double(1024) {
+                var count = self.size / (Double(1024))
+                count = Double(round(100 * count)/100)
+                
+                return "\(count) KB"
+            }else if self.size > Double(0){
+                
+                return "\(self.size) Byte"
+            }else{
+                return ""
+            }
+        }
+    }
     public var thumbURL:String{
         get{
             var thumbURL = self.url.replacingOccurrences(of: "/upload/", with: "/upload/w_30,c_scale/").replacingOccurrences(of: " ", with: "%20")
@@ -228,6 +247,15 @@ public class QFile:Object{
             realm.refresh()
             try! realm.write {
                 self.url = fileURL
+            }
+        }
+    }
+    internal func update(fileSize:Double){
+        if self.size != fileSize {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
+            try! realm.write {
+                self.size = fileSize
             }
         }
     }
