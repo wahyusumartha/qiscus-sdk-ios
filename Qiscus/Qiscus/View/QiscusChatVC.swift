@@ -126,6 +126,10 @@ open class QiscusChatVC: UIViewController{
                 self.view.layoutSubviews()
                 self.view.layoutIfNeeded()
                 Qiscus.chatRooms[self.chatRoom!.uniqueId] = self.chatRoom
+                if self.chatRoom!.comments.count > 0 {
+                    self.welcomeView.isHidden = true
+                    self.collectionView.isHidden = false
+                }
                 let delay = 0.5 * Double(NSEC_PER_SEC)
                 let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
                 DispatchQueue.main.asyncAfter(deadline: time, execute: {
@@ -555,11 +559,11 @@ open class QiscusChatVC: UIViewController{
                     self.showLoading("Load Data ...")
                     room.loadData(onSuccess: { (room) in
                         if room.comments.count > 0 {
+                            
                             self.collectionView.refreshData()
                         }
                         self.dismissLoading()
                     }, onError: { (error) in
-                        self.collectionView.isHidden = false
                         self.collectionView.refreshData()
                         QToasterSwift.toast(target: self, text: "error", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
                         self.dismissLoading()
@@ -715,6 +719,8 @@ open class QiscusChatVC: UIViewController{
         self.unreadIndicator.isHidden = true
         if firstLoad {
             if self.chatRoom!.comments.count > 0 {
+                self.welcomeView.isHidden = true
+                self.collectionView.isHidden = false
                 self.collectionView.room = self.chatRoom
                 self.collectionView.refreshData()
             }else{
