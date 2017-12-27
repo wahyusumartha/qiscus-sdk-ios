@@ -90,5 +90,14 @@ extension QiscusChatVC: QConversationViewDelegate {
         }
         return false
     }
+    public func viewDelegate(view: QConversationCollectionView, didLoadData messages: [[String]]) {
+        if messages.count > 0 {
+            self.welcomeView.isHidden = true
+            self.collectionView.isHidden = false
+        }else{
+            self.welcomeView.isHidden = false
+            self.collectionView.isHidden = true
+        }
+    }
 }
 

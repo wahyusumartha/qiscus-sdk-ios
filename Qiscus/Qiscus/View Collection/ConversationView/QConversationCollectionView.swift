@@ -32,6 +32,7 @@ public class QConversationCollectionView: UICollectionView {
                     self.messagesId = messages
                     self.reloadData()
                     self.scrollToBottom()
+                    self.viewDelegate?.viewDelegate?(view: self, didLoadData: self.messagesId)
                 }else{
                     QiscusBackgroundThread.async {
                         if let rts = QRoom.threadSaveRoom(withId: rid){
@@ -41,6 +42,7 @@ public class QConversationCollectionView: UICollectionView {
                             DispatchQueue.main.async {
                                 self.messagesId = messages
                                 self.reloadData()
+                                self.viewDelegate?.viewDelegate?(view: self, didLoadData: self.messagesId)
                             }
                         }
                     }
@@ -51,6 +53,7 @@ public class QConversationCollectionView: UICollectionView {
                 self.delegate = self
                 self.dataSource = self
                 self.reloadData()
+                self.viewDelegate?.viewDelegate?(view: self, didLoadData: self.messagesId)
             }
         }
     }
