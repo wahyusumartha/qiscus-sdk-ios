@@ -177,45 +177,31 @@ public class QConversationCollectionView: UICollectionView {
     open func userTypingChanged(user: QUser, typing:Bool){
         self.processingTyping = true
         if user.isInvalidated {return}
-        let beforeEmpty = self.typingUsers.count == 0
         if !typing {
             if self.typingUsers[user.email] != nil {
                 self.typingUsers[user.email] = nil
+                self.reloadData()
+                if self.isLastRowVisible{
+                    scrollToBottom()
+                }
             }
             if let timer = self.typingUserTimer[user.email] {
                 timer.invalidate()
-                self.typingUserTimer[user.email] = nil
             }
         }else{
             if self.typingUsers[user.email] == nil {
                 self.typingUsers[user.email] = user
+                
+                self.reloadData()
+                if self.isLastRowVisible{
+                    scrollToBottom()
+                }
+            }else{
                 if let timer = self.typingUserTimer[user.email] {
                     timer.invalidate()
                 }
-                self.typingUserTimer[user.email] = Timer.scheduledTimer(timeInterval: 7.0, target: self, selector: #selector(QConversationCollectionView.publishStopTyping(timer:)), userInfo: user, repeats: false)
+                self.typingUserTimer[user.email] = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(QConversationCollectionView.publishStopTyping(timer:)), userInfo: user, repeats: false)
             }
-        }
-        var tempPreviewedUser = [String]()
-        var i = 0
-        var changed = false
-        for (key, _) in self.typingUsers.reversed() {
-            if i < 3 {
-                if !self.previewedTypingUsers.contains(key){
-                    changed = true
-                }
-                tempPreviewedUser.append(key)
-            }
-            i += 1
-        }
-        self.previewedTypingUsers = tempPreviewedUser
-        func scroll(){
-            if self.isLastRowVisible{
-                scrollToBottom()
-            }
-        }
-        self.reloadData()
-        if (beforeEmpty && self.typingUsers.count > 0) || (changed && self.typingUsers.count > 0){
-            scroll()
         }
         self.processingTyping = false
     }
