@@ -191,7 +191,10 @@ public class QConversationCollectionView: UICollectionView {
         }else{
             if self.typingUsers[user.email] == nil {
                 self.typingUsers[user.email] = user
-                
+                if let timer = self.typingUserTimer[user.email] {
+                    timer.invalidate()
+                }
+                self.typingUserTimer[user.email] = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(QConversationCollectionView.publishStopTyping(timer:)), userInfo: user, repeats: false)
                 self.reloadData()
                 if self.isLastRowVisible{
                     scrollToBottom()
