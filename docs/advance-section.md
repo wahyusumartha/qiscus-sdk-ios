@@ -126,6 +126,7 @@ There are many available methods inside QRoomListCell that can ease your job. He
 * func roomDataChange(){}: while data of room change
 
 Here is how to do that:
+
 `swift
 // ChatListViewModel.swift
 ...
@@ -265,6 +266,7 @@ func qiscus(finishSync success: Bool, error: String?) {
 Qiscus Chat SDK provide Event Handler as notification center **QiscusNotification**, this event handler is a trigger while you're getting something changes, e.g: while got a new comment, there are avatars change, etc.
 
 Here how to do that:
+
 `swift
 import Qiscus
 
@@ -302,6 +304,7 @@ The following list are Event Handlers that are available in **QiscusNotification
 You can also customize your chat room components and functionalities by using Event handlers that are provided by **QiscusChatVCDelegate**.
 
 Here is how to do that: 
+
 `swift
 import Qiscus
 
