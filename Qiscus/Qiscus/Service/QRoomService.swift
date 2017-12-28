@@ -367,8 +367,7 @@ public class QRoomService:NSObject{
                                 break
                             case .document:
                                 var pageNumber = 0
-                                var size = Double(imageData.count) / (Double(1024 * 1024))
-                                size = Double(round(100 * size)/100)
+                                let size = Double(imageData.count)
                                 var pdfImage:UIImage?
                                 if let provider = CGDataProvider(data: imageData as NSData) {
                                     if let pdfDoc = CGPDFDocument(provider) {
