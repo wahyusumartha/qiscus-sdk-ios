@@ -1263,21 +1263,24 @@ public class QChatService:NSObject {
         }
         
     }
-    internal class func getNonce(withAppId appId:String, onSuccess:@escaping ((String)->Void), onFailed:@escaping ((String)->Void), secureURL:Bool = true){
+    internal class func getNonce(withAppId appId:String, baseURL:String? = nil,onSuccess:@escaping ((String)->Void), onFailed:@escaping ((String)->Void), secureURL:Bool = true){
         QiscusRequestThread.async { autoreleasepool{
-            var requestProtocol = "https"
-            if !secureURL {
-                requestProtocol = "http"
+            var baseUrl = ""
+            if let url = baseURL {
+                baseUrl = url
+            }else{
+                var requestProtocol = "https"
+                if !secureURL {
+                    requestProtocol = "http"
+                }
+                baseUrl = "\(requestProtocol)://\(appId).qiscus.com"
             }
-            let baseUrl = "\(requestProtocol)://\(appId).qiscus.com"
             
             QiscusMe.shared.appId = appId
             QiscusMe.shared.userData.set(appId, forKey: "qiscus_appId")
             
-            if QiscusMe.shared.baseUrl == "" {
-                QiscusMe.shared.baseUrl = baseUrl
-                QiscusMe.shared.userData.set(baseUrl, forKey: "qiscus_base_url")
-            }
+            QiscusMe.shared.baseUrl = baseUrl
+            QiscusMe.shared.userData.set(baseUrl, forKey: "qiscus_base_url")
             
             let authURL = "\(QiscusConfig.sharedInstance.BASE_API_URL)/auth/nonce"
             
