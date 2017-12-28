@@ -260,3 +260,118 @@ func qiscus(finishSync success: Bool, error: String?) {
    // do anything after synchronizing finished
 `
 
+### Notification Center
+
+Qiscus Chat SDK provide Event Handler as notification center **QiscusNotification**, this event handler is a trigger while you're getting something changes, e.g: while got a new comment, there are avatars change, etc.
+
+Here how to do that:
+`swift
+import Qiscus
+
+override func viewDidLoad() {
+    ...
+    NotificationCenter.default.addObserver(self,
+                                           selector: #selector(roomListChange(_:)),
+                                           name: QiscusNotification.GOT_NEW_ROOM,
+                                           object: nil)
+}
+
+@objc func roomListChange(_ sender: Notification) {
+    DispatchQueue.main.asyncAfter(deadline: .now()+0.5) {
+        // fetch data again
+        self.viewModel.loadData()
+    }
+}
+`
+
+The following list are Event Handlers that are available in **QiscusNotification**. Just wrote/ registering **QiscusNotification.NAME_OF_EVENT** on viewDidLoad section, then call you method like sample above:
+
+* COMMENT_DELETE: When any comment is deleted
+* MESSAGE_STATUS: handle 
+* USER_PRESENCE: provide response user presence (online/offline)
+* USER_TYPING: provide response when user is typing  
+* USER_AVATAR_CHANGE: provide response when user updated avatar
+* GOT_NEW_ROOM: provide response when new room is created
+* GOT_NEW_COMMENT: provide response when there is incoming message
+* ROOM_CHANGE: provide response when any room is changed
+* ROOM_DELETED: provide response when any room is deleted
+* ROOM_ORDER_MAY_CHANGE: provide response for updating list of room
+
+### Custom Chat Component
+
+You can also customize your chat room components and functionalities by using Event handlers that are provided by **QiscusChatVCDelegate**.
+
+Here is how to do that: 
+`swift
+import Qiscus
+
+public class ChatManager: NSObject {
+    static var shared = ChatManager()
+    override private init() {}
+    
+    public class func chatWithRoomId(_ roomId: String, contact: Contact? = nil) -> Void {
+        let chatView = Qiscus.chatView(withRoomId: roomId)
+        chatView.delegate = ChatManager.shared
+        chatView.data = contact
+        
+        chatView.hidesBottomBarWhenPushed = true
+        openViewController(chatView)
+    }
+    ...
+}
+
+extension ChatManager: QiscusChatVCDelegate {
+    func chatVC(enableForwardAction viewController:QiscusChatVC)->Bool {
+        return true // true to enable forward feature
+    }
+
+    func chatVC(enableInfoAction viewController:QiscusChatVC)->Bool {
+        return true // true to show message info
+    }
+    
+    func chatVC(overrideBackAction viewController:QiscusChatVC)->Bool {
+        return true // true to custom back action
+    }
+        
+    func chatVC(backAction viewController:QiscusChatVC, room:QRoom?, data:Any?) {
+        // custom back button action
+    }
+    
+    func chatVC(titleAction viewController:QiscusChatVC, room:QRoom?, data:Any?) {
+        // custom title action
+    }
+    
+    func chatVC(viewController:QiscusChatVC, onForwardComment comment:QComment, data:Any?) {
+        // custom forward message action
+    }
+    
+    func chatVC(viewController:QiscusChatVC, infoActionComment comment:QComment,data:Any?) {
+        // custom info message action
+    }
+        
+    func chatVC(onViewDidLoad viewController:QiscusChatVC) {
+        // call your method while view is loaded
+    }
+    
+    func chatVC(viewController:QiscusChatVC, willAppear animated:Bool) {
+        // call your method while view is appearing
+    }
+    
+    func chatVC(viewController:QiscusChatVC, willDisappear animated:Bool) {
+        // call your method while view will be disappeared
+    }
+        
+    func chatVC(viewController:QiscusChatVC, willPostComment comment:QComment, room:QRoom?, data:Any?)->QComment? {
+        // call your method while SDK is posting any comment
+    }
+        
+    func chatVC(viewController:QiscusChatVC, cellForComment comment:QComment)->QChatCell? {
+        // to change SDK cell with your own cell
+    }
+    
+    func chatVC(viewController:QiscusChatVC, heightForComment comment:QComment)->QChatCellHeight? {
+        // change the height of cell, if you use your own cell
+        // PS: Don't change the height of default cell, this will broke the view
+    }
+}
+`
