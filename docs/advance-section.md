@@ -286,10 +286,10 @@ override func viewDidLoad() {
 }
 ```
 
-The following list are Event Handlers that are available in **QiscusNotification**. Just wrote/ registering **QiscusNotification.NAME_OF_EVENT** on viewDidLoad section, then call you method like sample above:
+The following list are Event Handlers that are available in **QiscusNotification**. Just register an event you want to call using **QiscusNotification.NAME_OF_EVENT** on `viewDidLoad` section, then call your method like sample above.
 
 * COMMENT_DELETE: When any comment is deleted
-* MESSAGE_STATUS: handle 
+* MESSAGE_STATUS: when status of  message is changed. e.g: sending, pending, sent, delivered, read, failed
 * USER_PRESENCE: provide response user presence (online/offline)
 * USER_TYPING: provide response when user is typing  
 * USER_AVATAR_CHANGE: provide response when user updated avatar
@@ -298,6 +298,7 @@ The following list are Event Handlers that are available in **QiscusNotification
 * ROOM_CHANGE: provide response when any room is changed
 * ROOM_DELETED: provide response when any room is deleted
 * ROOM_ORDER_MAY_CHANGE: provide response for updating list of room
+
 
 ### Custom Chat Component
 
