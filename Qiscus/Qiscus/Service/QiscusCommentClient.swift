@@ -102,8 +102,8 @@ open class QiscusCommentClient: NSObject {
                             }else{
                                 if let delegate = Qiscus.shared.delegate {
                                     Qiscus.uiThread.async { autoreleasepool{
-                                        delegate.qiscusFailToConnect?("\(json["message"].stringValue)")
-                                        delegate.qiscus?(didConnect: false, error: "\(json["message"].stringValue)")
+                                        delegate.qiscusFailToConnect?("\(json["error"]["message"].stringValue)")
+                                        delegate.qiscus?(didConnect: false, error: "\(json["error"]["message"].stringValue)")
                                     }}
                                 }
                             }
