@@ -16,16 +16,20 @@ public class QiscusNotification: NSObject {
     
     private static var typingTimer = [String:Timer]()
     
-    public static let GOT_NEW_ROOM = NSNotification.Name("qiscus_gotNewRoom")
-    public static let GOT_NEW_COMMENT = NSNotification.Name("qiscus_gotNewComment")
+    
     public static let COMMENT_DELETE = NSNotification.Name("qiscus_commentDelete")
+    public static let MESSAGE_STATUS = NSNotification.Name("qiscus_messageStatus")
+    
     public static let USER_PRESENCE = NSNotification.Name("quscys_userPresence")
     public static let USER_TYPING = NSNotification.Name("qiscus_userTyping")
     public static let USER_AVATAR_CHANGE = NSNotification.Name("qiscus_userAvatarChange")
-    public static let MESSAGE_STATUS = NSNotification.Name("qiscus_messageStatus")
+    
+    public static let GOT_NEW_ROOM = NSNotification.Name("qiscus_gotNewRoom")
+    public static let GOT_NEW_COMMENT = NSNotification.Name("qiscus_gotNewComment")
     public static let ROOM_CHANGE = NSNotification.Name("qiscus_roomChange")
     public static let ROOM_DELETED = NSNotification.Name("qiscus_roomDeleted")
     public static let ROOM_ORDER_MAY_CHANGE = NSNotification.Name("qiscus_romOrderChange")
+    
     public static let FINISHED_CLEAR_MESSAGES = NSNotification.Name("qiscus_finishedClearMessages")
     public static let FINISHED_SYNC_ROOMLIST = NSNotification.Name("qiscus_finishedSyncRoomList")
     public static let START_CLOUD_SYNC = NSNotification.Name("qiscus_startCloudSync")
@@ -90,6 +94,18 @@ public class QiscusNotification: NSObject {
             let notification = QiscusNotification.shared
             notification.publish(gotNewComment: comment, room: room)
             notification.roomOrderChange()
+            if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
+                roomDelegate.gotNewComment(comment)
+            }
+            let id = room.id
+            let uid = comment.uniqueId
+            DispatchQueue.main.async {
+                if let mainRoom = QRoom.room(withId: id){
+                    if let c = QComment.comment(withUniqueId: uid){
+                        mainRoom.delegate?.room?(gotNewComment: c)
+                    }
+                }
+            }
         }
     }
     public class func publish(commentDeleteOnRoom room:QRoom){

@@ -116,16 +116,16 @@ class QCellPostbackLeft: QChatCell {
     func postback(sender:UIButton){
         let allData = JSON(parseJSON: self.comment!.data).arrayValue
         if allData.count > sender.tag {
-            let data = allData[sender.tag]
-            self.delegate?.didTapPostbackButton(withData: data)
+            self.delegate?.didTapPostbackButton(onComment: self.comment!, index: sender.tag)
         }
     }
     
     func accountLinking(sender:UIButton){
-        let data = JSON(parseJSON: self.comment!.data)
-        self.delegate?.didTapAccountLinking(withData: data)
+        self.delegate?.didTapAccountLinking(onComment: self.comment!)
     }
-    public override func comment(didChangePosition position: QCellPosition) {
-        self.balloonView.image = self.getBallon()
+    public override func comment(didChangePosition comment:QComment, position: QCellPosition) {
+        if comment.uniqueId == self.comment?.uniqueId {
+            self.balloonView.image = self.getBallon()
+        }
     }
 }

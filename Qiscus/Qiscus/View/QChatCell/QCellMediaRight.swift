@@ -77,7 +77,7 @@ class QCellMediaRight: QChatCell {
             if caption != "" {
                 mediaCaption.attributedText = self.comment!.attributedText
                 captionHeight.constant = self.comment!.textSize.height
-                mediaCaption.sizeToFit()
+//                mediaCaption.sizeToFit()
                 mediaCaption.isHidden = false
                 containerHeight.constant = 140
             }
@@ -181,6 +181,7 @@ class QCellMediaRight: QChatCell {
     
     @objc open func downloadMedia(_ sender: ChatFileButton){
         sender.isHidden = true
+//        self.comment?.delegate = self
         if let room = QRoom.room(withId: comment!.roomId){
             room.downloadMedia(onComment: self.comment!)
         }
@@ -272,10 +273,11 @@ class QCellMediaRight: QChatCell {
                     self.comment!.displayImage = image
                 })
             }else{
-                self.videoPlay.isHidden = true
-                self.downloadButton.comment = self.comment!
-                self.downloadButton.addTarget(self, action: #selector(QCellMediaRight.downloadMedia(_:)), for: .touchUpInside)
-                self.downloadButton.isHidden = false
+                imageDisplay.loadAsync(file.thumbURL, onLoaded: { (image, _) in
+                    self.imageDisplay.image = image
+                    self.comment!.displayImage = image
+                    file.saveMiniThumbImage(withImage: image)
+                })
             }
             self.progressView.isHidden = true
             self.progressContainer.isHidden = true
@@ -292,15 +294,22 @@ class QCellMediaRight: QChatCell {
                 self.videoPlay.isHidden = true
                 self.videoFrame.isHidden = true
             }
-            self.tapRecognizer = UITapGestureRecognizer(target:self,action:#selector(self.didTapImage))
-            self.imageDisplay.addGestureRecognizer(tapRecognizer!)
+            if !QFileManager.isFileExist(inLocalPath: file.localPath){
+                self.videoPlay.isHidden = true
+                self.downloadButton.comment = self.comment!
+                self.downloadButton.addTarget(self, action: #selector(QCellMediaRight.downloadMedia(_:)), for: .touchUpInside)
+                self.downloadButton.isHidden = false
+            }else{
+                self.tapRecognizer = UITapGestureRecognizer(target:self,action:#selector(self.didTapImage))
+                self.imageDisplay.addGestureRecognizer(tapRecognizer!)
+            }
         }
     }
     func didTapImage(){
         if !self.comment!.isUploading && !self.comment!.isDownloading{
             if let file = self.comment!.file{
                 if QFileManager.isFileExist(inLocalPath: file.localPath){
-                    delegate?.didTapCell(withData: self.comment!)
+                    delegate?.didTapCell(onComment: self.comment!)
                 }
             }
         }
@@ -347,26 +356,46 @@ class QCellMediaRight: QChatCell {
             self.userNameLabel.text = self.comment?.senderName
         }
     }
-    public override func comment(didChangePosition position: QCellPosition) {
-        self.balloonView.image = self.getBallon()
+    public override func comment(didChangePosition comment:QComment, position: QCellPosition) {
+        if self.comment?.uniqueId == comment.uniqueId {
+            self.balloonView.image = self.getBallon()
+        }
     }
-    public override func comment(didDownload downloading:Bool){
-        self.downloadFinished()
+    public override func comment(didDownload comment:QComment, downloading:Bool){
+        if self.comment?.uniqueId == comment.uniqueId {
+            if !downloading {
+                self.downloadFinished()
+            }else{
+                self.downloadingMedia()
+            }
+        }
     }
-    public override func comment(didUpload uploading:Bool){
-        self.uploadFinished()
+    public override func comment(didUpload comment:QComment, uploading:Bool){
+        if self.comment?.uniqueId == comment.uniqueId {
+            if !uploading {
+                self.uploadFinished()
+            }else{
+                self.uploadingMedia()
+            }
+        }
     }
-    public override func comment(didChangeProgress progress:CGFloat){
-        self.downloadButton.isHidden = true
-        self.progressLabel.text = "\(Int(progress * 100)) %"
-        self.progressLabel.isHidden = false
-        self.progressContainer.isHidden = false
-        self.progressView.isHidden = false
-        
-        let newHeight = progress * maxProgressHeight
-        self.progressHeight.constant = newHeight
-        UIView.animate(withDuration: 0.65, animations: {
-            self.progressView.layoutIfNeeded()
-        })
+    public override func comment(didChangeProgress comment:QComment, progress:CGFloat){
+        if self.comment?.uniqueId == comment.uniqueId {
+            if self.comment!.isUploading || self.comment!.isDownloading {
+                self.downloadButton.isHidden = true
+                self.progressLabel.text = "\(Int(progress * 100)) %"
+                self.progressLabel.isHidden = false
+                self.progressContainer.isHidden = false
+                self.progressView.isHidden = false
+                
+                let newHeight = progress * maxProgressHeight
+                self.progressHeight.constant = newHeight
+                UIView.animate(withDuration: 0.65, animations: {
+                    self.progressView.layoutIfNeeded()
+                })
+            }
+        }else{
+            self.downloadFinished()
+        }
     }
 }

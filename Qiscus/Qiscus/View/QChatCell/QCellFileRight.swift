@@ -47,7 +47,7 @@ class QCellFileRight: QChatCell {
         
         if let file = self.comment!.file {
             fileNameLabel.text = file.filename
-            if file.ext == "pdf" || file.ext == "pdf_" || file.ext == "doc" || file.ext == "docx" || file.ext == "ppt" || file.ext == "pptx" || file.ext == "xls" || file.ext == "xlsx" || file.ext == "txt" {
+            if file.ext == "doc" || file.ext == "docx" || file.ext == "ppt" || file.ext == "pptx" || file.ext == "xls" || file.ext == "xlsx" || file.ext == "txt" {
                 fileTypeLabel.text = "\(file.ext.uppercased()) File"
             }else{
                 fileTypeLabel.text = "Unknown File"
@@ -121,7 +121,9 @@ class QCellFileRight: QChatCell {
             self.userNameLabel.text = self.comment?.senderName
         }
     }
-    public override func comment(didChangePosition position: QCellPosition) {
-        self.balloonView.image = self.getBallon()
+    public override func comment(didChangePosition comment:QComment, position: QCellPosition) {
+        if comment.uniqueId == self.comment?.uniqueId {
+            self.balloonView.image = self.getBallon()
+        }
     }
 }

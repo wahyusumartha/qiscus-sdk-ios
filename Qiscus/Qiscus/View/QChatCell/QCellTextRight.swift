@@ -165,6 +165,39 @@ class QCellTextRight: QChatCell {
                 text = filename
                 
                 break
+            case .document :
+                self.linkImage.contentMode = .scaleAspectFill
+                self.linkImage.image = nil
+                let filename = self.comment!.fileName(text: text)
+                let url = self.comment!.getAttachmentURL(message: text)
+                
+                self.linkImageWidth.constant = 55
+                self.linkImage.isHidden = false
+                text = filename
+                if let file = QFile.file(withURL: url){
+                    if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
+                        self.linkImage.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
+                            self.linkImage.image = image
+                        })
+                    }else if QFileManager.isFileExist(inLocalPath: file.localMiniThumbPath){
+                        self.linkImage.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
+                            self.linkImage.image = image
+                        })
+                    }else{
+                        self.linkImage.loadAsync(file.thumbURL, onLoaded: { (image, _) in
+                            self.linkImage.image = image
+                        })
+                    }
+                    var description = "\(file.filename)\nPDF File"
+                    if file.pages > 0 {
+                        description = "\(description), \(file.pages) page"
+                    }
+                    if file.sizeString != "" {
+                        description = "\(description), \(file.sizeString)"
+                    }
+                    text = description
+                }
+                break
             case .location :
                 self.linkImage.contentMode = .scaleAspectFill
                 self.linkImage.image = Qiscus.image(named: "map_ico")
@@ -290,7 +323,7 @@ class QCellTextRight: QChatCell {
         textView.font = UIFont.systemFont(ofSize: 14)
     }
     func openLink(){
-        self.delegate?.didTouchLink(onCell: self)
+        self.delegate?.didTouchLink(onComment: self.comment!)
     }
     public override func updateUserName() {
         if let sender = self.comment?.sender {
@@ -299,7 +332,9 @@ class QCellTextRight: QChatCell {
             self.userNameLabel.text = self.comment?.senderName
         }
     }
-    public override func comment(didChangePosition position: QCellPosition) {
-        self.balloonView.image = self.getBallon()
+    public override func comment(didChangePosition comment:QComment, position: QCellPosition) {
+        if comment.uniqueId == self.comment?.uniqueId {
+            self.balloonView.image = self.getBallon()
+        }
     }
 }

@@ -17,15 +17,8 @@ extension QiscusChatVC:CNContactPickerDelegate{
     public func contactPicker(_ picker: CNContactPickerViewController, didSelect contact: CNContact) {
         func share(name:String, value:String){
             let newComment = self.chatRoom!.newContactComment(name: name, value: value)
-            let section = self.chatRoom!.comments.count - 1
-            let group = self.chatRoom!.comments[section]
-            let item = group.comments.count - 1
-            self.collectionView.reloadData()
             self.postComment(comment: newComment)
-            
             self.chatRoom!.post(comment: newComment)
-            let indexPath = IndexPath(item: item, section: section)
-            self.collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
         }
         let contactName = "\(contact.givenName) \(contact.familyName)".trimmingCharacters(in: .whitespacesAndNewlines)
         let contactSheetController = UIAlertController(title: contactName, message: "select contact you want to share", preferredStyle: .actionSheet)
@@ -120,7 +113,7 @@ extension QiscusChatVC {
         }
         
         if Qiscus.sharedInstance.iCloudUpload {
-            let iCloudActionButton = UIAlertAction(title: "iCloud", style: .default) { action -> Void in
+            let iCloudActionButton = UIAlertAction(title: "Document", style: .default) { action -> Void in
                 self.iCloudOpen()
             }
             actionSheetController.addAction(iCloudActionButton)
@@ -253,9 +246,6 @@ extension QiscusChatVC {
         QToasterSwift.toast(target: self, text: QiscusTextConfiguration.sharedInstance.noConnectionText, backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
     }
     // MARK: - Overriding back action
-    public func setBackButton(withAction action:@escaping (()->Void)){
-        self.backAction = action
-    }
     
     func setTitle(title:String = "", withSubtitle:String? = nil){
         QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
@@ -348,6 +338,7 @@ extension QiscusChatVC {
             }
             if self.chatSubtitle == nil || self.chatSubtitle == ""{
                 if let room = self.chatRoom {
+                    if room.isInvalidated { return }
                     var subtitleString = ""
                     if room.type == .group{
                         subtitleString = "You"
@@ -366,7 +357,7 @@ extension QiscusChatVC {
                                         if user.presence == .offline{
                                             let lastSeenString = user.lastSeenString
                                             if lastSeenString != "" {
-                                                subtitleString = "lastSeen: \(user.lastSeenString)"
+                                                subtitleString = "last seen: \(user.lastSeenString)"
                                             }
                                         }else{
                                             subtitleString = "online"
@@ -488,23 +479,26 @@ extension QiscusChatVC {
     func goToTitleAction(){
         self.inputBarBottomMargin.constant = 0
         self.view.layoutIfNeeded()
-        self.titleAction()
-    }
-    func scrollToBottom(_ animated:Bool = false){
-        if self.chatRoom != nil {
-            if self.collectionView.numberOfSections > 0 {
-                let section = self.collectionView.numberOfSections - 1
-                if self.collectionView.numberOfItems(inSection: section) > 0 {
-                    let item = self.collectionView.numberOfItems(inSection: section) - 1
-                    let lastIndexPath = IndexPath(row: item, section: section)
-                    self.collectionView.scrollToItem(at: lastIndexPath, at: .bottom, animated: animated)
-                    if self.isPresence {
-                        self.chatRoom!.readAll()
-                    }
-                }
-            }
+        if let delegate = self.delegate {
+            delegate.chatVC?(titleAction: self, room: self.chatRoom, data:self.data)
         }
     }
+//    func scrollToBottom(_ animated:Bool = false){
+//        self.collectionView.scrollToBottom()
+////        if self.chatRoom != nil {
+////            if self.collectionView.numberOfSections > 0 {
+////                let section = self.collectionView.numberOfSections - 1
+////                if self.collectionView.numberOfItems(inSection: section) > 0 {
+////                    let item = self.collectionView.numberOfItems(inSection: section) - 1
+////                    let lastIndexPath = IndexPath(row: item, section: section)
+////                    self.collectionView.scrollToItem(at: lastIndexPath, at: .bottom, animated: animated)
+////                    if self.isPresence {
+////                        self.chatRoom!.readAll()
+////                    }
+////                }
+////            }
+////        }
+//    }
     
     func setNavigationColor(_ color:UIColor, tintColor:UIColor){
         self.topColor = color
@@ -843,16 +837,35 @@ extension QiscusChatVC {
     }
     
     // MARK: - Load More Control
-    func loadMore(){
-        if let room = self.chatRoom {
-            if room.comments.count > 0 {
-                let indexPath = IndexPath(item: 0, section: 0)
-                self.topComment = room.comment(onIndexPath: indexPath)
-            }
-            room.loadMore()
-        }
-    }
-    
+//    func loadMore(){
+//        if let room = self.chatRoom {
+//            let id = room.id
+//            self.loadMoreComment(roomId: id)
+//        }
+//    }
+//    func loadMoreComment(roomId:String){
+//        QiscusBackgroundThread.async {
+//            if self.loadingMore { return }
+//            self.loadingMore = true
+//            if let r = QRoom.threadSaveRoom(withId: roomId){
+//                if r.canLoadMore{
+//                    r.loadMore()
+//                }else{
+//                    self.loadingMore = false
+//                    DispatchQueue.main.async {
+//                        self.loadMoreControl.endRefreshing()
+//                        self.loadMoreControl.removeFromSuperview()
+//                    }
+//                }
+//            }else{
+//                self.loadingMore = false
+//                DispatchQueue.main.async {
+//                    self.loadMoreControl.endRefreshing()
+//                }
+//            }
+//        }
+//    }
+//    
     
     // MARK: - Back Button
     class func backButton(_ target: UIViewController, action: Selector) -> UIBarButtonItem{
@@ -861,7 +874,7 @@ extension QiscusChatVC {
         
         let image = Qiscus.image(named: "ic_back")?.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
         backIcon.image = image
-        backIcon.tintColor = UINavigationBar.appearance().tintColor
+        backIcon.tintColor = QiscusChatVC.currentNavbarTint
 
         if UIApplication.shared.userInterfaceLayoutDirection == .leftToRight {
             backIcon.frame = CGRect(x: 0,y: 11,width: 13,height: 22)
@@ -909,13 +922,219 @@ extension QiscusChatVC {
         }
     }
     func forward(comment:QComment){
-        if self.forwardAction != nil {
-            self.forwardAction!(comment)
+        if let delegate = self.delegate {
+            delegate.chatVC?(viewController: self, onForwardComment: comment, data: self.data)
         }
     }
     func info(comment:QComment){
-        if self.infoAction != nil {
-            self.infoAction!(comment)
+        if let delegate = self.delegate {
+            delegate.chatVC?(viewController: self, infoActionComment: comment, data: self.data)
+        }
+    }
+    public func hideInputBar(){
+        self.inputBarHeight.constant = 0
+        self.minInputHeight.constant = 0
+    }
+    open func reply(toComment comment:QComment?){
+        if comment == nil {
+            Qiscus.uiThread.async { autoreleasepool{
+                self.linkPreviewTopMargin.constant = 0
+                UIView.animate(withDuration: 0.65, animations: {
+                    self.view.layoutIfNeeded()
+                }, completion: {(_) in
+                    if self.inputText.value == "" {
+                        self.sendButton.isEnabled = false
+                        self.sendButton.isHidden = true
+                        self.recordButton.isHidden = false
+                        self.linkImage.image = nil
+                    }
+                })
+            }}
+        }
+        else{
+            Qiscus.uiThread.async {autoreleasepool{
+                switch comment!.type {
+                case .text:
+                    self.linkDescription.text = comment!.text
+                    self.linkImageWidth.constant = 0
+                    break
+                case .document:
+                    self.linkImage.contentMode = .scaleAspectFill
+                    if let file = comment!.file {
+                        if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
+                            self.linkImage.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
+                                self.linkImage.image = image
+                            })
+                        }
+                        else if QFileManager.isFileExist(inLocalPath: file.localMiniThumbPath){
+                            self.linkImage.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
+                                self.linkImage.image = image
+                            })
+                        }
+                        else{
+                            self.linkImage.loadAsync(file.thumbURL, onLoaded: { (image, _) in
+                                self.linkImage.image = image
+                            })
+                        }
+                        self.linkImageWidth.constant = 55
+                        var description = "\(file.filename)\nPDF File"
+                        if file.pages > 0 {
+                            description = "\(description), \(file.pages) page"
+                        }
+                        if file.sizeString != "" {
+                            description = "\(description), \(file.sizeString)"
+                        }
+                        self.linkDescription.text = description
+                    }
+                    break
+                case .video, .image:
+                    self.linkImage.contentMode = .scaleAspectFill
+                    if let file = comment!.file {
+                        if comment!.type == .video || comment!.type == .image {
+                            if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
+                                self.linkImage.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
+                                    self.linkImage.image = image
+                                })
+                            }
+                            else if QFileManager.isFileExist(inLocalPath: file.localMiniThumbPath){
+                                self.linkImage.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
+                                    self.linkImage.image = image
+                                })
+                            }
+                            else{
+                                self.linkImage.loadAsync(file.thumbURL, onLoaded: { (image, _) in
+                                    self.linkImage.image = image
+                                })
+                            }
+                            self.linkImageWidth.constant = 55
+                        }
+                        var description = "\(file.filename)\n"
+                        if file.sizeString != "" {
+                            description = "\(description), \(file.sizeString)"
+                        }
+                        self.linkDescription.text = file.filename
+                    }
+                    break
+                case .audio:
+                    self.linkImageWidth.constant = 0
+                    if let file = comment!.file {
+                        var description = "\(file.filename)\nAUDIO FILE"
+                        
+                        if file.sizeString != "" {
+                            description = "\(description), \(file.sizeString)"
+                        }
+                        self.linkDescription.text = description
+                    }
+                    break
+                case .file:
+                    self.linkImageWidth.constant = 0
+                    if let file = comment!.file {
+                        var description = "\(file.filename)\n\(file.ext.uppercased()) FILE"
+                        
+                        if file.sizeString != "" {
+                            description = "\(description), \(file.sizeString)"
+                        }
+                        self.linkDescription.text = description
+                    }
+                    break
+                case .location:
+                    let payload = JSON(parseJSON: comment!.data)
+                    self.linkImage.contentMode = .scaleAspectFill
+                    self.linkImage.image = Qiscus.image(named: "map_ico")
+                    self.linkImageWidth.constant = 55
+                    self.linkDescription.text = "\(payload["name"].stringValue) - \(payload["address"].stringValue)"
+                    break
+                case .contact:
+                    let payload = JSON(parseJSON: comment!.data)
+                    self.linkImage.contentMode = .top
+                    self.linkImage.image = Qiscus.image(named: "contact")
+                    self.linkImageWidth.constant = 55
+                    self.linkDescription.text = "\(payload["name"].stringValue) - \(payload["value"].stringValue)"
+                    break
+                case .reply:
+                    self.linkDescription.text = comment!.text
+                    self.linkImageWidth.constant = 0
+                    break
+                default:
+                    break
+                }
+                
+                if let user = self.replyData!.sender {
+                    self.linkTitle.text = user.fullname
+                }else{
+                    self.linkTitle.text = comment!.senderName
+                }
+                self.linkPreviewTopMargin.constant = -65
+                
+                UIView.animate(withDuration: 0.35, animations: {
+                    self.view.layoutIfNeeded()
+                    if self.lastVisibleRow != nil {
+                        self.collectionView.scrollToItem(at: self.lastVisibleRow!, at: .bottom, animated: true)
+                    }
+                }, completion: { (_) in
+                    if self.inputText.value == "" {
+                        self.sendButton.isEnabled = false
+                    }else{
+                        self.sendButton.isEnabled = true
+                    }
+                    self.sendButton.isHidden = false
+                    self.recordButton.isHidden = true
+                })
+            }}
+        }
+    }
+    func didTapActionButton(withData data:JSON){
+        if Qiscus.sharedInstance.connected{
+            let postbackType = data["type"]
+            let payload = data["payload"]
+            switch postbackType {
+            case "link":
+                let urlString = payload["url"].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                let urlArray = urlString.components(separatedBy: "/")
+                func openInBrowser(){
+                    if let url = URL(string: urlString) {
+                        UIApplication.shared.openURL(url)
+                    }
+                }
+                
+                if urlArray.count > 2 {
+                    if urlArray[2].lowercased().contains("instagram.com") {
+                        var instagram = "instagram://app"
+                        if urlArray.count == 4 || (urlArray.count == 5 && urlArray[4] == ""){
+                            let usernameIG = urlArray[3]
+                            instagram = "instagram://user?username=\(usernameIG)"
+                        }
+                        if let instagramURL =  URL(string: instagram) {
+                            if UIApplication.shared.canOpenURL(instagramURL) {
+                                UIApplication.shared.openURL(instagramURL)
+                            }else{
+                                openInBrowser()
+                            }
+                        }
+                    }else{
+                        openInBrowser()
+                    }
+                }else{
+                    openInBrowser()
+                }
+                
+                
+                break
+            default:
+                let text = data["label"].stringValue
+                let type = "button_postback_response"
+                
+                if let room = self.chatRoom {
+                    let newComment = room.newComment(text: text)
+                    room.post(comment: newComment, type: type, payload: payload)
+                }
+                break
+            }
+            
+        }else{
+            Qiscus.uiThread.async { autoreleasepool{
+                self.showNoConnectionToast()
+                }}
         }
     }
 }

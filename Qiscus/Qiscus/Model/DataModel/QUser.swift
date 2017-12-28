@@ -30,6 +30,13 @@ public class QUser:Object {
     internal dynamic var rawPresence:Int = 0
     internal dynamic var avatarData:Data?
     
+    public var cachedAvatar:UIImage?
+    
+    override public static func primaryKey() -> String? {
+        return "email"
+    }
+    
+    
     public var fullname:String{
         if self.definedName != "" {
             return self.definedName
@@ -105,10 +112,11 @@ public class QUser:Object {
     
     // MARK: - Unstored properties
     override public static func ignoredProperties() -> [String] {
-        return ["avatar","delegate"]
+        return ["cachedAvatar","delegate"]
     }
     public class func saveUser(withEmail email:String, id:Int? = nil ,fullname:String? = nil, avatarURL:String? = nil, lastSeen:Double? = nil)->QUser{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         var user = QUser()
         if let savedUser = QUser.getUser(email: email){
             user = savedUser
@@ -137,6 +145,7 @@ public class QUser:Object {
                 
                 DispatchQueue.main.async {
                     if let u = QUser.user(withEmail: email){
+                        u.cachedAvatar = nil
                         u.delegate?.user?(didChangeAvatarURL: avatarURL!)
                         QiscusNotification.publish(userAvatarChange: u)
                     }
@@ -167,7 +176,7 @@ public class QUser:Object {
                 user.id = id!
             }
             try! realm.write {
-                realm.add(user)
+                realm.add(user, update:true)
             }
             user.downloadAvatar()
         }
@@ -176,6 +185,7 @@ public class QUser:Object {
     }
     internal class func getUser(email:String) -> QUser? {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         let data = realm.objects(QUser.self).filter("email == '\(email)'")
         if data.count > 0 {
             let user = data.first!
@@ -185,6 +195,7 @@ public class QUser:Object {
     }
     public class func user(withEmail email:String) -> QUser? {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         if let cachedUser = QUser.cache[email] {
             if !cachedUser.isInvalidated {
                 return cachedUser
@@ -207,7 +218,9 @@ public class QUser:Object {
         let email = self.email
         QiscusDBThread.async {
             if let user = QUser.getUser(email: email){
+                if user.isInvalidated { return }
                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                realm.refresh()
                 try! realm.write {
                     user.rawPresence = presence.rawValue
                 }
@@ -224,6 +237,7 @@ public class QUser:Object {
         QiscusDBThread.async {
             if let user = QUser.getUser(email: email){
                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                realm.refresh()
                 if lastSeen > user.lastSeen {
                     try! realm.write {
                         user.lastSeen = lastSeen
@@ -231,7 +245,7 @@ public class QUser:Object {
                     DispatchQueue.main.async {
                         if let room = QRoom.room(withUser: email) {
                             if let mainUser = QUser.user(withEmail: email){
-                                room.delegate?.room(didChangeUser: room, user: mainUser)
+                                room.delegate?.room?(didChangeUser: room, user: mainUser)
                             }
                         }
                     }
@@ -241,6 +255,7 @@ public class QUser:Object {
     }
     public func setName(name:String){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         if name != self.definedName {
             try! realm.write {
                 self.definedName = name
@@ -250,6 +265,7 @@ public class QUser:Object {
     }
     public class func all() -> [QUser]{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         let data = realm.objects(QUser.self)
         
         if data.count > 0 {
@@ -268,6 +284,7 @@ public class QUser:Object {
     }
     public func clearAvatar(){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
         try! realm.write {
             self.avatarData = nil
         }
@@ -287,6 +304,7 @@ public class QUser:Object {
                 QiscusDBThread.async {
                     if let user = QUser.getUser(email: email){
                         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        realm.refresh()
                         try! realm.write {
                             user.avatarData = data
                         }

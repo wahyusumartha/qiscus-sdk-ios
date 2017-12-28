@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
 s.name         = "Qiscus"
-s.version      = "2.6.1"
+s.version      = "2.7.0"
 s.summary      = "Qiscus SDK for iOS"
 
 s.description  = <<-DESC
@@ -25,7 +25,7 @@ s.platform      = :ios, "9.0"
 
 s.dependency 'Alamofire', '~> 4.5.1'
 s.dependency 'AlamofireImage', '~> 3.3.0'
-s.dependency 'RealmSwift', '~> 2.10.2'
+s.dependency 'RealmSwift', '~> 3.0.2'
 s.dependency 'SwiftyJSON', '~> 3.1.4'
 s.dependency 'ImageViewer', '4.0'
 s.dependency 'CocoaMQTT', '1.0.19'

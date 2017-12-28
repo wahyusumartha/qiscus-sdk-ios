@@ -64,18 +64,13 @@ class QCellCardRight: QChatCell {
         self.buttons = [UIButton]()
         var yPos = CGFloat(0)
         let titleColor = UIColor(red: 101/255, green: 119/255, blue: 183/255, alpha: 1)
+        var i = 0
         for buttonData in buttonsData{
             let buttonFrame = CGRect(x: 0, y: yPos, width: buttonWidth, height: 45)
-            let button = QCardButton(frame: buttonFrame)
-            button.label = buttonData["label"].stringValue
-            button.payload = "\(buttonData)"
+            let button = UIButton(frame: buttonFrame)
+            button.setTitle(buttonData["label"].stringValue, for: .normal)
+            button.tag = i
             
-            let buttonType = buttonData["type"].stringValue
-            if buttonType == "link" {
-                button.type = .link
-            }else{
-                button.type = .postback
-            }
             let borderFrame = CGRect(x: 0, y: 0, width: buttonWidth, height: 0.5)
             let buttonBorder = UIView(frame: borderFrame)
             buttonBorder.backgroundColor = UIColor(red: 0.6, green: 0.6, blue: 0.6, alpha: 1)
@@ -86,13 +81,18 @@ class QCellCardRight: QChatCell {
             button.addTarget(self, action: #selector(cardButtonTapped(_:)), for: .touchUpInside)
             
             yPos += 45
+            i += 1
         }
         self.buttonAreaHeight.constant = yPos
         self.cardHeight.constant = 90 + yPos
         self.containerView.layoutIfNeeded()
     }
-    func cardButtonTapped(_ sender: QCardButton) {
-        let data = JSON(parseJSON: sender.payload)
-        self.delegate?.didTapPostbackButton(withData: data)
+    func cardButtonTapped(_ sender: UIButton) {
+        let data = self.comment!.data
+        let payload = JSON(parseJSON: data)
+        let buttonsData = payload["buttons"].arrayValue
+        if buttonsData.count > sender.tag {
+            self.delegate?.didTapCardButton(onComment: self.comment!, index: sender.tag)
+        }
     }
 }

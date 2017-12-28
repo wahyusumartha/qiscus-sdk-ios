@@ -13,7 +13,7 @@ import Foundation
     case room
 }
 public class QFileManager:NSObject{
-    private class func directoryPath(forDirectory directory:QDirectoryType)->String{
+    internal class func directoryPath(forDirectory directory:QDirectoryType)->String{
         var dir = ""
         switch directory {
         case .comment:

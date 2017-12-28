@@ -12,22 +12,29 @@ import SwiftyJSON
 
 internal extension QRoom {
     internal func pinRoom(){
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        try! realm.write {
-            self.pinned = Double(Date().timeIntervalSince1970)
+        let id = self.id
+        QiscusDBThread.async {
+            if let r = QRoom.threadSaveRoom(withId: id) {
+                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                realm.refresh()
+                try! realm.write {
+                    r.pinned = Double(Date().timeIntervalSince1970)
+                }
+            }
         }
     }
     internal func unpinRoom(){
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        try! realm.write {
-            self.pinned = 0
-        }
-    }
-    internal func getCommentGroup(index:Int)->QCommentGroup?{
-        if self.comments.count > index {
-            return self.comments[index]
-        }else{
-            return nil
+        let id = self.id
+        QiscusDBThread.async {
+            if let r = QRoom.threadSaveRoom(withId: id) {
+                if r.pinned != 0 {
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    realm.refresh()
+                    try! realm.write {
+                        r.pinned = 0
+                    }
+                }
+            }
         }
     }
     internal func updateRoom(roomName:String? = nil, roomAvatarURL:String? = nil, roomOptions:String? = nil, onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){
@@ -39,15 +46,8 @@ internal extension QRoom {
         QiscusBackgroundThread.async { autoreleasepool{
             let message: String = "0";
             let channel = "r/\(roomId)/\(roomId)/\(QiscusMe.shared.email)/t"
-//            func execute(){
-                Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
-//            }
             
-//            DispatchQueue.main.async {
-//                autoreleasepool {
-//                    execute()
-//                }
-//            }
+            Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
             }}
         if self.selfTypingTimer != nil {
             if self.typingTimer!.isValid {
@@ -61,15 +61,7 @@ internal extension QRoom {
         QiscusBackgroundThread.async { autoreleasepool{
             let message: String = "1";
             let channel = "r/\(roomId)/\(roomId)/\(QiscusMe.shared.email)/t"
-            //func execute(){
-                Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
-            //}
-            
-//            DispatchQueue.main.async {
-//                autoreleasepool{
-//                    execute()
-//                }
-//            }
+            Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
             }}
         if self.typingTimer != nil {
             if self.typingTimer!.isValid {
@@ -84,6 +76,8 @@ internal extension QRoom {
     internal func checkCommentStatus(){
         let id = self.id
         QiscusDBThread.async {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
             if let room = QRoom.threadSaveRoom(withId: id){
                 var lastReadId = 0
                 var lastDeliveredId = 0
@@ -96,7 +90,6 @@ internal extension QRoom {
                     }
                 }
                 if lastReadId > 0 && lastDeliveredId > 0 {
-                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                     if lastReadId != room.lastReadCommentId {
                         try! realm.write {
                             room.lastReadCommentId = lastReadId
@@ -107,38 +100,52 @@ internal extension QRoom {
                             room.lastDeliveredCommentId = lastDeliveredId
                         }
                     }
-                    let filteredGroup = room.comments.filter("senderEmail == '\(QiscusMe.shared.email)'")
-                    for group in filteredGroup {
-                        let deliveredData = group.comments.filter("id != 0 AND id <= \(room.lastDeliveredCommentId) AND statusRaw < \(QCommentStatus.delivered.rawValue) ")
-                        let readData = group.comments.filter("id != 0 AND id <= \(room.lastReadCommentId) AND statusRaw < \(QCommentStatus.read.rawValue) ")
-                        for c in deliveredData {
-                            c.updateStatus(status: .delivered)
-                            if c.id == room.lastCommentId {
-                                if room.lastCommentStatusRaw != QCommentStatus.delivered.rawValue{
-                                    try! realm.write {
-                                        room.lastCommentStatusRaw = QCommentStatus.delivered.rawValue
-                                    }
-                                    let rId = room.id
-                                    DispatchQueue.main.async {
-                                        if let r = QRoom.room(withId: rId){
-                                            QiscusNotification.publish(roomChange: r, onProperty: .lastComment)
+                    let deliveredData = room.comments.filter("id != 0 AND id <= \(room.lastDeliveredCommentId) AND statusRaw < \(QCommentStatus.delivered.rawValue) ")
+                    let readData = room.comments.filter("id != 0 AND id <= \(room.lastReadCommentId) AND statusRaw < \(QCommentStatus.read.rawValue) ")
+                    
+                    for c in deliveredData {
+                        c.updateStatus(status: .delivered)
+                        if c.id == room.lastCommentId {
+                            if room.lastCommentStatusRaw != QCommentStatus.delivered.rawValue{
+                                try! realm.write {
+                                    room.lastCommentStatusRaw = QCommentStatus.delivered.rawValue
+                                }
+                                let rId = room.id
+                                let rts = ThreadSafeReference(to: room)
+                                DispatchQueue.main.async {
+                                    let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                                    mainRealm.refresh()
+                                    if Qiscus.chatRooms[rId] == nil {
+                                        if let r = mainRealm.resolve(rts) {
+                                            Qiscus.chatRooms[rId] = r
                                         }
+                                    }
+                                    if let r = QRoom.room(withId: rId){
+                                        QiscusNotification.publish(roomChange: r, onProperty: .lastComment)
                                     }
                                 }
                             }
                         }
-                        for c in readData {
-                            c.updateStatus(status: .read)
-                            if c.id == room.lastCommentId {
-                                if room.lastCommentStatusRaw != QCommentStatus.read.rawValue{
-                                    try! realm.write {
-                                        room.lastCommentStatusRaw = QCommentStatus.read.rawValue
-                                    }
-                                    let rId = room.id
-                                    DispatchQueue.main.async {
-                                        if let r = QRoom.room(withId: rId){
-                                            QiscusNotification.publish(roomChange: r, onProperty: .lastComment)
+                    }
+                    for c in readData {
+                        c.updateStatus(status: .read)
+                        if c.id == room.lastCommentId {
+                            if room.lastCommentStatusRaw != QCommentStatus.read.rawValue{
+                                try! realm.write {
+                                    room.lastCommentStatusRaw = QCommentStatus.read.rawValue
+                                }
+                                let rId = room.id
+                                let rts = ThreadSafeReference(to:room)
+                                DispatchQueue.main.async {
+                                    let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                                    mainRealm.refresh()
+                                    if Qiscus.chatRooms[rId] == nil {
+                                        if let r = mainRealm.resolve(rts) {
+                                            Qiscus.chatRooms[rId] = r
                                         }
+                                    }
+                                    if let r = QRoom.getRoom(withId: rId){
+                                        QiscusNotification.publish(roomChange: r, onProperty: .lastComment)
                                     }
                                 }
                             }
@@ -187,147 +194,85 @@ internal extension QRoom {
                 channels.append("r/\(room.id)/\(room.id)/+/d")
                 channels.append("r/\(room.id)/\(room.id)/+/r")
                 channels.append("r/\(room.id)/\(room.id)/+/t")
-                                
+                
                 DispatchQueue.global().async {autoreleasepool{
                     for channel in channels{
                         Qiscus.shared.mqtt?.unsubscribe(channel)
                     }
-                }}
+                    }}
             }
         }
         
-    }
-    internal func resetRoomComment(){
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let data =  realm.objects(QComment.self).filter("roomId == '\(self.id)'")
-        
-        try! realm.write {
-            self.typingUser = ""
-        }
-        for comment in data {
-            try! realm.write {
-                comment.durationLabel = ""
-                comment.currentTimeSlider = Float(0)
-                comment.seekTimeLabel = "00:00"
-                comment.audioIsPlaying = false
-                // file variable
-                comment.isDownloading = false
-                comment.isUploading = false
-                comment.progress = 0
-            }
-        }
-    }
-    internal func getComment(withUniqueId uniqueId:String)->QComment?{
-        let groupData = self.comments.filter("id CONTAINS '\(uniqueId)'")
-        if let group = groupData.first {
-            let commentData = group.comments.filter("uniqueId == '\(uniqueId)'")
-            return commentData.first
-        }
-        return nil
     }
     
     internal func addComment(newComment:QComment, onTop:Bool = false){
-        let roomId = self.id
+        let id = self.id
         let cUniqueId = newComment.uniqueId
         
-        if self.getComment(withUniqueId: cUniqueId) != nil {
-            Qiscus.printLog(text: "fail to add newComment, comment with same uniqueId already exist")
-            return
-        }
-        
-        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-        let _ = newComment.textSize
-        let senderEmail = newComment.senderEmail
-        let senderName = newComment.senderName
-        let avatarURL = newComment.senderAvatarURL
-        
-        //TODO: - check this
-        
-        if QUser.getUser(email: senderEmail) == nil {
-            let _ = QUser.saveUser(withEmail: senderEmail, fullname: senderName, avatarURL: avatarURL)
-        }
-        
-        if self.comments.count == 0 {
-            let commentGroup = QCommentGroup()
-            commentGroup.senderEmail = newComment.senderEmail
-            commentGroup.senderName = newComment.senderName
-            commentGroup.createdAt = newComment.createdAt
-            commentGroup.id = "\(newComment.uniqueId)"
-            commentGroup.comments.append(newComment)
-            try! realm.write {
-                self.comments.append(commentGroup)
-            }
-        }
-        else if onTop{
-            let firstCommentGroup = self.comments.first!
-            if firstCommentGroup.date == newComment.date && firstCommentGroup.senderEmail == newComment.senderEmail && newComment.type != .system {
-                newComment.cellPosRaw = QCellPosition.first.rawValue
-                try! realm.write {
-                    firstCommentGroup.createdAt = newComment.createdAt
-                    firstCommentGroup.senderName = newComment.senderName
-                    firstCommentGroup.comments.insert(newComment, at: 0)
+        QiscusDBThread.sync {
+            if let room = QRoom.threadSaveRoom(withId: id) {
+                let predicate = NSPredicate(format: "uniqueId = %@", cUniqueId)
+                if room.comments.filter(predicate).count > 0 {
+                    Qiscus.printLog(text: "fail to add newComment, comment with same uniqueId already exist")
+                    return
                 }
-                if !firstCommentGroup.id.contains(cUniqueId){
-                    let newId = "\(firstCommentGroup.id)   \(cUniqueId)"
+                
+                let senderEmail = newComment.senderEmail
+                let senderName = newComment.senderName
+                let avatarURL = newComment.senderAvatarURL
+                
+                let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                realm.refresh()
+                
+                if QUser.getUser(email: senderEmail) == nil {
+                    let _ = QUser.saveUser(withEmail: senderEmail, fullname: senderName, avatarURL: avatarURL)
+                }
+                
+                if room.comments.count == 0 {
+                    newComment.cellPosRaw = QCellPosition.single.rawValue
+                    
                     try! realm.write {
-                        firstCommentGroup.id = newId
+                        realm.add(newComment, update: true)
+                        room.comments.append(newComment)
                     }
                 }
-                firstCommentGroup.calculateCommentPosition()
-            }else{
-                let commentGroup = QCommentGroup()
-                commentGroup.senderEmail = newComment.senderEmail
-                commentGroup.senderName = newComment.senderName
-                commentGroup.createdAt = newComment.createdAt
-                commentGroup.id = "\(cUniqueId)"
-                newComment.cellPosRaw = QCellPosition.first.rawValue
-                commentGroup.comments.append(newComment)
-                try! realm.write {
-                    self.comments.insert(commentGroup, at: 0)
-                }
-            }
-            if self.lastComment == nil {
-                self.updateLastComentInfo(comment: newComment)
-            }
-        }
-        else{
-            let lastGroup = self.comments[self.comments.count - 1]
-            let lastComment = lastGroup.comments[lastGroup.comments.count - 1]
-            if lastGroup.date == newComment.date && lastGroup.senderEmail == newComment.senderEmail && newComment.type != .system && lastComment.type != .system{
-                newComment.cellPosRaw = QCellPosition.last.rawValue
-                try! realm.write {
-                    lastGroup.comments.append(newComment)
-                }
-                if !lastGroup.id.contains(cUniqueId){
-                    let newId = "\(lastGroup.id)   \(cUniqueId)"
+                else if onTop{
                     try! realm.write {
-                        lastGroup.id = newId
+                        realm.add(newComment, update: true)
+                        self.comments.insert(newComment, at: 0)
+                    }
+                    if room.lastComment == nil {
+                        room.updateLastComentInfo(comment: newComment)
                     }
                 }
-                lastGroup.calculateCommentPosition()
-            }else{
-                let commentGroup = QCommentGroup()
-                commentGroup.senderEmail = newComment.senderEmail
-                commentGroup.senderName = newComment.senderName
-                commentGroup.createdAt = newComment.createdAt
-                commentGroup.id = "\(newComment.uniqueId)"
-                newComment.cellPosRaw = QCellPosition.first.rawValue
-                commentGroup.comments.append(newComment)
-                try! realm.write {
-                    self.comments.append(commentGroup)
+                else{
+                    try! realm.write {
+                        realm.add(newComment, update: true)
+                        room.comments.append(newComment)
+                    }
                 }
-            }
-        }
-        if !onTop {
-            DispatchQueue.main.async {
-                if let r = QRoom.room(withId: roomId){
-                    if let c = r.getComment(withUniqueId: cUniqueId){
-                        QiscusNotification.publish(gotNewComment: c, room: r)
-                        if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                            roomDelegate.gotNewComment(c)
+                if !onTop {
+                    let rId = self.id
+                    let uid = newComment.uniqueId
+                    if Thread.isMainThread {
+                        if let r = QRoom.getRoom(withId: rId){
+                            if let c = QComment.comment(withUniqueId: uid){
+                                QiscusNotification.publish(gotNewComment: c, room: r)
+                            }
+                        }
+                    }else{
+                        DispatchQueue.main.sync {
+                            if let r = QRoom.getRoom(withId: rId){
+                                if let c = QComment.comment(withUniqueId: uid){
+                                    QiscusNotification.publish(gotNewComment: c, room: r)
+                                }
+                            }
                         }
                     }
                 }
+            }else{
+                Qiscus.printLog(text: "fail to add newComment, room not exist")
+                return
             }
         }
     }
@@ -350,6 +295,7 @@ internal extension QRoom {
                 if !room.isInvalidated {
                     if cCreatedAt > room.lastCommentCreatedAt || cId > room.lastCommentId || cId == 0 {
                         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        realm.refresh()
                         try! realm.write {
                             room.lastCommentId = cId
                             room.lastCommentText = cText
@@ -363,11 +309,23 @@ internal extension QRoom {
                             room.lastCommentData = cData
                             room.lastCommentRawExtras = cRawExtras
                         }
+                        let rts = ThreadSafeReference(to:room)
                         DispatchQueue.main.async {
+                            let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            mainRealm.refresh()
+                            if Qiscus.chatRooms[id] == nil {
+                                if let r = mainRealm.resolve(rts) {
+                                    Qiscus.chatRooms[id] = r
+                                }
+                            }
                             if let cache = QRoom.room(withId: id){
                                 if let c = cache.lastComment {
-                                    QiscusNotification.publish(gotNewComment: c, room: cache)
+                                    if cache.comments.count == 0 {
+                                        QiscusNotification.publish(gotNewComment: c, room: cache)
+                                    }
+                                    QiscusNotification.publish(roomChange: cache, onProperty: .lastComment)
                                 }
+                                
                             }
                         }
                     }
@@ -381,12 +339,21 @@ internal extension QRoom {
         QiscusDBThread.async {
             if let room = QRoom.threadSaveRoom(withId: id) {
                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                realm.refresh()
                 if let option = json["options"].string {
                     if option != "" && option != "<null>" && option != room.data{
                         try! realm.write {
                             room.data = option
                         }
+                        let rts = ThreadSafeReference(to:room)
                         DispatchQueue.main.async {
+                            let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            mainRealm.refresh()
+                            if Qiscus.chatRooms[id] == nil {
+                                if let r = mainRealm.resolve(rts) {
+                                    Qiscus.chatRooms[id] = r
+                                }
+                            }
                             if let cache = QRoom.room(withId: id) {
                                 QiscusNotification.publish(roomChange: cache, onProperty: .data)
                             }
@@ -398,9 +365,18 @@ internal extension QRoom {
                         try! realm.write {
                             room.unreadCount = unread
                         }
+                        let rts = ThreadSafeReference(to: room)
                         DispatchQueue.main.async {
-                            if let cache = QRoom.room(withId: id) {
+                            let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            mainRealm.refresh()
+                            if Qiscus.chatRooms[id] == nil {
+                                if let r = mainRealm.resolve(rts) {
+                                    Qiscus.chatRooms[id] = r
+                                }
+                            }
+                            if let cache = QRoom.getRoom(withId: id) {
                                 QiscusNotification.publish(roomChange: cache, onProperty: .unreadCount)
+                                cache.delegate?.room?(didChangeUnread: cache)
                             }
                         }
                     }
@@ -411,7 +387,15 @@ internal extension QRoom {
                             room.storedName = roomName
                         }
                         if room.definedname == "" {
+                            let rts = ThreadSafeReference(to: room)
                             DispatchQueue.main.async {
+                                let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                                mainRealm.refresh()
+                                if Qiscus.chatRooms[id] == nil {
+                                    if let r = mainRealm.resolve(rts) {
+                                        Qiscus.chatRooms[id] = r
+                                    }
+                                }
                                 if let cache = QRoom.room(withId: id) {
                                     QiscusNotification.publish(roomChange: cache, onProperty: .name)
                                 }
@@ -438,7 +422,15 @@ internal extension QRoom {
                             room.lastCommentTypeRaw = comment.typeRaw
                             room.lastCommentData = comment.data
                         }
+                        let rts = ThreadSafeReference(to: room)
                         DispatchQueue.main.async {
+                            let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            mainRealm.refresh()
+                            if Qiscus.chatRooms[id] == nil {
+                                if let r = mainRealm.resolve(rts) {
+                                    Qiscus.chatRooms[id] = r
+                                }
+                            }
                             if let cache = QRoom.room(withId: id) {
                                 QiscusNotification.publish(roomChange: cache, onProperty: .lastComment)
                             }
@@ -490,7 +482,7 @@ internal extension QRoom {
                     for participant in room.participants{
                         if !participantString.contains(participant.email){
                             try! realm.write {
-                                room.participants.remove(objectAtIndex: index)
+                                room.participants.remove(at: index)
                                 participantRemoved = true
                             }
                             participantChanged = true
@@ -498,9 +490,17 @@ internal extension QRoom {
                         index += 1
                     }
                     if participantChanged {
+                        let rts = ThreadSafeReference(to: room)
                         DispatchQueue.main.async {
+                            let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                            mainRealm.refresh()
+                            if Qiscus.chatRooms[id] == nil {
+                                if let r = mainRealm.resolve(rts) {
+                                    Qiscus.chatRooms[id] = r
+                                }
+                            }
                             if let cache = QRoom.room(withId: id) {
-                                cache.delegate?.room(didChangeParticipant: cache)
+                                cache.delegate?.room?(didChangeParticipant: cache)
                                 QiscusNotification.publish(roomChange: cache, onProperty: .participant)
                             }
                         }
@@ -528,25 +528,8 @@ internal extension QRoom {
             commentText = json["payload"]["text"].stringValue
         }
         let avatarURL = json["user_avatar_url"].stringValue
-
-        let _ = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL)
         
-//        let savedParticipant = self.participants.filter("email == '\(senderEmail)'")
-//        if savedParticipant.count > 0 {
-//            let participant = savedParticipant.first!
-//            if !participant.isInvalidated {
-//                if participant.lastReadCommentId < commentId {
-//                    try! realm.write {
-//                        participant.lastReadCommentId = commentId
-//                        participant.lastDeliveredCommentId = commentId
-//                    }
-//                }else if participant.lastDeliveredCommentId < commentId{
-//                    try! realm.write {
-//                        participant.lastDeliveredCommentId = commentId
-//                    }
-//                }
-//            }
-//        }
+        let _ = QUser.saveUser(withEmail: senderEmail, fullname: commentSenderName, avatarURL: avatarURL)
         
         let newComment = QComment()
         newComment.uniqueId = commentUniqueId
@@ -611,15 +594,55 @@ internal extension QRoom {
             break
         case "file_attachment":
             newComment.data = "\(json["payload"])"
-            var type = QiscusFileType.file
             let fileURL = json["payload"]["url"].stringValue
+            var filename = newComment.fileName(text: fileURL)
+//            "url" : url,
+//            "caption": caption,
+//            "size": fileData["size"].intValue,
+//            "pages": fileData["pages"].intValue,
+//            "file_name": fileData["name"].stringValue
+            var fileSize = Double(0)
+            var filePages = 0
+            if let pages = json["payload"]["pages"].int {
+                if pages > 0 {
+                    filePages = pages
+                }
+            }
+            if let size = json["payload"]["size"].double {
+                if size > 0 {
+                    fileSize = size 
+                }
+            }
+            
+            if let name = json["payload"]["file_name"].string {
+                if name != "" {
+                    filename = name
+                }
+            }else if filename.contains("-"){
+                let nameArr = filename.split(separator: "-")
+                var i = 0
+                for comp in nameArr {
+                    switch i {
+                    case 0 : filename = "" ; break
+                    case 1 : filename = "\(String(comp))"
+                    default: filename = "\(filename)-\(comp)"
+                    }
+                    i += 1
+                }
+            }
+            
+            var type = QiscusFileType.file
             if newComment.file == nil {
                 let file = QFile()
                 file.id = newComment.uniqueId
                 file.url = fileURL
                 file.senderEmail = newComment.senderEmail
+                file.filename = filename
+                file.pages = filePages
+                file.size = Double(fileSize)
+                
                 try! realm.write {
-                    realm.add(file)
+                    realm.add(file, update:true)
                 }
                 type = file.type
             }else{
@@ -638,6 +661,9 @@ internal extension QRoom {
             case .audio:
                 newComment.typeRaw = QCommentType.audio.name()
                 break
+            case .document:
+                newComment.typeRaw = QCommentType.document.name()
+                break
             default:
                 newComment.typeRaw = QCommentType.file.name()
                 break
@@ -647,13 +673,28 @@ internal extension QRoom {
             if newComment.text.hasPrefix("[file]"){
                 var type = QiscusFileType.file
                 let fileURL = QFile.getURL(fromString: newComment.text)
+                var filename = newComment.fileName(text: fileURL)
+                
+                if filename.contains("-"){
+                    let nameArr = filename.split(separator: "-")
+                    var i = 0
+                    for comp in nameArr {
+                        switch i {
+                        case 0 : filename = "" ; break
+                        case 1 : filename = "\(String(comp))"
+                        default: filename = "\(filename)-\(comp)"
+                        }
+                        i += 1
+                    }
+                }
                 if newComment.file == nil {
                     let file = QFile()
                     file.id = newComment.uniqueId
                     file.url = fileURL
+                    file.filename = filename
                     file.senderEmail = newComment.senderEmail
                     try! realm.write {
-                        realm.add(file)
+                        realm.add(file, update:true)
                     }
                     type = file.type
                 }else{
@@ -671,6 +712,9 @@ internal extension QRoom {
                     break
                 case .audio:
                     newComment.typeRaw = QCommentType.audio.name()
+                    break
+                case .document:
+                    newComment.typeRaw = QCommentType.document.name()
                     break
                 default:
                     newComment.typeRaw = QCommentType.file.name()
@@ -693,6 +737,7 @@ internal extension QRoom {
         QiscusDBThread.sync {
             if let room = QRoom.threadSaveRoom(withId:  roomId){
                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                realm.refresh()
                 let newComment = room.createComment(withJSON: json)
                 let commentUniqueId = newComment.uniqueId
                 
@@ -726,6 +771,7 @@ internal extension QRoom {
         QiscusDBThread.sync {
             autoreleasepool {
                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                realm.refresh()
                 guard let room = QRoom.threadSaveRoom(withId: roomId) else { return }
                 let commentUniqueId = json["unique_temp_id"].stringValue
                 let newComment = room.createComment(withJSON: json)
@@ -779,4 +825,75 @@ internal extension QRoom {
         let data = self.participants.filter("email == '\(email)'")
         return data.first
     }
+    
+    internal func getGrouppedCommentsUID()->[[String]]{
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        var retVal = [[String]]()
+        var uidList = [String]()
+        var s = 0
+        
+        var prevComment:QComment?
+        var group = [String]()
+        var count = 0
+        func checkPosition(ids:[String]) {
+            var n = 0
+            for id in ids {
+                var position = QCellPosition.middle
+                if ids.count > 1 {
+                    switch n {
+                    case 0 :
+                        position = .first
+                        break
+                    case ids.count - 1 :
+                        position = .last
+                        break
+                    default:
+                        position = .middle
+                        break
+                    }
+                }else{
+                    position = .single
+                }
+                n += 1
+                if let c = QComment.threadSaveComment(withUniqueId: id){
+                    c.updateCellPos(cellPos: position)
+                }
+            }
+        }
+        var deletedIndex = [Int]()
+        for comment in self.comments {
+            if !comment.isInvalidated {
+                if uidList.contains(comment.uniqueId) {
+                    if !deletedIndex.contains(count) {
+                        deletedIndex.append(count)
+                    }
+                }else{
+                    if let prev = prevComment{
+                        if prev.date == comment.date && prev.senderEmail == comment.senderEmail && comment.type != .system  {
+                            uidList.append(comment.uniqueId)
+                            group.append(comment.uniqueId)
+                        }else{
+                            retVal.append(group)
+                            checkPosition(ids: group)
+                            group = [String]()
+                            group.append(comment.uniqueId)
+                            uidList.append(comment.uniqueId)
+                        }
+                    }else{
+                        group.append(comment.uniqueId)
+                        uidList.append(comment.uniqueId)
+                    }
+                    if count == self.comments.count - 1  {
+                        retVal.append(group)
+                        checkPosition(ids: group)
+                    }else{
+                        prevComment = comment
+                    }
+                }
+            }
+            count += 1
+        }
+        return retVal
+    }
 }
+

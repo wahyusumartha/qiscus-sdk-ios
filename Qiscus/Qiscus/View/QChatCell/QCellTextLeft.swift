@@ -62,7 +62,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         LinkContainer.isHidden = true
     }
     func openLink(){
-        self.delegate?.didTouchLink(onCell: self)
+        self.delegate?.didTouchLink(onComment: self.comment!)
     }
     
     func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange) -> Bool {
@@ -175,6 +175,39 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
                 text = filename
                 
                 break
+            case .document :
+                self.linkImage.contentMode = .scaleAspectFill
+                self.linkImage.image = nil
+                let filename = self.comment!.fileName(text: text)
+                let url = self.comment!.getAttachmentURL(message: text)
+                
+                self.linkImageWidth.constant = 55
+                self.linkImage.isHidden = false
+                text = filename
+                if let file = QFile.file(withURL: url){
+                    if QFileManager.isFileExist(inLocalPath: file.localThumbPath){
+                        self.linkImage.loadAsync(fromLocalPath: file.localThumbPath, onLoaded: { (image, _) in
+                            self.linkImage.image = image
+                        })
+                    }else if QFileManager.isFileExist(inLocalPath: file.localMiniThumbPath){
+                        self.linkImage.loadAsync(fromLocalPath: file.localMiniThumbPath, onLoaded: { (image, _) in
+                            self.linkImage.image = image
+                        })
+                    }else{
+                        self.linkImage.loadAsync(file.thumbURL, onLoaded: { (image, _) in
+                            self.linkImage.image = image
+                        })
+                    }
+                    var description = "\(file.filename)\nPDF File"
+                    if file.pages > 0 {
+                        description = "\(description), \(file.pages) page"
+                    }
+                    if file.sizeString != "" {
+                        description = "\(description), \(file.sizeString)"
+                    }
+                    text = description
+                }
+                break
             case .location :
                 self.linkImage.contentMode = .scaleAspectFill
                 self.linkImage.image = Qiscus.image(named: "map_ico")
@@ -281,7 +314,9 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
             self.userNameLabel.text = self.comment?.senderName
         }
     }
-    public override func comment(didChangePosition position: QCellPosition) {
-        self.balloonView.image = self.getBallon()
+    public override func comment(didChangePosition comment:QComment, position: QCellPosition) {
+        if comment.uniqueId == self.comment?.uniqueId {
+            self.balloonView.image = self.getBallon()
+        }
     }
 }

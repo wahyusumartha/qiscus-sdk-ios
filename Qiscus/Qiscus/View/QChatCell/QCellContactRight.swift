@@ -51,7 +51,7 @@ class QCellContactRight: QChatCell {
         self.updateStatus(toStatus: self.comment!.status)
     }
     @IBAction func saveContact(_ sender: Any) {
-        self.delegate?.didTapSaveContact(withData: self.comment!)
+        self.delegate?.didTapSaveContact(onComment: self.comment!)
     }
     public override func updateStatus(toStatus status:QCommentStatus){
         dateLabel.textColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
@@ -87,7 +87,9 @@ class QCellContactRight: QChatCell {
             break
         }
     }
-    public override func comment(didChangePosition position: QCellPosition) {
-        self.balloonView.image = self.getBallon()
+    public override func comment(didChangePosition comment:QComment, position: QCellPosition) {
+        if self.comment?.uniqueId == comment.uniqueId {
+            self.balloonView.image = self.getBallon()
+        }
     }
 }

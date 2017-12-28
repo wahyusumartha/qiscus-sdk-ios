@@ -9,6 +9,23 @@
 import RealmSwift
 
 public extension QRoom {
+    
+    public var grouppedCommentsUID:[[String]]{
+        get{
+            return self.getGrouppedCommentsUID()
+        }
+    }
+    public var canLoadMore:Bool{
+        get{
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
+            let predicate = NSPredicate(format: "id > 0 AND beforeId == 0 AND roomId = %@",self.id)
+            if realm.objects(QComment.self).filter(predicate).count > 0 {
+                return false
+            }
+            return true
+        }
+    }
     public var isPinned:Bool {
         get{
             if self.isInvalidated { return false }
@@ -46,12 +63,6 @@ public extension QRoom {
         }
     }
     
-    public var lastCommentGroup:QCommentGroup?{
-        get{
-            if self.isInvalidated { return nil }
-            return self.comments.last
-        }
-    }
     public var lastComment:QComment?{
         get{
             if self.isInvalidated {return nil}
@@ -93,6 +104,7 @@ public extension QRoom {
         get{
             if self.isInvalidated { return [QComment]()}
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
             var comments = [QComment]()
             if Thread.isMainThread {
                 let data =  realm.objects(QComment.self).filter("roomId == '\(self.id)'").sorted(byKeyPath: "createdAt", ascending: true)

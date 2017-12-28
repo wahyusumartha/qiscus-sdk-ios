@@ -14,30 +14,41 @@ class QChatFooterLeft: UICollectionReusableView {
     
     public var user:QUser?{
         didSet{
+            if oldValue != nil {
+                oldValue?.delegate = nil
+            }
             if let sender = self.user{
+                QUser.cache[sender.email] = sender
                 sender.delegate = self
                 let email = sender.email
-                QiscusBackgroundThread.async {
-                    if let userData = QUser.getUser(email: email) {
-                        if let avatar = userData.avatar {
-                            let emailData = userData.email
-                            DispatchQueue.main.async {
-                                if emailData == self.user?.email {
-                                    self.avatarImage.image = avatar
+                if let avatar = sender.cachedAvatar{
+                    self.avatarImage.image = avatar
+                }
+                else {
+                    QiscusBackgroundThread.async {
+                        if let userData = QUser.getUser(email: email) {
+                            if let avatar = userData.avatar {
+                                let emailData = userData.email
+                                DispatchQueue.main.async {
+                                    if emailData == self.user?.email {
+                                        self.avatarImage.image = avatar
+                                        self.user?.cachedAvatar = avatar
+                                    }
                                 }
+                            }else{
+                                DispatchQueue.main.async {
+                                    self.avatarImage.image = Qiscus.image(named: "avatar")
+                                }
+                                userData.downloadAvatar()
                             }
                         }else{
                             DispatchQueue.main.async {
                                 self.avatarImage.image = Qiscus.image(named: "avatar")
                             }
-                            userData.downloadAvatar()
-                        }
-                    }else{
-                        DispatchQueue.main.async {
-                            self.avatarImage.image = Qiscus.image(named: "avatar")
                         }
                     }
                 }
+                
             }else{
                 avatarImage.image = nil
             }

@@ -72,14 +72,23 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                     let imageExt:String = String(imageNameArr.last!).lowercased()
                     
                     let gif:Bool = (imageExt == "gif" || imageExt == "gif_")
-                    let jpeg:Bool = (imageExt == "jpg" || imageExt == "jpg_")
                     let png:Bool = (imageExt == "png" || imageExt == "png_")
-                    let tif:Bool = (imageExt == "tif" || imageExt == "tif_")
                     
-                    if jpeg || tif{
-                        if tif {
-                            imageName = "\(timeToken).jpg"
+                    if png{
+                        data = UIImagePNGRepresentation(image)!
+                    }else if gif{
+                        let asset = PHAsset.fetchAssets(withALAssetURLs: [imageURL], options: nil)
+                        if let phAsset = asset.firstObject {
+                            let option = PHImageRequestOptions()
+                            option.isSynchronous = true
+                            option.isNetworkAccessAllowed = true
+                            PHImageManager.default().requestImageData(for: phAsset, options: option) {
+                                (gifData, dataURI, orientation, info) -> Void in
+                                data = gifData
+                            }
                         }
+                    }else{
+                        imageName = "\(timeToken).jpg"
                         let imageSize = image.size
                         var bigPart = CGFloat(0)
                         if(imageSize.width > imageSize.height){
@@ -94,19 +103,6 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                         }
                         
                         data = UIImageJPEGRepresentation(image, compressVal)!
-                    }else if png{
-                        data = UIImagePNGRepresentation(image)!
-                    }else if gif{
-                        let asset = PHAsset.fetchAssets(withALAssetURLs: [imageURL], options: nil)
-                        if let phAsset = asset.firstObject {
-                            let option = PHImageRequestOptions()
-                            option.isSynchronous = true
-                            option.isNetworkAccessAllowed = true
-                            PHImageManager.default().requestImageData(for: phAsset, options: option) {
-                                (gifData, dataURI, orientation, info) -> Void in
-                                data = gifData
-                            }
-                        }
                     }
                 }else{
                     imageName = "\(timeToken).jpg"
@@ -127,16 +123,6 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                 }
                 
                 if data != nil {
-    //                let text = QiscusTextConfiguration.sharedInstance.confirmationImageUploadText
-    //                let okText = QiscusTextConfiguration.sharedInstance.alertOkText
-    //                let cancelText = QiscusTextConfiguration.sharedInstance.alertCancelText
-                    
-    //                QPopUpView.showAlert(withTarget: self, image: image, message: text, firstActionTitle: okText, secondActionTitle: cancelText,
-    //                doneAction: {
-    //                    self.postFile(filename: imageName, data: data!, type: .image)
-    //                },
-    //                cancelAction: {}
-    //                )
                     let mediaSize = Double(data!.count) / 1024.0
                     if mediaSize > Qiscus.maxUploadSizeInKB {
                         picker.dismiss(animated: true, completion: {
@@ -212,6 +198,7 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
             do{
                 var data:Data = try Data(contentsOf: dataURL, options: NSData.ReadingOptions.mappedIfSafe)
                 let mediaSize = Double(data.count) / 1024.0
+                
                 if mediaSize > Qiscus.maxUploadSizeInKB {
                     self.processingFile = false
                     self.dismissLoading()
@@ -229,13 +216,23 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                 let ext = String(fileNameArr.last!).lowercased()
                 
                 let gif = (ext == "gif" || ext == "gif_")
-                let jpeg = (ext == "jpg" || ext == "jpg_")
-                let png = (ext == "png" || ext == "png_")
                 let video = (ext == "mp4" || ext == "mp4_" || ext == "mov" || ext == "mov_")
-                
+                let isImage = (ext == "jpg" || ext == "jpg_" || ext == "tif" || ext == "heic" || ext == "png" || ext == "png_")
+                let isPDF = (ext == "pdf" || ext == "pdf_")
                 var usePopup = false
                 
-                if jpeg{
+                if isImage{
+                    var i = 0
+                    for n in fileNameArr{
+                        if i == 0 {
+                            fileName = String(n)
+                        }else if i == fileNameArr.count - 1 {
+                            fileName = "\(fileName).jpg"
+                        }else{
+                            fileName = "\(fileName).\(String(n))"
+                        }
+                        i += 1
+                    }
                     let image = UIImage(data: data)!
                     let imageSize = image.size
                     var bigPart = CGFloat(0)
@@ -251,11 +248,33 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                     }
                     data = UIImageJPEGRepresentation(image, compressVal)!
                     thumb = UIImage(data: data)
-                }else if png{
-                    let image = UIImage(data: data)!
-                    thumb = image
-                    data = UIImagePNGRepresentation(image)!
-                }else if gif{
+                }else if isPDF{
+                    usePopup = true
+                    popupText = "Are you sure to send this document?"
+                    fileType = QiscusFileType.document
+                    if let provider = CGDataProvider(data: data as NSData) {
+                        if let pdfDoc = CGPDFDocument(provider) {
+                            if let pdfPage:CGPDFPage = pdfDoc.page(at: 1) {
+                                var pageRect:CGRect = pdfPage.getBoxRect(.mediaBox)
+                                pageRect.size = CGSize(width:pageRect.size.width, height:pageRect.size.height)
+                                UIGraphicsBeginImageContext(pageRect.size)
+                                if let context:CGContext = UIGraphicsGetCurrentContext(){
+                                    context.saveGState()
+                                    context.translateBy(x: 0.0, y: pageRect.size.height)
+                                    context.scaleBy(x: 1.0, y: -1.0)
+                                    context.concatenate(pdfPage.getDrawingTransform(.mediaBox, rect: pageRect, rotate: 0, preserveAspectRatio: true))
+                                    context.drawPDFPage(pdfPage)
+                                    context.restoreGState()
+                                    if let pdfImage:UIImage = UIGraphicsGetImageFromCurrentImageContext() {
+                                        thumb = pdfImage
+                                    }
+                                }
+                                UIGraphicsEndImageContext()
+                            }
+                        }
+                    }
+                }
+                else if gif{
                     let image = UIImage(data: data)!
                     thumb = image
                     let asset = PHAsset.fetchAssets(withALAssetURLs: [dataURL], options: nil)
@@ -268,6 +287,7 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                             data = gifData!
                         }
                     }
+                    popupText = "Are you sure to send this image?"
                     usePopup = true
                 }else if video {
                     fileType = .video
@@ -297,7 +317,7 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                     fileType = QiscusFileType.file
                 }
                 self.dismissLoading()
-                UINavigationBar.appearance().tintColor = self.currentNavbarTint
+//                UINavigationBar.appearance().tintColor = self.currentNavbarTint
                 if usePopup {
                     QPopUpView.showAlert(withTarget: self, image: thumb, message:popupText, isVideoImage: video,
                                          doneAction: {
@@ -320,9 +340,11 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
             }
         }
     }
-    open func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-        UINavigationBar.appearance().tintColor = self.currentNavbarTint
-    }
+    
+//    open func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+//        print("before icloud appear = \(String(describing: self.currentNavbarTint))")
+//        UINavigationBar.appearance().tintColor = self.currentNavbarTint
+//    }
 }
 // MARK: - AudioPlayer
 extension QiscusChatVC:AVAudioPlayerDelegate{
@@ -331,7 +353,6 @@ extension QiscusChatVC:AVAudioPlayerDelegate{
             try AVAudioSession.sharedInstance().setActive(false)
             if let activeCell = activeAudioCell {
                 activeCell.comment!.updatePlaying(playing: false)
-                self.didChangeData(onCell: activeCell, withData: activeCell.comment!, dataTypeChanged: "isPlaying")
             }
             stopTimer()
             updateAudioDisplay()
@@ -341,7 +362,6 @@ extension QiscusChatVC:AVAudioPlayerDelegate{
     public func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
         if let activeCell = activeAudioCell as? QCellAudioLeft{
             activeCell.comment!.updatePlaying(playing: false)
-            self.didChangeData(onCell: activeCell, withData: activeCell.comment!, dataTypeChanged: "isPlaying")
         }
         stopTimer()
         updateAudioDisplay()

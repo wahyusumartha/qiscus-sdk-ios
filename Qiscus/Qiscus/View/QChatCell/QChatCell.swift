@@ -10,28 +10,27 @@ import UIKit
 import SwiftyJSON
 
 protocol ChatCellDelegate {
-    func didChangeSize(onCell cell:QChatCell)
-    func didTapCell(withData data:QComment)
-    func didTouchLink(onCell cell:QChatCell)
-    func didTapPostbackButton(withData data: JSON)
-    func didTapAccountLinking(withData data: JSON)
-    func didTapSaveContact(withData data:QComment)
+    func didTapCell(onComment comment: QComment)
+    func didTouchLink(onComment comment: QComment)
+    func didTapPostbackButton(onComment comment: QComment, index:Int)
+    func didTapAccountLinking(onComment comment: QComment)
+    func didTapSaveContact(onComment comment: QComment)
+    func didTapCardButton(onComment comment:QComment, index:Int)
     func didShare(comment: QComment)
     func didForward(comment: QComment)
     func didReply(comment:QComment)
     func getInfo(comment:QComment)
     func didTapFile(comment:QComment)
 }
-class QChatCell: UICollectionViewCell, QCommentDelegate {
+public class QChatCell: UICollectionViewCell, QCommentDelegate {
     
     var delegate: ChatCellDelegate?
-
-    var comment:QComment?{
-        didSet{
-            if comment != nil {
-                self.comment?.delegate = self
-                self.commentChanged()
-            }
+    
+    private var commentRaw:QComment?
+        
+    public var comment:QComment?{
+        get{
+            return self.commentRaw
         }
     }
     var linkTextAttributes:[String: Any]{
@@ -50,10 +49,18 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
             ]
         }
     }
-    override func awakeFromNib() {
+    override public func awakeFromNib() {
         super.awakeFromNib()
-        let center: NotificationCenter = NotificationCenter.default
-        center.addObserver(self, selector: #selector(QChatCell.messageStatusNotif(_:)), name: QiscusNotification.MESSAGE_STATUS, object: nil)
+        let resendMenuItem: UIMenuItem = UIMenuItem(title: "Resend", action: #selector(QChatCell.resend))
+        let deleteMenuItem: UIMenuItem = UIMenuItem(title: "Delete", action: #selector(QChatCell.deleteComment))
+        let replyMenuItem: UIMenuItem = UIMenuItem(title: "Reply", action: #selector(QChatCell.reply))
+        let forwardMenuItem: UIMenuItem = UIMenuItem(title: "Forward", action: #selector(QChatCell.forward))
+        let shareMenuItem: UIMenuItem = UIMenuItem(title: "Share", action: #selector(QChatCell.share))
+        let infoMenuItem: UIMenuItem = UIMenuItem(title: "Info", action: #selector(QChatCell.info))
+        
+        let menuItems:[UIMenuItem] = [resendMenuItem,deleteMenuItem,replyMenuItem,forwardMenuItem,shareMenuItem,infoMenuItem]
+        
+        UIMenuController.shared.menuItems = menuItems
     }
     @objc private func messageStatusNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
@@ -76,23 +83,34 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
         // implementation will be overrided on child class
     }
     open func resend(){
-        if let room = QRoom.room(withId: self.comment!.roomId) {
-            if self.comment!.type == .text {
-                room.updateCommentStatus(inComment: self.comment!, status: .sending)
-                room.post(comment: self.comment!)
-            }else{
-                if let file = self.comment!.file {
-                    if file.url.contains("http") {
-                        room.updateCommentStatus(inComment: self.comment!, status: .sending)
-                        room.post(comment: self.comment!)
-                    }else{
-                        if QFileManager.isFileExist(inLocalPath: file.localPath) {
-                            room.upload(comment: self.comment!, onSuccess: { (roomTarget, commentTarget) in
-                                roomTarget.post(comment: commentTarget)
-                            }, onError: { (_, _, error) in
-                                Qiscus.printLog(text: "error reupload file")
-                            })
+        let roomId = self.comment!.roomId
+        let cUid = self.comment!.uniqueId
+        QiscusBackgroundThread.async {
+            if let room = QRoom.threadSaveRoom(withId: roomId){
+                if let c = QComment.threadSaveComment(withUniqueId: cUid){
+                    switch c.type{
+                    case .text,.contact:
+                        c.updateStatus(status: .sending)
+                        room.post(comment: c)
+                        break
+                    case .video,.image,.audio,.file,.document:
+                        if let file = c.file {
+                            if file.url.contains("http") {
+                                c.updateStatus(status: .sending)
+                                room.post(comment: c)
+                            }else{
+                                if QFileManager.isFileExist(inLocalPath: file.localPath) {
+                                    room.upload(comment: c, onSuccess: { (r, message) in
+                                        r.post(comment: message)
+                                    }, onError: { (_, _, error) in
+                                        Qiscus.printLog(text: "error reupload file")
+                                    })
+                                }
+                            }
                         }
+                        break
+                    default:
+                        break
                     }
                 }
             }
@@ -103,9 +121,6 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
     }
     public func forward(){
         self.delegate?.didForward(comment: self.comment!)
-        if let chatView = Qiscus.shared.chatViews[self.comment!.roomId]{
-            chatView.forward(comment: self.comment!)
-        }
     }
     open func deleteComment(){
         if let room = QRoom.room(withId: self.comment!.roomId){
@@ -191,22 +206,49 @@ class QChatCell: UICollectionViewCell, QCommentDelegate {
             data.delegate = nil
         }
     }
-    // MARK: - commentDelegate
-    func comment(didChangeStatus status:QCommentStatus){
-        self.updateStatus(toStatus: status)
+    public func setData(comment:QComment){
+        var oldUniqueId:String?
+        self.clipsToBounds = true
+        if let oldComment = self.comment {
+            oldComment.delegate = nil
+            oldUniqueId = oldComment.uniqueId
+        }
+        if let cache = QComment.cache[comment.uniqueId]{
+            self.commentRaw = cache
+        }else{
+            QComment.cache[comment.uniqueId] = comment
+            self.commentRaw = comment
+        }
+        self.comment!.delegate = self
+        if let uId = oldUniqueId {
+            if uId != comment.uniqueId {
+                self.commentChanged()
+            }
+        }else{
+            self.commentChanged()
+        }
     }
-    func comment(didChangePosition position:QCellPosition){}
+    
+    // MARK: - commentDelegate
+    public func comment(didChangeStatus comment:QComment, status:QCommentStatus){
+        if comment.uniqueId == self.comment?.uniqueId{
+            self.updateStatus(toStatus: status)
+        }
+    }
+    public func comment(didChangePosition comment:QComment, position:QCellPosition){}
     
     // Audio comment delegate
-    func comment(didChangeDurationLabel label:String){}
-    func comment(didChangeCurrentTimeSlider value:Float){}
-    func comment(didChangeSeekTimeLabel label:String){}
-    func comment(didChangeAudioPlaying playing:Bool){}
+    public func comment(didChangeDurationLabel comment:QComment, label:String){}
+    public func comment(didChangeCurrentTimeSlider comment:QComment, value:Float){}
+    public func comment(didChangeSeekTimeLabel comment:QComment, label:String){}
+    public func comment(didChangeAudioPlaying comment:QComment, playing:Bool){}
     
     // File comment delegate
-    func comment(didDownload downloading:Bool){}
-    func comment(didUpload uploading:Bool){}
-    func comment(didChangeProgress progress:CGFloat){}
+    public func comment(didDownload comment:QComment, downloading:Bool){
+        
+    }
+    public func comment(didUpload comment:QComment, uploading:Bool){}
+    public func comment(didChangeProgress comment:QComment, progress:CGFloat){}
     
     
 }
