@@ -32,7 +32,6 @@ public class QConversationCollectionView: UICollectionView {
                     self.messagesId = messages
                     self.reloadData()
                     self.scrollToBottom()
-                    self.viewDelegate?.viewDelegate?(view: self, didLoadData: self.messagesId)
                 }else{
                     QiscusBackgroundThread.async {
                         if let rts = QRoom.threadSaveRoom(withId: rid){
@@ -42,7 +41,6 @@ public class QConversationCollectionView: UICollectionView {
                             DispatchQueue.main.async {
                                 self.messagesId = messages
                                 self.reloadData()
-                                self.viewDelegate?.viewDelegate?(view: self, didLoadData: self.messagesId)
                             }
                         }
                     }
@@ -53,7 +51,6 @@ public class QConversationCollectionView: UICollectionView {
                 self.delegate = self
                 self.dataSource = self
                 self.reloadData()
-                self.viewDelegate?.viewDelegate?(view: self, didLoadData: self.messagesId)
             }
         }
     }
@@ -74,8 +71,8 @@ public class QConversationCollectionView: UICollectionView {
             DispatchQueue.main.async {
                 if oldValue.count == 0 {
                     self.layoutIfNeeded()
-//                    self.scrollToBottom()
                 }
+                self.viewDelegate?.viewDelegate?(view: self, didLoadData: self.messagesId)
             }
         }
     }
@@ -96,12 +93,6 @@ public class QConversationCollectionView: UICollectionView {
     public var targetComment:QComment?
     
     override public func draw(_ rect: CGRect) {
-//        super.draw(rect)
-//        self.delegate = self
-//        self.dataSource = self
-//        self.registerCell()
-//        self.unsubscribeEvent()
-//        self.subscribeEvent()
         self.scrollsToTop = false
         if self.viewWithTag(1721) == nil {
             self.loadMoreControl.addTarget(self, action: #selector(self.loadMore), for: UIControlEvents.valueChanged)

@@ -120,16 +120,13 @@ open class QiscusChatVC: UIViewController{
         didSet{
             if let room = self.chatRoom {
                 room.subscribeRealtimeStatus()
+                self.collectionView.room = self.chatRoom
+
             }
             if oldValue == nil && self.chatRoom != nil {
                 let _ = self.view
                 self.view.layoutSubviews()
                 self.view.layoutIfNeeded()
-                Qiscus.chatRooms[self.chatRoom!.uniqueId] = self.chatRoom
-                if self.chatRoom!.comments.count > 0 {
-                    self.welcomeView.isHidden = true
-                    self.collectionView.isHidden = false
-                }
                 let delay = 0.5 * Double(NSEC_PER_SEC)
                 let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
                 DispatchQueue.main.asyncAfter(deadline: time, execute: {
@@ -137,7 +134,6 @@ open class QiscusChatVC: UIViewController{
                     self.dataLoaded = true
                 })
             }
-            self.collectionView.room = self.chatRoom
         }
     }
     public var chatMessage:String?
@@ -497,7 +493,6 @@ open class QiscusChatVC: UIViewController{
             self.firstLoadSetup()
             if self.chatRoom == nil || self.chatRoom?.comments.count
                 == 0 {
-                self.collectionView.isHidden = true
                 if !self.prefetch {
                     self.showLoading("Load data ...") //wil be marked
                 }
@@ -519,7 +514,6 @@ open class QiscusChatVC: UIViewController{
         super.viewDidAppear(animated)
         
         if self.chatRoom == nil {
-            self.collectionView.isHidden = true
             self.loadData()
         }else if self.firstLoad {
             self.loadRoomView()
@@ -555,11 +549,9 @@ open class QiscusChatVC: UIViewController{
             self.isPresence = true
             if let room = self.chatRoom {
                 if room.comments.count == 0 {
-                    self.collectionView.isHidden = true
                     self.showLoading("Load Data ...")
                     room.loadData(onSuccess: { (room) in
                         if room.comments.count > 0 {
-                            
                             self.collectionView.refreshData()
                         }
                         self.dismissLoading()
@@ -719,14 +711,11 @@ open class QiscusChatVC: UIViewController{
         self.unreadIndicator.isHidden = true
         if firstLoad {
             if self.chatRoom!.comments.count > 0 {
-                self.welcomeView.isHidden = true
-                self.collectionView.isHidden = false
                 self.collectionView.room = self.chatRoom
                 self.collectionView.refreshData()
             }else{
                 self.dismissLoading()
                 self.dataLoaded = true
-                self.collectionView.isHidden = false
             }
         }else{
             if self.chatRoom!.comments.count > 0 {
