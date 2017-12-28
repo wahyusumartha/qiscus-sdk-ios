@@ -108,77 +108,155 @@ Qiscus Chat SDK enable you to customize Chat UI as you like. You can modify colo
   Qiscus.style.chatFont = UIFont.systemFont(ofSize: fontSize)
 
 ```
+##Custom Room Cell
+
+You can also custom your own chat list interface by using QRoomListCell to be extended to your own RoomList Cell. In the IOS Sample App, you can see how to use it inside [ChatCell.swift](https://github.com/qiscus/qiscus-sdk-ios-sample-v2/blob/master/qiscus-sdk-ios-sample-v2/Views/ChatCell.swift) file.
+There are many available methods inside QRoomListCell that can ease your job. Here is the list of those methods:
+
+* func setupUI(){} : set your component here
+* func onUserTyping(user:QUser, typing:Bool){} : while user typing
+* func onRoomChange(room: QRoom): while any room changed
+* func gotNewComment(comment:QComment): while got new message
+* func searchTextChanged(){}: while user change keyword of search
+* func roomNameChange(){}: while room name changed
+* func roomAvatarChange(){}: while avatar in room change
+* func roomParticipantChange(){}: while participant change
+* func roomLastCommentChange(){}: while last comment change
+* func roomUnreadCountChange(){}: while unread count change
+* func roomDataChange(){}: while data of room change
+
+Here is how to do that:
+`swift
+// ChatListViewModel.swift
+...
+extension ChatListViewModel: UITableViewDataSource {
+    ...
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if let cell = tableView.dequeueReusableCell(withIdentifier: ChatCell.identifier, for: indexPath) as? ChatCell {
+            let chat = self.items[indexPath.row]
+            cell.room = chat
+            
+            tableView.tableFooterView = UIView()
+            
+            return cell
+        }
+        
+        return UITableViewCell()
+    }
+}
+
+// ChatCell.swift
+class ChatCell: QRoomListCell {
+    override func setupUI() {
+        self.setAvatar()
+        self.setName()
+        self.setMessageTime()
+        self.setUnreadCount()
+    }
+    ...
+}
+`
 
 ## Event Handler
 
 An Event Handler is a callback routine that operates asynchronously and handles inputs received into a program. Event Handlers are important in Qiscus because it allows a client to react to any events happening in Qiscus Chat SDK. For example, if a client wants to know any important events from server, such as success login event, client's app can be notified by calling a specific Event Handler. Client, then, can do things with data returned by the event.
 
-There are 2 type of Event Handler provided by Qiscus Chat SDK: **QiscusConfigDelegate** and **QiscusRoomDelegate**. 
-**QiscusConfigDelegate** provides event handler that are related to Qiscus Chat SDK initialization.such as events for push notification and event synchronize, while **QiscusRoomDelegate** provides event handlers that are related to room and messaging.
+There are 3 type of Event Handler that are provided by Qiscus Chat SDK: **QiscusConfigDelegate,** **QiscusNotification and **QiscusChatVCDelegate****. 
+**QiscusConfigDelegate** provides event handler that are related to Qiscus Chat SDK initialization such as events for push notification and event synchronize, while **QiscusNotification** provides event handlers that are related to room and messaging. **QiscusChatVCDelegate **provide event handlers to modify functionalities inside your chat room.
 
-To use event handler inside your app, you will need to extend QiscusConfigDelegate or QiscusRoomDelegate, so that you can see all event handlers that are provided by the class, then you can do whatever you need to do inside the event handlers.
- 
-There are several event handlers that are provided inside **QiscusConfigDelegate** as listed below :
+### Qiscus Config Delegate
+Here the list of Event Handler provided in QiscusConfigDelegate:
 
-```swift
+* qiscusFailToConnect(_ withMessage: String)
+* qiscusConnected()
+* qiscus(gotSilentNotification comment: QComment)
+* qiscus(didConnect succes: Bool, error: String?)
+* qiscus(didRegisterPushNotification success: Bool, deviceToken: String, error: String?)
+* qiscus(didUnregisterPushNotification success: Bool, error: String?)
+* qiscus(didTapLocalNotification comment: QComment, userInfo: [AnyHashable : Any]?)
+* qiscusStartSyncing()
+* qiscus(finishSync success: Bool, error: String?)
+
+To use event handler inside your app, you will need to extend  QiscusConfigDelegate or QiscusNotification, so that you can see all event handlers that are provided by the class, then you can do whatever you need to do inside the event handlers.
+
+**Fail to Connect**
+
+`qiscusFailToConnect()` is an event handler that is called when you fail to connect to Qiscus Chat SDK Service. 
+
+`swift
 func qiscusFailToConnect(_ withMessage: String) {
    // do anything if failed to connect to Qiscus Chat SDK 
 }
+`
+**User Connected**
 
+`qiscusConnected()` is an event handler that is called after you successfully connected to Chat SDK service.
+
+`swift
 func qiscusConnected() {
    // do anything after successfully connected to Qiscus Chat SDK
 }
-    
+`
+**Got Silent Notification**
+
+This event handler is called when your user turned off the notification on his/her phone.
+`swift
 func qiscus(gotSilentNotification comment: QComment) {
    //do anything if got new message in silent mode
 }
+`
 
+**Connect to Push Notification**
+
+This event handler is called when you successfully connected to Qiscus Push Notification.
+`swift
 func qiscus(didConnect succes: Bool, error: String?) {
    //do anything after successfully connected to Qiscus Push Notification
 }
+`
 
+**Registered Push Notification**
+
+This event handler is called when you want to listen your status of push notification that you registered.
+`swift
 func qiscus(didRegisterPushNotification success: Bool, deviceToken: String, error: String?) {
    // got status of registering qiscus sdk
-   //do anything after 
+   // do anything after
 }
+`
 
+**Unregistered Push Notification**
+
+This event handler is called when you want to listen to your push notification status, whether your push notification is registered or not.
+`swift
 func qiscus(didUnregisterPushNotification success: Bool, error: String?) {
    // got status of un-registering qiscus sdk
 }
+`
 
+**Tap Local Notification**
+
+This event handler is called after push notification alert is clicked.
+`swift
 func qiscus(didTapLocalNotification comment: QComment, userInfo: [AnyHashable : Any]?) {
    // do anything after push notification alert is clicked
 }
-    
+`    
+
+**Start Syncronizing**
+
+This event handler is called when you start synchronizing messages.
+`swift
 func qiscusStartSyncing() {    
    // do anything when Qiscus Chat SDK start to synchronize messages
 }
+`
 
+**Finish Syncronizing**
+
+This event handler is called after your app finished synchronizing messages.
+`swift
 func qiscus(finishSync success: Bool, error: String?) {
    // do anything after synchronizing finished
-}
-```
-
-There are some event handlers that are provided by **QiscusRoomDelegate** as listed below :
-```swift
-func gotNewComment(_ comments: QComment) {
-   // do anything after receiving new comment
-}
-
-func didFinishLoadRoom(onRoom room: QRoom) {
-   // do anything after chat room is successfully loaded
-}
-
-func didFailLoadRoom(withError error: String) {
-   // do anything after chat room is failed to load
-}
-
-func didFinishUpdateRoom(onRoom room: QRoom) {
-   // do anything after chat room is successfully updated
-}
-
-func didFailUpdateRoom(withError error: String) {
-   // do anything after chat room is failed to update
-}
-```
+`
 
