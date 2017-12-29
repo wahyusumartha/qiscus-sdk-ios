@@ -83,20 +83,6 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
             textWidth = self.minWidth
         }
         
-//        if self.data.showLink {
-//            self.linkTitle.text = self.data.linkTitle
-//            self.linkDescription.text = self.data.linkDescription
-//            self.linkImage.image = self.data.linkImage
-//            self.LinkContainer.isHidden = false
-//            self.ballonHeight.constant = 83
-//            self.textTopMargin.constant = 73
-//            self.linkHeight.constant = 65
-//            textWidth = self.maxWidth
-//            
-//            if !self.data.linkSaved{
-//                QiscusDataPresenter.getLinkData(withData: self.data)
-//            }
-//        }else
         if self.comment!.type == .reply{
             let replyData = JSON(parseJSON: self.comment!.data)
             var text = replyData["replied_comment_message"].stringValue
@@ -289,22 +275,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
             self.balloonTopMargin.constant = 0
             self.cellHeight.constant = 0
         }
-        
-        // last cell
-//        if self.comment?.cellPos == .single{
-//            self.leftMargin.constant = 35
-//            self.textLeading.constant = 23
-//            self.balloonWidth.constant = 31
-//        }
-//        else if self.comment?.cellPos == .last {
-//            self.leftMargin.constant = 35
-//            self.textLeading.constant = 23
-//            self.balloonWidth.constant = 31
-//        }else{
-//            self.textLeading.constant = 8
-//            self.leftMargin.constant = 50
-//            self.balloonWidth.constant = 16
-//        }
+
         self.textView.layoutIfNeeded()
     }
     public override func updateUserName() {

@@ -960,6 +960,7 @@ public class QComment:Object {
         temp.senderEmail = senderEmail
         temp.cellPosRaw = QCellPosition.single.rawValue
         temp.rawExtra = commentExtras
+        temp.statusRaw = QCommentStatus.sent.rawValue
         
         if let roomName = json["room_name"].string {
             temp.roomName = roomName

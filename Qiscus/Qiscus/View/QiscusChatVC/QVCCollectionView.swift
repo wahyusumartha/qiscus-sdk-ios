@@ -9,9 +9,7 @@
 import UIKit
 
 // MARK: - CollectionView dataSource, delegate, and delegateFlowLayout
-//extension QiscusChatVC: QConversationViewCellDelegate{
-//    
-//}
+
 extension QiscusChatVC: QConversationViewDelegate {
     public func viewDelegate(enableInfoAction view: QConversationCollectionView) -> Bool {
         if let delegate = self.delegate {
@@ -26,7 +24,7 @@ extension QiscusChatVC: QConversationViewDelegate {
         }
         return false
     }
-    open func viewDelegate(view:QConversationCollectionView, cellForComment comment:QComment)->QChatCell?{
+    public func viewDelegate(view:QConversationCollectionView, cellForComment comment:QComment)->QChatCell?{
         if let delegate = self.delegate {
             if let cell = delegate.chatVC?(viewController: self, cellForComment: comment){
                 return cell
@@ -34,7 +32,7 @@ extension QiscusChatVC: QConversationViewDelegate {
         }
         return nil
     }
-    open func viewDelegate(view:QConversationCollectionView, heightForComment comment:QComment)->QChatCellHeight?{
+    public func viewDelegate(view:QConversationCollectionView, heightForComment comment:QComment)->QChatCellHeight?{
         if let delegate = self.delegate {
             if let height = delegate.chatVC?(viewController: self, heightForComment: comment){
                 return height
@@ -42,13 +40,13 @@ extension QiscusChatVC: QConversationViewDelegate {
         }
         return nil
     }
-    open func viewDelegate(view:QConversationCollectionView, willDisplayCellForComment comment:QComment, cell:QChatCell, indexPath: IndexPath){
+    public func viewDelegate(view:QConversationCollectionView, willDisplayCellForComment comment:QComment, cell:QChatCell, indexPath: IndexPath){
  
     }
-    open func viewDelegate(view:QConversationCollectionView, didEndDisplayingCellForComment comment:QComment, cell:QChatCell, indexPath: IndexPath){
+    public func viewDelegate(view:QConversationCollectionView, didEndDisplayingCellForComment comment:QComment, cell:QChatCell, indexPath: IndexPath){
         
     }
-    open func viewDelegate(didEndDisplayingLastMessage view:QConversationCollectionView, comment:QComment){
+    public func viewDelegate(didEndDisplayingLastMessage view:QConversationCollectionView, comment:QComment){
         self.bottomButton.isHidden = false
         
         if self.chatRoom?.unreadCount == 0 {
@@ -91,7 +89,6 @@ extension QiscusChatVC: QConversationViewDelegate {
         return false
     }
     public func viewDelegate(view: QConversationCollectionView, didLoadData messages: [[String]]) {
-        self.dismissLoading()
         if messages.count > 0 {
             self.welcomeView.isHidden = true
             self.collectionView.isHidden = false
@@ -99,6 +96,7 @@ extension QiscusChatVC: QConversationViewDelegate {
             self.welcomeView.isHidden = false
             self.collectionView.isHidden = true
         }
+        self.dismissLoading()
     }
 }
 

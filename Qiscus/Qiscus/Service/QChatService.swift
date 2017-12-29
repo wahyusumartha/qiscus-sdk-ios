@@ -904,17 +904,22 @@ public class QChatService:NSObject {
                         }else{
                             let comments = json["results"]["comments"].arrayValue
                             var data = [String:[JSON]]()
+                            var roomsName = [String:String]()
                             var needSyncRoom = [String]()
                             if comments.count > 0 {
                                 QiscusBackgroundThread.async {
                                     for newComment in comments.reversed() {
                                         let roomId = "\(newComment["room_id"])"
+                                        let roomName = "\(newComment["room_name"])"
                                         let id = newComment["id"].intValue
                                         let type = newComment["type"].string
                                         
                                         if id > QiscusMe.shared.lastCommentId {
                                             if data[roomId] == nil {
                                                 data[roomId] = [JSON]()
+                                            }
+                                            if roomsName[roomId] == nil {
+                                                roomsName[roomId] = roomName
                                             }
                                             data[roomId]?.append(newComment)
                                             if type == "system_event" {
@@ -923,10 +928,14 @@ public class QChatService:NSObject {
                                                 }
                                             }
                                         }
+                                        
                                     }
                                     for (roomId,roomComments) in data {
                                         if roomComments.count > 0 {
                                             if let room = QRoom.threadSaveRoom(withId: roomId){
+                                                if let newName = roomsName[roomId] {
+                                                    room.update(name: newName)
+                                                }
                                                 var unread = room.unreadCount
                                                 for commentData in roomComments {
                                                     let email = commentData["email"].stringValue

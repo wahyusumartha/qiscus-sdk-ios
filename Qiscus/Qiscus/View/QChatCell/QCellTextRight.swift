@@ -66,28 +66,6 @@ class QCellTextRight: QChatCell {
             textWidth = self.minWidth
         }
         
-//        self.linkTitle.text = ""
-//        self.linkDescription.text = ""
-//        self.linkImage.image = self.data.linkImage
-//        self.LinkContainer.isHidden = true
-//        self.balloonHeight.constant = 10
-//        self.textTopMargin.constant = 0
-//        
-//        if self.data.showLink {
-//            self.linkTitle.text = self.data.linkTitle
-//            self.linkDescription.text = self.data.linkDescription
-//            self.linkImage.image = self.data.linkImage
-//            self.LinkContainer.isHidden = false
-//            self.balloonHeight.constant = 83
-//            self.textTopMargin.constant = 73
-//            self.linkHeight.constant = 65
-//            textWidth = self.maxWidth
-//            
-//            if !self.data.linkSaved{
-//                QiscusDataPresenter.getLinkData(withData: self.data)
-//            }
-//        }else
-        
         if self.comment?.type == .reply{
             let replyData = JSON(parseJSON: self.comment!.data)
             var text = replyData["replied_comment_message"].stringValue
