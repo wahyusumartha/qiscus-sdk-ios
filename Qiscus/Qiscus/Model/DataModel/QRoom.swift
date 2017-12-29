@@ -648,7 +648,7 @@ public class QRoom:Object {
             }
             DispatchQueue.main.async {
                 if let room = QRoom.room(withId: id){
-                    if room.definedname != "" {
+                    if room.definedname == "" {
                         QiscusNotification.publish(roomChange: room, onProperty: .name)
                         room.delegate?.room?(didChangeName: room)
                     }

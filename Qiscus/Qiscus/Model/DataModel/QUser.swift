@@ -128,6 +128,7 @@ public class QUser:Object {
                     DispatchQueue.main.async {
                         if let u = QUser.user(withEmail: email){
                             u.delegate?.user?(didChangeName: fullname!)
+                            QiscusNotification.publish(userNameChange: u)
                         }
                     }
                 }
@@ -256,11 +257,17 @@ public class QUser:Object {
     public func setName(name:String){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         realm.refresh()
+        let email = self.email
         if name != self.definedName {
             try! realm.write {
                 self.definedName = name
             }
-            self.delegate?.user?(didChangeName: name)
+            DispatchQueue.main.async {
+                if let user = QUser.user(withEmail: email) {
+                    user.delegate?.user?(didChangeName: name)
+                    QiscusNotification.publish(userNameChange: user)
+                }
+            }
         }
     }
     public class func all() -> [QUser]{

@@ -20,6 +20,7 @@ public class QConversationCollectionView: UICollectionView {
                 let rid = r.id
                 Qiscus.chatRooms[r.id] = r
                 r.delegate = self
+                r.subscribeRealtimeStatus()
                 self.registerCell()
                 self.unsubscribeEvent()
                 self.subscribeEvent()
@@ -28,7 +29,6 @@ public class QConversationCollectionView: UICollectionView {
                 if oldValue == nil {
                     var messages = r.grouppedCommentsUID
                     messages = self.checkHiddenMessage(messages: messages)
-                    
                     self.messagesId = messages
                     self.reloadData()
                     self.scrollToBottom()
@@ -71,6 +71,7 @@ public class QConversationCollectionView: UICollectionView {
             DispatchQueue.main.async {
                 if oldValue.count == 0 {
                     self.layoutIfNeeded()
+                    self.scrollToBottom()
                 }
                 self.viewDelegate?.viewDelegate?(view: self, didLoadData: self.messagesId)
             }
@@ -139,33 +140,34 @@ public class QConversationCollectionView: UICollectionView {
 
         center.addObserver(self, selector: #selector(QConversationCollectionView.commentDeleted(_:)), name: QiscusNotification.COMMENT_DELETE, object: nil)
         center.addObserver(self, selector: #selector(QConversationCollectionView.userTyping(_:)), name: QiscusNotification.USER_TYPING, object: nil)
+        center.addObserver(self, selector: #selector(QConversationCollectionView.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
     }
     public func unsubscribeEvent(){
         let center: NotificationCenter = NotificationCenter.default
         center.removeObserver(self, name: QiscusNotification.COMMENT_DELETE, object: nil)
         center.removeObserver(self, name: QiscusNotification.USER_TYPING, object: nil)
+        center.removeObserver(self, name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
     }
     // MARK: - Event handler
     open func onDeleteComment(){
         self.reloadData()
     }
     open func gotNewComment(comment: QComment, room:QRoom) {
-        if let rid = self.room?.id {
-            QiscusBackgroundThread.async {
-                if let rts = QRoom.threadSaveRoom(withId: rid){
-                    var messages = rts.grouppedCommentsUID
-                    messages = self.checkHiddenMessage(messages: messages)
-                    
-                    DispatchQueue.main.async {
-                        self.messagesId = messages
-                        self.reloadData()
+        let rid = room.id
+        QiscusBackgroundThread.async {
+            if let rts = QRoom.threadSaveRoom(withId: rid){
+                var messages = rts.grouppedCommentsUID
+                messages = self.checkHiddenMessage(messages: messages)
+                
+                DispatchQueue.main.async {
+                    self.messagesId = messages
+                    self.reloadData()
+                    if comment.senderEmail == QiscusMe.shared.email || self.isLastRowVisible {
+                        self.layoutIfNeeded()
+                        self.scrollToBottom(true)
                     }
                 }
             }
-        }
-        if self.isLastRowVisible || QiscusMe.shared.email == comment.senderEmail || !self.isPresence{
-            self.layoutIfNeeded()
-            self.scrollToBottom()
         }
     }
     open func userTypingChanged(user: QUser, typing:Bool){
@@ -462,6 +464,25 @@ public class QConversationCollectionView: UICollectionView {
             return newGroup
         }else{
             return retVal
+        }
+    }
+    func loadData(){
+        if let r = self.room {
+            let rid = r.id
+            QiscusBackgroundThread.async {
+                if let rts = QRoom.threadSaveRoom(withId: rid){
+                    rts.loadData(onSuccess: { (result) in
+                        var messages = result.grouppedCommentsUID
+                        messages = self.checkHiddenMessage(messages: messages)
+                        DispatchQueue.main.async {
+                            self.messagesId = messages
+                            self.reloadData()
+                        }
+                    }, onError: { (error) in
+                        Qiscus.printLog(text: "fail to load data on room")
+                    })
+                }
+            }
         }
     }
 }

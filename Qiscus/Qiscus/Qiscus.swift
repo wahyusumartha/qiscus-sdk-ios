@@ -338,67 +338,8 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
      No Documentation
      */
     
-    @objc public class func chat(withRoomId roomId:String, target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
-        if !Qiscus.sharedInstance.connected {
-            Qiscus.setupReachability()
-        }
-        
-        Qiscus.sharedInstance.isPushed = false
-        QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
-        QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
-        
-        let chatVC = QiscusChatVC()
-        if distinctId != nil{
-            chatVC.distincId = distinctId!
-        }else{
-            chatVC.distincId = ""
-        }
-        chatVC.chatRoomId = roomId
-        chatVC.optionalData = optionalData
-        chatVC.message = withMessage
-        chatVC.newRoom = false
-        chatVC.archived = readOnly
-        
-        if chatVC.isPresence {
-            chatVC.goBack()
-        }
-        
-        let navController = UINavigationController()
-        navController.viewControllers = [chatVC]
-        
-        UIApplication.shared.keyWindow?.rootViewController?.present(navController, animated: true, completion: nil)
-    }
-    @objc public class func chat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String? = nil, withMessage:String? = nil, optionalData:String?=nil){
-        if !Qiscus.sharedInstance.connected {
-            Qiscus.setupReachability()
-        }
-        
-        Qiscus.sharedInstance.isPushed = false
-        QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
-        QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
-        
-        
-        let chatVC = QiscusChatVC()
-        //chatVC.reset()
-        if distinctId != nil{
-            chatVC.distincId = distinctId!
-        }else{
-            chatVC.distincId = ""
-        }
-        chatVC.optionalData = optionalData
-        chatVC.message = withMessage
-        chatVC.users = users
-        chatVC.archived = readOnly
-        
-        if chatVC.isPresence {
-            chatVC.goBack()
-        }
-        
-        let navController = UINavigationController()
-        navController.viewControllers = [chatVC]
-        
-        UIApplication.shared.keyWindow?.rootViewController?.present(navController, animated: true, completion: nil)
-    }
+    
+    
     /**
      No Documentation
      */
@@ -618,7 +559,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                         // Write to the file
                         try  "\(dump)\n\(logFileText)".write(toFile: logFilePath, atomically: true, encoding: String.Encoding.utf8)
                     } catch let error as NSError {
-                        print("Failed writing to log file: \(logFilePath), Error: " + error.localizedDescription)
+                        Qiscus.printLog(text: "Failed writing to log file: \(logFilePath), Error: " + error.localizedDescription)
                     }
                 }
             }
@@ -652,11 +593,11 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         let chatVC = QiscusChatVC()
         //chatVC.reset()
         if distinctId != nil{
-            chatVC.distincId = distinctId!
+            chatVC.chatDistinctId = distinctId!
         }else{
-            chatVC.distincId = ""
+            chatVC.chatDistinctId = ""
         }
-        chatVC.optionalData = optionalData
+        chatVC.chatData = optionalData
         chatVC.chatMessage = withMessage
         chatVC.archived = readOnly
         chatVC.chatNewRoomUsers = users
@@ -664,33 +605,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         chatVC.chatSubtitle = subtitle
         return chatVC
     }
-    @objc public class func createChat(withUsers users:[String], target:UIViewController, readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil){
-        if !Qiscus.sharedInstance.connected {
-            Qiscus.setupReachability()
-        }
-        
-        Qiscus.sharedInstance.isPushed = false
-        QiscusUIConfiguration.sharedInstance.copyright.chatSubtitle = subtitle
-        QiscusUIConfiguration.sharedInstance.copyright.chatTitle = title
-        
-        let chatVC = QiscusChatVC()
-        //chatVC.reset()
-        if distinctId != nil{
-            chatVC.distincId = distinctId!
-        }else{
-            chatVC.distincId = ""
-        }
-        chatVC.optionalData = optionalData
-        chatVC.message = withMessage
-        chatVC.newRoom = true
-        chatVC.users = users
-        chatVC.archived = readOnly
-        
-        let navController = UINavigationController()
-        navController.viewControllers = [chatVC]
-        
-        UIApplication.shared.keyWindow?.rootViewController?.present(navController, animated: true, completion: nil)
-    }
+    
     
     // MARK: - Update Room Methode
     //    @objc public class func updateRoom(withRoomId roomId:Int, roomName:String? = nil, roomAvatarURL:String? = nil, roomAvatar:UIImage? = nil, roomOptions:String? = nil){
@@ -769,23 +684,14 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             }else{
                 if let currenRootView = window.rootViewController as? UINavigationController{
                     
-                    let viewController = currenRootView.viewControllers[currenRootView.viewControllers.count - 1]
-                    if Qiscus.sharedInstance.isPushed{
-                        let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
-                        currenRootView.pushViewController(chatVC, animated: true)
-                    }else{
-                        Qiscus.chat(withRoomId: roomId, target: viewController)
-                    }
+                    let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
+                    currenRootView.pushViewController(chatVC, animated: true)
                 }
                 else if let currentRootView = window.rootViewController as? UITabBarController{
                     if let navigation = currentRootView.selectedViewController as? UINavigationController{
-                        let viewController = navigation.viewControllers[navigation.viewControllers.count - 1]
-                        if Qiscus.sharedInstance.isPushed{
-                            let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
-                            navigation.pushViewController(chatVC, animated: true)
-                        }else{
-                            Qiscus.chat(withRoomId: roomId, target: viewController)
-                        }
+                        
+                        let chatVC = Qiscus.chatView(withRoomId: roomId, title: "")
+                        navigation.pushViewController(chatVC, animated: true)
                     }
                 }
             }
@@ -1451,7 +1357,7 @@ extension Qiscus { // Public class API to get room
         let filemanager = FileManager.default
         let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory,.userDomainMask,true)[0] as NSString
         let destinationPath = documentsPath.appendingPathComponent("Qiscus")
-        //print("destinationPath: \(destinationPath)")
+        
         do {
             try filemanager.removeItem(atPath: destinationPath)
         } catch {

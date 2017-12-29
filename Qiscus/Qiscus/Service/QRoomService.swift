@@ -647,14 +647,13 @@ public class QRoomService:NSObject{
                         let results = json["results"]
                         let error = json["error"]
                         if results != JSON.null{
-                            print("results: \(results)")
                             let comments = json["results"]["comments"].arrayValue
                             var needSync = false
                             for newComment in comments {
                                 let comment = QComment.tempComment(fromJSON: newComment)
                                 if comment.id <= QiscusMe.shared.lastCommentId {
                                     if let rd = QRoom.threadSaveRoom(withId: comment.roomId){
-                                        rd.addComment(newComment: comment, onTop: true)
+                                        rd.saveOldComment(fromJSON: newComment)
                                     }
                                 }else{
                                    needSync = true

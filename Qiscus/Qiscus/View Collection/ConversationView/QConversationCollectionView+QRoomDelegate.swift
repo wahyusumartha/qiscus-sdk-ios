@@ -71,27 +71,7 @@ extension QConversationCollectionView: QRoomDelegate {
         }
     }
     
-    public func room(gotNewComment comment: QComment) {
-        if let r = self.room {
-            if r.id == comment.roomId {
-                let rid = r.id
-                QiscusBackgroundThread.async {
-                    if let rts = QRoom.threadSaveRoom(withId: rid){
-                        var messages = rts.grouppedCommentsUID
-                        messages = self.checkHiddenMessage(messages: messages)
-                        DispatchQueue.main.async {
-                            self.messagesId = messages
-                            self.reloadData()
-                            if comment.senderEmail == QiscusMe.shared.email || self.isLastRowVisible {
-                                self.layoutIfNeeded()
-                                self.scrollToBottom(true)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    public func room(gotNewComment comment: QComment) {}
     
     public func room(didDeleteComment room:QRoom) {
         if let r = self.room {

@@ -61,25 +61,27 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
         let menuItems:[UIMenuItem] = [resendMenuItem,deleteMenuItem,replyMenuItem,forwardMenuItem,shareMenuItem,infoMenuItem]
         
         UIMenuController.shared.menuItems = menuItems
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(QChatCell.userNameChanged(_:)), name: QiscusNotification.USER_NAME_CHANGE, object: nil)
     }
-    @objc private func messageStatusNotif(_ notification: Notification){
-        if let userInfo = notification.userInfo {
-            if let commentData = userInfo["comment"] as? QComment {
-                if let currentComment = self.comment {
-                    if commentData.isInvalidated || currentComment.isInvalidated{ return }
-                    if self.comment?.uniqueId == commentData.uniqueId {
-                        self.updateStatus(toStatus: commentData.status)
-                    }
-                }
-            }
-        }
-    }
+    
     func setupCell(){
         // implementation will be overrided on child class
     }
 
-
-    func updateStatus(toStatus status:QCommentStatus){
+    // MARK: - userAvatarChange Handler
+    @objc private func userNameChanged(_ notification: Notification) {
+        if let userInfo = notification.userInfo {
+            if let c = self.comment {
+                let userData = userInfo["user"] as! QUser
+                if c.senderEmail == userData.email {
+                    self.updateUserName()
+                }
+            }
+        }
+    }
+    
+    open func updateStatus(toStatus status:QCommentStatus){
         // implementation will be overrided on child class
     }
     open func resend(){
@@ -146,7 +148,7 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
     }
     
     public func commentChanged(){
-        //print("comment changed")
+        
     }
 
     public func getBallon()->UIImage?{

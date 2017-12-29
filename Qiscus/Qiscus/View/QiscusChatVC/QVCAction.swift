@@ -162,24 +162,7 @@ extension QiscusChatVC {
         }
     }
     func getLinkPreview(url:String){
-//        var urlToCheck = url.lowercased()
-//        if !urlToCheck.contains("http"){
-//            urlToCheck = "http://\(url.lowercased())"
-//        }
-//        commentClient.getLinkMetadata(url: urlToCheck, withCompletion: {linkData in
-//            Qiscus.uiThread.async {
-//                self.linkImage.loadAsync(linkData.linkImageURL, placeholderImage: Qiscus.image(named: "link"))
-//                self.linkDescription.text = linkData.linkDescription
-//                self.linkTitle.text = linkData.linkTitle
-//                self.linkData = linkData
-//                self.linkPreviewTopMargin.constant = -65
-//                UIView.animate(withDuration: 0.65, animations: {
-//                    self.view.layoutIfNeeded()
-//                }, completion: nil)
-//            }
-//        }, withFailCompletion: {
-//            self.showLink = false
-//        })
+
     }
     func hideLinkContainer(){
         Qiscus.uiThread.async { autoreleasepool{
@@ -188,58 +171,6 @@ extension QiscusChatVC {
                 self.view.layoutIfNeeded()
             }, completion: nil)
         }}
-    }
-    func startTypingIndicator(withUser user:String){
-        self.typingIndicatorUser = user
-        self.isTypingOn = true
-        var typingText = ""
-        if let subtitle = self.subtitleLabel.text{
-            self.subtitleText = subtitle
-        }
-        if self.chatRoom?.type != .single {
-            typingText = "\(user) "
-        }
-        typingText = "\(typingText) is typing ..."
-        if self.subtitleText == "" {
-            // reduce title height
-            var frame = self.titleLabel.frame
-            frame.size.height = 17
-            UIView.animate(withDuration: 3.0, animations: {
-                self.titleLabel.frame = frame
-            }, completion: { (_) in
-                self.subtitleLabel.text = typingText
-            })
-        }else{
-            self.subtitleLabel.text = typingText
-        }
-        if self.remoteTypingTimer != nil {
-            if self.remoteTypingTimer!.isValid {
-                self.remoteTypingTimer?.invalidate()
-            }
-        }
-        self.remoteTypingTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(QiscusChatVC.stopTypingIndicator), userInfo: nil, repeats: false)
-    }
-    
-    func stopTypingIndicator(){
-        var frame = self.titleLabel.frame
-        frame.size.height = 30
-        if self.subtitleText == "" {
-            // increase title height
-            self.subtitleLabel.text = self.subtitleText
-            UIView.animate(withDuration: 0.5, animations: {
-                self.titleLabel.frame = frame
-            })
-        }else{
-            self.subtitleLabel.text = self.subtitleText
-            self.subtitleText = ""
-        }
-        
-        self.typingIndicatorUser = ""
-        self.isTypingOn = false
-        if self.remoteTypingTimer != nil {
-            self.remoteTypingTimer?.invalidate()
-            self.remoteTypingTimer = nil
-        }
     }
     
     func showNoConnectionToast(){
@@ -836,37 +767,6 @@ extension QiscusChatVC {
         }
     }
     
-    // MARK: - Load More Control
-//    func loadMore(){
-//        if let room = self.chatRoom {
-//            let id = room.id
-//            self.loadMoreComment(roomId: id)
-//        }
-//    }
-//    func loadMoreComment(roomId:String){
-//        QiscusBackgroundThread.async {
-//            if self.loadingMore { return }
-//            self.loadingMore = true
-//            if let r = QRoom.threadSaveRoom(withId: roomId){
-//                if r.canLoadMore{
-//                    r.loadMore()
-//                }else{
-//                    self.loadingMore = false
-//                    DispatchQueue.main.async {
-//                        self.loadMoreControl.endRefreshing()
-//                        self.loadMoreControl.removeFromSuperview()
-//                    }
-//                }
-//            }else{
-//                self.loadingMore = false
-//                DispatchQueue.main.async {
-//                    self.loadMoreControl.endRefreshing()
-//                }
-//            }
-//        }
-//    }
-//    
-    
     // MARK: - Back Button
     class func backButton(_ target: UIViewController, action: Selector) -> UIBarButtonItem{
         let backIcon = UIImageView()
@@ -913,7 +813,7 @@ extension QiscusChatVC {
         }else if self.chatUser != nil {
             self.chatService.room(withUser: self.chatUser!, distincId: self.chatDistinctId, optionalData: self.chatData, withMessage: self.chatMessage)
         }else if self.chatNewRoomUsers.count > 0 {
-            self.chatService.createRoom(withUsers: self.chatNewRoomUsers, roomName: self.chatTitle!, optionalData: optionalData, withMessage: self.chatMessage)
+            self.chatService.createRoom(withUsers: self.chatNewRoomUsers, roomName: self.chatTitle!, optionalData: self.chatData, withMessage: self.chatMessage)
         }else if self.chatRoomUniqueId != nil {
             self.chatService.room(withUniqueId: self.chatRoomUniqueId!, title: self.chatTitle!, avatarURL: self.chatAvatarURL, withMessage: self.chatMessage)
         }else {

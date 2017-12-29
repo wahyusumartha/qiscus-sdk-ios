@@ -53,7 +53,7 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
         alertController.addAction(galeryActionButton)
         self.present(alertController, animated: true, completion: nil)
     }
-    open func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]){
+    public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]){
         if !self.processingFile {
             self.processingFile = true
             let time = Double(Date().timeIntervalSince1970)
@@ -184,14 +184,14 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
             }
         }
     }
-    open func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+    public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
     }
 }
 
 // MARK: - UIDocumentPickerDelegate
 extension QiscusChatVC: UIDocumentPickerDelegate{
-    open func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentAt url: URL) {
+    public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentAt url: URL) {
         self.showLoading("Processing File")
         let coordinator = NSFileCoordinator()
         coordinator.coordinate(readingItemAt: url, options: NSFileCoordinator.ReadingOptions.forUploading, error: nil) { (dataURL) in
@@ -340,11 +340,6 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
             }
         }
     }
-    
-//    open func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-//        print("before icloud appear = \(String(describing: self.currentNavbarTint))")
-//        UINavigationBar.appearance().tintColor = self.currentNavbarTint
-//    }
 }
 // MARK: - AudioPlayer
 extension QiscusChatVC:AVAudioPlayerDelegate{
