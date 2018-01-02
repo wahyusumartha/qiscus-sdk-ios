@@ -81,16 +81,14 @@ extension QiscusChatVC: QConversationViewDelegate {
     public func viewDelegate(view:QConversationCollectionView, hideCellWith comment:QComment)->Bool{
         if let delegate = self.delegate {
             if let hide = delegate.chatVC?(viewController: self, hideCellWith: comment) {
-                if hide {
-                    return true
-                }
+                return hide
             }
         }
         return false
     }
     public func viewDelegate(view: QConversationCollectionView, didLoadData messages: [[String]]) {
         if messages.count > 0 {
-            let delay = 0.5 * Double(NSEC_PER_SEC)
+            let delay = 0.8 * Double(NSEC_PER_SEC)
             let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
             DispatchQueue.main.asyncAfter(deadline: time, execute: {
                 self.welcomeView.isHidden = true
@@ -106,7 +104,6 @@ extension QiscusChatVC: QConversationViewDelegate {
             self.collectionView.isHidden = true
             self.dismissLoading()
         }
-        
     }
 }
 

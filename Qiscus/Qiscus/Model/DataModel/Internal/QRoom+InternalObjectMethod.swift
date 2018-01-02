@@ -230,16 +230,12 @@ internal extension QRoom {
                 
                 if room.comments.count == 0 {
                     newComment.cellPosRaw = QCellPosition.single.rawValue
-                    
-                    try! realm.write {
-                        realm.add(newComment, update: true)
-                        room.comments.append(newComment)
-                    }
                 }
-                else if onTop{
+                
+                if onTop{
                     try! realm.write {
                         realm.add(newComment, update: true)
-                        self.comments.insert(newComment, at: 0)
+                        room.comments.insert(newComment, at: 0)
                     }
                     if room.lastComment == nil {
                         room.updateLastComentInfo(comment: newComment)
@@ -250,6 +246,9 @@ internal extension QRoom {
                         realm.add(newComment, update: true)
                         room.comments.append(newComment)
                     }
+                }
+                if UIApplication.shared.applicationState != .active {
+                    Qiscus.printLog(text: "sync qiscus added new message on background: \(newComment.text)")
                 }
                 if !onTop {
                     let rId = self.id

@@ -59,7 +59,7 @@ public class QConversationCollectionView: UICollectionView {
     public var previewedTypingUsers = [String]()
     public var isPresence = false
         
-    internal var messagesId = [[String]](){
+    public var messagesId = [[String]](){
         didSet{
             DispatchQueue.main.async {
                 if oldValue.count == 0 {

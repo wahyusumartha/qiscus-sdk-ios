@@ -348,6 +348,9 @@ public class QiscusChatVC: UIViewController{
         
         let center: NotificationCenter = NotificationCenter.default
         center.addObserver(self, selector: #selector(QiscusChatVC.appDidEnterBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
+        
+        self.welcomeView.isHidden = false
+        self.collectionView.isHidden = true
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -374,7 +377,9 @@ public class QiscusChatVC: UIViewController{
         super.viewWillDisappear(animated)
         view.endEditing(true)
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .UIKeyboardWillChangeFrame, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .UIApplicationDidBecomeActive, object: nil)
+        
         view.endEditing(true)
         
         self.dismissLoading()
@@ -406,6 +411,7 @@ public class QiscusChatVC: UIViewController{
             let center: NotificationCenter = NotificationCenter.default
             center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
             center.addObserver(self, selector: #selector(QiscusChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
+            center.addObserver(self, selector: #selector(QiscusChatVC.applicationDidBecomeActive), name: .UIApplicationDidBecomeActive, object: nil)
         }
         if self.loadMoreControl.isRefreshing {
             self.loadMoreControl.endRefreshing()
@@ -443,6 +449,7 @@ public class QiscusChatVC: UIViewController{
         }else{
             sendButton.isEnabled = true
         }
+        
         if let room = self.chatRoom {
             if self.collectionView.room == nil {
                 self.collectionView.room = room
@@ -456,9 +463,6 @@ public class QiscusChatVC: UIViewController{
                         self.showLoading("Load data ...")
                     }
                     self.collectionView.loadData()
-                }else{
-                    self.collectionView.isHidden = false
-                    self.welcomeView.isHidden = true
                 }
             }
             if self.chatMessage != nil && self.chatMessage != "" {
@@ -478,6 +482,12 @@ public class QiscusChatVC: UIViewController{
     
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        if firstLoad {
+            if self.isPresence && !self.prefetch {
+                self.showLoading("Load data ...")
+            }
+            self.collectionView.room = self.chatRoom
+        }
         if let room = self.chatRoom {
             Qiscus.shared.chatViews[room.id] = self
         }else{
@@ -644,6 +654,11 @@ public class QiscusChatVC: UIViewController{
     }
     public func register(_ chatCellClass: AnyClass?, forCellWithReuseIdentifier identifier: String) {
         self.collectionView.register(chatCellClass, forCellWithReuseIdentifier: identifier)
+    }
+    internal func applicationDidBecomeActive(){
+        if let room = self.collectionView.room{
+            room.syncRoom()
+        }
     }
 }
 

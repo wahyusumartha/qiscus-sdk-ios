@@ -1403,8 +1403,7 @@ extension Qiscus { // Public class API to get room
         }
     }
     
-    public class func backgroundSync(onSuccess:@escaping (()->Void),onError:@escaping ((String)->Void)){
-        QChatService.backgroundSync(onSuccess: onSuccess, onError: onError)
+    public class func backgroundSync(){
+        QChatService.backgroundSync()
     }
-    
 }
