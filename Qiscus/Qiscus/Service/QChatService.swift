@@ -734,8 +734,10 @@ public class QChatService:NSObject {
             QChatService.hasPendingSync = true
             return
         }
-        if UIApplication.shared.applicationState != .active {
-            Qiscus.printLog(text: "sync qiscus on background")
+        DispatchQueue.main.async {
+            if UIApplication.shared.applicationState != .active {
+                Qiscus.printLog(text: "sync qiscus on background")
+            }
         }
         func getTime()->String{
             let date = Date()

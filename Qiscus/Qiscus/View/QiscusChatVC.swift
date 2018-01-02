@@ -389,6 +389,11 @@ public class QiscusChatVC: UIViewController{
     }
     override public func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        if #available(iOS 11.0, *) {
+            self.navigationController?.navigationBar.prefersLargeTitles = false
+            self.navigationController?.navigationItem.largeTitleDisplayMode = .never
+        }
+        
         titleLabel.textColor = QiscusChatVC.currentNavbarTint
         subtitleLabel.textColor = QiscusChatVC.currentNavbarTint
         
