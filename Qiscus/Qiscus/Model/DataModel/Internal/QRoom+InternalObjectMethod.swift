@@ -247,8 +247,10 @@ internal extension QRoom {
                         room.comments.append(newComment)
                     }
                 }
-                if UIApplication.shared.applicationState != .active {
-                    Qiscus.printLog(text: "sync qiscus added new message on background: \(newComment.text)")
+                DispatchQueue.main.async{
+                    if UIApplication.shared.applicationState != .active {
+                        Qiscus.printLog(text: "sync qiscus added new message on background: \(newComment.text)")
+                    }
                 }
                 if !onTop {
                     let rId = self.id
