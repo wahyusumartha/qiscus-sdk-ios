@@ -90,13 +90,23 @@ extension QiscusChatVC: QConversationViewDelegate {
     }
     public func viewDelegate(view: QConversationCollectionView, didLoadData messages: [[String]]) {
         if messages.count > 0 {
-            self.welcomeView.isHidden = true
-            self.collectionView.isHidden = false
+            let delay = 0.5 * Double(NSEC_PER_SEC)
+            let time = DispatchTime.now() + delay / Double(NSEC_PER_SEC)
+            DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                self.welcomeView.isHidden = true
+                self.collectionView.isHidden = false
+                self.dismissLoading()
+                if self.firstLoad {
+                    self.collectionView.scrollToBottom()
+                    self.firstLoad = false
+                }
+            })
         }else{
             self.welcomeView.isHidden = false
             self.collectionView.isHidden = true
+            self.dismissLoading()
         }
-        self.dismissLoading()
+        
     }
 }
 

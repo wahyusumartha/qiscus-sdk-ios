@@ -493,9 +493,6 @@ public class QiscusChatVC: UIViewController{
             }
             self.chatTarget = nil
         }
-        
-        
-        self.firstLoad = false
         self.prefetch = false
     }
     
