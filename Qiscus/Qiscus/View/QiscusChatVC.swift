@@ -97,6 +97,7 @@ public class QiscusChatVC: UIViewController{
     let locationManager = CLLocationManager()
     var didFindLocation = true
     var prefetch:Bool = false
+    var presentingLoading = false
     
     internal let currentNavbarTint = UINavigationBar.appearance().tintColor
     static let currentNavbarTint = UINavigationBar.appearance().tintColor

@@ -58,9 +58,13 @@ extension QiscusChatVC:CNContactPickerDelegate{
 }
 extension QiscusChatVC {
     @objc public func showLoading(_ text:String = "Loading"){
-        self.showQiscusLoading(withText: text, isBlocking: true)
+        if !self.presentingLoading {
+            self.presentingLoading = true
+            self.showQiscusLoading(withText: text, isBlocking: true)
+        }
     }
     @objc public func dismissLoading(){
+        self.presentingLoading = false
         self.dismissQiscusLoading()
     }
     @objc public func unlockChat(){
