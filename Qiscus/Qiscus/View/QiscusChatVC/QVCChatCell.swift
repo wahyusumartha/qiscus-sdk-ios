@@ -178,7 +178,28 @@ extension QiscusChatVC: QConversationViewCellDelegate{
     public func cellDelegate(didTapCommentLink comment:QComment){
         
     }
-    public func cellDelegate(didTapSaveContact comment:QComment){}
+    public func cellDelegate(didTapSaveContact comment:QComment){
+        let payloadString = comment.data
+        let payload = JSON(parseJSON: payloadString)
+        let contactValue = payload["value"].stringValue
+        
+        let con = CNMutableContact()
+        con.givenName = payload["name"].stringValue
+        if contactValue.contains("@"){
+            let email = CNLabeledValue(label: CNLabelHome, value: contactValue as NSString)
+            con.emailAddresses.append(email)
+        }else{
+            let phone = CNLabeledValue(label: CNLabelPhoneNumberMobile, value: CNPhoneNumber(stringValue: contactValue))
+            con.phoneNumbers.append(phone)
+        }
+        
+        let unkvc = CNContactViewController(forUnknownContact: con)
+        unkvc.message = "Kiwari contact"
+        unkvc.contactStore = CNContactStore()
+        unkvc.delegate = self
+        unkvc.allowsActions = false
+        self.navigationController?.pushViewController(unkvc, animated: true)
+    }
     public func cellDelegate(didTapDocumentFile comment:QComment, room:QRoom){
         if let file = comment.file {
             if file.ext == "pdf" || file.ext == "pdf_" {
