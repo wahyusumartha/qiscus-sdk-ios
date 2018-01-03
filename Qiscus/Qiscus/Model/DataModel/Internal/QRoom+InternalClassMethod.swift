@@ -192,14 +192,16 @@ internal extension QRoom {
                         participantString.append(participantEmail)
                     }
                     room.updateCommentStatus()
-                    var index = 0
+                    var index = room.participants.count - 1
                     var participantRemoved = false
-                    for participant in room.participants{
+                    for participant in room.participants.reversed(){
                         if !participantString.contains(participant.email){
-                            room.participants.remove(at: index)
+                            try! realm.write {
+                                room.participants.remove(at: index)
+                            }
                             participantRemoved = true
                         }
-                        index += 1
+                        index -= 1
                     }
                     if participantRemoved {
                         let rId = room.id
