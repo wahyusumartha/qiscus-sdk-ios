@@ -394,7 +394,16 @@ public class QiscusChatVC: UIViewController{
             self.navigationController?.navigationBar.prefersLargeTitles = false
             self.navigationController?.navigationItem.largeTitleDisplayMode = .never
         }
-        
+        if !self.prefetch {
+            if let room = self.chatRoom {
+                let rid = room.id
+                QiscusBackgroundThread.async {
+                    if let rts = QRoom.threadSaveRoom(withId: rid){
+                        rts.readAll()
+                    }
+                }
+            }
+        }
         titleLabel.textColor = QiscusChatVC.currentNavbarTint
         subtitleLabel.textColor = QiscusChatVC.currentNavbarTint
         
