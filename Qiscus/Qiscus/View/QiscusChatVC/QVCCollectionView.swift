@@ -62,7 +62,7 @@ extension QiscusChatVC: QConversationViewDelegate {
                 }
             }
             self.unreadIndicator.text = unreadText
-            self.unreadIndicator.isHidden = false
+            self.unreadIndicator.isHidden = self.bottomButton.isHidden
         }
     }
     open func viewDelegate(willDisplayLastMessage view:QConversationCollectionView, comment:QComment){
@@ -97,6 +97,16 @@ extension QiscusChatVC: QConversationViewDelegate {
                 if self.firstLoad {
                     self.collectionView.scrollToBottom()
                     self.firstLoad = false
+                }
+                if !self.prefetch {
+                    if let room = self.chatRoom {
+                        let rid = room.id
+                        QiscusBackgroundThread.async {
+                            if let rts = QRoom.threadSaveRoom(withId: rid){
+                                rts.readAll()
+                            }
+                        }
+                    }
                 }
             })
         }else{
