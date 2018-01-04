@@ -239,6 +239,7 @@ public class QUser:Object {
             if let user = QUser.getUser(email: email){
                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                 realm.refresh()
+                if user.isInvalidated { return }
                 if lastSeen > user.lastSeen {
                     try! realm.write {
                         user.lastSeen = lastSeen
