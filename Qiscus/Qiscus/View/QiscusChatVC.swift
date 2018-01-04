@@ -18,6 +18,11 @@ import CoreLocation
 //
 import RealmSwift
 
+@objc public protocol QiscusChatVCConfigDelegate{
+    @objc optional func chatVCConfigDelegate(userNameLabelColor viewController:QiscusChatVC, forUser user:QUser)->UIColor?
+    @objc optional func chatVCConfigDelegate(hideRightAvatarOn viewController:QiscusChatVC)->Bool
+    @objc optional func chatVCConfigDelegate(hideUserNameLabel viewController:QiscusChatVC, forUser user:QUser)->Bool
+}
 @objc public protocol QiscusChatVCDelegate{
     func chatVC(enableForwardAction viewController:QiscusChatVC)->Bool
     func chatVC(enableInfoAction viewController:QiscusChatVC)->Bool
@@ -78,6 +83,8 @@ public class QiscusChatVC: UIViewController{
     @IBOutlet public weak var collectionViewTopMargin: NSLayoutConstraint!
     
     public var delegate:QiscusChatVCDelegate?
+    public var configDelegate:QiscusChatVCConfigDelegate?
+    
     public var data:Any?
     
     var isPresence:Bool = false
@@ -410,6 +417,7 @@ public class QiscusChatVC: UIViewController{
         self.collectionView.viewDelegate = self
         self.collectionView.roomDelegate = self
         self.collectionView.cellDelegate = self
+        self.collectionView.configDelegate = self
         
         UINavigationBar.appearance().tintColor = self.currentNavbarTint
         

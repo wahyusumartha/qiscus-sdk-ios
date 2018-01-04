@@ -78,7 +78,7 @@ class QCellAudioLeft: QCellAudio {
         self.currentTimeSlider.setValue(self.comment!.currentTimeSlider, animated: true)
         self.durationLabel.text = self.comment!.durationLabel
         
-        if self.comment!.cellPos == .first || self.comment!.cellPos == .single{
+        if self.showUserName{
             if let sender = self.comment?.sender {
                 self.userNameLabel.text = sender.fullname
             }else{

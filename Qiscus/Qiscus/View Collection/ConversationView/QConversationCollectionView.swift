@@ -52,6 +52,7 @@ public class QConversationCollectionView: UICollectionView {
     public var viewDelegate:QConversationViewDelegate?
     public var roomDelegate:QConversationViewRoomDelegate?
     public var cellDelegate:QConversationViewCellDelegate?
+    public var configDelegate:QConversationViewConfigurationDelegate?
     
     public var typingUserTimer = [String:Timer]()
     
@@ -294,7 +295,16 @@ public class QConversationCollectionView: UICollectionView {
         }
         
         if (comment.type != .system && first) {
-            retHeight += 20
+            var showUserName = true
+            if let user = comment.sender {
+                if let hidden = self.configDelegate?.configDelegate?(hideUserNameLabel: self, forUser: user){
+                    showUserName = !hidden
+                }
+            }
+            
+            if showUserName {
+                retHeight += 20
+            }
         }
         return retHeight
     }

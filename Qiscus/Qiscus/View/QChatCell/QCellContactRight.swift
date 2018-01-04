@@ -39,7 +39,7 @@ class QCellContactRight: QChatCell {
         
         self.balloonView.image = self.getBallon()
         
-        if self.comment?.cellPos == .first || self.comment?.cellPos == .single{
+        if self.showUserName{
             self.userNameLabel.text = "You"
             self.userNameLabel.isHidden = false
             self.topMargin.constant = 20

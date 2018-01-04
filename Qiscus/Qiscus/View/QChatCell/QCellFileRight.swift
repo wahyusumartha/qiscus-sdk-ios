@@ -39,7 +39,7 @@ class QCellFileRight: QChatCell {
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QChatCell.showFile))
         fileContainer.addGestureRecognizer(tapRecognizer)
         
-        if self.comment!.cellPos == .first || self.comment!.cellPos == .single{
+        if self.showUserName{
             userNameLabel.isHidden = false
             topMargin.constant = 20
             cellHeight.constant = 20

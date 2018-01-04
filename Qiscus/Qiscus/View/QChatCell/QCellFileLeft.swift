@@ -38,7 +38,7 @@ class QCellFileLeft: QChatCell {
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QChatCell.showFile))
         fileContainer.addGestureRecognizer(tapRecognizer)
         
-        if self.comment!.cellPos == .first || self.comment!.cellPos == .single{
+        if self.showUserName{
             if let sender = self.comment?.sender {
                 self.userNameLabel.text = sender.fullname
             }else{

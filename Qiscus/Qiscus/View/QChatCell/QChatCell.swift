@@ -25,6 +25,8 @@ protocol ChatCellDelegate {
 public class QChatCell: UICollectionViewCell, QCommentDelegate {
     
     var delegate: ChatCellDelegate?
+    var showUserName:Bool = false
+    var userNameColor:UIColor?
     
     private var commentRaw:QComment?
         
@@ -208,8 +210,10 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
             data.delegate = nil
         }
     }
-    public func setData(comment:QComment){
+    public func setData(comment:QComment, showUserName:Bool, userNameColor:UIColor?){
         var oldUniqueId:String?
+        self.showUserName = showUserName
+        self.userNameColor = userNameColor
         self.clipsToBounds = true
         if let oldComment = self.comment {
             oldComment.delegate = nil

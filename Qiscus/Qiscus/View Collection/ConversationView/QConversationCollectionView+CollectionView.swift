@@ -36,8 +36,22 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                 return cell
             }else{
                 var cell = collectionView.dequeueReusableCell(withReuseIdentifier: comment.cellIdentifier, for: indexPath) as! QChatCell
+                
+                var showName = false
+                var color:UIColor?
+                if indexPath.row == 0 {
+                    var showUserName = true
+                    if let user = comment.sender {
+                        if let hidden = self.configDelegate?.configDelegate?(hideUserNameLabel: self, forUser: user){
+                            showUserName = !hidden
+                        }
+                        color = self.configDelegate?.configDelegate?(userNameLabelColor: self, forUser: user)
+                    }
+                    showName = showUserName
+                }
+                
                 cell.clipsToBounds = true
-                cell.setData(comment: comment)
+                cell.setData(comment: comment, showUserName: showName, userNameColor:color)
                 cell.delegate = self
                 if let audioCell = cell as? QCellAudio{
                     audioCell.audioCellDelegate = self

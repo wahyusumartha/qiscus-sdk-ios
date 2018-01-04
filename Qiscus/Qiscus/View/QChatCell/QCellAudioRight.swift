@@ -81,7 +81,7 @@ class QCellAudioRight: QCellAudio {
         self.currentTimeSlider.setValue(self.comment!.currentTimeSlider, animated: true)
         self.durationLabel.text = self.comment!.durationLabel
         
-        if self.comment!.cellPos == .first || self.comment!.cellPos == .single{
+        if self.showUserName{
             userNameLabel.text = "You"
             userNameLabel.isHidden = false
             balloonTopMargin.constant = 20

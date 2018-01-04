@@ -260,7 +260,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         self.dateLabel.textColor = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
         
         
-        if self.comment?.cellPos == .first || self.comment?.cellPos == .single{
+        if self.showUserName{
             if let sender = self.comment?.sender {
                 self.userNameLabel.text = sender.fullname
             }else{

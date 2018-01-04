@@ -51,7 +51,7 @@ class QCellCardLeft: QChatCell {
         let buttonsData = payload["buttons"].arrayValue
         let buttonWidth = self.buttonArea.frame.size.width
         
-        if self.comment!.cellPos == .first || self.comment!.cellPos == .single{
+        if self.showUserName{
             if let sender = self.comment?.sender {
                 self.userNameLabel.text = sender.fullname.capitalized
             }else{

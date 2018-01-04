@@ -46,7 +46,7 @@ class QCellCardRight: QChatCell {
         })
         self.cardDescription.text = description
         
-        if self.comment!.cellPos == .first || self.comment!.cellPos == .single{
+        if self.showUserName{
             userNameLabel.isHidden = false
             topMargin.constant = 20
         }else{

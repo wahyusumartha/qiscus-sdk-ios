@@ -57,7 +57,7 @@ class QCellLocationRight: QChatCell {
         self.addressView.attributedText = self.comment?.attributedText
         self.locationLabel.text = payload["name"].stringValue
         
-        if self.comment?.cellPos == .first || self.comment?.cellPos == .single{
+        if self.showUserName{
             self.userNameLabel.text = "You"
             self.userNameLabel.isHidden = false
             self.topMargin.constant = 20
