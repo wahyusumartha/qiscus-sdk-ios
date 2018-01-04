@@ -30,6 +30,9 @@ class QCellContactLeft: QChatCell {
         self.balloonView.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor
     }
     override func commentChanged() {
+        if let color = self.userNameColor {
+            self.userNameLabel.textColor = color
+        }
         let data = self.comment!.data
         let payloadJSON = JSON(parseJSON: data)
         

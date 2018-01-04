@@ -76,6 +76,9 @@ class QCellAudioRight: QCellAudio {
         fileContainer.layer.cornerRadius = 10
     }
     public override func commentChanged() {
+        if let color = self.userNameColor {
+            self.userNameLabel.textColor = color
+        }
         self.progressHeight.constant = 0
         self.progressContainer.isHidden = true
         self.currentTimeSlider.setValue(self.comment!.currentTimeSlider, animated: true)

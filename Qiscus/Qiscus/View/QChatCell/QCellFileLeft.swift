@@ -30,6 +30,9 @@ class QCellFileLeft: QChatCell {
         fileIcon.contentMode = .scaleAspectFit
     }
     public override func commentChanged() {
+        if let color = self.userNameColor {
+            self.userNameLabel.textColor = color
+        }
         userNameLabel.isHidden = true
         topMargin.constant = 0
         cellHeight.constant = 0

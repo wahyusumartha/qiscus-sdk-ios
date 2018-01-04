@@ -58,6 +58,6 @@ import UIKit
 
 @objc public protocol QConversationViewConfigurationDelegate{
     @objc optional func configDelegate(userNameLabelColor collectionView:QConversationCollectionView, forUser user:QUser)->UIColor?
-    @objc optional func configDelegate(hideRightAvatarOn collectionView:QConversationCollectionView)->Bool
+    @objc optional func configDelegate(hideLeftAvatarOn collectionView:QConversationCollectionView)->Bool
     @objc optional func configDelegate(hideUserNameLabel collectionView:QConversationCollectionView, forUser user:QUser)->Bool
 }

@@ -20,7 +20,7 @@ import RealmSwift
 
 @objc public protocol QiscusChatVCConfigDelegate{
     @objc optional func chatVCConfigDelegate(userNameLabelColor viewController:QiscusChatVC, forUser user:QUser)->UIColor?
-    @objc optional func chatVCConfigDelegate(hideRightAvatarOn viewController:QiscusChatVC)->Bool
+    @objc optional func chatVCConfigDelegate(hideLeftAvatarOn viewController:QiscusChatVC)->Bool
     @objc optional func chatVCConfigDelegate(hideUserNameLabel viewController:QiscusChatVC, forUser user:QUser)->Bool
 }
 @objc public protocol QiscusChatVCDelegate{

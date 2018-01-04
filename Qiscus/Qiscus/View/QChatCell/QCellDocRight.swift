@@ -51,6 +51,9 @@ class QCellDocRight: QChatCell {
         docPreview.addGestureRecognizer(tapRecognizer)
     }
     public override func commentChanged() {
+        if let color = self.userNameColor {
+            self.userNameLabel.textColor = color
+        }
         balloonView.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonColor
         self.balloonView.image = self.getBallon()
         progressContainer.isHidden = true

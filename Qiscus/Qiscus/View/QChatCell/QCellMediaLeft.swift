@@ -62,6 +62,9 @@ class QCellMediaLeft: QChatCell {
     }
     
     public override func commentChanged() {
+        if let color = self.userNameColor {
+            self.userNameLabel.textColor = color
+        }
         captionWidth.constant = QiscusUIConfiguration.chatTextMaxWidth
         balloonView.tintColor = QiscusColorConfiguration.sharedInstance.leftBaloonColor
         self.balloonView.image = self.getBallon()

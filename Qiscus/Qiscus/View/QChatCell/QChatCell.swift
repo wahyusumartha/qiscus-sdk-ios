@@ -213,7 +213,11 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
     public func setData(comment:QComment, showUserName:Bool, userNameColor:UIColor?){
         var oldUniqueId:String?
         self.showUserName = showUserName
-        self.userNameColor = userNameColor
+        if let color = userNameColor {
+            self.userNameColor = userNameColor
+        }else{
+            self.userNameColor = UIColor(red: 85/255, green: 85/255, blue: 85/255, alpha: 1)
+        }
         self.clipsToBounds = true
         if let oldComment = self.comment {
             oldComment.delegate = nil

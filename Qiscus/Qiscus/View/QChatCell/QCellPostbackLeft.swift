@@ -37,6 +37,9 @@ class QCellPostbackLeft: QChatCell {
         textView.contentInset = UIEdgeInsets.zero
     }
     public override func commentChanged() {
+        if let color = self.userNameColor {
+            self.userNameLabel.textColor = color
+        }
         self.textView.attributedText = self.comment?.attributedText
         self.textView.linkTextAttributes = self.linkTextAttributes
         balloonView.image = getBallon()

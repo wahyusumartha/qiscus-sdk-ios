@@ -52,6 +52,9 @@ class QCellLocationLeft: QChatCell {
         self.mapView.addAnnotation(newPin)
     }
     override func commentChanged() {
+        if let color = self.userNameColor {
+            self.userNameLabel.textColor = color
+        }
         let payload = JSON(parseJSON: self.comment!.data)
         
         //set region on the map

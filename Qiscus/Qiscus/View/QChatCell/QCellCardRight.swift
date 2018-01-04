@@ -33,6 +33,9 @@ class QCellCardRight: QChatCell {
         self.displayView.clipsToBounds = true
     }
     override func commentChanged() {
+        if let color = self.userNameColor {
+            self.userNameLabel.textColor = color
+        }
         let data = self.comment!.data
         let payload = JSON(parseJSON: data)
         

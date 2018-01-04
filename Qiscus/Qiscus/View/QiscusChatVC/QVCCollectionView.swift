@@ -18,9 +18,9 @@ extension QiscusChatVC: QConversationViewConfigurationDelegate {
         }
         return nil
     }
-    public func configDelegate(hideRightAvatarOn collectionView:QConversationCollectionView)->Bool{
+    public func configDelegate(hideLeftAvatarOn collectionView:QConversationCollectionView)->Bool{
         if let config = self.configDelegate{
-            if let hidden = config.chatVCConfigDelegate?(hideRightAvatarOn: self){
+            if let hidden = config.chatVCConfigDelegate?(hideLeftAvatarOn: self){
                 return hidden
             }
         }

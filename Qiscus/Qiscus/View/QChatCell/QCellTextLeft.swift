@@ -70,6 +70,9 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
     }
 
     public override func commentChanged() {
+        if let color = self.userNameColor {
+            self.userNameLabel.textColor = color
+        }
         self.textView.comment = self.comment
         
         self.balloonView.image = self.getBallon()

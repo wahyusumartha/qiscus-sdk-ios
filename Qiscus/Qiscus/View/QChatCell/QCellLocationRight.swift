@@ -51,7 +51,9 @@ class QCellLocationRight: QChatCell {
         self.mapView.addAnnotation(newPin)
     }
     override func commentChanged() {
-        
+        if let color = self.userNameColor {
+            self.userNameLabel.textColor = color
+        }
         let payload = JSON(parseJSON: self.comment!.data)
         self.addressHeight.constant = self.comment!.textSize.height - 168.0
         self.addressView.attributedText = self.comment?.attributedText
