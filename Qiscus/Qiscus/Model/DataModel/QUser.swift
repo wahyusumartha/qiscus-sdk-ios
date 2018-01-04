@@ -216,18 +216,21 @@ public class QUser:Object {
         Qiscus.shared.mqtt?.subscribe(channel)
     }
     public func updatePresence(presence:QUserPresence){
+        if self.isInvalidated { return }
         let email = self.email
         QiscusDBThread.async {
             if let user = QUser.getUser(email: email){
-                if user.isInvalidated { return }
                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                 realm.refresh()
-                try! realm.write {
-                    user.rawPresence = presence.rawValue
-                }
-                DispatchQueue.main.sync {
-                    if let updatedUser = QUser.user(withEmail: email){
-                        QiscusNotification.publish(userPresence: updatedUser)
+                if user.isInvalidated { return }
+                if user.rawPresence != presence.rawValue {
+                    try! realm.write {
+                        user.rawPresence = presence.rawValue
+                    }
+                    DispatchQueue.main.sync {
+                        if let updatedUser = QUser.user(withEmail: email){
+                            QiscusNotification.publish(userPresence: updatedUser)
+                        }
                     }
                 }
             }
