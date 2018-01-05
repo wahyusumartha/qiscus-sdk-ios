@@ -159,6 +159,7 @@
 		39F7101B1F3D63B500774D97 /* ChatTapRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F710161F3D63B500774D97 /* ChatTapRecognizer.swift */; };
 		39F7101C1F3D63B500774D97 /* QCardButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F710171F3D63B500774D97 /* QCardButton.swift */; };
 		39F7101D1F3D63B500774D97 /* QTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F710181F3D63B500774D97 /* QTextView.swift */; };
+		3DC25A741FFF299500917505 /* QiscusErrorCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DC25A731FFF299500917505 /* QiscusErrorCode.swift */; };
 		6A7FF5E2D9CEB063A127937B /* Pods_Qiscus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A4527A84D23FDA5B8B32B9C1 /* Pods_Qiscus.framework */; };
 		B0846505F0ABD97C0375C737 /* Pods_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 88710D4C9FAFADF156A657F4 /* Pods_Example.framework */; };
 /* End PBXBuildFile section */
@@ -344,6 +345,7 @@
 		39F710161F3D63B500774D97 /* ChatTapRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChatTapRecognizer.swift; path = Qiscus/View/Component/ChatTapRecognizer.swift; sourceTree = "<group>"; };
 		39F710171F3D63B500774D97 /* QCardButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QCardButton.swift; path = Qiscus/View/Component/QCardButton.swift; sourceTree = "<group>"; };
 		39F710181F3D63B500774D97 /* QTextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QTextView.swift; path = Qiscus/View/Component/QTextView.swift; sourceTree = "<group>"; };
+		3DC25A731FFF299500917505 /* QiscusErrorCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QiscusErrorCode.swift; path = Qiscus/Model/QiscusErrorCode.swift; sourceTree = "<group>"; };
 		4D08EB2720080F1BFAA0EF4E /* Pods-Qiscus.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Qiscus.release.xcconfig"; path = "Pods/Target Support Files/Pods-Qiscus/Pods-Qiscus.release.xcconfig"; sourceTree = "<group>"; };
 		88710D4C9FAFADF156A657F4 /* Pods_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		98773C3A23586CB325C3DFE1 /* Pods-Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Example/Pods-Example.debug.xcconfig"; sourceTree = "<group>"; };
@@ -641,6 +643,7 @@
 				39F7100B1F3D62FE00774D97 /* QiscusGalleryItem.swift */,
 				39F7100C1F3D62FE00774D97 /* QiscusLinkData.swift */,
 				39F7100D1F3D62FE00774D97 /* QiscusMe.swift */,
+				3DC25A731FFF299500917505 /* QiscusErrorCode.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -1096,6 +1099,7 @@
 				39F70FAD1F3D5E8300774D97 /* QRoomService.swift in Sources */,
 				39F70F921F3D5BBD00774D97 /* NavigationBar.swift in Sources */,
 				39F70FA31F3D5D6F00774D97 /* QiscusTextConfiguration.swift in Sources */,
+				3DC25A741FFF299500917505 /* QiscusErrorCode.swift in Sources */,
 				394D7AA31F4E979E00E69E1C /* QCellLocationLeft.swift in Sources */,
 				394591671FD77D61008AD9B8 /* QConversationCollectionView.swift in Sources */,
 				39F70FF91F3D619900774D97 /* QCellTextRight.swift in Sources */,
