@@ -26,6 +26,7 @@ class QCellAudioLeft: QCellAudio {
     @IBOutlet weak var cellHeight: NSLayoutConstraint!
     @IBOutlet weak var balloonTopMargin: NSLayoutConstraint!
     @IBOutlet weak var progressHeight: NSLayoutConstraint!
+    @IBOutlet weak var balloonLeftMargin: NSLayoutConstraint!
     
     let defaultDateLeftMargin:CGFloat = -10
     var tapRecognizer: ChatTapRecognizer?
@@ -73,6 +74,11 @@ class QCellAudioLeft: QCellAudio {
         fileContainer.layer.cornerRadius = 10
     }
     public override func commentChanged() {
+        if self.hideAvatar {
+            self.balloonLeftMargin.constant = 0
+        }else{
+            self.balloonLeftMargin.constant = 27
+        }
         if let color = self.userNameColor {
             self.userNameLabel.textColor = color
         }

@@ -26,6 +26,8 @@ class QCellDocLeft: QChatCell {
     @IBOutlet weak var topMargin: NSLayoutConstraint!
     @IBOutlet weak var cellHeight: NSLayoutConstraint!
     @IBOutlet weak var containerWidth: NSLayoutConstraint!
+    @IBOutlet weak var balloonLeftMargin: NSLayoutConstraint!
+    
     
     let maxProgressHeight:CGFloat = 20
     
@@ -47,6 +49,11 @@ class QCellDocLeft: QChatCell {
         docPreview.addGestureRecognizer(tapRecognizer)
     }
     public override func commentChanged() {
+        if hideAvatar {
+            self.balloonLeftMargin.constant = 0
+        }else{
+            self.balloonLeftMargin.constant = 27
+        }
         if let color = self.userNameColor {
             self.userNameLabel.textColor = color
         }

@@ -38,6 +38,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
     @IBOutlet weak var textTopMargin: NSLayoutConstraint!
     @IBOutlet weak var ballonHeight: NSLayoutConstraint!
     @IBOutlet weak var cellWidth: NSLayoutConstraint!
+    @IBOutlet weak var balloonLeftMargin: NSLayoutConstraint!
     
     
     override func awakeFromNib() {
@@ -70,6 +71,11 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
     }
 
     public override func commentChanged() {
+        if hideAvatar {
+            self.balloonLeftMargin.constant = 0
+        }else{
+            self.balloonLeftMargin.constant = 27
+        }
         if let color = self.userNameColor {
             self.userNameLabel.textColor = color
         }

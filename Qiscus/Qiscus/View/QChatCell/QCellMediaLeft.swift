@@ -31,6 +31,7 @@ class QCellMediaLeft: QChatCell {
     @IBOutlet weak var progressHeight: NSLayoutConstraint!
     @IBOutlet weak var topMargin: NSLayoutConstraint!
     @IBOutlet weak var cellHeight: NSLayoutConstraint!
+    @IBOutlet weak var balloonLeftMargin: NSLayoutConstraint!
     
     let defaultDateLeftMargin:CGFloat = -10
     var tapRecognizer: UITapGestureRecognizer?
@@ -62,6 +63,11 @@ class QCellMediaLeft: QChatCell {
     }
     
     public override func commentChanged() {
+        if hideAvatar {
+            self.balloonLeftMargin.constant = 0
+        }else{
+            self.balloonLeftMargin.constant = 27
+        }
         if let color = self.userNameColor {
             self.userNameLabel.textColor = color
         }

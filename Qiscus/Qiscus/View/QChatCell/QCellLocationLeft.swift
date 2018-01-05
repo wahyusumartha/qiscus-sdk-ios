@@ -22,6 +22,7 @@ class QCellLocationLeft: QChatCell {
     
     @IBOutlet weak var topMargin: NSLayoutConstraint!
     @IBOutlet weak var addressHeight: NSLayoutConstraint!
+    @IBOutlet weak var balloonLeftMargin: NSLayoutConstraint!
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -52,6 +53,11 @@ class QCellLocationLeft: QChatCell {
         self.mapView.addAnnotation(newPin)
     }
     override func commentChanged() {
+        if hideAvatar {
+            self.balloonLeftMargin.constant = 0
+        }else{
+            self.balloonLeftMargin.constant = 27
+        }
         if let color = self.userNameColor {
             self.userNameLabel.textColor = color
         }
@@ -63,7 +69,11 @@ class QCellLocationLeft: QChatCell {
         self.locationLabel.text = payload["name"].stringValue
         
         if self.showUserName{
-            self.userNameLabel.text = "You"
+            if let sender = self.comment?.sender {
+                self.userNameLabel.text = sender.fullname
+            }else{
+                self.userNameLabel.text = self.comment?.senderName
+            }
             self.userNameLabel.isHidden = false
             self.topMargin.constant = 20
         }else{

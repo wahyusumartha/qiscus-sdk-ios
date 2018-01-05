@@ -171,6 +171,7 @@
             <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
             <size key="customSize" width="290" height="218"/>
             <connections>
+                <outlet property="balloonLeftMargin" destination="KzM-du-WSj" id="PVW-sA-SeL"/>
                 <outlet property="balloonView" destination="ncb-Sk-9TR" id="9YT-sl-fzu"/>
                 <outlet property="cellHeight" destination="5fU-nH-jer" id="qDJ-qL-FZA"/>
                 <outlet property="containerView" destination="f8E-J4-szc" id="tps-iQ-FLc"/>
