@@ -298,7 +298,7 @@ The following list are Event Handlers that are available in **QiscusNotification
 * ROOM_CHANGE: provide response when any room is changed
 * ROOM_DELETED: provide response when any room is deleted
 * ROOM_ORDER_MAY_CHANGE: provide response for updating list of room
-
+* USER_NAME_CHANGE : provide respon when any user changed his/her username
 
 ### Custom Chat Component
 
