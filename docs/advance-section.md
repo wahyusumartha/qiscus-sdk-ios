@@ -162,8 +162,8 @@ class ChatCell: QRoomListCell {
 
 An Event Handler is a callback routine that operates asynchronously and handles inputs received into a program. Event Handlers are important in Qiscus because it allows a client to react to any events happening in Qiscus Chat SDK. For example, if a client wants to know any important events from server, such as success login event, client's app can be notified by calling a specific Event Handler. Client, then, can do things with data returned by the event.
 
-There are 3 type of Event Handler that are provided by Qiscus Chat SDK: **QiscusConfigDelegate,** **QiscusNotification and **QiscusChatVCDelegate****. 
-**QiscusConfigDelegate** provides event handler that are related to Qiscus Chat SDK initialization such as events for push notification and event synchronize, while **QiscusNotification** provides event handlers that are related to room and messaging. **QiscusChatVCDelegate **provide event handlers to modify functionalities inside your chat room.
+There are 3 type of Event Handler that are provided by Qiscus Chat SDK: **QiscusConfigDelegate,** **QiscusNotification** and **QiscusChatVCDelegate**. 
+**QiscusConfigDelegate** provides event handler that are related to Qiscus Chat SDK initialization such as events for push notification and event synchronize, while **QiscusNotification** provides event handlers that are related to room and messaging. **QiscusChatVCDelegate** provide event handlers to modify functionalities inside your chat room.
 
 ### Qiscus Config Delegate
 Here the list of Event Handler provided in QiscusConfigDelegate:
