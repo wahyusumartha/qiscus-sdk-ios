@@ -22,6 +22,7 @@ class QCellCardLeft: QChatCell {
     
     @IBOutlet weak var cardHeight: NSLayoutConstraint!
     @IBOutlet weak var topMargin: NSLayoutConstraint!
+    @IBOutlet weak var balloonLeftMargin: NSLayoutConstraint!
     
     var buttons = [UIButton]()
     
@@ -35,6 +36,11 @@ class QCellCardLeft: QChatCell {
         self.displayView.clipsToBounds = true
     }
     override func commentChanged() {
+        if self.hideAvatar {
+            self.balloonLeftMargin.constant = 15
+        }else{
+            self.balloonLeftMargin.constant = 42
+        }
         if let color = self.userNameColor {
             self.userNameLabel.textColor = color
         }

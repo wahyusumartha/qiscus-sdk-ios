@@ -51,7 +51,11 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                 }
                 
                 cell.clipsToBounds = true
-                cell.setData(comment: comment, showUserName: showName, userNameColor:color)
+                var showAvatar = true
+                if let hideAvatar = self.configDelegate?.configDelegate?(hideLeftAvatarOn: self){
+                    showAvatar = !hideAvatar
+                }
+                cell.setData(comment: comment, showUserName: showName, userNameColor: color, hideAvatar: !showAvatar)
                 cell.delegate = self
                 if let audioCell = cell as? QCellAudio{
                     audioCell.audioCellDelegate = self
@@ -61,7 +65,11 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
             }
         }else{
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cellTypingLeft", for: indexPath) as! QCellTypingLeft
-            
+            var showAvatar = true
+            if let hideAvatar = self.configDelegate?.configDelegate?(hideLeftAvatarOn: self){
+                showAvatar = !hideAvatar
+            }
+            cell.hideAvatar = !showAvatar
             cell.users = typingUsers
             return cell
         }
@@ -325,7 +333,11 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
         if self.messagesId.count > section {
             let uid = self.messagesId[section].first!
             let firstMessage = QComment.comment(withUniqueId: uid)!
-            if firstMessage.senderEmail != QiscusMe.shared.email && firstMessage.type != .system {
+            var showAvatar = true
+            if let hideAvatar = self.configDelegate?.configDelegate?(hideLeftAvatarOn: self){
+                showAvatar = !hideAvatar
+            }
+            if showAvatar && firstMessage.senderEmail != QiscusMe.shared.email && firstMessage.type != .system {
                 height = 44
                 width = 44
             }
@@ -336,7 +348,11 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
         if self.messagesId.count > section {
             let uid = self.messagesId[section].first!
             if let firstMessage = QComment.comment(withUniqueId: uid) {
-                if firstMessage.senderEmail != QiscusMe.shared.email {
+                var showAvatar = true
+                if let hideAvatar = self.configDelegate?.configDelegate?(hideLeftAvatarOn: self){
+                    showAvatar = !hideAvatar
+                }
+                if showAvatar && firstMessage.senderEmail != QiscusMe.shared.email && firstMessage.type != .system {
                     return UIEdgeInsets(top: 0, left: 6, bottom: -44, right: 0)
                 }
             }

@@ -24,19 +24,24 @@ class QCellPostbackLeft: QChatCell {
     @IBOutlet weak var textViewHeight: NSLayoutConstraint!
     @IBOutlet weak var textViewWidth: NSLayoutConstraint!
     @IBOutlet weak var balloonTopMargin: NSLayoutConstraint!
-    @IBOutlet weak var leftMargin: NSLayoutConstraint!
     @IBOutlet weak var balloonWidth: NSLayoutConstraint!
     @IBOutlet weak var cellHeight: NSLayoutConstraint!
     @IBOutlet weak var balloonHeight: NSLayoutConstraint!
     @IBOutlet weak var textLeading: NSLayoutConstraint!
     @IBOutlet weak var textTopMargin: NSLayoutConstraint!
     @IBOutlet weak var buttonsViewHeight: NSLayoutConstraint!
+    @IBOutlet weak var balloonLeftMargin: NSLayoutConstraint!
     
     override func awakeFromNib() {
         super.awakeFromNib()
         textView.contentInset = UIEdgeInsets.zero
     }
     public override func commentChanged() {
+        if hideAvatar {
+            self.balloonLeftMargin.constant = 0
+        }else{
+            self.balloonLeftMargin.constant = 27
+        }
         if let color = self.userNameColor {
             self.userNameLabel.textColor = color
         }

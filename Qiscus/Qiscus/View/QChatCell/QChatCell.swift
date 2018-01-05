@@ -27,6 +27,7 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
     var delegate: ChatCellDelegate?
     var showUserName:Bool = false
     var userNameColor:UIColor?
+    var hideAvatar:Bool = false
     
     private var commentRaw:QComment?
         
@@ -210,9 +211,10 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
             data.delegate = nil
         }
     }
-    public func setData(comment:QComment, showUserName:Bool, userNameColor:UIColor?){
+    public func setData(comment:QComment, showUserName:Bool, userNameColor:UIColor?, hideAvatar:Bool){
         var oldUniqueId:String?
         self.showUserName = showUserName
+        self.hideAvatar = hideAvatar
         if let color = userNameColor {
             self.userNameColor = userNameColor
         }else{

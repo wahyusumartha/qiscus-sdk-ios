@@ -246,6 +246,7 @@ internal extension QRoom {
                         realm.add(newComment, update: true)
                         room.comments.append(newComment)
                     }
+                    room.updateLastComentInfo(comment: newComment)
                 }
                 let textMessage = newComment.text
                 DispatchQueue.main.async{
