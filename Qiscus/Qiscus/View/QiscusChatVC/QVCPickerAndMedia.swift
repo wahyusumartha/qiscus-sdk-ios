@@ -132,6 +132,7 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                         return
                     }
                     let uploader = QiscusUploaderVC(nibName: "QiscusUploaderVC", bundle: Qiscus.bundle)
+                    uploader.chatView = self
                     uploader.data = data
                     uploader.fileName = imageName
                     uploader.room = self.chatRoom
@@ -330,6 +331,7 @@ extension QiscusChatVC: UIDocumentPickerDelegate{
                     )
                 }else{
                     let uploader = QiscusUploaderVC(nibName: "QiscusUploaderVC", bundle: Qiscus.bundle)
+                    uploader.chatView = self
                     uploader.data = data
                     uploader.fileName = fileName
                     uploader.room = self.chatRoom
