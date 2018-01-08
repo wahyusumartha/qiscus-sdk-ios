@@ -1236,14 +1236,14 @@ public class QChatService:NSObject {
                         }else if json["status"].intValue == 401 {
                             if let delegate = Qiscus.shared.delegate {
                                 Qiscus.uiThread.async { autoreleasepool{
-                                    let errorCode = json["error"]["code"].string ?? ""
+                                    let errorCode = json["error"]["code"].int
                                     let message = json["error"]["message"].stringValue
                                     
-                                    if errorCode == "400301" {
+                                    if errorCode == 400301 {
                                         delegate.qiscusFailToConnect?(withMessage: "\(message)", error: QiscusErrorCode.ErrorInvalidAccess)
-                                    }else if errorCode == "400302" {
+                                    }else if errorCode == 400302 {
                                         delegate.qiscusFailToConnect?(withMessage: "\(message)", error: QiscusErrorCode.ErrorTokenExpired)
-                                    }else if errorCode == "400303" {
+                                    }else if errorCode == 400303 {
                                         delegate.qiscusFailToConnect?(withMessage: "\(message)", error: QiscusErrorCode.ErrorAppID)
                                     }else {
                                         delegate.qiscusFailToConnect?(withMessage: "\(message)", error: QiscusErrorCode.ErrorUnexpected)
