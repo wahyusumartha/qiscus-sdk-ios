@@ -28,7 +28,7 @@
                                     <constraint firstAttribute="height" constant="20" id="jzf-Ci-uix"/>
                                     <constraint firstAttribute="width" constant="200" id="tp6-AH-6Wg"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="12"/>
                                 <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>

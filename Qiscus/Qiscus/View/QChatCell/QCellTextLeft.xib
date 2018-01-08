@@ -27,7 +27,7 @@
                                     <constraint firstAttribute="width" constant="200" id="DOi-C0-cPK"/>
                                     <constraint firstAttribute="height" constant="20" id="yUD-b3-Jj9"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="12"/>
                                 <color key="textColor" red="0.43529411759999997" green="0.4431372549" blue="0.47450980390000003" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
