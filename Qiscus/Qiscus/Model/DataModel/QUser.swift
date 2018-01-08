@@ -39,9 +39,9 @@ public class QUser:Object {
     
     public var fullname:String{
         if self.definedName != "" {
-            return self.definedName
+            return self.definedName.capitalized
         }else{
-            return self.storedName
+            return self.storedName.capitalized
         }
     }
     public var presence:QUserPresence {
