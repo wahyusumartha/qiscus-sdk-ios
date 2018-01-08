@@ -17,7 +17,7 @@ import UIKit
     @objc optional func qiscusChat(gotNewRoom room:QRoom)
 }
 @objc public protocol QiscusConfigDelegate {
-    @objc optional func qiscusFailToConnect(error: QiscusErrorCode,  withMessage:String)
+    @objc optional func qiscusFailToConnect(withMessage message:String, error: QiscusErrorCode)
     @objc optional func qiscusConnected()
     
     @objc optional func qiscus(gotSilentNotification comment:QComment, userInfo:[AnyHashable:Any])

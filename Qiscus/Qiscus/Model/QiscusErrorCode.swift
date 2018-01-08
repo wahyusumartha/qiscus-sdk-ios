@@ -8,9 +8,9 @@
 
 import UIKit
 
-public enum QiscusErrorCode: Int {
-    case ErrorNonAuthorized = 400301
+@objc public enum QiscusErrorCode: Int {
+    case ErrorInvalidAccess = 400301
     case ErrorTokenExpired  = 400302
-    
+    case ErrorAppID         = 400303
     case ErrorUnexpected    = 500100
 }

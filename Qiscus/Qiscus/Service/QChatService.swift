@@ -1233,10 +1233,29 @@ public class QChatService:NSObject {
                             }
                             Qiscus.registerNotification()
                             
+                        }else if json["status"].intValue == 401 {
+                            if let delegate = Qiscus.shared.delegate {
+                                Qiscus.uiThread.async { autoreleasepool{
+                                    let errorCode = json["error"]["code"].string ?? ""
+                                    let message = json["error"]["message"].stringValue
+                                    
+                                    if errorCode == "400301" {
+                                        delegate.qiscusFailToConnect?(withMessage: "\(message)", error: QiscusErrorCode.ErrorInvalidAccess)
+                                    }else if errorCode == "400302" {
+                                        delegate.qiscusFailToConnect?(withMessage: "\(message)", error: QiscusErrorCode.ErrorTokenExpired)
+                                    }else if errorCode == "400303" {
+                                        delegate.qiscusFailToConnect?(withMessage: "\(message)", error: QiscusErrorCode.ErrorAppID)
+                                    }else {
+                                        delegate.qiscusFailToConnect?(withMessage: "\(message)", error: QiscusErrorCode.ErrorUnexpected)
+                                    }
+                                    
+                                    delegate.qiscus?(didConnect: false, error: "\(message)")
+                                    }}
+                            }
                         }else{
                             if let delegate = Qiscus.shared.delegate {
                                 Qiscus.uiThread.async { autoreleasepool{
-                                    delegate.qiscusFailToConnect?("\(json["error"]["message"].stringValue)")
+                                    delegate.qiscusFailToConnect?(withMessage: "\(json["error"]["message"].stringValue)", error: QiscusErrorCode.ErrorUnexpected)
                                     delegate.qiscus?(didConnect: false, error: "\(json["error"]["message"].stringValue)")
                                     }}
                             }
@@ -1245,7 +1264,7 @@ public class QChatService:NSObject {
                         if let delegate = Qiscus.shared.delegate {
                             Qiscus.uiThread.async { autoreleasepool{
                                 let error = "Cant get data from qiscus server"
-                                delegate.qiscusFailToConnect?(error)
+                                delegate.qiscusFailToConnect?(withMessage: error, error: QiscusErrorCode.ErrorUnexpected)
                                 delegate.qiscus?(didConnect: false, error: error)
                                 }}
                         }
@@ -1254,7 +1273,7 @@ public class QChatService:NSObject {
                 case .failure(let error):
                     if let delegate = Qiscus.shared.delegate {
                         Qiscus.uiThread.async {autoreleasepool{
-                            delegate.qiscusFailToConnect?("\(error)")
+                            delegate.qiscusFailToConnect?(withMessage:"\(error)", error: QiscusErrorCode.ErrorUnexpected)
                             delegate.qiscus?(didConnect: false, error: "\(error)")
                             }}
                     }

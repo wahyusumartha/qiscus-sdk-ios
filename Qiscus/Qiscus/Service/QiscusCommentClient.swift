@@ -102,7 +102,7 @@ open class QiscusCommentClient: NSObject {
                             }else{
                                 if let delegate = Qiscus.shared.delegate {
                                     Qiscus.uiThread.async { autoreleasepool{
-                                        delegate.qiscusFailToConnect?("\(json["error"]["message"].stringValue)")
+                                        delegate.qiscusFailToConnect?(withMessage: "\(json["error"]["message"].stringValue)", error: QiscusErrorCode.ErrorUnexpected)
                                         delegate.qiscus?(didConnect: false, error: "\(json["error"]["message"].stringValue)")
                                     }}
                                 }
@@ -111,7 +111,7 @@ open class QiscusCommentClient: NSObject {
                             if let delegate = Qiscus.shared.delegate {
                                 Qiscus.uiThread.async { autoreleasepool{
                                     let error = "Cant get data from qiscus server"
-                                    delegate.qiscusFailToConnect?(error)
+                                    delegate.qiscusFailToConnect?(withMessage: error, error: QiscusErrorCode.ErrorUnexpected)
                                     delegate.qiscus?(didConnect: false, error: error)
                                 }}
                             }
@@ -120,7 +120,7 @@ open class QiscusCommentClient: NSObject {
                     case .failure(let error):
                         if let delegate = Qiscus.shared.delegate {
                             Qiscus.uiThread.async {autoreleasepool{
-                                delegate.qiscusFailToConnect?("\(error)")
+                                delegate.qiscusFailToConnect?(withMessage: "\(error)", error: QiscusErrorCode.ErrorUnexpected)
                                 delegate.qiscus?(didConnect: false, error: "\(error)")
                             }}
                         }
