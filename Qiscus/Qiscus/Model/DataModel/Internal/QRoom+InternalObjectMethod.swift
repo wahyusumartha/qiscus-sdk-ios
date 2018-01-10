@@ -575,6 +575,10 @@ internal extension QRoom {
             newComment.data = "\(json["payload"])"
             newComment.typeRaw = QCommentType.system.name()
             break
+        case "carousel":
+            newComment.data = "\(json["payload"])"
+            newComment.typeRaw = QCommentType.carousel.name()
+            break
         case "card":
             newComment.data = "\(json["payload"])"
             newComment.typeRaw = QCommentType.card.name()

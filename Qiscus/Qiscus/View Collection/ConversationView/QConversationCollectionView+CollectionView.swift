@@ -60,6 +60,9 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                 if let audioCell = cell as? QCellAudio{
                     audioCell.audioCellDelegate = self
                     cell = audioCell
+                }else if let carouselCell = cell as? QCellCarousel {
+                    carouselCell.cellCarouselDelegate = self
+                    cell = carouselCell
                 }
                 return cell
             }
@@ -222,7 +225,7 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                         return false
                     default:
                         switch comment.type {
-                        case .postback,.account,.system,.card:
+                        case .postback,.account,.system,.card,.carousel:
                             return false
                         default:
                             return true
@@ -239,7 +242,7 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                         case .failed, .sending, .pending: return false
                         default:
                             switch comment.type {
-                            case .postback, .account,.system:
+                            case .postback, .account,.system,.carousel:
                                 return false
                             default:
                                 return true
@@ -259,7 +262,7 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                         case .failed, .sending, .pending: return false
                         default:
                             switch comment.type {
-                            case .postback, .account,.system:
+                            case .postback, .account,.system,.carousel:
                                 return false
                             default:
                                 return true

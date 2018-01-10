@@ -97,9 +97,7 @@ public class QConversationCollectionView: UICollectionView {
         let layout = self.collectionViewLayout as? UICollectionViewFlowLayout
         layout?.sectionHeadersPinToVisibleBounds = true
         layout?.sectionFootersPinToVisibleBounds = true
-        self.decelerationRate = UIScrollViewDecelerationRateNormal
-        
-        
+        self.decelerationRate = UIScrollViewDecelerationRateNormal        
     }
     
     open func registerCell(){
@@ -127,6 +125,7 @@ public class QConversationCollectionView: UICollectionView {
         self.register(UINib(nibName: "QCellContactLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellContactLeft")
         self.register(UINib(nibName: "QCellLocationRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellLocationRight")
         self.register(UINib(nibName: "QCellLocationLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellLocationLeft")
+        self.register(UINib(nibName: "QCellCarousel",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellCarousel")
         self.registerCustomCell?()
     }
     public func subscribeEvent(){
@@ -278,6 +277,9 @@ public class QConversationCollectionView: UICollectionView {
         
         switch comment.type {
         case .card, .contact    : break
+        case .carousel :
+            retHeight += 4
+            break
         case .video, .image     :
             if retHeight > 0 {
                 retHeight += 151 ;

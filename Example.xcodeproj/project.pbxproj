@@ -52,6 +52,12 @@
 		399BD7641FCD10F000BCD069 /* typing.gif in Resources */ = {isa = PBXBuildFile; fileRef = 399BD7631FCD10F000BCD069 /* typing.gif */; };
 		399DD5261FE50297004DCDBA /* QConversationCollectionView+chatCellDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399DD5251FE50297004DCDBA /* QConversationCollectionView+chatCellDelegate.swift */; };
 		399DD5281FE52703004DCDBA /* QConversationCollectionView+AVAudioDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399DD5271FE52703004DCDBA /* QConversationCollectionView+AVAudioDelegate.swift */; };
+		39A142C22003065C00A64953 /* QCellCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39A142C02003065C00A64953 /* QCellCarousel.swift */; };
+		39A142C32003065C00A64953 /* QCellCarousel.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39A142C12003065C00A64953 /* QCellCarousel.xib */; };
+		39A142C720031DDA00A64953 /* QCarouselCardCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39A142C520031DDA00A64953 /* QCarouselCardCell.swift */; };
+		39A142C820031DDA00A64953 /* QCarouselCardCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39A142C620031DDA00A64953 /* QCarouselCardCell.xib */; };
+		39A142CA200343E100A64953 /* QCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39A142C9200343E100A64953 /* QCard.swift */; };
+		39A142CE2003443B00A64953 /* QCardAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39A142CD2003443B00A64953 /* QCardAction.swift */; };
 		39BD59171EB2F1A3001AFB7C /* Qiscus.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 39BD59161EB2F1A3001AFB7C /* Qiscus.podspec */; };
 		39C929C71FB5583F0068EBF3 /* QiscusService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C929C61FB5583F0068EBF3 /* QiscusService.swift */; };
 		39E7542F1F5E7327003C3302 /* SearchResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E7542D1F5E7327003C3302 /* SearchResultVC.swift */; };
@@ -234,6 +240,12 @@
 		399BD7631FCD10F000BCD069 /* typing.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = typing.gif; path = Qiscus/GIF/typing.gif; sourceTree = "<group>"; };
 		399DD5251FE50297004DCDBA /* QConversationCollectionView+chatCellDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "QConversationCollectionView+chatCellDelegate.swift"; path = "Qiscus/View Collection/ConversationView/QConversationCollectionView+chatCellDelegate.swift"; sourceTree = "<group>"; };
 		399DD5271FE52703004DCDBA /* QConversationCollectionView+AVAudioDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "QConversationCollectionView+AVAudioDelegate.swift"; path = "Qiscus/View Collection/ConversationView/QConversationCollectionView+AVAudioDelegate.swift"; sourceTree = "<group>"; };
+		39A142C02003065C00A64953 /* QCellCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QCellCarousel.swift; path = Qiscus/View/QChatCell/QCellCarousel.swift; sourceTree = "<group>"; };
+		39A142C12003065C00A64953 /* QCellCarousel.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = QCellCarousel.xib; path = Qiscus/View/QChatCell/QCellCarousel.xib; sourceTree = "<group>"; };
+		39A142C520031DDA00A64953 /* QCarouselCardCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QCarouselCardCell.swift; path = Qiscus/View/QChatCell/QCarouselCardCell.swift; sourceTree = "<group>"; };
+		39A142C620031DDA00A64953 /* QCarouselCardCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = QCarouselCardCell.xib; path = Qiscus/View/QChatCell/QCarouselCardCell.xib; sourceTree = "<group>"; };
+		39A142C9200343E100A64953 /* QCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QCard.swift; path = Qiscus/Model/QCard.swift; sourceTree = "<group>"; };
+		39A142CD2003443B00A64953 /* QCardAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QCardAction.swift; path = Qiscus/Model/QCardAction.swift; sourceTree = "<group>"; };
 		39BD59161EB2F1A3001AFB7C /* Qiscus.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Qiscus.podspec; sourceTree = "<group>"; };
 		39C929C61FB5583F0068EBF3 /* QiscusService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QiscusService.swift; path = Qiscus/Service/QiscusService.swift; sourceTree = "<group>"; };
 		39E7542D1F5E7327003C3302 /* SearchResultVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchResultVC.swift; sourceTree = "<group>"; };
@@ -507,6 +519,15 @@
 			name = "gif assets";
 			sourceTree = "<group>";
 		};
+		39A142C4200306E200A64953 /* QCarouselCell */ = {
+			isa = PBXGroup;
+			children = (
+				39A142C520031DDA00A64953 /* QCarouselCardCell.swift */,
+				39A142C620031DDA00A64953 /* QCarouselCardCell.xib */,
+			);
+			name = QCarouselCell;
+			sourceTree = "<group>";
+		};
 		39E195E81DBDE392000DDF76 /* Library */ = {
 			isa = PBXGroup;
 			children = (
@@ -641,6 +662,8 @@
 				39F7100B1F3D62FE00774D97 /* QiscusGalleryItem.swift */,
 				39F7100C1F3D62FE00774D97 /* QiscusLinkData.swift */,
 				39F7100D1F3D62FE00774D97 /* QiscusMe.swift */,
+				39A142CD2003443B00A64953 /* QCardAction.swift */,
+				39A142C9200343E100A64953 /* QCard.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -663,10 +686,6 @@
 				39F70FC01F3D619900774D97 /* QCellAudioLeft.xib */,
 				39F70FC11F3D619900774D97 /* QCellAudioRight.swift */,
 				39F70FC21F3D619900774D97 /* QCellAudioRight.xib */,
-				39F70FC31F3D619900774D97 /* QCellCardLeft.swift */,
-				39F70FC41F3D619900774D97 /* QCellCardLeft.xib */,
-				39F70FC51F3D619900774D97 /* QCellCardRight.swift */,
-				39F70FC61F3D619900774D97 /* QCellCardRight.xib */,
 				392F18951F4D175700ABE232 /* QCellContactLeft.swift */,
 				392F18961F4D175700ABE232 /* QCellContactLeft.xib */,
 				39F70FC71F3D619900774D97 /* QCellContactRight.swift */,
@@ -708,6 +727,13 @@
 				39461C881FE2133100BEE09E /* QCellDocLeft.xib */,
 				39461C8B1FE24EEC00BEE09E /* QCellDocRight.swift */,
 				39461C8C1FE24EEC00BEE09E /* QCellDocRight.xib */,
+				39F70FC31F3D619900774D97 /* QCellCardLeft.swift */,
+				39F70FC41F3D619900774D97 /* QCellCardLeft.xib */,
+				39F70FC51F3D619900774D97 /* QCellCardRight.swift */,
+				39F70FC61F3D619900774D97 /* QCellCardRight.xib */,
+				39A142C02003065C00A64953 /* QCellCarousel.swift */,
+				39A142C12003065C00A64953 /* QCellCarousel.xib */,
+				39A142C4200306E200A64953 /* QCarouselCell */,
 			);
 			name = QChatCell;
 			sourceTree = "<group>";
@@ -872,6 +898,7 @@
 			files = (
 				39F70FE61F3D619900774D97 /* QCellCardLeft.xib in Resources */,
 				39F70FF21F3D619900774D97 /* QCellMediaRight.xib in Resources */,
+				39A142C32003065C00A64953 /* QCellCarousel.xib in Resources */,
 				399BD75B1FC7F50800BCD069 /* QChatEmptyHeaderCell.xib in Resources */,
 				39E7544F1F67B5AD003C3302 /* QiscusUploaderVC.xib in Resources */,
 				39F70FB21F3D5F5800774D97 /* QiscusChatVC.xib in Resources */,
@@ -900,6 +927,7 @@
 				394D7AA41F4E979E00E69E1C /* QCellLocationLeft.xib in Resources */,
 				39F70FEC1F3D619900774D97 /* QCellFileLeft.xib in Resources */,
 				39F70FE41F3D619900774D97 /* QCellAudioRight.xib in Resources */,
+				39A142C820031DDA00A64953 /* QCarouselCardCell.xib in Resources */,
 				39F70FF41F3D619900774D97 /* QCellPostbackLeft.xib in Resources */,
 				39F70FE21F3D619900774D97 /* QCellAudioLeft.xib in Resources */,
 			);
@@ -1072,6 +1100,7 @@
 				39F7101C1F3D63B500774D97 /* QCardButton.swift in Sources */,
 				39F70FE71F3D619900774D97 /* QCellCardRight.swift in Sources */,
 				393BE6E11F70B1F90099AD80 /* QRoomListCell.swift in Sources */,
+				39A142C22003065C00A64953 /* QCellCarousel.swift in Sources */,
 				393BE6E21F70B1F90099AD80 /* QRoomListDefaultCell.swift in Sources */,
 				39F70FF11F3D619900774D97 /* QCellMediaRight.swift in Sources */,
 				399BD7491FC3C74400BCD069 /* QRoom+InternalObjectMethod.swift in Sources */,
@@ -1114,6 +1143,7 @@
 				39F710001F3D619900774D97 /* QChatHeaderCell.swift in Sources */,
 				399BD75A1FC7F50800BCD069 /* QChatEmptyHeaderCell.swift in Sources */,
 				39461C8D1FE24EEC00BEE09E /* QCellDocRight.swift in Sources */,
+				39A142C720031DDA00A64953 /* QCarouselCardCell.swift in Sources */,
 				39F70F931F3D5BBD00774D97 /* QDate.swift in Sources */,
 				39F70FFB1F3D619900774D97 /* QChatCell.swift in Sources */,
 				39F70F8A1F3D5B4400774D97 /* QToasterView.swift in Sources */,
@@ -1132,6 +1162,8 @@
 				39F70F881F3D5B4400774D97 /* QToasterConfig.swift in Sources */,
 				39F1F7491D3B932A00FF1C8C /* Qiscus.swift in Sources */,
 				39F70F861F3D5B4400774D97 /* QReachability.swift in Sources */,
+				39A142CE2003443B00A64953 /* QCardAction.swift in Sources */,
+				39A142CA200343E100A64953 /* QCard.swift in Sources */,
 				39F70FE51F3D619900774D97 /* QCellCardLeft.swift in Sources */,
 				39F7101A1F3D63B500774D97 /* ChatInputText.swift in Sources */,
 				39F70FFC1F3D619900774D97 /* QChatFooterLeft.swift in Sources */,

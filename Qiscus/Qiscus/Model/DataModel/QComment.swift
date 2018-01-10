@@ -39,6 +39,7 @@ public enum QReplyType:Int{
     case location
     case custom
     case document
+    case carousel
     
     static let all = [text.name(), image.name(), video.name(), audio.name(),file.name(),postback.name(),account.name(), reply.name(), system.name(), card.name(), contact.name(), location.name(), custom.name()]
     
@@ -58,6 +59,7 @@ public enum QReplyType:Int{
             case .location  : return "location"
             case .custom    : return "custom"
             case .document  : return "document"
+            case .carousel  : return "carousel"
         }
     }
     init(name:String) {
@@ -75,6 +77,7 @@ public enum QReplyType:Int{
             case "contact_person"   : self = .contact ; break
             case "location"         : self = .location; break
             case "document"         : self = .document; break
+            case "carousel"         : self = .carousel; break
             default                 : self = .custom ; break
         }
     }
@@ -283,6 +286,8 @@ public class QComment:Object {
                 return "cellLocation\(position)"
             case .document:
                 return "cellDoc\(position)"
+            case .carousel:
+                return "cellCarousel"
             default:
                 return "cellText\(position)"
             }
@@ -306,15 +311,21 @@ public class QComment:Object {
         func recalculateSize()->CGSize{
             let textView = UITextView()
             textView.font = Qiscus.style.chatFont
+            if self.type == .carousel {
+                textView.font = UIFont.systemFont(ofSize: 12)
+            }
             textView.dataDetectorTypes = .all
             textView.linkTextAttributes = self.linkTextAttributes
             
             var maxWidth:CGFloat = QiscusUIConfiguration.chatTextMaxWidth
             if self.type == .location {
                 maxWidth = 204
+            }else if self.type == .carousel{
+                maxWidth = (QiscusHelper.screenWidth() * 0.60) - 8
             }
-            textView.attributedText = attributedText
-            
+            if self.type != .carousel {
+                textView.attributedText = attributedText
+            }
             var size = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
             
             switch self.type {
@@ -335,6 +346,24 @@ public class QComment:Object {
                 let payload = JSON(parseJSON: self.data)
                 let buttons = payload["buttons"].arrayValue
                 size.height = CGFloat(240 + (buttons.count * 45)) + 5
+                break
+            case .carousel:
+                let payload = JSON(parseJSON: self.data)
+                let cards = payload["cards"].arrayValue
+                var maxHeight = CGFloat(0)
+                for card in cards{
+                    var height = CGFloat(0)
+                    let desc = card["description"].stringValue
+                    textView.text = desc
+                    let buttons = card["buttons"].arrayValue
+                    size = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
+                    height = CGFloat(180 + (buttons.count * 45)) + size.height
+                    
+                    if height > maxHeight {
+                        maxHeight = height
+                    }
+                }
+                size.height = maxHeight + 5
                 break
             case .contact:
                 size.height = 115
@@ -365,7 +394,9 @@ public class QComment:Object {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         realm.refresh()
         if Float(Qiscus.style.chatFont.pointSize) != self.textFontSize || Qiscus.style.chatFont.familyName != self.textFontName{
-            recalculate = true
+            if self.type != .card && self.type != .carousel {
+                recalculate = true
+            }
             try! realm.write {
                 self.textFontSize = Float(Qiscus.style.chatFont.pointSize)
                 self.textFontName = Qiscus.style.chatFont.familyName

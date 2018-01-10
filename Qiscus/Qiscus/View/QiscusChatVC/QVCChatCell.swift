@@ -248,6 +248,61 @@ extension QiscusChatVC: QConversationViewCellDelegate{
             }
         }
     }
+    
+    public func cellDelegate(didTapCard card: QCard) {
+        let action = card.defaultAction
+        self.cellDelegate(didTapCardAction: action!)
+    }
+    public func cellDelegate(didTapCardAction action: QCardAction) {
+        if Qiscus.sharedInstance.connected{
+            switch action.type {
+            case .link:
+                let urlString = action.payload!["url"].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                let urlArray = urlString.components(separatedBy: "/")
+                func openInBrowser(){
+                    if let url = URL(string: urlString) {
+                        UIApplication.shared.openURL(url)
+                    }
+                }
+                
+                if urlArray.count > 2 {
+                    if urlArray[2].lowercased().contains("instagram.com") {
+                        var instagram = "instagram://app"
+                        if urlArray.count == 4 || (urlArray.count == 5 && urlArray[4] == ""){
+                            let usernameIG = urlArray[3]
+                            instagram = "instagram://user?username=\(usernameIG)"
+                        }
+                        if let instagramURL =  URL(string: instagram) {
+                            if UIApplication.shared.canOpenURL(instagramURL) {
+                                UIApplication.shared.openURL(instagramURL)
+                            }else{
+                                openInBrowser()
+                            }
+                        }
+                    }else{
+                        openInBrowser()
+                    }
+                }else{
+                    openInBrowser()
+                }                
+                break
+            default:
+                let text = action.postbackText
+                let type = "button_postback_response"
+                
+                if let room = self.chatRoom {
+                    let newComment = room.newComment(text: text)
+                    room.post(comment: newComment, type: type, payload: action.payload!)
+                }
+                break
+            }
+            
+        }else{
+            Qiscus.uiThread.async { autoreleasepool{
+                self.showNoConnectionToast()
+            }}
+        }
+    }
 }
 
 extension QiscusChatVC: CNContactViewControllerDelegate{
