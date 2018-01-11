@@ -1155,6 +1155,13 @@ extension Qiscus:CocoaMQTTDelegate{
 }
 
 extension Qiscus { // Public class API to get room
+    public class func clearMessages(inChannels channels:[String], onSuccess:@escaping ([QRoom],[String])->Void, onError:@escaping (Int)->Void){
+        QRoomService.clearMessages(inRoomsChannel: channels, onSuccess: { (rooms, channels) in
+            onSuccess(rooms,channels)
+        }) { (statusCode) in
+            onError(statusCode)
+        }
+    }
     public class func prepareView(witCompletion completion: @escaping (([QiscusChatVC])->Void)){
         if Thread.isMainThread {
             let allRoom = QRoom.all()

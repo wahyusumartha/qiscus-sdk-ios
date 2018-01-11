@@ -134,11 +134,13 @@ public class QConversationCollectionView: UICollectionView {
         center.addObserver(self, selector: #selector(QConversationCollectionView.commentDeleted(_:)), name: QiscusNotification.COMMENT_DELETE, object: nil)
         center.addObserver(self, selector: #selector(QConversationCollectionView.userTyping(_:)), name: QiscusNotification.USER_TYPING, object: nil)
         center.addObserver(self, selector: #selector(QConversationCollectionView.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
+        center.addObserver(self, selector: #selector(QConversationCollectionView.messageCleared(_:)), name: QiscusNotification.ROOM_CLEARMESSAGES, object: nil)
     }
     public func unsubscribeEvent(){
         let center: NotificationCenter = NotificationCenter.default
         center.removeObserver(self, name: QiscusNotification.COMMENT_DELETE, object: nil)
         center.removeObserver(self, name: QiscusNotification.USER_TYPING, object: nil)
+        center.removeObserver(self, name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
         center.removeObserver(self, name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
     }
     // MARK: - Event handler
@@ -232,7 +234,20 @@ public class QConversationCollectionView: UICollectionView {
             }
         }
     }
-    
+    @objc private func messageCleared(_ notification: Notification){
+        if let userInfo = notification.userInfo {
+            let room = userInfo["room"] as! QRoom
+            if room.isInvalidated { return }
+            if let currentRoom = self.room {
+                if !currentRoom.isInvalidated {
+                    if currentRoom.id == currentRoom.id {
+                        self.messagesId = [[String]]()
+                        self.reloadData()
+                    }
+                }
+            }
+        }
+    }
     @objc private func commentDeleted(_ notification: Notification) {
         if let userInfo = notification.userInfo {
             let room = userInfo["room"] as! QRoom

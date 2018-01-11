@@ -36,6 +36,7 @@ import AVFoundation
     
     @objc optional func room(didFinishLoadMore inRoom:QRoom, success:Bool, gotNewComment:Bool)
     @objc optional func room(didChangeUnread inRoom:QRoom)
+    @objc optional func room(didClearMessages cleared:Bool)
 }
 public class QRoom:Object {
     public dynamic var id:String = ""
@@ -889,12 +890,27 @@ public class QRoom:Object {
             }
         }
     }
+    public func clearMessages(onSuccess:@escaping ()->Void, onError:@escaping (Int)->Void){
+        let uid = self.uniqueId
+        QRoomService.clearMessages(inRoomsChannel: [uid], onSuccess: { (_, _) in
+            onSuccess()
+        }) { (statusCode) in
+            onError(statusCode)
+        }
+    }
     internal func clearMessage(){
+        let id = self.id
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         realm.refresh()
         
         try! realm.write {
             self.comments.removeAll()
+        }
+        DispatchQueue.main.async {
+            if let room = QRoom.room(withId: id){
+                room.delegate?.room?(didClearMessages: true)
+                QiscusNotification.publish(roomCleared: room)
+            }
         }
     }
     internal class func removeAllMessage(){

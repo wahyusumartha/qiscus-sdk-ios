@@ -279,7 +279,44 @@ internal extension QRoom {
             }
         }
     }
-    
+    internal func clearLastComment(){
+        let id = self.id
+        QiscusDBThread.async {
+            if let room = QRoom.threadSaveRoom(withId: id){
+                if !room.isInvalidated {
+                    
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    realm.refresh()
+                    try! realm.write {
+                        room.lastCommentId = 0
+                        room.lastCommentText = ""
+                        room.lastCommentUniqueId = ""
+                        room.lastCommentBeforeId = 0
+                        room.lastCommentCreatedAt = 0
+                        room.lastCommentSenderEmail = ""
+                        room.lastCommentSenderName = ""
+                        room.lastCommentStatusRaw = QCommentStatus.sending.rawValue
+                        room.lastCommentTypeRaw = QCommentType.text.name()
+                        room.lastCommentData = ""
+                        room.lastCommentRawExtras = ""
+                    }
+                    let rts = ThreadSafeReference(to:room)
+                    DispatchQueue.main.async {
+                        let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        mainRealm.refresh()
+                        if Qiscus.chatRooms[id] == nil {
+                            if let r = mainRealm.resolve(rts) {
+                                Qiscus.chatRooms[id] = r
+                            }
+                        }
+                        if let cache = QRoom.room(withId: id){
+                            QiscusNotification.publish(roomChange: cache, onProperty: .lastComment)
+                        }
+                    }
+                }
+            }
+        }
+    }
     internal func updateLastComentInfo(comment:QComment, triggerNotification:Bool = true){
         let id = self.id
         let cId = comment.id

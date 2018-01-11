@@ -135,6 +135,10 @@ open class QiscusConfig: NSObject {
         let config = QiscusConfig.sharedInstance
         return "\(config.BASE_API_URL)/load_comments/"
     }
+    internal class var CLEAR_MESSAGES:String{
+        let config = QiscusConfig.sharedInstance
+        return "\(config.BASE_API_URL)/clear_room_messages/"
+    }
     open class func LOAD_URL_(withTopicId topicId:Int, commentId:Int)->String{
         let config = QiscusConfig.sharedInstance
         return "\(config.BASE_API_URL)/topic/\(topicId)/comment/\(commentId)/token/\(config.USER_TOKEN)"

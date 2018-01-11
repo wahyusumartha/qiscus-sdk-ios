@@ -829,4 +829,58 @@ public class QRoomService:NSObject{
             }
         })
     }
+    
+    internal class func clearMessages(inRoomsChannel rooms:[String], onSuccess:@escaping ([QRoom],[String])->Void, onError:@escaping (Int)->Void){
+        let url = QiscusConfig.CLEAR_MESSAGES
+        let parameters =  [
+            "room_channel_ids" : rooms as AnyObject,
+            "token" : Qiscus.shared.config.USER_TOKEN as AnyObject
+        ]
+        QiscusService.session.request(url, method: .delete, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+            
+            if let response = responseData.result.value{
+                let json = JSON(response)
+                let results = json["results"]
+                print("results: \(results)")
+                let status = json["status"].intValue
+                if results != JSON.null && status == 200{
+                    QiscusBackgroundThread.async{
+                        let rooms = results["rooms"].arrayValue
+                        var rIds = [String]()
+                        for room in rooms {
+                            let roomId = "\(room["id"])"
+                            let rUid = room["unique_id"].stringValue
+                            if let r = QRoom.threadSaveRoom(withId: roomId){
+                                r.syncRoomData(withJSON: room)
+                                r.clearMessage()
+                                r.clearLastComment()
+                            }else{
+                                let _ = QRoom.addNewRoom(json: room)
+                            }
+                            rIds.append(roomId)
+                        }
+                        DispatchQueue.main.async {
+                            var roomsResult = [QRoom]()
+                            var rUids = [String]()
+                            for roomId in rIds {
+                                if let room = QRoom.room(withId: roomId) {
+                                    roomsResult.append(room)
+                                    rUids.append(room.uniqueId)
+                                }
+                            }
+                            onSuccess(roomsResult,rUids)
+                        }
+                    }
+                }else{
+                    onError(status)
+                }
+            }else{
+                if let statusCode = responseData.response?.statusCode {
+                    onError(statusCode)
+                }else{
+                    onError(400)
+                }
+            }
+        })
+    }
 }
