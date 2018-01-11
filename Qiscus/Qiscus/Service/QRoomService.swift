@@ -499,6 +499,8 @@ public class QRoomService:NSObject{
             let localPath = file.localPath
             let filename = file.filename
             let mimeType = file.mimeType
+            let cUid = comment.uniqueId
+            let rid = room.id
             
             QiscusFileThread.async {autoreleasepool{
             do {
@@ -534,88 +536,113 @@ public class QRoomService:NSObject{
                                                     if file.isInvalidated || comment.isInvalidated || room.isInvalidated {
                                                         return
                                                     }
-                                                    let size = fileData["size"].intValue
-                                                    file.update(fileURL: url)
-                                                    file.update(fileSize: Double(size))
-                                                    comment.update(text: "[file]\(url) [/file]")
-                                                    comment.updateUploading(uploading: false)
-                                                    comment.updateProgress(progress: 1)
-                                                    comment.updateStatus(status: .sent)
-                                                    let fileInfo = JSON(parseJSON: comment.data)
-                                                    let caption = fileInfo["caption"].stringValue
-                                                    let newData:[AnyHashable:Any] = [
-                                                        "url" : url,
-                                                        "caption": caption,
-                                                        "size": size,
-                                                        "pages": fileData["pages"].intValue,
-                                                        "file_name": fileData["name"].stringValue
-                                                    ]
-                                                    let newDataJSON = JSON(newData)
-                                                    comment.update(data: "\(newDataJSON)")
-                                                    onSuccess(room,comment)
+                                                    
+                                                    if let c = QComment.comment(withUniqueId: cUid){
+                                                        let size = fileData["size"].intValue
+                                                        if let f = c.file {
+                                                            f.update(fileURL: url)
+                                                            f.update(fileSize: Double(size))
+                                                        }
+                                                        c.update(text: "[file]\(url) [/file]")
+                                                        c.updateUploading(uploading: false)
+                                                        c.updateProgress(progress: 1)
+                                                        c.updateStatus(status: .sent)
+                                                        let fileInfo = JSON(parseJSON: c.data)
+                                                        let caption = fileInfo["caption"].stringValue
+                                                        let newData:[AnyHashable:Any] = [
+                                                            "url" : url,
+                                                            "caption": caption,
+                                                            "size": size,
+                                                            "pages": fileData["pages"].intValue,
+                                                            "file_name": fileData["name"].stringValue
+                                                        ]
+                                                        let newDataJSON = JSON(newData)
+                                                        c.update(data: "\(newDataJSON)")
+                                                        if let r = QRoom.room(withId: rid){
+                                                            onSuccess(r,c)
+                                                        }
+                                                    }
                                                 }}
                                             }
                                         }
                                     }else{
                                         DispatchQueue.main.async { autoreleasepool{
-                                            if comment.isInvalidated || room.isInvalidated {
-                                                return
+                                            if let c = QComment.comment(withUniqueId: cUid){
+                                                if c.isInvalidated || room.isInvalidated {
+                                                    return
+                                                }
+                                                c.updateUploading(uploading: false)
+                                                c.updateProgress(progress: 0)
+                                                c.updateStatus(status: .failed)
+                                                if let r = QRoom.room(withId: rid) {
+                                                    onError(r,c,"Fail to upload file, no readable response")
+                                                }
                                             }
-                                            comment.updateUploading(uploading: false)
-                                            comment.updateProgress(progress: 0)
-                                            comment.updateStatus(status: .failed)
                                         }}
-                                        onError(room,comment,"Fail to upload file, no readable response")
                                     }
                                 }else{
                                     DispatchQueue.main.async { autoreleasepool{
-                                        if comment.isInvalidated || room.isInvalidated {
-                                            return
+                                        if let c = QComment.comment(withUniqueId: cUid){
+                                            if c.isInvalidated || room.isInvalidated {
+                                                return
+                                            }
+                                            c.updateUploading(uploading: false)
+                                            c.updateProgress(progress: 0)
+                                            c.updateStatus(status: .failed)
+                                            if let r = QRoom.room(withId: rid){
+                                                onError(r,c,"Fail to upload file, no readable response")
+                                            }
                                         }
-                                        comment.updateUploading(uploading: false)
-                                        comment.updateProgress(progress: 0)
-                                        comment.updateStatus(status: .failed)
                                     }}
-                                    onError(room,comment,"Fail to upload file, no readable response")
                                 }
                             })
                             upload.uploadProgress(closure: {uploadProgress in
                                 let progress = CGFloat(uploadProgress.fractionCompleted)
                                 DispatchQueue.main.async { autoreleasepool{
-                                    if comment.isInvalidated {
-                                        return
+                                    if let c = QComment.comment(withUniqueId: cUid){
+                                        if c.isInvalidated {
+                                            return
+                                        }
+                                        c.updateUploading(uploading: true)
+                                        c.updateProgress(progress: progress)
+                                        onProgress?(uploadProgress.fractionCompleted)
                                     }
-                                    comment.updateUploading(uploading: true)
-                                    comment.updateProgress(progress: progress)
-                                    onProgress?(uploadProgress.fractionCompleted)
                                 }}
                             })
                             break
                         case .failure(let error):
                             DispatchQueue.main.async { autoreleasepool{
-                                if comment.isInvalidated || room.isInvalidated {
-                                    return
+                                if let c = QComment.comment(withUniqueId: cUid){
+                                    if c.isInvalidated || room.isInvalidated {
+                                        return
+                                    }
+                                    c.updateUploading(uploading: false)
+                                    c.updateProgress(progress: 0)
+                                    c.updateStatus(status: .failed)
+                                    if let r = QRoom.room(withId: rid){
+                                        onError(r,c,"Fail to upload file, \(error)")
+                                    }
                                 }
-                                comment.updateUploading(uploading: false)
-                                comment.updateProgress(progress: 0)
-                                comment.updateStatus(status: .failed)
                             }}
-                            onError(room,comment,"Fail to upload file, \(error)")
+                            
                             break
                         }
                     })
                 }}
             } catch {
                 DispatchQueue.main.async {
-                    if comment.isInvalidated {
-                        return
+                    if let c = QComment.comment(withUniqueId: cUid) {
+                        if c.isInvalidated {
+                            return
+                        }
+                        c.updateUploading(uploading: false)
+                        c.updateProgress(progress: 0)
+                        c.updateStatus(status: .failed)
+                        if let r = QRoom.room(withId: rid){
+                            onError(r, c, "Local file not found")
+                        }
                     }
-                    comment.updateUploading(uploading: false)
-                    comment.updateProgress(progress: 0)
-                    comment.updateStatus(status: .failed)
                 }
-                
-                onError(room, comment, "Local file not found")
             }
             }}
         }
