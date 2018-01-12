@@ -305,7 +305,7 @@ public class QConversationCollectionView: UICollectionView {
         case .audio             : retHeight = 83 ; break
         case .file              : retHeight = 67  ; break
         case .reply             : retHeight += 88 ; break
-        case .system            : retHeight += 46 ; break
+        case .system            : retHeight += 5 ; break
         case .text              : retHeight += 15 ; break
         case .document          : retHeight += 7; break
         default                 : retHeight += 20 ; break
