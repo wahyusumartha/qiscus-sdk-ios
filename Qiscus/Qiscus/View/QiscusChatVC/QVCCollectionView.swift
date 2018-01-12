@@ -123,7 +123,7 @@ extension QiscusChatVC: QConversationViewDelegate {
                     self.collectionView.scrollToBottom()
                     self.firstLoad = false
                 }
-                if !self.prefetch {
+                if !self.prefetch && self.isPresence{
                     if let room = self.chatRoom {
                         let rid = room.id
                         QiscusBackgroundThread.async {

@@ -375,7 +375,7 @@ public class QiscusChatVC: UIViewController{
         }
         
     }
-    
+
     override public func viewWillDisappear(_ animated: Bool) {
         if let room = self.chatRoom {
             room.readAll()
@@ -401,7 +401,9 @@ public class QiscusChatVC: UIViewController{
             self.navigationController?.navigationBar.prefersLargeTitles = false
             self.navigationController?.navigationItem.largeTitleDisplayMode = .never
         }
+        
         if !self.prefetch {
+            self.isPresence = true
             if let room = self.chatRoom {
                 let rid = room.id
                 QiscusBackgroundThread.async {
@@ -430,7 +432,6 @@ public class QiscusChatVC: UIViewController{
         setupPage()
         
         if !self.prefetch {
-            self.isPresence = true
             let center: NotificationCenter = NotificationCenter.default
             center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
             center.addObserver(self, selector: #selector(QiscusChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
