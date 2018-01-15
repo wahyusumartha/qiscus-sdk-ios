@@ -51,7 +51,7 @@ public class QRoomService:NSObject{
                         }
                         DispatchQueue.main.async {
                             if let mainRoom = QRoom.room(withId: roomId){
-                                mainRoom.delegate?.room?(didFinishSync: room)
+                                mainRoom.delegate?.room?(didFinishSync: mainRoom)
                             }
                         }
                     }
