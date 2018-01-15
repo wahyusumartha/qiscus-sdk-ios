@@ -31,7 +31,12 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if indexPath.section < self.messagesId.count && indexPath.row < self.messagesId[indexPath.section].count {
             let uid = self.messagesId[indexPath.section][indexPath.row]
-            let comment = QComment.comment(withUniqueId: uid)!
+            var comment = QComment()
+            if let c = QComment.comment(withUniqueId: uid){
+                if !c.isInvalidated {
+                    comment = c
+                }
+            }
             if let cell = self.viewDelegate?.viewDelegate?(view: self, cellForComment: comment){
                 return cell
             }else{

@@ -222,8 +222,10 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
         }
         self.clipsToBounds = true
         if let oldComment = self.comment {
-            oldComment.delegate = nil
-            oldUniqueId = oldComment.uniqueId
+            if !oldComment.isInvalidated {
+                oldComment.delegate = nil
+                oldUniqueId = oldComment.uniqueId
+            }
         }
         if let cache = QComment.cache[comment.uniqueId]{
             self.commentRaw = cache

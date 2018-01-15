@@ -907,11 +907,7 @@ internal extension QRoom {
         var deletedIndex = [Int]()
         for comment in self.comments {
             if !comment.isInvalidated {
-                if uidList.contains(comment.uniqueId) {
-                    if !deletedIndex.contains(count) {
-                        deletedIndex.append(count)
-                    }
-                }else{
+                if !uidList.contains(comment.uniqueId) {
                     if let prev = prevComment{
                         if prev.date == comment.date && prev.senderEmail == comment.senderEmail && comment.type != .system  {
                             uidList.append(comment.uniqueId)
