@@ -36,8 +36,10 @@ public class QConversationCollectionView: UICollectionView {
                             self.messagesId = messages
                             self.reloadData()
                         }
+                        rts.sync()
                     }
                 }
+                
             }else{
                 self.messagesId = [[String]]()
                 self.unsubscribeEvent()
