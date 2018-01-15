@@ -398,7 +398,14 @@ public class QRoom:Object {
     }
     public func post(comment:QComment, type:String? = nil, payload:JSON? = nil){
         let service = QRoomService()
-        service.postComment(onRoom: self.id, comment: comment, type: type, payload:payload)
+        let id = self.id
+        let pendingMessages = self.comments.filter("statusRaw == %d", QCommentStatus.pending.rawValue)
+        if pendingMessages.count > 0 {
+            for pendingMessage in pendingMessages {
+                service.postComment(onRoom: id, comment: pendingMessage)
+            }
+        }
+        service.postComment(onRoom: id, comment: comment, type: type, payload:payload)
     }
     
     public func upload(comment:QComment, onSuccess:  @escaping (QRoom, QComment)->Void, onError:  @escaping (QRoom,QComment,String)->Void, onProgress:((Double)->Void)? = nil){
