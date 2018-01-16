@@ -44,11 +44,7 @@ internal extension QRoom {
                 if !room.isInvalidated {
                     let room = rooms.first!
                     Qiscus.chatRooms[room.id] = room
-                    if Qiscus.shared.chatViews[room.id] ==  nil{
-                        let chatView = QiscusChatVC()
-                        chatView.chatRoom = Qiscus.chatRooms[room.id]
-                        Qiscus.shared.chatViews[room.id] = chatView
-                    }
+                    
                     room.subscribeRoomChannel()
                     return room
                 }
@@ -67,11 +63,6 @@ internal extension QRoom {
                 return cachedRoom
             }else{
                 Qiscus.chatRooms[room.id] = room
-                if Qiscus.shared.chatViews[room.id] ==  nil{
-                    let chatView = QiscusChatVC()
-                    chatView.chatRoom = Qiscus.chatRooms[room.id]
-                    Qiscus.shared.chatViews[room.id] = chatView
-                }
                 Qiscus.sharedInstance.RealtimeConnect()
                 return room
             }
@@ -90,11 +81,6 @@ internal extension QRoom {
                     return cachedRoom
                 }else{
                     Qiscus.chatRooms[room.id] = room
-                    if Qiscus.shared.chatViews[room.id] ==  nil{
-                        let chatView = QiscusChatVC()
-                        chatView.chatRoom = Qiscus.chatRooms[room.id]
-                        Qiscus.shared.chatViews[room.id] = chatView
-                    }
                     Qiscus.sharedInstance.RealtimeConnect()
                     return room
                 }

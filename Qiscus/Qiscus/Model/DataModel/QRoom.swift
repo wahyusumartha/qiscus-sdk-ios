@@ -764,11 +764,6 @@ public class QRoom:Object {
             if Qiscus.chatRooms[self.id] == nil {
                 Qiscus.chatRooms[self.id] = self
             }
-            if Qiscus.shared.chatViews[self.id] ==  nil{
-                let chatView = QiscusChatVC()
-                chatView.chatRoom = Qiscus.chatRooms[self.id]
-                Qiscus.shared.chatViews[self.id] = chatView
-            }
         }else{
             DispatchQueue.main.sync {
                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
@@ -776,11 +771,6 @@ public class QRoom:Object {
                 guard let room = realm.resolve(roomTS) else { return }
                 if Qiscus.chatRooms[room.id] == nil {
                     Qiscus.chatRooms[room.id] = room
-                }
-                if Qiscus.shared.chatViews[room.id] ==  nil{
-                    let chatView = QiscusChatVC()
-                    chatView.chatRoom = Qiscus.chatRooms[room.id]
-                    Qiscus.shared.chatViews[room.id] = chatView
                 }
             }
         }
