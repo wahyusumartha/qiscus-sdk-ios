@@ -93,12 +93,12 @@ public class QCarouselCardCell: UICollectionViewCell {
         self.cardHeight.constant = height - 185
         self.containerArea.layoutIfNeeded()
     }
-    func cardButtonTapped(_ sender: UIButton) {
+    @objc func cardButtonTapped(_ sender: UIButton) {
         if let c = self.card {
             self.cardDelegate?.carouselCard(cardCell: self, didTapAction: c.actions[sender.tag])
         }
     }
-    func cardTapped(){
+    @objc func cardTapped(){
         if let c = self.card {
             if let action = c.defaultAction {
                 self.cardDelegate?.carouselCard(cardCell: self, didTapAction: action)

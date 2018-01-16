@@ -538,7 +538,7 @@ extension QiscusChatVC {
     func uploadFromCamera(){
         view.endEditing(true)
         if Qiscus.sharedInstance.connected{
-            if AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo) ==  AVAuthorizationStatus.authorized
+            if AVCaptureDevice.authorizationStatus(for: AVMediaType.video) ==  AVAuthorizationStatus.authorized
             {
                 DispatchQueue.main.async(execute: {
                     let picker = UIImagePickerController()
@@ -550,7 +550,7 @@ extension QiscusChatVC {
                     self.present(picker, animated: true, completion: nil)
                 })
             }else{
-                AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeVideo, completionHandler: { (granted :Bool) -> Void in
+                AVCaptureDevice.requestAccess(for: AVMediaType.video, completionHandler: { (granted :Bool) -> Void in
                     if granted {
                         let picker = UIImagePickerController()
                         picker.delegate = self
@@ -670,7 +670,7 @@ extension QiscusChatVC {
             }}
         }
     }
-    func updateTimer(){
+    @objc func updateTimer(){
         if let timerLabel = self.recordBackground.viewWithTag(543) as? UILabel {
             self.recordDuration += 1
             let minutes = Int(self.recordDuration / 60)
@@ -686,7 +686,7 @@ extension QiscusChatVC {
             timerLabel.text = "\(minutesString):\(secondsString)"
         }
     }
-    func updateAudioMeter(){
+    @objc func updateAudioMeter(){
         if let audioRecorder = self.recorder{
             audioRecorder.updateMeters()
             let normalizedValue:CGFloat = pow(10.0, CGFloat(audioRecorder.averagePower(forChannel: 0)) / 20)

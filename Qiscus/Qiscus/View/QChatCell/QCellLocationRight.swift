@@ -106,7 +106,7 @@ class QCellLocationRight: QChatCell {
             break
         }
     }
-    func openMap(){
+    @objc func openMap(){
         let payload = JSON(parseJSON: self.comment!.data)
         
         let latitude: CLLocationDegrees = payload["latitude"].doubleValue
