@@ -222,7 +222,7 @@ public class QRoomService:NSObject{
     }
     public func postComment(onRoom roomId:String, comment:QComment, type:String? = nil, payload:JSON? = nil){
         var parameters:[String: AnyObject] = [String: AnyObject]()
-        
+        var commentUniqueId = comment.uniqueId
         parameters = [
             "comment"  : comment.text as AnyObject,
             "room_id"   : roomId as AnyObject,
@@ -271,35 +271,41 @@ public class QRoomService:NSObject{
                         let commentJSON = json["results"]["comment"]
                         let commentId = commentJSON["id"].intValue
                         let commentBeforeId = commentJSON["comment_before_id"].intValue
-                        
-                        comment.update(commentId: commentId, beforeId: commentBeforeId)
-                        
-                        if let room = QRoom.room(withId: roomId){
-                            if comment.status == QCommentStatus.sending || comment.status == QCommentStatus.failed {
-                                    room.updateCommentStatus(inComment: comment, status: .sent)
+                        if let c = QComment.threadSaveComment(withUniqueId: commentUniqueId){
+                            c.update(commentId: commentId, beforeId: commentBeforeId)
+                            if let room = QRoom.threadSaveRoom(withId: roomId){
+                                if c.status == QCommentStatus.sending || c.status == QCommentStatus.failed {
+                                    room.updateCommentStatus(inComment: c, status: .sent)
+                                }
+                                self.sync(onRoom: room)
                             }
-                            self.sync(onRoom: room)
                         }
                     }else{
                         let status = QCommentStatus.failed
-                        if let room = QRoom.room(withId: roomId){
-                            room.updateCommentStatus(inComment: comment, status: status)
+                        if let room = QRoom.threadSaveRoom(withId: roomId){
+                            if let c = QComment.threadSaveComment(withUniqueId: commentUniqueId){
+                                room.updateCommentStatus(inComment: c, status: status)
+                            }
                         }
                     }
                 }else{
                     let status = QCommentStatus.failed
-                    if let room = QRoom.room(withId: roomId){
-                        room.updateCommentStatus(inComment: comment, status: status)
+                    if let room = QRoom.threadSaveRoom(withId: roomId){
+                        if let c = QComment.threadSaveComment(withUniqueId: commentUniqueId){
+                            room.updateCommentStatus(inComment: c, status: status)
+                        }
                     }
                 }
                 break
             case .failure(let error):
                 var status = QCommentStatus.failed
                 if comment.type == .text || comment.type == .reply || comment.type == .custom {
-                    status = .pending
+                    status = .failed
                 }
-                if let room = QRoom.room(withId: roomId){
-                    room.updateCommentStatus(inComment: comment, status: status)
+                if let room = QRoom.threadSaveRoom(withId: roomId){
+                    if let c = QComment.threadSaveComment(withUniqueId: commentUniqueId){
+                        room.updateCommentStatus(inComment: c, status: status)
+                    }
                 }
                 Qiscus.printLog(text: "fail to post comment with error: \(error)")
                 let delay = 2.0 * Double(NSEC_PER_SEC)
