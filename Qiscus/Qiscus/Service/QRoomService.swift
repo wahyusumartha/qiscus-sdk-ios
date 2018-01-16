@@ -300,7 +300,7 @@ public class QRoomService:NSObject{
             case .failure(let error):
                 var status = QCommentStatus.failed
                 if comment.type == .text || comment.type == .reply || comment.type == .custom {
-                    status = .failed
+                    status = .pending
                 }
                 if let room = QRoom.threadSaveRoom(withId: roomId){
                     if let c = QComment.threadSaveComment(withUniqueId: commentUniqueId){
