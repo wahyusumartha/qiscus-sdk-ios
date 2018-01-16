@@ -904,7 +904,6 @@ internal extension QRoom {
                 }
             }
         }
-        var deletedIndex = [Int]()
         for comment in self.comments {
             if !comment.isInvalidated {
                 if !uidList.contains(comment.uniqueId) {

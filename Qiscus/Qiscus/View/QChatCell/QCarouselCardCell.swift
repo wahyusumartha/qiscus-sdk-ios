@@ -29,7 +29,7 @@ public class QCarouselCardCell: UICollectionViewCell {
     
     var card:QCard?{
         didSet{
-            if let c = self.card{
+            if self.card != nil{
                 self.cardChanged()
             }
         }

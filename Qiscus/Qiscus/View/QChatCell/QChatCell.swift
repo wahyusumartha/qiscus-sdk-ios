@@ -140,7 +140,7 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
             self.delegate?.didShare(comment: comment)
         }
     }
-    open func showFile(){
+    @objc open func showFile(){
         if let c = self.comment {
             self.delegate?.didTapFile(comment: c)
         }
@@ -216,7 +216,7 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
         self.showUserName = showUserName
         self.hideAvatar = hideAvatar
         if let color = userNameColor {
-            self.userNameColor = userNameColor
+            self.userNameColor = color
         }else{
             self.userNameColor = UIColor(red: 85/255, green: 85/255, blue: 85/255, alpha: 1)
         }

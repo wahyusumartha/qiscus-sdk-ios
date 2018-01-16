@@ -222,7 +222,7 @@ public class QRoomService:NSObject{
     }
     public func postComment(onRoom roomId:String, comment:QComment, type:String? = nil, payload:JSON? = nil){
         var parameters:[String: AnyObject] = [String: AnyObject]()
-        var commentUniqueId = comment.uniqueId
+        let commentUniqueId = comment.uniqueId
         parameters = [
             "comment"  : comment.text as AnyObject,
             "room_id"   : roomId as AnyObject,
@@ -855,7 +855,6 @@ public class QRoomService:NSObject{
                         var rIds = [String]()
                         for room in rooms {
                             let roomId = "\(room["id"])"
-                            let rUid = room["unique_id"].stringValue
                             if let r = QRoom.threadSaveRoom(withId: roomId){
                                 r.syncRoomData(withJSON: room)
                                 r.clearMessage()

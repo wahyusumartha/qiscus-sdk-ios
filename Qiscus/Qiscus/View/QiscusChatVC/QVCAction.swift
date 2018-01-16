@@ -84,7 +84,7 @@ extension QiscusChatVC {
         }
         )
     }
-    func confirmUnlockChat(){
+    @objc func confirmUnlockChat(){
         self.unlockAction()
     }
     func showAlert(alert:UIAlertController){
@@ -411,7 +411,7 @@ extension QiscusChatVC {
             self.present(picker, animated: true, completion: nil)
         })
     }
-    func goToTitleAction(){
+    @objc func goToTitleAction(){
         self.inputBarBottomMargin.constant = 0
         self.view.layoutIfNeeded()
         if let delegate = self.delegate {
@@ -453,7 +453,7 @@ extension QiscusChatVC {
         self.emptyChatImage.tintColor = self.bottomColor
     }
     
-    func sendMessage(){
+    @objc func sendMessage(){
         //if Qiscus.shared.connected{
             if !self.isRecording {
                 let value = self.inputText.value.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -570,7 +570,7 @@ extension QiscusChatVC {
             self.showNoConnectionToast()
         }
     }
-    func recordVoice(){
+    @objc func recordVoice(){
         self.prepareRecording()
     }
     func startRecording(){
@@ -737,7 +737,7 @@ extension QiscusChatVC {
             })
         }
     }
-    func cancelRecordVoice(){
+    @objc func cancelRecordVoice(){
         self.recordViewLeading.constant = 8
         Qiscus.uiThread.async { autoreleasepool{
             UIView.animate(withDuration: 0.5, animations: {

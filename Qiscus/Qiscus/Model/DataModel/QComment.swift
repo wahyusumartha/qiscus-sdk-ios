@@ -416,7 +416,7 @@ public class QComment:Object {
         }
     }
     
-    var textAttribute:[String: Any]{
+    var textAttribute:[NSAttributedStringKey: Any]{
         get{
             if self.type == .location {
                 let style = NSMutableParagraphStyle()
@@ -428,9 +428,9 @@ public class QComment:Object {
                 }
                 
                 return [
-                    NSAttributedStringKey.foregroundColor.rawValue: foregroundColorAttributeName,
-                    NSAttributedStringKey.font.rawValue: systemFont,
-                    NSAttributedStringKey.paragraphStyle.rawValue: style
+                    NSAttributedStringKey.foregroundColor: foregroundColorAttributeName,
+                    NSAttributedStringKey.font: systemFont,
+                    NSAttributedStringKey.paragraphStyle: style
                 ]
             }
             else if self.type == .system {
@@ -441,9 +441,9 @@ public class QComment:Object {
                 let foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.systemBalloonTextColor
                 
                 return [
-                    NSAttributedStringKey.foregroundColor.rawValue: foregroundColorAttributeName,
-                    NSAttributedStringKey.font.rawValue: systemFont,
-                    NSAttributedStringKey.paragraphStyle.rawValue: style
+                    NSAttributedStringKey.foregroundColor: foregroundColorAttributeName,
+                    NSAttributedStringKey.font: systemFont,
+                    NSAttributedStringKey.paragraphStyle: style
                 ]
             }else{
                 var foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
@@ -451,8 +451,8 @@ public class QComment:Object {
                     foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
                 }
                 return [
-                    NSAttributedStringKey.foregroundColor.rawValue: foregroundColorAttributeName,
-                    NSAttributedStringKey.font.rawValue: Qiscus.style.chatFont
+                    NSAttributedStringKey.foregroundColor: foregroundColorAttributeName,
+                    NSAttributedStringKey.font: Qiscus.style.chatFont
                 ]
             }
         }
