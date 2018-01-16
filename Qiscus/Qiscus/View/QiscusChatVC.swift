@@ -494,6 +494,7 @@ public class QiscusChatVC: UIViewController{
                 self.postComment(comment: newMessage)
                 self.chatMessage = nil
             }
+            room.resendPendingMessage()
             setupNavigationTitle()
             setupPage()
         }else{

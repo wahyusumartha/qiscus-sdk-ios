@@ -36,6 +36,7 @@ public class QConversationCollectionView: UICollectionView {
                             self.messagesId = messages
                             self.reloadData()
                         }
+                        rts.resendPendingMessage()
                         rts.sync()
                     }
                 }

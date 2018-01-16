@@ -396,15 +396,20 @@ public class QRoom:Object {
         self.addComment(newComment: comment)
         self.post(comment: comment)
     }
-    public func post(comment:QComment, type:String? = nil, payload:JSON? = nil){
-        let service = QRoomService()
+    internal func resendPendingMessage(){
         let id = self.id
         let pendingMessages = self.comments.filter("statusRaw == %d", QCommentStatus.pending.rawValue)
+        let service = QRoomService()
         if pendingMessages.count > 0 {
             for pendingMessage in pendingMessages {
                 service.postComment(onRoom: id, comment: pendingMessage)
             }
         }
+    }
+    public func post(comment:QComment, type:String? = nil, payload:JSON? = nil){
+        let service = QRoomService()
+        let id = self.id
+        self.resendPendingMessage()
         service.postComment(onRoom: id, comment: comment, type: type, payload:payload)
     }
     
