@@ -15,6 +15,7 @@ import RealmSwift
 
 public class QRoomService:NSObject{    
     public func sync(onRoom room:QRoom){
+        
         if room.isInvalidated {
             return
         }
@@ -40,14 +41,17 @@ public class QRoomService:NSObject{
                         r.syncRoomData(withJSON: roomData)
                         
                         let commentPayload = results["comments"].arrayValue
-                        for json in commentPayload {
+                        var needSync = false
+                        for json in commentPayload.reversed() {
                             let commentId = json["id"].intValue
-                            
                             if commentId <= QiscusMe.shared.lastCommentId {
-                                r.saveOldComment(fromJSON: json)
+                                r.saveNewComment(fromJSON: json)
                             }else{
-                                QChatService.syncProcess()
+                                needSync = true
                             }
+                        }
+                        if needSync {
+                            QChatService.syncProcess()
                         }
                         DispatchQueue.main.async {
                             if let mainRoom = QRoom.room(withId: roomId){
