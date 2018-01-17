@@ -28,6 +28,6 @@ s.dependency 'AlamofireImage', '~> 3.3.0'
 s.dependency 'RealmSwift', '~> 3.0.2'
 s.dependency 'SwiftyJSON', '~> 3.1.4'
 s.dependency 'ImageViewer', '5.0.0'
-s.dependency 'CocoaMQTT', '1.0.19'
+s.dependency 'CocoaMQTT', '1.1.1'
 
 end
