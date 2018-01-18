@@ -69,7 +69,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     
     var isPushed:Bool = false
     var reachability:QReachability?
+    
     internal var mqtt:CocoaMQTT?
+    internal var connectingMQTT = false
+    
     var notificationAction:((QiscusChatVC)->Void)? = nil
     var syncing = false
     var syncTimer: Timer?
@@ -540,6 +543,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.sync(cloud: true)
     }
     public class func printLog(text:String){
+        print(text)
         if Qiscus.showDebugPrint{
             let logText = "[Qiscus]: \(text)"
             DispatchQueue.global().sync{
@@ -697,33 +701,44 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             }
         }
     }
-    
-    class func mqttConnect(chatOnly:Bool = false){
-        let appName = Bundle.main.infoDictionary![kCFBundleNameKey as String] as! String
-        var deviceID = "000"
-        if let vendorIdentifier = UIDevice.current.identifierForVendor {
-            deviceID = vendorIdentifier.uuidString
-        }
-        
-        //QChatService.sync()
-        QiscusBackgroundThread.async {
-            let clientID = "iosMQTT-\(appName)-\(deviceID)-\(QiscusMe.shared.id)"
-            let mqtt = CocoaMQTT(clientID: clientID, host: QiscusMe.shared.realtimeServer, port: UInt16(QiscusMe.shared.realtimePort))
-            mqtt.username = ""
-            mqtt.password = ""
-            mqtt.cleanSession = true
-            mqtt.willMessage = CocoaMQTTWill(topic: "u/\(QiscusMe.shared.email)/s", message: "0")
-            mqtt.keepAlive = 60
-            mqtt.delegate = Qiscus.shared
-            mqtt.enableSSL = QiscusMe.shared.realtimeSSL
-            DispatchQueue.main.async {
-                let state = UIApplication.shared.applicationState
-                if state == .active {
-                    QiscusBackgroundThread.async {
-                        mqtt.connect()
-                    }
+    internal func mqttConnect(){
+        if Qiscus.shared.connectingMQTT { return }
+        Qiscus.shared.connectingMQTT = true
+//        QiscusBackgroundThread.async {
+            if self.mqtt == nil {
+                let appName = Bundle.main.infoDictionary![kCFBundleNameKey as String] as! String
+                var deviceID = "000"
+                if let vendorIdentifier = UIDevice.current.identifierForVendor {
+                    deviceID = vendorIdentifier.uuidString
+                }
+                
+                let clientID = "iosMQTT-\(appName)-\(deviceID)-\(QiscusMe.shared.id)"
+                self.mqtt = CocoaMQTT(clientID: clientID, host: QiscusMe.shared.realtimeServer, port: UInt16(QiscusMe.shared.realtimePort))
+                self.mqtt!.username = ""
+                self.mqtt!.password = ""
+                self.mqtt!.cleanSession = true
+                self.mqtt!.willMessage = CocoaMQTTWill(topic: "u/\(QiscusMe.shared.email)/s", message: "0")
+                self.mqtt!.keepAlive = 60
+                self.mqtt!.delegate = Qiscus.shared
+                self.mqtt!.enableSSL = QiscusMe.shared.realtimeSSL
+                
+                if QiscusMe.shared.realtimeSSL {
+                    self.mqtt!.allowUntrustCACertificate = true
                 }
             }
+        print("mqtt host: \(self.mqtt!.host)")
+        print("mqtt port: \(self.mqtt!.port)")
+        print("mqtt clientId: \(self.mqtt!.clientID)")
+        print("mqtt state: \(self.mqtt!.connState)")
+        print("mqtt delegate: \(self.mqtt!.delegate != nil)")
+        print("mqtt ssl: \(self.mqtt!.enableSSL)")
+        
+            self.mqtt!.connect()
+//        }
+    }
+    class func mqttConnect(chatOnly:Bool = false){
+        QiscusBackgroundThread.asyncAfter(deadline: .now() + 1.0) {
+            Qiscus.shared.mqttConnect()
         }
     }
     public class func createLocalNotification(forComment comment:QComment, alertTitle:String? = nil, alertBody:String? = nil, userInfo:[AnyHashable : Any]? = nil){
@@ -861,52 +876,76 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         QiscusMe.shared.deviceToken = ""
         QiscusCommentClient.sharedInstance.unRegisterDevice()
     }
+    public class func sync(cloud:Bool = false){
+        if Qiscus.isLoggedIn{
+            QChatService.syncProcess(cloud: cloud)
+        }
+    }
+    
+    func topViewController(controller: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
+        if let navigationController = controller as? UINavigationController {
+            return topViewController(controller: navigationController.visibleViewController)
+        }
+        if let tabController = controller as? UITabBarController {
+            if let selected = tabController.selectedViewController {
+                return topViewController(controller: selected)
+            }
+        }
+        if let presented = controller?.presentedViewController {
+            return topViewController(controller: presented)
+        }
+        return controller
+    }
+    public class func cacheData(){
+        QRoom.cacheAll()
+        QComment.cacheAll()
+        QUser.cacheAll()
+        QParticipant.cacheAll()
+    }
+    @objc public class func getNonce(withAppId appId:String, baseURL:String? = nil, onSuccess:@escaping ((String)->Void), onFailed:@escaping ((String)->Void), secureURL:Bool = true){
+        QChatService.getNonce(withAppId: appId, baseURL: baseURL, onSuccess: onSuccess, onFailed: onFailed, secureURL: secureURL)
+    }
+    @objc public class func setup(withUserIdentityToken uidToken:String, delegate: QiscusConfigDelegate? = nil){
+        if delegate != nil {
+            Qiscus.shared.delegate = delegate
+        }
+        QChatService.setup(withuserIdentityToken: uidToken)
+        Qiscus.setupReachability()
+        Qiscus.sharedInstance.RealtimeConnect()
+    }
+    public class func subscribeAllRoomNotification(){
+        QiscusBackgroundThread.async { autoreleasepool {
+            let rooms = QRoom.all()
+            for room in rooms {
+                room.subscribeRealtimeStatus()
+            }
+        }}
+    }
 }
 extension Qiscus:CocoaMQTTDelegate{
-    public func mqtt(_ mqtt: CocoaMQTT, didConnect host: String, port: Int){
+    public func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck){
+        Qiscus.printLog(text: "[Qiscus-MQTT] didConnectAck")
         let state = UIApplication.shared.applicationState
-        
-        if state == .active {
+        let activeState = (state == .active)
+        Qiscus.shared.connectingMQTT = false
+        QiscusBackgroundThread.async {
             let commentChannel = "\(QiscusMe.shared.token)/c"
             mqtt.subscribe(commentChannel, qos: .qos2)
             
             for channel in Qiscus.realtimeChannel{
                 mqtt.subscribe(channel)
             }
+            Qiscus.realtimeConnected = true
             Qiscus.shared.mqtt = mqtt
-            Qiscus.shared.startPublishOnlineStatus()
-        }
-        if self.syncTimer != nil {
-            self.syncTimer?.invalidate()
-            self.syncTimer = nil
-        }
-    }
-    public func mqtt(_ mqtt: CocoaMQTT, didConnectAck ack: CocoaMQTTConnAck){
-        let state = UIApplication.shared.applicationState
-        let activeState = (state == .active)
-        QiscusBackgroundThread.async {
+            
             if activeState {
-                let commentChannel = "\(QiscusMe.shared.token)/c"
-                mqtt.subscribe(commentChannel, qos: .qos2)
-                
-                for channel in Qiscus.realtimeChannel{
-                    mqtt.subscribe(channel)
-                }
-                Qiscus.realtimeConnected = true
-                Qiscus.shared.mqtt = mqtt
                 Qiscus.shared.startPublishOnlineStatus()
             }
-            //            if self.syncTimer != nil {
-            //                self.syncTimer?.invalidate()
-            //                self.syncTimer = nil
-            //            }
         }
     }
     public func mqtt(_ mqtt: CocoaMQTT, didPublishMessage message: CocoaMQTTMessage, id: UInt16){
-        
     }
     public func mqtt(_ mqtt: CocoaMQTT, didPublishAck id: UInt16){
-        
     }
     public func mqtt(_ mqtt: CocoaMQTT, didReceiveMessage message: CocoaMQTTMessage, id: UInt16 ){
         QiscusBackgroundThread.async {autoreleasepool{
@@ -1097,61 +1136,29 @@ extension Qiscus:CocoaMQTTDelegate{
     public func mqttDidPing(_ mqtt: CocoaMQTT){
     }
     public func mqttDidReceivePong(_ mqtt: CocoaMQTT){
-        
+
     }
     public func mqttDidDisconnect(_ mqtt: CocoaMQTT, withError err: Error?){
+        Qiscus.printLog(text: "[Qiscus-MQTT] mqttDidDisconnect")
+        Qiscus.shared.connectingMQTT = false
         if Qiscus.isLoggedIn {
             Qiscus.shared.stopPublishOnlineStatus()
             Qiscus.realtimeConnected = false
             Qiscus.sync()
         }
     }
-    
-    public class func sync(cloud:Bool = false){
-        if Qiscus.isLoggedIn{
-            QChatService.syncProcess(cloud: cloud)
-        }
+    public func mqtt(_ mqtt: CocoaMQTT, didStateChangeTo state: CocoaMQTTConnState) {
+        Qiscus.printLog(text: "[Qiscus-MQTT] didStateChangeTo state: \(state)")
+    }
+    public func mqtt(_ mqtt: CocoaMQTT, didPublishComplete id: UInt16) {
+        Qiscus.printLog(text: "[Qiscus-MQTT] didPublishComplete")
+    }
+    public func mqtt(_ mqtt: CocoaMQTT, didReceive trust: SecTrust, completionHandler: @escaping (Bool) -> Void) {
+        Qiscus.printLog(text: "[Qiscus-MQTT] didReceive trust")
+        completionHandler(true)
     }
     
-    func topViewController(controller: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
-        if let navigationController = controller as? UINavigationController {
-            return topViewController(controller: navigationController.visibleViewController)
-        }
-        if let tabController = controller as? UITabBarController {
-            if let selected = tabController.selectedViewController {
-                return topViewController(controller: selected)
-            }
-        }
-        if let presented = controller?.presentedViewController {
-            return topViewController(controller: presented)
-        }
-        return controller
-    }
-    public class func cacheData(){
-        QRoom.cacheAll()
-        QComment.cacheAll()
-        QUser.cacheAll()
-        QParticipant.cacheAll()
-    }
-    @objc public class func getNonce(withAppId appId:String, baseURL:String? = nil, onSuccess:@escaping ((String)->Void), onFailed:@escaping ((String)->Void), secureURL:Bool = true){
-        QChatService.getNonce(withAppId: appId, baseURL: baseURL, onSuccess: onSuccess, onFailed: onFailed, secureURL: secureURL)
-    }
-    @objc public class func setup(withUserIdentityToken uidToken:String, delegate: QiscusConfigDelegate? = nil){
-        if delegate != nil {
-            Qiscus.shared.delegate = delegate
-        }
-        QChatService.setup(withuserIdentityToken: uidToken)
-        Qiscus.setupReachability()
-        Qiscus.sharedInstance.RealtimeConnect()
-    }
-    public class func subscribeAllRoomNotification(){
-        QiscusBackgroundThread.async { autoreleasepool {
-            let rooms = QRoom.all()
-            for room in rooms {
-                room.subscribeRealtimeStatus()
-            }
-            }}
-    }
+    
 }
 
 extension Qiscus { // Public class API to get room
