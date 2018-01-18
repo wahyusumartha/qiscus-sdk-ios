@@ -185,8 +185,13 @@ public class QRoomService:NSObject{
                                 onError("No change on room data")
                             }
                         }else if error != JSON.null{
-                            onError("\(error)")
-                            Qiscus.printLog(text: "error update chat room: \(error)")
+                            var message = "Error update chat room"
+                            let errorMessages = error["detailed_messages"].arrayValue
+                            if let e = errorMessages.first?.string {
+                                message = e
+                            }
+                            onError("\(message)")
+                            Qiscus.printLog(text: "error update chat room: \(message)")
                         }
                     }else{
                         Qiscus.printLog(text: "fail to update chat room")

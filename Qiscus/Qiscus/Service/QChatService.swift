@@ -145,7 +145,6 @@ public class QChatService:NSObject {
                                 let json = JSON(response)
                                 let results = json["results"]
                                 let error = json["error"]
-                                
                                 if results != JSON.null{
                                     Qiscus.printLog(text: "getListComment with id response: \(responseData)")
                                     let roomData = results["room"]
@@ -179,11 +178,16 @@ public class QChatService:NSObject {
                                         }
                                     }
                                 }else if error != JSON.null{
-                                    self.delegate?.chatService(didFailLoadRoom: "\(error)")
+                                    var message = "Failed to load room data"
+                                    let errorMessages = error["detailed_messages"].arrayValue
+                                    if let e = errorMessages.first?.string {
+                                        message = e
+                                    }
+                                    self.delegate?.chatService(didFailLoadRoom: "\(message)")
                                     DispatchQueue.main.async {
                                         autoreleasepool{
                                             if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                                                roomDelegate.didFailLoadRoom(withError: "\(error)")
+                                                roomDelegate.didFailLoadRoom(withError: "\(message)")
                                             }
                                         }
                                     }
@@ -279,10 +283,15 @@ public class QChatService:NSObject {
                                         }
                                     }
                                 }else if error != JSON.null{
-                                    onError("\(error)")
+                                    var message = "Failed to load room data"
+                                    let errorMessages = error["detailed_messages"].arrayValue
+                                    if let e = errorMessages.first?.string {
+                                        message = e
+                                    }
+                                    onError("\(message)")
                                     DispatchQueue.main.async { autoreleasepool{
                                         if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                                            roomDelegate.didFailLoadRoom(withError: "\(error)")
+                                            roomDelegate.didFailLoadRoom(withError: "\(message)")
                                         }
                                         }}
                                 }else{
@@ -375,8 +384,13 @@ public class QChatService:NSObject {
                                     }
                                 }
                             }else if error != JSON.null{
-                                onError("\(error)")
-                                Qiscus.printLog(text: "\(error)")
+                                var message = "Failed to load room data"
+                                let errorMessages = error["detailed_messages"].arrayValue
+                                if let e = errorMessages.first?.string {
+                                    message = e
+                                }
+                                onError("\(message)")
+                                Qiscus.printLog(text: "\(message)")
                                 DispatchQueue.main.async { autoreleasepool{
                                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
                                         roomDelegate.didFailLoadRoom(withError: "\(error)")
@@ -476,11 +490,16 @@ public class QChatService:NSObject {
                                     }
                                 }
                             }else if error != JSON.null{
-                                self.delegate?.chatService(didFailLoadRoom: "\(error)")
-                                Qiscus.printLog(text: "\(error)")
+                                var message = "Failed to load room data"
+                                let errorMessages = error["detailed_messages"].arrayValue
+                                if let e = errorMessages.first?.string {
+                                    message = e
+                                }
+                                self.delegate?.chatService(didFailLoadRoom: "\(message)")
+                                Qiscus.printLog(text: "\(message)")
                                 DispatchQueue.main.async { autoreleasepool{
                                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                                        roomDelegate.didFailLoadRoom(withError: "\(error)")
+                                        roomDelegate.didFailLoadRoom(withError: "\(message)")
                                     }
                                     }}
                             }else{
@@ -590,11 +609,16 @@ public class QChatService:NSObject {
                                     }
                                 }
                             }else if error != JSON.null{
-                                self.delegate?.chatService(didFailLoadRoom: "\(error)")
-                                Qiscus.printLog(text: "\(error)")
+                                var message = "Failed to load room data"
+                                let errorMessages = error["detailed_messages"].arrayValue
+                                if let e = errorMessages.first?.string {
+                                    message = e
+                                }
+                                self.delegate?.chatService(didFailLoadRoom: "\(message)")
+                                Qiscus.printLog(text: "\(message)")
                                 DispatchQueue.main.async { autoreleasepool{
                                     if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                                        roomDelegate.didFailLoadRoom(withError: "\(error)")
+                                        roomDelegate.didFailLoadRoom(withError: "\(message)")
                                     }
                                     }}
                             }else{
@@ -675,10 +699,15 @@ public class QChatService:NSObject {
                                     }
                                 }
                             }else if error != JSON.null{
+                                var message = "Failed to load room data"
+                                let errorMessages = error["detailed_messages"].arrayValue
+                                if let e = errorMessages.first?.string {
+                                    message = e
+                                }
                                 DispatchQueue.main.async { autoreleasepool{
-                                    onError("\(error)")
+                                    onError("\(message)")
                                     }}
-                                Qiscus.printLog(text: "\(error)")
+                                Qiscus.printLog(text: "\(message)")
                             }else{
                                 let error = "Failed to load room data"
                                 DispatchQueue.main.async { autoreleasepool{
@@ -970,11 +999,16 @@ public class QChatService:NSObject {
                                 }
                             }
                         }else if error != JSON.null{
-                            self.delegate?.chatService(didFailLoadRoom: "\(error)")
-                            Qiscus.printLog(text: "\(error)")
+                            var message = "Failed to load room data"
+                            let errorMessages = error["detailed_messages"].arrayValue
+                            if let e = errorMessages.first?.string {
+                                message = e
+                            }
+                            self.delegate?.chatService(didFailLoadRoom: "\(message)")
+                            Qiscus.printLog(text: "\(message)")
                             DispatchQueue.main.async { autoreleasepool{
                                 if let roomDelegate = QiscusCommentClient.shared.roomDelegate{
-                                    roomDelegate.didFailLoadRoom(withError: "\(error)")
+                                    roomDelegate.didFailLoadRoom(withError: "\(message)")
                                 }
                                 }}
                         }else{
@@ -1054,8 +1088,13 @@ public class QChatService:NSObject {
                                 }
                             }
                         }else if error != JSON.null{
+                            var message = "Failed to load room data"
+                            let errorMessages = error["detailed_messages"].arrayValue
+                            if let e = errorMessages.first?.string {
+                                message = e
+                            }
                             DispatchQueue.main.async { autoreleasepool{
-                                onError("\(error)")
+                                onError("\(message)")
                                 }}
                         }else{
                             let error = "Failed to load room data"

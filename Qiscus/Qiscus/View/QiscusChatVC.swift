@@ -42,6 +42,8 @@ import RealmSwift
     @objc optional func chatVC(viewController:QiscusChatVC, cellForComment comment:QComment)->QChatCell?
     @objc optional func chatVC(viewController:QiscusChatVC, heightForComment comment:QComment)->QChatCellHeight?
     @objc optional func chatVC(viewController:QiscusChatVC, hideCellWith comment:QComment)->Bool
+    
+    @objc optional func chatVC(viewController:QiscusChatVC, didFailLoadRoom error:String)
 }
 
 public class QiscusChatVC: UIViewController{
@@ -716,8 +718,9 @@ extension QiscusChatVC:QChatServiceDelegate{
         DispatchQueue.main.asyncAfter(deadline: time, execute: {
             self.dismissLoading()
         })
-        QToasterSwift.toast(target: self, text: "Can't load chat room", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+        QToasterSwift.toast(target: self, text: "Can't load chat room\n\(error)", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
         self.dataLoaded = false
+        self.delegate?.chatVC?(viewController: self, didFailLoadRoom: error)
     }
     
 }
