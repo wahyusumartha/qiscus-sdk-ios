@@ -25,10 +25,10 @@ public class QChatService:NSObject {
     
     // MARK: - reconnect
     private func reconnect(onSuccess:@escaping (()->Void)){
-        let email = QiscusMe.shared.userData.value(forKey: "qiscus_param_email") as? String
-        let userKey = QiscusMe.shared.userData.value(forKey: "qiscus_param_pass") as? String
-        let userName = QiscusMe.shared.userData.value(forKey: "qiscus_param_username") as? String
-        let avatarURL = QiscusMe.shared.userData.value(forKey: "qiscus_param_avatar") as? String
+        let email = Qiscus.client.userData.value(forKey: "qiscus_param_email") as? String
+        let userKey = Qiscus.client.userData.value(forKey: "qiscus_param_pass") as? String
+        let userName = Qiscus.client.userData.value(forKey: "qiscus_param_username") as? String
+        let avatarURL = Qiscus.client.userData.value(forKey: "qiscus_param_avatar") as? String
         if email != nil && userKey != nil && userName != nil {
             QiscusCommentClient.sharedInstance.loginOrRegister(email!, password: userKey!, username: userName!, avatarURL: avatarURL, reconnect: true, onSuccess: onSuccess)
         }
@@ -37,10 +37,10 @@ public class QChatService:NSObject {
     internal class func updateProfil(userName: String? = nil, userAvatarURL: String? = nil, onSuccess: @escaping (()->Void),onError:@escaping ((String)->Void)){
         if Qiscus.isLoggedIn {
             var parameters:[String: AnyObject] = [String: AnyObject]()
-            let email = QiscusMe.shared.userData.value(forKey: "qiscus_param_email") as? String
-            let userKey = QiscusMe.shared.userData.value(forKey: "qiscus_param_pass") as? String
-            let currentName = QiscusMe.shared.userData.value(forKey: "qiscus_param_username") as? String
-            let currentAvatarURL = QiscusMe.shared.userData.value(forKey: "qiscus_param_avatar") as? String
+            let email = Qiscus.client.userData.value(forKey: "qiscus_param_email") as? String
+            let userKey = Qiscus.client.userData.value(forKey: "qiscus_param_pass") as? String
+            let currentName = Qiscus.client.userData.value(forKey: "qiscus_param_username") as? String
+            let currentAvatarURL = Qiscus.client.userData.value(forKey: "qiscus_param_avatar") as? String
             
             parameters = [
                 "email"  : email as AnyObject,
@@ -73,7 +73,7 @@ public class QChatService:NSObject {
                                 
                                 if success {
                                     let userData = json["results"]["user"]
-                                    let _ = QiscusMe.saveData(fromJson: userData, reconnect: true)
+                                    let _ = QiscusClient.saveData(fromJson: userData, reconnect: true)
                                     Qiscus.setupReachability()
                                     if let delegate = Qiscus.shared.delegate {
                                         Qiscus.uiThread.async { autoreleasepool{
@@ -154,7 +154,7 @@ public class QChatService:NSObject {
                                         let room = QRoom.room(fromJSON: roomData)
                                         for json in commentPayload {
                                             let commentId = json["id"].intValue
-                                            if commentId <= QiscusMe.shared.lastCommentId {
+                                            if commentId <= Qiscus.client.lastCommentId {
                                                 room.saveOldComment(fromJSON: json)
                                             }else{
                                                 QChatService.syncProcess()
@@ -265,7 +265,7 @@ public class QChatService:NSObject {
                                         
                                         for json in commentPayload {
                                             let commentId = json["id"].intValue
-                                            if commentId <= QiscusMe.shared.lastCommentId {
+                                            if commentId <= Qiscus.client.lastCommentId {
                                                 room.saveOldComment(fromJSON: json)
                                             }else{
                                                 QChatService.syncProcess()
@@ -360,7 +360,7 @@ public class QChatService:NSObject {
                                     let room = QRoom.room(fromJSON: roomData)
                                     for json in commentPayload {
                                         let commentId = json["id"].intValue
-                                        if commentId <= QiscusMe.shared.lastCommentId {
+                                        if commentId <= Qiscus.client.lastCommentId {
                                             room.saveOldComment(fromJSON: json)
                                         }else{
                                             QChatService.syncProcess()
@@ -466,7 +466,7 @@ public class QChatService:NSObject {
                                     let room = QRoom.room(fromJSON: roomData)
                                     for json in commentPayload {
                                         let commentId = json["id"].intValue
-                                        if commentId <= QiscusMe.shared.lastCommentId {
+                                        if commentId <= Qiscus.client.lastCommentId {
                                             room.saveOldComment(fromJSON: json)
                                         }else{
                                             QChatService.syncProcess()
@@ -585,7 +585,7 @@ public class QChatService:NSObject {
                                     for json in commentPayload {
                                         let commentId = json["id"].intValue
                                         
-                                        if commentId <= QiscusMe.shared.lastCommentId {
+                                        if commentId <= Qiscus.client.lastCommentId {
                                             room.saveOldComment(fromJSON: json)
                                         }else{
                                             QChatService.syncProcess()
@@ -683,7 +683,7 @@ public class QChatService:NSObject {
                                     for json in commentPayload {
                                         let commentId = json["id"].intValue
                                         
-                                        if commentId <= QiscusMe.shared.lastCommentId {
+                                        if commentId <= Qiscus.client.lastCommentId {
                                             room.saveOldComment(fromJSON: json)
                                         }else{
                                             QChatService.syncProcess()
@@ -756,7 +756,7 @@ public class QChatService:NSObject {
     }
     
     @objc internal class func syncProcess(first:Bool = true, cloud:Bool = false){
-        if QiscusMe.shared.lastCommentId == 0 {
+        if Qiscus.client.lastCommentId == 0 {
             return
         }
         if QChatService.inSyncProcess {
@@ -781,7 +781,7 @@ public class QChatService:NSObject {
             let limit = 60
             
             let parameters:[String: AnyObject] =  [
-                "last_received_comment_id"  : QiscusMe.shared.lastCommentId as AnyObject,
+                "last_received_comment_id"  : Qiscus.client.lastCommentId as AnyObject,
                 "token" : qiscus.config.USER_TOKEN as AnyObject,
                 "order" : "asc" as AnyObject,
                 "limit" : limit as AnyObject
@@ -806,7 +806,7 @@ public class QChatService:NSObject {
                         if needClear {
                             QiscusBackgroundThread.async {
                                 QRoom.removeAllMessage()
-                                QiscusMe.updateLastCommentId(commentId: lastReceivedCommentId)
+                                QiscusClient.updateLastCommentId(commentId: lastReceivedCommentId)
                             }
                         }else{
                             let comments = json["results"]["comments"].arrayValue
@@ -821,7 +821,7 @@ public class QChatService:NSObject {
                                         let id = newComment["id"].intValue
                                         let type = newComment["type"].string
                                         
-                                        if id > QiscusMe.shared.lastCommentId {
+                                        if id > Qiscus.client.lastCommentId {
                                             if data[roomId] == nil {
                                                 data[roomId] = [JSON]()
                                             }
@@ -859,7 +859,7 @@ public class QChatService:NSObject {
                                                             }
                                                         }
                                                     }
-                                                    if email == QiscusMe.shared.email {
+                                                    if email == Qiscus.client.email {
                                                         unread = 0
                                                     }else{
                                                         unread += 1
@@ -873,7 +873,7 @@ public class QChatService:NSObject {
                                             }
                                         }
                                     }
-                                    QiscusMe.updateLastCommentId(commentId: lastReceivedCommentId)
+                                    QiscusClient.updateLastCommentId(commentId: lastReceivedCommentId)
                                 }
                             }
                             
@@ -977,7 +977,7 @@ public class QChatService:NSObject {
                                 for json in commentPayload {
                                     let commentId = json["id"].intValue
                                     
-                                    if commentId <= QiscusMe.shared.lastCommentId {
+                                    if commentId <= Qiscus.client.lastCommentId {
                                         room.saveOldComment(fromJSON: json)
                                     }
                                 }
@@ -1072,7 +1072,7 @@ public class QChatService:NSObject {
                                 for json in commentPayload {
                                     let commentId = json["id"].intValue
                                     
-                                    if commentId <= QiscusMe.shared.lastCommentId {
+                                    if commentId <= Qiscus.client.lastCommentId {
                                         room.saveOldComment(fromJSON: json)
                                     }
                                 }
@@ -1202,11 +1202,11 @@ public class QChatService:NSObject {
                 baseUrl = "\(requestProtocol)://\(appId).qiscus.com"
             }
             
-            QiscusMe.shared.appId = appId
-            QiscusMe.shared.userData.set(appId, forKey: "qiscus_appId")
+            Qiscus.client.appId = appId
+            Qiscus.client.userData.set(appId, forKey: "qiscus_appId")
             
-            QiscusMe.shared.baseUrl = baseUrl
-            QiscusMe.shared.userData.set(baseUrl, forKey: "qiscus_base_url")
+            Qiscus.client.baseUrl = baseUrl
+            Qiscus.client.userData.set(baseUrl, forKey: "qiscus_base_url")
             
             let authURL = "\(QiscusConfig.sharedInstance.BASE_API_URL)/auth/nonce"
             
@@ -1262,7 +1262,7 @@ public class QChatService:NSObject {
                         
                         if success {
                             let userData = json["results"]["user"]
-                            let _ = QiscusMe.saveData(fromJson: userData)
+                            let _ = QiscusClient.saveData(fromJson: userData)
                             Qiscus.setupReachability()
                             if let delegate = Qiscus.shared.delegate {
                                 Qiscus.uiThread.async { autoreleasepool{

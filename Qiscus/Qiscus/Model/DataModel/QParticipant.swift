@@ -51,7 +51,7 @@ public class QParticipant:Object {
                         }
                         var lastDeliveredId = 0
                         for p in room.participants {
-                            if p.email != QiscusMe.shared.email {
+                            if p.email != Qiscus.client.email {
                                 if lastDeliveredId == 0 {
                                     lastDeliveredId = p.lastDeliveredCommentId
                                 }
@@ -103,7 +103,7 @@ public class QParticipant:Object {
                         var lastDelivered = 0
                         var lastRead = 0
                         for p in room.participants {
-                            if p.email != QiscusMe.shared.email {
+                            if p.email != Qiscus.client.email {
                                 if lastDelivered == 0 {
                                     lastDelivered = p.lastDeliveredCommentId
                                 }else if p.lastDeliveredCommentId < lastDelivered {

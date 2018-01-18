@@ -28,7 +28,7 @@ public class QCellCarousel: QChatCell{
         didSet{
             self.carouselView.reloadData()
             if let c = self.comment {
-                if c.senderEmail == QiscusMe.shared.email {
+                if c.senderEmail == Qiscus.client.email {
                     if cards.count > 0 {
                         if cards.count == 1 {
                             self.carouselLeading.constant = QiscusHelper.screenWidth() - (QiscusHelper.screenWidth() * 0.6 + 32)
@@ -64,7 +64,7 @@ public class QCellCarousel: QChatCell{
             var leftSpace = CGFloat(0)
             var rightSpace = CGFloat(0)
             
-            if c.senderEmail == QiscusMe.shared.email {
+            if c.senderEmail == Qiscus.client.email {
                 self.userNameLabel.textAlignment = .right
                 rightSpace = 15
             }else{
@@ -82,7 +82,7 @@ public class QCellCarousel: QChatCell{
             self.carouselView.collectionViewLayout = layout
             
             if self.showUserName{
-                if c.senderEmail == QiscusMe.shared.email {
+                if c.senderEmail == Qiscus.client.email {
                     self.userNameLabel.text = "You"
                 } else if let sender = c.sender {
                     self.userNameLabel.text = sender.fullname

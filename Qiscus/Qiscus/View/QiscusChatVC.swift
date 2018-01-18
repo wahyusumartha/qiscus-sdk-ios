@@ -748,7 +748,7 @@ extension QiscusChatVC:QConversationViewRoomDelegate{
     public func roomDelegate(didFailUpdate error: String){}
     public func roomDelegate(didChangeUser room: QRoom, user: QUser){
         if self.chatRoom!.type == .single {
-            if user.email != QiscusMe.shared.email && self.chatRoom!.typingUser == ""{
+            if user.email != Qiscus.client.email && self.chatRoom!.typingUser == ""{
                 self.loadSubtitle()
             }
         }

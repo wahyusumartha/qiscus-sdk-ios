@@ -105,8 +105,8 @@ public class QRoom:Object {
         comment.roomId = self.id
         comment.text = "\(name) - \(value)"
         comment.createdAt = Double(Date().timeIntervalSince1970)
-        comment.senderEmail = QiscusMe.shared.email
-        comment.senderName = QiscusMe.shared.userName
+        comment.senderEmail = Qiscus.client.email
+        comment.senderName = Qiscus.client.userName
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.typeRaw = "contact_person"
         comment.data = payload
@@ -162,8 +162,8 @@ public class QRoom:Object {
         comment.roomId = self.id
         comment.text = ""
         comment.createdAt = Double(Date().timeIntervalSince1970)
-        comment.senderEmail = QiscusMe.shared.email
-        comment.senderName = QiscusMe.shared.userName
+        comment.senderEmail = Qiscus.client.email
+        comment.senderName = Qiscus.client.userName
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.typeRaw = "location"
         comment.data = payload
@@ -198,8 +198,8 @@ public class QRoom:Object {
         comment.roomId = self.id
         
         comment.createdAt = Double(Date().timeIntervalSince1970)
-        comment.senderEmail = QiscusMe.shared.email
-        comment.senderName = QiscusMe.shared.userName
+        comment.senderEmail = Qiscus.client.email
+        comment.senderName = Qiscus.client.userName
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.typeRaw = type
         comment.data = payload
@@ -235,8 +235,8 @@ public class QRoom:Object {
         
         comment.text = "[file]\(fileName) [/file]"
         comment.createdAt = Double(Date().timeIntervalSince1970)
-        comment.senderEmail = QiscusMe.shared.email
-        comment.senderName = QiscusMe.shared.userName
+        comment.senderEmail = Qiscus.client.email
+        comment.senderName = Qiscus.client.userName
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.isUploading = true
         comment.progress = 0
@@ -249,7 +249,7 @@ public class QRoom:Object {
         file.id = uniqueID
         file.roomId = self.id
         file.url = fileName
-        file.senderEmail = QiscusMe.shared.email
+        file.senderEmail = Qiscus.client.email
         file.filename = filename
         
         if let fileData = data {
@@ -361,8 +361,8 @@ public class QRoom:Object {
         comment.roomId = self.id
         comment.text = text
         comment.createdAt = Double(Date().timeIntervalSince1970)
-        comment.senderEmail = QiscusMe.shared.email
-        comment.senderName = QiscusMe.shared.userName
+        comment.senderEmail = Qiscus.client.email
+        comment.senderName = Qiscus.client.userName
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.typeRaw = type.name()
         comment.roomName = self.name
@@ -388,8 +388,8 @@ public class QRoom:Object {
         comment.roomId = self.id
         comment.text = text
         comment.createdAt = Double(Date().timeIntervalSince1970)
-        comment.senderEmail = QiscusMe.shared.email
-        comment.senderName = QiscusMe.shared.userName
+        comment.senderEmail = Qiscus.client.email
+        comment.senderName = Qiscus.client.userName
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.typeRaw = QCommentType.text.name()
         
@@ -581,11 +581,11 @@ public class QRoom:Object {
             var minReadId = 0
             var first = true
             for participant in self.participants {
-                if first && participant.email != QiscusMe.shared.email{
+                if first && participant.email != Qiscus.client.email{
                     minDeliveredId = participant.lastDeliveredCommentId
                     minReadId = participant.lastReadCommentId
                     first = false
-                }else if participant.email != QiscusMe.shared.email{
+                }else if participant.email != Qiscus.client.email{
                     if participant.lastDeliveredCommentId < minDeliveredId {
                         minDeliveredId = participant.lastDeliveredCommentId
                     }
@@ -740,7 +740,7 @@ public class QRoom:Object {
                     }
                     if room.type == .single {
                         for participant in room.participants {
-                            if participant.email != QiscusMe.shared.email {
+                            if participant.email != Qiscus.client.email {
                                 if let user = QUser.getUser(email: participant.email) {
                                     user.setName(name: name)
                                 }

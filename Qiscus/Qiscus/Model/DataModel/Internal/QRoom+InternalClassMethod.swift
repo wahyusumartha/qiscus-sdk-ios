@@ -141,7 +141,7 @@ internal extension QRoom {
                         let savedUser = QUser.saveUser(withEmail: participantEmail, fullname: fullname, avatarURL: avatarURL)
                         
                         if room.type == .single {
-                            if savedUser.email != QiscusMe.shared.email {
+                            if savedUser.email != Qiscus.client.email {
                                 try! realm.write {
                                     room.singleUser = participantEmail
                                 }

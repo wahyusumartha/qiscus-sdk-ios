@@ -278,7 +278,7 @@ extension QiscusChatVC {
                     if room.type == .group{
                         subtitleString = "You"
                         for participant in room.participants{
-                            if participant.email != QiscusMe.shared.email {
+                            if participant.email != Qiscus.client.email {
                                 if let user = participant.user {
                                     subtitleString += ", \(user.fullname)"
                                 }
@@ -287,7 +287,7 @@ extension QiscusChatVC {
                     }else{
                         if room.participants.count > 0 {
                             for participant in room.participants {
-                                if participant.email != QiscusMe.shared.email{
+                                if participant.email != Qiscus.client.email{
                                     if let user = participant.user{
                                         if user.presence == .offline{
                                             let lastSeenString = user.lastSeenString

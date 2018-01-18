@@ -17,7 +17,7 @@ class QTextView: UITextView {
         get{
             var foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor
             var underlineColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor
-            if self.comment?.senderEmail == QiscusMe.shared.email{
+            if self.comment?.senderEmail == Qiscus.client.email{
                 foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor
                 underlineColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor
             }

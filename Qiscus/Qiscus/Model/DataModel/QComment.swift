@@ -186,7 +186,7 @@ public class QComment:Object {
         get{
             var foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor
             var underlineColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor
-            if self.senderEmail == QiscusMe.shared.email{
+            if self.senderEmail == Qiscus.client.email{
                 foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor
                 underlineColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor
             }
@@ -264,7 +264,7 @@ public class QComment:Object {
     public var cellIdentifier:String{
         get{
             var position = "Left"
-            if self.senderEmail == QiscusMe.shared.email {
+            if self.senderEmail == Qiscus.client.email {
                 position = "Right"
             }
             switch self.type {
@@ -423,7 +423,7 @@ public class QComment:Object {
                 style.alignment = NSTextAlignment.left
                 let systemFont = UIFont.systemFont(ofSize: 14.0)
                 var foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
-                if self.senderEmail == QiscusMe.shared.email{
+                if self.senderEmail == Qiscus.client.email{
                     foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
                 }
                 
@@ -447,7 +447,7 @@ public class QComment:Object {
                 ]
             }else{
                 var foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
-                if self.senderEmail == QiscusMe.shared.email{
+                if self.senderEmail == Qiscus.client.email{
                     foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
                 }
                 return [
@@ -497,7 +497,7 @@ public class QComment:Object {
                 commentInfo.readUser = [QParticipant]()
                 commentInfo.undeliveredUser = [QParticipant]()
                 for participant in room.participants {
-                    if participant.email != QiscusMe.shared.email{
+                    if participant.email != Qiscus.client.email{
                         if participant.lastReadCommentId >= self.id {
                             commentInfo.readUser.append(participant)
                         }else if participant.lastDeliveredCommentId >= self.id{
@@ -641,8 +641,8 @@ public class QComment:Object {
         comment.roomId = roomId
         comment.text = self.text
         comment.createdAt = Double(Date().timeIntervalSince1970)
-        comment.senderEmail = QiscusMe.shared.email
-        comment.senderName = QiscusMe.shared.userName
+        comment.senderEmail = Qiscus.client.email
+        comment.senderName = Qiscus.client.userName
         comment.statusRaw = QCommentStatus.sending.rawValue
         comment.data = self.data
         comment.typeRaw = self.type.name()
@@ -660,7 +660,7 @@ public class QComment:Object {
             file!.roomId = roomId
             file!.url = fileRef.url
             file!.filename = fileRef.filename
-            file!.senderEmail = QiscusMe.shared.email
+            file!.senderEmail = Qiscus.client.email
             file!.localPath = fileRef.localPath
             file!.mimeType = fileRef.mimeType
             file!.localThumbPath = fileRef.localThumbPath

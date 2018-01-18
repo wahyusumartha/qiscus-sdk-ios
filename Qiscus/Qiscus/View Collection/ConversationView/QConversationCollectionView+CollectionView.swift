@@ -89,7 +89,7 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
             let uid = commentGroup.first!
             let firsMessage = QComment.comment(withUniqueId: uid)!
             if kind == UICollectionElementKindSectionFooter{
-                if firsMessage.senderEmail == QiscusMe.shared.email{
+                if firsMessage.senderEmail == Qiscus.client.email{
                     let footerCell = self.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterRight", for: indexPath) as! QChatFooterRight
                     return footerCell
                 }else{
@@ -260,7 +260,7 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                 if let viewDelegate = self.viewDelegate {
                     if  !Qiscus.sharedInstance.connected ||
                         !viewDelegate.viewDelegate(enableInfoAction: self) ||
-                        self.room!.type == .single || comment.senderEmail != QiscusMe.shared.email{
+                        self.room!.type == .single || comment.senderEmail != Qiscus.client.email{
                         return false
                     }else {
                         switch comment.status {
@@ -345,7 +345,7 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
             if let hideAvatar = self.configDelegate?.configDelegate?(hideLeftAvatarOn: self){
                 showAvatar = !hideAvatar
             }
-            if showAvatar && firstMessage.senderEmail != QiscusMe.shared.email && firstMessage.type != .system {
+            if showAvatar && firstMessage.senderEmail != Qiscus.client.email && firstMessage.type != .system {
                 height = 44
                 width = 44
             }
@@ -360,7 +360,7 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                 if let hideAvatar = self.configDelegate?.configDelegate?(hideLeftAvatarOn: self){
                     showAvatar = !hideAvatar
                 }
-                if showAvatar && firstMessage.senderEmail != QiscusMe.shared.email && firstMessage.type != .system {
+                if showAvatar && firstMessage.senderEmail != Qiscus.client.email && firstMessage.type != .system {
                     return UIEdgeInsets(top: 0, left: 6, bottom: -44, right: 0)
                 }
             }

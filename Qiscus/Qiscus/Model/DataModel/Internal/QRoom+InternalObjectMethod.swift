@@ -45,7 +45,7 @@ internal extension QRoom {
         let roomId = self.id
         QiscusBackgroundThread.async { autoreleasepool{
             let message: String = "0";
-            let channel = "r/\(roomId)/\(roomId)/\(QiscusMe.shared.email)/t"
+            let channel = "r/\(roomId)/\(roomId)/\(Qiscus.client.email)/t"
             
             Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
             }}
@@ -60,7 +60,7 @@ internal extension QRoom {
         let roomId = self.id
         QiscusBackgroundThread.async { autoreleasepool{
             let message: String = "1";
-            let channel = "r/\(roomId)/\(roomId)/\(QiscusMe.shared.email)/t"
+            let channel = "r/\(roomId)/\(roomId)/\(Qiscus.client.email)/t"
             Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
             }}
         if self.typingTimer != nil {
@@ -166,7 +166,7 @@ internal extension QRoom {
                 channels.append("r/\(room.id)/\(room.id)/+/t")
                 
                 for participant in room.participants{
-                    if participant.email != QiscusMe.shared.email {
+                    if participant.email != Qiscus.client.email {
                         channels.append("u/\(participant.email)/s")
                     }
                 }

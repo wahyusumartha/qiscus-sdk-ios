@@ -160,7 +160,7 @@ public class QConversationCollectionView: UICollectionView {
                 DispatchQueue.main.async {
                     self.messagesId = messages
                     self.reloadData()
-                    if comment.senderEmail == QiscusMe.shared.email || self.isLastRowVisible {
+                    if comment.senderEmail == Qiscus.client.email || self.isLastRowVisible {
                         self.layoutIfNeeded()
                         self.scrollToBottom(true)
                     }

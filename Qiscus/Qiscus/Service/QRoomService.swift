@@ -44,7 +44,7 @@ public class QRoomService:NSObject{
                         var needSync = false
                         for json in commentPayload.reversed() {
                             let commentId = json["id"].intValue
-                            if commentId <= QiscusMe.shared.lastCommentId {
+                            if commentId <= Qiscus.client.lastCommentId {
                                 r.saveNewComment(fromJSON: json)
                             }else{
                                 needSync = true
@@ -533,7 +533,7 @@ public class QRoomService:NSObject{
                     
                     QiscusService.session.upload(multipartFormData: {formData in
                         formData.append(data, withName: "file", fileName: filename, mimeType: mimeType)
-                        formData.append(QiscusMe.shared.token.data(using: .utf8)! , withName: "token")
+                        formData.append(Qiscus.client.token.data(using: .utf8)! , withName: "token")
                     }, with: urlUpload, encodingCompletion: {
                         encodingResult in
                         switch encodingResult{
@@ -693,7 +693,7 @@ public class QRoomService:NSObject{
                             var needSync = false
                             for newComment in comments {
                                 let comment = QComment.tempComment(fromJSON: newComment)
-                                if comment.id <= QiscusMe.shared.lastCommentId {
+                                if comment.id <= Qiscus.client.lastCommentId {
                                     if let rd = QRoom.threadSaveRoom(withId: comment.roomId){
                                         rd.saveOldComment(fromJSON: newComment)
                                     }

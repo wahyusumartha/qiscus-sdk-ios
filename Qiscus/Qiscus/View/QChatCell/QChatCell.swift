@@ -40,7 +40,7 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
         get{
             var foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor
             var underlineColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonLinkColor
-            if self.comment?.senderEmail == QiscusMe.shared.email{
+            if self.comment?.senderEmail == Qiscus.client.email{
                 foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor
                 underlineColorAttributeName = QiscusColorConfiguration.sharedInstance.rightBaloonLinkColor
             }
@@ -160,7 +160,7 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
         
         switch self.comment!.cellPos {
         case .single, .last:
-            if self.comment?.senderEmail == QiscusMe.shared.email {
+            if self.comment?.senderEmail == Qiscus.client.email {
                 balloonImage = Qiscus.style.assets.rightBallonLast
             }else{
                 edgeInset = UIEdgeInsetsMake(13, 28, 13, 13)
@@ -168,7 +168,7 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
             }
             break
         default:
-            if self.comment?.senderEmail == QiscusMe.shared.email {
+            if self.comment?.senderEmail == Qiscus.client.email {
                 balloonImage = Qiscus.style.assets.rightBallonNormal
             }else{
                 edgeInset = UIEdgeInsetsMake(13, 28, 13, 13)

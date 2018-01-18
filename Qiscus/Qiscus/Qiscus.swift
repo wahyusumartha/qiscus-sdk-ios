@@ -24,7 +24,8 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     
     static let sharedInstance = Qiscus()
     
-    static let qiscusVersionNumber:String = "2.6.2"
+    static let qiscusVersionNumber:String = "2.8.0"
+    public static let client = QiscusClient.shared
     
     public static var showDebugPrint = false
     public static var saveLog:Bool = false
@@ -102,7 +103,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     @objc public class var isLoggedIn:Bool{
         get{
-            return QiscusMe.isLoggedIn
+            return QiscusClient.isLoggedIn
         }
     }
     @objc public class var deviceToken:String{
@@ -165,7 +166,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }
         Qiscus.shared.mqtt?.disconnect()
         Qiscus.unRegisterPN()
-        QiscusMe.clear()
+        QiscusClient.clear()
         Qiscus.removeLogFile()
     }
     @objc public class func clearData(){
@@ -218,20 +219,20 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         QChatService.syncProcess()
     }
     @objc public class func setBaseURL(withURL url:String){
-        QiscusMe.shared.baseUrl = url
-        QiscusMe.shared.userData.set(url, forKey: "qiscus_base_url")
+        Qiscus.client.baseUrl = url
+        Qiscus.client.userData.set(url, forKey: "qiscus_base_url")
     }
     @objc public class func setAppId(appId:String){
-        QiscusMe.shared.appId = appId
-        QiscusMe.shared.userData.set(appId, forKey: "qiscus_appId")
+        Qiscus.client.appId = appId
+        Qiscus.client.userData.set(appId, forKey: "qiscus_appId")
     }
     @objc public class func setRealtimeServer(withServer server:String, port:Int = 1883, enableSSL:Bool = false){
-        QiscusMe.shared.realtimeServer = server
-        QiscusMe.shared.realtimePort = port
-        QiscusMe.shared.realtimeSSL = enableSSL
-        QiscusMe.shared.userData.set(server, forKey: "qiscus_realtimeServer")
-        QiscusMe.shared.userData.set(port, forKey: "qiscus_realtimePort")
-        QiscusMe.shared.userData.set(enableSSL, forKey: "qiscus_realtimeSSL")
+        Qiscus.client.realtimeServer = server
+        Qiscus.client.realtimePort = port
+        Qiscus.client.realtimeSSL = enableSSL
+        Qiscus.client.userData.set(server, forKey: "qiscus_realtimeServer")
+        Qiscus.client.userData.set(port, forKey: "qiscus_realtimePort")
+        Qiscus.client.userData.set(enableSSL, forKey: "qiscus_realtimeSSL")
     }
     public class func updateProfile(username:String? = nil, avatarURL:String? = nil, onSuccess:@escaping (()->Void), onFailed:@escaping ((String)->Void)) {
         QChatService.updateProfil(userName: username, userAvatarURL: avatarURL, onSuccess: onSuccess, onError: onFailed)
@@ -249,8 +250,8 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }
         var needLogin = false
         
-        if QiscusMe.isLoggedIn {
-            if email != QiscusMe.shared.email{
+        if QiscusClient.isLoggedIn {
+            if email != Qiscus.client.email{
                 needLogin = true
             }
         }else{
@@ -259,20 +260,20 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.setupReachability()
         if needLogin {
             Qiscus.clear()
-            QiscusMe.shared.appId = appId
-            QiscusMe.shared.userData.set(appId, forKey: "qiscus_appId")
+            Qiscus.client.appId = appId
+            Qiscus.client.userData.set(appId, forKey: "qiscus_appId")
             
-            QiscusMe.shared.userData.set(email, forKey: "qiscus_param_email")
-            QiscusMe.shared.userData.set(userKey, forKey: "qiscus_param_pass")
-            QiscusMe.shared.userData.set(username, forKey: "qiscus_param_username")
+            Qiscus.client.userData.set(email, forKey: "qiscus_param_email")
+            Qiscus.client.userData.set(userKey, forKey: "qiscus_param_pass")
+            Qiscus.client.userData.set(username, forKey: "qiscus_param_username")
             
-            if QiscusMe.shared.baseUrl == "" {
-                QiscusMe.shared.baseUrl = baseUrl
-                QiscusMe.shared.userData.set(baseUrl, forKey: "qiscus_base_url")
+            if Qiscus.client.baseUrl == "" {
+                Qiscus.client.baseUrl = baseUrl
+                Qiscus.client.userData.set(baseUrl, forKey: "qiscus_base_url")
             }
             
             if avatarURL != nil{
-                QiscusMe.shared.userData.set(avatarURL, forKey: "qiscus_param_avatar")
+                Qiscus.client.userData.set(avatarURL, forKey: "qiscus_param_avatar")
             }
             
             QiscusCommentClient.sharedInstance.loginOrRegister(userEmail, password: userKey, username: username, avatarURL: avatarURL)
@@ -628,7 +629,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                 token += String(format: "%02.2hhx", deviceToken[i] as CVarArg)
             }
             Qiscus.qiscusDeviceToken = token
-            QiscusMe.shared.deviceToken = token
+            Qiscus.client.deviceToken = token
             Qiscus.printLog(text: "Device token: \(token)")
             QiscusCommentClient.sharedInstance.registerDevice(withToken: token)
         }
@@ -656,7 +657,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                 tokenString += String(format: "%02.2hhx", token[i] as CVarArg)
             }
             Qiscus.qiscusDeviceToken = tokenString
-            QiscusMe.shared.deviceToken = tokenString
+            Qiscus.client.deviceToken = tokenString
             Qiscus.printLog(text: "Device token: \(tokenString)")
             QChatService.registerDevice(withToken: tokenString)
         }
@@ -712,17 +713,17 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                     deviceID = vendorIdentifier.uuidString
                 }
                 
-                let clientID = "iosMQTT-\(appName)-\(deviceID)-\(QiscusMe.shared.id)"
-                self.mqtt = CocoaMQTT(clientID: clientID, host: QiscusMe.shared.realtimeServer, port: UInt16(QiscusMe.shared.realtimePort))
+                let clientID = "iosMQTT-\(appName)-\(deviceID)-\(Qiscus.client.id)"
+                self.mqtt = CocoaMQTT(clientID: clientID, host: Qiscus.client.realtimeServer, port: UInt16(Qiscus.client.realtimePort))
                 self.mqtt!.username = ""
                 self.mqtt!.password = ""
                 self.mqtt!.cleanSession = true
-                self.mqtt!.willMessage = CocoaMQTTWill(topic: "u/\(QiscusMe.shared.email)/s", message: "0")
+                self.mqtt!.willMessage = CocoaMQTTWill(topic: "u/\(Qiscus.client.email)/s", message: "0")
                 self.mqtt!.keepAlive = 60
                 self.mqtt!.delegate = Qiscus.shared
-                self.mqtt!.enableSSL = QiscusMe.shared.realtimeSSL
+                self.mqtt!.enableSSL = Qiscus.client.realtimeSSL
                 
-                if QiscusMe.shared.realtimeSSL {
+                if Qiscus.client.realtimeSSL {
                     self.mqtt!.allowUntrustCACertificate = true
                 }
             }
@@ -810,7 +811,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                 QiscusBackgroundThread.async {autoreleasepool{
                     var message: String = "1";
                     
-                    let channel = "u/\(QiscusMe.shared.email)/s"
+                    let channel = "u/\(Qiscus.client.email)/s"
                     if offline {
                         message = "0"
                         
@@ -839,14 +840,14 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }
     }
     @objc func publishOnlineStatus(){
-        let channel = "u/\(QiscusMe.shared.email)/s"
+        let channel = "u/\(Qiscus.client.email)/s"
         let isActive = (Qiscus.sharedInstance.application.applicationState == UIApplicationState.active)
         if isActive {
             self.mqtt?.publish(channel, withString: "1", qos: .qos1, retained: true)
         }
     }
     func stopPublishOnlineStatus(){
-        let channel = "u/\(QiscusMe.shared.email)/s"
+        let channel = "u/\(Qiscus.client.email)/s"
         self.userStatusTimer?.invalidate()
         self.mqtt?.publish(channel, withString: "0", qos: .qos1, retained: true)
     }
@@ -868,12 +869,12 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     // MARK: - register PushNotification
     @objc public class func registerDevice(withToken deviceToken: String){
         Qiscus.qiscusDeviceToken = deviceToken
-        QiscusMe.shared.deviceToken = deviceToken
+        Qiscus.client.deviceToken = deviceToken
         QiscusCommentClient.sharedInstance.registerDevice(withToken: deviceToken)
     }
     @objc public class func unRegisterDevice(){
         Qiscus.qiscusDeviceToken = ""
-        QiscusMe.shared.deviceToken = ""
+        Qiscus.client.deviceToken = ""
         QiscusCommentClient.sharedInstance.unRegisterDevice()
     }
     public class func sync(cloud:Bool = false){
@@ -929,7 +930,7 @@ extension Qiscus:CocoaMQTTDelegate{
         let activeState = (state == .active)
         Qiscus.shared.connectingMQTT = false
         QiscusBackgroundThread.async {
-            let commentChannel = "\(QiscusMe.shared.token)/c"
+            let commentChannel = "\(Qiscus.client.token)/c"
             mqtt.subscribe(commentChannel, qos: .qos2)
             
             for channel in Qiscus.realtimeChannel{
@@ -957,9 +958,9 @@ extension Qiscus:CocoaMQTTDelegate{
                     let json = JSON(parseJSON:messageData)
                     let roomId = "\(json["room_id"])"
                     let commentId = json["id"].intValue
-                    if commentId > QiscusMe.shared.lastCommentId {
-                        if QiscusMe.shared.lastCommentId == 0 || QiscusMe.shared.lastKnownCommentId == 0 {
-                            QiscusMe.updateLastCommentId(commentId: commentId - 1)
+                    if commentId > Qiscus.client.lastCommentId {
+                        if Qiscus.client.lastCommentId == 0 || Qiscus.client.lastKnownCommentId == 0 {
+                            QiscusClient.updateLastCommentId(commentId: commentId - 1)
                         }
                         func syncData(){
                             QChatService.syncProcess()
@@ -969,7 +970,7 @@ extension Qiscus:CocoaMQTTDelegate{
                             let payload = json["payload"]
                             let type = payload["type"].stringValue
                             if type == "remove_member" || type == "left_room"{
-                                if payload["object_email"].stringValue == QiscusMe.shared.email {
+                                if payload["object_email"].stringValue == Qiscus.client.email {
                                     DispatchQueue.main.async {autoreleasepool{
                                         let comment = QComment.tempComment(fromJSON: json)
                                         
@@ -1033,7 +1034,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     let roomId = String(channelArr[2])
                     let userEmail:String = String(channelArr[3])
                     let data = (messageData == "0") ? "" : userEmail
-                    if userEmail != QiscusMe.shared.email {
+                    if userEmail != Qiscus.client.email {
                         DispatchQueue.main.async {autoreleasepool{
                             if let room = QRoom.room(withId: roomId) {
                                 if room.isInvalidated{ return }
@@ -1053,7 +1054,7 @@ extension Qiscus:CocoaMQTTDelegate{
                         let messageArr = messageData.split(separator: ":")
                         let commentId = Int(String(messageArr[0]))!
                         let userEmail = String(channelArr[3])
-                        if userEmail != QiscusMe.shared.email {
+                        if userEmail != Qiscus.client.email {
                             if let room = QRoom.threadSaveRoom(withId: roomId){
                                 if let participant = room.participant(withEmail: userEmail) {
                                     participant.updateLastDeliveredId(commentId: commentId)
@@ -1069,7 +1070,7 @@ extension Qiscus:CocoaMQTTDelegate{
                     let commentId = Int(String(messageArr[0]))!
                     
                     let userEmail = String(channelArr[3])
-                    if userEmail != QiscusMe.shared.email {
+                    if userEmail != Qiscus.client.email {
                         DispatchQueue.main.async { autoreleasepool{
                             if let room = QRoom.room(withId: roomId){
                                 let savedParticipant = room.participants.filter("email == '\(userEmail)'")
@@ -1096,7 +1097,7 @@ extension Qiscus:CocoaMQTTDelegate{
                         let userEmail = String(channelArr[1])
                         let presenceString = String(messageArr[0])
                         if let rawPresence = Int(presenceString){
-                            if userEmail != QiscusMe.shared.email{
+                            if userEmail != Qiscus.client.email{
                                 if let timeToken = Double(String(messageArr[1])){
                                     if let user = QUser.getUser(email: userEmail){
                                         user.updateLastSeen(lastSeen: Double(timeToken)/1000)
