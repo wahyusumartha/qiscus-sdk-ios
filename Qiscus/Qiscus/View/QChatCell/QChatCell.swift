@@ -76,6 +76,9 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
     @objc private func userNameChanged(_ notification: Notification) {
         if let userInfo = notification.userInfo {
             if let c = self.comment {
+                if c.isInvalidated {
+                    return
+                }
                 let userData = userInfo["user"] as! QUser
                 if c.senderEmail == userData.email {
                     self.updateUserName()
