@@ -60,6 +60,7 @@
 		39A142CE2003443B00A64953 /* QCardAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39A142CD2003443B00A64953 /* QCardAction.swift */; };
 		39BD59171EB2F1A3001AFB7C /* Qiscus.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 39BD59161EB2F1A3001AFB7C /* Qiscus.podspec */; };
 		39C929C71FB5583F0068EBF3 /* QiscusService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C929C61FB5583F0068EBF3 /* QiscusService.swift */; };
+		39D2A8B62017149F004D4EF7 /* QiscusClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D2A8B52017149F004D4EF7 /* QiscusClient.swift */; };
 		39E7542F1F5E7327003C3302 /* SearchResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E7542D1F5E7327003C3302 /* SearchResultVC.swift */; };
 		39E754301F5E7327003C3302 /* SearchResultVC.xib in Resources */ = {isa = PBXBuildFile; fileRef = 39E7542E1F5E7327003C3302 /* SearchResultVC.xib */; };
 		39E754331F5E84B0003C3302 /* SearchCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39E754311F5E84B0003C3302 /* SearchCell.swift */; };
@@ -158,7 +159,6 @@
 		39F7100E1F3D62FE00774D97 /* QiscusFileHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F7100A1F3D62FE00774D97 /* QiscusFileHelper.swift */; };
 		39F7100F1F3D62FE00774D97 /* QiscusGalleryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F7100B1F3D62FE00774D97 /* QiscusGalleryItem.swift */; };
 		39F710101F3D62FE00774D97 /* QiscusLinkData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F7100C1F3D62FE00774D97 /* QiscusLinkData.swift */; };
-		39F710111F3D62FE00774D97 /* QiscusMe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F7100D1F3D62FE00774D97 /* QiscusMe.swift */; };
 		39F710131F3D638F00774D97 /* ChatPreviewDocVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F710121F3D638F00774D97 /* ChatPreviewDocVC.swift */; };
 		39F710191F3D63B500774D97 /* ChatFileButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F710141F3D63B500774D97 /* ChatFileButton.swift */; };
 		39F7101A1F3D63B500774D97 /* ChatInputText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F710151F3D63B500774D97 /* ChatInputText.swift */; };
@@ -248,6 +248,7 @@
 		39A142CD2003443B00A64953 /* QCardAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QCardAction.swift; path = Qiscus/Model/QCardAction.swift; sourceTree = "<group>"; };
 		39BD59161EB2F1A3001AFB7C /* Qiscus.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Qiscus.podspec; sourceTree = "<group>"; };
 		39C929C61FB5583F0068EBF3 /* QiscusService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QiscusService.swift; path = Qiscus/Service/QiscusService.swift; sourceTree = "<group>"; };
+		39D2A8B52017149F004D4EF7 /* QiscusClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusClient.swift; path = Qiscus/Model/QiscusClient.swift; sourceTree = "<group>"; };
 		39E7542D1F5E7327003C3302 /* SearchResultVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchResultVC.swift; sourceTree = "<group>"; };
 		39E7542E1F5E7327003C3302 /* SearchResultVC.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchResultVC.xib; sourceTree = "<group>"; };
 		39E754311F5E84B0003C3302 /* SearchCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchCell.swift; sourceTree = "<group>"; };
@@ -349,7 +350,6 @@
 		39F7100A1F3D62FE00774D97 /* QiscusFileHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusFileHelper.swift; path = Qiscus/Model/QiscusFileHelper.swift; sourceTree = "<group>"; };
 		39F7100B1F3D62FE00774D97 /* QiscusGalleryItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusGalleryItem.swift; path = Qiscus/Model/QiscusGalleryItem.swift; sourceTree = "<group>"; };
 		39F7100C1F3D62FE00774D97 /* QiscusLinkData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusLinkData.swift; path = Qiscus/Model/QiscusLinkData.swift; sourceTree = "<group>"; };
-		39F7100D1F3D62FE00774D97 /* QiscusMe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QiscusMe.swift; path = Qiscus/Model/QiscusMe.swift; sourceTree = "<group>"; };
 		39F710121F3D638F00774D97 /* ChatPreviewDocVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChatPreviewDocVC.swift; path = Qiscus/View/ChatPreviewDocVC.swift; sourceTree = "<group>"; };
 		39F710141F3D63B500774D97 /* ChatFileButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChatFileButton.swift; path = Qiscus/View/Component/ChatFileButton.swift; sourceTree = "<group>"; };
 		39F710151F3D63B500774D97 /* ChatInputText.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChatInputText.swift; path = Qiscus/View/Component/ChatInputText.swift; sourceTree = "<group>"; };
@@ -661,7 +661,7 @@
 				39F7100A1F3D62FE00774D97 /* QiscusFileHelper.swift */,
 				39F7100B1F3D62FE00774D97 /* QiscusGalleryItem.swift */,
 				39F7100C1F3D62FE00774D97 /* QiscusLinkData.swift */,
-				39F7100D1F3D62FE00774D97 /* QiscusMe.swift */,
+				39D2A8B52017149F004D4EF7 /* QiscusClient.swift */,
 				39A142CD2003443B00A64953 /* QCardAction.swift */,
 				39A142C9200343E100A64953 /* QCard.swift */,
 			);
@@ -1097,6 +1097,7 @@
 				39F70FE01F3D619900774D97 /* QCellAudio.swift in Sources */,
 				39F70FAA1F3D5E8300774D97 /* QChatService.swift in Sources */,
 				39F70F911F3D5BBD00774D97 /* Background.swift in Sources */,
+				39D2A8B62017149F004D4EF7 /* QiscusClient.swift in Sources */,
 				39F7101C1F3D63B500774D97 /* QCardButton.swift in Sources */,
 				39F70FE71F3D619900774D97 /* QCellCardRight.swift in Sources */,
 				393BE6E11F70B1F90099AD80 /* QRoomListCell.swift in Sources */,
@@ -1112,7 +1113,6 @@
 				394D7A9F1F4E735300E69E1C /* QCellLocationRight.swift in Sources */,
 				39F70F961F3D5BBD00774D97 /* ViewController.swift in Sources */,
 				399BD7431FC3BDE000BCD069 /* QRoom+PublicProperty.swift in Sources */,
-				39F710111F3D62FE00774D97 /* QiscusMe.swift in Sources */,
 				39F70FA41F3D5D6F00774D97 /* QiscusUIConfiguration.swift in Sources */,
 				39F70F711F3D56F400774D97 /* QFile.swift in Sources */,
 				39F70F871F3D5B4400774D97 /* QSiriWaveView.swift in Sources */,
