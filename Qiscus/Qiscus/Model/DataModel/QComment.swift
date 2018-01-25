@@ -142,7 +142,13 @@ public class QComment:Object {
     @objc internal dynamic var rawExtra:String = ""
     // MARK : - Ignored Parameters
     var displayImage:UIImage?
-    public var delegate:QCommentDelegate?
+    public var delegate:QCommentDelegate?{
+        didSet{
+            if Thread.isMainThread {
+                QComment.cache[self.uniqueId] = self
+            }
+        }
+    }
     
     // audio variable
     @objc public dynamic var durationLabel = ""
