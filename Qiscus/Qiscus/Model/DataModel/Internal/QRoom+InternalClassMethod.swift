@@ -31,7 +31,6 @@ internal extension QRoom {
         if Thread.isMainThread {
             if let cache = Qiscus.chatRooms[id] {
                 if !cache.isInvalidated {
-                    cache.subscribeRoomChannel()
                     return cache
                 }else{
                     Qiscus.chatRooms[id] = nil
@@ -44,8 +43,6 @@ internal extension QRoom {
                 if !room.isInvalidated {
                     let room = rooms.first!
                     Qiscus.chatRooms[room.id] = room
-                    
-                    room.subscribeRoomChannel()
                     return room
                 }
             }

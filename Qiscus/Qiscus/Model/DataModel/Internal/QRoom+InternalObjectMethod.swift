@@ -165,12 +165,13 @@ internal extension QRoom {
                 channels.append("r/\(room.id)/\(room.id)/+/r")
                 channels.append("r/\(room.id)/\(room.id)/+/t")
                 
-                for participant in room.participants{
-                    if participant.email != QiscusMe.shared.email {
-                        channels.append("u/\(participant.email)/s")
+                if room.type == .single {
+                    for participant in room.participants{
+                        if participant.email != QiscusMe.shared.email {
+                            channels.append("u/\(participant.email)/s")
+                        }
                     }
                 }
-                
                 DispatchQueue.main.async {
                     for channel in channels{
                         if Qiscus.realtimeConnected {

@@ -20,7 +20,6 @@ public class QConversationCollectionView: UICollectionView {
                 let rid = r.id
                 Qiscus.chatRooms[r.id] = r
                 r.delegate = self
-                r.subscribeRealtimeStatus()
                 self.registerCell()
                 self.unsubscribeEvent()
                 self.subscribeEvent()

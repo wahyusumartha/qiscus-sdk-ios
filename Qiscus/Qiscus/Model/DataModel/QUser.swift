@@ -206,7 +206,7 @@ public class QUser:Object {
         if data.count > 0 {
             let user = data.first!
             user.cacheObject()
-            user.subscribeRealtimeStatus()
+//            user.subscribeRealtimeStatus()
             return user
         }
         return nil
