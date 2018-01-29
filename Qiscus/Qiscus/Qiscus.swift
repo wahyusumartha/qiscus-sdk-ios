@@ -247,7 +247,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         var needLogin = false
         
         if QiscusMe.isLoggedIn {
-            if email != QiscusMe.shared.email{
+            if email != QiscusMe.shared.email || appId != QiscusMe.shared.appId{
                 needLogin = true
             }
         }else{
