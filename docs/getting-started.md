@@ -16,7 +16,7 @@ To install Qiscus Chat SDK, you need to initiate pod to generate Podfile. You ca
  pod init
 ```
 
-After Podfile is initialized, open it and type 'Qiscus' in the pod section
+After Podfile is initialized, open it and type 'Qiscus' in the pod section, pod 'Qiscus' is supporting Swift 4
 
 ```swift
   target 'Sample' do
@@ -36,6 +36,12 @@ Install Qiscus through CocoaPods
 ```cmd
  pod install
 ```
+Install Qiscus SDK for Swift 3 simply replace pod 'Qiscus' section with this following code in Podfile : 
+
+```swift
+pod 'Qiscus', '~> 2.7.5'
+```
+
 ### Setting Permission
 
 Before to start, you need to enable some permission by implementing few line of codes inside Info.plist file, to allow your app accessing phone camera for sending images, enable sharing location on your device, and many other functionalities. You can do that by right clicking on your Info.plist file → Open As → Source Code, then add the following codes:
