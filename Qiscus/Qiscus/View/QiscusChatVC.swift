@@ -18,6 +18,13 @@ import CoreLocation
 //
 import RealmSwift
 
+@objc public protocol QiscusChatVCCellDelegate{
+    @objc optional func chatVC(viewController:QiscusChatVC, didTapLinkButtonWithURL url:URL )
+    @objc optional func chatVC(viewController:QiscusChatVC, cellForComment comment:QComment)->QChatCell?
+    @objc optional func chatVC(viewController:QiscusChatVC, heightForComment comment:QComment)->QChatCellHeight?
+    @objc optional func chatVC(viewController:QiscusChatVC, hideCellWith comment:QComment)->Bool
+}
+
 @objc public protocol QiscusChatVCConfigDelegate{
     @objc optional func chatVCConfigDelegate(userNameLabelColor viewController:QiscusChatVC, forUser user:QUser)->UIColor?
     @objc optional func chatVCConfigDelegate(hideLeftAvatarOn viewController:QiscusChatVC)->Bool
@@ -38,10 +45,6 @@ import RealmSwift
     @objc optional func chatVC(viewController:QiscusChatVC, willDisappear animated:Bool)
     
     @objc optional func chatVC(viewController:QiscusChatVC, willPostComment comment:QComment, room:QRoom?, data:Any?)->QComment?
-    
-    @objc optional func chatVC(viewController:QiscusChatVC, cellForComment comment:QComment)->QChatCell?
-    @objc optional func chatVC(viewController:QiscusChatVC, heightForComment comment:QComment)->QChatCellHeight?
-    @objc optional func chatVC(viewController:QiscusChatVC, hideCellWith comment:QComment)->Bool
 }
 
 public class QiscusChatVC: UIViewController{
@@ -84,6 +87,7 @@ public class QiscusChatVC: UIViewController{
     
     public var delegate:QiscusChatVCDelegate?
     public var configDelegate:QiscusChatVCConfigDelegate?
+    public var cellDelegate:QiscusChatVCCellDelegate?
     
     public var data:Any?
     
@@ -181,7 +185,6 @@ public class QiscusChatVC: UIViewController{
     var audioTimer: Timer?
     var activeAudioCell: QCellAudio?
     
-    var cellDelegate:QiscusChatCellDelegate?
     var loadingView = QLoadingViewController.sharedInstance
     
     var firstLoad = true
