@@ -196,11 +196,20 @@ internal extension QRoom {
                 channels.append("r/\(room.id)/\(room.id)/+/r")
                 channels.append("r/\(room.id)/\(room.id)/+/t")
                 
+                
+                if room.type == .single {
+                    for participant in room.participants{
+                        if participant.email != QiscusMe.shared.email {
+                            channels.append("u/\(participant.email)/s")
+                        }
+                    }
+                }
+                
                 DispatchQueue.global().async {autoreleasepool{
                     for channel in channels{
                         Qiscus.shared.mqtt?.unsubscribe(channel)
                     }
-                    }}
+                }}
             }
         }
         
