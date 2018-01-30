@@ -662,10 +662,10 @@ public class QiscusChatVC: UIViewController{
     @IBAction func showAttcahMenu(_ sender: UIButton) {
         self.showAttachmentMenu()
     }
-    override public func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
-        collectionView.collectionViewLayout.invalidateLayout()
-    }
+//    override public func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+//        super.viewWillTransition(to: size, with: coordinator)
+//        collectionView.collectionViewLayout.invalidateLayout()
+//    }
     
     @IBAction func doNothing(_ sender: Any) {}
     
