@@ -129,7 +129,9 @@ public class QiscusChatVC: UIViewController{
     public var chatRoom:QRoom?{
         didSet{
             if let room = self.chatRoom {
-                room.subscribeRealtimeStatus()
+                if !prefetch && isPresence {
+                    room.subscribeRealtimeStatus()
+                }
                 self.collectionView.room = self.chatRoom
             }
             if oldValue == nil && self.chatRoom != nil {
@@ -381,6 +383,7 @@ public class QiscusChatVC: UIViewController{
     override public func viewWillDisappear(_ animated: Bool) {
         if let room = self.chatRoom {
             room.readAll()
+            room.unsubscribeRoomChannel()
         }
         self.isPresence = false
         self.dataLoaded = false
@@ -411,6 +414,7 @@ public class QiscusChatVC: UIViewController{
                 QiscusBackgroundThread.async {
                     if let rts = QRoom.threadSaveRoom(withId: rid){
                         rts.readAll()
+                        rts.subscribeRoomChannel()
                     }
                 }
             }

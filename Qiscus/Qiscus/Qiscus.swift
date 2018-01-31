@@ -933,8 +933,8 @@ extension Qiscus:CocoaMQTTDelegate{
             let commentChannel = "\(Qiscus.client.token)/c"
             mqtt.subscribe(commentChannel, qos: .qos2)
             
-            for channel in Qiscus.realtimeChannel{
-                mqtt.subscribe(channel)
+            for room in QRoom.all() {
+                mqtt.subscribe("r/\(room.id)/\(room.id)/+/t")
             }
             Qiscus.realtimeConnected = true
             Qiscus.shared.mqtt = mqtt
@@ -1065,31 +1065,28 @@ extension Qiscus:CocoaMQTTDelegate{
                     
                     break
                 case "r":
-                    let roomId = String(channelArr[2])
-                    let messageArr = messageData.split(separator: ":")
-                    let commentId = Int(String(messageArr[0]))!
-                    
-                    let userEmail = String(channelArr[3])
-                    if userEmail != Qiscus.client.email {
-                        DispatchQueue.main.async { autoreleasepool{
-                            if let room = QRoom.room(withId: roomId){
-                                let savedParticipant = room.participants.filter("email == '\(userEmail)'")
-                                if savedParticipant.count > 0 {
-                                    let participant = savedParticipant.first!
-                                    participant.updateLastReadId(commentId: commentId)
+                    QiscusBackgroundThread.async {
+                        let roomId = String(channelArr[2])
+                        let messageArr = messageData.split(separator: ":")
+                        let commentUid = String(messageArr.last!)
+                        let commentId = Int(String(messageArr[0]))!
+                        let userEmail = String(channelArr[3])
+                        
+                        if QRoom.threadSaveRoom(withId: roomId) == nil { return }
+                        guard let c = QComment.threadSaveComment(withUniqueId: commentUid) else {return}
+                        if userEmail == Qiscus.client.email {
+                            c.read()
+                        }else{
+                            DispatchQueue.main.async {
+                                if let room = QRoom.room(withId: roomId){
+                                    if let participant = room.participants.filter("email == '\(userEmail)'").first {
+                                        participant.updateLastReadId(commentId: commentId)
+                                    }
                                 }
                             }
-                            }}
-                    }else{
-                        QiscusBackgroundThread.async { autoreleasepool{
-                            if let substring = messageArr.last {
-                                let uniqueId = String(substring)
-                                if let c = QComment.threadSaveComment(withUniqueId: uniqueId){
-                                    c.read()
-                                }
-                            }
-                            }}
+                        }
                     }
+                    
                     break
                 case "s":
                     QiscusBackgroundThread.async {
@@ -1175,7 +1172,6 @@ extension Qiscus { // Public class API to get room
             let allRoom = QRoom.all()
             var allView = [QiscusChatVC]()
             for room in allRoom {
-                room.subscribeRoomChannel()
                 if Qiscus.chatRooms[room.id] == nil {
                     Qiscus.chatRooms[room.id] = room
                 }
@@ -1203,7 +1199,6 @@ extension Qiscus { // Public class API to get room
         if Thread.isMainThread {
             let allRoom = QRoom.all()
             for room in allRoom {
-                room.subscribeRoomChannel()
                 if Qiscus.chatRooms[room.id] == nil {
                     Qiscus.chatRooms[room.id] = room
                 }
