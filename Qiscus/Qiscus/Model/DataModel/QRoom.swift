@@ -224,6 +224,8 @@ public class QRoom:Object {
         if fileName == "asset.jpg" || fileName == "asset.png" {
             fileName = "\(uniqueID).\(fileExt)"
         }
+        fileName = fileName.replacingOccurrences(of: "%", with: "")
+
         var payloadData:[AnyHashable : Any] = [
             "url" : fileName,
             "caption" : caption
@@ -250,7 +252,7 @@ public class QRoom:Object {
         file.roomId = self.id
         file.url = fileName
         file.senderEmail = Qiscus.client.email
-        file.filename = filename
+        file.filename = fileName
         
         if let fileData = data {
             let size = fileData.count
@@ -262,7 +264,7 @@ public class QRoom:Object {
                 "caption" : caption,
                 "size" : file.size,
                 "pages" : 0,
-                "file_name": filename
+                "file_name": fileName
             ]
         }
         
