@@ -243,7 +243,7 @@ public class QConversationCollectionView: UICollectionView {
             if room.isInvalidated { return }
             if let currentRoom = self.room {
                 if !currentRoom.isInvalidated {
-                    if currentRoom.id == currentRoom.id {
+                    if currentRoom.id == room.id {
                         self.messagesId = [[String]]()
                         self.reloadData()
                     }
