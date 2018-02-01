@@ -12,7 +12,7 @@ import UIKit
     @objc optional func didDeselect(room:QRoom)
     @objc optional func didSelect(comment: QComment)
     @objc optional func didDeselect(comment:QComment)
-    @objc optional func didReload() -> [QRoom]?
+    @objc optional func willLoad(rooms: [QRoom]) -> [QRoom]?
 }
 
 open class QRoomList: UITableView{
@@ -86,10 +86,11 @@ open class QRoomList: UITableView{
     }
     public func reload(){
         if !self.clearingData {
-            if let extRooms = self.listDelegate?.didReload?() {
+            let roomsData = QRoom.all()
+            if let extRooms = self.listDelegate?.willLoad?(rooms: roomsData) {
                 self.rooms = extRooms
             } else {
-                self.rooms = QRoom.all()
+                self.rooms = roomsData
             }
             
             let indexSet = IndexSet(integer: 0)
