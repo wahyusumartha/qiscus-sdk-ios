@@ -251,7 +251,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         var needLogin = false
         
         if QiscusClient.isLoggedIn {
-            if email != Qiscus.client.email{
+            if email != Qiscus.client.email || appId != Qiscus.client.appId{
                 needLogin = true
             }
         }else{
