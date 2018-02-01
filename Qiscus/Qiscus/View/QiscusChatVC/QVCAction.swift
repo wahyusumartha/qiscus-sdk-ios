@@ -480,7 +480,9 @@ extension QiscusChatVC {
                         type = .reply
                         self.replyData = nil
                     }
-                    let comment = chatRoom!.newComment(text: value, payload: payload, type: type)
+                    
+                    guard let chatRoomObj = chatRoom else {return}
+                    let comment = chatRoomObj.newComment(text: value, payload: payload, type: type)
                     self.postComment(comment: comment)
                     
                     self.inputText.clearValue()

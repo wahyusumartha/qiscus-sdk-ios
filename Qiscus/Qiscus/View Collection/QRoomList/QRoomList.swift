@@ -83,7 +83,7 @@ open class QRoomList: UITableView{
         let cell = self.dequeueReusableCell(withIdentifier: "searchDefaultCell", for: indexPath) as! QSearchListDefaultCell
         return cell
     }
-    public func reload(){
+    open func reload(){
         if !self.clearingData {
             self.rooms = QRoom.all()
             let indexSet = IndexSet(integer: 0)
