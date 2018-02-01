@@ -12,6 +12,7 @@ import UIKit
     @objc optional func didDeselect(room:QRoom)
     @objc optional func didSelect(comment: QComment)
     @objc optional func didDeselect(comment:QComment)
+    @objc optional func didReload() -> [QRoom]?
 }
 
 open class QRoomList: UITableView{
@@ -83,14 +84,19 @@ open class QRoomList: UITableView{
         let cell = self.dequeueReusableCell(withIdentifier: "searchDefaultCell", for: indexPath) as! QSearchListDefaultCell
         return cell
     }
-    open func reload(){
+    public func reload(){
         if !self.clearingData {
-            self.rooms = QRoom.all()
+            if let extRooms = self.listDelegate?.didReload?() {
+                self.rooms = extRooms
+            } else {
+                self.rooms = QRoom.all()
+            }
+            
             let indexSet = IndexSet(integer: 0)
             self.reloadSections(indexSet, with: .none)
         }
     }
-    
+
     public func search(text:String){
         self.searchText = text
         QChatService.searchComment(withQuery: text, onSuccess: { (comments) in
