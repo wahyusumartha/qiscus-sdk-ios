@@ -253,37 +253,39 @@ extension QiscusChatVC: QConversationViewCellDelegate{
         let action = card.defaultAction
         self.cellDelegate(didTapCardAction: action!)
     }
+    
     public func cellDelegate(didTapCardAction action: QCardAction) {
         if Qiscus.sharedInstance.connected{
             switch action.type {
             case .link:
                 let urlString = action.payload!["url"].stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
                 let urlArray = urlString.components(separatedBy: "/")
-                func openInBrowser(){
-                    if let url = URL(string: urlString) {
-                        UIApplication.shared.openURL(url)
-                    }
-                }
                 
-                if urlArray.count > 2 {
-                    if urlArray[2].lowercased().contains("instagram.com") {
-                        var instagram = "instagram://app"
-                        if urlArray.count == 4 || (urlArray.count == 5 && urlArray[4] == ""){
-                            let usernameIG = urlArray[3]
-                            instagram = "instagram://user?username=\(usernameIG)"
-                        }
-                        if let instagramURL =  URL(string: instagram) {
-                            if UIApplication.shared.canOpenURL(instagramURL) {
-                                UIApplication.shared.openURL(instagramURL)
-                            }else{
-                                openInBrowser()
-                            }
-                        }
+                if let url = URL(string: urlString) {
+                    if let overridedMethod = self.cellDelegate?.chatVC?(viewController: self, didTapLinkButtonWithURL: url){
+                        overridedMethod
                     }else{
-                        openInBrowser()
+                        if urlArray.count > 2 {
+                            if urlArray[2].lowercased().contains("instagram.com") {
+                                var instagram = "instagram://app"
+                                if urlArray.count == 4 || (urlArray.count == 5 && urlArray[4] == ""){
+                                    let usernameIG = urlArray[3]
+                                    instagram = "instagram://user?username=\(usernameIG)"
+                                }
+                                if let instagramURL =  URL(string: instagram) {
+                                    if UIApplication.shared.canOpenURL(instagramURL) {
+                                        UIApplication.shared.openURL(instagramURL)
+                                    }else{
+                                        UIApplication.shared.openURL(url)
+                                    }
+                                }
+                            }else{
+                                UIApplication.shared.openURL(url)
+                            }
+                        }else{
+                            UIApplication.shared.openURL(url)
+                        }
                     }
-                }else{
-                    openInBrowser()
                 }                
                 break
             default:

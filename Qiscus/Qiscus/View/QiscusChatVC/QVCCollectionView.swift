@@ -50,7 +50,7 @@ extension QiscusChatVC: QConversationViewDelegate {
         return false
     }
     public func viewDelegate(view:QConversationCollectionView, cellForComment comment:QComment)->QChatCell?{
-        if let delegate = self.delegate {
+        if let delegate = self.cellDelegate {
             if let cell = delegate.chatVC?(viewController: self, cellForComment: comment){
                 return cell
             }
@@ -58,7 +58,7 @@ extension QiscusChatVC: QConversationViewDelegate {
         return nil
     }
     public func viewDelegate(view:QConversationCollectionView, heightForComment comment:QComment)->QChatCellHeight?{
-        if let delegate = self.delegate {
+        if let delegate = self.cellDelegate {
             if let height = delegate.chatVC?(viewController: self, heightForComment: comment){
                 return height
             }
@@ -104,7 +104,7 @@ extension QiscusChatVC: QConversationViewDelegate {
         }
     }
     public func viewDelegate(view:QConversationCollectionView, hideCellWith comment:QComment)->Bool{
-        if let delegate = self.delegate {
+        if let delegate = self.cellDelegate {
             if let hide = delegate.chatVC?(viewController: self, hideCellWith: comment) {
                 return hide
             }
