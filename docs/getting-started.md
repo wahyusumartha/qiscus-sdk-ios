@@ -25,7 +25,7 @@ After Podfile is initialized, open it and type 'Qiscus' in the pod section
   use_frameworks!
 
   .....
-  pod 'Qiscus'
+  pod 'Qiscus', '~> 2.7.5'
   .....
 
 end
