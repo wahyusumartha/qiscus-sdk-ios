@@ -65,7 +65,7 @@ public class QParticipant:Object {
                             room.lastDeliveredCommentId = lastDeliveredId
                         }
                         
-                        let data = room.comments.filter("id != 0 AND id <= \(lastDeliveredId) AND statusRaw < \(QCommentStatus.delivered.rawValue) AND statusRaw != \(QCommentStatus.sending.rawValue) AND statusRaw != \(QCommentStatus.pending.rawValue)")
+                        let data = room.rawComments.filter("id != 0 AND id <= \(lastDeliveredId) AND statusRaw < \(QCommentStatus.delivered.rawValue) AND statusRaw != \(QCommentStatus.sending.rawValue) AND statusRaw != \(QCommentStatus.pending.rawValue)")
                         for c in data {
                             c.updateStatus(status: .delivered)
                             if c.id == room.lastCommentId {
@@ -120,7 +120,7 @@ public class QParticipant:Object {
                             try! realm.write {
                                 room.lastDeliveredCommentId = lastDelivered
                             }
-                            let data = room.comments.filter("id != 0 AND id <= \(lastDelivered) AND statusRaw < \(QCommentStatus.delivered.rawValue) AND statusRaw != \(QCommentStatus.sending.rawValue) AND statusRaw != \(QCommentStatus.pending.rawValue)")
+                            let data = room.rawComments.filter("id != 0 AND id <= \(lastDelivered) AND statusRaw < \(QCommentStatus.delivered.rawValue) AND statusRaw != \(QCommentStatus.sending.rawValue) AND statusRaw != \(QCommentStatus.pending.rawValue)")
                             for c in data {
                                 c.updateStatus(status: .delivered)
                                 if c.id == room.lastCommentId {
@@ -142,7 +142,7 @@ public class QParticipant:Object {
                             try! realm.write {
                                 room.lastReadCommentId = lastRead
                             }
-                            let data = room.comments.filter("id != 0 AND id <= \(lastRead) AND statusRaw < \(QCommentStatus.read.rawValue) AND statusRaw != \(QCommentStatus.sending.rawValue) AND statusRaw != \(QCommentStatus.pending.rawValue)")
+                            let data = room.rawComments.filter("id != 0 AND id <= \(lastRead) AND statusRaw < \(QCommentStatus.read.rawValue) AND statusRaw != \(QCommentStatus.sending.rawValue) AND statusRaw != \(QCommentStatus.pending.rawValue)")
                             for c in data {
                                 c.updateStatus(status: .read)
                                 if c.id == room.lastCommentId {

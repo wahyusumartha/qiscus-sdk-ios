@@ -100,8 +100,8 @@ internal extension QRoom {
                             room.lastDeliveredCommentId = lastDeliveredId
                         }
                     }
-                    let deliveredData = room.comments.filter("id != 0 AND id <= \(room.lastDeliveredCommentId) AND statusRaw < \(QCommentStatus.delivered.rawValue) ")
-                    let readData = room.comments.filter("id != 0 AND id <= \(room.lastReadCommentId) AND statusRaw < \(QCommentStatus.read.rawValue) ")
+                    let deliveredData = room.rawComments.filter("id != 0 AND id <= \(room.lastDeliveredCommentId) AND statusRaw < \(QCommentStatus.delivered.rawValue) ")
+                    let readData = room.rawComments.filter("id != 0 AND id <= \(room.lastReadCommentId) AND statusRaw < \(QCommentStatus.read.rawValue) ")
                     
                     for c in deliveredData {
                         c.updateStatus(status: .delivered)
@@ -220,7 +220,7 @@ internal extension QRoom {
         QiscusDBThread.sync {
             if let room = QRoom.threadSaveRoom(withId: id) {
                 let predicate = NSPredicate(format: "uniqueId = %@", cUniqueId)
-                if room.comments.filter(predicate).count > 0 {
+                if room.rawComments.filter(predicate).count > 0 {
                     Qiscus.printLog(text: "fail to add newComment, comment with same uniqueId already exist")
                     return
                 }
@@ -243,7 +243,7 @@ internal extension QRoom {
                 if onTop{
                     try! realm.write {
                         realm.add(newComment, update: true)
-                        room.comments.insert(newComment, at: 0)
+                        room.rawComments.insert(newComment, at: 0)
                     }
                     if room.lastComment == nil {
                         room.updateLastComentInfo(comment: newComment)
@@ -252,7 +252,7 @@ internal extension QRoom {
                 else{
                     try! realm.write {
                         realm.add(newComment, update: true)
-                        room.comments.append(newComment)
+                        room.rawComments.append(newComment)
                     }
                     room.updateLastComentInfo(comment: newComment)
                 }

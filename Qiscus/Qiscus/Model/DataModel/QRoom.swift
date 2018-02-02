@@ -77,7 +77,16 @@ public class QRoom:Object {
     @objc internal dynamic var lastParticipantsDeliveredId:Int = 0
     @objc internal dynamic var roomVersion014:Bool = true
     
-    public let comments = List<QComment>()
+    internal let rawComments = List<QComment>()
+    public var comments:[QComment]{
+        get{
+            var comments = [QComment]()
+            if self.rawComments.count > 0 {
+                comments = Array(self.rawComments.sorted(byKeyPath: "createdAt", ascending: true))
+            }
+            return comments
+        }
+    }
     public let participants = List<QParticipant>()
     
     public var delegate:QRoomDelegate?
@@ -400,7 +409,7 @@ public class QRoom:Object {
     }
     internal func resendPendingMessage(){
         let id = self.id
-        let pendingMessages = self.comments.filter("statusRaw == %d", QCommentStatus.pending.rawValue)
+        let pendingMessages = self.rawComments.filter("statusRaw == %d", QCommentStatus.pending.rawValue)
         let service = QRoomService()
         if pendingMessages.count > 0 {
             for pendingMessage in pendingMessages {
@@ -485,11 +494,11 @@ public class QRoom:Object {
         QiscusDBThread.async {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             if let r = QRoom.threadSaveRoom(withId: id){
-                var i = r.comments.count - 1
-                for c in r.comments.reversed() {
+                var i = r.rawComments.count - 1
+                for c in r.rawComments.reversed() {
                     if c.uniqueId == cUid {
                         try! realm.write {
-                            r.comments.remove(at: i)
+                            r.rawComments.remove(at: i)
                             realm.delete(c)
                         }
                         if Thread.isMainThread {
@@ -566,8 +575,8 @@ public class QRoom:Object {
         let id = self.id
         QiscusDBThread.async {
             if let room = QRoom.threadSaveRoom(withId: id){
-                if room.comments.count > 0 {
-                    let unreadComment = room.comments.filter("isRead == false")
+                if room.rawComments.count > 0 {
+                    let unreadComment = room.rawComments.filter("isRead == false")
                     let unread = unreadComment.count
                         
                     if room.unreadCount != unread {
@@ -609,7 +618,7 @@ public class QRoom:Object {
         QiscusBackgroundThread.async {
             if let room = QRoom.threadSaveRoom(withId: roomId){
                 if readId > room.lastParticipantsReadId {
-                    for comment in room.comments{
+                    for comment in room.rawComments{
                         if (comment.statusRaw < QCommentStatus.read.rawValue && comment.status != .failed && comment.status != .sending && comment.status != .pending && comment.id < readId) || comment.id == readId{
                             comment.updateStatus(status: .read)
                         }
@@ -629,7 +638,7 @@ public class QRoom:Object {
         QiscusDBThread.async {
             if let room = QRoom.threadSaveRoom(withId: roomId){
                 if deliveredId > room.lastParticipantsDeliveredId {                    
-                    for comment in room.comments{
+                    for comment in room.rawComments{
                         if (comment.statusRaw < QCommentStatus.delivered.rawValue && comment.status != .failed && comment.status != .sending && comment.id < deliveredId) || (comment.id == deliveredId && comment.status != .read){
                             if !comment.isInvalidated {
                                 comment.updateStatus(status: .delivered)
@@ -908,7 +917,7 @@ public class QRoom:Object {
         realm.refresh()
         
         try! realm.write {
-            self.comments.removeAll()
+            self.rawComments.removeAll()
         }
         DispatchQueue.main.async {
             if let room = QRoom.room(withId: id){

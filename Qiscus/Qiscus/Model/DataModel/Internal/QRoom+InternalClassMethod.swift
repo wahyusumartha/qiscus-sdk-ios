@@ -275,7 +275,7 @@ internal extension QRoom {
                     }
                 }
                 try! realm.write {
-                    r.comments.removeAll()
+                    r.rawComments.removeAll()
                 }
                 for participant in r.participants {
                     if !participant.isInvalidated {
