@@ -36,6 +36,7 @@ Install Qiscus through CocoaPods
 ```cmd
  pod install
 ```
+
 Install Qiscus SDK for Swift 3 simply replace pod 'Qiscus' section with this following code in Podfile : 
 
 ```swift
