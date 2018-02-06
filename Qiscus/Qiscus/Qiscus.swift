@@ -705,7 +705,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     internal func mqttConnect(){
         if Qiscus.shared.connectingMQTT { return }
         Qiscus.shared.connectingMQTT = true
-//        QiscusBackgroundThread.async {
+        QiscusBackgroundThread.async {
             if self.mqtt == nil {
                 let appName = Bundle.main.infoDictionary![kCFBundleNameKey as String] as! String
                 var deviceID = "000"
@@ -727,15 +727,8 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
                     self.mqtt!.allowUntrustCACertificate = true
                 }
             }
-        print("mqtt host: \(self.mqtt!.host)")
-        print("mqtt port: \(self.mqtt!.port)")
-        print("mqtt clientId: \(self.mqtt!.clientID)")
-        print("mqtt state: \(self.mqtt!.connState)")
-        print("mqtt delegate: \(self.mqtt!.delegate != nil)")
-        print("mqtt ssl: \(self.mqtt!.enableSSL)")
-        
             self.mqtt!.connect()
-//        }
+        }
     }
     class func mqttConnect(chatOnly:Bool = false){
         QiscusBackgroundThread.asyncAfter(deadline: .now() + 1.0) {
@@ -1031,21 +1024,34 @@ extension Qiscus:CocoaMQTTDelegate{
                     
                     break
                 case "t":
-                    let roomId = String(channelArr[2])
-                    let userEmail:String = String(channelArr[3])
-                    let data = (messageData == "0") ? "" : userEmail
-                    if userEmail != Qiscus.client.email {
-                        DispatchQueue.main.async {autoreleasepool{
-                            if let room = QRoom.room(withId: roomId) {
-                                if room.isInvalidated{ return }
-                                if let user = QUser.user(withEmail: userEmail){
-                                    if user.isInvalidated { return }
-                                    let typing = (messageData == "0") ? false : true
-                                    QiscusNotification.publish(userTyping: user, room: room, typing: typing)
+                    QiscusBackgroundThread.async {
+                        let roomId = String(channelArr[2])
+                        let userEmail:String = String(channelArr[3])
+                        let data = (messageData == "0") ? "" : userEmail
+                        
+                        
+                        func startTypingNotification(){
+                            DispatchQueue.main.async {
+                                if let room = QRoom.room(withId: roomId) {
+                                    if room.isInvalidated{ return }
+                                    if let user = QUser.user(withEmail: userEmail){
+                                        if user.isInvalidated { return }
+                                        let typing = (messageData == "0") ? false : true
+                                        QiscusNotification.publish(userTyping: user, room: room, typing: typing)
+                                    }
+                                    room.updateUserTyping(userEmail: data)
                                 }
-                                room.updateUserTyping(userEmail: data)
                             }
-                            }}
+                        }
+                        
+                        if userEmail != Qiscus.client.email {
+                            if let r = QRoom.threadSaveRoom(withId: roomId){
+                                if r.isInvalidated { return }
+                                if QUser.getUser(email: userEmail) != nil {
+                                    startTypingNotification()
+                                }
+                            }
+                        }
                     }
                     break
                 case "d":

@@ -59,12 +59,10 @@ open class QRoomListCell: UITableViewCell {
             if room.isInvalidated || user.isInvalidated {
                 return
             }
-            if let currentRoom = self.room {
-                if currentRoom.isInvalidated { return }
-            }
-            if self.room?.id == room.id {
-                self.onUserTyping(user: user, typing: typing)
-            }
+            guard let currentRoom = self.room else { return }
+            if currentRoom.isInvalidated { return }
+            if self.room?.id != room.id { return}
+            self.onUserTyping(user: user, typing: typing)
         }
     }
     @objc private func newCommentNotif(_ notification: Notification){

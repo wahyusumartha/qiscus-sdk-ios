@@ -693,20 +693,38 @@ public class QComment:Object {
     // MARK : updater method
     public func updateStatus(status:QCommentStatus){
         let uId = self.uniqueId
+        
+        func update (c:QComment){
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
+            try! realm.write {
+                c.statusRaw = status.rawValue
+            }
+            DispatchQueue.main.async {
+                if let cache = QComment.cache[uId]{
+                    QiscusNotification.publish(messageStatus: cache, status: status)
+                    cache.delegate?.comment(didChangeStatus: cache, status: status)
+                }
+            }
+        }
         QiscusDBThread.async {
             if let c = QComment.threadSaveComment(withUniqueId: uId){
-                if c.status != status {
-                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-                    realm.refresh()
-                    try! realm.write {
-                        c.statusRaw = status.rawValue
+                if c.status == status { return }
+                switch c.status {
+                case .read: break
+                case .sent:
+                    if status == .delivered || status == .read {
+                        update(c: c)
                     }
-                    DispatchQueue.main.async {
-                        if let cache = QComment.cache[uId]{
-                            QiscusNotification.publish(messageStatus: cache, status: status)
-                            cache.delegate?.comment(didChangeStatus: cache, status: status)
-                        }
+                    break
+                case .delivered:
+                    if status == .read {
+                        update(c: c)
                     }
+                    break
+                default:
+                    update(c: c)
+                    break
                 }
             }
         }
