@@ -24,7 +24,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     
     static let sharedInstance = Qiscus()
     
-    static let qiscusVersionNumber:String = "2.8.1"
+    static let qiscusVersionNumber:String = "2.8.2"
     public static let client = QiscusClient.shared
     
     public static var showDebugPrint = false
@@ -926,6 +926,9 @@ extension Qiscus:CocoaMQTTDelegate{
             let commentChannel = "\(Qiscus.client.token)/c"
             mqtt.subscribe(commentChannel, qos: .qos2)
             
+            let eventChannel = "\(Qiscus.client.token)/n"
+            mqtt.subscribe(eventChannel, qos: .qos2)
+            
             for room in QRoom.all() {
                 mqtt.subscribe("r/\(room.id)/\(room.id)/+/t")
             }
@@ -947,6 +950,17 @@ extension Qiscus:CocoaMQTTDelegate{
                 let channelArr = message.topic.split(separator: "/")
                 let lastChannelPart = String(channelArr.last!)
                 switch lastChannelPart {
+                case "n":
+                    QiscusBackgroundThread.async {
+                        let json = JSON(parseJSON:messageData)
+                        let eventId = "\(json["id"])"
+                        let lastEventId = Int64(Qiscus.client.lastEventId)
+                        if Qiscus.client.lastEventId == "" || lastEventId == nil{
+                            QiscusClient.update(lastEventId: eventId)
+                        }
+                        Qiscus.syncEvent()
+                    }
+                    break
                 case "c":
                     let json = JSON(parseJSON:messageData)
                     let roomId = "\(json["room_id"])"
@@ -1421,5 +1435,8 @@ extension Qiscus { // Public class API to get room
     
     public class func backgroundSync(){
         QChatService.backgroundSync()
+    }
+    public class func syncEvent(){
+        QChatService.syncEvent()
     }
 }

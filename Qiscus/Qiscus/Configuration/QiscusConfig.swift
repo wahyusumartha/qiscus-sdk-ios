@@ -80,7 +80,11 @@ open class QiscusConfig: NSObject {
     internal class var SYNC_URL:String{
         get{
             return "\(QiscusConfig.sharedInstance.BASE_API_URL)/sync"
-    
+        }
+    }
+    internal class var SYNC_EVENT_URL:String{
+        get{
+            return "\(QiscusConfig.sharedInstance.BASE_API_URL)/sync_event"
         }
     }
     internal class var SEARCH_URL:String{
@@ -111,6 +115,11 @@ open class QiscusConfig: NSObject {
     }
     internal class var UPDATE_ROOM_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_API_URL)/update_room"
+    }
+    internal class var DELETE_MESSAGES:String{
+        get{
+            return "\(QiscusConfig.sharedInstance.BASE_API_URL)/delete_messages"
+        }
     }
     internal class var UPDATE_COMMENT_STATUS_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_API_URL)/update_comment_status"

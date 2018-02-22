@@ -20,7 +20,7 @@ import UIKit
     func viewDelegate(enableForwardAction view:QConversationCollectionView)->Bool
     func viewDelegate(enableInfoAction view:QConversationCollectionView)->Bool
     
-    @objc optional func viewDelegate(view:QConversationCollectionView, cellForComment comment:QComment)->QChatCell?
+    @objc optional func viewDelegate(view:QConversationCollectionView, cellForComment comment:QComment, indexPath:IndexPath)->QChatCell?
     @objc optional func viewDelegate(view:QConversationCollectionView, heightForComment comment:QComment)->QChatCellHeight?
     @objc optional func viewDelegate(view:QConversationCollectionView, willDisplayCellForComment comment:QComment, cell:QChatCell, indexPath:IndexPath)
     @objc optional func viewDelegate(view:QConversationCollectionView, didEndDisplayingCellForComment comment:QComment, cell:QChatCell, indexPath:IndexPath)
@@ -28,6 +28,8 @@ import UIKit
     @objc optional func viewDelegate(willDisplayLastMessage view:QConversationCollectionView, comment:QComment)
     @objc optional func viewDelegate(view:QConversationCollectionView, hideCellWith comment:QComment)->Bool
     @objc optional func viewDelegate(view:QConversationCollectionView, didLoadData messages:[[String]])
+    
+    @objc optional func viewDelegate(usingSoftDeleteOnView view:QConversationCollectionView)->Bool
 }
 @objc public protocol QConversationViewRoomDelegate{
     @objc optional func roomDelegate(didChangeName room: QRoom, name:String)
@@ -63,4 +65,5 @@ import UIKit
     @objc optional func configDelegate(userNameLabelColor collectionView:QConversationCollectionView, forUser user:QUser)->UIColor?
     @objc optional func configDelegate(hideLeftAvatarOn collectionView:QConversationCollectionView)->Bool
     @objc optional func configDelegate(hideUserNameLabel collectionView:QConversationCollectionView, forUser user:QUser)->Bool
+    @objc optional func configDelegate(deletedMessageText collectionView:QConversationCollectionView, selfMessage isSelf:Bool)->String
 }

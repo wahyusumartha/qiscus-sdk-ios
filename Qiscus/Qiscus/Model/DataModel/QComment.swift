@@ -89,6 +89,9 @@ public enum QReplyType:Int{
     case delivered
     case read
     case failed
+    case deleting
+    case deletePending
+    case deleted
 }
 @objc public protocol QCommentDelegate {
     func comment(didChangeStatus comment:QComment, status:QCommentStatus)
@@ -273,6 +276,9 @@ public class QComment:Object {
             if self.senderEmail == Qiscus.client.email {
                 position = "Right"
             }
+            if self.status == .deleted {
+                return "cellDeleted\(position)"
+            }
             switch self.type {
             case .system:
                 return "cellSystem"
@@ -327,7 +333,7 @@ public class QComment:Object {
             if self.type == .location {
                 maxWidth = 204
             }else if self.type == .carousel{
-                maxWidth = (QiscusHelper.screenWidth() * 0.60) - 8
+                maxWidth = (QiscusHelper.screenWidth() * 0.70) - 8
             }
             if self.type != .carousel {
                 textView.attributedText = attributedText
@@ -697,6 +703,7 @@ public class QComment:Object {
         func update (c:QComment){
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             realm.refresh()
+            if c.isInvalidated {return}
             try! realm.write {
                 c.statusRaw = status.rawValue
             }
@@ -711,7 +718,17 @@ public class QComment:Object {
             if let c = QComment.threadSaveComment(withUniqueId: uId){
                 if c.status == status { return }
                 switch c.status {
-                case .read: break
+                case .read:
+                    if (status == .deleting || status == .deletePending || status == .deleted){
+                        update(c: c)
+                    }
+                    break
+                case .deleted: break
+                case .deleting, .deletePending:
+                    if  (status != c.status) && ( status == .deletePending || status == .deleted || status == .deleting){
+                        update(c: c)
+                    }
+                    break
                 case .sent:
                     if status == .delivered || status == .read {
                         update(c: c)
@@ -734,11 +751,13 @@ public class QComment:Object {
         if self.cellPos != cellPos {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             realm.refresh()
+            if self.isInvalidated { return }
             try! realm.write {
                 self.cellPosRaw = cellPos.rawValue
             }
             func execute(){
                 if let cache = QComment.cache[uId] {
+                    if cache.isInvalidated { return }
                     cache.delegate?.comment(didChangePosition: cache, position: cellPos)
                 }
             }
@@ -1281,6 +1300,32 @@ public class QComment:Object {
         }else{
             Qiscus.printLog(text: "invalid json object")
             return nil
+        }
+    }
+    public func delete(forMeOnly forMe:Bool = false, hardDelete:Bool = false, onSuccess: @escaping ()->Void, onError: @escaping (Int?)->Void){
+        let uid = self.uniqueId
+        let roomId = self.roomId
+        QiscusBackgroundThread.async {
+            if let c = QComment.threadSaveComment(withUniqueId: uid) {
+                c.updateStatus(status: .deleting)
+                QRoomService.delete(messagesWith: [uid], forMe: forMe, hardDelete: hardDelete, onSuccess: { (uids) in
+                    if uids.contains(uid){
+                        DispatchQueue.main.async {
+                            onSuccess()
+                        }
+                        
+                    }
+                }, onError: { (uids, statusCode) in
+                    if uids.contains(uid){
+                        if let comment = QComment.threadSaveComment(withUniqueId: uid){
+                            comment.updateStatus(status: .deletePending)
+                        }
+                    }
+                    DispatchQueue.main.async {
+                        onError(statusCode)
+                    }
+                })
+            }
         }
     }
 }

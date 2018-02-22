@@ -78,6 +78,7 @@ public class QRoom:Object {
     @objc internal dynamic var roomVersion015:Bool = true
     
     internal let rawComments = List<QComment>()
+    
     public var comments:[QComment]{
         get{
             var comments = [QComment]()
@@ -87,6 +88,20 @@ public class QRoom:Object {
             return comments
         }
     }
+    public func comments(withFilter query:NSPredicate?)->[QComment]{
+        var comments = [QComment]()
+        var results = self.rawComments.sorted(byKeyPath: "createdAt", ascending: true)
+
+        if query != nil {
+            results = results.filter(query!)
+        }
+        
+        if results.count > 0 {
+            comments = Array(results)
+        }
+        return comments
+    }
+    
     public let participants = List<QParticipant>()
     
     public var delegate:QRoomDelegate?

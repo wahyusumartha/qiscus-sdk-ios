@@ -10,10 +10,8 @@ import RealmSwift
 
 public extension QRoom {
     
-    public var grouppedCommentsUID:[[String]]{
-        get{
-            return self.getGrouppedCommentsUID()
-        }
+    public func grouppedCommentsUID(filter:NSPredicate? = nil)->[[String]]{
+        return self.getGrouppedCommentsUID(filter:filter)
     }
     public var canLoadMore:Bool{
         get{

@@ -67,6 +67,7 @@ open class QiscusClient: NSObject {
     public var realtimeSSL:Bool = false
     
     public var lastCommentId = Int(0)
+    public var lastEventId = ""
     public var lastKnownCommentId = Int(0)
     
     public var paramEmail = ""
@@ -121,6 +122,9 @@ open class QiscusClient: NSObject {
         }
         if let lastComment = userData.value(forKey: "qiscus_lastComment_id") as? Int{
             self.lastCommentId = lastComment
+        }
+        if let lastEvent = userData.value(forKey: "qiscus_lastEvent_id") as? String{
+            self.lastEventId = lastEvent
         }
         if let lastComment = userData.value(forKey: "qiscus_lastKnownComment_id") as? Int{
             self.lastKnownCommentId = lastComment
@@ -200,7 +204,7 @@ open class QiscusClient: NSObject {
             Qiscus.client.userData.set(commentId, forKey: "qiscus_lastKnownComment_id")
         }
     }
-    open class func clear(){
+    public class func clear(){
         Qiscus.client.id = 0
         Qiscus.client.email = ""
         Qiscus.client.userName = ""
@@ -208,6 +212,7 @@ open class QiscusClient: NSObject {
         Qiscus.client.rtKey = ""
         Qiscus.client.token = ""
         Qiscus.client.lastCommentId = 0
+        Qiscus.client.lastEventId = ""
         
         Qiscus.client.userData.removeObject(forKey: "qiscus_id")
         Qiscus.client.userData.removeObject(forKey: "qiscus_email")
@@ -217,6 +222,26 @@ open class QiscusClient: NSObject {
         Qiscus.client.userData.removeObject(forKey: "qiscus_token")
         Qiscus.client.userData.removeObject(forKey: "qiscus_lastComment_id")
         Qiscus.client.userData.removeObject(forKey: "qiscus_lastKnownComment_id")
+        Qiscus.client.userData.removeObject(forKey: "qiscus_lastEvent_id")
+    }
+    
+    public class func update(lastEventId eventId: String){
+        guard let newId = Int64(eventId) else {return}
+        if Qiscus.client.lastEventId == "" {
+            Qiscus.client.lastEventId = eventId
+            Qiscus.client.userData.set(eventId, forKey: "qiscus_lastEvent_id")
+        }else{
+            if let currentId = Int64(Qiscus.client.lastEventId) {
+                if currentId < newId {
+                    Qiscus.client.lastEventId = eventId
+                    Qiscus.client.userData.set(eventId, forKey: "qiscus_lastEvent_id")
+                }
+            } else { 
+                Qiscus.client.lastEventId = eventId
+                Qiscus.client.userData.set(eventId, forKey: "qiscus_lastEvent_id")
+            }
+            
+        }
     }
 }
 

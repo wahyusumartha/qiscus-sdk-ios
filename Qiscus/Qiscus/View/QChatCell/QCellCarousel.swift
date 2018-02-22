@@ -119,7 +119,7 @@ extension QCellCarousel: UICollectionViewDelegateFlowLayout {
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if let c = self.comment {
             var size = c.textSize
-            size.width = QiscusHelper.screenWidth() * 0.60
+            size.width = QiscusHelper.screenWidth() * 0.70
             size.height += 30
             return size
         }

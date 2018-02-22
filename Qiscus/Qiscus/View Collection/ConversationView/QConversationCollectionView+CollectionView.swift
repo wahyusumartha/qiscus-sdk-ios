@@ -37,7 +37,7 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                     comment = c
                 }
             }
-            if let cell = self.viewDelegate?.viewDelegate?(view: self, cellForComment: comment){
+            if let cell = self.viewDelegate?.viewDelegate?(view: self, cellForComment: comment, indexPath: indexPath){
                 return cell
             }else{
                 var cell = collectionView.dequeueReusableCell(withReuseIdentifier: comment.cellIdentifier, for: indexPath) as! QChatCell
@@ -60,8 +60,9 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                 if let hideAvatar = self.configDelegate?.configDelegate?(hideLeftAvatarOn: self){
                     showAvatar = !hideAvatar
                 }
-                cell.setData(comment: comment, showUserName: showName, userNameColor: color, hideAvatar: !showAvatar)
                 cell.delegate = self
+                cell.setData(onIndexPath: indexPath, comment: comment, showUserName: showName, userNameColor: color, hideAvatar: !showAvatar)
+                
                 if let audioCell = cell as? QCellAudio{
                     audioCell.audioCellDelegate = self
                     cell = audioCell
@@ -221,7 +222,14 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                     }
                 }
             case "deleteComment":
-                if comment.status == .failed  {  return true  }
+                if comment.senderEmail == Qiscus.client.email && comment.status != .deleting && comment.status != .deleted {
+                    return true
+                }
+                return false
+            case "deleteForMe":
+                if comment.status != .deleting && comment.status != .deleted {
+                    return true
+                }
                 return false
             case "reply":
                 if Qiscus.sharedInstance.connected{

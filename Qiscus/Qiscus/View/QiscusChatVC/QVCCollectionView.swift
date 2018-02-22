@@ -34,8 +34,23 @@ extension QiscusChatVC: QConversationViewConfigurationDelegate {
         }
         return false
     }
+    public func configDelegate(deletedMessageText collectionView: QConversationCollectionView, selfMessage isSelf: Bool) -> String {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(deletedMessageTextFor: self, selfMessage: isSelf){
+            return config
+        }else if isSelf {
+            return "🚫 You deleted this message."
+        }else{
+            return "🚫 This message was deleted."
+        }
+    }
 }
 extension QiscusChatVC: QConversationViewDelegate {
+    public func viewDelegate(usingSoftDeleteOnView view: QConversationCollectionView) -> Bool {
+        if let softDelete = self.configDelegate?.chatVCConfigDelegate!(usingSoftDeleteOn: self){
+            return softDelete
+        }
+        return false
+    }
     public func viewDelegate(enableInfoAction view: QConversationCollectionView) -> Bool {
         if let delegate = self.delegate {
             return delegate.chatVC(enableInfoAction: self)
@@ -49,9 +64,9 @@ extension QiscusChatVC: QConversationViewDelegate {
         }
         return false
     }
-    public func viewDelegate(view:QConversationCollectionView, cellForComment comment:QComment)->QChatCell?{
+    public func viewDelegate(view:QConversationCollectionView, cellForComment comment:QComment, indexPath:IndexPath)->QChatCell?{
         if let delegate = self.cellDelegate {
-            if let cell = delegate.chatVC?(viewController: self, cellForComment: comment){
+            if let cell = delegate.chatVC?(viewController:self, cellForComment:comment, indexPath:indexPath){
                 return cell
             }
         }

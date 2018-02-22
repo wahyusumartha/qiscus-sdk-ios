@@ -19,6 +19,7 @@ public class QChatService:NSObject {
     public var delegate:QChatServiceDelegate?
     static var syncTimer:Timer? = nil
     static var inSyncProcess:Bool = false
+    static var inSyncEvent:Bool = false
     static var hasPendingSync:Bool = false
     static var syncRetryTime:Double = 3.0
     static var downloadTasks = [String]()
@@ -1828,6 +1829,77 @@ public class QChatService:NSObject {
                     }
                     break
                 }
+            })
+        }
+    }
+    
+    internal class func syncEvent(){
+        if QChatService.inSyncEvent { return }
+        if Qiscus.client.lastEventId == "" { return }
+        
+        guard let lastEventId = Int64(Qiscus.client.lastEventId) else { return }
+        
+        DispatchQueue.main.async {
+            if UIApplication.shared.applicationState != .active {
+                Qiscus.printLog(text: "sync qiscus event on background")
+            }
+        }
+        func getTime()->String{
+            let date = Date()
+            let df = DateFormatter()
+            df.dateFormat = "y-MM-dd H:m:ss"
+            return df.string(from: date)
+        }
+        QiscusRequestThread.sync {
+            Qiscus.printLog(text: "Start event syncing on  \(getTime())")
+            QChatService.inSyncEvent = true
+            
+            let loadURL = QiscusConfig.SYNC_EVENT_URL
+            
+            let parameters:[String: AnyObject] =  [
+                "token" : qiscus.config.USER_TOKEN as AnyObject,
+                "start_event_id" : lastEventId as AnyObject,
+            ]
+            QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                if let response = responseData.result.value {
+                    let json = JSON(response)
+                    let eventsData = json["events"].arrayValue
+                    
+                    for eventJSON in eventsData.reversed() {
+                        let action = eventJSON["action_topic"].stringValue
+                        let payload = eventJSON["payload"]
+                        let eventId = "\(eventJSON["id"])"
+                        
+                        switch action {
+                        case "delete_message":
+                            let data = payload["data"]
+                            let hardDelete = data["is_hard_delete"].boolValue
+                            let rooms = data["deleted_messages"].arrayValue
+                            
+                            for roomJSON in rooms {
+                                let roomId = roomJSON["room_id"].stringValue
+                                if let room = QRoom.threadSaveRoom(withId: roomId){
+                                    let comments = roomJSON["message_unique_ids"].arrayValue
+                                    for commentJSON in comments {
+                                        let uid = commentJSON.stringValue
+                                        if let c = QComment.threadSaveComment(withUniqueId: uid){
+                                            if hardDelete {
+                                                room.deleteComment(comment: c)
+                                            }else{
+                                                c.updateStatus(status: .deleted)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            break
+                        default:break
+                        }
+                        QiscusClient.update(lastEventId: eventId)
+                    }
+                }
+                QChatService.inSyncEvent = false
             })
         }
     }

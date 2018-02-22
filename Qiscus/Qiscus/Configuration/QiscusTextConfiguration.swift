@@ -77,6 +77,8 @@ open class QiscusTextConfiguration: NSObject {
     /// Your text if the process of uploading fail, Default value : "Sending Failed"
     open var failedText = "failed"
     
+    open var deletingText = "deleting"
+    
     /// Your text if there isn't connection internet, Default value :  "can't connect to internet, please check your connection"
     open var noConnectionText = "can't connect to internet, please check your connection"
     

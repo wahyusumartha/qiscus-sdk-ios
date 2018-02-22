@@ -897,4 +897,76 @@ public class QRoomService:NSObject{
             }
         })
     }
+    
+    internal class func delete(messagesWith uniqueIds:[String], forMe:Bool, hardDelete:Bool, onSuccess:@escaping ([String])->Void, onError:@escaping ([String],Int?)->Void){
+        let url = QiscusConfig.DELETE_MESSAGES
+        let parameters =  [
+            "unique_ids" : uniqueIds as AnyObject,
+            "token" : Qiscus.shared.config.USER_TOKEN as AnyObject,
+            "is_delete_for_everyone": !forMe as AnyObject,
+            "is_hard_delete": hardDelete as AnyObject
+        ]
+        QiscusBackgroundThread.async {
+            for cUid in uniqueIds {
+                if let c = QComment.threadSaveComment(withUniqueId: cUid){
+                    c.updateStatus(status: .deleting)
+                }
+            }
+        }
+        QiscusService.session.request(url, method: .delete, parameters: parameters, encoding: URLEncoding(destination: .methodDependent), headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+            QiscusBackgroundThread.async {
+                if let response = responseData.result.value{
+                    let json = JSON(response)
+                    let results = json["results"]
+                    
+                    let status = json["status"].intValue
+                    var successUids = [String]()
+                    var errorUids = [String]()
+                    
+                    if results != JSON.null && status == 200{
+                        
+                        if let commentJSONs = results["comments"].array{
+                            for cJSON in commentJSONs {
+                                if let uId = cJSON["unique_temp_id"].string{
+                                    successUids.append(uId)
+                                    if let c = QComment.threadSaveComment(withUniqueId: uId){
+                                        c.updateStatus(status: .deleted)
+                                    }
+                                }
+                            }
+                        }
+                        for uid in uniqueIds {
+                            if !successUids.contains(uid){
+                                errorUids.append(uid)
+                            }
+                        }
+                        if successUids.count > 0 {
+                            DispatchQueue.main.async {
+                                onSuccess(successUids)
+                            }
+                        }
+                        if errorUids.count > 0 {
+                            DispatchQueue.main.async {
+                                onError(errorUids,nil)
+                            }
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            onError(uniqueIds,nil)
+                        }
+                    }
+                }else{
+                    if let statusCode = responseData.response?.statusCode {
+                        DispatchQueue.main.async {
+                            onError(uniqueIds,statusCode)
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            onError(uniqueIds,nil)
+                        }
+                    }
+                }
+            }
+        })
+    }
 }

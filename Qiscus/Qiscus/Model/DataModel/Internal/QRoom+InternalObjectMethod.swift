@@ -571,7 +571,25 @@ internal extension QRoom {
         let commentBeforeId = json["comment_before_id"].intValue
         let senderEmail = json["email"].stringValue
         let commentType = json["type"].stringValue
+        
         let commentExtras = "\(json["extras"])"
+        let isDeleted = json["is_deleted"].boolValue
+        let statusData = json["status"].stringValue
+        var commentStatus = QCommentStatus.sent
+        
+        if isDeleted {
+            commentStatus = .deleted
+        }else{
+            switch statusData {
+            case "read" :
+                commentStatus = .read
+                break
+            case "delivered":
+                commentStatus = .delivered
+                break
+            default: break
+            }
+        }        
         if commentType == "reply" || commentType == "buttons" {
             commentText = json["payload"]["text"].stringValue
         }
@@ -595,13 +613,18 @@ internal extension QRoom {
         newComment.rawExtra = commentExtras
         newComment.senderAvatarURL = commentSenderAvatarURL
         
-        var status = QCommentStatus.sent
-        if newComment.id < self.lastParticipantsReadId {
-            status = .read
-        }else if newComment.id < self.lastParticipantsDeliveredId{
-            status = .delivered
+        
+        if newComment.id > self.lastParticipantsReadId && newComment.id > 0 && commentStatus == .read{
+            try! realm.write {
+                self.lastParticipantsReadId = newComment.id
+                self.lastParticipantsDeliveredId = newComment.id
+            }
+        }else if newComment.id > self.lastParticipantsDeliveredId  && newComment.id > 0 && commentStatus == .delivered{
+            try! realm.write {
+                self.lastParticipantsDeliveredId = newComment.id
+            }
         }
-        newComment.statusRaw = status.rawValue
+        newComment.statusRaw = commentStatus.rawValue
         
         switch commentType {
         case "buttons":
@@ -648,11 +671,6 @@ internal extension QRoom {
             newComment.data = "\(json["payload"])"
             let fileURL = json["payload"]["url"].stringValue
             var filename = newComment.fileName(text: fileURL)
-//            "url" : url,
-//            "caption": caption,
-//            "size": fileData["size"].intValue,
-//            "pages": fileData["pages"].intValue,
-//            "file_name": fileData["name"].stringValue
             var fileSize = Double(0)
             var filePages = 0
             if let pages = json["payload"]["pages"].int {
@@ -878,12 +896,12 @@ internal extension QRoom {
         return data.first
     }
     
-    internal func getGrouppedCommentsUID()->[[String]]{
+    internal func getGrouppedCommentsUID(filter:NSPredicate? = nil)->[[String]]{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         var retVal = [[String]]()
         var uidList = [String]()
         var s = 0
-        
+        let date = Double(Date().timeIntervalSince1970)
         var prevComment:QComment?
         var group = [String]()
         var count = 0
@@ -912,7 +930,9 @@ internal extension QRoom {
                 }
             }
         }
-        for comment in self.comments {
+        let filteredComments = self.comments(withFilter: filter)
+        for comment in  filteredComments{
+            
             if !comment.isInvalidated {
                 if !uidList.contains(comment.uniqueId) {
                     if let prev = prevComment{
@@ -930,7 +950,7 @@ internal extension QRoom {
                         group.append(comment.uniqueId)
                         uidList.append(comment.uniqueId)
                     }
-                    if count == self.comments.count - 1  {
+                    if count == filteredComments.count - 1  {
                         retVal.append(group)
                         checkPosition(ids: group)
                     }else{

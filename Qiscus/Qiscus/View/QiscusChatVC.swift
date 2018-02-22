@@ -18,7 +18,7 @@ import RealmSwift
 
 @objc public protocol QiscusChatVCCellDelegate{
     @objc optional func chatVC(viewController:QiscusChatVC, didTapLinkButtonWithURL url:URL )
-    @objc optional func chatVC(viewController:QiscusChatVC, cellForComment comment:QComment)->QChatCell?
+    @objc optional func chatVC(viewController:QiscusChatVC, cellForComment comment:QComment, indexPath:IndexPath)->QChatCell?
     @objc optional func chatVC(viewController:QiscusChatVC, heightForComment comment:QComment)->QChatCellHeight?
     @objc optional func chatVC(viewController:QiscusChatVC, hideCellWith comment:QComment)->Bool
 }
@@ -27,6 +27,8 @@ import RealmSwift
     @objc optional func chatVCConfigDelegate(userNameLabelColor viewController:QiscusChatVC, forUser user:QUser)->UIColor?
     @objc optional func chatVCConfigDelegate(hideLeftAvatarOn viewController:QiscusChatVC)->Bool
     @objc optional func chatVCConfigDelegate(hideUserNameLabel viewController:QiscusChatVC, forUser user:QUser)->Bool
+    @objc optional func chatVCConfigDelegate(usingSoftDeleteOn viewController:QiscusChatVC)->Bool
+    @objc optional func chatVCConfigDelegate(deletedMessageTextFor viewController:QiscusChatVC, selfMessage isSelf:Bool)->String
 }
 
 @objc public protocol QiscusChatVCDelegate{

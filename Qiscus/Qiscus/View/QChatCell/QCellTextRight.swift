@@ -262,7 +262,19 @@ class QCellTextRight: QChatCell {
     }
     
     public override func updateStatus(toStatus status:QCommentStatus){
+        super.updateStatus(toStatus: status)
         switch status {
+        case .deleted:
+            dateLabel.text = self.comment!.time.lowercased()
+            statusImage.image = Qiscus.image(named: "ic_deleted")?.withRenderingMode(.alwaysTemplate)
+            break
+        case .deleting, .deletePending:
+            dateLabel.text = QiscusTextConfiguration.sharedInstance.deletingText
+            if status == .deletePending {
+                dateLabel.text = self.comment!.time.lowercased()
+            }
+            statusImage.image = Qiscus.image(named: "ic_deleting")?.withRenderingMode(.alwaysTemplate)
+            break;
         case .sending, .pending:
             dateLabel.textColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor
             statusImage.tintColor = QiscusColorConfiguration.sharedInstance.rightBaloonTextColor

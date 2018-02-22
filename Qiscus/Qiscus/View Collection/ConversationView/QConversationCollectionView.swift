@@ -26,10 +26,17 @@ public class QConversationCollectionView: UICollectionView {
                 self.subscribeEvent()
                 self.delegate = self
                 self.dataSource = self
-
+                var hardDelete = false
+                if let softDelete = self.viewDelegate?.viewDelegate?(usingSoftDeleteOnView: self){
+                    hardDelete = !softDelete
+                }
+                var predicate:NSPredicate?
+                if hardDelete {
+                    predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deletePending.rawValue, QCommentStatus.deleting.rawValue)
+                }
                 QiscusBackgroundThread.async {
                     if let rts = QRoom.threadSaveRoom(withId: rid){
-                        var messages = rts.grouppedCommentsUID
+                        var messages = rts.grouppedCommentsUID(filter: predicate)
                         messages = self.checkHiddenMessage(messages: messages)
                         
                         DispatchQueue.main.async {
@@ -104,6 +111,8 @@ public class QConversationCollectionView: UICollectionView {
     }
     
     open func registerCell(){
+        self.register(UINib(nibName: "QCellDeletedLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellDeletedLeft")
+        self.register(UINib(nibName: "QCellDeletedRight",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellDeletedRight")
         self.register(UINib(nibName: "QCellTypingLeft",bundle: Qiscus.bundle), forCellWithReuseIdentifier: "cellTypingLeft")
         self.register(UINib(nibName: "QChatEmptyFooter",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: "emptyFooter")
         self.register(UINib(nibName: "QChatEmptyHeaderCell",bundle: Qiscus.bundle), forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "emptyHeader")
@@ -152,9 +161,17 @@ public class QConversationCollectionView: UICollectionView {
     }
     open func gotNewComment(comment: QComment, room:QRoom) {
         let rid = room.id
+        var hardDelete = false
+        if let softDelete = self.viewDelegate?.viewDelegate?(usingSoftDeleteOnView: self){
+            hardDelete = !softDelete
+        }
+        var predicate:NSPredicate?
+        if hardDelete {
+            predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deletePending.rawValue, QCommentStatus.deleting.rawValue)
+        }
         QiscusBackgroundThread.async {
             if let rts = QRoom.threadSaveRoom(withId: rid){
-                var messages = rts.grouppedCommentsUID
+                var messages = rts.grouppedCommentsUID(filter: predicate)
                 messages = self.checkHiddenMessage(messages: messages)
                 
                 DispatchQueue.main.async {
@@ -292,28 +309,58 @@ public class QConversationCollectionView: UICollectionView {
     
     open func cellHeightForComment (comment:QComment, defaultHeight height:CGFloat, firstInSection first:Bool)->CGFloat{
         var retHeight = height
-        
-        switch comment.type {
-        case .card, .contact    : break
-        case .carousel :
-            retHeight += 4
-            break
-        case .video, .image     :
-            if retHeight > 0 {
-                retHeight += 151 ;
+        if comment.status == .deleted {
+            var text = ""
+            let isSelf = comment.senderEmail == Qiscus.client.email
+            if let config = self.configDelegate?.configDelegate?(deletedMessageText: self, selfMessage: isSelf){
+                text = config
+            }else if isSelf {
+                text = "🚫 You deleted this message."
             }else{
-                retHeight = 140
+                text = "🚫 This message was deleted."
             }
-            break
-        case .audio             : retHeight = 83 ; break
-        case .file              : retHeight = 67  ; break
-        case .reply             : retHeight += 88 ; break
-        case .system            : retHeight += 5 ; break
-        case .text              : retHeight += 15 ; break
-        case .document          : retHeight += 7; break
-        default                 : retHeight += 20 ; break
+            
+            let attributedText = NSMutableAttributedString(string: text)
+            
+            let foregroundColorAttributeName = QiscusColorConfiguration.sharedInstance.leftBaloonTextColor
+            
+            let textAttribute:[NSAttributedStringKey: Any] = [
+                NSAttributedStringKey.foregroundColor: foregroundColorAttributeName,
+                NSAttributedStringKey.font: Qiscus.style.chatFont.italic()
+            ]
+            
+            let allRange = (text as NSString).range(of: text)
+            attributedText.addAttributes(textAttribute, range: allRange)
+            
+            let maxWidth = (QiscusHelper.screenWidth() * 0.70) - 8
+            let textView = UITextView()
+            textView.attributedText = attributedText
+            
+            let size = textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
+            
+            retHeight = size.height + 14
+        }else{
+            switch comment.type {
+            case .card, .contact    : break
+            case .carousel :
+                retHeight += 4
+                break
+            case .video, .image     :
+                if retHeight > 0 {
+                    retHeight += 151 ;
+                }else{
+                    retHeight = 140
+                }
+                break
+            case .audio             : retHeight = 83 ; break
+            case .file              : retHeight = 67  ; break
+            case .reply             : retHeight += 88 ; break
+            case .system            : retHeight += 5 ; break
+            case .text              : retHeight += 15 ; break
+            case .document          : retHeight += 7; break
+            default                 : retHeight += 20 ; break
+            }
         }
-        
         if (comment.type != .system && first) {
             var showUserName = true
             if let user = comment.sender {
@@ -362,46 +409,57 @@ public class QConversationCollectionView: UICollectionView {
             let roomId = room.id
             let uniqueId = comment.uniqueId
             QiscusBackgroundThread.async {
-                if let rts = QRoom.threadSaveRoom(withId: roomId){
-                    var section = 0
-                    var found = false
-                    for group in rts.grouppedCommentsUID{
-                        var item = 0
-                        if group.contains("\(uniqueId)"){
-                            for id in group {
-                                if id == uniqueId {
-                                    found = true
-                                    break
-                                }else{
-                                    item += 1
-                                }
-                            }
-                        }
-                        if found {
+                var found = false
+                var section = 0
+                var item = 0
+                for groupUid in self.messagesId {
+                    item = 0
+                    for uid in groupUid {
+                        if uid == uniqueId {
+                            found = true
                             break
-                        }else{
-                            section += 1
                         }
-                        self.targetIndexPath = IndexPath(item: item, section: section)
-                        DispatchQueue.main.async {
-                            self.layoutIfNeeded()
-                            self.scrollToItem(at: self.targetIndexPath!, at: .top, animated: true)
+                        if !found {
+                            item += 1
                         }
+                    }
+                    if !found {
+                        section += 1
+                    }else{
+                        break
+                    }
+                }
+                if found {
+                self.targetIndexPath = IndexPath(item: item, section: section)
+                    DispatchQueue.main.async {
+                        self.layoutIfNeeded()
+                        self.scrollToItem(at: self.targetIndexPath!, at: .top, animated: true)
                     }
                 }
             }
         }
     }
-    public func refreshData(){
+    public func refreshData(withCompletion completion: (()->Void)? = nil){
         if let room = self.room {
             let rid = room.id
+            var hardDelete = false
+            if let softDelete = self.viewDelegate?.viewDelegate?(usingSoftDeleteOnView: self){
+                hardDelete = !softDelete
+            }
+            var predicate:NSPredicate?
+            if hardDelete {
+                predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deletePending.rawValue, QCommentStatus.deleting.rawValue)
+            }
             QiscusBackgroundThread.async {
                 if let rts = QRoom.threadSaveRoom(withId: rid){
-                    var messages = rts.grouppedCommentsUID
+                    var messages = rts.grouppedCommentsUID(filter: predicate)
                     messages = self.checkHiddenMessage(messages: messages)
                     DispatchQueue.main.async {
                         self.messagesId = messages
                         self.reloadData()
+                        if let onFinish = completion {
+                            onFinish()
+                        }
                     }
                 }
             }
@@ -492,10 +550,18 @@ public class QConversationCollectionView: UICollectionView {
     func loadData(){
         if let r = self.room {
             let rid = r.id
+            var hardDelete = false
+            if let softDelete = self.viewDelegate?.viewDelegate?(usingSoftDeleteOnView: self){
+                hardDelete = !softDelete
+            }
+            var predicate:NSPredicate?
+            if hardDelete {
+                predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deletePending.rawValue, QCommentStatus.deleting.rawValue)
+            }
             QiscusBackgroundThread.async {
                 if let rts = QRoom.threadSaveRoom(withId: rid){
                     rts.loadData(onSuccess: { (result) in
-                        var messages = result.grouppedCommentsUID
+                        var messages = result.grouppedCommentsUID(filter: predicate)                        
                         messages = self.checkHiddenMessage(messages: messages)
                         DispatchQueue.main.async {
                             self.messagesId = messages
