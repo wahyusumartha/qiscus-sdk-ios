@@ -46,7 +46,7 @@ extension QiscusChatVC: QConversationViewConfigurationDelegate {
 }
 extension QiscusChatVC: QConversationViewDelegate {
     public func viewDelegate(usingSoftDeleteOnView view: QConversationCollectionView) -> Bool {
-        if let softDelete = self.configDelegate?.chatVCConfigDelegate!(usingSoftDeleteOn: self){
+        if let softDelete = self.configDelegate?.chatVCConfigDelegate?(usingSoftDeleteOn: self){
             return softDelete
         }
         return false
