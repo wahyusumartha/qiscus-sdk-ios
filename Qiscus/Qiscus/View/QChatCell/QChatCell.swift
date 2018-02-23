@@ -26,7 +26,7 @@ import SwiftyJSON
     func didDeleteComment(onIndexPath indexPath:IndexPath)
     @objc optional func deletedMessageText(selfMessage isSelf:Bool)->String
 }
-public class QChatCell: UICollectionViewCell, QCommentDelegate {
+open class QChatCell: UICollectionViewCell, QCommentDelegate {
     
     var delegate: ChatCellDelegate?
     var showUserName:Bool = false
@@ -57,7 +57,7 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
             ]
         }
     }
-    override public func awakeFromNib() {
+    override open func awakeFromNib() {
         super.awakeFromNib()
         let resendMenuItem: UIMenuItem = UIMenuItem(title: "Resend", action: #selector(QChatCell.resend))
         let deleteMenuItem: UIMenuItem = UIMenuItem(title: "Delete", action: #selector(QChatCell.deleteComment))
@@ -74,9 +74,10 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(QChatCell.userNameChanged(_:)), name: QiscusNotification.USER_NAME_CHANGE, object: nil)
     }
     
-    func setupCell(){
+    open func setupCell(){
         // implementation will be overrided on child class
     }
+    
     public class func defaultDeletedText(selfMessage isSelf:Bool = false)->String{
         if isSelf {
             return "🚫 You deleted this message."
@@ -144,7 +145,7 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
     @objc open func reply(){
         self.delegate?.didReply(comment: self.comment!)
     }
-    @objc public func forward(){
+    @objc open func forward(){
         self.delegate?.didForward(comment: self.comment!)
     }
     @objc open func deleteComment(){        
@@ -251,11 +252,11 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
         
     }
     
-    public func commentChanged(){
+    open func commentChanged(){
         
     }
 
-    public func getBallon()->UIImage?{
+    open func getBallon()->UIImage?{
         var balloonImage:UIImage? = nil
         var edgeInset = UIEdgeInsetsMake(13, 13, 13, 28)
         
@@ -280,31 +281,31 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
         
         return balloonImage?.resizableImage(withCapInsets: edgeInset, resizingMode: .stretch).withRenderingMode(.alwaysTemplate)
     }
-    public func willDisplayCell(){
+    open func willDisplayCell(){
         
     }
-    public func endDisplayingCell(){
+    open func endDisplayingCell(){
     
     }
-    public func cellWidthChanged(){
+    open func cellWidthChanged(){
     
     }
-    public func downloadingMedia(){
+    open func downloadingMedia(){
         // implementation will be overrided on child class
     }
-    public func downloadFinished(){
+    open func downloadFinished(){
     
     }
-    public func uploadingMedia(){
+    open func uploadingMedia(){
     
     }
-    public func uploadFinished(){
+    open func uploadFinished(){
         
     }
-    public func positionChanged(){
+    open func positionChanged(){
     
     }
-    public func updateUserName(){
+    open func updateUserName(){
     
     }
     internal func unbindData(){
@@ -348,25 +349,25 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
     }
     
     // MARK: - commentDelegate
-    public func comment(didChangeStatus comment:QComment, status:QCommentStatus){
+    open func comment(didChangeStatus comment:QComment, status:QCommentStatus){
         if comment.uniqueId == self.comment?.uniqueId{
             self.updateStatus(toStatus: status)
         }
     }
-    public func comment(didChangePosition comment:QComment, position:QCellPosition){}
+    open func comment(didChangePosition comment:QComment, position:QCellPosition){}
     
     // Audio comment delegate
-    public func comment(didChangeDurationLabel comment:QComment, label:String){}
-    public func comment(didChangeCurrentTimeSlider comment:QComment, value:Float){}
-    public func comment(didChangeSeekTimeLabel comment:QComment, label:String){}
-    public func comment(didChangeAudioPlaying comment:QComment, playing:Bool){}
+    open func comment(didChangeDurationLabel comment:QComment, label:String){}
+    open func comment(didChangeCurrentTimeSlider comment:QComment, value:Float){}
+    open func comment(didChangeSeekTimeLabel comment:QComment, label:String){}
+    open func comment(didChangeAudioPlaying comment:QComment, playing:Bool){}
     
     // File comment delegate
-    public func comment(didDownload comment:QComment, downloading:Bool){
+    open func comment(didDownload comment:QComment, downloading:Bool){
         
     }
-    public func comment(didUpload comment:QComment, uploading:Bool){}
-    public func comment(didChangeProgress comment:QComment, progress:CGFloat){}
+    open func comment(didUpload comment:QComment, uploading:Bool){}
+    open func comment(didChangeProgress comment:QComment, progress:CGFloat){}
     
     
 }
