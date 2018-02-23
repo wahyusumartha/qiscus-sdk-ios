@@ -523,19 +523,20 @@ public class QConversationCollectionView: UICollectionView {
             var prev:QComment?
             var s = 0
             for group in retVal {
-                let first = QComment.threadSaveComment(withUniqueId: group.first!)!
-                if prev == nil {
-                    newGroup.append(group)
-                    prev = first
-                }else{
-                    if prev!.date == first.date && prev!.senderEmail == first.senderEmail && first.type != .system {
-                        for uid in group {
-                            newGroup[s].append(uid)
-                        }
-                    }else{
-                        s += 1
+                if let first = QComment.threadSaveComment(withUniqueId: group.first!) {
+                    if prev == nil {
                         newGroup.append(group)
                         prev = first
+                    }else{
+                        if prev!.date == first.date && prev!.senderEmail == first.senderEmail && first.type != .system {
+                            for uid in group {
+                                newGroup[s].append(uid)
+                            }
+                        }else{
+                            s += 1
+                            newGroup.append(group)
+                            prev = first
+                        }
                     }
                 }
             }
