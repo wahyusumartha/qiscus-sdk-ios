@@ -67,7 +67,7 @@ public class QChatCell: UICollectionViewCell, QCommentDelegate {
         let shareMenuItem: UIMenuItem = UIMenuItem(title: "Share", action: #selector(QChatCell.share))
         let infoMenuItem: UIMenuItem = UIMenuItem(title: "Info", action: #selector(QChatCell.info))
         
-        let menuItems:[UIMenuItem] = [resendMenuItem,deleteMenuItem,deleteForMeMenuItem,replyMenuItem,forwardMenuItem,shareMenuItem,infoMenuItem]
+        let menuItems:[UIMenuItem] = [replyMenuItem,forwardMenuItem,resendMenuItem,deleteMenuItem,deleteForMeMenuItem,shareMenuItem,infoMenuItem]
         
         UIMenuController.shared.menuItems = menuItems
         
