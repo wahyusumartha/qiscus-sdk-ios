@@ -174,11 +174,12 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                             chatCell.backgroundColor = UIColor.clear
                             chatCell.endDisplayingCell()
                             
-                            let message = QComment.comment(withUniqueId: uid)!
-                            self.viewDelegate?.viewDelegate?(view: self, didEndDisplayingCellForComment: message, cell: chatCell, indexPath: indexPath)
-                            if isLastRow {
-                                self.isLastRowVisible = false
-                                self.viewDelegate?.viewDelegate?(didEndDisplayingLastMessage: self, comment: message)
+                            if let message = QComment.comment(withUniqueId: uid){
+                                self.viewDelegate?.viewDelegate?(view: self, didEndDisplayingCellForComment: message, cell: chatCell, indexPath: indexPath)
+                                if isLastRow {
+                                    self.isLastRowVisible = false
+                                    self.viewDelegate?.viewDelegate?(didEndDisplayingLastMessage: self, comment: message)
+                                }
                             }
                         }
                     }
