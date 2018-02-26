@@ -142,11 +142,12 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                         }
                         DispatchQueue.main.async {
                             chatCell.willDisplayCell()
-                            let message = QComment.comment(withUniqueId: uid)!
-                            self.viewDelegate?.viewDelegate?(view: self, willDisplayCellForComment: message, cell: chatCell, indexPath: indexPath)
-                            if isLastItem {
-                                self.viewDelegate?.viewDelegate?(willDisplayLastMessage: self, comment: message)
-                                self.isLastRowVisible = true
+                            if let message = QComment.comment(withUniqueId: uid) {
+                                self.viewDelegate?.viewDelegate?(view: self, willDisplayCellForComment: message, cell: chatCell, indexPath: indexPath)
+                                if isLastItem {
+                                    self.viewDelegate?.viewDelegate?(willDisplayLastMessage: self, comment: message)
+                                    self.isLastRowVisible = true
+                                }
                             }
                         }
                     }
