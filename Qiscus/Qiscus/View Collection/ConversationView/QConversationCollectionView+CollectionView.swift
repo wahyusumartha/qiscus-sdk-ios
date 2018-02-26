@@ -234,7 +234,7 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
             case "reply":
                 if Qiscus.sharedInstance.connected{
                     switch comment.status {
-                    case .failed, .sending, .pending :
+                    case .failed, .sending, .pending, .deleted, .deleting, .deletePending :
                         return false
                     default:
                         switch comment.type {
