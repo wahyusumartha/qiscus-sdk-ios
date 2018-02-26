@@ -574,16 +574,19 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     
     // MARK: - local DB
     private class func getConfiguration()->Realm.Configuration{
-        var conf = Realm.Configuration.defaultConfiguration
-        
-        var realmURL = conf.fileURL!
-        realmURL.deleteLastPathComponent()
-        realmURL.appendPathComponent("Qiscus.realm")
-        
-        conf.fileURL = realmURL
+        let documentDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last! as NSString
+        let fileURL = documentDirectory.appendingPathComponent("Qiscus.realm")
+        let objectTypes = [
+                    QRoom.self,
+                    QComment.self,
+                    QFile.self,
+                    QUser.self,
+                    QParticipant.self,
+                    QiscusLinkData.self
+        ]
+        var conf = Realm.Configuration(fileURL: NSURL(string: fileURL) as URL?, objectTypes: objectTypes)
         conf.deleteRealmIfMigrationNeeded = true
         conf.schemaVersion = Qiscus.shared.config.dbSchemaVersion
-        
         return conf
     }
     
