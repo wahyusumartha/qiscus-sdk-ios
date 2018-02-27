@@ -744,12 +744,12 @@ public class QComment:Object {
                     }
                     break
                 case .sent:
-                    if status == .delivered || status == .read {
+                    if status == .delivered || status == .read || status == .deleting || status == .deletePending || status == .deleted{
                         update(c: c)
                     }
                     break
                 case .delivered:
-                    if status == .read {
+                    if status == .read || status == .deleting || status == .deletePending || status == .deleted{
                         update(c: c)
                     }
                     break
