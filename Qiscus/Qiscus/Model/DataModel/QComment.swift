@@ -709,9 +709,11 @@ public class QComment:Object {
                 c.statusRaw = status.rawValue
             }
             if status == .deleted {
-                try! realm.write {
-                    c.text = "This message was deleted"
-                    c.typeRaw = QCommentType.text.name()
+                if !c.isInvalidated {
+                    try! realm.write {
+                        c.text = "This message was deleted"
+                        c.typeRaw = QCommentType.text.name()
+                    }
                 }
                 if let r = QRoom.threadSaveRoom(withId: rId){
                     if r.lastCommentUniqueId == uId {
