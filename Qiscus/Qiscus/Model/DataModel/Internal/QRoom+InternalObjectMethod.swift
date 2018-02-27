@@ -980,9 +980,11 @@ internal extension QRoom {
                         }else{
                             retVal.append(group)
                             checkPosition(ids: group)
-                            group = [String]()
-                            group.append(comment.uniqueId)
-                            uidList.append(comment.uniqueId)
+                            if !comment.isInvalidated {
+                                group = [String]()
+                                group.append(comment.uniqueId)
+                                uidList.append(comment.uniqueId)
+                            }
                         }
                     }else{
                         group.append(comment.uniqueId)
