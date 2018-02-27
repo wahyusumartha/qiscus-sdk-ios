@@ -325,7 +325,47 @@ internal extension QRoom {
             }
         }
     }
-    internal func updateLastComentInfo(comment:QComment, triggerNotification:Bool = true){
+    internal func recalculateLastComment(){
+        let roomId = self.id
+        let lastCommentId = 0
+        let predicate = NSPredicate(format: "statusRaw != %d", QCommentStatus.deleted.rawValue)
+        let allComment = self.rawComments.sorted(byKeyPath: "createdAt", ascending: true).filter(predicate)
+        
+        if let last = allComment.reversed().last {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
+            try! realm.write {
+                self.lastCommentId = last.id
+                self.lastCommentText = last.text
+                self.lastCommentUniqueId = last.uniqueId
+                self.lastCommentBeforeId = last.beforeId
+                self.lastCommentCreatedAt = last.createdAt
+                self.lastCommentSenderEmail = last.senderEmail
+                self.lastCommentSenderName = last.senderName
+                self.lastCommentStatusRaw = last.statusRaw
+                self.lastCommentTypeRaw = last.typeRaw
+                self.lastCommentData = last.data
+                self.lastCommentRawExtras = last.rawExtra
+            }
+            let rts = ThreadSafeReference(to:self)
+            DispatchQueue.main.async {
+                let mainRealm = try! Realm(configuration: Qiscus.dbConfiguration)
+                mainRealm.refresh()
+                if Qiscus.chatRooms[roomId] == nil {
+                    if let r = mainRealm.resolve(rts) {
+                        Qiscus.chatRooms[roomId] = r
+                    }
+                }
+                if let cache = QRoom.room(withId: roomId){
+                    if let c = cache.lastComment {
+                        QiscusNotification.publish(roomChange: cache, onProperty: .lastComment)
+                    }
+                    
+                }
+            }
+        }
+    }
+    internal func updateLastComentInfo(comment:QComment, triggerNotification:Bool = true ){
         let id = self.id
         let cId = comment.id
         let cText = comment.text

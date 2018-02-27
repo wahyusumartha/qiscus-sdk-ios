@@ -350,8 +350,18 @@ open class QChatCell: UICollectionViewCell, QCommentDelegate {
     
     // MARK: - commentDelegate
     open func comment(didChangeStatus comment:QComment, status:QCommentStatus){
-        if comment.uniqueId == self.comment?.uniqueId{
-            self.updateStatus(toStatus: status)
+        if let c = self.comment {
+            if comment.isInvalidated || c.isInvalidated {
+                if let delegate = self.delegate {
+                    if let index = self.indexPath {
+                        delegate.didDeleteComment(onIndexPath: index)
+                    }
+                }
+            }else{
+                if comment.uniqueId == c.uniqueId{
+                    self.updateStatus(toStatus: status)
+                }
+            }
         }
     }
     open func comment(didChangePosition comment:QComment, position:QCellPosition){}

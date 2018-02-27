@@ -699,6 +699,7 @@ public class QComment:Object {
     // MARK : updater method
     public func updateStatus(status:QCommentStatus){
         let uId = self.uniqueId
+        let rId = self.roomId
         
         func update (c:QComment){
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
@@ -706,6 +707,17 @@ public class QComment:Object {
             if c.isInvalidated {return}
             try! realm.write {
                 c.statusRaw = status.rawValue
+            }
+            if status == .deleted {
+                try! realm.write {
+                    c.text = "This message was deleted"
+                    c.typeRaw = QCommentType.text.name()
+                }
+                if let r = QRoom.threadSaveRoom(withId: rId){
+                    if r.lastCommentUniqueId == uId {
+                        r.recalculateLastComment()
+                    }
+                }
             }
             DispatchQueue.main.async {
                 if let cache = QComment.cache[uId]{

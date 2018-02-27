@@ -516,6 +516,9 @@ public class QRoom:Object {
                             r.rawComments.remove(at: i)
                             realm.delete(c)
                         }
+                        if cUid == r.lastCommentUniqueId {
+                            r.recalculateLastComment()
+                        }
                         if Thread.isMainThread {
                             publishNotification(roomId: id)
                         }else{
