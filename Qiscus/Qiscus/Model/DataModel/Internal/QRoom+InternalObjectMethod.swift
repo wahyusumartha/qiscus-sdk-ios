@@ -328,10 +328,10 @@ internal extension QRoom {
     internal func recalculateLastComment(){
         let roomId = self.id
         let lastCommentId = 0
-        let predicate = NSPredicate(format: "statusRaw != %d", QCommentStatus.deleted.rawValue)
+        let predicate = NSPredicate(format: "statusRaw != %d AND id > %d", QCommentStatus.deleted.rawValue,0)
         let allComment = self.rawComments.sorted(byKeyPath: "createdAt", ascending: true).filter(predicate)
         
-        if let last = allComment.reversed().last {
+        if let last = allComment.last {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             realm.refresh()
             try! realm.write {
