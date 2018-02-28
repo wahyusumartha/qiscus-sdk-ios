@@ -43,6 +43,62 @@ extension QiscusChatVC: QConversationViewConfigurationDelegate {
             return "🚫 This message was deleted."
         }
     }
+    
+    public func configDelegate(enableInfoMenuItem collectionView: QConversationCollectionView, forComment comment: QComment) -> Bool {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(enableInfoMenuItem: self, forComment: comment) {
+            return config
+        }
+        
+        return true
+    }
+    
+    public func configDelegate(enableReplyMenuItem collectionView: QConversationCollectionView, forComment comment: QComment) -> Bool {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(enableReplyMenuItem: self, forComment: comment) {
+            return config
+        }
+        
+        return true
+    }
+    
+    public func configDelegate(enableShareMenuItem collectionView: QConversationCollectionView, forComment comment: QComment) -> Bool {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(enableShareMenuItem: self, forComment: comment) {
+            return config
+        }
+        
+        return true
+    }
+    
+    public func configDelegate(enableDeleteMenuItem collectionView: QConversationCollectionView, forComment comment: QComment) -> Bool {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(enableDeleteMenuItem: self, forComment: comment) {
+            return config
+        }
+        
+        return true
+    }
+    
+    public func configDelegate(enableResendMenuItem collectionView: QConversationCollectionView, forComment comment: QComment) -> Bool {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(enableResendMenuItem: self, forComment: comment) {
+            return config
+        }
+        
+        return true
+    }
+    
+    public func configDelegate(enableDeleteForMeMenuItem collectionView: QConversationCollectionView, forComment comment: QComment) -> Bool {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(enableDeleteForMeMenuItem: self, forComment: comment) {
+            return config
+        }
+        
+        return true
+    }
+    
+    public func configDelegate(enableForwardMenuItem collectionView: QConversationCollectionView, forComment comment: QComment) -> Bool {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(enableForwardMenuItem: self, forComment: comment) {
+            return config
+        }
+        
+        return true
+    }
 }
 extension QiscusChatVC: QConversationViewDelegate {
     public func viewDelegate(usingSoftDeleteOnView view: QConversationCollectionView) -> Bool {

@@ -19,6 +19,62 @@ extension QConversationCollectionView: QCellCarouselDelegate{
     }
 }
 extension QConversationCollectionView: ChatCellDelegate, ChatCellAudioDelegate {
+    public func enableReplyMenuItem(onCell cell:QChatCell)->Bool {
+        guard let comment = cell.comment else {return true}
+        if let config = self.configDelegate?.configDelegate?(enableReplyMenuItem: self, forComment: comment){
+            return config
+        }
+        return true
+    }
+    
+    public func enableForwardMenuItem(onCell cell:QChatCell)->Bool {
+        guard let comment = cell.comment else {return true}
+        if let config = self.configDelegate?.configDelegate?(enableForwardMenuItem: self, forComment: comment){
+            return config
+        }
+        return true
+    }
+    
+    public func enableResendMenuItem(onCell cell:QChatCell)->Bool {
+        guard let comment = cell.comment else {return true}
+        if let config = self.configDelegate?.configDelegate?(enableResendMenuItem: self, forComment: comment){
+            return config
+        }
+        return true
+    }
+    
+    public func enableDeleteMenuItem(onCell cell:QChatCell)->Bool {
+        guard let comment = cell.comment else {return true}
+        if let config = self.configDelegate?.configDelegate?(enableDeleteMenuItem: self, forComment: comment){
+            return config
+        }
+        return true
+    }
+    
+    public func enableDeleteForMeMenuItem(onCell cell:QChatCell)->Bool {
+        guard let comment = cell.comment else {return true}
+        if let config = self.configDelegate?.configDelegate?(enableDeleteForMeMenuItem: self, forComment: comment){
+            return config
+        }
+        return true
+    }
+    
+    public func enableShareMenuItem(onCell cell:QChatCell)->Bool {
+        guard let comment = cell.comment else {return true}
+        if let config = self.configDelegate?.configDelegate?(enableShareMenuItem: self, forComment: comment){
+            return config
+        }
+        return true
+    }
+    
+    public func enableInfoMenuItem(onCell cell:QChatCell)->Bool {
+        guard let comment = cell.comment else {return true}
+        if let config = self.configDelegate?.configDelegate?(enableInfoMenuItem: self, forComment: comment){
+            return config
+        }
+        return true
+    }
+    
     public func deletedMessageText(selfMessage isSelf:Bool)->String {
         if let config = self.configDelegate?.configDelegate?(deletedMessageText: self, selfMessage: isSelf){
             return config
