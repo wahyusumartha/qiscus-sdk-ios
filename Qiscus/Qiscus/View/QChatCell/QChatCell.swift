@@ -356,6 +356,22 @@ open class QChatCell: UICollectionViewCell, QCommentDelegate {
         let shareMenuItem: UIMenuItem = UIMenuItem(title: "Share", action: #selector(QChatCell.share))
         let infoMenuItem: UIMenuItem = UIMenuItem(title: "Info", action: #selector(QChatCell.info))
         
+        if let isEnable = delegate?.enableReplyMenuItem?(onCell: self) {
+            if isEnable {
+                menuItems.append(replyMenuItem)
+            }
+        } else {
+            menuItems.append(replyMenuItem)
+        }
+        
+        if let isEnable = delegate?.enableForwardMenuItem?(onCell: self) {
+            if isEnable {
+                menuItems.append(forwardMenuItem)
+            }
+        } else {
+            menuItems.append(forwardMenuItem)
+        }
+
         if let isEnable = delegate?.enableResendMenuItem?(onCell: self) {
             if isEnable {
                 menuItems.append(resendMenuItem)
@@ -380,21 +396,6 @@ open class QChatCell: UICollectionViewCell, QCommentDelegate {
             menuItems.append(deleteForMeMenuItem)
         }
         
-        if let isEnable = delegate?.enableReplyMenuItem?(onCell: self) {
-            if isEnable {
-                menuItems.append(replyMenuItem)
-            }
-        } else {
-            menuItems.append(replyMenuItem)
-        }
-        
-        if let isEnable = delegate?.enableForwardMenuItem?(onCell: self) {
-            if isEnable {
-                menuItems.append(forwardMenuItem)
-            }
-        } else {
-            menuItems.append(forwardMenuItem)
-        }
         
         if let isEnable = delegate?.enableShareMenuItem?(onCell: self) {
             if isEnable {
