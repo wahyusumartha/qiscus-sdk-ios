@@ -60,8 +60,8 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                 if let hideAvatar = self.configDelegate?.configDelegate?(hideLeftAvatarOn: self){
                     showAvatar = !hideAvatar
                 }
-                cell.delegate = self
-                cell.setData(onIndexPath: indexPath, comment: comment, showUserName: showName, userNameColor: color, hideAvatar: !showAvatar)
+                
+                cell.setData(onIndexPath: indexPath, comment: comment, showUserName: showName, userNameColor: color, hideAvatar: !showAvatar, delegate: self)
                 
                 if let audioCell = cell as? QCellAudio{
                     audioCell.audioCellDelegate = self
