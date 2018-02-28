@@ -706,7 +706,9 @@ public class QComment:Object {
             realm.refresh()
             if c.isInvalidated {return}
             try! realm.write {
-                c.statusRaw = status.rawValue
+                if !c.isInvalidated {
+                    c.statusRaw = status.rawValue
+                }
             }
             if status == .deleted {
 //                if !c.isInvalidated {
