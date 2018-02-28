@@ -24,7 +24,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     
     static let sharedInstance = Qiscus()
     
-    static let qiscusVersionNumber:String = "2.8.2"
+    static let qiscusVersionNumber:String = "2.8.3"
     public static let client = QiscusClient.shared
     
     public static var showDebugPrint = false
