@@ -36,6 +36,10 @@ import RealmSwift
     @objc optional func chatVCConfigDelegate(enableDeleteForMeMenuItem viewController:QiscusChatVC, forComment comment: QComment)->Bool
     @objc optional func chatVCConfigDelegate(enableShareMenuItem viewController:QiscusChatVC, forComment comment: QComment)->Bool
     @objc optional func chatVCConfigDelegate(enableInfoMenuItem viewController:QiscusChatVC, forComment comment: QComment)->Bool
+    
+    @objc optional func chatVCConfigDelegate(usingNavigationSubtitleTyping viewController:QiscusChatVC)->Bool
+    @objc optional func chatVCConfigDelegate(usingTypingCell viewController:QiscusChatVC)->Bool
+    
 }
 
 @objc public protocol QiscusChatVCDelegate{
@@ -257,7 +261,10 @@ public class QiscusChatVC: UIViewController{
     var contactVC = CNContactPickerViewController()
     var typingUsers = [String:QUser]()
     var typingUserTimer = [String:Timer]()
+    
     var processingTyping = false
+    
+    
     var previewedTypingUsers = [String]()
     
     public init() {
@@ -401,7 +408,11 @@ public class QiscusChatVC: UIViewController{
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         NotificationCenter.default.removeObserver(self, name: .UIKeyboardWillChangeFrame, object: nil)
         NotificationCenter.default.removeObserver(self, name: .UIApplicationDidBecomeActive, object: nil)
-        
+        if let navBarTyping = self.configDelegate?.chatVCConfigDelegate?(usingNavigationSubtitleTyping: self){
+            if navBarTyping {
+                NotificationCenter.default.removeObserver(self, name: QiscusNotification.USER_TYPING, object: nil)
+            }
+        }
         view.endEditing(true)
         
         self.dismissLoading()
@@ -451,6 +462,11 @@ public class QiscusChatVC: UIViewController{
             center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
             center.addObserver(self, selector: #selector(QiscusChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
             center.addObserver(self, selector: #selector(QiscusChatVC.applicationDidBecomeActive), name: .UIApplicationDidBecomeActive, object: nil)
+            if let navBarTyping = self.configDelegate?.chatVCConfigDelegate?(usingNavigationSubtitleTyping: self){
+                if navBarTyping {
+                    center.addObserver(self, selector: #selector(QiscusChatVC.userTyping(_:)), name: QiscusNotification.USER_TYPING, object: nil)
+                }
+            }
         }
         if self.loadMoreControl.isRefreshing {
             self.loadMoreControl.endRefreshing()

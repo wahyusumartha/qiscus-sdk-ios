@@ -20,9 +20,13 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
     }
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
         var sectionNumber = 0
+        var usingTypingCell = true
+        if let config = self.configDelegate?.configDelegate?(usingTpingCellIndicator: self){
+            usingTypingCell = config
+        }
         if self.room != nil {
             sectionNumber = self.messagesId.count
-            if self.typingUsers.count > 0 {
+            if usingTypingCell && self.typingUsers.count > 0 {
                 sectionNumber += 1
             }
         }
