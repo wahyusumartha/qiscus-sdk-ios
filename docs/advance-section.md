@@ -91,6 +91,7 @@ When your backend returns a JWT after receiving Nonce from your client app, the 
 
 ## UI Customization
 
+### Basic Customization
 Qiscus Chat SDK enable you to customize Chat UI as you like. You can modify colors, change bubble chat design, modify Chat Header, and many more. All customization method are inside `Qiscus.style()`. By calling it, you can simply look at the autocomplete suggestion in your IDE to see lots of methods to modify your Chat Interface.
 
 ```swift
@@ -108,7 +109,15 @@ Qiscus Chat SDK enable you to customize Chat UI as you like. You can modify colo
   Qiscus.style.chatFont = UIFont.systemFont(ofSize: fontSize)
 
 ```
-##Custom Room Cell
+
+### Advance Customization
+
+For advance customization, you can only use our Core SDK API for the data flow and use your own full UI. By using this approach you will have full control over the UI. We have sample on how you can do it and there are documentation on list of core api that we provide in the SDK. check it here [https://bitbucket.org/qiscus/qiscus-sdk-core-ios-sample](https://bitbucket.org/qiscus/qiscus-sdk-core-ios-sample)
+
+
+
+
+### Custom Room Cell
 
 You can also custom your own chat list interface by using QRoomListCell to be extended to your own RoomList Cell. In the IOS Sample App, you can see how to use it inside [ChatCell.swift](https://github.com/qiscus/qiscus-sdk-ios-sample-v2/blob/master/qiscus-sdk-ios-sample-v2/Views/ChatCell.swift) file.
 There are many available methods inside QRoomListCell that can ease your job. Here is the list of those methods:
