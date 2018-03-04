@@ -115,58 +115,6 @@ Qiscus Chat SDK enable you to customize Chat UI as you like. You can modify colo
 For advance customization, you can only use our Core SDK API for the data flow and use your own full UI. By using this approach you will have full control over the UI. We have sample on how you can do it and there are documentation on list of core api that we provide in the SDK. check it here [https://bitbucket.org/qiscus/qiscus-sdk-core-ios-sample](https://bitbucket.org/qiscus/qiscus-sdk-core-ios-sample)
 
 
-
-
-### Custom Room Cell
-
-You can also custom your own chat list interface by using QRoomListCell to be extended to your own RoomList Cell. In the IOS Sample App, you can see how to use it inside [ChatCell.swift](https://github.com/qiscus/qiscus-sdk-ios-sample-v2/blob/master/qiscus-sdk-ios-sample-v2/Views/ChatCell.swift) file.
-There are many available methods inside QRoomListCell that can ease your job. Here is the list of those methods:
-
-* func setupUI(){} : set your component here
-* func onUserTyping(user:QUser, typing:Bool){} : while user typing
-* func onRoomChange(room: QRoom): while any room changed
-* func gotNewComment(comment:QComment): while got new message
-* func searchTextChanged(){}: while user change keyword of search
-* func roomNameChange(){}: while room name changed
-* func roomAvatarChange(){}: while avatar in room change
-* func roomParticipantChange(){}: while participant change
-* func roomLastCommentChange(){}: while last comment change
-* func roomUnreadCountChange(){}: while unread count change
-* func roomDataChange(){}: while data of room change
-
-Here is how to do that:
-
-```swift
-// ChatListViewModel.swift
-...
-extension ChatListViewModel: UITableViewDataSource {
-    ...
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let cell = tableView.dequeueReusableCell(withIdentifier: ChatCell.identifier, for: indexPath) as? ChatCell {
-            let chat = self.items[indexPath.row]
-            cell.room = chat
-            
-            tableView.tableFooterView = UIView()
-            
-            return cell
-        }
-        
-        return UITableViewCell()
-    }
-}
-
-// ChatCell.swift
-class ChatCell: QRoomListCell {
-    override func setupUI() {
-        self.setAvatar()
-        self.setName()
-        self.setMessageTime()
-        self.setUnreadCount()
-    }
-    ...
-}
-```
-
 ## Event Handler
 
 An Event Handler is a callback routine that operates asynchronously and handles inputs received into a program. Event Handlers are important in Qiscus because it allows a client to react to any events happening in Qiscus Chat SDK. For example, if a client wants to know any important events from server, such as success login event, client's app can be notified by calling a specific Event Handler. Client, then, can do things with data returned by the event.
