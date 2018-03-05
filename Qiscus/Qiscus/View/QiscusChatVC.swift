@@ -161,6 +161,14 @@ public class QiscusChatVC: UIViewController{
                     self.dataLoaded = true
                 })
             }
+            if let navBarTyping = self.configDelegate?.chatVCConfigDelegate?(usingNavigationSubtitleTyping: self){
+                if navBarTyping {
+                    if let roomId = self.chatRoom?.id {
+                        let center: NotificationCenter = NotificationCenter.default
+                        center.addObserver(self, selector: #selector(QiscusChatVC.userTyping(_:)), name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
+                    }
+                }
+            }
         }
     }
     public var chatMessage:String?
