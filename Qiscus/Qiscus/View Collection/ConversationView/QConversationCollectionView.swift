@@ -144,16 +144,21 @@ public class QConversationCollectionView: UICollectionView {
         let center: NotificationCenter = NotificationCenter.default
 
 //        center.addObserver(self, selector: #selector(QConversationCollectionView.commentDeleted(_:)), name: QiscusNotification.COMMENT_DELETE, object: nil)
-        center.addObserver(self, selector: #selector(QConversationCollectionView.userTyping(_:)), name: QiscusNotification.USER_TYPING, object: nil)
         center.addObserver(self, selector: #selector(QConversationCollectionView.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
-        center.addObserver(self, selector: #selector(QConversationCollectionView.messageCleared(_:)), name: QiscusNotification.ROOM_CLEARMESSAGES, object: nil)
+        
+        guard let roomId = self.room?.id else {return}
+        
+        center.addObserver(self, selector: #selector(QConversationCollectionView.userTyping(_:)), name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
+        center.addObserver(self, selector: #selector(QConversationCollectionView.messageCleared(_:)), name: QiscusNotification.ROOM_CLEARMESSAGES(onRoom: roomId), object: nil)
     }
     public func unsubscribeEvent(){
         let center: NotificationCenter = NotificationCenter.default
 //        center.removeObserver(self, name: QiscusNotification.COMMENT_DELETE, object: nil)
-        center.removeObserver(self, name: QiscusNotification.USER_TYPING, object: nil)
         center.removeObserver(self, name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
-        center.removeObserver(self, name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
+        
+        guard let roomId = self.room?.id else {return}
+        center.removeObserver(self, name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
+        center.removeObserver(self, name: QiscusNotification.ROOM_CLEARMESSAGES(onRoom: roomId), object: nil)
     }
     // MARK: - Event handler
     open func onDeleteComment(){
