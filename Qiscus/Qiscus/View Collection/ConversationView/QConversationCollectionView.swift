@@ -146,19 +146,21 @@ public class QConversationCollectionView: UICollectionView {
 //        center.addObserver(self, selector: #selector(QConversationCollectionView.commentDeleted(_:)), name: QiscusNotification.COMMENT_DELETE, object: nil)
         center.addObserver(self, selector: #selector(QConversationCollectionView.newCommentNotif(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
         
-        guard let roomId = self.room?.id else {return}
+        if let roomId = self.room?.id {
+            center.addObserver(self, selector: #selector(QConversationCollectionView.userTyping(_:)), name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
+            center.addObserver(self, selector: #selector(QConversationCollectionView.messageCleared(_:)), name: QiscusNotification.ROOM_CLEARMESSAGES(onRoom: roomId), object: nil)
+        }
         
-        center.addObserver(self, selector: #selector(QConversationCollectionView.userTyping(_:)), name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
-        center.addObserver(self, selector: #selector(QConversationCollectionView.messageCleared(_:)), name: QiscusNotification.ROOM_CLEARMESSAGES(onRoom: roomId), object: nil)
     }
     public func unsubscribeEvent(){
         let center: NotificationCenter = NotificationCenter.default
 //        center.removeObserver(self, name: QiscusNotification.COMMENT_DELETE, object: nil)
         center.removeObserver(self, name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
         
-        guard let roomId = self.room?.id else {return}
-        center.removeObserver(self, name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
-        center.removeObserver(self, name: QiscusNotification.ROOM_CLEARMESSAGES(onRoom: roomId), object: nil)
+        if let roomId = self.room?.id {
+            center.removeObserver(self, name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
+            center.removeObserver(self, name: QiscusNotification.ROOM_CLEARMESSAGES(onRoom: roomId), object: nil)
+        }
     }
     // MARK: - Event handler
     open func onDeleteComment(){
