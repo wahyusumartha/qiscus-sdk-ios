@@ -396,6 +396,7 @@ public class QiscusChatVC: UIViewController{
         
     }
 
+    
     override public func viewWillDisappear(_ animated: Bool) {
         if let room = self.chatRoom {
             room.readAll()
@@ -410,7 +411,8 @@ public class QiscusChatVC: UIViewController{
         NotificationCenter.default.removeObserver(self, name: .UIApplicationDidBecomeActive, object: nil)
         if let navBarTyping = self.configDelegate?.chatVCConfigDelegate?(usingNavigationSubtitleTyping: self){
             if navBarTyping {
-                NotificationCenter.default.removeObserver(self, name: QiscusNotification.USER_TYPING, object: nil)
+                guard let roomId = self.chatRoom?.id else {return}
+                NotificationCenter.default.removeObserver(self, name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
             }
         }
         view.endEditing(true)
@@ -464,7 +466,8 @@ public class QiscusChatVC: UIViewController{
             center.addObserver(self, selector: #selector(QiscusChatVC.applicationDidBecomeActive), name: .UIApplicationDidBecomeActive, object: nil)
             if let navBarTyping = self.configDelegate?.chatVCConfigDelegate?(usingNavigationSubtitleTyping: self){
                 if navBarTyping {
-                    center.addObserver(self, selector: #selector(QiscusChatVC.userTyping(_:)), name: QiscusNotification.USER_TYPING, object: nil)
+                    guard let roomId = self.chatRoom?.id else { return }
+                    center.addObserver(self, selector: #selector(QiscusChatVC.userTyping(_:)), name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
                 }
             }
         }
