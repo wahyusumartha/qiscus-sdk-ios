@@ -263,18 +263,16 @@ internal extension QRoom {
                     }
                 }
                 if !onTop {
-                    let rId = self.id
-                    let uid = newComment.uniqueId
                     if Thread.isMainThread {
-                        if let r = QRoom.getRoom(withId: rId){
-                            if let c = QComment.comment(withUniqueId: uid){
+                        if let r = QRoom.getRoom(withId: id){
+                            if let c = QComment.comment(withUniqueId: cUniqueId){
                                 QiscusNotification.publish(gotNewComment: c, room: r)
                             }
                         }
                     }else{
                         DispatchQueue.main.sync {
-                            if let r = QRoom.getRoom(withId: rId){
-                                if let c = QComment.comment(withUniqueId: uid){
+                            if let r = QRoom.getRoom(withId: id){
+                                if let c = QComment.comment(withUniqueId: cUniqueId){
                                     QiscusNotification.publish(gotNewComment: c, room: r)
                                 }
                             }
@@ -982,9 +980,11 @@ internal extension QRoom {
                         }else{
                             retVal.append(group)
                             checkPosition(ids: group)
-                            group = [String]()
-                            group.append(comment.uniqueId)
-                            uidList.append(comment.uniqueId)
+                            if !comment.isInvalidated {
+                                group = [String]()
+                                group.append(comment.uniqueId)
+                                uidList.append(comment.uniqueId)
+                            }
                         }
                     }else{
                         group.append(comment.uniqueId)

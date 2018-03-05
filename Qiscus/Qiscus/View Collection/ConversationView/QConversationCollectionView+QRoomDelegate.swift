@@ -126,7 +126,7 @@ extension QConversationCollectionView: QRoomDelegate {
                             CATransaction.commit()
                             self.loadMoreControl.endRefreshing()
                             
-                            if r.canLoadMore {
+                            if !r.canLoadMore {
                                 self.loadMoreControl.removeFromSuperview()
                             }
                         }

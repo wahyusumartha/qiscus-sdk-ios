@@ -188,12 +188,18 @@ public class QConversationCollectionView: UICollectionView {
     open func userTypingChanged(user: QUser, typing:Bool){
         self.processingTyping = true
         if user.isInvalidated {return}
+        var usingCellTyping = true
+        if let config = self.configDelegate?.configDelegate?(usingTpingCellIndicator: self){
+            usingCellTyping = config
+        }
         if !typing {
             if self.typingUsers[user.email] != nil {
                 self.typingUsers[user.email] = nil
-                self.reloadData()
-                if self.isLastRowVisible{
-                    scrollToBottom()
+                if usingCellTyping {
+                    self.reloadData()
+                    if self.isLastRowVisible{
+                        scrollToBottom()
+                    }
                 }
             }
             if let timer = self.typingUserTimer[user.email] {
@@ -206,9 +212,11 @@ public class QConversationCollectionView: UICollectionView {
                     timer.invalidate()
                 }
                 self.typingUserTimer[user.email] = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(QConversationCollectionView.publishStopTyping(timer:)), userInfo: user, repeats: false)
-                self.reloadData()
-                if self.isLastRowVisible{
-                    scrollToBottom()
+                if usingCellTyping {
+                    self.reloadData()
+                    if self.isLastRowVisible{
+                        scrollToBottom()
+                    }
                 }
             }else{
                 if let timer = self.typingUserTimer[user.email] {

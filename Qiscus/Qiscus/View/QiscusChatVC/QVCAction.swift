@@ -328,9 +328,11 @@ extension QiscusChatVC {
                             self.titleLabel.frame = frame
                         }, completion: { (_) in
                             self.subtitleLabel.text = subtitleString
+                            self.subtitleText = subtitleString
                         })
                     }else{
                         self.subtitleLabel.text = subtitleString
+                        self.subtitleText = subtitleString
                     }
                     if subtitleString.contains("minute") || subtitleString.contains("hours") || subtitleString.contains("seconds"){
                         var delay = 60.0 * Double(NSEC_PER_SEC)
@@ -345,6 +347,7 @@ extension QiscusChatVC {
                 }
             }else{
                 self.subtitleLabel.text = self.chatSubtitle!
+                self.subtitleText = self.chatSubtitle!
             }
         }}
         }
@@ -1040,6 +1043,39 @@ extension QiscusChatVC {
             Qiscus.uiThread.async { autoreleasepool{
                 self.showNoConnectionToast()
                 }}
+        }
+    }
+    
+    @objc internal func userTyping(_ notification: Notification){
+        if let userInfo = notification.userInfo {
+            let user = userInfo["user"] as! QUser
+            let typing = userInfo["typing"] as! Bool
+            let room = userInfo["room"] as! QRoom
+            if room.isInvalidated || user.isInvalidated {
+                return
+            }
+            if let currentRoom = self.chatRoom {
+                if currentRoom.isInvalidated { return }
+                if currentRoom.id == room.id {
+                    if !processingTyping{
+                        self.userTypingChanged(user: user, typing: typing)
+                    }
+                }
+            }
+        }
+    }
+    
+    open func userTypingChanged(user: QUser, typing:Bool){
+        if user.isInvalidated {return}
+        if !typing {
+            self.subtitleLabel.text = self.subtitleText
+        }else{
+            guard let room = self.chatRoom else {return}
+            if room.type == .single {
+                self.subtitleLabel.text = "is typing ..."
+            }else{
+                self.subtitleLabel.text = "\(user.fullname) is typing ..."
+            }
         }
     }
 }

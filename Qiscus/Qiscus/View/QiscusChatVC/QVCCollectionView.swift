@@ -10,6 +10,12 @@ import UIKit
 
 // MARK: - CollectionView dataSource, delegate, and delegateFlowLayout
 extension QiscusChatVC: QConversationViewConfigurationDelegate {
+    public func configDelegate(usingTpingCellIndicator collectionView: QConversationCollectionView) -> Bool {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(usingTypingCell: self){
+            return config
+        }
+        return true
+    }
     public func configDelegate(userNameLabelColor collectionView:QConversationCollectionView, forUser user:QUser)->UIColor?{
         if let config = self.configDelegate{
             if let color = config.chatVCConfigDelegate?(userNameLabelColor: self, forUser: user){
@@ -42,6 +48,62 @@ extension QiscusChatVC: QConversationViewConfigurationDelegate {
         }else{
             return "🚫 This message was deleted."
         }
+    }
+    
+    public func configDelegate(enableInfoMenuItem collectionView: QConversationCollectionView, forComment comment: QComment) -> Bool {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(enableInfoMenuItem: self, forComment: comment) {
+            return config
+        }
+        
+        return true
+    }
+    
+    public func configDelegate(enableReplyMenuItem collectionView: QConversationCollectionView, forComment comment: QComment) -> Bool {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(enableReplyMenuItem: self, forComment: comment) {
+            return config
+        }
+        
+        return true
+    }
+    
+    public func configDelegate(enableShareMenuItem collectionView: QConversationCollectionView, forComment comment: QComment) -> Bool {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(enableShareMenuItem: self, forComment: comment) {
+            return config
+        }
+        
+        return true
+    }
+    
+    public func configDelegate(enableDeleteMenuItem collectionView: QConversationCollectionView, forComment comment: QComment) -> Bool {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(enableDeleteMenuItem: self, forComment: comment) {
+            return config
+        }
+        
+        return true
+    }
+    
+    public func configDelegate(enableResendMenuItem collectionView: QConversationCollectionView, forComment comment: QComment) -> Bool {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(enableResendMenuItem: self, forComment: comment) {
+            return config
+        }
+        
+        return true
+    }
+    
+    public func configDelegate(enableDeleteForMeMenuItem collectionView: QConversationCollectionView, forComment comment: QComment) -> Bool {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(enableDeleteForMeMenuItem: self, forComment: comment) {
+            return config
+        }
+        
+        return true
+    }
+    
+    public func configDelegate(enableForwardMenuItem collectionView: QConversationCollectionView, forComment comment: QComment) -> Bool {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(enableForwardMenuItem: self, forComment: comment) {
+            return config
+        }
+        
+        return true
     }
 }
 extension QiscusChatVC: QConversationViewDelegate {

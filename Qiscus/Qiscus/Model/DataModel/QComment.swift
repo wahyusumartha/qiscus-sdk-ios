@@ -706,13 +706,17 @@ public class QComment:Object {
             realm.refresh()
             if c.isInvalidated {return}
             try! realm.write {
-                c.statusRaw = status.rawValue
+                if !c.isInvalidated {
+                    c.statusRaw = status.rawValue
+                }
             }
             if status == .deleted {
-                try! realm.write {
-                    c.text = "This message was deleted"
-                    c.typeRaw = QCommentType.text.name()
-                }
+//                if !c.isInvalidated {
+//                    try! realm.write {
+//                        c.text = "This message was deleted"
+//                        c.typeRaw = QCommentType.text.name()
+//                    }
+//                }
                 if let r = QRoom.threadSaveRoom(withId: rId){
                     if r.lastCommentUniqueId == uId {
                         r.recalculateLastComment()
@@ -742,12 +746,12 @@ public class QComment:Object {
                     }
                     break
                 case .sent:
-                    if status == .delivered || status == .read {
+                    if status == .delivered || status == .read || status == .deleting || status == .deletePending || status == .deleted{
                         update(c: c)
                     }
                     break
                 case .delivered:
-                    if status == .read {
+                    if status == .read || status == .deleting || status == .deletePending || status == .deleted{
                         update(c: c)
                     }
                     break

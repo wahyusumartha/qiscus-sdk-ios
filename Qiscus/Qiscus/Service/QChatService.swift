@@ -1884,6 +1884,7 @@ public class QChatService:NSObject {
                                         let uid = commentJSON.stringValue
                                         if let c = QComment.threadSaveComment(withUniqueId: uid){
                                             if hardDelete {
+//                                                c.updateStatus(status: .deleted)
                                                 room.deleteComment(comment: c)
                                             }else{
                                                 c.updateStatus(status: .deleted)

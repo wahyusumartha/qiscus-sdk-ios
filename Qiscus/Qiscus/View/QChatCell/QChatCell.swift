@@ -25,7 +25,15 @@ import SwiftyJSON
     func willDeleteComment(onIndexPath indexPath:IndexPath)
     func didDeleteComment(onIndexPath indexPath:IndexPath)
     @objc optional func deletedMessageText(selfMessage isSelf:Bool)->String
+    @objc optional func enableReplyMenuItem(onCell cell:QChatCell)->Bool
+    @objc optional func enableForwardMenuItem(onCell cell:QChatCell)->Bool
+    @objc optional func enableResendMenuItem(onCell cell:QChatCell)->Bool
+    @objc optional func enableDeleteMenuItem(onCell cell:QChatCell)->Bool
+    @objc optional func enableDeleteForMeMenuItem(onCell cell:QChatCell)->Bool
+    @objc optional func enableShareMenuItem(onCell cell:QChatCell)->Bool
+    @objc optional func enableInfoMenuItem(onCell cell:QChatCell)->Bool
 }
+
 open class QChatCell: UICollectionViewCell, QCommentDelegate {
     
     var delegate: ChatCellDelegate?
@@ -57,19 +65,9 @@ open class QChatCell: UICollectionViewCell, QCommentDelegate {
             ]
         }
     }
+    
     override open func awakeFromNib() {
         super.awakeFromNib()
-        let resendMenuItem: UIMenuItem = UIMenuItem(title: "Resend", action: #selector(QChatCell.resend))
-        let deleteMenuItem: UIMenuItem = UIMenuItem(title: "Delete", action: #selector(QChatCell.deleteComment))
-        let deleteForMeMenuItem: UIMenuItem = UIMenuItem(title: "Delete For Me", action: #selector(QChatCell.deleteForMe))
-        let replyMenuItem: UIMenuItem = UIMenuItem(title: "Reply", action: #selector(QChatCell.reply))
-        let forwardMenuItem: UIMenuItem = UIMenuItem(title: "Forward", action: #selector(QChatCell.forward))
-        let shareMenuItem: UIMenuItem = UIMenuItem(title: "Share", action: #selector(QChatCell.share))
-        let infoMenuItem: UIMenuItem = UIMenuItem(title: "Info", action: #selector(QChatCell.info))
-        
-        let menuItems:[UIMenuItem] = [replyMenuItem,forwardMenuItem,resendMenuItem,deleteMenuItem,deleteForMeMenuItem,shareMenuItem,infoMenuItem]
-        
-        UIMenuController.shared.menuItems = menuItems
         
         NotificationCenter.default.addObserver(self, selector: #selector(QChatCell.userNameChanged(_:)), name: QiscusNotification.USER_NAME_CHANGE, object: nil)
     }
@@ -313,9 +311,11 @@ open class QChatCell: UICollectionViewCell, QCommentDelegate {
             data.delegate = nil
         }
     }
-    public func setData(onIndexPath indexPath:IndexPath, comment:QComment, showUserName:Bool, userNameColor:UIColor?, hideAvatar:Bool){
+    public func setData(onIndexPath indexPath:IndexPath, comment:QComment, showUserName:Bool, userNameColor:UIColor?, hideAvatar:Bool, delegate:ChatCellDelegate? = nil){
         var oldUniqueId:String?
-        
+        if delegate != nil {
+            self.delegate = delegate!
+        }
         self.showUserName = showUserName
         self.hideAvatar = hideAvatar
         self.indexPath = indexPath
@@ -346,6 +346,74 @@ open class QChatCell: UICollectionViewCell, QCommentDelegate {
         }else{
             self.commentChanged()
         }
+        var menuItems: [UIMenuItem] = [UIMenuItem]()
+        
+        let resendMenuItem: UIMenuItem = UIMenuItem(title: "Resend", action: #selector(QChatCell.resend))
+        let deleteMenuItem: UIMenuItem = UIMenuItem(title: "Delete", action: #selector(QChatCell.deleteComment))
+        let deleteForMeMenuItem: UIMenuItem = UIMenuItem(title: "Delete For Me", action: #selector(QChatCell.deleteForMe))
+        let replyMenuItem: UIMenuItem = UIMenuItem(title: "Reply", action: #selector(QChatCell.reply))
+        let forwardMenuItem: UIMenuItem = UIMenuItem(title: "Forward", action: #selector(QChatCell.forward))
+        let shareMenuItem: UIMenuItem = UIMenuItem(title: "Share", action: #selector(QChatCell.share))
+        let infoMenuItem: UIMenuItem = UIMenuItem(title: "Info", action: #selector(QChatCell.info))
+        
+        if let isEnable = delegate?.enableReplyMenuItem?(onCell: self) {
+            if isEnable {
+                menuItems.append(replyMenuItem)
+            }
+        } else {
+            menuItems.append(replyMenuItem)
+        }
+        
+        if let isEnable = delegate?.enableForwardMenuItem?(onCell: self) {
+            if isEnable {
+                menuItems.append(forwardMenuItem)
+            }
+        } else {
+            menuItems.append(forwardMenuItem)
+        }
+
+        if let isEnable = delegate?.enableResendMenuItem?(onCell: self) {
+            if isEnable {
+                menuItems.append(resendMenuItem)
+            }
+        } else {
+            menuItems.append(resendMenuItem)
+        }
+        
+        if let isEnable = delegate?.enableDeleteMenuItem?(onCell: self) {
+            if isEnable {
+                menuItems.append(deleteMenuItem)
+            }
+        } else {
+            menuItems.append(deleteMenuItem)
+        }
+        
+        if let isEnable = delegate?.enableDeleteForMeMenuItem?(onCell: self) {
+            if isEnable {
+                menuItems.append(deleteForMeMenuItem)
+            }
+        } else {
+            menuItems.append(deleteForMeMenuItem)
+        }
+        
+        
+        if let isEnable = delegate?.enableShareMenuItem?(onCell: self) {
+            if isEnable {
+                menuItems.append(shareMenuItem)
+            }
+        } else {
+            menuItems.append(shareMenuItem)
+        }
+        
+        if let isEnable = delegate?.enableInfoMenuItem?(onCell: self) {
+            if isEnable {
+                menuItems.append(infoMenuItem)
+            }
+        } else {
+            menuItems.append(infoMenuItem)
+        }
+        
+        UIMenuController.shared.menuItems = menuItems
     }
     
     // MARK: - commentDelegate
