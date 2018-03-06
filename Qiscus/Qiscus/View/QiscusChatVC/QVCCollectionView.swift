@@ -10,6 +10,12 @@ import UIKit
 
 // MARK: - CollectionView dataSource, delegate, and delegateFlowLayout
 extension QiscusChatVC: QConversationViewConfigurationDelegate {
+    public func configDelegate(usingTpingCellIndicator collectionView: QConversationCollectionView) -> Bool {
+        if let config = self.configDelegate?.chatVCConfigDelegate?(usingTypingCell: self){
+            return config
+        }
+        return true
+    }
     public func configDelegate(userNameLabelColor collectionView:QConversationCollectionView, forUser user:QUser)->UIColor?{
         if let config = self.configDelegate{
             if let color = config.chatVCConfigDelegate?(userNameLabelColor: self, forUser: user){

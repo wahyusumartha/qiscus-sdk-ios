@@ -73,4 +73,5 @@ import UIKit
     @objc optional func configDelegate(enableShareMenuItem collectionView:QConversationCollectionView, forComment comment: QComment)->Bool
     @objc optional func configDelegate(enableForwardMenuItem collectionView:QConversationCollectionView, forComment comment: QComment)->Bool
     @objc optional func configDelegate(enableInfoMenuItem collectionView:QConversationCollectionView, forComment comment: QComment)->Bool
+    @objc optional func configDelegate(usingTpingCellIndicator collectionView:QConversationCollectionView)->Bool
 }
