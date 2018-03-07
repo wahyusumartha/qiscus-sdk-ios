@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>QiscusChatVCConfigDelegate Protocol Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Protocol/QiscusChatVCConfigDelegate" class="dashAnchor"></a>
+    <a title="QiscusChatVCConfigDelegate Protocol Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="../index.html">Qiscus Docs</a> (5% documented)</p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="../index.html">Qiscus Reference</a>
+        <img id="carat" src="../img/carat.png" />
+        QiscusChatVCConfigDelegate Protocol Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Classes.html#/c:@M@Qiscus@objc(cs)ChatFileButton">ChatFileButton</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/ChatInputText.html">ChatInputText</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/ChatPreviewDocVC.html">ChatPreviewDocVC</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes.html#/c:@M@Qiscus@objc(cs)ChatTapRecognizer">ChatTapRecognizer</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QCard.html">QCard</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QCardAction.html">QCardAction</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QCarouselCardCell.html">QCarouselCardCell</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QCellCarousel.html">QCellCarousel</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QChatCell.html">QChatCell</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QChatCellHeight.html">QChatCellHeight</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QChatCellHelper.html">QChatCellHelper</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QChatService.html">QChatService</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QComment.html">QComment</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QCommentIndexPath.html">QCommentIndexPath</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QCommentInfo.html">QCommentInfo</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QConversationCollectionView.html">QConversationCollectionView</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QFile.html">QFile</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QFileManager.html">QFileManager</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QLoadingViewController.html">QLoadingViewController</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QParticipant.html">QParticipant</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QPopUpView.html">QPopUpView</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QReachability.html">QReachability</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QReachability/NetworkStatus.html">– NetworkStatus</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QRoom.html">QRoom</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QRoomList.html">QRoomList</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QRoomListCell.html">QRoomListCell</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QRoomService.html">QRoomService</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QSearchListCell.html">QSearchListCell</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QSiriWaveView.html">QSiriWaveView</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QSyncNotifData.html">QSyncNotifData</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QToasterSwift.html">QToasterSwift</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QUser.html">QUser</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/Qiscus.html">Qiscus</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QiscusAssetsConfiguration.html">QiscusAssetsConfiguration</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes.html#/c:@M@Qiscus@objc(cs)QiscusAsyncImageView">QiscusAsyncImageView</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QiscusChatVC.html">QiscusChatVC</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QiscusClient.html">QiscusClient</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QiscusColorConfiguration.html">QiscusColorConfiguration</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QiscusCommentClient.html">QiscusCommentClient</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QiscusConfig.html">QiscusConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QiscusFileHelper.html">QiscusFileHelper</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes.html#/c:@M@Qiscus@objc(cs)QiscusGalleryItem">QiscusGalleryItem</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QiscusHelper.html">QiscusHelper</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QiscusIndexPathData.html">QiscusIndexPathData</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QiscusLinkData.html">QiscusLinkData</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QiscusNotification.html">QiscusNotification</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QiscusSearchIndexPathData.html">QiscusSearchIndexPathData</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QiscusTextConfiguration.html">QiscusTextConfiguration</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Classes/QiscusUIConfiguration.html">QiscusUIConfiguration</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Global Variables.html">Global Variables</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Global Variables.html#/s:6Qiscus32QReachabilityChangedNotificationSo14NSNotificationC4NameVv">QReachabilityChangedNotification</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Enums/CellPosition.html">CellPosition</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/CellTypePosition.html">CellTypePosition</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/QCardButtonType.html">QCardButtonType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/QCellPosition.html">QCellPosition</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/QCommentProperty.html">QCommentProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/QCommentStatus.html">QCommentStatus</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/QCommentType.html">QCommentType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/QDirectoryType.html">QDirectoryType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/QReachabilityError.html">QReachabilityError</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/QReplyType.html">QReplyType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/QRoomProperty.html">QRoomProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/QRoomType.html">QRoomType</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/QUserPresence.html">QUserPresence</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Enums/QiscusFileType.html">QiscusFileType</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Extensions.html">Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Extensions/QiscusUploaderVC.html">QiscusUploaderVC</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/UIImage.html">UIImage</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/UIImageView.html">UIImageView</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/UINavigationBar.html">UINavigationBar</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/UINavigationItem.html">UINavigationItem</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/UIView.html">UIView</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Extensions/UIViewController.html">UIViewController</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="../Protocols.html">Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="../Protocols/ChatCellDelegate.html">ChatCellDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/ChatInputTextDelegate.html">ChatInputTextDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QCarouselCardDelegate.html">QCarouselCardDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QCellCarouselDelegate.html">QCellCarouselDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QChatServiceDelegate.html">QChatServiceDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QCommentDelegate.html">QCommentDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QConversationViewCellDelegate.html">QConversationViewCellDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QConversationViewConfigurationDelegate.html">QConversationViewConfigurationDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QConversationViewDelegate.html">QConversationViewDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QConversationViewRoomDelegate.html">QConversationViewRoomDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QParticipantDelegate.html">QParticipantDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QRoomDelegate.html">QRoomDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QRoomListDelegate.html">QRoomListDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QUserDelegate.html">QUserDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QiscusChatCellDelegate.html">QiscusChatCellDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QiscusChatDelegate.html">QiscusChatDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QiscusChatVCCellDelegate.html">QiscusChatVCCellDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QiscusChatVCConfigDelegate.html">QiscusChatVCConfigDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QiscusChatVCDelegate.html">QiscusChatVCDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QiscusConfigDelegate.html">QiscusConfigDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QiscusDiagnosticDelegate.html">QiscusDiagnosticDelegate</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="../Protocols/QiscusRoomDelegate.html">QiscusRoomDelegate</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>QiscusChatVCConfigDelegate</h1>
+              <div class="declaration">
+                <div class="language">
+                  <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">QiscusChatVCConfigDelegate</span></code></pre>
+
+                </div>
+              </div>
+            <p>Undocumented</p>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithUserNameLabelColor:forUser:"></a>
+                    <a name="//apple_ref/swift/Method/chatVCConfigDelegate(userNameLabelColor:forUser:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithUserNameLabelColor:forUser:">chatVCConfigDelegate(userNameLabelColor:forUser:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">optional</span> <span class="kd">func</span> <span class="nf">chatVCConfigDelegate</span><span class="p">(</span><span class="n">userNameLabelColor</span> <span class="nv">viewController</span><span class="p">:</span><span class="kt"><a href="../Classes/QiscusChatVC.html">QiscusChatVC</a></span><span class="p">,</span> <span class="n">forUser</span> <span class="nv">user</span><span class="p">:</span><span class="kt"><a href="../Classes/QUser.html">QUser</a></span><span class="p">)</span><span class="o">-&gt;</span><span class="kt">UIColor</span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithHideLeftAvatarOn:"></a>
+                    <a name="//apple_ref/swift/Method/chatVCConfigDelegate(hideLeftAvatarOn:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithHideLeftAvatarOn:">chatVCConfigDelegate(hideLeftAvatarOn:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">optional</span> <span class="kd">func</span> <span class="nf">chatVCConfigDelegate</span><span class="p">(</span><span class="n">hideLeftAvatarOn</span> <span class="nv">viewController</span><span class="p">:</span><span class="kt"><a href="../Classes/QiscusChatVC.html">QiscusChatVC</a></span><span class="p">)</span><span class="o">-&gt;</span><span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithHideUserNameLabel:forUser:"></a>
+                    <a name="//apple_ref/swift/Method/chatVCConfigDelegate(hideUserNameLabel:forUser:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithHideUserNameLabel:forUser:">chatVCConfigDelegate(hideUserNameLabel:forUser:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">optional</span> <span class="kd">func</span> <span class="nf">chatVCConfigDelegate</span><span class="p">(</span><span class="n">hideUserNameLabel</span> <span class="nv">viewController</span><span class="p">:</span><span class="kt"><a href="../Classes/QiscusChatVC.html">QiscusChatVC</a></span><span class="p">,</span> <span class="n">forUser</span> <span class="nv">user</span><span class="p">:</span><span class="kt"><a href="../Classes/QUser.html">QUser</a></span><span class="p">)</span><span class="o">-&gt;</span><span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateUsingSoftDeleteOn:"></a>
+                    <a name="//apple_ref/swift/Method/chatVCConfigDelegate(usingSoftDeleteOn:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateUsingSoftDeleteOn:">chatVCConfigDelegate(usingSoftDeleteOn:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">optional</span> <span class="kd">func</span> <span class="nf">chatVCConfigDelegate</span><span class="p">(</span><span class="n">usingSoftDeleteOn</span> <span class="nv">viewController</span><span class="p">:</span><span class="kt"><a href="../Classes/QiscusChatVC.html">QiscusChatVC</a></span><span class="p">)</span><span class="o">-&gt;</span><span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithDeletedMessageTextFor:selfMessage:"></a>
+                    <a name="//apple_ref/swift/Method/chatVCConfigDelegate(deletedMessageTextFor:selfMessage:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithDeletedMessageTextFor:selfMessage:">chatVCConfigDelegate(deletedMessageTextFor:selfMessage:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">optional</span> <span class="kd">func</span> <span class="nf">chatVCConfigDelegate</span><span class="p">(</span><span class="n">deletedMessageTextFor</span> <span class="nv">viewController</span><span class="p">:</span><span class="kt"><a href="../Classes/QiscusChatVC.html">QiscusChatVC</a></span><span class="p">,</span> <span class="n">selfMessage</span> <span class="nv">isSelf</span><span class="p">:</span><span class="kt">Bool</span><span class="p">)</span><span class="o">-&gt;</span><span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithEnableReplyMenuItem:forComment:"></a>
+                    <a name="//apple_ref/swift/Method/chatVCConfigDelegate(enableReplyMenuItem:forComment:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithEnableReplyMenuItem:forComment:">chatVCConfigDelegate(enableReplyMenuItem:forComment:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">optional</span> <span class="kd">func</span> <span class="nf">chatVCConfigDelegate</span><span class="p">(</span><span class="n">enableReplyMenuItem</span> <span class="nv">viewController</span><span class="p">:</span><span class="kt"><a href="../Classes/QiscusChatVC.html">QiscusChatVC</a></span><span class="p">,</span> <span class="n">forComment</span> <span class="nv">comment</span><span class="p">:</span> <span class="kt"><a href="../Classes/QComment.html">QComment</a></span><span class="p">)</span><span class="o">-&gt;</span><span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithEnableForwardMenuItem:forComment:"></a>
+                    <a name="//apple_ref/swift/Method/chatVCConfigDelegate(enableForwardMenuItem:forComment:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithEnableForwardMenuItem:forComment:">chatVCConfigDelegate(enableForwardMenuItem:forComment:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">optional</span> <span class="kd">func</span> <span class="nf">chatVCConfigDelegate</span><span class="p">(</span><span class="n">enableForwardMenuItem</span> <span class="nv">viewController</span><span class="p">:</span><span class="kt"><a href="../Classes/QiscusChatVC.html">QiscusChatVC</a></span><span class="p">,</span> <span class="n">forComment</span> <span class="nv">comment</span><span class="p">:</span> <span class="kt"><a href="../Classes/QComment.html">QComment</a></span><span class="p">)</span><span class="o">-&gt;</span><span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithEnableResendMenuItem:forComment:"></a>
+                    <a name="//apple_ref/swift/Method/chatVCConfigDelegate(enableResendMenuItem:forComment:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithEnableResendMenuItem:forComment:">chatVCConfigDelegate(enableResendMenuItem:forComment:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">optional</span> <span class="kd">func</span> <span class="nf">chatVCConfigDelegate</span><span class="p">(</span><span class="n">enableResendMenuItem</span> <span class="nv">viewController</span><span class="p">:</span><span class="kt"><a href="../Classes/QiscusChatVC.html">QiscusChatVC</a></span><span class="p">,</span> <span class="n">forComment</span> <span class="nv">comment</span><span class="p">:</span> <span class="kt"><a href="../Classes/QComment.html">QComment</a></span><span class="p">)</span><span class="o">-&gt;</span><span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithEnableDeleteMenuItem:forComment:"></a>
+                    <a name="//apple_ref/swift/Method/chatVCConfigDelegate(enableDeleteMenuItem:forComment:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithEnableDeleteMenuItem:forComment:">chatVCConfigDelegate(enableDeleteMenuItem:forComment:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">optional</span> <span class="kd">func</span> <span class="nf">chatVCConfigDelegate</span><span class="p">(</span><span class="n">enableDeleteMenuItem</span> <span class="nv">viewController</span><span class="p">:</span><span class="kt"><a href="../Classes/QiscusChatVC.html">QiscusChatVC</a></span><span class="p">,</span> <span class="n">forComment</span> <span class="nv">comment</span><span class="p">:</span> <span class="kt"><a href="../Classes/QComment.html">QComment</a></span><span class="p">)</span><span class="o">-&gt;</span><span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithEnableDeleteForMeMenuItem:forComment:"></a>
+                    <a name="//apple_ref/swift/Method/chatVCConfigDelegate(enableDeleteForMeMenuItem:forComment:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithEnableDeleteForMeMenuItem:forComment:">chatVCConfigDelegate(enableDeleteForMeMenuItem:forComment:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">optional</span> <span class="kd">func</span> <span class="nf">chatVCConfigDelegate</span><span class="p">(</span><span class="n">enableDeleteForMeMenuItem</span> <span class="nv">viewController</span><span class="p">:</span><span class="kt"><a href="../Classes/QiscusChatVC.html">QiscusChatVC</a></span><span class="p">,</span> <span class="n">forComment</span> <span class="nv">comment</span><span class="p">:</span> <span class="kt"><a href="../Classes/QComment.html">QComment</a></span><span class="p">)</span><span class="o">-&gt;</span><span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithEnableShareMenuItem:forComment:"></a>
+                    <a name="//apple_ref/swift/Method/chatVCConfigDelegate(enableShareMenuItem:forComment:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithEnableShareMenuItem:forComment:">chatVCConfigDelegate(enableShareMenuItem:forComment:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">optional</span> <span class="kd">func</span> <span class="nf">chatVCConfigDelegate</span><span class="p">(</span><span class="n">enableShareMenuItem</span> <span class="nv">viewController</span><span class="p">:</span><span class="kt"><a href="../Classes/QiscusChatVC.html">QiscusChatVC</a></span><span class="p">,</span> <span class="n">forComment</span> <span class="nv">comment</span><span class="p">:</span> <span class="kt"><a href="../Classes/QComment.html">QComment</a></span><span class="p">)</span><span class="o">-&gt;</span><span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithEnableInfoMenuItem:forComment:"></a>
+                    <a name="//apple_ref/swift/Method/chatVCConfigDelegate(enableInfoMenuItem:forComment:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateWithEnableInfoMenuItem:forComment:">chatVCConfigDelegate(enableInfoMenuItem:forComment:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">optional</span> <span class="kd">func</span> <span class="nf">chatVCConfigDelegate</span><span class="p">(</span><span class="n">enableInfoMenuItem</span> <span class="nv">viewController</span><span class="p">:</span><span class="kt"><a href="../Classes/QiscusChatVC.html">QiscusChatVC</a></span><span class="p">,</span> <span class="n">forComment</span> <span class="nv">comment</span><span class="p">:</span> <span class="kt"><a href="../Classes/QComment.html">QComment</a></span><span class="p">)</span><span class="o">-&gt;</span><span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateUsingNavigationSubtitleTyping:"></a>
+                    <a name="//apple_ref/swift/Method/chatVCConfigDelegate(usingNavigationSubtitleTyping:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateUsingNavigationSubtitleTyping:">chatVCConfigDelegate(usingNavigationSubtitleTyping:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">optional</span> <span class="kd">func</span> <span class="nf">chatVCConfigDelegate</span><span class="p">(</span><span class="n">usingNavigationSubtitleTyping</span> <span class="nv">viewController</span><span class="p">:</span><span class="kt"><a href="../Classes/QiscusChatVC.html">QiscusChatVC</a></span><span class="p">)</span><span class="o">-&gt;</span><span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateUsingTypingCell:"></a>
+                    <a name="//apple_ref/swift/Method/chatVCConfigDelegate(usingTypingCell:)" class="dashAnchor"></a>
+                    <a class="token" href="#/c:@M@Qiscus@objc(pl)QiscusChatVCConfigDelegate(im)chatVCConfigDelegateUsingTypingCell:">chatVCConfigDelegate(usingTypingCell:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">optional</span> <span class="kd">func</span> <span class="nf">chatVCConfigDelegate</span><span class="p">(</span><span class="n">usingTypingCell</span> <span class="nv">viewController</span><span class="p">:</span><span class="kt"><a href="../Classes/QiscusChatVC.html">QiscusChatVC</a></span><span class="p">)</span><span class="o">-&gt;</span><span class="kt">Bool</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2018 <a class="link" href="https://qisc.us" target="_blank" rel="external">Qiscus</a>. All rights reserved. (Last updated: 2018-03-07)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>

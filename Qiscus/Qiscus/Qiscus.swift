@@ -236,6 +236,8 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.setupReachability()
         QChatService.syncProcess()
     }
+    
+    // MARK: - Configuration
     @objc public class func setBaseURL(withURL url:String){
         Qiscus.client.baseUrl = url
         Qiscus.client.userData.set(url, forKey: "qiscus_base_url")
@@ -252,6 +254,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.client.userData.set(port, forKey: "qiscus_realtimePort")
         Qiscus.client.userData.set(enableSSL, forKey: "qiscus_realtimeSSL")
     }
+    
     public class func updateProfile(username:String? = nil, avatarURL:String? = nil, onSuccess:@escaping (()->Void), onFailed:@escaping ((String)->Void)) {
         QChatService.updateProfil(userName: username, userAvatarURL: avatarURL, onSuccess: onSuccess, onError: onFailed)
     }
@@ -306,6 +309,24 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.sharedInstance.RealtimeConnect()
     }
 
+    // local DB
+    private class func getConfiguration()->Realm.Configuration{
+        let documentDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last! as NSString
+        let fileURL = documentDirectory.appendingPathComponent("Qiscus.realm")
+        let objectTypes = [
+            QRoom.self,
+            QComment.self,
+            QFile.self,
+            QUser.self,
+            QParticipant.self,
+            QiscusLinkData.self
+        ]
+        var conf = Realm.Configuration(fileURL: NSURL(string: fileURL) as URL?, objectTypes: objectTypes)
+        conf.deleteRealmIfMigrationNeeded = true
+        conf.schemaVersion = Qiscus.shared.config.dbSchemaVersion
+        return conf
+    }
+    
     /**
      No Documentation
      */
@@ -535,23 +556,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }
     }
     
-    // MARK: - local DB
-    private class func getConfiguration()->Realm.Configuration{
-        let documentDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last! as NSString
-        let fileURL = documentDirectory.appendingPathComponent("Qiscus.realm")
-        let objectTypes = [
-                    QRoom.self,
-                    QComment.self,
-                    QFile.self,
-                    QUser.self,
-                    QParticipant.self,
-                    QiscusLinkData.self
-        ]
-        var conf = Realm.Configuration(fileURL: NSURL(string: fileURL) as URL?, objectTypes: objectTypes)
-        conf.deleteRealmIfMigrationNeeded = true
-        conf.schemaVersion = Qiscus.shared.config.dbSchemaVersion
-        return conf
-    }
+    
     
     // MARK: - Create NEW Chat
     @objc public class func createChatView(withUsers users:[String], readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
