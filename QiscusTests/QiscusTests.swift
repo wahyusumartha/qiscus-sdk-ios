@@ -6,6 +6,7 @@
 //  Copyright © 2018 Ahmad Athaullah. All rights reserved.
 //
 
+import Qiscus
 import XCTest
 
 class QiscusTests: XCTestCase {
@@ -13,6 +14,7 @@ class QiscusTests: XCTestCase {
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
+        
     }
     
     override func tearDown() {

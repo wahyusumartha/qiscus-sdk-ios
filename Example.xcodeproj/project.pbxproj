@@ -183,7 +183,7 @@
 			remoteGlobalIDString = 39F1F70E1D3B91E200FF1C8C;
 			remoteInfo = Qiscus;
 		};
-		3D4ED3B2204D424A00B064FD /* PBXContainerItemProxy */ = {
+		3D4A9D04204D481700122A51 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 39F1F6A11D3B90E200FF1C8C /* Project object */;
 			proxyType = 1;
@@ -873,7 +873,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				3D4ED3B3204D424A00B064FD /* PBXTargetDependency */,
+				3D4A9D05204D481700122A51 /* PBXTargetDependency */,
 			);
 			name = QiscusTests;
 			productName = QiscusTests;
@@ -1283,10 +1283,10 @@
 			target = 39F1F70E1D3B91E200FF1C8C /* Qiscus */;
 			targetProxy = 392A00E31F8F1CF30066B440 /* PBXContainerItemProxy */;
 		};
-		3D4ED3B3204D424A00B064FD /* PBXTargetDependency */ = {
+		3D4A9D05204D481700122A51 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 39F1F70E1D3B91E200FF1C8C /* Qiscus */;
-			targetProxy = 3D4ED3B2204D424A00B064FD /* PBXContainerItemProxy */;
+			targetProxy = 3D4A9D04204D481700122A51 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
