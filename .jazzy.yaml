@@ -1,0 +1,8 @@
+author: Qiscus Pte ltd
+author_url: http://qiscus.com
+github_url: https://github.com/qiscus/qiscus-sdk-ios
+root_url: https://github.com/qiscus/qiscus-sdk-ios/Documentations
+module: Qiscus
+output: Documentations
+theme: fullwidth
+xcodebuild_arguments: [-workspace, 'Example.xcworkspace', -scheme, 'Example']

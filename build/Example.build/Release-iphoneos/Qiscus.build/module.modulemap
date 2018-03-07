@@ -1,4 +1,0 @@
-framework module Qiscus {
-    header "Qiscus-Swift.h"
-    requires objc
-}
