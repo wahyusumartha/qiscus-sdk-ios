@@ -158,6 +158,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             }}
     }
     
+    /**
+     Logout Qiscus and clear all data with this function
+     @func clearData()
+     */
     @objc public class func clear(){
         Qiscus.clearData()
         Qiscus.shared.stopPublishOnlineStatus()
@@ -169,6 +173,12 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         QiscusClient.clear()
         Qiscus.removeLogFile()
     }
+    
+    /**
+     Remove all database, cache, file in local document, and stop all API request.
+     
+     User no need to re-Login
+     */
     @objc public class func clearData(){
         Qiscus.cancellAllRequest()
         Qiscus.removeAllFile()
@@ -182,22 +192,30 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.shared.chatViews = [String:QiscusChatVC]()
         Qiscus.realtimeChannel = [String]()
     }
+    
+    /**
+     Remove your device token from backend, Then you not receiving any Push Notification (Apns nor Pushkit)
+    */
     @objc public class func unRegisterPN(){
         if Qiscus.isLoggedIn {
             QiscusCommentClient.sharedInstance.unRegisterDevice()
         }
     }
+    
     // need Documentation
     func backgroundCheck(cloud:Bool = false){
         if Qiscus.isLoggedIn{
             QChatService.syncProcess(cloud: cloud)
         }
     }
+    
     func checkChat(){
         if Qiscus.isLoggedIn{
             Qiscus.mqttConnect(chatOnly: true)
         }
     }
+    
+    
     func RealtimeConnect(){
         NotificationCenter.default.removeObserver(self, name: .UIApplicationDidBecomeActive, object: nil)
         NotificationCenter.default.removeObserver(self, name: .UIApplicationDidEnterBackground, object: nil)
