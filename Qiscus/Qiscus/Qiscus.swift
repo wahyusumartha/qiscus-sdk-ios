@@ -152,6 +152,8 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.sharedInstance.config.showToasterMessage = true
     }
     
+    // MARK: - Deprecated
+    @available(*, deprecated, message: "no longer available ...")
     class func disconnectRealtime(){
         Qiscus.uiThread.async { autoreleasepool{
             Qiscus.sharedInstance.mqtt?.disconnect()
@@ -209,13 +211,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }
     }
     
-    func checkChat(){
-        if Qiscus.isLoggedIn{
-            Qiscus.mqttConnect(chatOnly: true)
-        }
-    }
-    
-    
     func RealtimeConnect(){
         NotificationCenter.default.removeObserver(self, name: .UIApplicationDidBecomeActive, object: nil)
         NotificationCenter.default.removeObserver(self, name: .UIApplicationDidEnterBackground, object: nil)
@@ -228,6 +223,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             Qiscus.mqttConnect()
         }
     }
+    
     public class func connect(delegate:QiscusConfigDelegate? = nil){
         Qiscus.shared.RealtimeConnect()
         if delegate != nil {
@@ -520,7 +516,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         if !Qiscus.sharedInstance.styleConfiguration.rewriteChatFont {
             Qiscus.sharedInstance.styleConfiguration.chatFont = UIFont.preferredFont(forTextStyle: UIFontTextStyle.body)
         }
-        if let chatView = self.topViewController() as? QiscusChatVC {
+        if let chatView = QiscusHelper.topViewController() as? QiscusChatVC {
             chatView.isPresence = true
             
         }
@@ -582,15 +578,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         return chatVC
     }
     
-    
-    // MARK: - Update Room Methode
-    //    @objc public class func updateRoom(withRoomId roomId:Int, roomName:String? = nil, roomAvatarURL:String? = nil, roomAvatar:UIImage? = nil, roomOptions:String? = nil){
-    ////        Qiscus.commentService.updateRoom(withRoomId: roomId, roomName: roomName, roomAvatarURL: roomAvatarURL, roomOptions: roomOptions)
-    //        if let room = QRoom.room(withId: roomId) {
-    //            room.update(name: roomName, avatarURL: roomAvatarURL, data: roomOptions)
-    //        }
-    //    }
-    
     // MARK: - Push Notification Setup
     public func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, for type: PKPushType) {
         if Qiscus.isLoggedIn{
@@ -609,7 +596,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         if Qiscus.isLoggedIn{
             let payloadData = JSON(payload.dictionaryPayload)
             if let _ = payloadData["qiscus_sdk"].string {
-                Qiscus.sharedInstance.checkChat()
+                Qiscus.mqttConnect(chatOnly: true)
             }
         }
     }
@@ -846,22 +833,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             QChatService.syncProcess(cloud: cloud)
         }
     }
-    
-    // MARK: Helper
-    func topViewController(controller: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
-        if let navigationController = controller as? UINavigationController {
-            return topViewController(controller: navigationController.visibleViewController)
-        }
-        if let tabController = controller as? UITabBarController {
-            if let selected = tabController.selectedViewController {
-                return topViewController(controller: selected)
-            }
-        }
-        if let presented = controller?.presentedViewController {
-            return topViewController(controller: presented)
-        }
-        return controller
-    }
+
     public class func cacheData(){
         QRoom.cacheAll()
         QComment.cacheAll()
