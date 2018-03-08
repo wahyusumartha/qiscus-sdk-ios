@@ -204,13 +204,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }
     }
     
-    // need Documentation
-    func backgroundCheck(cloud:Bool = false){
-        if Qiscus.isLoggedIn{
-            QChatService.syncProcess(cloud: cloud)
-        }
-    }
-    
     func RealtimeConnect(){
         NotificationCenter.default.removeObserver(self, name: .UIApplicationDidBecomeActive, object: nil)
         NotificationCenter.default.removeObserver(self, name: .UIApplicationDidEnterBackground, object: nil)
@@ -523,6 +516,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.connect()
         Qiscus.sync(cloud: true)
     }
+    
+    /**
+     
+     */
     public class func printLog(text:String){
         print(text)
         if Qiscus.showDebugPrint{
@@ -555,6 +552,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     
     
     // MARK: - Create NEW Chat
+    
+    /**
+     
+     */
     @objc public class func createChatView(withUsers users:[String], readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -579,6 +580,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     // MARK: - Push Notification Setup
+    
+    /**
+     
+     */
     public func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, for type: PKPushType) {
         if Qiscus.isLoggedIn{
             var token: String = ""
@@ -592,6 +597,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             QiscusCommentClient.sharedInstance.registerDevice(withToken: token)
         }
     }
+    
+    /**
+     
+     */
     public func pushRegistry(_ registry: PKPushRegistry, didReceiveIncomingPushWith payload: PKPushPayload, for type: PKPushType) {
         if Qiscus.isLoggedIn{
             let payloadData = JSON(payload.dictionaryPayload)
@@ -603,11 +612,19 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     public func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType) {
         Qiscus.registerNotification()
     }
+    
+    /**
+     
+     */
     @objc public class func registerNotification(){
         let notificationSettings = UIUserNotificationSettings(types: [.badge, .sound, .alert], categories: nil)
         Qiscus.sharedInstance.application.registerUserNotificationSettings(notificationSettings)
         Qiscus.sharedInstance.application.registerForRemoteNotifications()
     }
+    
+    /**
+     
+     */
     @objc public class func didRegisterUserNotification(withToken token: Data){
         if Qiscus.isLoggedIn{
             var tokenString: String = ""
@@ -621,7 +638,9 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }
     }
     
-    
+    /**
+     
+     */
     @objc public class func didReceive(RemoteNotification userInfo:[AnyHashable : Any], completionHandler: @escaping (UIBackgroundFetchResult) -> Void = {_ in}){
         completionHandler(.newData)
         
@@ -639,6 +658,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             }
         }
     }
+    
+    /**
+     
+     */
     @objc public class func notificationAction(roomId: String){
         if let window = UIApplication.shared.keyWindow{
             if Qiscus.sharedInstance.notificationAction != nil{
@@ -693,6 +716,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             Qiscus.shared.mqttConnect()
         }
     }
+    
+    /**
+     
+     */
     public class func createLocalNotification(forComment comment:QComment, alertTitle:String? = nil, alertBody:String? = nil, userInfo:[AnyHashable : Any]? = nil){
         DispatchQueue.main.async {autoreleasepool{
             let localNotification = UILocalNotification()
@@ -723,6 +750,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             Qiscus.shared.application.scheduleLocalNotification(localNotification)
             }}
     }
+    
+    /**
+     
+     */
     public class func didReceiveNotification(notification:UILocalNotification){
         if notification.userInfo != nil {
             if let comment = QComment.decodeDictionary(data: notification.userInfo!) {
@@ -740,6 +771,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             }
         }
     }
+    
+    /**
+     
+     */
     public class func didReceiveUNUserNotification(withUserInfo userInfo:[AnyHashable:Any]){
         if let comment = QComment.decodeDictionary(data: userInfo) {
             var userData:[AnyHashable : Any]? = [AnyHashable : Any]()
@@ -755,6 +790,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             Qiscus.shared.delegate?.qiscus?(didTapLocalNotification: comment, userInfo: userData)
         }
     }
+    
+    /**
+     
+     */
     class func publishUserStatus(offline:Bool = false){
         if Qiscus.isLoggedIn{
             DispatchQueue.main.async {
@@ -779,6 +818,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             }
         }
     }
+    
     func startPublishOnlineStatus(){
         if Thread.isMainThread{
             self.userStatusTimer?.invalidate()
@@ -790,6 +830,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             }
         }
     }
+    
     @objc func publishOnlineStatus(){
         let channel = "u/\(Qiscus.client.email)/s"
         let isActive = (Qiscus.sharedInstance.application.applicationState == UIApplicationState.active)
@@ -797,11 +838,13 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             self.mqtt?.publish(channel, withString: "1", qos: .qos1, retained: true)
         }
     }
+    
     func stopPublishOnlineStatus(){
         let channel = "u/\(Qiscus.client.email)/s"
         self.userStatusTimer?.invalidate()
         self.mqtt?.publish(channel, withString: "0", qos: .qos1, retained: true)
     }
+    
     @objc func goToBackgroundMode(){
         for (_,chatView) in self.chatViews {
             if chatView.isPresence {
@@ -823,26 +866,49 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.client.deviceToken = deviceToken
         QiscusCommentClient.sharedInstance.registerDevice(withToken: deviceToken)
     }
+    
+    /**
+     
+     */
     @objc public class func unRegisterDevice(){
         Qiscus.qiscusDeviceToken = ""
         Qiscus.client.deviceToken = ""
         QiscusCommentClient.sharedInstance.unRegisterDevice()
     }
+    
+    /**
+     
+     */
     public class func sync(cloud:Bool = false){
         if Qiscus.isLoggedIn{
             QChatService.syncProcess(cloud: cloud)
         }
     }
-
+    
+    /**
+ 
+     */
     public class func cacheData(){
         QRoom.cacheAll()
         QComment.cacheAll()
         QUser.cacheAll()
         QParticipant.cacheAll()
     }
+    
+    /**
+     
+     */
     @objc public class func getNonce(withAppId appId:String, baseURL:String? = nil, onSuccess:@escaping ((String)->Void), onFailed:@escaping ((String)->Void), secureURL:Bool = true){
         QChatService.getNonce(withAppId: appId, baseURL: baseURL, onSuccess: onSuccess, onFailed: onFailed, secureURL: secureURL)
     }
+    
+    /**
+     Qiscus Setup with `identity token`, 2nd call method after you call getNounce. Response from you backend then putback in to Qiscus Server
+     
+     - parameter uidToken: token where you get from get nonce
+     - parameter delegate: asd
+     
+     */
     @objc public class func setup(withUserIdentityToken uidToken:String, delegate: QiscusConfigDelegate? = nil){
         if delegate != nil {
             Qiscus.shared.delegate = delegate
@@ -851,6 +917,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.setupReachability()
         Qiscus.sharedInstance.RealtimeConnect()
     }
+    
+    /**
+     
+     */
     public class func subscribeAllRoomNotification(){
         QiscusBackgroundThread.async { autoreleasepool {
             let rooms = QRoom.all()
