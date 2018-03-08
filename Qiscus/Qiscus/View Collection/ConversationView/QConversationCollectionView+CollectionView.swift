@@ -9,6 +9,16 @@
 import UIKit
 
 extension QConversationCollectionView: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    // MARK: SCrolling
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        self.onScrolling = true
+    }
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        self.onScrolling = false
+        if self.needToReload {
+            self.refreshData()
+        }
+    }
     // MARK: CollectionView Data source
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if self.room == nil {return 0}
