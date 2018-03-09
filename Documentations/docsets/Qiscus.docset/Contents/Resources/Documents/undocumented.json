@@ -141,41 +141,6 @@
       "warning": "undocumented"
     },
     {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Configuration/QiscusConfig.swift",
-      "line": 83,
-      "symbol": "QiscusConfig.USER_TOKEN",
-      "symbol_kind": "source.lang.swift.decl.var.instance",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Configuration/QiscusConfig.swift",
-      "line": 89,
-      "symbol": "QiscusConfig.PUSHER_KEY",
-      "symbol_kind": "source.lang.swift.decl.var.instance",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Configuration/QiscusConfig.swift",
-      "line": 95,
-      "symbol": "QiscusConfig.LINK_METADATA_URL",
-      "symbol_kind": "source.lang.swift.decl.var.class",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Configuration/QiscusConfig.swift",
-      "line": 100,
-      "symbol": "QiscusConfig.LOAD_URL_(withTopicId:commentId:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.class",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Configuration/QiscusConfig.swift",
-      "line": 105,
-      "symbol": "QiscusConfig.ROOM_REQUEST_ID_URL",
-      "symbol_kind": "source.lang.swift.decl.var.class",
-      "warning": "undocumented"
-    },
-    {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Configuration/QiscusTextConfiguration.swift",
       "line": 11,
       "symbol": "QiscusTextConfiguration",
@@ -345,246 +310,190 @@
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 73,
+      "line": 65,
+      "symbol": "Qiscus.iCloudUpload",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
+      "line": 66,
+      "symbol": "Qiscus.cameraUpload",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
+      "line": 67,
       "symbol": "Qiscus.galeryUpload",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 74,
+      "line": 68,
       "symbol": "Qiscus.contactShare",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 75,
+      "line": 69,
       "symbol": "Qiscus.locationShare",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 88,
+      "line": 82,
       "symbol": "Qiscus.diagnosticDelegate",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 90,
+      "line": 84,
       "symbol": "Qiscus.styleConfiguration",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 91,
+      "line": 85,
       "symbol": "Qiscus.connected",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 92,
+      "line": 86,
       "symbol": "Qiscus.httpRealTime",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 93,
+      "line": 87,
       "symbol": "Qiscus.toastMessageAct",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 98,
+      "line": 92,
       "symbol": "Qiscus.chatViews",
       "symbol_kind": "source.lang.swift.decl.var.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 100,
+      "line": 94,
       "symbol": "Qiscus.versionNumber",
       "symbol_kind": "source.lang.swift.decl.var.class",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 105,
+      "line": 99,
       "symbol": "Qiscus.shared",
       "symbol_kind": "source.lang.swift.decl.var.class",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 110,
+      "line": 104,
       "symbol": "Qiscus.isLoggedIn",
       "symbol_kind": "source.lang.swift.decl.var.class",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 115,
+      "line": 109,
       "symbol": "Qiscus.deviceToken",
       "symbol_kind": "source.lang.swift.decl.var.class",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 120,
+      "line": 114,
       "symbol": "Qiscus.style",
       "symbol_kind": "source.lang.swift.decl.var.class",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 226,
+      "line": 220,
       "symbol": "Qiscus.connect(delegate:)",
       "symbol_kind": "source.lang.swift.decl.function.method.class",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 260,
+      "line": 230,
+      "symbol": "Qiscus.setBaseURL(withURL:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
+      "line": 234,
+      "symbol": "Qiscus.setAppId(appId:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
+      "line": 238,
       "symbol": "Qiscus.setRealtimeServer(withServer:port:enableSSL:)",
       "symbol_kind": "source.lang.swift.decl.function.method.class",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 269,
+      "line": 247,
       "symbol": "Qiscus.updateProfile(username:avatarURL:onSuccess:onFailed:)",
       "symbol_kind": "source.lang.swift.decl.function.method.class",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 272,
+      "line": 250,
       "symbol": "Qiscus.setup(withAppId:userEmail:userKey:username:avatarURL:delegate:secureURl:)",
       "symbol_kind": "source.lang.swift.decl.function.method.class",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 394,
+      "line": 372,
       "symbol": "Qiscus.chatView(withRoomId:readOnly:title:subtitle:withMessage:)",
       "symbol_kind": "source.lang.swift.decl.function.method.class",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 413,
+      "line": 391,
       "symbol": "Qiscus.image(named:)",
       "symbol_kind": "source.lang.swift.decl.function.method.class",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 543,
-      "symbol": "Qiscus.printLog(text:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.class",
+      "line": 612,
+      "symbol": "Qiscus.pushRegistry(_:didInvalidatePushTokenFor:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 577,
-      "symbol": "Qiscus.createChatView(withUsers:readOnly:title:subtitle:distinctId:optionalData:withMessage:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.class",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 641,
-      "symbol": "Qiscus.registerNotification()",
-      "symbol_kind": "source.lang.swift.decl.function.method.class",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 648,
-      "symbol": "Qiscus.didRegisterUserNotification(withToken:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.class",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 662,
-      "symbol": "Qiscus.didReceive(RemoteNotification:completionHandler:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.class",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 681,
-      "symbol": "Qiscus.notificationAction(roomId:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.class",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 737,
-      "symbol": "Qiscus.createLocalNotification(forComment:alertTitle:alertBody:userInfo:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.class",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 769,
-      "symbol": "Qiscus.didReceiveNotification(notification:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.class",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 788,
-      "symbol": "Qiscus.didReceiveUNUserNotification(withUserInfo:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.class",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 867,
+      "line": 859,
       "symbol": "Qiscus.setNotificationAction(onClick:)",
       "symbol_kind": "source.lang.swift.decl.function.method.class",
       "warning": "undocumented"
     },
     {
       "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 872,
+      "line": 864,
       "symbol": "Qiscus.registerDevice(withToken:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.class",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 879,
-      "symbol": "Qiscus.unRegisterDevice()",
-      "symbol_kind": "source.lang.swift.decl.function.method.class",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 886,
-      "symbol": "Qiscus.sync(cloud:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.class",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 903,
-      "symbol": "Qiscus.getNonce(withAppId:baseURL:onSuccess:onFailed:secureURL:)",
-      "symbol_kind": "source.lang.swift.decl.function.method.class",
-      "warning": "undocumented"
-    },
-    {
-      "file": "/Users/qicus/iOS/Qiscus/Qiscus/Qiscus/Qiscus.swift",
-      "line": 924,
-      "symbol": "Qiscus.subscribeAllRoomNotification()",
       "symbol_kind": "source.lang.swift.decl.function.method.class",
       "warning": "undocumented"
     },

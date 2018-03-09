@@ -23,7 +23,7 @@
         <a class="header-link" href="../index.html">
           Qiscus Docs
         </a>
-         (29% documented)
+         (35% documented)
       </p>
     
       <p class="header-col--secondary">
@@ -260,7 +260,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
+                        <p>iCloud Config, by default is disable/false. You need to setup icloud capabilities then create container in your developer account.</p>
 
                       </div>
                       <div class="declaration">
@@ -287,7 +287,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
+                        <p>Set camera upload to upload photo/video inside chat View, by default is enable/true.</p>
 
                       </div>
                       <div class="declaration">
@@ -879,7 +879,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
+                        <p>to setup Qiscus URL Server, this method called when you are using dedicated server.</p>
 
                       </div>
                       <div class="declaration">
@@ -889,6 +889,25 @@
                           <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">public</span> <span class="kd">class</span> <span class="kd">func</span> <span class="nf">setBaseURL</span><span class="p">(</span><span class="n">withURL</span> <span class="nv">url</span><span class="p">:</span><span class="kt">String</span><span class="p">)</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>url</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Your custom/dedicated server, with Qiscus Enggine</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
@@ -906,7 +925,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
+                        <p>Set App ID, when you are using nonce auth you need to setup App ID before get nounce</p>
 
                       </div>
                       <div class="declaration">
@@ -916,6 +935,25 @@
                           <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">public</span> <span class="kd">class</span> <span class="kd">func</span> <span class="nf">setAppId</span><span class="p">(</span><span class="nv">appId</span><span class="p">:</span><span class="kt">String</span><span class="p">)</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>appId</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Qiscus App ID, please register or login in <a href="http://qiscus.com">http://qiscus.com</a> to find your App ID</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
@@ -1518,7 +1556,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
+                        <p>Device will be generate an device token, then register to qiscus</p>
 
                       </div>
                       <div class="declaration">
@@ -1545,7 +1583,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
+                        <p>Forward you Push Notification payload to Qiscus SDK, then Qiscus will be filter the content.</p>
 
                       </div>
                       <div class="declaration">
@@ -1555,6 +1593,37 @@
                           <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">pushRegistry</span><span class="p">(</span><span class="n">_</span> <span class="nv">registry</span><span class="p">:</span> <span class="kt">PKPushRegistry</span><span class="p">,</span> <span class="n">didReceiveIncomingPushWith</span> <span class="nv">payload</span><span class="p">:</span> <span class="kt">PKPushPayload</span><span class="p">,</span> <span class="k">for</span> <span class="nv">type</span><span class="p">:</span> <span class="kt">PKPushType</span><span class="p">)</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>payload</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>your pushkit payload or The push payload sent by a developer via APNS server API.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>type</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>This is a PKPushType constant, which is present in [registry desiredPushTypes].</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
@@ -1572,7 +1641,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
+                        <p>Phone no longer receive push notif, then qiscus will be register notification to the client</p>
 
                       </div>
                       <div class="declaration">
@@ -1907,8 +1976,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
-
+                        
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
@@ -1961,7 +2029,7 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Undocumented</p>
+                        <p>Qiscus Setup with <code>identity token</code>, 2nd call method after you call getNounce. Response from you backend then putback in to Qiscus Server</p>
 
                       </div>
                       <div class="declaration">
@@ -1971,6 +2039,37 @@
                           <pre class="highlight swift"><code><span class="kd">@objc</span> <span class="kd">public</span> <span class="kd">class</span> <span class="kd">func</span> <span class="nf">setup</span><span class="p">(</span><span class="n">withUserIdentityToken</span> <span class="nv">uidToken</span><span class="p">:</span><span class="kt">String</span><span class="p">,</span> <span class="nv">delegate</span><span class="p">:</span> <span class="kt">QiscusConfigDelegate</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
 
                         </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>uidToken</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>token where you get from get nonce</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>delegate</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>asd</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                     </section>
                   </div>
@@ -2866,7 +2965,7 @@
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2018 <a class="link" href="http://qiscus.com" target="_blank" rel="external">Qiscus Pte ltd</a>. All rights reserved. (Last updated: 2018-03-08)</p>
+      <p>&copy; 2018 <a class="link" href="http://qiscus.com" target="_blank" rel="external">Qiscus Pte ltd</a>. All rights reserved. (Last updated: 2018-03-09)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.9.1</a>, a <a class="link" href="http://realm.io" target="_blank" rel="external">Realm</a> project.</p>
     </section>
   </body>
