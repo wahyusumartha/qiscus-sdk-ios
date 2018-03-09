@@ -506,8 +506,9 @@ public class QRoom:Object {
                 QiscusNotification.publish(commentDeleteOnRoom: mainRoom)
             }
         }
-        QiscusDBThread.async {
+        QiscusDBThread.sync {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
             if let r = QRoom.threadSaveRoom(withId: id){
                 var i = r.rawComments.count - 1
                 for c in r.rawComments.reversed() {
