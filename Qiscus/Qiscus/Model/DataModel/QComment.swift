@@ -148,7 +148,9 @@ public class QComment:Object {
     public var delegate:QCommentDelegate?{
         didSet{
             if Thread.isMainThread {
-                QComment.cache[self.uniqueId] = self
+                if !self.isInvalidated {
+                    QComment.cache[self.uniqueId] = self
+                }
             }
         }
     }
