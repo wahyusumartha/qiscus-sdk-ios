@@ -162,6 +162,7 @@ public class QConversationCollectionView: UICollectionView {
         
         center.addObserver(self, selector: #selector(QConversationCollectionView.newCommentNotif(_:)), name: QiscusNotification.ROOM_CHANGE(onRoom: roomId), object: nil)
         center.addObserver(self, selector: #selector(QConversationCollectionView.messageCleared(_:)), name: QiscusNotification.ROOM_CLEARMESSAGES(onRoom: roomId), object: nil)
+        center.addObserver(self, selector: #selector(QConversationCollectionView.commentDeleted(_:)), name: QiscusNotification.COMMENT_DELETE(onRoom: roomId), object: nil)
     }
     public func unsubscribeEvent(roomId:String){
         let center: NotificationCenter = NotificationCenter.default
@@ -175,10 +176,31 @@ public class QConversationCollectionView: UICollectionView {
         }
         center.removeObserver(self, name: QiscusNotification.ROOM_CHANGE(onRoom: roomId), object: nil)
         center.removeObserver(self, name: QiscusNotification.ROOM_CLEARMESSAGES(onRoom: roomId), object: nil)
+        center.removeObserver(self, name: QiscusNotification.COMMENT_DELETE(onRoom: roomId), object: nil)
     }
     // MARK: - Event handler
-    open func onDeleteComment(){
-        self.reloadData()
+    open func onDeleteComment(room: QRoom){
+        let rid = room.id
+        var hardDelete = false
+        if let softDelete = self.viewDelegate?.viewDelegate?(usingSoftDeleteOnView: self){
+            hardDelete = !softDelete
+        }
+        var predicate:NSPredicate?
+        if hardDelete {
+            predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deletePending.rawValue, QCommentStatus.deleting.rawValue)
+        }
+        
+        
+        QiscusBackgroundThread.async {
+            if let rts = QRoom.threadSaveRoom(withId: rid){
+                var messages = rts.grouppedCommentsUID(filter: predicate)
+                messages = self.checkHiddenMessage(messages: messages)
+                DispatchQueue.main.async {
+                    self.messagesId = messages
+                    self.reloadData()
+                }
+            }
+        }
     }
     open func gotNewComment(comment: QComment, room:QRoom) {
         let rid = room.id
@@ -321,7 +343,7 @@ public class QConversationCollectionView: UICollectionView {
             if let currentRoom = self.room {
                 if !currentRoom.isInvalidated && !room.isInvalidated{
                     if currentRoom.id == room.id {
-                        self.onDeleteComment()
+                        self.onDeleteComment(room: room)
                     }
                 }
             }
@@ -488,10 +510,10 @@ public class QConversationCollectionView: UICollectionView {
     public func refreshData(withCompletion completion: (()->Void)? = nil){
         if let room = self.room {
             let rid = room.id
-            if self.onScrolling {
-                self.needToReload = true
-                return
-            }
+//            if self.onScrolling {
+//                self.needToReload = true
+//                return
+//            }
             var hardDelete = false
             if let softDelete = self.viewDelegate?.viewDelegate?(usingSoftDeleteOnView: self){
                 hardDelete = !softDelete
@@ -508,7 +530,7 @@ public class QConversationCollectionView: UICollectionView {
                         self.messagesId = messages
                         self.reloadData()
                         if let onFinish = completion {
-                            self.needToReload = false
+//                            self.needToReload = false
                             onFinish()
                         }
                     }
