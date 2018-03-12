@@ -190,17 +190,36 @@ public class QConversationCollectionView: UICollectionView {
         if hardDelete {
             predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deletePending.rawValue, QCommentStatus.deleting.rawValue)
         }
+        
+        
         QiscusBackgroundThread.async {
             if let rts = QRoom.threadSaveRoom(withId: rid){
                 var messages = rts.grouppedCommentsUID(filter: predicate)
                 messages = self.checkHiddenMessage(messages: messages)
                 
-                DispatchQueue.main.async {
-                    self.messagesId = messages
-                    self.reloadData()
-                    if comment.senderEmail == Qiscus.client.email || self.isLastRowVisible {
-                        self.layoutIfNeeded()
-                        self.scrollToBottom(true)
+                var section = 0
+                var changed = false
+                if messages.count != self.messagesId.count {
+                    changed = true
+                }else{
+                    var i = 0
+                    for group in messages {
+                        if group.count != self.messagesId[i].count {
+                            changed = true
+                            break
+                        }
+                        i += 1
+                    }
+                }
+                
+                if changed {
+                    DispatchQueue.main.async {
+                        self.messagesId = messages
+                        self.reloadData()
+                        if comment.senderEmail == Qiscus.client.email || self.isLastRowVisible {
+                            self.layoutIfNeeded()
+                            self.scrollToBottom(true)
+                        }
                     }
                 }
             }
