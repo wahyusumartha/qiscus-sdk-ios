@@ -182,7 +182,7 @@ open class QChatCell: UICollectionViewCell, QCommentDelegate {
                                 }
                             }
                         }, onError: { (statusCode) in
-                            print("delete error: status code \(statusCode)")
+                            print("delete error: status code \(String(describing: statusCode))")
                         })
                     }
                 }

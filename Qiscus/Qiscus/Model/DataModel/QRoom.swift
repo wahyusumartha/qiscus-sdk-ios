@@ -104,7 +104,13 @@ public class QRoom:Object {
     
     public let participants = List<QParticipant>()
     
-    public var delegate:QRoomDelegate?
+    public var delegate:QRoomDelegate? {
+        didSet {
+            if Thread.isMainThread && !self.isInvalidated {
+                Qiscus.chatRooms[id] = self
+            }
+        }
+    }
     internal var typingTimer:Timer?
     internal var selfTypingTimer:Timer?
     
@@ -502,7 +508,9 @@ public class QRoom:Object {
         let cUid = comment.uniqueId
         func publishNotification(roomId:String){
             if let mainRoom = QRoom.room(withId: id){
-                mainRoom.delegate?.room?(didDeleteComment: mainRoom)
+                if let roomDelegate = mainRoom.delegate {
+                    roomDelegate.room?(didDeleteComment: mainRoom)
+                }
                 QiscusNotification.publish(commentDeleteOnRoom: mainRoom)
             }
         }

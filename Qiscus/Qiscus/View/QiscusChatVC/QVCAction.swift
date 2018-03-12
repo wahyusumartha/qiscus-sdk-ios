@@ -483,11 +483,6 @@ extension QiscusChatVC {
                         type = .reply
                         self.replyData = nil
                     }
-                    
-                    guard let chatRoomObj = chatRoom else {return}
-                    let comment = chatRoomObj.newComment(text: value, payload: payload, type: type)
-                    self.postComment(comment: comment)
-                    
                     self.inputText.clearValue()
                     
                     DispatchQueue.main.async { autoreleasepool{
@@ -495,7 +490,63 @@ extension QiscusChatVC {
                         self.minInputHeight.constant = 32
                         self.sendButton.isEnabled = false
                         self.inputText.layoutIfNeeded()
-                    }}
+                        }
+                    }
+                    
+                    guard let chatRoomObj = chatRoom else {return}
+                    let comment = chatRoomObj.newComment(text: value, payload: payload, type: type)
+                    self.postComment(comment: comment)
+                    
+                    var section = 0
+                    var item = 0
+                    if comment.sender?.email == Qiscus.client.email {
+                        if let lastUid = self.collectionView.messagesId.last?.last {
+                            if let lastComment = QComment.comment(withUniqueId: lastUid) {
+                                section = self.collectionView.messagesId.count - 1
+                                item = (self.collectionView.messagesId.last?.count)! - 1
+                                
+                                if lastComment.date == comment.date && lastComment.sender?.email == comment.sender?.email {
+                                    var lastGroup = self.collectionView.messagesId.last
+                                    lastGroup?.append(comment.uniqueId)
+                                    
+                                    self.collectionView.messagesId.removeLast()
+                                    self.collectionView.messagesId.append(lastGroup!)
+                                    
+                                    let newIndexPath = IndexPath(row: item + 1, section: section)
+                                    
+                                    self.collectionView.performBatchUpdates({
+                                        self.collectionView.insertItems(at: [newIndexPath])
+                                    }, completion: { (success) in
+                                        self.collectionView.layoutIfNeeded()
+                                        self.collectionView.scrollToBottom(true)
+                                        
+                                        if lastComment.cellPos == .single {
+                                            lastComment.updateCellPos(cellPos: .first)
+                                        }else if lastComment.cellPos == .last {
+                                            lastComment.updateCellPos(cellPos: .middle)
+                                        }
+                                        let lastIndexPath = IndexPath(row: item, section: section)
+                                        self.collectionView.reloadItems(at: [lastIndexPath])
+                                        
+                                    })
+                                    
+                                } else {
+                                    self.collectionView.messagesId.append([comment.uniqueId])
+                                    let newIndexPath = IndexPath(row: 0, section: section + 1)
+                                    comment.updateCellPos(cellPos: .single)
+                                    self.collectionView.performBatchUpdates({
+                                        self.collectionView.insertSections(IndexSet(integer: section + 1))
+                                        self.collectionView.insertItems(at: [newIndexPath])
+                                    }, completion: { (success) in
+                                        self.collectionView.layoutIfNeeded()
+                                        self.collectionView.scrollToBottom(true)
+                                    })
+                                }
+                            }
+                            
+                            
+                        }
+                    }
                 }
             }else{
                 if !self.processingAudio {
