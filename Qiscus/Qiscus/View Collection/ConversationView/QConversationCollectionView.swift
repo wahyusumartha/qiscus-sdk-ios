@@ -15,7 +15,7 @@ public class QConversationCollectionView: UICollectionView {
         didSet{
             var oldRoomId = "0"
             if let oldRoom = oldValue {
-                oldRoom.delegate = nil
+//                oldRoom.delegate = nil
                 oldRoomId = oldRoom.id
             }
             if let r = room {
@@ -37,7 +37,7 @@ public class QConversationCollectionView: UICollectionView {
                     }
                     var predicate:NSPredicate?
                     if hardDelete {
-                        predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deletePending.rawValue, QCommentStatus.deleting.rawValue)
+                        predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
                     }
                     QiscusBackgroundThread.async {
                         if let rts = QRoom.threadSaveRoom(withId: rid){
@@ -49,6 +49,7 @@ public class QConversationCollectionView: UICollectionView {
                                 self.reloadData()
                             }
                             rts.resendPendingMessage()
+                            rts.redeletePendingDeletedMessage()
                             rts.sync()
                         }
                     }
@@ -187,7 +188,7 @@ public class QConversationCollectionView: UICollectionView {
         }
         var predicate:NSPredicate?
         if hardDelete {
-            predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deletePending.rawValue, QCommentStatus.deleting.rawValue)
+            predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
         }
         
         
@@ -210,7 +211,7 @@ public class QConversationCollectionView: UICollectionView {
         }
         var predicate:NSPredicate?
         if hardDelete {
-            predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deletePending.rawValue, QCommentStatus.deleting.rawValue)
+            predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
         }
         
         
@@ -520,7 +521,7 @@ public class QConversationCollectionView: UICollectionView {
             }
             var predicate:NSPredicate?
             if hardDelete {
-                predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deletePending.rawValue, QCommentStatus.deleting.rawValue)
+                predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
             }
             QiscusBackgroundThread.async {
                 if let rts = QRoom.threadSaveRoom(withId: rid){
@@ -536,6 +537,8 @@ public class QConversationCollectionView: UICollectionView {
                     }
                 }
             }
+            
+            
         }
     }
     internal func checkMessagePos(inGroup group:[String]){
@@ -630,7 +633,7 @@ public class QConversationCollectionView: UICollectionView {
             }
             var predicate:NSPredicate?
             if hardDelete {
-                predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deletePending.rawValue, QCommentStatus.deleting.rawValue)
+                predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
             }
             QiscusBackgroundThread.async {
                 if let rts = QRoom.threadSaveRoom(withId: rid){

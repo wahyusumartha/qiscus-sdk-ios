@@ -28,7 +28,7 @@ extension QConversationCollectionView: QRoomDelegate {
                 }
                 var predicate:NSPredicate?
                 if hardDelete {
-                    predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deletePending.rawValue, QCommentStatus.deleting.rawValue)
+                    predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
                 }
                 QiscusBackgroundThread.async {
                     if let rts = QRoom.threadSaveRoom(withId: rid){
@@ -91,7 +91,7 @@ extension QConversationCollectionView: QRoomDelegate {
                 }
                 var predicate:NSPredicate?
                 if hardDelete {
-                    predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deletePending.rawValue, QCommentStatus.deleting.rawValue)
+                    predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
                 }
                 QiscusBackgroundThread.async {
                     if let rts = QRoom.threadSaveRoom(withId: rid){
