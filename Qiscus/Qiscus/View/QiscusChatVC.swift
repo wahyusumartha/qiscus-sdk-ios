@@ -539,6 +539,7 @@ public class QiscusChatVC: UIViewController{
                 self.chatMessage = nil
             }
             room.resendPendingMessage()
+            room.redeletePendingDeletedMessage()
             setupNavigationTitle()
             setupPage()
         }else{

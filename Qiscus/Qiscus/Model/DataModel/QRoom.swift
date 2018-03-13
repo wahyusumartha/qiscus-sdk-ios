@@ -438,10 +438,27 @@ public class QRoom:Object {
             }
         }
     }
+    
+    internal func redeletePendingDeletedMessage() {
+        let pendingDeletedMessages = self.rawComments.filter("statusRaw == %d", QCommentStatus.deletePending.rawValue)
+        if pendingDeletedMessages.count > 0 {
+            for pendingDeletedMessage in pendingDeletedMessages {
+                pendingDeletedMessage.delete(forMeOnly: false, hardDelete: true, onSuccess: {
+                    if !pendingDeletedMessage.isInvalidated {
+                        self.deleteComment(comment: pendingDeletedMessage)
+                    }
+                }, onError: { (code) in
+                    
+                })
+            }
+        }
+    }
+    
     public func post(comment:QComment, type:String? = nil, payload:JSON? = nil){
         let service = QRoomService()
         let id = self.id
         self.resendPendingMessage()
+        self.redeletePendingDeletedMessage()
         service.postComment(onRoom: id, comment: comment, type: type, payload:payload)
     }
     
