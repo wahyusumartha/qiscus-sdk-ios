@@ -47,7 +47,7 @@ public class QFileManager:NSObject{
     }
     internal class func saveFile(withData fileData: Data, fileName: String, type:QDirectoryType)->String{
         let directoryPath = QFileManager.directoryPath(forDirectory: type)
-        let path = "\(directoryPath)/\(fileName.replacingOccurrences(of: " ", with: "_"))"
+        let path = "\(directoryPath)/\(fileName.replacingOccurrences(of: " ", with: "_").replacingOccurrences(of: "’", with: "%E2%80%99"))"
         try? fileData.write(to: URL(fileURLWithPath: path), options: [.atomic])
         return path
     }
