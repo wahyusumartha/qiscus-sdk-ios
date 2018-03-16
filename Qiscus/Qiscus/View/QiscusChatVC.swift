@@ -553,7 +553,7 @@ public class QiscusChatVC: UIViewController{
     override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if firstLoad {
-            if self.isPresence && !self.prefetch {
+            if self.isPresence && !self.prefetch && self.chatRoom == nil {
                 self.showLoading("Load data ...")
             }
             self.collectionView.room = self.chatRoom
@@ -561,7 +561,7 @@ public class QiscusChatVC: UIViewController{
         if let room = self.chatRoom {
             Qiscus.shared.chatViews[room.id] = self
         }else{
-            if self.isPresence && !self.prefetch {
+            if self.isPresence && !self.prefetch && self.chatRoom == nil {
                 self.showLoading("Load data ...")
             }
         }
