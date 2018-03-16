@@ -527,7 +527,7 @@ public class QiscusChatVC: UIViewController{
             self.unreadIndicator.isHidden = true
             if let r = self.collectionView.room {
                 if r.comments.count == 0 {
-                    if self.isPresence && !self.prefetch {
+                    if self.isPresence && !self.prefetch && self.chatRoom == nil {
                         self.showLoading("Load data ...")
                     }
                     self.collectionView.loadData()
