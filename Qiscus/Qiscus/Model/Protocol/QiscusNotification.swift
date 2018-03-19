@@ -16,8 +16,6 @@ public class QiscusNotification: NSObject {
     
     private static var typingTimer = [String:Timer]()
     
-    
-    public static let COMMENT_DELETE = NSNotification.Name("qiscus_commentDelete")
     public static let MESSAGE_STATUS = NSNotification.Name("qiscus_messageStatus")
     public static let USER_PRESENCE = NSNotification.Name("quscys_userPresence")
     public static let USER_AVATAR_CHANGE = NSNotification.Name("qiscus_userAvatarChange")
@@ -44,6 +42,9 @@ public class QiscusNotification: NSObject {
     }
     public class func ROOM_CLEARMESSAGES(onRoom roomId: String) -> NSNotification.Name {
         return NSNotification.Name("qiscus_clearMessages_\(roomId)")
+    }
+    public class func COMMENT_DELETE(onRoom roomId: String) -> NSNotification.Name {
+        return NSNotification.Name("qiscus_commentDelete_\(roomId)")
     }
     
     internal class func publish(roomCleared room:QRoom){
@@ -213,7 +214,7 @@ public class QiscusNotification: NSObject {
     }
     private func publish(commentDeleteOnRoom room:QRoom) {
         let userInfo = ["room" : room]
-        self.nc.post(name: QiscusNotification.COMMENT_DELETE, object: nil, userInfo: userInfo)
+        self.nc.post(name: QiscusNotification.COMMENT_DELETE(onRoom: room.id), object: nil, userInfo: userInfo)
     }
     private func publish(userTyping user:QUser, room:QRoom ,typing:Bool = true){
         if room.isInvalidated || user.isInvalidated {

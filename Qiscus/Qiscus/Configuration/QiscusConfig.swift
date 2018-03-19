@@ -11,6 +11,37 @@ import UIKit
 open class QiscusConfig: NSObject {
     
     static let sharedInstance = QiscusConfig()
+    
+    open var commentPerLoad:Int = 10
+    open var dbSchemaVersion:UInt64 = 75
+    
+    open var UPLOAD_URL = ""
+    
+    open var showToasterMessage:Bool = true
+    open var showToasterMessageInsideChat:Bool = true
+    internal var API_VERSION = "2"
+    
+    open var BASE_URL:String{
+        get{
+            return Qiscus.client.baseUrl
+        }
+    }
+    open var USER_EMAIL:String{
+        get{
+            return Qiscus.client.email
+        }
+    }
+    open var USER_TOKEN:String{
+        get{
+            return Qiscus.client.token
+        }
+    }
+    open var PUSHER_KEY:String{
+        get{
+            return Qiscus.client.rtKey
+        }
+    }
+    
     internal var BASE_API_URL:String{
         get{
             if Qiscus.client.baseUrl != "" {
@@ -35,7 +66,9 @@ open class QiscusConfig: NSObject {
             return headers
         }
     }
+    
     fileprivate override init() {}
+    
     internal class var postCommentURL:String{
         get{
             let config = QiscusConfig.sharedInstance
@@ -43,65 +76,7 @@ open class QiscusConfig: NSObject {
         }
     }
     
-    // Open
-    // MARK: Setter variable
-    open var commentPerLoad:Int = 10
-    open var dbSchemaVersion:UInt64 = 74
-    open var showToasterMessage:Bool = true
-    open var showToasterMessageInsideChat:Bool = true
-    internal var API_VERSION = "2"
-    open var UPLOAD_URL = ""
-    open func setUserConfig(withEmail email:String, userKey:String, rtKey:String){
-        Qiscus.client.email = email
-        Qiscus.client.userData.set(email, forKey: "qiscus_email")
-        
-        Qiscus.client.token = userKey
-        Qiscus.client.userData.set(userKey, forKey: "qiscus_token")
-        
-        Qiscus.client.rtKey = rtKey
-        Qiscus.client.userData.set(rtKey, forKey: "qiscus_rt_key")
-    }
-    
-    //MARK: Getter variable
-    /**
-     Qiscus Base URL Server
-     */
-    open var BASE_URL:String{
-        get{
-            return Qiscus.client.baseUrl
-        }
-    }
-    /**
-     Your Qiscus Client User identifier (ex: Email, Phone Number, ID, etc)
-     */
-    open var USER_EMAIL:String{
-        get{
-            return Qiscus.client.email
-        }
-    }
-    
-    open var USER_TOKEN:String{
-        get{
-            return Qiscus.client.token
-        }
-    }
-    
-    open class var LINK_METADATA_URL:String{
-        let config = QiscusConfig.sharedInstance
-        return "\(config.BASE_API_URL)/get_url_metadata"
-    }
-    
-    open class func LOAD_URL_(withTopicId topicId:Int, commentId:Int)->String{
-        let config = QiscusConfig.sharedInstance
-        return "\(config.BASE_API_URL)/topic/\(topicId)/comment/\(commentId)/token/\(config.USER_TOKEN)"
-    }
-    
-    open class var ROOM_REQUEST_ID_URL:String{
-        let config = QiscusConfig.sharedInstance
-        return "\(config.BASE_API_URL)/get_room_by_id"
-    }
-    
-    // URL
+    // MARK: -URL
     internal class var SYNC_URL:String{
         get{
             return "\(QiscusConfig.sharedInstance.BASE_API_URL)/sync"
@@ -161,6 +136,10 @@ open class QiscusConfig: NSObject {
     internal class var ROOM_UNIQUEID_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_API_URL)/get_or_create_room_with_unique_id"
     }
+    open class var LINK_METADATA_URL:String{
+        let config = QiscusConfig.sharedInstance
+        return "\(config.BASE_API_URL)/get_url_metadata"
+    }
     internal class var LOAD_URL:String{
         let config = QiscusConfig.sharedInstance
         return "\(config.BASE_API_URL)/load_comments/"
@@ -169,6 +148,22 @@ open class QiscusConfig: NSObject {
         let config = QiscusConfig.sharedInstance
         return "\(config.BASE_API_URL)/clear_room_messages/"
     }
-    
-    
+    open class func LOAD_URL_(withTopicId topicId:Int, commentId:Int)->String{
+        let config = QiscusConfig.sharedInstance
+        return "\(config.BASE_API_URL)/topic/\(topicId)/comment/\(commentId)/token/\(config.USER_TOKEN)"
+    }
+    open class var ROOM_REQUEST_ID_URL:String{
+        let config = QiscusConfig.sharedInstance
+        return "\(config.BASE_API_URL)/get_room_by_id"
+    }
+    open func setUserConfig(withEmail email:String, userKey:String, rtKey:String){
+        Qiscus.client.email = email
+        Qiscus.client.userData.set(email, forKey: "qiscus_email")
+        
+        Qiscus.client.token = userKey
+        Qiscus.client.userData.set(userKey, forKey: "qiscus_token")
+        
+        Qiscus.client.rtKey = rtKey
+        Qiscus.client.userData.set(rtKey, forKey: "qiscus_rt_key")
+    }
 }

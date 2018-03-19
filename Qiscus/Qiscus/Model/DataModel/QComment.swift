@@ -148,7 +148,9 @@ public class QComment:Object {
     public var delegate:QCommentDelegate?{
         didSet{
             if Thread.isMainThread {
-                QComment.cache[self.uniqueId] = self
+                if !self.isInvalidated {
+                    QComment.cache[self.uniqueId] = self
+                }
             }
         }
     }
@@ -601,13 +603,15 @@ public class QComment:Object {
     }
     public func fileName(text:String) ->String{
         let url = getAttachmentURL(message: text)
-        var fileName:String? = ""
+        var fileName:String = ""
         
-        let remoteURL = url.replacingOccurrences(of: " ", with: "%20")
-        let  mediaURL = URL(string: remoteURL)!
-        fileName = mediaURL.lastPathComponent.replacingOccurrences(of: "%20", with: "_")
+        let remoteURL = url.replacingOccurrences(of: " ", with: "%20").replacingOccurrences(of: "’", with: "%E2%80%99")
         
-        return fileName!
+        if let mediaURL = URL(string: remoteURL) {
+            fileName = mediaURL.lastPathComponent.replacingOccurrences(of: "%20", with: "_")
+        }
+        
+        return fileName
     }
     private func fileExtension(fromURL url:String) -> String{
         var ext = ""

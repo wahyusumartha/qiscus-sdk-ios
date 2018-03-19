@@ -23,11 +23,13 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
 @objc public class Qiscus: NSObject, PKPushRegistryDelegate, UNUserNotificationCenterDelegate {
     
     static let sharedInstance = Qiscus()
-    static let qiscusVersionNumber:String = "2.8.4"
-    @available(*, deprecated, message: "no longer available for public ...")
-    static let client = QiscusClient.shared
 
-    // Thread
+    
+    static let qiscusVersionNumber:String = "2.8.5"
+    public static var client : QiscusClient {
+        get { return QiscusClient.shared }
+    }
+
     static let uiThread = DispatchQueue.main
     
     static var qiscusDeviceToken: String = ""

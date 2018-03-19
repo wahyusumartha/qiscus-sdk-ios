@@ -21,8 +21,10 @@ open class QRoomListCell: UITableViewCell {
             setupUI()
             
             if let oldRoom = oldValue {
-                let roomId = oldRoom.id
-                self.unsubscribeEvent(roomId: roomId)
+                if !oldRoom.isInvalidated {
+                    let roomId = oldRoom.id
+                    self.unsubscribeEvent(roomId: roomId)
+                }
             }
             
             if let currentRoom = room {

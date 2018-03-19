@@ -75,7 +75,7 @@ public class QRoom:Object {
     // MARK: private method
     @objc internal dynamic var lastParticipantsReadId:Int = 0
     @objc internal dynamic var lastParticipantsDeliveredId:Int = 0
-    @objc internal dynamic var roomVersion016:Bool = true
+    @objc internal dynamic var roomVersion017:Bool = true
     
     internal let rawComments = List<QComment>()
     
@@ -104,7 +104,13 @@ public class QRoom:Object {
     
     public let participants = List<QParticipant>()
     
-    public var delegate:QRoomDelegate?
+    public var delegate:QRoomDelegate? {
+        didSet {
+            if Thread.isMainThread && !self.isInvalidated {
+                Qiscus.chatRooms[id] = self
+            }
+        }
+    }
     internal var typingTimer:Timer?
     internal var selfTypingTimer:Timer?
     
@@ -432,10 +438,27 @@ public class QRoom:Object {
             }
         }
     }
+    
+    internal func redeletePendingDeletedMessage() {
+        let pendingDeletedMessages = self.rawComments.filter("statusRaw == %d", QCommentStatus.deletePending.rawValue)
+        if pendingDeletedMessages.count > 0 {
+            for pendingDeletedMessage in pendingDeletedMessages {
+                pendingDeletedMessage.delete(forMeOnly: false, hardDelete: true, onSuccess: {
+                    if !pendingDeletedMessage.isInvalidated {
+                        self.deleteComment(comment: pendingDeletedMessage)
+                    }
+                }, onError: { (code) in
+                    
+                })
+            }
+        }
+    }
+    
     public func post(comment:QComment, type:String? = nil, payload:JSON? = nil){
         let service = QRoomService()
         let id = self.id
         self.resendPendingMessage()
+        self.redeletePendingDeletedMessage()
         service.postComment(onRoom: id, comment: comment, type: type, payload:payload)
     }
     
@@ -502,12 +525,15 @@ public class QRoom:Object {
         let cUid = comment.uniqueId
         func publishNotification(roomId:String){
             if let mainRoom = QRoom.room(withId: id){
-                mainRoom.delegate?.room?(didDeleteComment: mainRoom)
+                if let roomDelegate = mainRoom.delegate {
+                    roomDelegate.room?(didDeleteComment: mainRoom)
+                }
                 QiscusNotification.publish(commentDeleteOnRoom: mainRoom)
             }
         }
-        QiscusDBThread.async {
+        QiscusDBThread.sync {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
             if let r = QRoom.threadSaveRoom(withId: id){
                 var i = r.rawComments.count - 1
                 for c in r.rawComments.reversed() {

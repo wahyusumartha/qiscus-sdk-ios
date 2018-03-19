@@ -336,7 +336,7 @@ public class QRoomService:NSObject{
         if let file = comment.file {
             comment.updateDownloading(downloading: true)
             comment.updateProgress(progress: 0)
-            let fileURL = file.url.replacingOccurrences(of: " ", with: "%20")
+            let fileURL = file.url.replacingOccurrences(of: " ", with: "%20").replacingOccurrences(of: "’", with: "%E2%80%99")
             let ext = file.ext
             let type = file.type
             QiscusRequestThread.async {
