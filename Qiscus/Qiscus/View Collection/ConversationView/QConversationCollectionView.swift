@@ -248,44 +248,72 @@ public class QConversationCollectionView: UICollectionView {
             }
         }
     }
-    open func userTypingChanged(user: QUser, typing:Bool){
+    open func userTypingChanged(userEmail: String, typing:Bool){
         self.processingTyping = true
-        if user.isInvalidated {return}
-        var usingCellTyping = true
-        if let config = self.configDelegate?.configDelegate?(usingTpingCellIndicator: self){
-            usingCellTyping = config
-        }
-        if !typing {
-            if self.typingUsers[user.email] != nil {
-                self.typingUsers[user.email] = nil
-                if usingCellTyping {
-                    self.reloadData()
-                    if self.isLastRowVisible{
-                        scrollToBottom()
+        if self.messagesId.count <= 0 { return }
+        let section = self.messagesId.count - 1
+        QiscusBackgroundThread.sync {
+            if !typing {
+                if self.typingUsers[userEmail] != nil {
+                    self.typingUsers[userEmail] = nil
+                    if self.typingUsers.count > 0 {
+                        let typingIndexPath = IndexPath(item: 0, section: section + 1)
+                        DispatchQueue.main.async {
+                            self.reloadItems(at: [typingIndexPath])
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            self.performBatchUpdates({
+                                let indexSet = IndexSet(integer: section + 1)
+                                self.deleteSections(indexSet)
+                            }, completion: { (_) in
+                                if self.isLastRowVisible{
+                                    self.scrollToBottom()
+                                }
+                            })
+                        }
                     }
-                }
-            }
-            if let timer = self.typingUserTimer[user.email] {
-                timer.invalidate()
-            }
-        }else{
-            if self.typingUsers[user.email] == nil {
-                self.typingUsers[user.email] = user
-                if let timer = self.typingUserTimer[user.email] {
-                    timer.invalidate()
-                }
-                self.typingUserTimer[user.email] = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(QConversationCollectionView.publishStopTyping(timer:)), userInfo: user, repeats: false)
-                if usingCellTyping {
-                    self.reloadData()
-                    if self.isLastRowVisible{
-                        scrollToBottom()
+                    if let timer = self.typingUserTimer[userEmail] {
+                        timer.invalidate()
+                        self.typingUserTimer[userEmail] = nil
                     }
                 }
             }else{
-                if let timer = self.typingUserTimer[user.email] {
+                let typingIndexPath = IndexPath(item: 0, section: section + 1)
+                
+                if self.typingUsers[userEmail] == nil {
+                    if self.typingUsers.count > 0 {
+                        DispatchQueue.main.async {
+                            if let user = QUser.user(withEmail: userEmail) {
+                                self.typingUsers[userEmail] = user
+                                self.reloadItems(at: [typingIndexPath])
+                            }
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            if let user = QUser.user(withEmail: userEmail) {
+                                self.performBatchUpdates({
+                                    let indexSet = IndexSet(integer: section + 1)
+                                    self.typingUsers[userEmail] = user
+                                    self.insertSections(indexSet)
+                                    self.insertItems(at: [typingIndexPath])
+                                }, completion: { (_) in
+                                    if self.isLastRowVisible{
+                                        self.scrollToBottom()
+                                    }
+                                })
+                            }
+                        }
+                    }
+                }
+                if let timer = self.typingUserTimer[userEmail] {
                     timer.invalidate()
                 }
-                self.typingUserTimer[user.email] = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(QConversationCollectionView.publishStopTyping(timer:)), userInfo: user, repeats: false)
+                DispatchQueue.main.async {
+                    if let user = QUser.user(withEmail: userEmail) {
+                        self.typingUserTimer[userEmail] = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(QConversationCollectionView.publishStopTyping(timer:)), userInfo: user, repeats: false)
+                    }
+                }
             }
         }
         self.processingTyping = false
@@ -294,21 +322,29 @@ public class QConversationCollectionView: UICollectionView {
     
     // MARK: - Notification Listener
     @objc private func userTyping(_ notification: Notification){
+        var usingCellTyping = true
+        if let config = self.configDelegate?.configDelegate?(usingTpingCellIndicator: self){
+            usingCellTyping = config
+        }
+        if !usingCellTyping { return }
         if let userInfo = notification.userInfo {
-            let user = userInfo["user"] as! QUser
-            let typing = userInfo["typing"] as! Bool
-            let room = userInfo["room"] as! QRoom
-            if room.isInvalidated || user.isInvalidated {
+            guard let user = userInfo["user"] as? QUser  else { return }
+            guard let typing = userInfo["typing"] as? Bool else { return }
+            guard let room = userInfo["room"] as? QRoom else {return}
+            guard let currentRoom = self.room else {return}
+            
+            let userEmail = user.email
+            let roomId = room.id
+            
+            if currentRoom.id != roomId { return }
+            
+            if room.isInvalidated || user.isInvalidated || currentRoom.isInvalidated{
                 return
             }
-            if let currentRoom = self.room {
-                if currentRoom.isInvalidated { return }
-                if currentRoom.id == room.id {
-                    if !processingTyping{
-                        self.userTypingChanged(user: user, typing: typing)
-                    }
-                }
-            }
+            
+            if self.processingTyping { return }
+            
+            self.userTypingChanged(userEmail: userEmail, typing: typing)            
         }
     }
     @objc private func newCommentNotif(_ notification: Notification){
