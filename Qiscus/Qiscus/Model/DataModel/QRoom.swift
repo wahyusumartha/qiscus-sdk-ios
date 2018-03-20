@@ -240,6 +240,100 @@ public class QRoom:Object {
         self.addComment(newComment: comment)
         return comment
     }
+    
+    public func prepareImageComment(filename: String = "", caption: String = "", data: Data? = nil, thumbImage: UIImage? = nil) -> QComment {
+
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
+            let comment = QComment()
+            let time = Double(Date().timeIntervalSince1970)
+            let timeToken = UInt64(time * 10000)
+            let uniqueID = "ios-\(timeToken)"
+            let fileNameArr = filename.split(separator: ".")
+            let fileExt = String(fileNameArr.last!).lowercased()
+            
+            var fileName = filename.lowercased()
+            if fileName == "asset.jpg" || fileName == "asset.png" {
+                fileName = "\(uniqueID).\(fileExt)"
+            }
+            fileName = fileName.replacingOccurrences(of: "%", with: "")
+            
+            var payloadData:[AnyHashable : Any] = [
+                "url" : fileName,
+                "caption" : caption
+            ]
+            
+            comment.uniqueId = uniqueID
+            comment.id = 0
+            comment.roomId = self.id
+            
+            comment.text = "[file]\(fileName) [/file]"
+            comment.createdAt = Double(Date().timeIntervalSince1970)
+            comment.senderEmail = Qiscus.client.email
+            comment.senderName = Qiscus.client.userName
+            comment.statusRaw = QCommentStatus.sending.rawValue
+            comment.isUploading = true
+            comment.progress = 0
+            comment.roomAvatar = self.avatarURL
+            comment.roomName = self.name
+            comment.roomTypeRaw = self.typeRaw
+            comment.isRead = true
+            
+            let file = QFile()
+            file.id = uniqueID
+            file.roomId = self.id
+            file.url = fileName
+            file.senderEmail = Qiscus.client.email
+            file.filename = fileName
+            
+            if let fileData = data {
+                let size = fileData.count
+                file.size = Double(size)
+                file.localPath = QFile.saveFile(data!, fileName: fileName)
+                
+                payloadData = [
+                    "url" : fileName,
+                    "caption" : caption,
+                    "size" : file.size,
+                    "pages" : 0,
+                    "file_name": fileName
+                ]
+            }
+            
+            if let mime = QiscusFileHelper.mimeTypes["\(fileExt)"] {
+                file.mimeType = mime
+            }
+            
+            let image = UIImage(data: data!)
+            let gif = (fileExt == "gif" || fileExt == "gif_")
+            let jpeg = (fileExt == "jpg" || fileExt == "jpg_")
+            let png = (fileExt == "png" || fileExt == "png_")
+            
+            var thumb = UIImage()
+            var thumbData:Data?
+            if !gif {
+                thumb = QFile.createThumbImage(image!)
+                if jpeg {
+                    thumbData = UIImageJPEGRepresentation(thumb, 1)
+                    file.localThumbPath = QFile.saveFile(thumbData!, fileName: "thumb-\(fileName)")
+                }else if png {
+                    thumbData = UIImagePNGRepresentation(thumb)
+                    file.localThumbPath = QFile.saveFile(thumbData!, fileName: "thumb-\(fileName)")
+                }
+            }else{
+                file.localThumbPath = QFile.saveFile(data!, fileName: "thumb-\(fileName)")
+            }
+            
+            comment.typeRaw = QCommentType.image.name()
+            let payloadJSON = JSON(payloadData)
+            comment.data = "\(payloadJSON)"
+            try! realm.write {
+                realm.add(file, update:true)
+            }
+            
+            return comment
+    }
+    
     public func newFileComment(type:QiscusFileType, filename:String = "", caption:String = "", data:Data? = nil, thumbImage:UIImage? = nil)->QComment{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         realm.refresh()
