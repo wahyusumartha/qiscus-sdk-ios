@@ -41,7 +41,7 @@ open class QiscusConfig: NSObject {
             return Qiscus.client.rtKey
         }
     }
-
+    
     internal var BASE_API_URL:String{
         get{
             if Qiscus.client.baseUrl != "" {
@@ -56,7 +56,7 @@ open class QiscusConfig: NSObject {
             var headers:[String:String] = [
                 "User-Agent" : "QiscusSDKIos/v\(Qiscus.versionNumber)",
                 "QISCUS_SDK_APP_ID" : Qiscus.client.appId,
-            ]
+                ]
             if Qiscus.client.token != "" {
                 headers["QISCUS_SDK_TOKEN"] = Qiscus.client.token
             }
