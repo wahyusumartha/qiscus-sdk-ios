@@ -11,6 +11,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="QiscusUploaderVC" customModule="Qiscus" customModuleProvider="target">
             <connections>
+                <outlet property="deleteButton" destination="B6N-6j-PNI" id="AtG-EO-M2K"/>
                 <outlet property="imageCollection" destination="AwI-dX-FnG" id="q0b-8v-1vs"/>
                 <outlet property="imageView" destination="Lhw-an-yNz" id="uTt-Sg-HAL"/>
                 <outlet property="inputBottom" destination="Dld-hL-Szd" id="NJg-Dr-9Lm"/>
@@ -104,19 +105,6 @@
                         <constraint firstItem="qaz-XA-cHL" firstAttribute="leading" secondItem="0Tv-aF-mLZ" secondAttribute="trailing" constant="15" id="nlK-zj-0iJ"/>
                     </constraints>
                 </view>
-                <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="AwI-dX-FnG">
-                    <rect key="frame" x="5" y="483" width="310" height="80"/>
-                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
-                    <constraints>
-                        <constraint firstAttribute="height" constant="80" id="ZQt-bj-Wd3"/>
-                    </constraints>
-                    <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="G6F-vT-API">
-                        <size key="itemSize" width="50" height="50"/>
-                        <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                        <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                        <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
-                    </collectionViewFlowLayout>
-                </collectionView>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="v7d-tL-Rht">
                     <rect key="frame" x="0.0" y="20" width="320" height="30"/>
                     <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -130,6 +118,30 @@
                         <action selector="cancel:" destination="-1" eventType="touchUpInside" id="5JI-A4-mwZ"/>
                     </connections>
                 </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="B6N-6j-PNI">
+                    <rect key="frame" x="280" y="20" width="30" height="30"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="30" id="DJG-0O-5Jr"/>
+                        <constraint firstAttribute="width" constant="30" id="Lp4-Ad-ODq"/>
+                    </constraints>
+                    <state key="normal" image="ic_deleting"/>
+                    <connections>
+                        <action selector="deleteImage:" destination="-1" eventType="touchUpInside" id="XE9-eh-MSu"/>
+                    </connections>
+                </button>
+                <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="AwI-dX-FnG">
+                    <rect key="frame" x="5" y="483" width="310" height="80"/>
+                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="80" id="ZQt-bj-Wd3"/>
+                    </constraints>
+                    <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="G6F-vT-API">
+                        <size key="itemSize" width="75" height="75"/>
+                        <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                        <size key="footerReferenceSize" width="50" height="50"/>
+                        <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                    </collectionViewFlowLayout>
+                </collectionView>
             </subviews>
             <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <constraints>
@@ -142,6 +154,8 @@
                 <constraint firstAttribute="trailing" secondItem="66j-8D-8gE" secondAttribute="trailing" id="Ton-4s-59V"/>
                 <constraint firstAttribute="trailing" secondItem="AwI-dX-FnG" secondAttribute="trailing" constant="5" id="Uri-ma-rbF"/>
                 <constraint firstItem="66j-8D-8gE" firstAttribute="bottom" secondItem="qaz-XA-cHL" secondAttribute="bottom" constant="8" id="WTq-xJ-V7o"/>
+                <constraint firstAttribute="trailing" secondItem="B6N-6j-PNI" secondAttribute="trailing" constant="10" id="dM8-Ih-mnz"/>
+                <constraint firstItem="B6N-6j-PNI" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="20" id="eo0-NN-k5b"/>
                 <constraint firstItem="66j-8D-8gE" firstAttribute="top" secondItem="v7d-tL-Rht" secondAttribute="bottom" id="ubK-37-ioN"/>
                 <constraint firstItem="66j-8D-8gE" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="vuG-wp-B6U"/>
                 <constraint firstItem="v7d-tL-Rht" firstAttribute="width" secondItem="orB-oB-Ggp" secondAttribute="width" id="wTR-UC-frb"/>
@@ -255,5 +269,6 @@ FhIWGxYgFigWKxYwFj8WQxZKFlIWXxZkFmYWaBZtFnUWeBZ9FoUWiBaaFp0WogAAAAAAAAIBAAAAAAAA
 AEEAAAAAAAAAAAAAAAAAABakA
 </mutableData>
         </image>
+        <image name="ic_deleting" width="24" height="24"/>
     </resources>
 </document>

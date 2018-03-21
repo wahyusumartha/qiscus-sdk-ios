@@ -19,7 +19,7 @@ class QiscusUploaderVC: UIViewController, UIScrollViewDelegate {
     @IBOutlet weak var sendButton: UIButton!
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var imageView: UIImageView!
-    
+    @IBOutlet weak var deleteButton: UIButton!
     @IBOutlet weak var imageCollection: UICollectionView!
     @IBOutlet weak var inputBottom: NSLayoutConstraint!
     @IBOutlet weak var mediaCaption: ChatInputText!
@@ -32,6 +32,7 @@ class QiscusUploaderVC: UIViewController, UIScrollViewDelegate {
     var fileName :String?
     var room    : QRoom?
     var imageData: [QComment] = []
+    var selectedImageIndex: Int = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,12 +47,20 @@ class QiscusUploaderVC: UIViewController, UIScrollViewDelegate {
         self.mediaCaption.font = Qiscus.style.chatFont
         self.mediaCaption.placeholder = QiscusTextConfiguration.sharedInstance.captionPlaceholder
         
+        imageCollection.dataSource = self
+        imageCollection.delegate = self
         imageCollection.register(UINib(nibName: "MultipleImageCell", bundle: Qiscus.bundle), forCellWithReuseIdentifier: "MultipleImageCell")
         imageCollection.backgroundColor = UIColor.clear
         imageCollection.isHidden = true
+        imageCollection.allowsSelection = true
+        self.deleteButton.isHidden = true
         
         if self.fileName != nil && self.data != nil && self.imageData.count == 0 {
             self.imageData.append(self.generateComment(fileName: self.fileName!, data: self.data!, mediaCaption: self.mediaCaption.value))
+        }
+        
+        for gesture in self.view.gestureRecognizers! {
+            self.view.removeGestureRecognizer(gesture)
         }
     }
 
@@ -66,8 +75,7 @@ class QiscusUploaderVC: UIViewController, UIScrollViewDelegate {
                 self.imageView.image = UIImage(data: self.data!)
             }
         }
-        imageCollection.dataSource = self
-        imageCollection.delegate = self
+
         let center: NotificationCenter = NotificationCenter.default
         center.addObserver(self, selector: #selector(QiscusUploaderVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         center.addObserver(self, selector: #selector(QiscusUploaderVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
@@ -92,6 +100,16 @@ class QiscusUploaderVC: UIViewController, UIScrollViewDelegate {
         return newComment
     }
     
+    @IBAction func deleteImage(_ sender: UIButton) {
+        sender.isHidden = self.imageData.count == 2
+        self.imageData.remove(at: self.selectedImageIndex)
+        self.selectedImageIndex = self.selectedImageIndex != 0 ? self.selectedImageIndex - 1 : 0
+        self.imageCollection.reloadData()
+        self.imageCollection.selectItem(at: IndexPath(row: self.selectedImageIndex, section: 0), animated: true, scrollPosition: .bottom)
+        self.imageView.loadAsync(fromLocalPath: (self.imageData[self.selectedImageIndex].file?.localThumbPath)!, onLoaded: { (image, _) in
+            self.imageView.image = image
+        })
+    }
     @IBAction func addMoreImage(_ sender: UIButton) {
         self.goToGaleryPicker()
     }
@@ -103,15 +121,13 @@ class QiscusUploaderVC: UIViewController, UIScrollViewDelegate {
                 self.imageData.removeFirst()
                 self.imageData.insert(firstComment, at: 0)
                 for comment in imageData {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
-                        self.room!.add(newComment: comment)
-                        self.room!.upload(comment: comment, onSuccess: { (roomResult, commentResult) in
-                            if let chatView = self.chatView {
-                                chatView.postComment(comment: commentResult)
-                            }
-                        }, onError: { (roomResult, commentResult, error) in
-                            Qiscus.printLog(text: "Error: \(error)")
-                        })
+                    self.room!.add(newComment: comment)
+                    self.room!.upload(comment: comment, onSuccess: { (roomResult, commentResult) in
+                        if let chatView = self.chatView {
+                            chatView.postComment(comment: commentResult)
+                        }
+                    }, onError: { (roomResult, commentResult, error) in
+                        Qiscus.printLog(text: "Error: \(error)")
                     })
                 }
 //                let newComment = self.room!.newFileComment(type: .image, filename: self.fileName!, caption: self.mediaCaption.value, data: self.data!)
@@ -162,7 +178,7 @@ class QiscusUploaderVC: UIViewController, UIScrollViewDelegate {
             picker.delegate = self
             picker.allowsEditing = false
             picker.sourceType = UIImagePickerControllerSourceType.photoLibrary
-            picker.mediaTypes = [kUTTypeMovie as String, kUTTypeImage as String]
+            picker.mediaTypes = [kUTTypeImage as String]
             self.present(picker, animated: true, completion: nil)
         })
     }
@@ -253,9 +269,14 @@ extension QiscusUploaderVC: UIImagePickerControllerDelegate, UINavigationControl
                     
                     imageData.append(self.generateComment(fileName: imageName, data: data!, mediaCaption: ""))
                     self.inputBottom.constant = self.imageCollection.frame.height
+                    UIView.animate(withDuration: 1, delay: 0, options: UIViewAnimationOptions(), animations: {
+                        self.view.layoutIfNeeded()
+                        
+                    }, completion: nil)
                     picker.dismiss(animated: true, completion: nil)
                     self.imageCollection.reloadData()
                     imageCollection.isHidden = false
+                    self.deleteButton.isHidden = false
                 }
             }
     }
@@ -264,7 +285,7 @@ extension QiscusUploaderVC: UIImagePickerControllerDelegate, UINavigationControl
     }
 }
 
-extension QiscusUploaderVC: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
+extension QiscusUploaderVC: UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
@@ -278,6 +299,7 @@ extension QiscusUploaderVC: UICollectionViewDelegateFlowLayout, UICollectionView
         self.imageView.loadAsync(fromLocalPath: imagePath!, onLoaded: { (image, _) in
             self.imageView.image = image
         })
+        self.selectedImageIndex = indexPath.row
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
