@@ -258,23 +258,25 @@ open class QChatCell: UICollectionViewCell, QCommentDelegate {
         var balloonImage:UIImage? = nil
         var edgeInset = UIEdgeInsetsMake(13, 13, 13, 28)
         
-        switch self.comment!.cellPos {
-        case .single, .last:
-            if self.comment?.senderEmail == Qiscus.client.email {
-                balloonImage = Qiscus.style.assets.rightBallonLast
-            }else{
-                edgeInset = UIEdgeInsetsMake(13, 28, 13, 13)
-                balloonImage = Qiscus.style.assets.leftBallonLast
+        if !(self.comment?.isInvalidated)! {
+            switch self.comment!.cellPos {
+            case .single, .last:
+                if self.comment?.senderEmail == Qiscus.client.email {
+                    balloonImage = Qiscus.style.assets.rightBallonLast
+                }else{
+                    edgeInset = UIEdgeInsetsMake(13, 28, 13, 13)
+                    balloonImage = Qiscus.style.assets.leftBallonLast
+                }
+                break
+            default:
+                if self.comment?.senderEmail == Qiscus.client.email {
+                    balloonImage = Qiscus.style.assets.rightBallonNormal
+                }else{
+                    edgeInset = UIEdgeInsetsMake(13, 28, 13, 13)
+                    balloonImage = Qiscus.style.assets.leftBallonNormal
+                }
+                break
             }
-            break
-        default:
-            if self.comment?.senderEmail == Qiscus.client.email {
-                balloonImage = Qiscus.style.assets.rightBallonNormal
-            }else{
-                edgeInset = UIEdgeInsetsMake(13, 28, 13, 13)
-                balloonImage = Qiscus.style.assets.leftBallonNormal
-            }
-            break
         }
         
         return balloonImage?.resizableImage(withCapInsets: edgeInset, resizingMode: .stretch).withRenderingMode(.alwaysTemplate)
