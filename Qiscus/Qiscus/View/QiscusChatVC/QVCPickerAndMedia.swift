@@ -29,7 +29,8 @@ extension QiscusChatVC:GalleryItemsDataSource{
         
         return [
             GalleryConfigurationItem.closeButtonMode(.custom(closeButton)),
-            GalleryConfigurationItem.thumbnailsButtonMode(.custom(seeAllButton))
+            GalleryConfigurationItem.thumbnailsButtonMode(.custom(seeAllButton)),
+            GalleryConfigurationItem.deleteButtonMode(.none)
         ]
     }
     
