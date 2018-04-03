@@ -37,7 +37,7 @@ public class QConversationCollectionView: UICollectionView {
                     }
                     var predicate:NSPredicate?
                     if hardDelete {
-                        predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
+                        predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
                     }
                     QiscusBackgroundThread.async {
                         if let rts = QRoom.threadSaveRoom(withId: rid){
@@ -188,7 +188,7 @@ public class QConversationCollectionView: UICollectionView {
         }
         var predicate:NSPredicate?
         if hardDelete {
-            predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
+            predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
         }
         
         
@@ -211,7 +211,7 @@ public class QConversationCollectionView: UICollectionView {
         }
         var predicate:NSPredicate?
         if hardDelete {
-            predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
+            predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
         }
         
         
@@ -557,7 +557,7 @@ public class QConversationCollectionView: UICollectionView {
             }
             var predicate:NSPredicate?
             if hardDelete {
-                predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
+                predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
             }
             QiscusBackgroundThread.async {
                 if let rts = QRoom.threadSaveRoom(withId: rid){

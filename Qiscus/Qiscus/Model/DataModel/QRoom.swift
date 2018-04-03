@@ -473,6 +473,7 @@ public class QRoom:Object {
             realm.add(file, update:true)
         }
         self.addComment(newComment: comment)
+        realm.refresh()
         return comment
     }
     

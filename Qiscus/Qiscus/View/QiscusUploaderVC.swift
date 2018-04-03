@@ -130,18 +130,14 @@ class QiscusUploaderVC: UIViewController, UIScrollViewDelegate {
                         Qiscus.printLog(text: "Error: \(error)")
                     })
                 }
-//                let newComment = self.room!.newFileComment(type: .image, filename: self.fileName!, caption: self.mediaCaption.value, data: self.data!)
-//                self.room!.upload(comment: newComment, onSuccess: { (roomResult, commentResult) in
-//                    if let chatView = self.chatView {
-//                        chatView.postComment(comment: commentResult)
-//                    }
-//                }, onError: { (roomResult, commentResult, error) in
-//                    Qiscus.printLog(text:"Error: \(error)")
-//                })
+                
+                self.room!.delegate?.room!(didFinishSync: self.room!)
+                
                 let _ = self.navigationController?.popViewController(animated: true)
             }
         }
     }
+    
     // MARK: - Keyboard Methode
     @objc func keyboardWillHide(_ notification: Notification){
         let info: NSDictionary = (notification as NSNotification).userInfo! as NSDictionary
