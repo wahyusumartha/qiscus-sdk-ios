@@ -100,6 +100,7 @@ internal extension QRoom {
             let roomName = json["room_name"].stringValue
             let roomAvatar = json["avatar_url"].stringValue
             let unread = json["unread_count"].intValue
+            let isPublicChannel = json["is_public_channel"].boolValue
             
             var chatType = QRoomType.single
             if chatTypeRaw != "single" {
@@ -233,6 +234,7 @@ internal extension QRoom {
                 }
                 room.uniqueId = roomUniqueId
                 room.typeRaw = chatType.rawValue
+                room.isPublicChannel = isPublicChannel
                 room.distinctId = distinctId
                 room.storedName = roomName
                 room.storedAvatarURL = roomAvatar

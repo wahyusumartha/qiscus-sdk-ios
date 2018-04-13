@@ -161,8 +161,10 @@ internal extension QRoom {
             if let room = QRoom.threadSaveRoom(withId: id) {
                 var channels = [String]()
                 
-                channels.append("r/\(room.id)/\(room.id)/+/d")
-                channels.append("r/\(room.id)/\(room.id)/+/r")
+                if !room.isPublicChannel {
+                    channels.append("r/\(room.id)/\(room.id)/+/d")
+                    channels.append("r/\(room.id)/\(room.id)/+/r")
+                }
                 
                 if room.type == .single {
                     for participant in room.participants{
@@ -192,8 +194,10 @@ internal extension QRoom {
             if let room = QRoom.threadSaveRoom(withId: id) {
                 var channels = [String]()
                 
-                channels.append("r/\(room.id)/\(room.id)/+/d")
-                channels.append("r/\(room.id)/\(room.id)/+/r")
+                if !room.isPublicChannel {
+                    channels.append("r/\(room.id)/\(room.id)/+/d")
+                    channels.append("r/\(room.id)/\(room.id)/+/r")
+                }
                 
                 if room.type == .single {
                     for participant in room.participants{
@@ -927,7 +931,9 @@ internal extension QRoom {
     
     internal func publishStatus(withStatus status:QCommentStatus){
         let service = QRoomService()
-        service.publisComentStatus(onRoom: self, status: status)
+        if !self.isPublicChannel {
+            service.publisComentStatus(onRoom: self, status: status)
+        }
     }
     internal func getParticipant(withEmail email:String)->QParticipant?{
         let data = self.participants.filter("email == '\(email)'")

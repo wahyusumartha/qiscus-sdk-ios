@@ -46,6 +46,7 @@ public class QRoom:Object {
     @objc public dynamic var storedAvatarURL:String = ""
     @objc public dynamic var definedAvatarURL:String = ""
     @objc internal dynamic var avatarData:Data?
+    @objc public dynamic var isPublicChannel: Bool = false
     @objc public dynamic var data:String = ""
     @objc public dynamic var distinctId:String = ""
     @objc public dynamic var typeRaw:Int = QRoomType.single.rawValue
@@ -795,9 +796,13 @@ public class QRoom:Object {
         }
     }
     public class func publishStatus(roomId:String, commentId:Int, status:QCommentStatus){
-        QiscusBackgroundThread.async {
-            let service = QRoomService()
-            service.publishStatus(inRoom: roomId, commentId: commentId, commentStatus: status)
+        if let room = QRoom.room(withId: roomId) {
+            if !room.isPublicChannel {
+                QiscusBackgroundThread.async {
+                    let service = QRoomService()
+                    service.publishStatus(inRoom: roomId, commentId: commentId, commentStatus: status)
+                }
+            }
         }
     }
     
