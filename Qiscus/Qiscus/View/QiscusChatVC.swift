@@ -457,6 +457,7 @@ public class QiscusChatVC: UIViewController{
         self.collectionView.roomDelegate = self
         self.collectionView.cellDelegate = self
         self.collectionView.configDelegate = self
+        self.collectionView.reloadData()
         
         UINavigationBar.appearance().tintColor = self.currentNavbarTint
         

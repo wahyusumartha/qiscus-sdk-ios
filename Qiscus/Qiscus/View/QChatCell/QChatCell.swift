@@ -392,10 +392,22 @@ open class QChatCell: UICollectionViewCell, QCommentDelegate {
         
         if let isEnable = delegate?.enableDeleteForMeMenuItem?(onCell: self) {
             if isEnable {
-                menuItems.append(deleteForMeMenuItem)
+                if let room = comment.room {
+                    if !room.isPublicChannel {
+                        menuItems.append(deleteForMeMenuItem)
+                    }
+                } else {
+                    menuItems.append(deleteForMeMenuItem)
+                }
             }
         } else {
-            menuItems.append(deleteForMeMenuItem)
+            if let room = comment.room {
+                if !room.isPublicChannel {
+                    menuItems.append(deleteForMeMenuItem)
+                }
+            } else {
+                menuItems.append(deleteForMeMenuItem)
+            }
         }
         
         
@@ -409,10 +421,22 @@ open class QChatCell: UICollectionViewCell, QCommentDelegate {
         
         if let isEnable = delegate?.enableInfoMenuItem?(onCell: self) {
             if isEnable {
-                menuItems.append(infoMenuItem)
+                if let room = comment.room {
+                    if !room.isPublicChannel {
+                        menuItems.append(infoMenuItem)
+                    }
+                } else {
+                    menuItems.append(infoMenuItem)
+                }
             }
         } else {
-            menuItems.append(infoMenuItem)
+            if let room = comment.room {
+                if !room.isPublicChannel {
+                    menuItems.append(infoMenuItem)
+                }
+            } else {
+                menuItems.append(infoMenuItem)
+            }
         }
         
         UIMenuController.shared.menuItems = menuItems
