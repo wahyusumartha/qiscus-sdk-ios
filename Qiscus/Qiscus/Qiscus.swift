@@ -1005,4 +1005,13 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             }
         }}
     }
+    
+    
+    /// search local message comment
+    ///
+    /// - Parameter searchQuery: query to search
+    /// - Returns: array of QComment obj
+    public class func searchComment(searchQuery: String) -> [QComment] {
+        return QComment.comments(searchQuery: searchQuery)
+    }
 }

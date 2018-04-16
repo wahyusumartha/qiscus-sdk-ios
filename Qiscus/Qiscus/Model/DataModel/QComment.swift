@@ -555,6 +555,22 @@ public class QComment:Object {
         }
         return nil
     }
+    
+    internal class func comments(searchQuery: String) -> [QComment] {
+        if Thread.isMainThread {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
+            
+            let comments = realm.objects(QComment.self).filter({ (comment) -> Bool in
+                return comment.text.lowercased().contains(searchQuery.lowercased())
+            })
+            
+            return Array(comments)
+        }
+        
+        return [QComment]()
+    }
+    
     public class func comment(withId id:Int)->QComment?{
         if Thread.isMainThread {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
