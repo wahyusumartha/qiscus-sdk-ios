@@ -543,9 +543,10 @@ public class QiscusChatVC: UIViewController{
             room.redeletePendingDeletedMessage()
             setupNavigationTitle()
             setupPage()
-        }else{
-            self.loadData()
         }
+        
+        self.loadData()
+        
         if let delegate = self.delegate {
             delegate.chatVC?(viewController: self, willAppear: animated)
         }
