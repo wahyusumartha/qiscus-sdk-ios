@@ -56,6 +56,7 @@ open class QiscusConfig: NSObject {
             var headers:[String:String] = [
                 "User-Agent" : "QiscusSDKIos/v\(Qiscus.versionNumber)",
                 "QISCUS_SDK_APP_ID" : Qiscus.client.appId,
+                "QISCUS_SDK_VERSION" : "IOS_\(Qiscus.versionNumber)",
                 ]
             if Qiscus.client.token != "" {
                 headers["QISCUS_SDK_TOKEN"] = Qiscus.client.token
