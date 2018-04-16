@@ -1200,7 +1200,7 @@ public class QChatService:NSObject {
                 if !secureURL {
                     requestProtocol = "http"
                 }
-                baseUrl = "\(requestProtocol)://\(appId).qiscus.com"
+                baseUrl = "\(requestProtocol)://api.qiscus.com"
             }
             
             Qiscus.client.appId = appId

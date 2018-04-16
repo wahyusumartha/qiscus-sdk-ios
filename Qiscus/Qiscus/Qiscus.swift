@@ -328,7 +328,6 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
      - parameter appId: Qiscus App ID, please register or login in http://qiscus.com to find your App ID
     */
     @objc public class func setAppId(appId:String){
-        Qiscus.setBaseURL(withURL: "https://\(appId).qiscus.com")
         Qiscus.client.appId = appId
         Qiscus.client.userData.set(appId, forKey: "qiscus_appId")
     }

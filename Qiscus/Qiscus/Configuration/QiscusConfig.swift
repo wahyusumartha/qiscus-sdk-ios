@@ -47,7 +47,7 @@ open class QiscusConfig: NSObject {
             if Qiscus.client.baseUrl != "" {
                 return "\(Qiscus.client.baseUrl)/api/v\(self.API_VERSION)/mobile"
             }else{
-                return "\(Qiscus.client.appId).qiscus.com/api/v\(self.API_VERSION)/mobile"
+                return "api.qiscus.com/api/v\(self.API_VERSION)/mobile"
             }
         }
     }
