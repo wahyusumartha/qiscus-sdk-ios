@@ -351,9 +351,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             requestProtocol = "http"
         }
         let email = userEmail.lowercased()
-        let baseUrl = "\(requestProtocol)://\(appId).qiscus.com"
+        let baseUrl = "\(requestProtocol)://api.qiscus.com"
         
         if delegate != nil {
+            
             Qiscus.shared.delegate = delegate
         }
         var needLogin = false
