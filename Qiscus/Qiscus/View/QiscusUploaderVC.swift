@@ -189,7 +189,6 @@ extension QiscusUploaderVC: UIImagePickerControllerDelegate, UINavigationControl
     }
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]){
             let time = Double(Date().timeIntervalSince1970)
-            let timeToken = UInt64(time * 10000)
             let fileType:String = info[UIImagePickerControllerMediaType] as! String
             //picker.dismiss(animated: true, completion: nil)
             
@@ -220,7 +219,9 @@ extension QiscusUploaderVC: UIImagePickerControllerDelegate, UINavigationControl
                             }
                         }
                     }else{
-                        imageName = "\(timeToken).jpg"
+                        let result = PHAsset.fetchAssets(withALAssetURLs: [imageURL], options: nil)
+                        let asset = result.firstObject
+                        imageName = "\((asset?.value(forKey: "filename"))!)"
                         let imageSize = image.size
                         var bigPart = CGFloat(0)
                         if(imageSize.width > imageSize.height){
@@ -236,22 +237,6 @@ extension QiscusUploaderVC: UIImagePickerControllerDelegate, UINavigationControl
                         
                         data = UIImageJPEGRepresentation(image, compressVal)!
                     }
-                }else{
-                    imageName = "\(timeToken).jpg"
-                    let imageSize = image.size
-                    var bigPart = CGFloat(0)
-                    if(imageSize.width > imageSize.height){
-                        bigPart = imageSize.width
-                    }else{
-                        bigPart = imageSize.height
-                    }
-                    
-                    var compressVal = CGFloat(1)
-                    if(bigPart > 2000){
-                        compressVal = 2000 / bigPart
-                    }
-                    
-                    data = UIImageJPEGRepresentation(image, compressVal)!
                 }
                 
                 if data != nil {
