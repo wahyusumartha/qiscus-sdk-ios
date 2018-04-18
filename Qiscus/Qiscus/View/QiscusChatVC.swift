@@ -883,6 +883,7 @@ public class QiscusChatVC: UIViewController{
 
 extension QiscusChatVC:QChatServiceDelegate{
     public func chatService(didFinishLoadRoom inRoom: QRoom, withMessage message: String?) {
+        self.chatRoomId = inRoom.id
         self.chatRoom = inRoom
         self.loadTitle()
         self.loadSubtitle()
