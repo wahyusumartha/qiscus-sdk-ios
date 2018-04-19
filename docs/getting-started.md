@@ -199,6 +199,9 @@ class ViewController: UIViewController {
 
 ```
 
+## Channel 
+Channel is a room that behave similar like a group chat, in channel anyone can join using the room uniqueId, there are several limitation on channel like : no typing indicator, no read/deliver status, no comment info, and “delete for me” is not available
+
 ## More About Room
 
 After successfully created your room, you may need to do advance development for your chat app. This may include invite more participant to your room, enter to a specific room without invitation, and so forth. Hence, in this section you will learn about the following things :
