@@ -1015,4 +1015,18 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     public class func searchComment(searchQuery: String) -> [QComment] {
         return QComment.comments(searchQuery: searchQuery)
     }
+    
+    
+    /// get all unread count
+    ///
+    /// - Parameters:
+    ///   - onSuccess: success completion with unread count value
+    ///   - onError: error completion with error message
+    public class func getAllUnreadCount(onSuccess: @escaping ((_ unread: Int) -> Void), onError: @escaping ((_ error: String) -> Void)) {
+        QChatService.defaultService.getAllUnreadCount(onSuccess: { (unread) in
+            onSuccess(unread)
+        }) { (error) in
+            onError(error)
+        }
+    }
 }

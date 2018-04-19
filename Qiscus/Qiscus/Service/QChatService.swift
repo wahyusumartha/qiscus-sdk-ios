@@ -1116,6 +1116,51 @@ public class QChatService:NSObject {
             }
         }
     }
+    
+    public func getAllUnreadCount(onSuccess: @escaping ((_ unread: Int)->Void), onError: @escaping ((_ error: String)->Void)) {
+        if Qiscus.isLoggedIn{
+            QiscusRequestThread.async {autoreleasepool{
+                let loadURL = QiscusConfig.ALL_UNREAD_COUNT
+                
+                var parameters:[String : AnyObject] =  [
+                    "token"  : qiscus.config.USER_TOKEN as AnyObject
+                ]
+                
+                QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+                    if let response = responseData.result.value {
+                        let json = JSON(response)
+                        let results = json["results"]
+                        let error = json["error"]
+                        
+                        if results != JSON.null {
+                            let unreadCount = results["total_unread_count"].intValue
+                            onSuccess(unreadCount)
+                        } else if error != JSON.null {
+                            var message = "Failed to get unread count"
+                            let errorMessages = error["detailed_messages"].arrayValue
+                            if let e = errorMessages.first?.string {
+                                message = e
+                            }
+                            DispatchQueue.main.async { autoreleasepool{
+                                onError("\(message)")
+                                }}
+                        }
+                    }else{
+                        let error = "Failed to load room data"
+                        DispatchQueue.main.async { autoreleasepool{
+                            onError("\(error)")
+                            }}
+                    }
+                })
+                }}
+        }
+        else{
+            reconnect {
+                self.getAllUnreadCount(onSuccess: onSuccess, onError: onError)
+            }
+        }
+    }
+    
     internal class func registerDevice(withToken deviceToken: String){
         func register(){
             let parameters:[String: AnyObject] = [
