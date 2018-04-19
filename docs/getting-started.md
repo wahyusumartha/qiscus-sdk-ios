@@ -144,7 +144,8 @@ You can learn from the figure below to understand what really happened when call
 
 ### Updating a User Profile and Avatar
 
-After your user account is created, sometimes you may need to update a user information, such as changing user avatar. You can use method `Qiscus.updateProfile()` to make changes to your account.
+After your user account is created, sometimes you may need to update a user information, such as 
+ging user avatar. You can use method `Qiscus.updateProfile()` to make changes to your account.
 
 ```swift
 Qiscus.updateProfile(username: "Your Name", avatarURL: "https://myimage.com/myNewIma...", onSuccess: {
@@ -199,8 +200,8 @@ class ViewController: UIViewController {
 
 ```
 
-## Channel 
-Channel is a room that behave similar like a group chat, in channel anyone can join using the room uniqueId, there are several limitation on channel like : no typing indicator, no read/deliver status, no comment info, and “delete for me” is not available
+## Channels 
+Channels is a room that behave similar like a group chat, in channel anyone can join using the room uniqueId, there are several limitation on channel like : no typing indicator, no read/deliver status, no comment info, and “delete for me” is not available
 
 ## More About Room
 
