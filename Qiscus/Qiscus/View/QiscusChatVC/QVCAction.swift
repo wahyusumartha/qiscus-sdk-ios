@@ -612,13 +612,25 @@ extension QiscusChatVC {
             }else{
                 AVCaptureDevice.requestAccess(for: AVMediaType.video, completionHandler: { (granted :Bool) -> Void in
                     if granted {
-                        let picker = UIImagePickerController()
-                        picker.delegate = self
-                        picker.allowsEditing = false
-                        picker.mediaTypes = [(kUTTypeImage as String),(kUTTypeMovie as String)]
-                        
-                        picker.sourceType = UIImagePickerControllerSourceType.camera
-                        self.present(picker, animated: true, completion: nil)
+                        PHPhotoLibrary.requestAuthorization({(status:PHAuthorizationStatus) in
+                            switch status{
+                            case .authorized:
+                                let picker = UIImagePickerController()
+                                picker.delegate = self
+                                picker.allowsEditing = false
+                                picker.mediaTypes = [(kUTTypeImage as String),(kUTTypeMovie as String)]
+                                
+                                picker.sourceType = UIImagePickerControllerSourceType.camera
+                                self.present(picker, animated: true, completion: nil)
+                                break
+                            case .denied:
+                                self.showPhotoAccessAlert()
+                                break
+                            default:
+                                self.showPhotoAccessAlert()
+                                break
+                            }
+                        })
                     }else{
                         DispatchQueue.main.async(execute: {
                             self.showCameraAccessAlert()
