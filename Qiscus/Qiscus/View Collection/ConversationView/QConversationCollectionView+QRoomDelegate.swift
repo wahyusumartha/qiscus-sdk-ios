@@ -79,7 +79,9 @@ extension QConversationCollectionView: QRoomDelegate {
         }
     }
     
-    public func room(gotNewComment comment: QComment) {}
+    public func room(gotNewComment comment: QComment) {
+        print("gotNewComment::")
+    }
     
     public func room(didDeleteComment room:QRoom) {
         if let r = self.room {

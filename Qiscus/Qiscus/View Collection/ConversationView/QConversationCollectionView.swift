@@ -352,7 +352,11 @@ public class QConversationCollectionView: UICollectionView {
             guard let property = userInfo["property"] as? QRoomProperty else {return}
             if property == .lastComment {
                 guard let room = userInfo["room"] as? QRoom else {return}
-                guard let comment = room.lastComment else {return}
+                guard let comment = room.lastComment else {
+                    if room.isInvalidated { return }
+                    self.roomDelegate?.roomDelegate?(gotFirstComment: room)
+                    return
+                }
                 
                 if room.isInvalidated { return }
                 self.gotNewComment(comment: comment, room: room)

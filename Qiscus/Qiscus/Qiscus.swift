@@ -351,9 +351,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             requestProtocol = "http"
         }
         let email = userEmail.lowercased()
-        let baseUrl = "\(requestProtocol)://\(appId).qiscus.com"
+        let baseUrl = "\(requestProtocol)://api.qiscus.com"
         
         if delegate != nil {
+            
             Qiscus.shared.delegate = delegate
         }
         var needLogin = false
@@ -446,7 +447,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
      */
     @objc public class func chatView(withRoomUniqueId uniqueId:String, readOnly:Bool = false, title:String = "", avatarUrl:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
         if let room = QRoom.room(withUniqueId: uniqueId){
-            return Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
+            let chatVC = Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
+            chatVC.chatRoomUniqueId = uniqueId
+            chatVC.isPublicChannel = true
+            return chatVC
         }else{
             if !Qiscus.sharedInstance.connected {
                 Qiscus.setupReachability()
@@ -459,6 +463,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             chatVC.chatRoomUniqueId = uniqueId
             chatVC.chatAvatarURL = avatarUrl
             chatVC.chatTitle = title
+            chatVC.isPublicChannel = true
             
             if chatVC.isPresence {
                 chatVC.goBack()
@@ -1013,5 +1018,19 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     /// - Returns: array of QComment obj
     public class func searchComment(searchQuery: String) -> [QComment] {
         return QComment.comments(searchQuery: searchQuery)
+    }
+    
+    
+    /// get all unread count
+    ///
+    /// - Parameters:
+    ///   - onSuccess: success completion with unread count value
+    ///   - onError: error completion with error message
+    public class func getAllUnreadCount(onSuccess: @escaping ((_ unread: Int) -> Void), onError: @escaping ((_ error: String) -> Void)) {
+        QChatService.defaultService.getAllUnreadCount(onSuccess: { (unread) in
+            onSuccess(unread)
+        }) { (error) in
+            onError(error)
+        }
     }
 }

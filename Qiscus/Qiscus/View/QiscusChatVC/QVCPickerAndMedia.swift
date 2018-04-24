@@ -66,11 +66,12 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                 var imageName:String = ""
                 let image = info[UIImagePickerControllerOriginalImage] as! UIImage
                 var data = UIImagePNGRepresentation(image)
+                
                 if let imageURL = info[UIImagePickerControllerReferenceURL] as? URL{
                     imageName = imageURL.lastPathComponent
                     
                     let imageNameArr = imageName.split(separator: ".")
-                    let imageExt:String = String(imageNameArr.last!).lowercased()
+                        let imageExt:String = String(imageNameArr.last!).lowercased()
                     
                     let gif:Bool = (imageExt == "gif" || imageExt == "gif_")
                     let png:Bool = (imageExt == "png" || imageExt == "png_")
@@ -89,7 +90,9 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                             }
                         }
                     }else{
-                        imageName = "\(timeToken).jpg"
+                        let result = PHAsset.fetchAssets(withALAssetURLs: [imageURL], options: nil)
+                        let asset = result.firstObject
+                        imageName = "\((asset?.value(forKey: "filename"))!)"
                         let imageSize = image.size
                         var bigPart = CGFloat(0)
                         if(imageSize.width > imageSize.height){
@@ -106,21 +109,24 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                         data = UIImageJPEGRepresentation(image, compressVal)!
                     }
                 }else{
-                    imageName = "\(timeToken).jpg"
-                    let imageSize = image.size
-                    var bigPart = CGFloat(0)
-                    if(imageSize.width > imageSize.height){
-                        bigPart = imageSize.width
-                    }else{
-                        bigPart = imageSize.height
+                    let mediaSize = Double(data!.count) / 1024.0
+                    if mediaSize > Qiscus.maxUploadSizeInKB {
+                        picker.dismiss(animated: true, completion: {
+                            self.processingFile = false
+                            self.showFileTooBigAlert()
+                        })
+                        return
                     }
                     
-                    var compressVal = CGFloat(1)
-                    if(bigPart > 2000){
-                        compressVal = 2000 / bigPart
-                    }
+                    UIImageWriteToSavedPhotosAlbum(image, self, #selector(QiscusChatVC.image(_:didFinishSavingWithError:contextInfo:)), nil)
                     
-                    data = UIImageJPEGRepresentation(image, compressVal)!
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                        picker.dismiss(animated: true, completion: {
+                            self.processingFile = false
+                        })
+                    })
+                    
+                    return
                 }
                 
                 if data != nil {
@@ -186,6 +192,56 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
             }
         }
     }
+    
+    @objc func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+        let requestOptions = PHImageRequestOptions()
+        requestOptions.isSynchronous = true
+        
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key:"creationDate", ascending: false)]
+        fetchOptions.fetchLimit = 1
+        
+        let fetchResult: PHFetchResult = PHAsset.fetchAssets(with: PHAssetMediaType.image, options: fetchOptions)
+        // Perform the image request
+        
+        var imageName = ""
+        PHImageManager.default().requestImage(for: fetchResult.object(at: 0) as PHAsset, targetSize: view.frame.size, contentMode: PHImageContentMode.aspectFill, options: requestOptions, resultHandler: { (image, info) in
+            if let info = info {
+                if info.keys.contains(NSString(string: "PHImageFileURLKey")) {
+                    if let path = info[NSString(string: "PHImageFileURLKey")] as? NSURL {
+                        imageName = path.lastPathComponent!
+                        print("image localpath \(path)")
+                    }
+                }
+            }
+        })
+        
+        let imageSize = image.size
+        var bigPart = CGFloat(0)
+        if(imageSize.width > imageSize.height){
+            bigPart = imageSize.width
+        }else{
+            bigPart = imageSize.height
+        }
+        
+        var compressVal = CGFloat(1)
+        if(bigPart > 2000){
+            compressVal = 2000 / bigPart
+        }
+        
+        let data = UIImageJPEGRepresentation(image, compressVal)!
+        
+        
+        if data != nil {
+            let uploader = QiscusUploaderVC(nibName: "QiscusUploaderVC", bundle: Qiscus.bundle)
+            uploader.chatView = self
+            uploader.data = data
+            uploader.fileName = imageName
+            uploader.room = self.chatRoom
+            self.navigationController?.pushViewController(uploader, animated: true)
+        }
+    }
+    
     public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
     }

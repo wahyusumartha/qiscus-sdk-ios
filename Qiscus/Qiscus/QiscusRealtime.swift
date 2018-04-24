@@ -25,6 +25,8 @@ extension Qiscus:CocoaMQTTDelegate{
             for room in QRoom.all() {
                 if !room.isPublicChannel {
                     mqtt.subscribe("r/\(room.id)/\(room.id)/+/t")
+                } else {
+                    mqtt.subscribe("\(Qiscus.client.appId)/\(room.uniqueId)/c")
                 }
             }
             Qiscus.realtimeConnected = true

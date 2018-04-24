@@ -137,6 +137,9 @@ open class QiscusConfig: NSObject {
     internal class var ROOM_UNIQUEID_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_API_URL)/get_or_create_room_with_unique_id"
     }
+    internal class var ALL_UNREAD_COUNT: String {
+        return "\(QiscusConfig.sharedInstance.BASE_API_URL)/total_unread_count"
+    }
     open class var LINK_METADATA_URL:String{
         let config = QiscusConfig.sharedInstance
         return "\(config.BASE_API_URL)/get_url_metadata"

@@ -39,6 +39,7 @@ import UIKit
     @objc optional func roomDelegate(didChangeUser room: QRoom, user: QUser)
     @objc optional func roomDelegate(didChangeParticipant room: QRoom)
     @objc optional func roomDelegate(didChangeUnread room:QRoom, unreadCount:Int)
+    @objc optional func roomDelegate(gotFirstComment room:QRoom)
 }
 
 @objc public protocol QConversationViewCellDelegate{

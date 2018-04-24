@@ -612,13 +612,25 @@ extension QiscusChatVC {
             }else{
                 AVCaptureDevice.requestAccess(for: AVMediaType.video, completionHandler: { (granted :Bool) -> Void in
                     if granted {
-                        let picker = UIImagePickerController()
-                        picker.delegate = self
-                        picker.allowsEditing = false
-                        picker.mediaTypes = [(kUTTypeImage as String),(kUTTypeMovie as String)]
-                        
-                        picker.sourceType = UIImagePickerControllerSourceType.camera
-                        self.present(picker, animated: true, completion: nil)
+                        PHPhotoLibrary.requestAuthorization({(status:PHAuthorizationStatus) in
+                            switch status{
+                            case .authorized:
+                                let picker = UIImagePickerController()
+                                picker.delegate = self
+                                picker.allowsEditing = false
+                                picker.mediaTypes = [(kUTTypeImage as String),(kUTTypeMovie as String)]
+                                
+                                picker.sourceType = UIImagePickerControllerSourceType.camera
+                                self.present(picker, animated: true, completion: nil)
+                                break
+                            case .denied:
+                                self.showPhotoAccessAlert()
+                                break
+                            default:
+                                self.showPhotoAccessAlert()
+                                break
+                            }
+                        })
                     }else{
                         DispatchQueue.main.async(execute: {
                             self.showCameraAccessAlert()
@@ -872,13 +884,13 @@ extension QiscusChatVC {
     }
     // MARK: - Load DataSource on firstTime
     func loadData(){
-        if self.chatRoomId != nil {
+        if self.chatRoomId != nil && !self.isPublicChannel {
             self.chatService.room(withId: self.chatRoomId!, withMessage: self.chatMessage)
         }else if self.chatUser != nil {
             self.chatService.room(withUser: self.chatUser!, distincId: self.chatDistinctId, optionalData: self.chatData, withMessage: self.chatMessage)
         }else if self.chatNewRoomUsers.count > 0 {
             self.chatService.createRoom(withUsers: self.chatNewRoomUsers, roomName: self.chatTitle!, optionalData: self.chatData, withMessage: self.chatMessage)
-        }else if self.chatRoomUniqueId != nil {
+        }else if self.chatRoomUniqueId != nil && self.isPublicChannel {
             self.chatService.room(withUniqueId: self.chatRoomUniqueId!, title: self.chatTitle!, avatarURL: self.chatAvatarURL, withMessage: self.chatMessage)
         }else {
             self.dismissLoading()
