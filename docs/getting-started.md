@@ -204,7 +204,7 @@ class ViewController: UIViewController {
 
 Channel is a room that behave similar like a group chat, in channel anyone can join using the room uniqueId, there are several limitation on channel like : no typing indicator, no read/deliver status, no comment info, and “delete for me” is not available. Here how you can create or join a Channel Room:
 
-**How to create channel : **
+**How to create channel :**
 ```
 import Qiscus
 
