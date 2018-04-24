@@ -201,7 +201,18 @@ class ViewController: UIViewController {
 ```
 
 ## Channels 
-Channels is a room that behave similar like a group chat, in channel anyone can join using the room uniqueId, there are several limitation on channel like : no typing indicator, no read/deliver status, no comment info, and “delete for me” is not available
+
+Channel is a room that behave similar like a group chat, in channel anyone can join using the room uniqueId, there are several limitation on channel like : no typing indicator, no read/deliver status, no comment info, and “delete for me” is not available. Here how you can create or join a Channel Room:
+
+**How to create channel : **
+```
+import Qiscus
+
+let viewController = Qiscus.chatView(withRoomUniqueId: "thisIsChannel", readOnly: false, title: "This is channel", avatarUrl: "http://your.avatar.url", subtitle: "channel subtitle", withMessage: "this is initial message (optional)" )
+navigationController.pushViewController(chatView, animated: true)
+
+```
+
 
 ## More About Room
 
