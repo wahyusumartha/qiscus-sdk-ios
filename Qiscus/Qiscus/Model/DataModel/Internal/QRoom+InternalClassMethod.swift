@@ -214,6 +214,7 @@ internal extension QRoom {
                 savedRoom.update(avatarURL: roomAvatar)
                 savedRoom.update(name: roomName)
                 savedRoom.updateUnreadCommentCount(count: unread)
+                savedRoom.updateTotalParticipant(count: roomTotalParticipant)
                 if option != "" && option != "<null>" && savedRoom.data != option{
                     try! realm.write {
                         savedRoom.data = option

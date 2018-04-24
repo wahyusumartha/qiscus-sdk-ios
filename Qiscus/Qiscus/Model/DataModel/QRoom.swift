@@ -700,6 +700,21 @@ public class QRoom:Object {
         }
     }
     
+    internal func updateTotalParticipant(count:Int){
+        let id = self.id
+        QiscusDBThread.async {
+            if let room = QRoom.threadSaveRoom(withId: id){
+                if room.roomTotalParticipant != count {
+                    let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                    realm.refresh()
+                    try! realm.write {
+                        room.roomTotalParticipant = count
+                    }
+                }
+            }
+        }
+    }
+    
     public func readAll(){
         let id = self.id
         QiscusDBThread.async {

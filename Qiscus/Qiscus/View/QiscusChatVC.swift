@@ -173,6 +173,7 @@ public class QiscusChatVC: UIViewController{
     }
     public var chatMessage:String?
     public var chatRoomId:String?
+    public var isPublicChannel:Bool = false
     public var chatUser:String?
     public var chatTitle:String?{
         didSet{
@@ -885,9 +886,17 @@ extension QiscusChatVC:QChatServiceDelegate{
     public func chatService(didFinishLoadRoom inRoom: QRoom, withMessage message: String?) {
         self.chatRoomId = inRoom.id
         self.chatRoom = inRoom
+        self.chatRoomUniqueId = inRoom.uniqueId
+        self.isPublicChannel = inRoom.isPublicChannel
+        print("room \(inRoom)")
         self.loadTitle()
         self.loadSubtitle()
         self.unreadIndicator.isHidden = true
+        
+        if inRoom.isPublicChannel {
+            Qiscus.shared.mqtt?.subscribe("\(Qiscus.client.appId)/\(inRoom.uniqueId)/c")
+        }
+        
         if self.chatMessage != nil && self.chatMessage != "" {
             let newMessage = self.chatRoom!.newComment(text: self.chatMessage!)
             self.postComment(comment: newMessage)
@@ -904,6 +913,7 @@ extension QiscusChatVC:QChatServiceDelegate{
             }
         }
         self.dismissLoading()
+        
     }
     public func chatService(didFailLoadRoom error: String) {
         let delay = 1.5 * Double(NSEC_PER_SEC)
@@ -963,6 +973,10 @@ extension QiscusChatVC:QConversationViewRoomDelegate{
             }
             self.unreadIndicator.isHidden = self.bottomButton.isHidden
         }
+    }
+    public func roomDelegate(gotFirstComment room: QRoom) {
+        self.welcomeView.isHidden = true
+        self.collectionView.isHidden = false
     }
 }
 
