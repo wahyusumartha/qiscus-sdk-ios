@@ -98,15 +98,21 @@ open class QRoomList: UITableView{
         }
     }
 
-    public func search(text:String){
+    public func search(text:String, searchLocal: Bool = false){
         self.searchText = text
-        QChatService.searchComment(withQuery: text, onSuccess: { (comments) in
-            if text == self.searchText {
-                self.comments = comments
+        
+        if !searchLocal {
+            QChatService.searchComment(withQuery: text, onSuccess: { (comments) in
+                if text == self.searchText {
+                    self.comments = comments
+                }
+            }) { (error) in
+                Qiscus.printLog(text: "test")
             }
-        }) { (error) in
-            Qiscus.printLog(text: "test")
+        } else {
+            self.comments = Qiscus.searchComment(searchQuery: text)
         }
+        
     }
     @objc private func dataCleared(_ notification: Notification){
         dataCleared()
