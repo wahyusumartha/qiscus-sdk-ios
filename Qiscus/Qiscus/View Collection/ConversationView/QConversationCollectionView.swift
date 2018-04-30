@@ -265,14 +265,16 @@ public class QConversationCollectionView: UICollectionView {
                         }
                     }else{
                         DispatchQueue.main.async {
-                            self.performBatchUpdates({
-                                let indexSet = IndexSet(integer: section + 1)
-                                self.deleteSections(indexSet)
-                            }, completion: { (_) in
-                                if self.isLastRowVisible{
-                                    self.scrollToBottom()
-                                }
-                            })
+                            if !self.isHidden {
+                                self.performBatchUpdates({
+                                    let indexSet = IndexSet(integer: section + 1)
+                                    self.deleteSections(indexSet)
+                                }, completion: { (_) in
+                                    if self.isLastRowVisible{
+                                        self.scrollToBottom()
+                                    }
+                                })
+                            }
                         }
                     }
                     if let timer = self.typingUserTimer[userEmail] {
