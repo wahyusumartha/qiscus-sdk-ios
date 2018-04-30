@@ -294,17 +294,19 @@ public class QConversationCollectionView: UICollectionView {
                     }else{
                         DispatchQueue.main.async {
                             if let user = QUser.user(withEmail: userEmail) {
-                                self.performBatchUpdates({
-                                    let indexSet = IndexSet(integer: section + 1)
-                                    self.typingUsers[userEmail] = user
-
-                                    self.insertSections(indexSet)
-                                    self.insertItems(at: [typingIndexPath])
-                                }, completion: { (_) in
-                                    if self.isLastRowVisible{
-                                        self.scrollToBottom()
-                                    }
-                                })
+                                if !self.isHidden {
+                                    self.performBatchUpdates({
+                                        let indexSet = IndexSet(integer: section + 1)
+                                        self.typingUsers[userEmail] = user
+                                        
+                                        self.insertSections(indexSet)
+                                        self.insertItems(at: [typingIndexPath])
+                                    }, completion: { (_) in
+                                        if self.isLastRowVisible{
+                                            self.scrollToBottom()
+                                        }
+                                    })
+                                }
                             }
                         }
                     }
