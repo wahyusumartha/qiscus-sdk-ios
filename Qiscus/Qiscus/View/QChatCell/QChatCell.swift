@@ -334,13 +334,20 @@ open class QChatCell: UICollectionViewCell, QCommentDelegate {
                 oldUniqueId = oldComment.uniqueId
             }
         }
-        if let cache = QComment.cache[comment.uniqueId]{
-            self.commentRaw = cache
-        }else{
-            QComment.cache[comment.uniqueId] = comment
-            self.commentRaw = comment
+        
+        if !comment.isInvalidated {
+            if let cache = QComment.cache[comment.uniqueId]{
+                self.commentRaw = cache
+            }else{
+                QComment.cache[comment.uniqueId] = comment
+                self.commentRaw = comment
+            }
         }
-        self.comment!.delegate = self
+        
+        if let selfComment = self.comment {
+            selfComment.delegate = self
+        }
+        
         if let uId = oldUniqueId {
             if uId != comment.uniqueId {
                 self.commentChanged()

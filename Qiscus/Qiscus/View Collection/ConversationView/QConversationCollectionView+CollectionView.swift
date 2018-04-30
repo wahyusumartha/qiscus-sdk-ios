@@ -102,21 +102,25 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
         if indexPath.section < self.messagesId.count {
             let commentGroup = self.messagesId[indexPath.section]
             let uid = commentGroup.first!
-            let firsMessage = QComment.comment(withUniqueId: uid)!
-            if kind == UICollectionElementKindSectionFooter{
-                if firsMessage.senderEmail == Qiscus.client.email{
-                    let footerCell = self.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterRight", for: indexPath) as! QChatFooterRight
-                    return footerCell
+            if let firsMessage = QComment.comment(withUniqueId: uid) {
+                if kind == UICollectionElementKindSectionFooter{
+                    if firsMessage.senderEmail == Qiscus.client.email{
+                        let footerCell = self.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterRight", for: indexPath) as! QChatFooterRight
+                        return footerCell
+                    }else{
+                        let footerCell = self.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterLeft", for: indexPath) as! QChatFooterLeft
+                        footerCell.user = firsMessage.sender
+                        return footerCell
+                    }
                 }else{
-                    let footerCell = self.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellFooterLeft", for: indexPath) as! QChatFooterLeft
-                    footerCell.user = firsMessage.sender
-                    return footerCell
+                    let headerCell = self.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellHeader", for: indexPath) as! QChatHeaderCell
+                    
+                    headerCell.dateString = firsMessage.date
+                    return headerCell
                 }
-            }else{
-                let headerCell = self.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "cellHeader", for: indexPath) as! QChatHeaderCell
-                
-                headerCell.dateString = firsMessage.date
-                return headerCell
+            } else {
+                let footerCell = self.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "emptyFooter", for: indexPath) as! QChatEmptyFooter
+                return footerCell
             }
         }else{
             if kind == UICollectionElementKindSectionFooter{
@@ -363,15 +367,17 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
         var height = CGFloat(0)
         var width = CGFloat(0)
         if self.messagesId.count > section {
-            let uid = self.messagesId[section].first!
-            let firstMessage = QComment.comment(withUniqueId: uid)!
             var showAvatar = true
-            if let hideAvatar = self.configDelegate?.configDelegate?(hideLeftAvatarOn: self){
-                showAvatar = !hideAvatar
-            }
-            if showAvatar && firstMessage.senderEmail != Qiscus.client.email && firstMessage.type != .system {
-                height = 44
-                width = 44
+            if let uid = self.messagesId[section].first {
+                if let firstMessage = QComment.comment(withUniqueId: uid) {
+                    if let hideAvatar = self.configDelegate?.configDelegate?(hideLeftAvatarOn: self){
+                        showAvatar = !hideAvatar
+                    }
+                    if showAvatar && firstMessage.senderEmail != Qiscus.client.email && firstMessage.type != .system {
+                        height = 44
+                        width = 44
+                    }
+                }
             }
         }
         return CGSize(width: width, height: height)

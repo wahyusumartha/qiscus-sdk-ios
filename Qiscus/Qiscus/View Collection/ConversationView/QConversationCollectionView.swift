@@ -239,6 +239,8 @@ public class QConversationCollectionView: UICollectionView {
                     DispatchQueue.main.async {
                         self.messagesId = messages
                         self.reloadData()
+                        
+                        if comment.isInvalidated {return}
                         if comment.senderEmail == Qiscus.client.email || self.isLastRowVisible {
                             self.layoutIfNeeded()
                             self.scrollToBottom(true)
@@ -295,6 +297,7 @@ public class QConversationCollectionView: UICollectionView {
                                 self.performBatchUpdates({
                                     let indexSet = IndexSet(integer: section + 1)
                                     self.typingUsers[userEmail] = user
+
                                     self.insertSections(indexSet)
                                     self.insertItems(at: [typingIndexPath])
                                 }, completion: { (_) in

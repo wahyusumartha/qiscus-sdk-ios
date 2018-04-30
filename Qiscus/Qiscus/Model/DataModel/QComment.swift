@@ -323,6 +323,7 @@ public class QComment:Object {
         var recalculate = false
         
         func recalculateSize()->CGSize{
+            if self.isInvalidated {return CGSize()}
             let textView = UITextView()
             textView.font = Qiscus.style.chatFont
             if self.type == .carousel {
@@ -407,6 +408,7 @@ public class QComment:Object {
         }
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         realm.refresh()
+        if self.isInvalidated {return CGSize()}
         if Float(Qiscus.style.chatFont.pointSize) != self.textFontSize || Qiscus.style.chatFont.familyName != self.textFontName{
             if self.type != .card && self.type != .carousel {
                 recalculate = true
@@ -977,6 +979,7 @@ public class QComment:Object {
         if self.isRead {return}
         QiscusDBThread.async {
             if let comment = QComment.threadSaveComment(withUniqueId: uniqueId){
+                if comment.isInvalidated {return}
                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                 realm.refresh()
                 try! realm.write {
