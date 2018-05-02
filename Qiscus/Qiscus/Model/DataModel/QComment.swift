@@ -312,6 +312,7 @@ public class QComment:Object {
         get {
             let date = Date(timeIntervalSince1970: self.createdAt)
             let timeFormatter = DateFormatter()
+            timeFormatter.timeZone = NSTimeZone.local
             timeFormatter.dateFormat = "h:mm a"
             let timeString = timeFormatter.string(from: date)
             
