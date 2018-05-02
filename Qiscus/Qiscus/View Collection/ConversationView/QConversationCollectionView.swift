@@ -65,6 +65,7 @@ public class QConversationCollectionView: UICollectionView {
             }
         }
     }
+    
     public var typingUsers = [String:QUser]()
     
     public var viewDelegate:QConversationViewDelegate?
@@ -91,6 +92,8 @@ public class QConversationCollectionView: UICollectionView {
     }
     internal var loadingMore = false
     internal var targetIndexPath:IndexPath?
+    internal var userTypingEmail: String = ""
+    internal var isTyping: Bool = false
     
     var isLastRowVisible: Bool = false
     
@@ -252,12 +255,21 @@ public class QConversationCollectionView: UICollectionView {
     }
     open func userTypingChanged(userEmail: String, typing:Bool){
         self.processingTyping = true
+        self.userTypingEmail = userEmail
+        self.isTyping = typing
+        
         if self.messagesId.count <= 0 { return }
+        
+        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(self.proccessTyping), object: nil)
+        self.perform(#selector(self.proccessTyping), with: nil, afterDelay: 0.5)
+    }
+    
+    @objc private func proccessTyping() {
         let section = self.messagesId.count - 1
         QiscusBackgroundThread.sync {
-            if !typing {
-                if self.typingUsers[userEmail] != nil {
-                    self.typingUsers[userEmail] = nil
+            if !isTyping {
+                if self.typingUsers[self.userTypingEmail] != nil {
+                    self.typingUsers[self.userTypingEmail] = nil
                     if self.typingUsers.count > 0 {
                         let typingIndexPath = IndexPath(item: 0, section: section + 1)
                         DispatchQueue.main.async {
@@ -268,7 +280,10 @@ public class QConversationCollectionView: UICollectionView {
                             if !self.isHidden {
                                 self.performBatchUpdates({
                                     let indexSet = IndexSet(integer: section + 1)
-                                    self.deleteSections(indexSet)
+                                    
+                                    if self.numberOfSections > (section + 1)  {
+                                        self.deleteSections(indexSet)
+                                    }
                                 }, completion: { (_) in
                                     if self.isLastRowVisible{
                                         self.scrollToBottom()
@@ -277,30 +292,30 @@ public class QConversationCollectionView: UICollectionView {
                             }
                         }
                     }
-                    if let timer = self.typingUserTimer[userEmail] {
+                    if let timer = self.typingUserTimer[self.userTypingEmail] {
                         timer.invalidate()
-                        self.typingUserTimer[userEmail] = nil
+                        self.typingUserTimer[self.userTypingEmail] = nil
                     }
                 }
             }else{
                 let typingIndexPath = IndexPath(item: 0, section: section + 1)
                 
-                if self.typingUsers[userEmail] == nil {
+                if self.typingUsers[self.userTypingEmail] == nil {
                     if self.typingUsers.count > 0 {
                         DispatchQueue.main.async {
-                            if let user = QUser.user(withEmail: userEmail) {
-                                self.typingUsers[userEmail] = user
+                            if let user = QUser.user(withEmail: self.userTypingEmail) {
+                                self.typingUsers[self.userTypingEmail] = user
                                 self.reloadItems(at: [typingIndexPath])
                             }
                         }
                     }else{
                         DispatchQueue.main.async {
-                            if let user = QUser.user(withEmail: userEmail) {
+                            if let user = QUser.user(withEmail: self.userTypingEmail) {
+                                self.typingUsers[self.userTypingEmail] = user
                                 if !self.isHidden {
+                                    let indexSet = IndexSet(integer: section + 1)
+                                    
                                     self.performBatchUpdates({
-                                        let indexSet = IndexSet(integer: section + 1)
-                                        self.typingUsers[userEmail] = user
-                                        
                                         self.insertSections(indexSet)
                                         self.insertItems(at: [typingIndexPath])
                                     }, completion: { (_) in
@@ -313,17 +328,18 @@ public class QConversationCollectionView: UICollectionView {
                         }
                     }
                 }
-                if let timer = self.typingUserTimer[userEmail] {
+                if let timer = self.typingUserTimer[self.userTypingEmail] {
                     timer.invalidate()
                 }
                 DispatchQueue.main.async {
-                    if let user = QUser.user(withEmail: userEmail) {
-                        self.typingUserTimer[userEmail] = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(QConversationCollectionView.publishStopTyping(timer:)), userInfo: user, repeats: false)
+                    if let user = QUser.user(withEmail: self.userTypingEmail) {
+                        self.typingUserTimer[self.userTypingEmail] = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(QConversationCollectionView.publishStopTyping(timer:)), userInfo: user, repeats: false)
                     }
                 }
             }
         }
         self.processingTyping = false
+        
     }
     
     
@@ -340,14 +356,14 @@ public class QConversationCollectionView: UICollectionView {
             guard let room = userInfo["room"] as? QRoom else {return}
             guard let currentRoom = self.room else {return}
             
+            if room.isInvalidated || user.isInvalidated || currentRoom.isInvalidated{
+                return
+            }
+            
             let userEmail = user.email
             let roomId = room.id
             
             if currentRoom.id != roomId { return }
-            
-            if room.isInvalidated || user.isInvalidated || currentRoom.isInvalidated{
-                return
-            }
             
             if self.processingTyping { return }
             
