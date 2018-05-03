@@ -97,40 +97,40 @@ extension QiscusChatVC {
     func showAttachmentMenu(){
         let actionSheetController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
-        let cancelActionButton = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+        let cancelActionButton = UIAlertAction(title: String.getLocalize(key: "CANCEL"), style: .cancel) { action -> Void in
             Qiscus.printLog(text: "Cancel attach file")
         }
         actionSheetController.addAction(cancelActionButton)
         
         if Qiscus.shared.cameraUpload {
-            let cameraActionButton = UIAlertAction(title: "Camera", style: .default) { action -> Void in
+            let cameraActionButton = UIAlertAction(title: String.getLocalize(key: "CAMERA"), style: .default) { action -> Void in
                 self.uploadFromCamera()
             }
             actionSheetController.addAction(cameraActionButton)
         }
         
         if Qiscus.shared.galeryUpload {
-            let galeryActionButton = UIAlertAction(title: "Gallery", style: .default) { action -> Void in
+            let galeryActionButton = UIAlertAction(title: String.getLocalize(key: "GALLERY"), style: .default) { action -> Void in
                 self.uploadImage()
             }
             actionSheetController.addAction(galeryActionButton)
         }
         
         if Qiscus.sharedInstance.iCloudUpload {
-            let iCloudActionButton = UIAlertAction(title: "Document", style: .default) { action -> Void in
+            let iCloudActionButton = UIAlertAction(title: String.getLocalize(key: "DOCUMENT"), style: .default) { action -> Void in
                 self.iCloudOpen()
             }
             actionSheetController.addAction(iCloudActionButton)
         }
         
         if Qiscus.shared.contactShare {
-            let contactActionButton = UIAlertAction(title: "Contact", style: .default) { action -> Void in
+            let contactActionButton = UIAlertAction(title: String.getLocalize(key: "CONTACT"), style: .default) { action -> Void in
                 self.shareContact()
             }
             actionSheetController.addAction(contactActionButton)
         }
         if Qiscus.shared.locationShare {
-            let contactActionButton = UIAlertAction(title: "Current Location", style: .default) { action -> Void in
+            let contactActionButton = UIAlertAction(title: String.getLocalize(key: "CURRENT_LOCATION"), style: .default) { action -> Void in
                 self.shareCurrentLocation()
             }
             actionSheetController.addAction(contactActionButton)
@@ -144,7 +144,7 @@ extension QiscusChatVC {
         if CLLocationManager.locationServicesEnabled() {
             switch CLLocationManager.authorizationStatus() {
             case .authorizedAlways, .authorizedWhenInUse:
-                self.showLoading("Getting your current location")
+                self.showLoading(String.getLocalize(key: "LOADING_LOCATION"))
                 
                 locationManager.delegate = self
                 locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters

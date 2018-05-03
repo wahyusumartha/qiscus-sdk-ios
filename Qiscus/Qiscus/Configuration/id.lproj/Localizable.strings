@@ -1,0 +1,31 @@
+/*
+ Localizable.strings
+ Pods
+ 
+ Created by Rahardyan Bisma on 03/05/18.
+ 
+ */
+
+//Chat view:
+"YOU"               = "Anda";
+"LAST_SEEN"         = "terakhir dilihat: ";
+"FEW_SECOND_AGO"    = "beberapa detik yang lalu";
+"LOADING_LOCATION"  = "Mencari lokasi saat ini";
+
+
+//cell option:
+"COPY"              = "Salin";
+"REPLY"             = "Balas";
+"FORWARD"           = "Teruskan";
+"DELETE"            = "Hapus";
+"DELETE_FOR_ME"     = "Hapus untuk saya";
+
+//Attachment menu:
+"CAMERA"            = "Kamera";
+"GALLERY"           = "Galeri";
+"DOCUMENT"          = "Dokumen";
+"CONTACT"           = "Kontak";
+"CURRENT_LOCATION"  = "Lokasi Sekarang";
+"CANCEL"            = "Batal";
+
+

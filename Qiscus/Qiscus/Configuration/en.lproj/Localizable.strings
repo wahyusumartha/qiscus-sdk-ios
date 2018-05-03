@@ -1,0 +1,29 @@
+/*
+ Localizable.strings
+ Pods
+ 
+ Created by Rahardyan Bisma on 03/05/18.
+ 
+ */
+
+//Chat view:
+"YOU"               = "You";
+"LAST_SEEN"         = "last seen: ";
+"FEW_SECOND_AGO"    = "few seconds ago";
+"LOADING_LOCATION"  = "Getting your current location";
+
+
+//cell option:
+"COPY"              = "Copy";
+"REPLY"             = "Reply";
+"FORWARD"           = "Forward";
+"DELETE"            = "Delete";
+"DELETE_FOR_ME"     = "Delete for me";
+
+//Attachment menu:
+"CAMERA"            = "Camera";
+"GALLERY"           = "Gallery";
+"DOCUMENT"          = "Document";
+"CONTACT"           = "Contact";
+"CURRENT_LOCATION"  = "Current Location";
+"CANCEL"            = "Cancel";
