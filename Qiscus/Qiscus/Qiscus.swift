@@ -62,6 +62,8 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
      */
     public static var chatDelegate:QiscusChatDelegate?
     
+    public static var disableLocalization: Bool = false
+    
     /**
      Setup maximum size when you send attachment inside chat view, example send video/image from galery. By default maximum size is unlimited.
     */

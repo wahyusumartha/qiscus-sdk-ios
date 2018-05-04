@@ -88,7 +88,7 @@ class QCellTextRight: QChatCell {
             var username = replyData["replied_comment_sender_username"].stringValue
             let repliedEmail = replyData["replied_comment_sender_email"].stringValue
             if repliedEmail == Qiscus.client.email {
-                username = "You"
+                username = "YOU".getLocalize()
             }else{
                 if let user = QUser.user(withEmail: repliedEmail){
                     username = user.fullname
@@ -245,7 +245,7 @@ class QCellTextRight: QChatCell {
         
         // first cell
         if self.showUserName{
-            self.userNameLabel.text = "You"
+            self.userNameLabel.text = "YOU".getLocalize()
             self.userNameLabel.isHidden = false
             self.balloonTopMargin.constant = 20
             self.cellHeight.constant = 20

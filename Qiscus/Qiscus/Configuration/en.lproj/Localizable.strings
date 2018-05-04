@@ -19,6 +19,7 @@
 "LOADING_LOCATION"  = "Getting your current location";
 "WELCOME"           = "Welcome";
 "EMPTY_MESSAGE"     = "Let's write message to start conversation";
+"AT"                = "at";
 
 
 //cell option:

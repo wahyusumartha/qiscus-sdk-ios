@@ -19,7 +19,7 @@
 "LOADING_LOCATION"  = "Mencari lokasi saat ini";
 "WELCOME"           = "Selamat Datang";
 "EMPTY_MESSAGE"     = "Ayo tulis pesan untuk memulai percakapan";
-
+"AT"                = "pada";
 
 //cell option:
 "COPY"              = "Salin";

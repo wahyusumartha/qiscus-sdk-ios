@@ -102,7 +102,7 @@ public class QUser:Object {
                     result = "YESTERDAY_AT".getLocalize(value: timeString)
                 }
                 else{
-                    result = "\(dateString) at \(timeString)"
+                    result = "\(dateString) " + "AT".getLocalize() + " \(timeString)"
                 }
                 
                 return result
