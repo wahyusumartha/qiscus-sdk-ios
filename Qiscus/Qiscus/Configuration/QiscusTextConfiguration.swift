@@ -12,10 +12,10 @@ open class QiscusTextConfiguration: NSObject {
     static var sharedInstance = QiscusTextConfiguration()
     
     /// Your text to show as subtitle if there isn't any message, Default value : "Let's write message to start conversation"
-    open var emptyMessage = "Let's write message to start conversation"
+    open var emptyMessage = "EMPTY_MESSAGE".getLocalize()
     
     /// Your text to show as title if there isn't any message, Default value : "Welcome"
-    open var emptyTitle = "Welcome"
+    open var emptyTitle = "WELCOME".getLocalize()
     
     /// Your text to show as title chat, Default value : "Title"
     open var chatTitle = ""

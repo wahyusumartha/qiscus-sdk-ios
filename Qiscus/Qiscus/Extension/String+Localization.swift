@@ -8,15 +8,15 @@
 import Foundation
 
 extension String {
-    static func getLocalize(key: String, value: Int) -> String{
-        return String(format: NSLocalizedString(key, tableName: nil, bundle: Qiscus.bundle, value: "", comment: ""), value)
+    func getLocalize(value: Int) -> String{
+        return String(format: NSLocalizedString(self, bundle: Qiscus.bundle, comment: ""), value)
     }
     
-    static func getLocalize(key: String, value: String) -> String{
-        return String(format: NSLocalizedString(key, tableName: nil, bundle: Qiscus.bundle, value: "", comment: ""), value)
+    func getLocalize(value: String) -> String{
+        return String(format: NSLocalizedString(self, bundle: Qiscus.bundle, comment: ""), value)
     }
     
-    static func getLocalize(key: String) -> String{
-        return NSLocalizedString(key, tableName: nil, bundle: Qiscus.bundle, value: "", comment: "")
+    func getLocalize() -> String{
+        return NSLocalizedString(self, bundle: Qiscus.bundle, comment: "")
     }
 }
