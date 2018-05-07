@@ -21,7 +21,6 @@
 "EMPTY_MESSAGE"     = "Let's write message to start conversation";
 "AT"                = "at";
 
-
 //cell option:
 "COPY"              = "Copy";
 "REPLY"             = "Reply";
