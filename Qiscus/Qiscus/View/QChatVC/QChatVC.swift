@@ -1,0 +1,221 @@
+//
+//  QChatVC.swift
+//  Qiscus
+//
+//  Created by Rahardyan Bisma on 07/05/18.
+//
+
+import UIKit
+
+open class QChatVC: UIViewController {
+    
+    @IBOutlet weak var tableViewConversation: UITableView!
+    @IBOutlet weak var viewInput: NSLayoutConstraint!
+    @IBOutlet weak var btnAttachment: UIButton!
+    @IBOutlet weak var btnSend: UIButton!
+    @IBOutlet weak var tfInput: UITextField!
+    @IBOutlet weak var constraintViewInputBottom: NSLayoutConstraint!
+    private var titleLabel = UILabel()
+    private var subtitleLabel = UILabel()
+    private var subtitleText:String = ""
+    private var roomAvatar = UIImageView()
+    private var titleView = UIView()
+    private var presenter: QChatPresenter!
+    private var comments: [[CommentModel]] = []
+    
+    var roomId: String = ""
+    
+    public init() {
+        super.init(nibName: "QChatVC", bundle: Qiscus.bundle)
+    }
+    
+    required public init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override open func viewDidLoad() {
+        super.viewDidLoad()
+        self.presenter = QChatPresenter(view: self)
+        self.setupUI()
+        self.presenter.loadRoom(withId: self.roomId)
+        // Do any additional setup after loading the view.
+    }
+    
+    open override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+    }
+    
+    open override func viewWillAppear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        view.endEditing(true)
+    }
+    
+    override open func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .UIKeyboardWillChangeFrame, object: nil)
+        
+        view.endEditing(true)
+    }
+    
+    private func setupUI() {
+        // config navBar
+        self.setupNavigationTitle()
+        self.qiscusAutoHideKeyboard()
+        self.setupTableView()
+        let center: NotificationCenter = NotificationCenter.default
+        center.addObserver(self, selector: #selector(QChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        center.addObserver(self, selector: #selector(QChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
+    }
+    
+    private func setupNavigationTitle(){
+        if #available(iOS 11.0, *) {
+            self.navigationController?.navigationBar.prefersLargeTitles = false
+        }
+        var totalButton = 1
+        if let leftButtons = self.navigationItem.leftBarButtonItems {
+            totalButton += leftButtons.count
+        }
+        if let rightButtons = self.navigationItem.rightBarButtonItems {
+            totalButton += rightButtons.count
+        }
+        
+//        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(QiscusChatVC.goToTitleAction))
+//        self.titleView.addGestureRecognizer(tapRecognizer)
+        
+        let containerWidth = QiscusHelper.screenWidth() - 49
+        let titleWidth = QiscusHelper.screenWidth() - CGFloat(49 * totalButton) - 40
+        
+        self.titleLabel.frame = CGRect(x: 40, y: 7, width: titleWidth, height: 17)
+        self.titleLabel.textColor = QiscusChatVC.currentNavbarTint
+        
+        self.subtitleLabel.frame = CGRect(x: 40, y: 25, width: titleWidth, height: 13)
+        self.subtitleLabel.textColor = QiscusChatVC.currentNavbarTint
+        
+        self.roomAvatar.frame = CGRect(x: 0,y: 6,width: 32,height: 32)
+        self.roomAvatar.layer.cornerRadius = 16
+        self.roomAvatar.contentMode = .scaleAspectFill
+        self.roomAvatar.backgroundColor = UIColor.white
+        let bgColor = QiscusColorConfiguration.sharedInstance.avatarBackgroundColor
+        self.roomAvatar.frame = CGRect(x: 0,y: 6,width: 32,height: 32)
+        self.roomAvatar.layer.cornerRadius = 16
+        self.roomAvatar.clipsToBounds = true
+        self.roomAvatar.backgroundColor = bgColor[0]
+        
+        self.titleView.frame = CGRect(x: 0, y: 0, width: containerWidth, height: 44)
+        self.titleView.addSubview(self.titleLabel)
+        self.titleView.addSubview(self.subtitleLabel)
+        self.titleView.addSubview(self.roomAvatar)
+        
+        let backButton = QiscusChatVC.backButton(self, action: #selector(QChatVC.goBack))
+        self.navigationItem.setHidesBackButton(true, animated: false)
+        self.navigationItem.leftBarButtonItems = [backButton]
+        
+        self.navigationItem.titleView = titleView
+    }
+    
+    private func setupTableView() {
+        let rotate = CGAffineTransform(rotationAngle: CGFloat(M_PI))
+        self.tableViewConversation.transform = rotate
+        self.tableViewConversation.scrollIndicatorInsets = UIEdgeInsetsMake(0,0,0,self.tableViewConversation.bounds.size.width-10)
+        self.tableViewConversation.estimatedRowHeight = 300
+        self.tableViewConversation.rowHeight = UITableViewAutomaticDimension
+        self.tableViewConversation.dataSource = self
+        self.tableViewConversation.delegate = self
+        
+        self.tableViewConversation.register(UINib(nibName: "LeftTextCell",bundle: Qiscus.bundle), forCellReuseIdentifier: "LeftTextCell")
+    }
+    
+    @objc func goBack() {
+        view.endEditing(true)
+        self.navigationController?.popViewController(animated: true)
+    }
+    
+    // MARK: - Keyboard Methode
+    @objc func keyboardWillHide(_ notification: Notification){
+        let info: NSDictionary = (notification as NSNotification).userInfo! as NSDictionary
+        
+        let animateDuration = info[UIKeyboardAnimationDurationUserInfoKey] as! Double
+//        let goToRow = self.lastVisibleRow
+        self.constraintViewInputBottom.constant = 0
+        UIView.animate(withDuration: animateDuration, delay: 0, options: UIViewAnimationOptions(), animations: {
+            self.view.layoutIfNeeded()
+//            if goToRow != nil {
+//                self.collectionView.scrollToItem(at: goToRow!, at: .bottom, animated: false)
+//            }
+        }, completion: nil)
+    }
+    
+    @objc func keyboardChange(_ notification: Notification){
+        let info:NSDictionary = (notification as NSNotification).userInfo! as NSDictionary
+        let keyboardSize = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
+        
+        let keyboardHeight: CGFloat = keyboardSize.height
+        let animateDuration = info[UIKeyboardAnimationDurationUserInfoKey] as! Double
+        
+        self.constraintViewInputBottom.constant = 0 - keyboardHeight
+//        let goToRow = self.lastVisibleRow
+        UIView.animate(withDuration: animateDuration, delay: 0, options: UIViewAnimationOptions(), animations: {
+            self.view.layoutIfNeeded()
+//            if goToRow != nil {
+//                self.collectionView.scrollToItem(at: goToRow!, at: .bottom, animated: true)
+//            }
+        }, completion: nil)
+    }
+}
+
+extension QChatVC: QChatViewDelegate {
+    func onLoadRoomFinished(roomName: String, roomAvatar: UIImage?) {
+        DispatchQueue.main.async {
+            self.titleLabel.text = roomName
+            self.roomAvatar.image = roomAvatar
+        }
+    }
+    
+    func onLoadMessageFinished(comments: [[CommentModel]]) {
+        self.comments = comments
+        
+        self.tableViewConversation.reloadData()
+    }
+    
+    func onSendMessageFinished(comment: CommentModel) {
+        
+    }
+}
+
+extension QChatVC: UITableViewDataSource {
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if self.comments.count == 0 {
+            return 0
+        }
+        return self.comments[section].count
+    }
+    
+    public func numberOfSections(in tableView: UITableView) -> Int {
+        return self.comments.count
+    }
+    
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let comment = self.comments[indexPath.section][indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
+        cell.lbName.text = comment.senderName
+        cell.tvContent.text = comment.text
+        print("comment text: \(comment.text)")
+        
+        return cell
+    }
+    
+    public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UITableViewAutomaticDimension
+    }
+    
+    public func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UITableViewAutomaticDimension
+    }
+    
+    
+}
+
+extension QChatVC: UITableViewDelegate {
+
+}

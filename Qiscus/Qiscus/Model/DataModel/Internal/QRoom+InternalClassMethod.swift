@@ -36,6 +36,7 @@ internal extension QRoom {
                     Qiscus.chatRooms[id] = nil
                 }
             }
+            
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
             realm.refresh()
             let rooms = realm.objects(QRoom.self).filter("id == '\(id)'")
@@ -46,9 +47,18 @@ internal extension QRoom {
                     return room
                 }
             }
+//            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+//            realm.refresh()
+//            if let room = realm.object(ofType: QRoom.self, forPrimaryKey: id) {
+//                if !room.isInvalidated {
+//                    Qiscus.chatRooms[room.id] = room
+//                    return room
+//                }
+//            }
         }
         return nil
     }
+    
     internal class func getRoom(withUniqueId uniqueId:String) -> QRoom? {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         realm.refresh()

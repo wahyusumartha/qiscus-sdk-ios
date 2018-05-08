@@ -20,6 +20,7 @@ public extension QRoom {
     public class func room(withId id:String) -> QRoom? {
         return QRoom.getRoom(withId: id)
     }
+    
     public class func room(withUniqueId uniqueId:String) -> QRoom? {
         return QRoom.getRoom(withUniqueId:uniqueId)
     }

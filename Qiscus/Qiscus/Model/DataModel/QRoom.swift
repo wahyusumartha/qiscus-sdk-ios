@@ -1017,7 +1017,7 @@ public class QRoom:Object {
             onError("invalid offset")
         }
     }
-    internal func downloadRoomAvatar(){
+    internal func downloadRoomAvatar(onSuccess: @escaping(QRoom)->Void = {_ in }){
         let id = self.id
         let url = self.avatarURL.replacingOccurrences(of: "/upload/", with: "/upload/c_thumb,g_center,h_100,w_100/")
         if !QChatService.downloadTasks.contains(url){
@@ -1032,6 +1032,7 @@ public class QRoom:Object {
                         DispatchQueue.main.async { autoreleasepool {
                             if let cache = QRoom.room(withId: id){
                                 QiscusNotification.publish(roomChange: cache, onProperty: .avatar)
+                                onSuccess(cache)
                                 cache.delegate?.room?(didChangeAvatar: cache)
                             }
                         }}

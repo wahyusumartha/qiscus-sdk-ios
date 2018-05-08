@@ -493,6 +493,13 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         
         return chatVC
     }
+    
+    @objc public class func chatView2(withRoomId roomId: String) -> QChatVC {
+        var chatVC = QChatVC()
+        chatVC.roomId = roomId
+        
+        return chatVC
+    }
     @objc public class func image(named name:String)->UIImage?{
         return UIImage(named: name, in: Qiscus.bundle, compatibleWith: nil)?.localizedImage()
     }

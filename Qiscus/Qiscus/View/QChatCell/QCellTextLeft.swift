@@ -63,7 +63,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         LinkContainer.isHidden = true
     }
     @objc func openLink(){
-        self.delegate?.didTouchLink(onComment: self.comment!)
+//        self.delegate?.didTouchLink(onComment: self.comment!)
     }
     
     func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange) -> Bool {
@@ -82,15 +82,6 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         self.textView.comment = self.comment
         
         self.balloonView.image = self.getBallon()
-        
-        let textSize = self.comment!.textSize
-        var textWidth = self.comment!.textSize.width
-        
-        if textWidth > self.minWidth {
-            textWidth = textSize.width
-        }else{
-            textWidth = self.minWidth
-        }
         
         if self.comment!.type == .reply{
             let replyData = JSON(parseJSON: self.comment!.data)
@@ -237,7 +228,6 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
             self.ballonHeight.constant = 83
             self.textTopMargin.constant = 73
             self.linkHeight.constant = 65
-            textWidth = self.maxWidth
         }else{
             self.linkTitle.text = ""
             self.linkDescription.text = ""
@@ -249,17 +239,16 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         
         
         var size = self.textView.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
-        if self.comment?.type == .postback && self.comment?.data != ""{
-            let payload = JSON(parseJSON: self.comment!.data)
-            
-            if let buttonsPayload = payload.array {
-                let heightAdd = CGFloat(35 * buttonsPayload.count)
-                size.height += heightAdd
-            }else{
-                size.height += 35
-            }
-        }
-        self.textViewWidth.constant = textWidth
+//        if self.comment?.type == .postback && self.comment?.data != ""{
+//            let payload = JSON(parseJSON: self.comment!.data)
+//
+//            if let buttonsPayload = payload.array {
+//                let heightAdd = CGFloat(35 * buttonsPayload.count)
+//                size.height += heightAdd
+//            }else{
+//                size.height += 35
+//            }
+//        }
         self.textViewHeight.constant = size.height
         
         self.userNameLabel.textAlignment = .left
@@ -270,11 +259,8 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         
         
         if self.showUserName{
-            if let sender = self.comment?.sender {
-                self.userNameLabel.text = sender.fullname
-            }else{
-                self.userNameLabel.text = self.comment?.senderName
-            }
+            self.userNameLabel.text = self.comment?.senderName
+            
             self.userNameLabel.isHidden = false
             self.balloonTopMargin.constant = 20
             self.cellHeight.constant = 20
@@ -288,11 +274,7 @@ class QCellTextLeft: QChatCell, UITextViewDelegate {
         self.textView.layoutIfNeeded()
     }
     public override func updateUserName() {
-        if let sender = self.comment?.sender {
-            self.userNameLabel.text = sender.fullname
-        }else{
-            self.userNameLabel.text = self.comment?.senderName
-        }
+        self.userNameLabel.text = self.comment?.senderName
     }
     public override func comment(didChangePosition comment:QComment, position: QCellPosition) {
         if comment.uniqueId == self.comment?.uniqueId {
