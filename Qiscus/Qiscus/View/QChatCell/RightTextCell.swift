@@ -8,7 +8,10 @@
 import UIKit
 
 class RightTextCell: UITableViewCell {
-
+    @IBOutlet weak var lbName: UILabel!
+    @IBOutlet weak var tvContent: UITextView!
+    @IBOutlet weak var ivBaloon: UIImageView!
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

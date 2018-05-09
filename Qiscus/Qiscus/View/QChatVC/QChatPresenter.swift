@@ -17,6 +17,7 @@ protocol QChatViewDelegate {
     func onLoadRoomFinished(roomName: String, roomAvatar: UIImage?)
     func onLoadMessageFinished(comments: [[CommentModel]])
     func onSendMessageFinished(comment: CommentModel)
+    func onGotNewComment(comment: CommentModel)
 }
 
 class QChatPresenter: QChatUserInteraction {
@@ -32,13 +33,16 @@ class QChatPresenter: QChatUserInteraction {
             DispatchQueue.main.async {
                 self.view.onLoadRoomFinished(roomName: room.name, roomAvatar: room.avatar)
                 self.loadRoomAvatar(room: room)
-                self.view.onLoadMessageFinished(comments: self.generateComments(qComment: room.comments))
+                self.view.onLoadMessageFinished(comments: self.generateComments(qComments: room.comments))
             }
         }
 
         DispatchQueue.main.async {
             self.chatService.room(withId: roomId)
         }
+        
+        let center: NotificationCenter = NotificationCenter.default
+        center.addObserver(self, selector: #selector(QChatPresenter.newCommentNotif(_:)), name: QiscusNotification.ROOM_CHANGE(onRoom: roomId), object: nil)
     }
     
     func sendMessage(withText text: String) {
@@ -47,7 +51,7 @@ class QChatPresenter: QChatUserInteraction {
     
     func getMessage(inRoom roomId: String) {
         if let comments = QRoom.room(withId: roomId)?.comments {
-            self.view.onLoadMessageFinished(comments: generateComments(qComment: comments))
+            self.view.onLoadMessageFinished(comments: generateComments(qComments: comments))
         }
         
         self.chatService.room(withId: roomId)
@@ -63,12 +67,11 @@ class QChatPresenter: QChatUserInteraction {
         })
     }
     
-    private func generateComments(qComment: [QComment]) -> [[CommentModel]] {
-        var commentModels: [CommentModel] = []
-        for comment in qComment {
-            let comment = CommentModel(uniqueId: comment.uniqueId, id: comment.id, roomId: comment.roomId, text: comment.text, time: comment.time, date: comment.date, senderEmail: comment.senderEmail, senderName: comment.senderName, senderAvatarURL: comment.senderAvatarURL, roomName: comment.roomName, textFontName: comment.textFontName, textFontSize: comment.textFontSize, displayImage: comment.displayImage, durationLabel: comment.durationLabel, currentTimeSlider: comment.currentTimeSlider, seekTimeLabel: comment.seekTimeLabel, audioIsPlaying: comment.audioIsPlaying, isDownloading: comment.isDownloading, isUploading: comment.isUploading, progress: comment.progress, isRead: comment.isRead, extras: comment.extras)
+    private func generateComments(qComments: [QComment]) -> [[CommentModel]] {
+        var commentModels = qComments.map { (comment) -> CommentModel in
+            let comment = CommentModel(uniqueId: comment.uniqueId, id: comment.id, roomId: comment.roomId, text: comment.text, time: comment.time, date: comment.date, senderEmail: comment.senderEmail, senderName: comment.senderName, senderAvatarURL: comment.senderAvatarURL, roomName: comment.roomName, textFontName: comment.textFontName, textFontSize: comment.textFontSize, displayImage: comment.displayImage, durationLabel: comment.durationLabel, currentTimeSlider: comment.currentTimeSlider, seekTimeLabel: comment.seekTimeLabel, audioIsPlaying: comment.audioIsPlaying, isDownloading: comment.isDownloading, isUploading: comment.isUploading, progress: comment.progress, isRead: comment.isRead, extras: comment.extras, isMyComment: comment.senderEmail == Qiscus.client.email, commentType: comment.type, commentStatus: comment.status)
             
-            commentModels.append(comment)
+            return comment
         }
         
         return self.groupingComments(comments: commentModels)
@@ -139,13 +142,29 @@ class QChatPresenter: QChatUserInteraction {
         }
         return retVal
     }
+    
+    // MARK : Notification center function
+    @objc private func newCommentNotif(_ notification: Notification) {
+        if let userInfo = notification.userInfo {
+            guard let property = userInfo["property"] as? QRoomProperty else {return}
+            if property == .lastComment {
+                guard let room = userInfo["room"] as? QRoom else {return}
+                guard let comment = room.lastComment else {return}
+                
+                if room.isInvalidated { return }
+                
+                let commentModel = CommentModel(uniqueId: comment.uniqueId, id: comment.id, roomId: comment.roomId, text: comment.text, time: comment.time, date: comment.date, senderEmail: comment.senderEmail, senderName: comment.senderName, senderAvatarURL: comment.senderAvatarURL, roomName: comment.roomName, textFontName: comment.textFontName, textFontSize: comment.textFontSize, displayImage: comment.displayImage, durationLabel: comment.durationLabel, currentTimeSlider: comment.currentTimeSlider, seekTimeLabel: comment.seekTimeLabel, audioIsPlaying: comment.audioIsPlaying, isDownloading: comment.isDownloading, isUploading: comment.isUploading, progress: comment.progress, isRead: comment.isRead, extras: comment.extras, isMyComment: comment.senderEmail == Qiscus.client.email, commentType: comment.type, commentStatus: comment.status)
+                self.view.onGotNewComment(comment: commentModel)
+            }
+        }
+    }
 }
 
 extension QChatPresenter: QChatServiceDelegate {
     func chatService(didFinishLoadRoom room:QRoom, withMessage message:String?) {
         self.view.onLoadRoomFinished(roomName: room.name, roomAvatar: room.avatar)
         self.loadRoomAvatar(room: room)
-        self.view.onLoadMessageFinished(comments: self.generateComments(qComment: room.comments))
+        self.view.onLoadMessageFinished(comments: self.generateComments(qComments: room.comments))
     }
     
     func chatService(didFailLoadRoom error:String) {

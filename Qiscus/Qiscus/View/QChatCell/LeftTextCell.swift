@@ -7,10 +7,11 @@
 
 import UIKit
 
-class LeftTextCell: UITableViewCell {
+class LeftTextCell: BaseChatCell {
     @IBOutlet weak var lbName: UILabel!
     @IBOutlet weak var tvContent: UITextView!
     @IBOutlet weak var ivBaloon: UIImageView!
+    @IBOutlet weak var lbTime: UILabel!
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -20,6 +21,12 @@ class LeftTextCell: UITableViewCell {
         tvContent.isEditable = false
         tvContent.dataDetectorTypes = .link
         tvContent.isScrollEnabled = false;
+    }
+    
+    override func bindDataToView() {
+        self.tvContent.text = self.comment.text
+        self.lbName.text = self.comment.senderName
+        self.lbTime.text = self.comment.time
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {

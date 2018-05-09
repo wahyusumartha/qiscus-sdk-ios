@@ -35,4 +35,8 @@ public struct CommentModel {
     
     var isRead: Bool = false
     var extras: [String: Any]?
+    
+    var isMyComment: Bool = false
+    var commentType: QCommentType = .text
+    var commentStatus: QCommentStatus = .sending
 }

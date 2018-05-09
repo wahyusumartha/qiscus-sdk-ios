@@ -123,7 +123,11 @@ open class QChatVC: UIViewController {
         self.tableViewConversation.dataSource = self
         self.tableViewConversation.delegate = self
         
+        self.tableViewConversation.estimatedSectionHeaderHeight = 30
+        
         self.tableViewConversation.register(UINib(nibName: "LeftTextCell",bundle: Qiscus.bundle), forCellReuseIdentifier: "LeftTextCell")
+        self.tableViewConversation.register(UINib(nibName: "RightTextCell", bundle: Qiscus.bundle), forCellReuseIdentifier: "RightTextCell")
+        self.tableViewConversation.register(UINib(nibName: "AvatarFooterCell", bundle: Qiscus.bundle), forCellReuseIdentifier: "AvatarFooterCell")
     }
     
     @objc func goBack() {
@@ -175,11 +179,34 @@ extension QChatVC: QChatViewDelegate {
     func onLoadMessageFinished(comments: [[CommentModel]]) {
         self.comments = comments
         
+        print("first comment \(self.comments.first?.first)")
         self.tableViewConversation.reloadData()
     }
     
     func onSendMessageFinished(comment: CommentModel) {
         
+    }
+    
+    func onGotNewComment(comment: CommentModel) {
+        if let latestCommentSection = self.comments.first {
+            if let latestComment = latestCommentSection.first {
+                if comment.senderName == latestComment.senderName || comment.date == latestComment.date {
+                    self.comments[0].insert(comment, at: 0)
+                    let indexPath = IndexPath(row: 0, section: 0)
+                    
+                    self.tableViewConversation.beginUpdates()
+                    self.tableViewConversation.insertRows(at: [indexPath], with: .top)
+                    self.tableViewConversation.endUpdates()
+                } else {
+                    self.comments.insert([comment], at: 0)
+                    let indexPath = IndexPath(row: 0, section: 0)
+                    
+                    self.tableViewConversation.beginUpdates()
+                    self.tableViewConversation.insertSections(IndexSet(integer: 0), with: .top)
+                    self.tableViewConversation.endUpdates()
+                }
+            }
+        }
     }
 }
 
@@ -198,20 +225,30 @@ extension QChatVC: UITableViewDataSource {
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let comment = self.comments[indexPath.section][indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
-        cell.lbName.text = comment.senderName
-        cell.tvContent.text = comment.text
+        
+        cell.comment = comment
         print("comment text: \(comment.text)")
         
         return cell
     }
     
-    public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return UITableViewAutomaticDimension
+    public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let view = UIView(frame: CGRect(x: 0, y: 0, width: QiscusHelper.screenWidth(), height: 0))
+        view.backgroundColor = .clear
+        view.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
+        
+        let avatar = UIImageView(frame: CGRect(x: 5, y: -5, width: 30, height: 30))
+        avatar.clipsToBounds = true
+        avatar.layer.cornerRadius = avatar.frame.width/2
+        avatar.backgroundColor = .black
+        avatar.contentMode = .scaleAspectFill
+        
+        view.addSubview(avatar)
+        
+        return view
     }
     
-    public func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-        return UITableViewAutomaticDimension
-    }
+    
     
     
 }
