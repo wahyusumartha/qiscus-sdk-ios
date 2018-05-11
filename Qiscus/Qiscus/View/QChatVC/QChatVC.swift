@@ -21,7 +21,6 @@ open class QChatVC: UIViewController {
     private var roomAvatar = UIImageView()
     private var titleView = UIView()
     private var presenter: QChatPresenter!
-    private var comments: [[CommentModel]] = []
     
     var roomId: String = ""
     
@@ -176,10 +175,7 @@ extension QChatVC: QChatViewDelegate {
         }
     }
     
-    func onLoadMessageFinished(comments: [[CommentModel]]) {
-        self.comments = comments
-        
-        print("first comment \(self.comments.first?.first)")
+    func onLoadMessageFinished() {
         self.tableViewConversation.reloadData()
     }
     
@@ -187,43 +183,36 @@ extension QChatVC: QChatViewDelegate {
         
     }
     
-    func onGotNewComment(comment: CommentModel) {
-        if let latestCommentSection = self.comments.first {
-            if let latestComment = latestCommentSection.first {
-                if comment.senderName == latestComment.senderName || comment.date == latestComment.date {
-                    self.comments[0].insert(comment, at: 0)
-                    let indexPath = IndexPath(row: 0, section: 0)
-                    
-                    self.tableViewConversation.beginUpdates()
-                    self.tableViewConversation.insertRows(at: [indexPath], with: .top)
-                    self.tableViewConversation.endUpdates()
-                } else {
-                    self.comments.insert([comment], at: 0)
-                    let indexPath = IndexPath(row: 0, section: 0)
-                    
-                    self.tableViewConversation.beginUpdates()
-                    self.tableViewConversation.insertSections(IndexSet(integer: 0), with: .top)
-                    self.tableViewConversation.endUpdates()
-                }
-            }
+    func onGotNewComment(newSection: Bool) {
+        if newSection {
+            self.tableViewConversation.beginUpdates()
+            self.tableViewConversation.insertSections(IndexSet(integer: 0), with: .top)
+            self.tableViewConversation.endUpdates()
+        } else {
+            let indexPath = IndexPath(row: 0, section: 0)
+            self.tableViewConversation.beginUpdates()
+            self.tableViewConversation.insertRows(at: [indexPath], with: .top)
+            self.tableViewConversation.endUpdates()
         }
     }
 }
 
 extension QChatVC: UITableViewDataSource {
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if self.comments.count == 0 {
+        let sectionCount = self.presenter.getComments().count
+        let rowCount = self.presenter.getComments()[section].count
+        if sectionCount == 0 {
             return 0
         }
-        return self.comments[section].count
+        return rowCount
     }
     
     public func numberOfSections(in tableView: UITableView) -> Int {
-        return self.comments.count
+        return self.presenter.getComments().count
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let comment = self.comments[indexPath.section][indexPath.row]
+        let comment = self.presenter.getComments()[indexPath.section][indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
         
         cell.comment = comment
@@ -247,12 +236,10 @@ extension QChatVC: UITableViewDataSource {
         
         return view
     }
-    
-    
-    
-    
 }
 
 extension QChatVC: UITableViewDelegate {
-
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
 }

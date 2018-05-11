@@ -15,25 +15,31 @@ protocol QChatUserInteraction {
 
 protocol QChatViewDelegate {
     func onLoadRoomFinished(roomName: String, roomAvatar: UIImage?)
-    func onLoadMessageFinished(comments: [[CommentModel]])
+    func onLoadMessageFinished()
     func onSendMessageFinished(comment: CommentModel)
-    func onGotNewComment(comment: CommentModel)
+    func onGotNewComment(newSection: Bool)
 }
 
 class QChatPresenter: QChatUserInteraction {
     private let view: QChatViewDelegate!
     private let chatService: QChatService = QChatService()
+    private var comments: [[CommentModel]] = [[]]
     init(view: QChatViewDelegate) {
         self.view = view
         chatService.delegate = self
     }
     
+    func getComments() -> [[CommentModel]] {
+        return self.comments
+    }
+    
     func loadRoom(withId roomId: String) {
         if let room = QRoom.room(withId: roomId) {
             DispatchQueue.main.async {
+                self.comments = self.generateComments(qComments: room.comments)
                 self.view.onLoadRoomFinished(roomName: room.name, roomAvatar: room.avatar)
                 self.loadRoomAvatar(room: room)
-                self.view.onLoadMessageFinished(comments: self.generateComments(qComments: room.comments))
+                self.view.onLoadMessageFinished()
             }
         }
 
@@ -51,7 +57,8 @@ class QChatPresenter: QChatUserInteraction {
     
     func getMessage(inRoom roomId: String) {
         if let comments = QRoom.room(withId: roomId)?.comments {
-            self.view.onLoadMessageFinished(comments: generateComments(qComments: comments))
+            self.comments = self.generateComments(qComments: comments)
+            self.view.onLoadMessageFinished()
         }
         
         self.chatService.room(withId: roomId)
@@ -154,7 +161,22 @@ class QChatPresenter: QChatUserInteraction {
                 if room.isInvalidated { return }
                 
                 let commentModel = CommentModel(uniqueId: comment.uniqueId, id: comment.id, roomId: comment.roomId, text: comment.text, time: comment.time, date: comment.date, senderEmail: comment.senderEmail, senderName: comment.senderName, senderAvatarURL: comment.senderAvatarURL, roomName: comment.roomName, textFontName: comment.textFontName, textFontSize: comment.textFontSize, displayImage: comment.displayImage, durationLabel: comment.durationLabel, currentTimeSlider: comment.currentTimeSlider, seekTimeLabel: comment.seekTimeLabel, audioIsPlaying: comment.audioIsPlaying, isDownloading: comment.isDownloading, isUploading: comment.isUploading, progress: comment.progress, isRead: comment.isRead, extras: comment.extras, isMyComment: comment.senderEmail == Qiscus.client.email, commentType: comment.type, commentStatus: comment.status)
-                self.view.onGotNewComment(comment: commentModel)
+                
+                if let latestCommentSection = self.comments.first {
+                    if let latestComment = latestCommentSection.first {
+                        if commentModel.senderName != latestComment.senderName || commentModel.date != latestComment.date {
+                            self.comments.insert([commentModel], at: 0)
+                            self.view.onGotNewComment(newSection: true)
+                        } else {
+                            self.comments[0].insert(commentModel, at: 0)
+                            self.view.onGotNewComment(newSection: false)
+                        }
+                    }
+                } else {
+                    self.comments.insert([commentModel], at: 0)
+                    self.view.onGotNewComment(newSection: true)
+                }
+                
             }
         }
     }
@@ -162,9 +184,10 @@ class QChatPresenter: QChatUserInteraction {
 
 extension QChatPresenter: QChatServiceDelegate {
     func chatService(didFinishLoadRoom room:QRoom, withMessage message:String?) {
+        self.comments = self.generateComments(qComments: room.comments)
+        self.view.onLoadMessageFinished()
         self.view.onLoadRoomFinished(roomName: room.name, roomAvatar: room.avatar)
         self.loadRoomAvatar(room: room)
-        self.view.onLoadMessageFinished(comments: self.generateComments(qComments: room.comments))
     }
     
     func chatService(didFailLoadRoom error:String) {
