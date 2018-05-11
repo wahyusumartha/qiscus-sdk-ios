@@ -20,6 +20,12 @@
 "WELCOME"           = "Welcome";
 "EMPTY_MESSAGE"     = "Let's write message to start conversation";
 "AT"                = "at";
+"FAILED"            = "failed";
+"DELETING"          = "deleting";
+"SENDING"           = "sending";
+"DOWNLOADING"       = "downloading";
+"UPLOADING"         = "uploading";
+"NO_CONNECTION"     = "can't connect to internet, please check your connection";
 
 //cell option:
 "COPY"              = "Copy";
@@ -38,3 +44,10 @@
 "CONTACT"           = "Contact";
 "CURRENT_LOCATION"  = "Current Location";
 "CANCEL"            = "Cancel";
+
+//Alert Dialog:
+"CONFIRMATION"              = "CONFIRMATION";
+"UPLOAD_IMAGE_CONFIRMATION" = "Are you sure to send this image?";
+"UPLOAD_FILE_CONFIRMATION"  = "Are you sure to send";
+"SETTING"                   = "SETTING";
+
