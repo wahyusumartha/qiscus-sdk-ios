@@ -133,9 +133,14 @@ extension Qiscus:CocoaMQTTDelegate{
                         Qiscus.publishStatustimer?.invalidate()
                     }
                     
-                    DispatchQueue.main.async {
-                        Qiscus.publishStatustimer = Timer.scheduledTimer(timeInterval: 1.5, target: self, selector: #selector(self.publishStatus(sender:)), userInfo: statusObj, repeats: false)
+                    if UIApplication.shared.applicationState == .active {
+                        DispatchQueue.main.async {
+                            Qiscus.publishStatustimer = Timer.scheduledTimer(timeInterval: 1.5, target: self, selector: #selector(self.publishStatus(sender:)), userInfo: statusObj, repeats: false)
+                        }
+                    } else {
+                        QRoom.publishStatus(roomId: roomId, commentId: commentId, status: .delivered)
                     }
+                    
                     break
                 case "t":
                     QiscusBackgroundThread.async {
