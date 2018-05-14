@@ -6,11 +6,13 @@
 //
 
 import Foundation
+import AlamofireImage
 
 protocol QChatUserInteraction {
     func sendMessage(withText text: String)
     func loadRoom(withId roomId: String)
     func getMessage(inRoom roomId: String)
+    func getAvatarImage(avatarURL: String, imageView: UIImageView)
 }
 
 protocol QChatViewDelegate {
@@ -23,7 +25,9 @@ protocol QChatViewDelegate {
 class QChatPresenter: QChatUserInteraction {
     private let view: QChatViewDelegate!
     private let chatService: QChatService = QChatService()
+    private let imageCache: AutoPurgingImageCache = AutoPurgingImageCache()
     private var comments: [[CommentModel]] = [[]]
+
     init(view: QChatViewDelegate) {
         self.view = view
         chatService.delegate = self
@@ -64,6 +68,24 @@ class QChatPresenter: QChatUserInteraction {
         self.chatService.room(withId: roomId)
     }
     
+    func getAvatarImage(avatarURL: String, imageView: UIImageView) {
+        let urlRequest = URLRequest(url: URL(string: avatarURL)!)
+        DispatchQueue.global(qos: .background).async {
+            if let cachedAvatar = self.imageCache.image(for: urlRequest, withIdentifier: avatarURL) {
+                DispatchQueue.main.async {
+                    imageView.image = cachedAvatar
+                }
+            } else {
+                let urlRequest = URLRequest(url: URL(string: avatarURL)!)
+                let avatarImage = UIImage(named: "avatar", in: Qiscus.bundle, compatibleWith: nil)!.af_imageRoundedIntoCircle()
+                
+                self.imageCache.add
+                self.imageCache.add(avatarImage, for: urlRequest, withIdentifier: avatarURL)
+                imageView.af_setImage(withURL: URL(string: avatarURL)!)
+            }
+        }
+    }
+    
     private func loadRoomAvatar(room: QRoom) {
         room.loadAvatar(onSuccess: { (avatar) in
             self.view.onLoadRoomFinished(roomName: room.name, roomAvatar: room.avatar)
@@ -77,6 +99,13 @@ class QChatPresenter: QChatUserInteraction {
     private func generateComments(qComments: [QComment]) -> [[CommentModel]] {
         var commentModels = qComments.map { (comment) -> CommentModel in
             let comment = CommentModel(uniqueId: comment.uniqueId, id: comment.id, roomId: comment.roomId, text: comment.text, time: comment.time, date: comment.date, senderEmail: comment.senderEmail, senderName: comment.senderName, senderAvatarURL: comment.senderAvatarURL, roomName: comment.roomName, textFontName: comment.textFontName, textFontSize: comment.textFontSize, displayImage: comment.displayImage, durationLabel: comment.durationLabel, currentTimeSlider: comment.currentTimeSlider, seekTimeLabel: comment.seekTimeLabel, audioIsPlaying: comment.audioIsPlaying, isDownloading: comment.isDownloading, isUploading: comment.isUploading, progress: comment.progress, isRead: comment.isRead, extras: comment.extras, isMyComment: comment.senderEmail == Qiscus.client.email, commentType: comment.type, commentStatus: comment.status)
+            
+            DispatchQueue.global(qos: .background).async {
+                let urlRequest = URLRequest(url: URL(string: comment.senderAvatarURL)!)
+                let avatarImage = UIImage(named: "avatar", in: Qiscus.bundle, compatibleWith: nil)!.af_imageRoundedIntoCircle()
+                
+                self.imageCache.add(avatarImage, for: urlRequest, withIdentifier: comment.senderAvatarURL)
+            }
             
             return comment
         }

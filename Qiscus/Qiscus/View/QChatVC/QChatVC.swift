@@ -23,6 +23,7 @@ open class QChatVC: UIViewController {
     private var presenter: QChatPresenter!
     
     var roomId: String = ""
+    var tempSection = -1
     
     public init() {
         super.init(nibName: "QChatVC", bundle: Qiscus.bundle)
@@ -216,8 +217,10 @@ extension QChatVC: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
         
         cell.comment = comment
-        print("comment text: \(comment.text)")
+        cell.firstInSection = indexPath.row == self.tableViewConversation.numberOfRows(inSection: indexPath.section)
+        print("section \(indexPath.row), \(self.presenter.getComments()[indexPath.section].count - 1)")
         
+        tempSection = indexPath.section
         return cell
     }
     
@@ -231,6 +234,11 @@ extension QChatVC: UITableViewDataSource {
         avatar.layer.cornerRadius = avatar.frame.width/2
         avatar.backgroundColor = .black
         avatar.contentMode = .scaleAspectFill
+        
+        if let senderAvatarURL = self.presenter.getComments()[section].first?.senderAvatarURL {
+            self.presenter.getAvatarImage(avatarURL: senderAvatarURL, imageView: avatar)
+        }
+        
         
         view.addSubview(avatar)
         

@@ -118,7 +118,7 @@ public class QUser:Object {
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         realm.refresh()
         var user = QUser()
-        if let savedUser = QUser.getUser(email: email){
+        if let savedUser = QUser.getUser(email: email) {
             user = savedUser
             if fullname != nil  && fullname! != user.storedName {
                 try! realm.write {
@@ -126,7 +126,7 @@ public class QUser:Object {
                 }
                 if user.definedName != "" {
                     DispatchQueue.main.async {
-                        if let u = QUser.user(withEmail: email){
+                        if let u = QUser.user(withEmail: email) {
                             u.delegate?.user?(didChangeName: fullname!)
                             QiscusNotification.publish(userNameChange: u)
                         }
@@ -138,21 +138,21 @@ public class QUser:Object {
                     user.id = id!
                 }
             }
-            if avatarURL != nil && avatarURL! != user.avatarURL{
+            if avatarURL != nil && avatarURL! != user.avatarURL {
                 try! realm.write {
                     user.avatarURL = avatarURL!
                 }
                 user.downloadAvatar()
                 
                 DispatchQueue.main.async {
-                    if let u = QUser.user(withEmail: email){
+                    if let u = QUser.user(withEmail: email) {
                         u.cachedAvatar = nil
                         u.delegate?.user?(didChangeAvatarURL: avatarURL!)
                         QiscusNotification.publish(userAvatarChange: u)
                     }
                 }
             }
-            if lastSeen != nil && lastSeen! > user.lastSeen{
+            if lastSeen != nil && lastSeen! > user.lastSeen {
                 try! realm.write {
                     user.lastSeen = lastSeen!
                 }

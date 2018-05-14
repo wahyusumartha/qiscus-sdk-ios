@@ -8,6 +8,7 @@
 import Foundation
 
 class BaseChatCell: UITableViewCell {
+    var firstInSection: Bool = false
     var comment: CommentModel! {
         didSet {
             bindDataToView()
