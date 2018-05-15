@@ -7,20 +7,23 @@
 
 import UIKit
 
-class RightTextCell: UITableViewCell {
-    @IBOutlet weak var lbName: UILabel!
+class RightTextCell: BaseChatCell {
     @IBOutlet weak var tvContent: UITextView!
     @IBOutlet weak var ivBaloon: UIImageView!
+    @IBOutlet weak var lbTime: UILabel!
     
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
+        self.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
+        tvContent.sizeToFit()
+        tvContent.isEditable = false
+        tvContent.dataDetectorTypes = .link
+        tvContent.isScrollEnabled = false
     }
 
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
+    override func bindDataToView() {
+        self.tvContent.text = self.comment.text
+        self.lbTime.text = self.comment.time
     }
-    
 }

@@ -44,6 +44,9 @@
                                 <constraint firstAttribute="height" constant="30" id="vTY-Og-8cN"/>
                             </constraints>
                             <state key="normal" image="send"/>
+                            <connections>
+                                <action selector="send:" destination="-1" eventType="touchUpInside" id="pUz-0U-bvb"/>
+                            </connections>
                         </button>
                         <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="bXL-df-oZf">
                             <rect key="frame" x="46" y="10" width="283" height="30"/>

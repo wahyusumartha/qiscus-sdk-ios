@@ -58,6 +58,17 @@ open class QChatVC: UIViewController {
         view.endEditing(true)
     }
     
+    //    MARK: View Event Listener
+    @IBAction func send(_ sender: UIButton) {
+        guard let text = self.tfInput.text else {return}
+        if !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            self.presenter.sendMessage(withText: text)
+        }
+        
+        self.tfInput.text = ""
+    }
+    
+    
     private func setupUI() {
         // config navBar
         self.setupNavigationTitle()
@@ -123,11 +134,10 @@ open class QChatVC: UIViewController {
         self.tableViewConversation.dataSource = self
         self.tableViewConversation.delegate = self
         
-        self.tableViewConversation.estimatedSectionHeaderHeight = 30
+//        self.tableViewConversation.estimatedSectionHeaderHeight = 30
         
         self.tableViewConversation.register(UINib(nibName: "LeftTextCell",bundle: Qiscus.bundle), forCellReuseIdentifier: "LeftTextCell")
         self.tableViewConversation.register(UINib(nibName: "RightTextCell", bundle: Qiscus.bundle), forCellReuseIdentifier: "RightTextCell")
-        self.tableViewConversation.register(UINib(nibName: "AvatarFooterCell", bundle: Qiscus.bundle), forCellReuseIdentifier: "AvatarFooterCell")
     }
     
     @objc func goBack() {
@@ -214,36 +224,68 @@ extension QChatVC: UITableViewDataSource {
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let comment = self.presenter.getComments()[indexPath.section][indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
-        
-        cell.comment = comment
-        cell.firstInSection = indexPath.row == self.tableViewConversation.numberOfRows(inSection: indexPath.section)
-        print("section \(indexPath.row), \(self.presenter.getComments()[indexPath.section].count - 1)")
+        let isMyComment = comment.isMyComment
         
         tempSection = indexPath.section
-        return cell
-    }
-    
-    public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let view = UIView(frame: CGRect(x: 0, y: 0, width: QiscusHelper.screenWidth(), height: 0))
-        view.backgroundColor = .clear
-        view.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
-        
-        let avatar = UIImageView(frame: CGRect(x: 5, y: -5, width: 30, height: 30))
-        avatar.clipsToBounds = true
-        avatar.layer.cornerRadius = avatar.frame.width/2
-        avatar.backgroundColor = .black
-        avatar.contentMode = .scaleAspectFill
-        
-        if let senderAvatarURL = self.presenter.getComments()[section].first?.senderAvatarURL {
-            self.presenter.getAvatarImage(avatarURL: senderAvatarURL, imageView: avatar)
+
+        if isMyComment {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "RightTextCell", for: indexPath) as! RightTextCell
+            cell.firstInSection = (indexPath.row == self.tableViewConversation.numberOfRows(inSection: indexPath.section) - 1)
+            cell.comment = comment
+            return cell
+        } else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
+            cell.firstInSection = (indexPath.row == self.tableViewConversation.numberOfRows(inSection: indexPath.section) - 1)
+            cell.comment = comment
+            return cell
         }
         
         
-        view.addSubview(avatar)
         
-        return view
+        
     }
+    
+//    public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+//        if let firstComment = self.presenter.getComments()[section].first {
+//            if firstComment.isMyComment {
+//                return 1
+//            } else {
+//                return 1
+//            }
+//        }
+//
+//        return 1
+//    }
+    
+//    public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+//        let view = UIView(frame: CGRect(x: 0, y: 0, width: QiscusHelper.screenWidth(), height: 0))
+//        view.backgroundColor = .clear
+//        view.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
+//        
+//        let viewAvatar = UIView(frame: CGRect(x: 5, y: -30, width: 30, height: 60))
+//        let avatar = UIImageView(frame: CGRect(x: 5, y: 0, width: 30, height: 30))
+//        avatar.clipsToBounds = true
+//        avatar.layer.cornerRadius = avatar.frame.width/2
+//        avatar.backgroundColor = .black
+//        avatar.contentMode = .scaleAspectFill
+//        
+//        viewAvatar.addSubview(avatar)
+//        
+////        self.presenter.getAvatarImage(section: section, imageView: avatar)
+//        
+//        
+//        view.addSubview(viewAvatar)
+//        
+////        if let firstComment = self.presenter.getComments()[section].first {
+////            if firstComment.isMyComment {
+////                return nil
+////            } else {
+////                return view
+////            }
+////        }
+//        
+//        return nil
+//    }
 }
 
 extension QChatVC: UITableViewDelegate {
