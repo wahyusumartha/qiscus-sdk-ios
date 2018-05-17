@@ -36,8 +36,8 @@ open class QChatVC: UIViewController {
     override open func viewDidLoad() {
         super.viewDidLoad()
         self.presenter = QChatPresenter(view: self)
-        self.setupUI()
         self.presenter.loadRoom(withId: self.roomId)
+        self.setupUI()
         // Do any additional setup after loading the view.
     }
     
@@ -133,11 +133,12 @@ open class QChatVC: UIViewController {
         self.tableViewConversation.rowHeight = UITableViewAutomaticDimension
         self.tableViewConversation.dataSource = self
         self.tableViewConversation.delegate = self
-        
+        self.tableViewConversation.scrollsToTop = false
 //        self.tableViewConversation.estimatedSectionHeaderHeight = 30
         
         self.tableViewConversation.register(UINib(nibName: "LeftTextCell",bundle: Qiscus.bundle), forCellReuseIdentifier: "LeftTextCell")
         self.tableViewConversation.register(UINib(nibName: "RightTextCell", bundle: Qiscus.bundle), forCellReuseIdentifier: "RightTextCell")
+        self.tableViewConversation.register(UINib(nibName: "PlainTextCell", bundle: Qiscus.bundle), forCellReuseIdentifier: "PlainTextCell")
     }
     
     @objc func goBack() {
@@ -194,15 +195,21 @@ extension QChatVC: QChatViewDelegate {
         
     }
     
-    func onGotNewComment(newSection: Bool) {
+    func onGotNewComment(newSection: Bool, isMyComment: Bool) {
         if newSection {
             self.tableViewConversation.beginUpdates()
-            self.tableViewConversation.insertSections(IndexSet(integer: 0), with: .top)
+            self.tableViewConversation.insertSections(IndexSet(integer: 0), with: .none)
+            if isMyComment {
+                self.tableViewConversation.scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: true)
+            }
             self.tableViewConversation.endUpdates()
         } else {
             let indexPath = IndexPath(row: 0, section: 0)
             self.tableViewConversation.beginUpdates()
-            self.tableViewConversation.insertRows(at: [indexPath], with: .top)
+            self.tableViewConversation.insertRows(at: [indexPath], with: .none)
+            if isMyComment {
+                self.tableViewConversation.scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: true)
+            }
             self.tableViewConversation.endUpdates()
         }
     }
@@ -224,25 +231,16 @@ extension QChatVC: UITableViewDataSource {
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let comment = self.presenter.getComments()[indexPath.section][indexPath.row]
-        let isMyComment = comment.isMyComment
         
         tempSection = indexPath.section
-
-        if isMyComment {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "RightTextCell", for: indexPath) as! RightTextCell
-            cell.firstInSection = (indexPath.row == self.tableViewConversation.numberOfRows(inSection: indexPath.section) - 1)
-            cell.comment = comment
-            return cell
-        } else {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
-            cell.firstInSection = (indexPath.row == self.tableViewConversation.numberOfRows(inSection: indexPath.section) - 1)
-            cell.comment = comment
-            return cell
-        }
+//
+        let cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
+        cell.firstInSection = true
+        cell.comment = comment
         
-        
-        
-        
+//        let cell = tableView.dequeueReusableCell(withIdentifier: "PlainTextCell", for: indexPath) as! PlainTextCell
+//        cell.label.text = comment.text
+        return cell
     }
     
 //    public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {

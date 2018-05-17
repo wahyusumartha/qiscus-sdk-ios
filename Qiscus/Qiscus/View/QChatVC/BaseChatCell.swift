@@ -15,6 +15,7 @@ class BaseChatCell: UITableViewCell {
         }
     }
     
+    
     var indexPath: IndexPath!
     
     func bindDataToView() {

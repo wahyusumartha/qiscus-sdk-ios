@@ -19,7 +19,7 @@ protocol QChatViewDelegate {
     func onLoadRoomFinished(roomName: String, roomAvatar: UIImage?)
     func onLoadMessageFinished()
     func onSendMessageFinished(comment: CommentModel)
-    func onGotNewComment(newSection: Bool)
+    func onGotNewComment(newSection: Bool, isMyComment: Bool)
 }
 
 class QChatPresenter: QChatUserInteraction {
@@ -69,15 +69,15 @@ class QChatPresenter: QChatUserInteraction {
                 if let latestComment = latestCommentSection.first {
                     if commentModel.senderName != latestComment.senderName || commentModel.date != latestComment.date {
                         self.comments.insert([commentModel], at: 0)
-                        self.view.onGotNewComment(newSection: true)
+                        self.view.onGotNewComment(newSection: true, isMyComment: commentModel.isMyComment)
                     } else {
                         self.comments[0].insert(commentModel, at: 0)
-                        self.view.onGotNewComment(newSection: false)
+                        self.view.onGotNewComment(newSection: false, isMyComment: commentModel.isMyComment)
                     }
                 }
             } else {
                 self.comments.insert([commentModel], at: 0)
-                self.view.onGotNewComment(newSection: true)
+                self.view.onGotNewComment(newSection: true, isMyComment: false)
             }
         }
     }
@@ -246,15 +246,15 @@ class QChatPresenter: QChatUserInteraction {
                     if let latestComment = latestCommentSection.first {
                         if commentModel.senderName != latestComment.senderName || commentModel.date != latestComment.date {
                             self.comments.insert([commentModel], at: 0)
-                            self.view.onGotNewComment(newSection: true)
+                            self.view.onGotNewComment(newSection: true, isMyComment: false)
                         } else {
                             self.comments[0].insert(commentModel, at: 0)
-                            self.view.onGotNewComment(newSection: false)
+                            self.view.onGotNewComment(newSection: false, isMyComment: false)
                         }
                     }
                 } else {
                     self.comments.insert([commentModel], at: 0)
-                    self.view.onGotNewComment(newSection: true)
+                    self.view.onGotNewComment(newSection: true, isMyComment: false)
                 }
                 
             }
