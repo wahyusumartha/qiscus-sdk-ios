@@ -23,11 +23,16 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="151"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="redraw" horizontalHuggingPriority="251" verticalHuggingPriority="249" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wp0-cQ-h97">
-                                <rect key="frame" x="57.5" y="39.5" width="65" height="109"/>
+                                <rect key="frame" x="57.5" y="21" width="65" height="125"/>
                                 <color key="backgroundColor" red="0.82533193010000006" green="0.82533193010000006" blue="0.82533193010000006" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="cornerRadiuss">
+                                        <real key="value" value="6"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dix-JB-2Gb">
-                                <rect key="frame" x="60" y="8" width="240" height="21"/>
+                                <rect key="frame" x="60" y="0.0" width="240" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="21" id="1Ee-co-MDM"/>
                                 </constraints>
@@ -45,7 +50,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Label" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="osk-wp-0kH">
-                                <rect key="frame" x="60" y="37" width="50" height="94"/>
+                                <rect key="frame" x="60" y="26" width="50" height="105"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="lessThanOrEqual" constant="200" id="DtK-e8-sFV"/>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="50" id="L5r-3E-0Z8"/>
@@ -57,16 +62,16 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="osk-wp-0kH" firstAttribute="top" secondItem="dix-JB-2Gb" secondAttribute="bottom" constant="8" id="245-Ui-ffq"/>
+                            <constraint firstItem="osk-wp-0kH" firstAttribute="top" secondItem="dix-JB-2Gb" secondAttribute="bottom" constant="5" id="245-Ui-ffq"/>
                             <constraint firstItem="dix-JB-2Gb" firstAttribute="leading" secondItem="1rL-tf-aH3" secondAttribute="leading" constant="60" id="6mG-IW-oRm"/>
-                            <constraint firstItem="wp0-cQ-h97" firstAttribute="centerY" secondItem="osk-wp-0kH" secondAttribute="centerY" constant="10" id="7Za-1l-jLg"/>
+                            <constraint firstItem="wp0-cQ-h97" firstAttribute="centerY" secondItem="osk-wp-0kH" secondAttribute="centerY" constant="5" id="7Za-1l-jLg"/>
                             <constraint firstItem="wp0-cQ-h97" firstAttribute="centerX" secondItem="osk-wp-0kH" secondAttribute="centerX" constant="5" id="8T7-6l-gti"/>
-                            <constraint firstItem="wp0-cQ-h97" firstAttribute="height" secondItem="osk-wp-0kH" secondAttribute="height" constant="15" id="8gt-x4-5Yh"/>
+                            <constraint firstItem="wp0-cQ-h97" firstAttribute="height" secondItem="osk-wp-0kH" secondAttribute="height" constant="20" id="8gt-x4-5Yh"/>
                             <constraint firstAttribute="trailing" secondItem="dix-JB-2Gb" secondAttribute="trailing" constant="20" id="B9H-9F-Dtw"/>
                             <constraint firstItem="SNF-Gs-Byf" firstAttribute="trailing" secondItem="osk-wp-0kH" secondAttribute="trailing" id="E30-H0-FpX"/>
                             <constraint firstItem="wp0-cQ-h97" firstAttribute="width" secondItem="osk-wp-0kH" secondAttribute="width" constant="15" id="VOQ-sr-KF7"/>
                             <constraint firstAttribute="bottom" secondItem="osk-wp-0kH" secondAttribute="bottom" constant="20" id="def-q0-5TN"/>
-                            <constraint firstItem="dix-JB-2Gb" firstAttribute="top" secondItem="1rL-tf-aH3" secondAttribute="top" constant="8" id="hkJ-WF-Dcv"/>
+                            <constraint firstItem="dix-JB-2Gb" firstAttribute="top" secondItem="1rL-tf-aH3" secondAttribute="top" id="hkJ-WF-Dcv"/>
                             <constraint firstItem="SNF-Gs-Byf" firstAttribute="top" secondItem="osk-wp-0kH" secondAttribute="bottom" constant="2" id="xXi-mw-fv9"/>
                         </constraints>
                     </view>
