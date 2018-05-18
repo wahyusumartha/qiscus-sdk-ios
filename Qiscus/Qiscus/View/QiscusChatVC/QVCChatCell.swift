@@ -93,7 +93,10 @@ extension QiscusChatVC: QConversationViewCellDelegate{
                             currentIndex = totalIndex
                         }
                         let urlString = "file://\(file.localPath)"
-                        if let url = URL(string: urlString){
+                        
+                        if let encoded = urlString.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
+                            let url = URL(string: encoded)
+                        {
                             if let imageData = try? Data(contentsOf: url) {
                                 if file.type == .image {
                                     if file.ext == "gif"{
