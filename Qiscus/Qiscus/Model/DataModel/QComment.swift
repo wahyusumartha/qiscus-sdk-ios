@@ -167,7 +167,7 @@ public class QComment:Object {
     
     
     // read mark
-    @objc internal dynamic var isRead:Bool = false
+    @objc public dynamic var isRead:Bool = false
     
     override public static func primaryKey() -> String? {
         return "uniqueId"
