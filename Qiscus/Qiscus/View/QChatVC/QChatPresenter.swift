@@ -211,7 +211,6 @@ class QChatPresenter: QChatUserInteraction {
                         group = [CommentModel]()
                         group.append(comment)
                         uidList.append(comment)
-                        
                     }
                 }else{
                     group.append(comment)

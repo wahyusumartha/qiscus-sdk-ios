@@ -42,6 +42,19 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
         }
         return sectionNumber
     }
+    
+    class textCell: UICollectionViewCell {
+        var tvContent: UITextView = {
+           var tv = UITextView()
+            
+            return tv
+        }()
+        
+        override func awakeFromNib() {
+            
+        }
+    }
+    
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if indexPath.section < self.messagesId.count && indexPath.row < self.messagesId[indexPath.section].count {
             let uid = self.messagesId[indexPath.section][indexPath.row]
@@ -84,6 +97,9 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                     carouselCell.cellCarouselDelegate = self
                     cell = carouselCell
                 }
+                
+                cell.layer.shouldRasterize = true
+                cell.layer.rasterizationScale = UIScreen.main.scale
                 return cell
             }
         }else{

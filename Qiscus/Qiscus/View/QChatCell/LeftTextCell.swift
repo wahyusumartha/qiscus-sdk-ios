@@ -23,10 +23,8 @@ class LeftTextCell: BaseChatCell {
         super.awakeFromNib()
         // Initialization code
         self.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
-        
         self.leftConstrain = NSLayoutConstraint(item: tvContent, attribute: .leading, relatedBy: .equal, toItem: lbName, attribute: .leading, multiplier: 1, constant: -5)
         self.rightConstrain = NSLayoutConstraint(item: lbName, attribute: .trailing, relatedBy: .equal, toItem: tvContent, attribute: .trailing, multiplier: 1, constant: 10)
-        
     }
     
     override func bindDataToView() {
@@ -47,13 +45,13 @@ class LeftTextCell: BaseChatCell {
             lbNameLeading.constant = 60
             lbName.textAlignment = .left
         }
-//
-//        if firstInSection {
-//            self.lbName.isHidden = false
-//            self.lbNameHeight.constant = CGFloat(21)
-//        } else {
-//            self.lbName.isHidden = true
-//            self.lbNameHeight.constant = CGFloat(0)
-//        }
+
+        if firstInSection {
+            self.lbName.isHidden = false
+            self.lbNameHeight.constant = CGFloat(21)
+        } else {
+            self.lbName.isHidden = true
+            self.lbNameHeight.constant = CGFloat(0)
+        }
     }
 }
