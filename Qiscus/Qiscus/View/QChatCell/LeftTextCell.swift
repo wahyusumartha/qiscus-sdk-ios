@@ -19,6 +19,9 @@ class LeftTextCell: BaseChatCell {
     var leftConstrain: NSLayoutConstraint!
     var rightConstrain: NSLayoutConstraint!
     
+    @IBOutlet weak var ivCommentImage: UIImageView!
+    @IBOutlet weak var ivHeight: NSLayoutConstraint!
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
@@ -52,6 +55,17 @@ class LeftTextCell: BaseChatCell {
         } else {
             self.lbName.isHidden = true
             self.lbNameHeight.constant = CGFloat(0)
+        }
+        
+        self.configureImageContent()
+    }
+    
+    private func configureImageContent() {
+//
+        if false {
+            self.ivHeight.constant = 100
+        } else {
+            self.ivHeight.constant = 0
         }
     }
 }
