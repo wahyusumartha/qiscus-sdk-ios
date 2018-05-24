@@ -385,9 +385,21 @@ public class QiscusChatVC: UIViewController{
         
         let center: NotificationCenter = NotificationCenter.default
         center.addObserver(self, selector: #selector(QiscusChatVC.appDidEnterBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
+   
+        let presence: NotificationCenter = NotificationCenter.default
+        presence.addObserver(self, selector: #selector(QiscusChatVC.appPresence), name: QiscusNotification.USER_PRESENCE, object: nil)
         
         self.welcomeView.isHidden = false
         self.collectionView.isHidden = true
+    }
+    
+    @objc func appPresence(){
+        print("update presence")
+        if let room = self.chatRoom {
+            if room.type == .single{
+                self.loadSubtitle()
+            }
+        }
     }
     
     required public init?(coder aDecoder: NSCoder) {
