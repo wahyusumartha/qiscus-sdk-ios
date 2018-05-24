@@ -123,7 +123,7 @@ public class QiscusChatVC: UIViewController{
     var didFindLocation = true
     var prefetch:Bool = false
     var presentingLoading = false
-    
+    var flagPresence = true
     internal let currentNavbarTint = UINavigationBar.appearance().tintColor
     static let currentNavbarTint = UINavigationBar.appearance().tintColor
     
@@ -385,9 +385,27 @@ public class QiscusChatVC: UIViewController{
         
         let center: NotificationCenter = NotificationCenter.default
         center.addObserver(self, selector: #selector(QiscusChatVC.appDidEnterBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
-        
+       
         self.welcomeView.isHidden = false
         self.collectionView.isHidden = true
+    }
+    
+    @objc func appPresence(){
+         self.loadSubtitle()
+    }
+    
+    func checkSingleRoom()->Bool{
+        print("room typee \(self.chatRoom?.type)")
+        if let room = self.chatRoom {
+            if room.type == .single && flagPresence{
+                flagPresence = false
+                return true
+            }else{
+                return false
+            }
+        }else {
+            return false
+        }
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -418,6 +436,9 @@ public class QiscusChatVC: UIViewController{
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         NotificationCenter.default.removeObserver(self, name: .UIKeyboardWillChangeFrame, object: nil)
         NotificationCenter.default.removeObserver(self, name: .UIApplicationDidBecomeActive, object: nil)
+        if checkSingleRoom(){
+            NotificationCenter.default.removeObserver(self, name: QiscusNotification.USER_PRESENCE, object:nil)
+        }
         if let navBarTyping = self.configDelegate?.chatVCConfigDelegate?(usingNavigationSubtitleTyping: self){
             if navBarTyping {
                 if let roomId = self.chatRoom?.id {
@@ -911,6 +932,10 @@ extension QiscusChatVC:QChatServiceDelegate{
             }else{
                 self.collectionView.scrollToBottom()
             }
+        }
+        if checkSingleRoom(){
+            let presence: NotificationCenter = NotificationCenter.default
+            presence.addObserver(self, selector: #selector(QiscusChatVC.appPresence), name: QiscusNotification.USER_PRESENCE, object: nil)
         }
         self.dismissLoading()
         
