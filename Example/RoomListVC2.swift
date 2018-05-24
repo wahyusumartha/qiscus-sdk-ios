@@ -34,7 +34,8 @@ class RoomListVC2: UIViewController {
         let addButton = UIBarButtonItem(title: "+", style: .plain, target: self, action: #selector(addChat))
         let searchButton = UIBarButtonItem(title: "s", style: .plain, target: self, action: #selector(searchText))
 
-        let rightBarButtons = [ addButton, searchButton]
+        //let rightBarButtons = [ addButton, searchButton]
+        let rightBarButtons = [ addButton]
         self.navigationItem.rightBarButtonItems = rightBarButtons
         
     }
