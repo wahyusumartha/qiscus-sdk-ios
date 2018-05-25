@@ -494,7 +494,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         return chatVC
     }
     
-    @objc public class func chatView2(withRoomId roomId: String) -> QChatVC {
+    @objc public class func chatView2(roomId: String) -> QChatVC {
         var chatVC = QChatVC()
         chatVC.roomId = roomId
         

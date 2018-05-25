@@ -1,13 +1,13 @@
 //
-//  LeftTextCell.swift
+//  QImageCell.swift
 //  Qiscus
 //
-//  Created by Rahardyan Bisma on 08/05/18.
+//  Created by Rahardyan Bisma on 24/05/18.
 //
 
 import UIKit
 
-class LeftTextCell: BaseChatCell {
+class QImageCell: BaseChatCell {
     @IBOutlet weak var lbName: UILabel!
     @IBOutlet weak var tvContent: UILabel!
     @IBOutlet weak var ivBaloonLeft: UIImageView!
@@ -23,7 +23,7 @@ class LeftTextCell: BaseChatCell {
         super.awakeFromNib()
         // Initialization code
         self.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
-        self.leftConstrain = NSLayoutConstraint(item: tvContent, attribute: .leading, relatedBy: .equal, toItem: lbName, attribute: .leading, multiplier: 1, constant: 100)
+        self.leftConstrain = NSLayoutConstraint(item: tvContent, attribute: .leading, relatedBy: .equal, toItem: lbName, attribute: .leading, multiplier: 1, constant: -5)
         self.rightConstrain = NSLayoutConstraint(item: lbName, attribute: .trailing, relatedBy: .equal, toItem: tvContent, attribute: .trailing, multiplier: 1, constant: 10)
     }
     
@@ -31,7 +31,7 @@ class LeftTextCell: BaseChatCell {
         self.tvContent.text = self.comment.text
         self.lbName.text = self.comment.senderName
         self.lbTime.text = self.comment.time
-
+        
         if self.comment.isMyComment {
             viewContainer.addConstraint(rightConstrain)
             viewContainer.removeConstraint(leftConstrain)
@@ -42,10 +42,10 @@ class LeftTextCell: BaseChatCell {
             viewContainer.removeConstraint(rightConstrain)
             viewContainer.addConstraint(leftConstrain)
             lbNameTrailing.constant = 20
-            lbNameLeading.constant = 55
+            lbNameLeading.constant = 60
             lbName.textAlignment = .left
         }
-
+        
         if firstInSection {
             self.lbName.isHidden = false
             self.lbNameHeight.constant = CGFloat(21)
@@ -55,3 +55,4 @@ class LeftTextCell: BaseChatCell {
         }
     }
 }
+
