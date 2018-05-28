@@ -947,7 +947,11 @@ extension QiscusChatVC:QChatServiceDelegate{
             self.dismissLoading()
         })
         if chatRoom?.storedName == nil {
-            QToasterSwift.toast(target: self, text: "Can't load chat room\n\(error)", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+            if !Qiscus.sharedInstance.connected {
+                QToasterSwift.toast(target: self, text: "No Internet Connection", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+            }else {
+                QToasterSwift.toast(target: self, text: "Can't load chat room\n\(error)", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+            }
         }
         self.dataLoaded = false
         self.delegate?.chatVC?(viewController: self, didFailLoadRoom: error)
