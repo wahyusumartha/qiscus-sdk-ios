@@ -57,7 +57,13 @@ open class QiscusConfig: NSObject {
                 "User-Agent" : "QiscusSDKIos/v\(Qiscus.versionNumber)",
                 "QISCUS_SDK_APP_ID" : Qiscus.client.appId,
                 "QISCUS_SDK_VERSION" : "IOS_\(Qiscus.versionNumber)",
+                "QISCUS_SDK_PLATFORM": "iOS",
+                "QISCUS_SDK_DEVICE_BRAND": "Apple",
+                "QISCUS_SDK_DEVICE_MODEL": UIDevice.modelName,
+                "QISCUS_SDK_DEVICE_OS_VERSION": UIDevice.current.systemVersion
                 ]
+            
+            
             if Qiscus.client.token != "" {
                 headers["QISCUS_SDK_TOKEN"] = Qiscus.client.token
             }
