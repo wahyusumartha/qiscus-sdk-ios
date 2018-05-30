@@ -113,18 +113,18 @@ extension QChatNoLagVC: UITableViewDataSource {
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if !self.comments.isEmpty {
-            let comment = self.comments[indexPath.section][indexPath.row]
-//            let cell = tableView.dequeueReusableCell(withIdentifier: "PlainTextCell", for: indexPath) as! PlainTextCell
-//            cell.label.text = comment.text
-            
-            var cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
-            
-            cell.comment = comment
-            
-            return cell
-        }
-        
+//        if !self.comments.isEmpty {
+//            let comment = self.comments[indexPath.section][indexPath.row]
+////            let cell = tableView.dequeueReusableCell(withIdentifier: "PlainTextCell", for: indexPath) as! PlainTextCell
+////            cell.label.text = comment.text
+//            
+//            
+//            
+//            cell.comment = comment
+//            
+//            return cell
+//        }
+//        
         return UITableViewCell()
     }
     

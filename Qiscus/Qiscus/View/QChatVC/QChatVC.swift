@@ -230,19 +230,19 @@ extension QChatVC: UITableViewDataSource {
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let comment = self.presenter.getComments()[indexPath.section][indexPath.row]
-        
-        tempSection = indexPath.section
-
-        let cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
-        cell.firstInSection = indexPath.row == self.presenter.getComments()[indexPath.section].count - 1
-        cell.comment = comment
-        cell.layer.shouldRasterize = true
-        cell.layer.rasterizationScale = UIScreen.main.scale
+//        let comment = self.presenter.getComments()[indexPath.section][indexPath.row]
+//
+//        tempSection = indexPath.section
+//
+//        let cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
+//        cell.firstInSection = indexPath.row == self.presenter.getComments()[indexPath.section].count - 1
+//        cell.comment = comment
+//        cell.layer.shouldRasterize = true
+//        cell.layer.rasterizationScale = UIScreen.main.scale
         
 //        let cell = tableView.dequeueReusableCell(withIdentifier: "PlainTextCell", for: indexPath) as! PlainTextCell
 //        cell.label.text = comment.text
-        return cell
+        return UITableViewCell()
     }
     
     public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
