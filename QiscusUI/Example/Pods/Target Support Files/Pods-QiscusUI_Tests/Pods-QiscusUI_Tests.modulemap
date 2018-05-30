@@ -1,0 +1,6 @@
+framework module Pods_QiscusUI_Tests {
+  umbrella header "Pods-QiscusUI_Tests-umbrella.h"
+
+  export *
+  module * { export * }
+}

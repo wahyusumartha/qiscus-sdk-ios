@@ -1,0 +1,6 @@
+framework module QiscusUI {
+  umbrella header "QiscusUI-umbrella.h"
+
+  export *
+  module * { export * }
+}

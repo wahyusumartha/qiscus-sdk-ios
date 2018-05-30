@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'QiscusUI_Example' do
+  pod 'QiscusUI', :path => '../'
+
+  target 'QiscusUI_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end

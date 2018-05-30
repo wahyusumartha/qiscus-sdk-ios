@@ -1,0 +1,710 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		5712C7C28CC24146D890E393BDB06DD7 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6604A7D69453B4569E4E4827FB9155A9 /* Foundation.framework */; };
+		60BFF2F85198B1081D9132C2B41D7566 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6604A7D69453B4569E4E4827FB9155A9 /* Foundation.framework */; };
+		6C23D03AF72C7DDAF35594A8175154FE /* Pods-QiscusUI_Tests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 974BBEF376013E5469A6A6F0C13E1B9E /* Pods-QiscusUI_Tests-dummy.m */; };
+		72746E3580AFE289ED4919DFF3BF8B5A /* ReplaceMe.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51C5F837787B9BA914CB0791C4A1F4E /* ReplaceMe.swift */; };
+		913830446858331C122E94C9F54965A0 /* Pods-QiscusUI_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 3F75D39D7C3120CF2E7F368DC8972158 /* Pods-QiscusUI_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		94C01A95D2F56FDB5572AF00166FBBBB /* Pods-QiscusUI_Tests-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = CD941EB9EFF9D4FC407D679C5D11A9FC /* Pods-QiscusUI_Tests-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		95A85253F1AE531E3637B6146FDE2C7C /* Pods-QiscusUI_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 0558835A710D7D7F2B9DFD69CC936AAC /* Pods-QiscusUI_Example-dummy.m */; };
+		95E29032A78088D4CC8704B1F60712B9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6604A7D69453B4569E4E4827FB9155A9 /* Foundation.framework */; };
+		C913BCD9F94B0A51A6112025B1D12A7E /* QiscusUI-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 9F6C2CFE7CFCD1D0C92530059DE62E0E /* QiscusUI-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DD7611F61A55060CCF43B92EC9DB3F66 /* QiscusUI-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 3529DCCABFBB5C6263BF879409203E61 /* QiscusUI-dummy.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		38BA4014F8FDC0C6AED1E82E19FCFA22 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D41D8CD98F00B204E9800998ECF8427E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 57A32DE0672D0E1614DF963E432FA022;
+			remoteInfo = QiscusUI;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0558835A710D7D7F2B9DFD69CC936AAC /* Pods-QiscusUI_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-QiscusUI_Example-dummy.m"; sourceTree = "<group>"; };
+		0DADF942AFE2EE383786443FC919730E /* QiscusUI.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; path = QiscusUI.modulemap; sourceTree = "<group>"; };
+		0FB78D9CF41B8FD0C0DE3271A2689E4E /* QiscusUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = QiscusUI.framework; path = QiscusUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1A3BEA2B8F8047815C2BF76C4E48C360 /* Pods-QiscusUI_Tests-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-QiscusUI_Tests-frameworks.sh"; sourceTree = "<group>"; };
+		23EC9BE972DF35FADE33373A497B2ED5 /* Pods-QiscusUI_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-QiscusUI_Example.release.xcconfig"; sourceTree = "<group>"; };
+		25F76FBEFDCC3DE8B2393BF64D860513 /* Pods-QiscusUI_Tests.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; path = "Pods-QiscusUI_Tests.modulemap"; sourceTree = "<group>"; };
+		2D4E13741DE9E37CADE2F25D6E813827 /* Pods-QiscusUI_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-QiscusUI_Tests.debug.xcconfig"; sourceTree = "<group>"; };
+		333C829CC54EFFD1C9005533F86C6432 /* Pods-QiscusUI_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-QiscusUI_Example-frameworks.sh"; sourceTree = "<group>"; };
+		33D38C60F3790F438017BA5DE7EBB2F6 /* Pods-QiscusUI_Tests-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-QiscusUI_Tests-resources.sh"; sourceTree = "<group>"; };
+		3529DCCABFBB5C6263BF879409203E61 /* QiscusUI-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "QiscusUI-dummy.m"; sourceTree = "<group>"; };
+		388B68F6A924573F508C2A0085FF2F26 /* QiscusUI-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "QiscusUI-prefix.pch"; sourceTree = "<group>"; };
+		3DC2D551F2F7D34C746FD6B85664F1FE /* Pods-QiscusUI_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-QiscusUI_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
+		3F75D39D7C3120CF2E7F368DC8972158 /* Pods-QiscusUI_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-QiscusUI_Example-umbrella.h"; sourceTree = "<group>"; };
+		492868E95CFCE957394B4C2E2949DED6 /* Pods-QiscusUI_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-QiscusUI_Example-acknowledgements.plist"; sourceTree = "<group>"; };
+		5448BBAA79001A5EE25DE40782950710 /* Pods-QiscusUI_Example-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-QiscusUI_Example-resources.sh"; sourceTree = "<group>"; };
+		6604A7D69453B4569E4E4827FB9155A9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		6FCE404F6205A259B2A0F169DD55EE30 /* Pods-QiscusUI_Example.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; path = "Pods-QiscusUI_Example.modulemap"; sourceTree = "<group>"; };
+		82A476EC69C348A6E5EA00FBE463005D /* QiscusUI.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = QiscusUI.xcconfig; sourceTree = "<group>"; };
+		843C76A44B2C32B2B7C459A0B7C1D613 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		93A4A3777CF96A4AAC1D13BA6DCCEA73 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		974BBEF376013E5469A6A6F0C13E1B9E /* Pods-QiscusUI_Tests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-QiscusUI_Tests-dummy.m"; sourceTree = "<group>"; };
+		9EB5D80D15B06602AA79EA5C934FB2AC /* Pods-QiscusUI_Tests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-QiscusUI_Tests-acknowledgements.markdown"; sourceTree = "<group>"; };
+		9F6C2CFE7CFCD1D0C92530059DE62E0E /* QiscusUI-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "QiscusUI-umbrella.h"; sourceTree = "<group>"; };
+		A51C5F837787B9BA914CB0791C4A1F4E /* ReplaceMe.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ReplaceMe.swift; path = QiscusUI/Classes/ReplaceMe.swift; sourceTree = "<group>"; };
+		C5C5E5F2B7C44197A17DCBD1BE8E2DF3 /* Pods-QiscusUI_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-QiscusUI_Tests.release.xcconfig"; sourceTree = "<group>"; };
+		CACF7FB1E657C4922B60A20CFE2CCE80 /* Pods_QiscusUI_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_QiscusUI_Example.framework; path = "Pods-QiscusUI_Example.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		CD941EB9EFF9D4FC407D679C5D11A9FC /* Pods-QiscusUI_Tests-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-QiscusUI_Tests-umbrella.h"; sourceTree = "<group>"; };
+		D062F29876AFE1C8667507C5BA2592BA /* Pods-QiscusUI_Tests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-QiscusUI_Tests-acknowledgements.plist"; sourceTree = "<group>"; };
+		D9C84712F0D42B8BA8C3D3269E080A05 /* Pods_QiscusUI_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_QiscusUI_Tests.framework; path = "Pods-QiscusUI_Tests.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E695EAE243846EE9309DF3479DA35D94 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EAACD1AB7AD1A768EE473679128B5069 /* Pods-QiscusUI_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-QiscusUI_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		FA37388E5FEE831F8D10A00690EB0BB2 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3B1D94CFD445B9E3F862E4E760AD1B2E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95E29032A78088D4CC8704B1F60712B9 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8C0B579A806D2DEDBD2E2C9781CF8443 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5712C7C28CC24146D890E393BDB06DD7 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CC90C7FA69FDF8CCC9093D3D27053943 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				60BFF2F85198B1081D9132C2B41D7566 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4724C3CC1AF480BDD218153865BB8F29 /* Pods-QiscusUI_Tests */ = {
+			isa = PBXGroup;
+			children = (
+				FA37388E5FEE831F8D10A00690EB0BB2 /* Info.plist */,
+				25F76FBEFDCC3DE8B2393BF64D860513 /* Pods-QiscusUI_Tests.modulemap */,
+				9EB5D80D15B06602AA79EA5C934FB2AC /* Pods-QiscusUI_Tests-acknowledgements.markdown */,
+				D062F29876AFE1C8667507C5BA2592BA /* Pods-QiscusUI_Tests-acknowledgements.plist */,
+				974BBEF376013E5469A6A6F0C13E1B9E /* Pods-QiscusUI_Tests-dummy.m */,
+				1A3BEA2B8F8047815C2BF76C4E48C360 /* Pods-QiscusUI_Tests-frameworks.sh */,
+				33D38C60F3790F438017BA5DE7EBB2F6 /* Pods-QiscusUI_Tests-resources.sh */,
+				CD941EB9EFF9D4FC407D679C5D11A9FC /* Pods-QiscusUI_Tests-umbrella.h */,
+				2D4E13741DE9E37CADE2F25D6E813827 /* Pods-QiscusUI_Tests.debug.xcconfig */,
+				C5C5E5F2B7C44197A17DCBD1BE8E2DF3 /* Pods-QiscusUI_Tests.release.xcconfig */,
+			);
+			name = "Pods-QiscusUI_Tests";
+			path = "Target Support Files/Pods-QiscusUI_Tests";
+			sourceTree = "<group>";
+		};
+		72FC2D7BEEA9A595A518D096860A7BBF /* Targets Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				EF3DF4B3DCE109DAC7939FE562F6CC2E /* Pods-QiscusUI_Example */,
+				4724C3CC1AF480BDD218153865BB8F29 /* Pods-QiscusUI_Tests */,
+			);
+			name = "Targets Support Files";
+			sourceTree = "<group>";
+		};
+		7DB346D0F39D3F0E887471402A8071AB = {
+			isa = PBXGroup;
+			children = (
+				93A4A3777CF96A4AAC1D13BA6DCCEA73 /* Podfile */,
+				F11F4516E2BA29052DB90A1AAD4825E4 /* Development Pods */,
+				BC3CA7F9E30CC8F7E2DD044DD34432FC /* Frameworks */,
+				E8F77D2FDBAD94DF95B7B4292D21AAB2 /* Products */,
+				72FC2D7BEEA9A595A518D096860A7BBF /* Targets Support Files */,
+			);
+			sourceTree = "<group>";
+		};
+		9D56338F4538DE59E39F060254C2A84D /* Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				843C76A44B2C32B2B7C459A0B7C1D613 /* Info.plist */,
+				0DADF942AFE2EE383786443FC919730E /* QiscusUI.modulemap */,
+				82A476EC69C348A6E5EA00FBE463005D /* QiscusUI.xcconfig */,
+				3529DCCABFBB5C6263BF879409203E61 /* QiscusUI-dummy.m */,
+				388B68F6A924573F508C2A0085FF2F26 /* QiscusUI-prefix.pch */,
+				9F6C2CFE7CFCD1D0C92530059DE62E0E /* QiscusUI-umbrella.h */,
+			);
+			name = "Support Files";
+			path = "Example/Pods/Target Support Files/QiscusUI";
+			sourceTree = "<group>";
+		};
+		BC3CA7F9E30CC8F7E2DD044DD34432FC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D35AF013A5F0BAD4F32504907A52519E /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D35AF013A5F0BAD4F32504907A52519E /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				6604A7D69453B4569E4E4827FB9155A9 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		D546659596E9FAAD88BB88A2FF756E6A /* QiscusUI */ = {
+			isa = PBXGroup;
+			children = (
+				A51C5F837787B9BA914CB0791C4A1F4E /* ReplaceMe.swift */,
+				9D56338F4538DE59E39F060254C2A84D /* Support Files */,
+			);
+			name = QiscusUI;
+			path = ../..;
+			sourceTree = "<group>";
+		};
+		E8F77D2FDBAD94DF95B7B4292D21AAB2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CACF7FB1E657C4922B60A20CFE2CCE80 /* Pods_QiscusUI_Example.framework */,
+				D9C84712F0D42B8BA8C3D3269E080A05 /* Pods_QiscusUI_Tests.framework */,
+				0FB78D9CF41B8FD0C0DE3271A2689E4E /* QiscusUI.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EF3DF4B3DCE109DAC7939FE562F6CC2E /* Pods-QiscusUI_Example */ = {
+			isa = PBXGroup;
+			children = (
+				E695EAE243846EE9309DF3479DA35D94 /* Info.plist */,
+				6FCE404F6205A259B2A0F169DD55EE30 /* Pods-QiscusUI_Example.modulemap */,
+				3DC2D551F2F7D34C746FD6B85664F1FE /* Pods-QiscusUI_Example-acknowledgements.markdown */,
+				492868E95CFCE957394B4C2E2949DED6 /* Pods-QiscusUI_Example-acknowledgements.plist */,
+				0558835A710D7D7F2B9DFD69CC936AAC /* Pods-QiscusUI_Example-dummy.m */,
+				333C829CC54EFFD1C9005533F86C6432 /* Pods-QiscusUI_Example-frameworks.sh */,
+				5448BBAA79001A5EE25DE40782950710 /* Pods-QiscusUI_Example-resources.sh */,
+				3F75D39D7C3120CF2E7F368DC8972158 /* Pods-QiscusUI_Example-umbrella.h */,
+				EAACD1AB7AD1A768EE473679128B5069 /* Pods-QiscusUI_Example.debug.xcconfig */,
+				23EC9BE972DF35FADE33373A497B2ED5 /* Pods-QiscusUI_Example.release.xcconfig */,
+			);
+			name = "Pods-QiscusUI_Example";
+			path = "Target Support Files/Pods-QiscusUI_Example";
+			sourceTree = "<group>";
+		};
+		F11F4516E2BA29052DB90A1AAD4825E4 /* Development Pods */ = {
+			isa = PBXGroup;
+			children = (
+				D546659596E9FAAD88BB88A2FF756E6A /* QiscusUI */,
+			);
+			name = "Development Pods";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		2C30B37E3AB3BD9541C6E1B193EC29C6 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C913BCD9F94B0A51A6112025B1D12A7E /* QiscusUI-umbrella.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6D1DE948EAC0CEEAC42B03D47BFC891A /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				913830446858331C122E94C9F54965A0 /* Pods-QiscusUI_Example-umbrella.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E87369494C82572D045E61B4F4CD83C4 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				94C01A95D2F56FDB5572AF00166FBBBB /* Pods-QiscusUI_Tests-umbrella.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		4B0051106132D4D98FC2BC0561023F8E /* Pods-QiscusUI_Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E17B0530F5B270AE9EBD36F2C7C61806 /* Build configuration list for PBXNativeTarget "Pods-QiscusUI_Tests" */;
+			buildPhases = (
+				5385294CD274B40D2FAE35B12CD9EC53 /* Sources */,
+				8C0B579A806D2DEDBD2E2C9781CF8443 /* Frameworks */,
+				E87369494C82572D045E61B4F4CD83C4 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Pods-QiscusUI_Tests";
+			productName = "Pods-QiscusUI_Tests";
+			productReference = D9C84712F0D42B8BA8C3D3269E080A05 /* Pods_QiscusUI_Tests.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		5216E4BDB6A82592BA80CAE72FEC295F /* Pods-QiscusUI_Example */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 067B46FDFA9F64BEAD12C4BBEDBD5116 /* Build configuration list for PBXNativeTarget "Pods-QiscusUI_Example" */;
+			buildPhases = (
+				CD432278AC7461DB0310FBD06882E13F /* Sources */,
+				3B1D94CFD445B9E3F862E4E760AD1B2E /* Frameworks */,
+				6D1DE948EAC0CEEAC42B03D47BFC891A /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				203DE55802ED531F66591502BEC72491 /* PBXTargetDependency */,
+			);
+			name = "Pods-QiscusUI_Example";
+			productName = "Pods-QiscusUI_Example";
+			productReference = CACF7FB1E657C4922B60A20CFE2CCE80 /* Pods_QiscusUI_Example.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		57A32DE0672D0E1614DF963E432FA022 /* QiscusUI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DFC03F29795C6130811B502D7C57FF6D /* Build configuration list for PBXNativeTarget "QiscusUI" */;
+			buildPhases = (
+				B05E90DF6BE84B4153604EB0B3759836 /* Sources */,
+				CC90C7FA69FDF8CCC9093D3D27053943 /* Frameworks */,
+				2C30B37E3AB3BD9541C6E1B193EC29C6 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = QiscusUI;
+			productName = QiscusUI;
+			productReference = 0FB78D9CF41B8FD0C0DE3271A2689E4E /* QiscusUI.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D41D8CD98F00B204E9800998ECF8427E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0830;
+				LastUpgradeCheck = 0700;
+			};
+			buildConfigurationList = 2D8E8EC45A3A1A1D94AE762CB5028504 /* Build configuration list for PBXProject "Pods" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 7DB346D0F39D3F0E887471402A8071AB;
+			productRefGroup = E8F77D2FDBAD94DF95B7B4292D21AAB2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5216E4BDB6A82592BA80CAE72FEC295F /* Pods-QiscusUI_Example */,
+				4B0051106132D4D98FC2BC0561023F8E /* Pods-QiscusUI_Tests */,
+				57A32DE0672D0E1614DF963E432FA022 /* QiscusUI */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5385294CD274B40D2FAE35B12CD9EC53 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6C23D03AF72C7DDAF35594A8175154FE /* Pods-QiscusUI_Tests-dummy.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B05E90DF6BE84B4153604EB0B3759836 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DD7611F61A55060CCF43B92EC9DB3F66 /* QiscusUI-dummy.m in Sources */,
+				72746E3580AFE289ED4919DFF3BF8B5A /* ReplaceMe.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CD432278AC7461DB0310FBD06882E13F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95A85253F1AE531E3637B6146FDE2C7C /* Pods-QiscusUI_Example-dummy.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		203DE55802ED531F66591502BEC72491 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = QiscusUI;
+			target = 57A32DE0672D0E1614DF963E432FA022 /* QiscusUI */;
+			targetProxy = 38BA4014F8FDC0C6AED1E82E19FCFA22 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		024348FDC70DC6B1FC003D878630171F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = EAACD1AB7AD1A768EE473679128B5069 /* Pods-QiscusUI_Example.debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Target Support Files/Pods-QiscusUI_Example/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-QiscusUI_Example/Pods-QiscusUI_Example.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = Pods_QiscusUI_Example;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		33DA7F43A1D2FA3C74A8C8FC246E1FA6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_REQUIRED = NO;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"POD_CONFIGURATION_DEBUG=1",
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = NO_SIGNING/;
+				STRIP_INSTALLED_PRODUCT = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SYMROOT = "${SRCROOT}/../build";
+			};
+			name = Debug;
+		};
+		654E512DDE622CE6C501BF5739FCD15E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 23EC9BE972DF35FADE33373A497B2ED5 /* Pods-QiscusUI_Example.release.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Target Support Files/Pods-QiscusUI_Example/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-QiscusUI_Example/Pods-QiscusUI_Example.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = Pods_QiscusUI_Example;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		731DC216E1A58545B559F6E0A2418060 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_REQUIRED = NO;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"POD_CONFIGURATION_RELEASE=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = NO_SIGNING/;
+				STRIP_INSTALLED_PRODUCT = NO;
+				SYMROOT = "${SRCROOT}/../build";
+			};
+			name = Release;
+		};
+		D46D432CA2F5E34795A3892B0505DCCE /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 82A476EC69C348A6E5EA00FBE463005D /* QiscusUI.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREFIX_HEADER = "Target Support Files/QiscusUI/QiscusUI-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/QiscusUI/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = "Target Support Files/QiscusUI/QiscusUI.modulemap";
+				PRODUCT_NAME = QiscusUI;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		DA8A40C810D48B732601D696D2A363BE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 82A476EC69C348A6E5EA00FBE463005D /* QiscusUI.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREFIX_HEADER = "Target Support Files/QiscusUI/QiscusUI-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/QiscusUI/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = "Target Support Files/QiscusUI/QiscusUI.modulemap";
+				PRODUCT_NAME = QiscusUI;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		EC0694C748407B73014AE5A0D33462DE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2D4E13741DE9E37CADE2F25D6E813827 /* Pods-QiscusUI_Tests.debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Target Support Files/Pods-QiscusUI_Tests/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-QiscusUI_Tests/Pods-QiscusUI_Tests.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = Pods_QiscusUI_Tests;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		F7967C89C4E396DC08311CC94BA044F1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C5C5E5F2B7C44197A17DCBD1BE8E2DF3 /* Pods-QiscusUI_Tests.release.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Target Support Files/Pods-QiscusUI_Tests/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-QiscusUI_Tests/Pods-QiscusUI_Tests.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = Pods_QiscusUI_Tests;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		067B46FDFA9F64BEAD12C4BBEDBD5116 /* Build configuration list for PBXNativeTarget "Pods-QiscusUI_Example" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				024348FDC70DC6B1FC003D878630171F /* Debug */,
+				654E512DDE622CE6C501BF5739FCD15E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2D8E8EC45A3A1A1D94AE762CB5028504 /* Build configuration list for PBXProject "Pods" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				33DA7F43A1D2FA3C74A8C8FC246E1FA6 /* Debug */,
+				731DC216E1A58545B559F6E0A2418060 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DFC03F29795C6130811B502D7C57FF6D /* Build configuration list for PBXNativeTarget "QiscusUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA8A40C810D48B732601D696D2A363BE /* Debug */,
+				D46D432CA2F5E34795A3892B0505DCCE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E17B0530F5B270AE9EBD36F2C7C61806 /* Build configuration list for PBXNativeTarget "Pods-QiscusUI_Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC0694C748407B73014AE5A0D33462DE /* Debug */,
+				F7967C89C4E396DC08311CC94BA044F1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D41D8CD98F00B204E9800998ECF8427E /* Project object */;
+}
