@@ -22,6 +22,7 @@ public struct CommentModel {
     var textFontName: String = ""
     var textFontSize: Float = 0
     var displayImage: UIImage?
+    var cellHeight: Float = 0
     
     //audio variable
     var durationLabel: String = ""

@@ -21,7 +21,7 @@ open class QChatVC: UIViewController {
     private var roomAvatar = UIImageView()
     private var titleView = UIView()
     private var presenter: QChatPresenter!
-    var heightAtIndexPath = NSMutableDictionary()
+    var heightAtIndexPath: [IndexPath: CGFloat] = [:]
     
     var roomId: String = ""
     var tempSection = -1
@@ -150,7 +150,6 @@ open class QChatVC: UIViewController {
         let rotate = CGAffineTransform(rotationAngle: CGFloat(M_PI))
         self.tableViewConversation.transform = rotate
         self.tableViewConversation.scrollIndicatorInsets = UIEdgeInsetsMake(0,0,0,self.tableViewConversation.bounds.size.width-10)
-        self.tableViewConversation.estimatedRowHeight = 300
         self.tableViewConversation.rowHeight = UITableViewAutomaticDimension
         self.tableViewConversation.dataSource = self
         self.tableViewConversation.delegate = self
@@ -251,21 +250,20 @@ extension QChatVC: UITableViewDataSource {
         return self.presenter.getComments().count
     }
     
+    public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return heightAtIndexPath[indexPath] ?? UITableViewAutomaticDimension
+    }
+    
     public func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-        if let height = heightAtIndexPath.object(forKey: indexPath) as? NSNumber {
-            return CGFloat(height.floatValue)
-        } else {
-            return UITableViewAutomaticDimension
-        }
+        return heightAtIndexPath[indexPath] ?? UITableViewAutomaticDimension
     }
     
     public func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         
-        if let height = self.heightAtIndexPath.object(forKey: indexPath) as? NSNumber {
+        if let height = self.heightAtIndexPath[indexPath] {
             
         } else {
-            let height = NSNumber(value: Float(cell.frame.size.height))
-            heightAtIndexPath.setObject(height, forKey: indexPath as NSCopying)
+            heightAtIndexPath[indexPath] = cell.frame.size.height
         }
     }
     
