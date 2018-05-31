@@ -43,8 +43,8 @@ class QChatPresenter: QChatUserInteraction {
     func loadRoom(withId roomId: String) {
         if let room = QRoom.room(withId: roomId) {
             self.room = room
+            self.comments = self.generateComments(qComments: room.comments)
             DispatchQueue.main.async {
-                self.comments = self.generateComments(qComments: room.comments)
                 self.view.onLoadRoomFinished(roomName: room.name, roomAvatar: room.avatar)
                 self.loadRoomAvatar(room: room)
                 self.view.onLoadMessageFinished()
@@ -56,6 +56,8 @@ class QChatPresenter: QChatUserInteraction {
         }
         
         let center: NotificationCenter = NotificationCenter.default
+        center.removeObserver(self, name: QiscusNotification.ROOM_CHANGE(onRoom: roomId), object: nil)
+
         center.addObserver(self, selector: #selector(QChatPresenter.newCommentNotif(_:)), name: QiscusNotification.ROOM_CHANGE(onRoom: roomId), object: nil)
     }
     
@@ -238,7 +240,10 @@ class QChatPresenter: QChatUserInteraction {
                 guard let comment = room.lastComment else {return}
                 
                 if room.isInvalidated { return }
-                if comment.senderEmail == Qiscus.client.email {return}
+                if comment.senderEmail == Qiscus.client.email {
+                    self.chatService.room(withId: room.id)
+                    return
+                }
                 
                 let commentModel = CommentModel(uniqueId: comment.uniqueId, id: comment.id, roomId: comment.roomId, text: comment.text, time: comment.time, date: comment.date, senderEmail: comment.senderEmail, senderName: comment.senderName, senderAvatarURL: comment.senderAvatarURL, roomName: comment.roomName, textFontName: "", textFontSize: 0, displayImage: nil, cellHeight: 0, durationLabel: comment.durationLabel, currentTimeSlider: comment.currentTimeSlider, seekTimeLabel: comment.seekTimeLabel, audioIsPlaying: comment.audioIsPlaying, isDownloading: comment.isDownloading, isUploading: comment.isUploading, progress: comment.progress, isRead: comment.isRead, extras: comment.extras, isMyComment: comment.senderEmail == Qiscus.client.email, commentType: comment.type, commentStatus: comment.status, file: comment.file)
                 
@@ -264,7 +269,7 @@ class QChatPresenter: QChatUserInteraction {
 
 extension QChatPresenter: QChatServiceDelegate {
     func chatService(didFinishLoadRoom room:QRoom, withMessage message:String?) {
-        
+        self.room = room
         self.comments = self.generateComments(qComments: room.comments)
         self.view.onLoadMessageFinished()
         self.view.onLoadRoomFinished(roomName: room.name, roomAvatar: room.avatar)

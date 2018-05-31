@@ -21,13 +21,14 @@ open class QChatVC: UIViewController {
     private var roomAvatar = UIImageView()
     private var titleView = UIView()
     private var presenter: QChatPresenter!
-    var heightAtIndexPath: [IndexPath: CGFloat] = [:]
+    var heightAtIndexPath: [String: CGFloat] = [:]
     
     var roomId: String = ""
     var tempSection = -1
     
     public init() {
         super.init(nibName: "QChatVC", bundle: QiscusUI.bundle)
+        self.presenter = QChatPresenter(view: self)
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -36,18 +37,16 @@ open class QChatVC: UIViewController {
     
     override open func viewDidLoad() {
         super.viewDidLoad()
-        self.presenter = QChatPresenter(view: self)
-        self.presenter.loadRoom(withId: self.roomId)
         self.setupUI()
         // Do any additional setup after loading the view.
     }
     
-    open override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-    }
-    
     open override func viewWillAppear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
+        super.viewWillAppear(animated)
+        self.presenter.loadRoom(withId: self.roomId)
+        let center: NotificationCenter = NotificationCenter.default
+        center.addObserver(self, selector: #selector(QChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        center.addObserver(self, selector: #selector(QChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
         view.endEditing(true)
     }
     
@@ -75,9 +74,6 @@ open class QChatVC: UIViewController {
         self.setupNavigationTitle()
         self.qiscusAutoHideKeyboard()
         self.setupTableView()
-        let center: NotificationCenter = NotificationCenter.default
-        center.addObserver(self, selector: #selector(QChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
-        center.addObserver(self, selector: #selector(QChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
     }
     
     private func setupNavigationTitle(){
@@ -217,21 +213,23 @@ extension QChatVC: QChatViewDelegate {
     }
     
     func onGotNewComment(newSection: Bool, isMyComment: Bool) {
-        if newSection {
-            self.tableViewConversation.beginUpdates()
-            self.tableViewConversation.insertSections(IndexSet(integer: 0), with: .none)
-            if isMyComment {
-                self.tableViewConversation.scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: true)
+        if Thread.isMainThread {
+            if newSection {
+                self.tableViewConversation.beginUpdates()
+                self.tableViewConversation.insertSections(IndexSet(integer: 0), with: .none)
+                if isMyComment {
+                    self.tableViewConversation.scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: true)
+                }
+                self.tableViewConversation.endUpdates()
+            } else {
+                let indexPath = IndexPath(row: 0, section: 0)
+                self.tableViewConversation.beginUpdates()
+                self.tableViewConversation.insertRows(at: [indexPath], with: .none)
+                if isMyComment {
+                    self.tableViewConversation.scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: true)
+                }
+                self.tableViewConversation.endUpdates()
             }
-            self.tableViewConversation.endUpdates()
-        } else {
-            let indexPath = IndexPath(row: 0, section: 0)
-            self.tableViewConversation.beginUpdates()
-            self.tableViewConversation.insertRows(at: [indexPath], with: .none)
-            if isMyComment {
-                self.tableViewConversation.scrollToRow(at: IndexPath(row: 0, section: 0), at: .bottom, animated: true)
-            }
-            self.tableViewConversation.endUpdates()
         }
     }
 }
@@ -251,19 +249,29 @@ extension QChatVC: UITableViewDataSource {
     }
     
     public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return heightAtIndexPath[indexPath] ?? UITableViewAutomaticDimension
+        let commentId = self.presenter.getComments()[indexPath.section][indexPath.row].uniqueId
+        if let cachedHeight = heightAtIndexPath[commentId] {
+            return cachedHeight
+        } else {
+            return UITableViewAutomaticDimension
+        }
     }
     
     public func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
-        return heightAtIndexPath[indexPath] ?? UITableViewAutomaticDimension
+        let commentId = self.presenter.getComments()[indexPath.section][indexPath.row].uniqueId
+        if let cachedHeight = heightAtIndexPath[commentId] {
+            return cachedHeight
+        } else {
+            return UITableViewAutomaticDimension
+        }
     }
     
     public func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        
-        if let height = self.heightAtIndexPath[indexPath] {
+        let commentId = self.presenter.getComments()[indexPath.section][indexPath.row].uniqueId
+        if let height = self.heightAtIndexPath[commentId] {
             
         } else {
-            heightAtIndexPath[indexPath] = cell.frame.size.height
+            heightAtIndexPath[commentId] = cell.frame.size.height
         }
     }
     

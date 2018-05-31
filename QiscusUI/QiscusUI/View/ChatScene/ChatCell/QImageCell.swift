@@ -13,12 +13,13 @@ class QImageCell: BaseChatCell {
     @IBOutlet weak var ivBaloonLeft: UIImageView!
     @IBOutlet weak var lbTime: UILabel!
     @IBOutlet weak var viewContainer: UIView!
+    @IBOutlet weak var ivStatus: UIImageView!
     @IBOutlet weak var lbNameHeight: NSLayoutConstraint!
     @IBOutlet weak var lbNameLeading: NSLayoutConstraint!
     @IBOutlet weak var lbNameTrailing: NSLayoutConstraint!
     @IBOutlet weak var btnButton: UIButton!
     @IBOutlet weak var ivComment: UIImageView!
-    
+    @IBOutlet weak var statusWidth: NSLayoutConstraint!
     
     var leftConstrain: NSLayoutConstraint!
     var rightConstrain: NSLayoutConstraint!
@@ -33,6 +34,10 @@ class QImageCell: BaseChatCell {
         self.ivComment.clipsToBounds = true
         self.ivComment.backgroundColor = UIColor.black
         self.ivComment.isUserInteractionEnabled = true
+    }
+    
+    override func menuResponderView() -> UIView {
+        return self.ivBaloonLeft
     }
     
     override func bindDataToView() {
@@ -58,12 +63,67 @@ class QImageCell: BaseChatCell {
             lbNameTrailing.constant = 5
             lbNameLeading.constant = 20
             lbName.textAlignment = .right
+            self.statusWidth.constant = 15
+            
+            self.statusWidth.constant = 15
+            
+            switch self.comment.commentStatus {
+            case .pending:
+                let pendingIcon = QiscusUI.image(named: "ic_pending")?.withRenderingMode(.alwaysTemplate)
+                self.ivStatus.tintColor = UIColor.lightGray
+                self.ivStatus.image = pendingIcon
+                break
+            case .sending:
+                let pendingIcon = QiscusUI.image(named: "ic_sending")?.withRenderingMode(.alwaysTemplate)
+                self.ivStatus.tintColor = UIColor.lightGray
+                self.ivStatus.image = pendingIcon
+                break
+            case .sent:
+                let pendingIcon = QiscusUI.image(named: "ic_sending")?.withRenderingMode(.alwaysTemplate)
+                self.ivStatus.tintColor = UIColor.lightGray
+                self.ivStatus.image = pendingIcon
+                break
+            case .delivered:
+                let pendingIcon = QiscusUI.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)
+                self.ivStatus.tintColor = UIColor.lightGray
+                self.ivStatus.image = pendingIcon
+                break
+            case .read:
+                let pendingIcon = QiscusUI.image(named: "ic_read")?.withRenderingMode(.alwaysTemplate)
+                self.ivStatus.tintColor = UIColor.green
+                self.ivStatus.image = pendingIcon
+                break
+            case .deleting:
+                let pendingIcon = QiscusUI.image(named: "ic_deleting")?.withRenderingMode(.alwaysTemplate)
+                self.ivStatus.tintColor = UIColor.lightGray
+                self.ivStatus.image = pendingIcon
+                break
+            case .deleted:
+                let pendingIcon = QiscusUI.image(named: "ic_deleted")?.withRenderingMode(.alwaysTemplate)
+                self.ivStatus.tintColor = UIColor.lightGray
+                self.ivStatus.image = pendingIcon
+                break
+            case .deletePending:
+                let pendingIcon = QiscusUI.image(named: "ic_deleting")?.withRenderingMode(.alwaysTemplate)
+                self.ivStatus.tintColor = UIColor.lightGray
+                self.ivStatus.image = pendingIcon
+                break
+            case .failed:
+                let pendingIcon = QiscusUI.image(named: "ic_pending")?.withRenderingMode(.alwaysTemplate)
+                self.ivStatus.tintColor = UIColor.lightGray
+                self.ivStatus.image = pendingIcon
+                break
+            default:
+                break
+            }
+            
         } else {
-            viewContainer.removeConstraint(rightConstrain)
             viewContainer.addConstraint(leftConstrain)
+            viewContainer.removeConstraint(rightConstrain)
             lbNameTrailing.constant = 20
             lbNameLeading.constant = 45
             lbName.textAlignment = .left
+            self.statusWidth.constant = 0
         }
         
         if firstInSection {

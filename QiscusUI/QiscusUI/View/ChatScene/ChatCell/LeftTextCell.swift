@@ -21,6 +21,7 @@ class LeftTextCell: BaseChatCell {
     var leftConstrain: NSLayoutConstraint!
     var rightConstrain: NSLayoutConstraint!
     
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
@@ -29,7 +30,12 @@ class LeftTextCell: BaseChatCell {
         self.rightConstrain = NSLayoutConstraint(item: lbName, attribute: .trailing, relatedBy: .equal, toItem: tvContent, attribute: .trailing, multiplier: 1, constant: 10)
     }
     
+    override func menuResponderView() -> UIView {
+        return self.ivBaloonLeft
+    }
+    
     override func bindDataToView() {
+        super.bindDataToView()
         self.tvContent.text = self.comment.text
         self.lbName.text = self.comment.senderName
         self.lbTime.text = self.comment.time
@@ -92,20 +98,20 @@ class LeftTextCell: BaseChatCell {
                 break
             }
         } else {
-            viewContainer.removeConstraint(rightConstrain)
             viewContainer.addConstraint(leftConstrain)
+            viewContainer.removeConstraint(rightConstrain)
             lbNameTrailing.constant = 20
             lbNameLeading.constant = 45
             lbName.textAlignment = .left
             self.statusWidth.constant = 0
         }
 
-        if firstInSection {
-            self.lbName.isHidden = false
-            self.lbNameHeight.constant = CGFloat(21)
-        } else {
-            self.lbName.isHidden = true
-            self.lbNameHeight.constant = CGFloat(0)
-        }
+//        if firstInSection {
+//            self.lbName.isHidden = false
+//            self.lbNameHeight.constant = CGFloat(21)
+//        } else {
+//            self.lbName.isHidden = true
+//            self.lbNameHeight.constant = CGFloat(0)
+//        }
     }
 }

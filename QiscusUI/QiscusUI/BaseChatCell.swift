@@ -14,19 +14,8 @@ class BaseChatCell: UITableViewCell {
             bindDataToView()
         }
     }
-    
     var indexPath: IndexPath!
-    
-    var menuItems: [UIMenuItem] = [UIMenuItem]()
-    
-    let resendMenuItem: UIMenuItem = UIMenuItem(title: "RESEND".getLocalize(), action: #selector(BaseChatCell.resend))
-    let copyMenuItem: UIMenuItem = UIMenuItem(title: "COPY".getLocalize(), action: #selector(BaseChatCell.copyComment))
-    let deleteMenuItem: UIMenuItem = UIMenuItem(title: "DELETE".getLocalize(), action: #selector(BaseChatCell.deleteComment))
-    let deleteForMeMenuItem: UIMenuItem = UIMenuItem(title: "DELETE_FOR_ME".getLocalize(), action: #selector(BaseChatCell.deleteForMe))
-    let replyMenuItem: UIMenuItem = UIMenuItem(title: "REPLY".getLocalize(), action: #selector(BaseChatCell.reply))
-    let forwardMenuItem: UIMenuItem = UIMenuItem(title: "FORWARD".getLocalize(), action: #selector(BaseChatCell.forward))
-    let shareMenuItem: UIMenuItem = UIMenuItem(title: "SHARE".getLocalize(), action: #selector(BaseChatCell.share))
-    let infoMenuItem: UIMenuItem = UIMenuItem(title: "INFO".getLocalize(), action: #selector(BaseChatCell.info))
+    var didLongPressed: Bool = false
     
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -39,14 +28,9 @@ class BaseChatCell: UITableViewCell {
     }
     
     func configureUI() {
-        self.menuItems.append(copyMenuItem)
-        self.menuItems.append(resendMenuItem)
-        self.menuItems.append(deleteMenuItem)
-        self.menuItems.append(deleteForMeMenuItem)
-        self.menuItems.append(replyMenuItem)
-        self.menuItems.append(forwardMenuItem)
-        self.menuItems.append(shareMenuItem)
-        self.menuItems.append(infoMenuItem)
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(BaseChatCell.handleLongPress))
+        
+        self.contentView.addGestureRecognizer(longPress)
     }
     
     override var canBecomeFirstResponder: Bool {
@@ -54,13 +38,11 @@ class BaseChatCell: UITableViewCell {
     }
     
     override func awakeFromNib() {
-        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(BaseChatCell.handleLongPress))
         
-        self.contentView.addGestureRecognizer(longPress)
     }
     
     func bindDataToView() {
-        
+
     }
     
     override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
@@ -71,16 +53,45 @@ class BaseChatCell: UITableViewCell {
         return false
     }
     
+    func menuResponderView() -> UIView {
+        return UIView()
+    }
+    
     @objc open func handleLongPress() {
-        self.contentView.becomeFirstResponder()
-        UIMenuController.shared.menuItems = menuItems
-        
-        let frame = CGRect(x: 0, y: 0, width: 150, height: 50)
-        
-        UIMenuController.shared.setTargetRect(frame, in: self.contentView)
-        
-        DispatchQueue.main.async {
-            UIMenuController.shared.setMenuVisible(true, animated: true)
+        if !self.didLongPressed {
+            self.becomeFirstResponder()
+            
+            var menuItems: [UIMenuItem] = [UIMenuItem]()
+            
+            let resendMenuItem: UIMenuItem = UIMenuItem(title: "RESEND".getLocalize(), action: #selector(BaseChatCell.resend))
+            let copyMenuItem: UIMenuItem = UIMenuItem(title: "COPY".getLocalize(), action: #selector(BaseChatCell.copyComment))
+            let deleteMenuItem: UIMenuItem = UIMenuItem(title: "DELETE".getLocalize(), action: #selector(BaseChatCell.deleteComment))
+            let deleteForMeMenuItem: UIMenuItem = UIMenuItem(title: "DELETE_FOR_ME".getLocalize(), action: #selector(BaseChatCell.deleteForMe))
+            let replyMenuItem: UIMenuItem = UIMenuItem(title: "REPLY".getLocalize(), action: #selector(BaseChatCell.reply))
+            let forwardMenuItem: UIMenuItem = UIMenuItem(title: "FORWARD".getLocalize(), action: #selector(BaseChatCell.forward))
+            let shareMenuItem: UIMenuItem = UIMenuItem(title: "SHARE".getLocalize(), action: #selector(BaseChatCell.share))
+            let infoMenuItem: UIMenuItem = UIMenuItem(title: "INFO".getLocalize(), action: #selector(BaseChatCell.info))
+            
+            if self.comment.commentStatus == .failed {menuItems.append(resendMenuItem)}
+            menuItems.append(copyMenuItem)
+            menuItems.append(replyMenuItem)
+            menuItems.append(deleteMenuItem)
+            menuItems.append(deleteForMeMenuItem)
+            menuItems.append(forwardMenuItem)
+            menuItems.append(shareMenuItem)
+            menuItems.append(infoMenuItem)
+            UIMenuController.shared.menuItems = menuItems
+            
+            UIMenuController.shared.setTargetRect(self.menuResponderView().frame, in: self.contentView)
+            
+            DispatchQueue.main.async {
+                UIMenuController.shared.setMenuVisible(true, animated: true)
+            }
+            
+            self.didLongPressed = true
+            DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 1, execute: {
+                self.didLongPressed = false
+            })
         }
     }
     

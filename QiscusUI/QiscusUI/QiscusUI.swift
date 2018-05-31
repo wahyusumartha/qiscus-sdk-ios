@@ -9,6 +9,7 @@ import Foundation
 
 var QiscusRequestThread = DispatchQueue(label: "com.qiscus.request", attributes: .concurrent)
 public class QiscusUI {
+    static var cachedVC: [String: QChatVC] = [:]
     class var bundle:Bundle{
         get{
             let podBundle = Bundle(for: QiscusUI.self)
@@ -24,10 +25,16 @@ public class QiscusUI {
     static var disableLocalization: Bool = false
     
     @objc public class func chatView(roomId: String) -> QChatVC {
-        let chatView = QChatVC()
-        chatView.roomId = roomId
-        chatView.hidesBottomBarWhenPushed = true
-        return chatView
+        if let cachedVC = self.cachedVC[roomId] {
+            return cachedVC
+        } else {
+            let chatView = QChatVC()
+            chatView.roomId = roomId
+            chatView.hidesBottomBarWhenPushed = true
+            
+            self.cachedVC[roomId] = chatView
+            return chatView
+        }
     }
     
     @objc public class func image(named name:String)->UIImage?{

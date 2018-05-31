@@ -40,8 +40,8 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SBK-KY-z8G">
-                                <rect key="frame" x="68" y="261.5" width="42" height="10"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SBK-KY-z8G">
+                                <rect key="frame" x="214" y="261.5" width="42" height="10"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="42" id="7Th-CZ-wkl"/>
                                 </constraints>
@@ -79,15 +79,23 @@
                                 </constraints>
                                 <state key="normal" image="ic_download_chat"/>
                             </button>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_read" translatesAutoresizingMaskIntoConstraints="NO" id="VS9-Wa-tGb">
+                                <rect key="frame" x="261" y="258.5" width="14" height="14"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="14" id="CP2-9r-s2d"/>
+                                    <constraint firstAttribute="width" constant="14" id="kU2-m3-0Yg"/>
+                                </constraints>
+                            </imageView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="SBK-KY-z8G" firstAttribute="trailing" secondItem="Z5K-ZI-nZ3" secondAttribute="trailing" id="3Vw-FD-xJu"/>
+                            <constraint firstItem="VS9-Wa-tGb" firstAttribute="top" secondItem="SBK-KY-z8G" secondAttribute="top" constant="-3" id="DvY-xN-81j"/>
                             <constraint firstItem="SBK-KY-z8G" firstAttribute="top" secondItem="Z5K-ZI-nZ3" secondAttribute="bottom" constant="2" id="GFw-hO-rjj"/>
                             <constraint firstAttribute="trailing" secondItem="uwF-cl-s3j" secondAttribute="trailing" constant="20" id="IMk-1c-dOS"/>
                             <constraint firstItem="sTr-aj-Nz9" firstAttribute="centerY" secondItem="Z5K-ZI-nZ3" secondAttribute="centerY" constant="-58" id="IrG-Uk-YLr"/>
                             <constraint firstItem="Z5K-ZI-nZ3" firstAttribute="top" secondItem="3Fg-9k-ymq" secondAttribute="bottom" constant="6" id="JLP-fb-8PV"/>
                             <constraint firstItem="uwF-cl-s3j" firstAttribute="top" secondItem="Wlm-Ty-P0r" secondAttribute="top" id="JMo-iB-gup"/>
+                            <constraint firstItem="VS9-Wa-tGb" firstAttribute="leading" secondItem="SBK-KY-z8G" secondAttribute="trailing" constant="5" id="O3z-n1-rW7"/>
                             <constraint firstItem="sTr-aj-Nz9" firstAttribute="width" secondItem="3Fg-9k-ymq" secondAttribute="width" id="Rgb-5v-Kp2"/>
                             <constraint firstItem="sTr-aj-Nz9" firstAttribute="height" secondItem="Z5K-ZI-nZ3" secondAttribute="height" constant="150" id="XEI-X9-NXD"/>
                             <constraint firstItem="sTr-aj-Nz9" firstAttribute="leading" secondItem="uwF-cl-s3j" secondAttribute="leading" id="bqT-II-fJF"/>
@@ -97,6 +105,7 @@
                             <constraint firstItem="3Fg-9k-ymq" firstAttribute="leading" secondItem="sTr-aj-Nz9" secondAttribute="leading" id="oos-g4-kkz"/>
                             <constraint firstItem="z1K-t8-6Lj" firstAttribute="centerY" secondItem="3Fg-9k-ymq" secondAttribute="centerY" id="poO-Tq-hFH"/>
                             <constraint firstItem="z1K-t8-6Lj" firstAttribute="centerX" secondItem="3Fg-9k-ymq" secondAttribute="centerX" id="q9q-pI-Kt7"/>
+                            <constraint firstItem="VS9-Wa-tGb" firstAttribute="trailing" secondItem="sTr-aj-Nz9" secondAttribute="trailing" constant="-5" id="xtY-kQ-4d1"/>
                         </constraints>
                     </view>
                 </subviews>
@@ -112,11 +121,13 @@
                 <outlet property="btnButton" destination="z1K-t8-6Lj" id="ngK-y0-h2L"/>
                 <outlet property="ivBaloonLeft" destination="sTr-aj-Nz9" id="yXc-2n-2Mc"/>
                 <outlet property="ivComment" destination="3Fg-9k-ymq" id="LzV-IL-gLS"/>
+                <outlet property="ivStatus" destination="VS9-Wa-tGb" id="giP-qh-3gT"/>
                 <outlet property="lbName" destination="uwF-cl-s3j" id="MM4-kz-rpx"/>
                 <outlet property="lbNameHeight" destination="qMl-Kb-NjC" id="qon-OL-6QR"/>
                 <outlet property="lbNameLeading" destination="lXs-5z-Roi" id="f00-7S-nVY"/>
                 <outlet property="lbNameTrailing" destination="IMk-1c-dOS" id="OyB-zY-uBy"/>
                 <outlet property="lbTime" destination="SBK-KY-z8G" id="HKr-HP-zB7"/>
+                <outlet property="statusWidth" destination="kU2-m3-0Yg" id="gId-IK-r3M"/>
                 <outlet property="tvContent" destination="Z5K-ZI-nZ3" id="xaD-Bh-DWq"/>
                 <outlet property="viewContainer" destination="Wlm-Ty-P0r" id="YMC-4T-C8L"/>
             </connections>
@@ -125,5 +136,6 @@
     </objects>
     <resources>
         <image name="ic_download_chat" width="36" height="36"/>
+        <image name="ic_read" width="72" height="72"/>
     </resources>
 </document>
