@@ -13,9 +13,14 @@ import AlamofireImage
 import AVFoundation
 import RealmSwift
 
-public class QRoomService:NSObject{    
+public class QRoomService:NSObject{
+    var isSyncing: Bool = false
     public func sync(onRoom room:QRoom){
+        if self.isSyncing {
+            return
+        }
         
+        self.isSyncing = true
         if room.isInvalidated {
             return
         }
@@ -24,7 +29,10 @@ public class QRoomService:NSObject{
             "id" : room.id as AnyObject,
             "token"  : Qiscus.shared.config.USER_TOKEN as AnyObject
         ]
+        
+        print("\(parameters)")
         QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
+            self.isSyncing = false
             if let response = responseData.result.value {
                 let json = JSON(response)
                 let results = json["results"]
@@ -229,7 +237,7 @@ public class QRoomService:NSObject{
             })
         }
     }
-    public func postComment(onRoom roomId:String, comment:QComment, type:String? = nil, payload:JSON? = nil){
+    public func postComment(onRoom roomId:String, comment:QComment, type:String? = nil, payload:JSON? = nil, onSuccess: @escaping () -> Void = {}){
         var parameters:[String: AnyObject] = [String: AnyObject]()
         let commentUniqueId = comment.uniqueId
         parameters = [
@@ -305,6 +313,7 @@ public class QRoomService:NSObject{
                         }
                     }
                 }
+                onSuccess()
                 break
             case .failure(let error):
                 var status = QCommentStatus.failed

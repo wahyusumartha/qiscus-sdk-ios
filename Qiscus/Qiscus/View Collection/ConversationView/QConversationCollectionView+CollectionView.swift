@@ -352,12 +352,10 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
             if section == 0 {
                 height = 35
             }else{
-                let uid = self.messagesId[section].first!
-                let uidBefore = self.messagesId[section - 1].first!
-                let group = QComment.comment(withUniqueId: uid)!
-                let groupBefore = QComment.comment(withUniqueId: uidBefore)!
-                if group.date != groupBefore.date {
-                    height = 35
+                if let uid = self.messagesId[section].first, let uidBefore = self.messagesId[section - 1].first, let group = QComment.comment(withUniqueId: uid), let groupBefore = QComment.comment(withUniqueId: uidBefore) {
+                    if group.date != groupBefore.date {
+                        height = 35
+                    }
                 }
             }
         }

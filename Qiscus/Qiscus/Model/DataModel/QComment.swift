@@ -1274,22 +1274,25 @@ public class QComment:Object {
             realm.refresh()
             let data = realm.objects(QComment.self).filter("statusRaw == 1")
             
-            if data.count > 0 {
-                for comment in data {
-                    if Thread.isMainThread {
-                        if let room = QRoom.room(withId: comment.roomId){
-                            room.updateCommentStatus(inComment: comment, status: .sending)
-                            room.post(comment: comment)
+            print("dataCount bro: \(data.count)")
+            if let comment = data.first {
+                if Thread.isMainThread {
+                    if let room = QRoom.room(withId: comment.roomId){
+                        room.updateCommentStatus(inComment: comment, status: .sending)
+                        room.post(comment: comment) {
+                            self.resendPendingMessage()
                         }
-                    }else{
-                        let commentTS = ThreadSafeReference(to: comment)
-                        DispatchQueue.main.sync {
-                            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
-                            realm.refresh()
-                            guard let c = realm.resolve(commentTS) else { return }
-                            if let room = QRoom.room(withId: c.roomId){
-                                room.updateCommentStatus(inComment: c, status: .sending)
-                                room.post(comment: c)
+                    }
+                }else{
+                    let commentTS = ThreadSafeReference(to: comment)
+                    DispatchQueue.main.sync {
+                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        realm.refresh()
+                        guard let c = realm.resolve(commentTS) else { return }
+                        if let room = QRoom.room(withId: c.roomId){
+                            room.updateCommentStatus(inComment: c, status: .sending)
+                            room.post(comment: c) {
+                                self.resendPendingMessage()
                             }
                         }
                     }
