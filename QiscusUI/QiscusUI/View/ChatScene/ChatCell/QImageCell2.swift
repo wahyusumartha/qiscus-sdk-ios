@@ -1,13 +1,13 @@
 //
-//  LeftTextCell.swift
-//  Qiscus
+//  QImageCell2.swift
+//  QiscusUI
 //
-//  Created by Rahardyan Bisma on 08/05/18.
+//  Created by Rahardyan Bisma on 31/05/18.
 //
 
 import UIKit
 
-class LeftTextCell: BaseChatCell {
+class QImageCell2: BaseChatCell {
     @IBOutlet weak var lbName: UILabel!
     @IBOutlet weak var tvContent: UILabel!
     @IBOutlet weak var ivBaloonLeft: UIImageView!
@@ -17,6 +17,8 @@ class LeftTextCell: BaseChatCell {
     @IBOutlet weak var lbNameHeight: NSLayoutConstraint!
     @IBOutlet weak var lbNameLeading: NSLayoutConstraint!
     @IBOutlet weak var lbNameTrailing: NSLayoutConstraint!
+    @IBOutlet weak var btnDownload: UIButton!
+    @IBOutlet weak var ivComment: UIImageView!
     @IBOutlet weak var statusWidth: NSLayoutConstraint!
     @IBOutlet weak var rightConstraint: NSLayoutConstraint!
     @IBOutlet weak var leftConstraint: NSLayoutConstraint!
@@ -25,6 +27,10 @@ class LeftTextCell: BaseChatCell {
         super.awakeFromNib()
         // Initialization code
         self.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
+        self.ivComment.contentMode = .scaleAspectFill
+        self.ivComment.clipsToBounds = true
+        self.ivComment.backgroundColor = UIColor.black
+        self.ivComment.isUserInteractionEnabled = true
     }
     
     override func menuResponderView() -> UIView {
@@ -32,17 +38,30 @@ class LeftTextCell: BaseChatCell {
     }
     
     override func bindDataToView() {
-        super.bindDataToView()
-        self.tvContent.text = self.comment.text
+        self.tvContent.text = "asdsad"
         self.lbName.text = self.comment.senderName
         self.lbTime.text = self.comment.time
-
+        
+        if let displayImage =  self.comment.displayImage {
+            self.ivComment.image = displayImage
+        } else {
+            if let file = self.comment.file {
+                self.ivComment.loadAsync(url: file.thumbURL, onLoaded: { (image, _) in
+                    self.ivComment.image = image
+                    self.comment.displayImage = image
+                    file.saveThumbImage(withImage: image)
+                })
+            }
+        }
+        
         if self.comment.isMyComment {
             self.rightConstraint.isActive = true
             self.leftConstraint.isActive = false
             lbNameTrailing.constant = 5
             lbNameLeading.constant = 20
             lbName.textAlignment = .right
+            self.statusWidth.constant = 15
+            
             self.statusWidth.constant = 15
             
             switch self.comment.commentStatus {
@@ -94,6 +113,7 @@ class LeftTextCell: BaseChatCell {
             default:
                 break
             }
+            
         } else {
             self.rightConstraint.isActive = false
             self.leftConstraint.isActive = true
@@ -102,7 +122,7 @@ class LeftTextCell: BaseChatCell {
             lbName.textAlignment = .left
             self.statusWidth.constant = 0
         }
-
+        
         if firstInSection {
             self.lbName.isHidden = false
             self.lbNameHeight.constant = CGFloat(21)
@@ -112,3 +132,5 @@ class LeftTextCell: BaseChatCell {
         }
     }
 }
+
+

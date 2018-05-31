@@ -20,16 +20,14 @@ class QImageCell: BaseChatCell {
     @IBOutlet weak var btnButton: UIButton!
     @IBOutlet weak var ivComment: UIImageView!
     @IBOutlet weak var statusWidth: NSLayoutConstraint!
+    @IBOutlet weak var rightConstraint: NSLayoutConstraint!
+    @IBOutlet weak var leftConstraint: NSLayoutConstraint!
     
-    var leftConstrain: NSLayoutConstraint!
-    var rightConstrain: NSLayoutConstraint!
     
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
         self.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
-        self.leftConstrain = NSLayoutConstraint(item: tvContent, attribute: .leading, relatedBy: .equal, toItem: lbName, attribute: .leading, multiplier: 1, constant: 7)
-        self.rightConstrain = NSLayoutConstraint(item: lbName, attribute: .trailing, relatedBy: .equal, toItem: tvContent, attribute: .trailing, multiplier: 1, constant: 10)
         self.ivComment.contentMode = .scaleAspectFill
         self.ivComment.clipsToBounds = true
         self.ivComment.backgroundColor = UIColor.black
@@ -58,8 +56,8 @@ class QImageCell: BaseChatCell {
         }
         
         if self.comment.isMyComment {
-            viewContainer.addConstraint(rightConstrain)
-            viewContainer.removeConstraint(leftConstrain)
+            self.rightConstraint.isActive = true
+            self.leftConstraint.isActive = false
             lbNameTrailing.constant = 5
             lbNameLeading.constant = 20
             lbName.textAlignment = .right
@@ -118,8 +116,8 @@ class QImageCell: BaseChatCell {
             }
             
         } else {
-            viewContainer.addConstraint(leftConstrain)
-            viewContainer.removeConstraint(rightConstrain)
+            self.rightConstraint.isActive = false
+            self.leftConstraint.isActive = true
             lbNameTrailing.constant = 20
             lbNameLeading.constant = 45
             lbName.textAlignment = .left
