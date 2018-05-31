@@ -154,8 +154,7 @@ open class QChatVC: UIViewController {
         //        self.tableViewConversation.estimatedSectionHeaderHeight = 30
         
         self.tableViewConversation.register(UINib(nibName: "LeftTextCell",bundle: QiscusUI.bundle), forCellReuseIdentifier: "LeftTextCell")
-        self.tableViewConversation.register(UINib(nibName: "QImageCell2",bundle: QiscusUI.bundle), forCellReuseIdentifier: "QImageCell2")
-        self.tableViewConversation.register(UINib(nibName: "RightTextCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "RightTextCell")
+        self.tableViewConversation.register(UINib(nibName: "QImageCell",bundle: QiscusUI.bundle), forCellReuseIdentifier: "QImageCell")
     }
     
     @objc func goBack() {
@@ -282,7 +281,7 @@ extension QChatVC: UITableViewDataSource {
         tempSection = indexPath.section
         
         if commentType == .image {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "QImageCell2", for: indexPath) as! QImageCell2
+            let cell = tableView.dequeueReusableCell(withIdentifier: "QImageCell", for: indexPath) as! QImageCell
             cell.firstInSection = indexPath.row == self.presenter.getComments()[indexPath.section].count - 1
             cell.comment = comment
             cell.layer.shouldRasterize = true

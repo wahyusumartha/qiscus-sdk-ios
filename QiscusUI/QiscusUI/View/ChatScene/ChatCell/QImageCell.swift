@@ -1,8 +1,8 @@
 //
-//  QImageCell.swift
+//  QImageCell2.swift
 //  QiscusUI
 //
-//  Created by Rahardyan Bisma on 25/05/18.
+//  Created by Rahardyan Bisma on 31/05/18.
 //
 
 import UIKit
@@ -17,12 +17,11 @@ class QImageCell: BaseChatCell {
     @IBOutlet weak var lbNameHeight: NSLayoutConstraint!
     @IBOutlet weak var lbNameLeading: NSLayoutConstraint!
     @IBOutlet weak var lbNameTrailing: NSLayoutConstraint!
-    @IBOutlet weak var btnButton: UIButton!
+    @IBOutlet weak var btnDownload: UIButton!
     @IBOutlet weak var ivComment: UIImageView!
     @IBOutlet weak var statusWidth: NSLayoutConstraint!
     @IBOutlet weak var rightConstraint: NSLayoutConstraint!
     @IBOutlet weak var leftConstraint: NSLayoutConstraint!
-    
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -39,7 +38,7 @@ class QImageCell: BaseChatCell {
     }
     
     override func bindDataToView() {
-        self.tvContent.text = ""
+        self.tvContent.text = "asdsad"
         self.lbName.text = self.comment.senderName
         self.lbTime.text = self.comment.time
         
@@ -133,4 +132,5 @@ class QImageCell: BaseChatCell {
         }
     }
 }
+
 
