@@ -216,15 +216,17 @@ extension Qiscus:CocoaMQTTDelegate{
                 case "s":
                     QiscusBackgroundThread.async {
                         let messageArr = messageData.split(separator: ":")
-                        let userEmail = String(channelArr[1])
-                        let presenceString = String(messageArr[0])
-                        if let rawPresence = Int(presenceString){
-                            if userEmail != Qiscus.client.email{
-                                if let timeToken = Double(String(messageArr[1])){
-                                    if let user = QUser.getUser(email: userEmail){
-                                        user.updateLastSeen(lastSeen: Double(timeToken)/1000)
-                                        let presence = QUserPresence(rawValue: rawPresence)!
-                                        user.updatePresence(presence: presence)
+                        if messageArr.count > 1 {
+                            let userEmail = String(channelArr[1])
+                            let presenceString = String(messageArr[0])
+                            if let rawPresence = Int(presenceString){
+                                if userEmail != Qiscus.client.email{
+                                    if let timeToken = Double(String(messageArr[1])){
+                                        if let user = QUser.getUser(email: userEmail){
+                                            user.updateLastSeen(lastSeen: Double(timeToken)/1000)
+                                            let presence = QUserPresence(rawValue: rawPresence)!
+                                            user.updatePresence(presence: presence)
+                                        }
                                     }
                                 }
                             }
