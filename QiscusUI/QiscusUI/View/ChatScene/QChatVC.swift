@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import ImageSlideshow
 
 open class QChatVC: UIViewController {
     
@@ -280,40 +281,25 @@ extension QChatVC: UITableViewDataSource {
         
         tempSection = indexPath.section
         
-        if commentType == .image {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "QImageCell", for: indexPath) as! QImageCell
-            cell.firstInSection = indexPath.row == self.presenter.getComments()[indexPath.section].count - 1
-            cell.comment = comment
-            cell.layer.shouldRasterize = true
-            cell.layer.rasterizationScale = UIScreen.main.scale
-            
-            return cell
-        } else {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
-            cell.firstInSection = indexPath.row == self.presenter.getComments()[indexPath.section].count - 1
-            cell.comment = comment
-            cell.layer.shouldRasterize = true
-            cell.layer.rasterizationScale = UIScreen.main.scale
-            
-            return cell
-//            if comment.isMyComment {
-//                let cell = tableView.dequeueReusableCell(withIdentifier: "RightTextCell", for: indexPath) as! RightTextCell
-//                cell.firstInSection = indexPath.row == self.presenter.getComments()[indexPath.section].count - 1
-//                cell.comment = comment
-//                cell.layer.shouldRasterize = true
-//                cell.layer.rasterizationScale = UIScreen.main.scale
-//                
-//                return cell
-//            } else {
-//                let cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
-//                cell.firstInSection = indexPath.row == self.presenter.getComments()[indexPath.section].count - 1
-//                cell.comment = comment
-//                cell.layer.shouldRasterize = true
-//                cell.layer.rasterizationScale = UIScreen.main.scale
-//                
-//                return cell
-//            }
+        var cell = BaseChatCell()
+        
+        switch commentType {
+        case .image:
+            cell = tableView.dequeueReusableCell(withIdentifier: "QImageCell", for: indexPath) as! QImageCell
+        default:
+            cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
         }
+        if commentType == .image {
+            
+        }
+        
+        cell.firstInSection = indexPath.row == self.presenter.getComments()[indexPath.section].count - 1
+        cell.comment = comment
+        cell.layer.shouldRasterize = true
+        cell.layer.rasterizationScale = UIScreen.main.scale
+        cell.delegate = self
+        
+        return cell
     }
     
     public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
@@ -362,6 +348,12 @@ extension QChatVC: UITableViewDataSource {
 extension QChatVC: UITableViewDelegate {
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+}
+
+extension QChatVC: ChatCellDelegate {
+    func onImageCellDidTap(imageSlideShow: ImageSlideshow) {
+        imageSlideShow.presentFullScreenController(from: self)
     }
 }
 

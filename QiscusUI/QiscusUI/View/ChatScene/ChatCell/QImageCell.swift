@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import ImageSlideshow
 
 class QImageCell: BaseChatCell {
     @IBOutlet weak var lbName: UILabel!
@@ -14,14 +15,20 @@ class QImageCell: BaseChatCell {
     @IBOutlet weak var lbTime: UILabel!
     @IBOutlet weak var viewContainer: UIView!
     @IBOutlet weak var ivStatus: UIImageView!
+    @IBOutlet weak var btnDownload: UIButton!
+    @IBOutlet weak var ivComment: UIImageView!
+    
+    @IBOutlet weak var ivCommentShow: ImageSlideshow!
+    @IBOutlet weak var progressContainer: UIView!
+    @IBOutlet weak var progressView: UIView!
+    @IBOutlet weak var progressLabel: UILabel!
     @IBOutlet weak var lbNameHeight: NSLayoutConstraint!
     @IBOutlet weak var lbNameLeading: NSLayoutConstraint!
     @IBOutlet weak var lbNameTrailing: NSLayoutConstraint!
-    @IBOutlet weak var btnDownload: UIButton!
-    @IBOutlet weak var ivComment: UIImageView!
     @IBOutlet weak var statusWidth: NSLayoutConstraint!
     @IBOutlet weak var rightConstraint: NSLayoutConstraint!
     @IBOutlet weak var leftConstraint: NSLayoutConstraint!
+    @IBOutlet weak var progressHeight: NSLayoutConstraint!
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -31,28 +38,55 @@ class QImageCell: BaseChatCell {
         self.ivComment.clipsToBounds = true
         self.ivComment.backgroundColor = UIColor.black
         self.ivComment.isUserInteractionEnabled = true
+        self.progressContainer.layer.cornerRadius = 20
+        self.progressContainer.clipsToBounds = true
+        self.progressContainer.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.65).cgColor
+        self.progressContainer.layer.borderWidth = 2
+        self.progressView.backgroundColor = UIColor.green
+        let imgTouchEvent = UITapGestureRecognizer(target: self, action: #selector(QImageCell.imageDidTap))
+        ivCommentShow.addGestureRecognizer(imgTouchEvent)
+        let pageIndicator = UIPageControl()
+        pageIndicator.hidesForSinglePage = true
+        ivCommentShow.pageIndicator = pageIndicator
+        ivCommentShow.circular = false
+    }
+    
+    @objc func imageDidTap() {
+        if let cellDelegate = self.delegate {
+            cellDelegate.onImageCellDidTap(imageSlideShow: self.ivCommentShow)
+        }
     }
     
     override func menuResponderView() -> UIView {
         return self.ivBaloonLeft
     }
     
+    func configureDisplayImage() {
+        if let displayImage = self.comment.displayImage {
+            let imgSource = ImageSource(image: displayImage)
+            self.ivCommentShow.setImageInputs([imgSource])
+            self.ivComment.image = displayImage
+            self.btnDownload.isHidden = true
+            self.progressContainer.isHidden = true
+        } else {
+            self.btnDownload.isHidden = false
+            self.progressContainer.isHidden = false
+            if let file = self.comment.file {
+                self.ivComment.loadAsync(url: file.thumbURL, onLoaded: { (image, _) in
+                    let imgSource = ImageSource(image: image)
+                    self.ivCommentShow.setImageInputs([imgSource])
+                    self.ivComment.image = image
+                    file.saveThumbImage(withImage: image)
+                })
+            }
+        }
+    }
     override func bindDataToView() {
         self.tvContent.text = "asdsad"
         self.lbName.text = self.comment.senderName
         self.lbTime.text = self.comment.time
         
-        if let displayImage =  self.comment.displayImage {
-            self.ivComment.image = displayImage
-        } else {
-            if let file = self.comment.file {
-                self.ivComment.loadAsync(url: file.thumbURL, onLoaded: { (image, _) in
-                    self.ivComment.image = image
-                    self.comment.displayImage = image
-                    file.saveThumbImage(withImage: image)
-                })
-            }
-        }
+        self.configureDisplayImage()
         
         if self.comment.isMyComment {
             self.rightConstraint.isActive = true
@@ -130,6 +164,37 @@ class QImageCell: BaseChatCell {
             self.lbName.isHidden = true
             self.lbNameHeight.constant = CGFloat(0)
         }
+    }
+    
+    override func updateDownloadProgress(progress: Double) {
+        DispatchQueue.main.async {
+            self.btnDownload.isHidden = true
+            self.progressLabel.text = "\(Int(progress * 100)) %"
+            self.progressLabel.isHidden = false
+            self.progressContainer.isHidden = false
+            self.progressView.isHidden = false
+            
+            let newHeight = CGFloat(progress) * self.maxProgressHeight
+            self.progressHeight.constant = newHeight
+            UIView.animate(withDuration: 0.65, animations: {
+                self.progressView.layoutIfNeeded()
+            })
+        }
+    }
+    
+    override func displayDownloadedImage(image: UIImage?) {
+        if let displayImage = image {
+            DispatchQueue.main.async {
+                self.ivComment.image = displayImage
+                self.progressContainer.isHidden = true
+                self.btnDownload.isHidden = true
+            }
+        }
+    }
+    
+    // MARK: button action
+    @IBAction func btnDownloadDidTap(_ sender: UIButton) {
+        self.downloadMedia()
     }
 }
 

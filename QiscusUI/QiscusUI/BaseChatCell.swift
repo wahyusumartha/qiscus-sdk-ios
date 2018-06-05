@@ -6,16 +6,31 @@
 //
 
 import Foundation
+import Qiscus
+import ImageSlideshow
+
+protocol ChatCellDelegate {
+    func onImageCellDidTap(imageSlideShow: ImageSlideshow)
+}
 
 class BaseChatCell: UITableViewCell {
-    var firstInSection: Bool = false
+    // MARK: cell data source
     var comment: CommentModel! {
         didSet {
             bindDataToView()
         }
     }
     var indexPath: IndexPath!
+    var firstInSection: Bool = false
+    
+    // MARK: Delegate
+    var delegate: ChatCellDelegate?
+    
+    // MARK: UI Flag
     var didLongPressed: Bool = false
+    
+    // MARK: UI Variable
+    let maxProgressHeight:CGFloat = 40.0
     
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -27,24 +42,62 @@ class BaseChatCell: UITableViewCell {
         self.configureUI()
     }
     
-    func configureUI() {
-        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(BaseChatCell.handleLongPress))
-        
-        self.contentView.addGestureRecognizer(longPress)
-    }
-    
     override var canBecomeFirstResponder: Bool {
         return true
     }
     
-    override func awakeFromNib() {
+    /// configure ui element when init cell
+    func configureUI() {
+        // MARK: configure long press on cell
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(BaseChatCell.handleLongPress))
+        self.contentView.addGestureRecognizer(longPress)
+    }
+    
+    
+    /// bind data to view when comment did set
+    func bindDataToView() {
+        preconditionFailure("this func must be override")
+        // no default implementation for now
+    }
+    
+    
+    /// view to become center focus for menu item
+    ///
+    /// - Returns: UIView
+    func menuResponderView() -> UIView {
+        preconditionFailure("this func must be override")
+        return UIView()
+    }
+    
+    func downloadMedia() {
+        if let qComment = QComment.comment(withId: self.comment.id), let qRoom = QRoom.room(withId: self.comment.roomId) {
+            qRoom.downloadMedia(onComment: qComment, isAudioFile: self.comment.commentType == .audio, onSuccess: { (qComment) in
+                guard let image = qComment.displayImage else {return}
+                QCacheManager.shared.cacheImage(image: image, onCommentUniqueId: qComment.uniqueId)
+                self.displayDownloadedImage(image: image)
+            }, onError: { (error) in
+                
+            }, onProgress: { (progress) in
+                self.updateDownloadProgress(progress: progress)
+                print("download progress \(progress)")
+            })
+        }
+    }
+    
+    func displayDownloadedImage(image: UIImage?) {
         
     }
     
-    func bindDataToView() {
-
+    func updateDownloadProgress(progress: Double) {
+        // MARK: download func implemented on file or image cell
     }
     
+    /// filter menu for cell's menu
+    ///
+    /// - Parameters:
+    ///   - action: menu action selector
+    ///   - sender:
+    /// - Returns: bool contain menu or not
     override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
         if action == #selector(BaseChatCell.resend) || action == #selector(BaseChatCell.deleteComment) || action == #selector(BaseChatCell.deleteForMe) || action == #selector(BaseChatCell.reply) || action == #selector(BaseChatCell.forward) || action == #selector(BaseChatCell.share) || action == #selector(BaseChatCell.info) || action == #selector(BaseChatCell.copyComment) {
             return true
@@ -52,11 +105,10 @@ class BaseChatCell: UITableViewCell {
         
         return false
     }
-    
-    func menuResponderView() -> UIView {
-        return UIView()
-    }
-    
+}
+
+// MARK: cell menu action
+extension BaseChatCell {
     @objc open func handleLongPress() {
         if !self.didLongPressed {
             self.becomeFirstResponder()

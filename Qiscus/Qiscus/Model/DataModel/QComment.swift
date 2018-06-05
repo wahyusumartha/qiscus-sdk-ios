@@ -144,7 +144,7 @@ public class QComment:Object {
     @objc internal dynamic var textFontSize:Float = 0
     @objc internal dynamic var rawExtra:String = ""
     // MARK : - Ignored Parameters
-    var displayImage:UIImage?
+    public var displayImage:UIImage?
     public var delegate:QCommentDelegate?{
         didSet{
             if Thread.isMainThread {
