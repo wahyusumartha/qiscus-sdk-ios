@@ -128,6 +128,16 @@ open class QiscusConfig: NSObject {
             return "\(QiscusConfig.sharedInstance.BASE_API_URL)/delete_messages"
         }
     }
+    internal class var REMOVE_ROOM_PARTICIPANT: String {
+        get {
+            return "\(QiscusConfig.sharedInstance.BASE_API_URL)/remove_room_participants"
+        }
+    }
+    internal class var ADD_ROOM_PARTICIPANT: String {
+        get {
+            return "\(QiscusConfig.sharedInstance.BASE_API_URL)/add_room_participants"
+        }
+    }
     internal class var UPDATE_COMMENT_STATUS_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_API_URL)/update_comment_status"
     }
