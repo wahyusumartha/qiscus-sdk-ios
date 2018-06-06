@@ -23,7 +23,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="150.5"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="redraw" horizontalHuggingPriority="251" verticalHuggingPriority="249" translatesAutoresizingMaskIntoConstraints="NO" id="Iu0-VT-qD4">
-                                <rect key="frame" x="237.5" y="21" width="65" height="124.5"/>
+                                <rect key="frame" x="57.5" y="21" width="65" height="124.5"/>
                                 <color key="backgroundColor" red="0.82533193010000006" green="0.82533193010000006" blue="0.82533193010000006" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="number" keyPath="cornerRadiuss">
@@ -41,7 +41,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bEE-ol-nUK">
-                                <rect key="frame" x="238.5" y="132.5" width="42" height="10"/>
+                                <rect key="frame" x="58.5" y="132.5" width="42" height="10"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="42" id="orN-M3-PNV"/>
                                 </constraints>
@@ -50,7 +50,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="halo" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ok4-GL-9Bo">
-                                <rect key="frame" x="245" y="26" width="50" height="104.5"/>
+                                <rect key="frame" x="65" y="26" width="50" height="104.5"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="50" id="rin-5v-5OI"/>
                                     <constraint firstAttribute="width" relation="lessThanOrEqual" constant="200" id="ruK-E3-b82"/>
@@ -60,7 +60,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_read" translatesAutoresizingMaskIntoConstraints="NO" id="kXa-fN-YR5">
-                                <rect key="frame" x="283.5" y="130.5" width="14" height="14"/>
+                                <rect key="frame" x="103.5" y="130.5" width="14" height="14"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="14" id="KRh-0i-Zde"/>
                                     <constraint firstAttribute="height" constant="14" id="cEv-Mj-mIS"/>
@@ -87,7 +87,7 @@
                         </constraints>
                         <variation key="default">
                             <mask key="constraints">
-                                <exclude reference="frE-sW-8ke"/>
+                                <exclude reference="u13-hJ-Fka"/>
                             </mask>
                         </variation>
                     </view>

@@ -24,7 +24,7 @@ s.resource_bundles = {
 s.platform      = :ios, "9.0"
 
 s.dependency 'Qiscus'
-s.dependency 'ImageSlideshow'
+s.dependency 'SimpleImageViewer'
 
 end
 

@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import ImageSlideshow
 
 open class QChatVC: UIViewController {
     
@@ -152,10 +151,10 @@ open class QChatVC: UIViewController {
         self.tableViewConversation.delegate = self
         self.tableViewConversation.scrollsToTop = false
         self.tableViewConversation.allowsSelection = false
-        //        self.tableViewConversation.estimatedSectionHeaderHeight = 30
         
-        self.tableViewConversation.register(UINib(nibName: "LeftTextCell",bundle: QiscusUI.bundle), forCellReuseIdentifier: "LeftTextCell")
-        self.tableViewConversation.register(UINib(nibName: "QImageCell",bundle: QiscusUI.bundle), forCellReuseIdentifier: "QImageCell")
+        self.tableViewConversation.register(UINib(nibName: "LeftTextCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "LeftTextCell")
+        self.tableViewConversation.register(UINib(nibName: "QImageCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QImageCell")
+        self.tableViewConversation.register(UINib(nibName: "QSystemCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QSystemCell")
     }
     
     @objc func goBack() {
@@ -275,6 +274,7 @@ extension QChatVC: UITableViewDataSource {
         }
     }
     
+    // MARK: table cell confi
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let comment = self.presenter.getComments()[indexPath.section][indexPath.row]
         let commentType = comment.commentType
@@ -286,11 +286,12 @@ extension QChatVC: UITableViewDataSource {
         switch commentType {
         case .image:
             cell = tableView.dequeueReusableCell(withIdentifier: "QImageCell", for: indexPath) as! QImageCell
+            break
+        case .system:
+            cell = tableView.dequeueReusableCell(withIdentifier: "QSystemCell", for: indexPath) as! QSystemCell
+            break
         default:
             cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
-        }
-        if commentType == .image {
-            
         }
         
         cell.firstInSection = indexPath.row == self.presenter.getComments()[indexPath.section].count - 1
@@ -314,6 +315,7 @@ extension QChatVC: UITableViewDataSource {
         return 1
     }
     
+    // MARK: chat avatar setup
     public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: QiscusHelper.screenWidth(), height: 0))
         view.backgroundColor = .clear
@@ -336,11 +338,10 @@ extension QChatVC: UITableViewDataSource {
         if let firstComment = self.presenter.getComments()[section].first {
             if firstComment.isMyComment {
                 return nil
-            } else {
+            } else if firstComment.commentType != .system {
                 return view
             }
         }
-        
         return nil
     }
 }
@@ -352,8 +353,8 @@ extension QChatVC: UITableViewDelegate {
 }
 
 extension QChatVC: ChatCellDelegate {
-    func onImageCellDidTap(imageSlideShow: ImageSlideshow) {
-        imageSlideShow.presentFullScreenController(from: self)
+    func onImageCellDidTap(imageSlideShow: UIViewController) {
+        self.navigationController?.present(imageSlideShow, animated: true, completion: nil)
     }
 }
 

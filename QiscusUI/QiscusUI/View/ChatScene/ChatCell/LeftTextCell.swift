@@ -23,8 +23,6 @@ class LeftTextCell: BaseChatCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
-        self.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
     }
     
     override func menuResponderView() -> UIView {
@@ -37,8 +35,11 @@ class LeftTextCell: BaseChatCell {
         self.lbTime.text = self.comment.time
 
         if self.comment.isMyComment {
-            self.rightConstraint.isActive = true
-            self.leftConstraint.isActive = false
+            DispatchQueue.main.async {
+                self.rightConstraint.isActive = true
+                self.leftConstraint.isActive = false
+            }
+            
             lbNameTrailing.constant = 5
             lbNameLeading.constant = 20
             lbName.textAlignment = .right
@@ -94,8 +95,11 @@ class LeftTextCell: BaseChatCell {
                 break
             }
         } else {
-            self.rightConstraint.isActive = false
-            self.leftConstraint.isActive = true
+            DispatchQueue.main.async {
+                self.leftConstraint.isActive = true
+                self.rightConstraint.isActive = false
+            }
+            
             lbNameTrailing.constant = 20
             lbNameLeading.constant = 45
             lbName.textAlignment = .left
@@ -109,5 +113,7 @@ class LeftTextCell: BaseChatCell {
             self.lbName.isHidden = true
             self.lbNameHeight.constant = CGFloat(0)
         }
+        
+        self.layoutIfNeeded()
     }
 }

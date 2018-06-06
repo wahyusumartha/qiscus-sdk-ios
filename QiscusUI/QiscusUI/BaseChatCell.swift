@@ -7,10 +7,9 @@
 
 import Foundation
 import Qiscus
-import ImageSlideshow
 
 protocol ChatCellDelegate {
-    func onImageCellDidTap(imageSlideShow: ImageSlideshow)
+    func onImageCellDidTap(imageSlideShow: UIViewController)
 }
 
 class BaseChatCell: UITableViewCell {
@@ -51,6 +50,7 @@ class BaseChatCell: UITableViewCell {
         // MARK: configure long press on cell
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(BaseChatCell.handleLongPress))
         self.contentView.addGestureRecognizer(longPress)
+        self.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
     }
     
     

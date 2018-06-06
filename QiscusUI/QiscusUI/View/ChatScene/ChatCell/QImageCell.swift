@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import ImageSlideshow
+import SimpleImageViewer
 
 class QImageCell: BaseChatCell {
     @IBOutlet weak var lbName: UILabel!
@@ -18,7 +18,6 @@ class QImageCell: BaseChatCell {
     @IBOutlet weak var btnDownload: UIButton!
     @IBOutlet weak var ivComment: UIImageView!
     
-    @IBOutlet weak var ivCommentShow: ImageSlideshow!
     @IBOutlet weak var progressContainer: UIView!
     @IBOutlet weak var progressView: UIView!
     @IBOutlet weak var progressLabel: UILabel!
@@ -33,7 +32,6 @@ class QImageCell: BaseChatCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
-        self.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
         self.ivComment.contentMode = .scaleAspectFill
         self.ivComment.clipsToBounds = true
         self.ivComment.backgroundColor = UIColor.black
@@ -44,16 +42,17 @@ class QImageCell: BaseChatCell {
         self.progressContainer.layer.borderWidth = 2
         self.progressView.backgroundColor = UIColor.green
         let imgTouchEvent = UITapGestureRecognizer(target: self, action: #selector(QImageCell.imageDidTap))
-        ivCommentShow.addGestureRecognizer(imgTouchEvent)
-        let pageIndicator = UIPageControl()
-        pageIndicator.hidesForSinglePage = true
-        ivCommentShow.pageIndicator = pageIndicator
-        ivCommentShow.circular = false
+        self.ivComment.addGestureRecognizer(imgTouchEvent)
     }
     
     @objc func imageDidTap() {
         if let cellDelegate = self.delegate {
-            cellDelegate.onImageCellDidTap(imageSlideShow: self.ivCommentShow)
+            let configuration = ImageViewerConfiguration { config in
+                config.imageView = ivComment
+            }
+            
+            let imageViewerController = ImageViewerController(configuration: configuration)
+            cellDelegate.onImageCellDidTap(imageSlideShow: imageViewerController)
         }
     }
     
@@ -63,8 +62,6 @@ class QImageCell: BaseChatCell {
     
     func configureDisplayImage() {
         if let displayImage = self.comment.displayImage {
-            let imgSource = ImageSource(image: displayImage)
-            self.ivCommentShow.setImageInputs([imgSource])
             self.ivComment.image = displayImage
             self.btnDownload.isHidden = true
             self.progressContainer.isHidden = true
@@ -73,8 +70,6 @@ class QImageCell: BaseChatCell {
             self.progressContainer.isHidden = false
             if let file = self.comment.file {
                 self.ivComment.loadAsync(url: file.thumbURL, onLoaded: { (image, _) in
-                    let imgSource = ImageSource(image: image)
-                    self.ivCommentShow.setImageInputs([imgSource])
                     self.ivComment.image = image
                     file.saveThumbImage(withImage: image)
                 })
@@ -89,8 +84,11 @@ class QImageCell: BaseChatCell {
         self.configureDisplayImage()
         
         if self.comment.isMyComment {
-            self.rightConstraint.isActive = true
-            self.leftConstraint.isActive = false
+            DispatchQueue.main.async {
+                self.rightConstraint.isActive = true
+                self.leftConstraint.isActive = false
+            }
+            
             lbNameTrailing.constant = 5
             lbNameLeading.constant = 20
             lbName.textAlignment = .right
@@ -149,8 +147,11 @@ class QImageCell: BaseChatCell {
             }
             
         } else {
-            self.rightConstraint.isActive = false
-            self.leftConstraint.isActive = true
+            DispatchQueue.main.async {
+                self.rightConstraint.isActive = false
+                self.leftConstraint.isActive = true
+            }
+            
             lbNameTrailing.constant = 20
             lbNameLeading.constant = 45
             lbName.textAlignment = .left
