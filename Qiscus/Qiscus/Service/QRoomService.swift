@@ -15,7 +15,7 @@ import RealmSwift
 
 public class QRoomService:NSObject{
     var isSyncing: Bool = false
-    public func sync(onRoom room:QRoom){
+    public func sync(onRoom room:QRoom, onSuccess: @escaping ((QRoom)->Void) = {_ in }){
         if self.isSyncing {
             return
         }
@@ -46,7 +46,7 @@ public class QRoomService:NSObject{
                         if r.isInvalidated {
                             return
                         }
-                        r.syncRoomData(withJSON: roomData)
+                        r.syncRoomData(withJSON: roomData, onSuccess: onSuccess)
                         
                         let commentPayload = results["comments"].arrayValue
                         var needSync = false
@@ -928,7 +928,7 @@ public class QRoomService:NSObject{
                     if results != JSON.null && status == 200{
                         let service = QRoomService()
                         if let room = QRoom.threadSaveRoom(withId: id) {
-                            service.sync(onRoom: room)
+                            service.sync(onRoom: room, onSuccess: onSuccess)
                         }
                     }else{
                         DispatchQueue.main.async {
@@ -971,7 +971,7 @@ public class QRoomService:NSObject{
                     if results != JSON.null && status == 200{
                         let service = QRoomService()
                         if let room = QRoom.threadSaveRoom(withId: id) {
-                            service.sync(onRoom: room)
+                            service.sync(onRoom: room, onSuccess: onSuccess)
                         }
                     }else{
                         DispatchQueue.main.async {
