@@ -16,6 +16,7 @@ class BaseChatCell: UITableViewCell {
     // MARK: cell data source
     var comment: CommentModel! {
         didSet {
+            configureInteractino()
             bindDataToView()
         }
     }
@@ -30,6 +31,7 @@ class BaseChatCell: UITableViewCell {
     
     // MARK: UI Variable
     let maxProgressHeight:CGFloat = 40.0
+    let longPress = UILongPressGestureRecognizer(target: self, action: #selector(BaseChatCell.handleLongPress))
     
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -48,9 +50,13 @@ class BaseChatCell: UITableViewCell {
     /// configure ui element when init cell
     func configureUI() {
         // MARK: configure long press on cell
-        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(BaseChatCell.handleLongPress))
-        self.contentView.addGestureRecognizer(longPress)
         self.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
+    }
+    
+    func configureInteractino() {
+        if self.comment.commentType != .system {
+            self.contentView.addGestureRecognizer(longPress)
+        }
     }
     
     

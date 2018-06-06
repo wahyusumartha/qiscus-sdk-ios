@@ -23,7 +23,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="36.5"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="k6g-Kv-M06">
-                                <rect key="frame" x="101" y="5.5" width="118" height="26.5"/>
+                                <rect key="frame" x="106" y="5.5" width="108" height="26.5"/>
                                 <color key="backgroundColor" red="0.52984312239999998" green="0.93675113340000005" blue="0.65961715789999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="number" keyPath="cornerRadiuss">
@@ -31,8 +31,8 @@
                                     </userDefinedRuntimeAttribute>
                                 </userDefinedRuntimeAttributes>
                             </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="System Message" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yeN-gH-sPr">
-                                <rect key="frame" x="105" y="8" width="110" height="20.5"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yeN-gH-sPr">
+                                <rect key="frame" x="110" y="8" width="100" height="20.5"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="lessThanOrEqual" constant="250" id="6Kq-9q-7XU"/>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="ZdO-oU-zO7"/>
@@ -67,6 +67,9 @@
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <connections>
+                <outlet property="lbComment" destination="yeN-gH-sPr" id="2Oq-SO-ltM"/>
+            </connections>
             <point key="canvasLocation" x="34" y="109.5"/>
         </tableViewCell>
     </objects>
