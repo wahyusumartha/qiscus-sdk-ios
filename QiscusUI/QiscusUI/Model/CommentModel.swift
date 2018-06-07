@@ -23,7 +23,7 @@ public struct CommentModel {
     var textFontSize: Float = 0
     var displayImage: UIImage?
     var additionalData: String = ""
-    var repliedText: String = "" 
+//    var repliedText: String = "" 
     
     //audio variable
     var durationLabel: String = ""
