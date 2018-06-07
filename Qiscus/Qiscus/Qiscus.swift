@@ -624,9 +624,9 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     
     
     public class func printLog(text:String){
-        print(text)
         if Qiscus.showDebugPrint{
             let logText = "[Qiscus]: \(text)"
+            print(logText)
             DispatchQueue.global().sync{
                 if Qiscus.saveLog {
                     let date = Date()
