@@ -830,6 +830,8 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             }else{
                 localNotification.alertBody = comment.text
             }
+            
+            localNotification.soundName = "default"
             var userData = [AnyHashable : Any]()
             
             if userInfo != nil {
