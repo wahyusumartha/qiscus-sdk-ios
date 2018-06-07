@@ -284,7 +284,7 @@ public class QRoomService:NSObject{
                             c.update(commentId: commentId, beforeId: commentBeforeId)
                             if let room = QRoom.threadSaveRoom(withId: roomId){
                                 if c.status == QCommentStatus.sending || c.status == QCommentStatus.failed {
-                                    room.updateCommentStatus(inComment: c, status: .sent)
+//                                    room.updateCommentStatus(inComment: c, status: .sent)
                                 }
                                 self.sync(onRoom: room)
                             }

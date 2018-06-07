@@ -17,10 +17,12 @@ public extension QRoom {
     public class func unpinAll(){
         QRoom.unpinAllRoom()
     }
+    public class func room(withThreadSaveId id: String) -> QRoom? {
+        return QRoom.threadSaveRoom(withId:id) 
+    }
     public class func room(withId id:String) -> QRoom? {
         return QRoom.getRoom(withId: id)
     }
-    
     public class func room(withUniqueId uniqueId:String) -> QRoom? {
         return QRoom.getRoom(withUniqueId:uniqueId)
     }

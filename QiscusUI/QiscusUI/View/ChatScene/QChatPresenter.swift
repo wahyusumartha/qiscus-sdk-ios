@@ -43,11 +43,13 @@ class QChatPresenter: QChatUserInteraction {
     func loadRoom(withId roomId: String) {
         if let room = QRoom.room(withId: roomId) {
             self.room = room
-            self.comments = self.generateComments(qComments: room.comments)
-            DispatchQueue.main.async {
-                self.view.onLoadRoomFinished(roomName: room.name, roomAvatar: room.avatar)
-                self.loadRoomAvatar(room: room)
-                self.view.onLoadMessageFinished()
+            self.generateComments(onRoomId: room.id) { commentModels in
+                self.comments = commentModels
+                DispatchQueue.main.async {
+                    self.view.onLoadRoomFinished(roomName: room.name, roomAvatar: room.avatar)
+                    self.loadRoomAvatar(room: room)
+                    self.view.onLoadMessageFinished()
+                }
             }
         }
 
@@ -86,9 +88,11 @@ class QChatPresenter: QChatUserInteraction {
     }
     
     func getMessage(inRoom roomId: String) {
-        if let comments = QRoom.room(withId: roomId)?.comments {
-            self.comments = self.generateComments(qComments: comments)
-            self.view.onLoadMessageFinished()
+        if let id = QRoom.room(withId: roomId)?.id {
+            self.generateComments(onRoomId: id) { commentModels in
+                self.comments = commentModels
+                self.view.onLoadMessageFinished()
+            }
         }
         
         self.chatService.room(withId: roomId)
@@ -175,14 +179,18 @@ class QChatPresenter: QChatUserInteraction {
         })
     }
     
-    private func generateComments(qComments: [QComment]) -> [[CommentModel]] {
-        var commentModels = qComments.map { (comment) -> CommentModel in
-            let comment = CommentModel(uniqueId: comment.uniqueId, id: comment.id, roomId: comment.roomId, text: comment.text, time: comment.time, date: comment.date, senderEmail: comment.senderEmail, senderName: comment.senderName, senderAvatarURL: comment.senderAvatarURL, roomName: comment.roomName, textFontName: "", textFontSize: 0, displayImage: QCacheManager.shared.getImage(onCommentUniqueId: comment.uniqueId), additionalData: comment.date, durationLabel: comment.durationLabel, currentTimeSlider: comment.currentTimeSlider, seekTimeLabel: comment.seekTimeLabel, audioIsPlaying: comment.audioIsPlaying, isDownloading: comment.isDownloading, isUploading: comment.isUploading, progress: comment.progress, isRead: comment.isRead, extras: comment.extras, isMyComment: comment.senderEmail == Qiscus.client.email, commentType: comment.type, commentStatus: comment.status, file: comment.file)
-            
-            return comment
+    private func generateComments(onRoomId id: String, completion: @escaping ([[CommentModel]])->Void) {
+        DispatchQueue.global(qos: .background).async {
+            if let qComments = QRoom.room(withThreadSaveId: id)?.comments {
+                var commentModels = qComments.map { (comment) -> CommentModel in
+                    let comment = CommentModel(uniqueId: comment.uniqueId, id: comment.id, roomId: comment.roomId, text: comment.text, time: comment.time, date: comment.date, senderEmail: comment.senderEmail, senderName: comment.senderName, senderAvatarURL: comment.senderAvatarURL, roomName: comment.roomName, textFontName: "", textFontSize: 0, displayImage: QCacheManager.shared.getImage(onCommentUniqueId: comment.uniqueId), additionalData: comment.date, durationLabel: comment.durationLabel, currentTimeSlider: comment.currentTimeSlider, seekTimeLabel: comment.seekTimeLabel, audioIsPlaying: comment.audioIsPlaying, isDownloading: comment.isDownloading, isUploading: comment.isUploading, progress: comment.progress, isRead: comment.isRead, extras: comment.extras, isMyComment: comment.senderEmail == Qiscus.client.email, commentType: comment.type, commentStatus: comment.status, file: comment.file)
+                    
+                    return comment
+                }
+                
+                completion(self.groupingComments(comments: commentModels))
+            }
         }
-        
-        return self.groupingComments(comments: commentModels)
      }
     
     private func groupingComments(comments: [CommentModel]) -> [[CommentModel]]{
@@ -289,8 +297,11 @@ class QChatPresenter: QChatUserInteraction {
 extension QChatPresenter: QChatServiceDelegate {
     func chatService(didFinishLoadRoom room:QRoom, withMessage message:String?) {
         self.room = room
-        self.comments = self.generateComments(qComments: room.comments)
-        self.view.onLoadMessageFinished()
+        self.generateComments(onRoomId: room.id) { commentModels in
+            self.comments = commentModels
+            self.view.onLoadMessageFinished()
+        }
+        
         self.view.onLoadRoomFinished(roomName: room.name, roomAvatar: room.avatar)
         self.loadRoomAvatar(room: room)
     }

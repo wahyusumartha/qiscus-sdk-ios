@@ -27,6 +27,22 @@ internal extension QRoom {
             room.unpin()
         }
     }
+    
+//    internal class func threadSaveRoom(withId id: String) -> QRoom? {
+//        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+//        realm.refresh()
+//        let rooms = realm.objects(QRoom.self).filter("id == '\(id)'")
+//        if let room = rooms.first {
+//            if !room.isInvalidated {
+//                let room = rooms.first!
+//                Qiscus.chatRooms[room.id] = room
+//                return room
+//            }
+//        }
+//        
+//        return nil
+//    }
+    
     internal class func getRoom(withId id:String) -> QRoom?{
         if Thread.isMainThread {
             if let cache = Qiscus.chatRooms[id] {
