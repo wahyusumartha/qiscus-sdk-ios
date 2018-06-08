@@ -15,7 +15,7 @@ import RealmSwift
 
 public class QRoomService:NSObject{
     var isSyncing: Bool = false
-    public func sync(onRoom room:QRoom){
+    public func sync(onRoom room:QRoom, onSuccess: @escaping ((QRoom)->Void) = {_ in }){
         if self.isSyncing {
             return
         }
@@ -46,7 +46,7 @@ public class QRoomService:NSObject{
                         if r.isInvalidated {
                             return
                         }
-                        r.syncRoomData(withJSON: roomData)
+                        r.syncRoomData(withJSON: roomData, onSuccess: onSuccess)
                         
                         let commentPayload = results["comments"].arrayValue
                         var needSync = false
@@ -905,6 +905,92 @@ public class QRoomService:NSObject{
                 }
             }
         })
+    }
+    
+    public class func removeParticipant(onRoom id: String, userIds: [String], onSuccess:@escaping (QRoom)->Void, onError: @escaping ([String], Int?)->Void) {
+        let url = QiscusConfig.REMOVE_ROOM_PARTICIPANT
+        let parameters = [
+            "room_id": id as AnyObject,
+            "emails" : userIds as AnyObject,
+            "token": Qiscus.shared.config.USER_TOKEN as AnyObject
+        ]
+        
+        QiscusService.session.request(url, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON { responseData in
+            QiscusBackgroundThread.async {
+                if let response = responseData.result.value{
+                    let json = JSON(response)
+                    let results = json["results"]
+                    
+                    let status = json["status"].intValue
+                    var successUids = [String]()
+                    var errorUids = [String]()
+                    
+                    if results != JSON.null && status == 200{
+                        let service = QRoomService()
+                        if let room = QRoom.threadSaveRoom(withId: id) {
+                            service.sync(onRoom: room, onSuccess: onSuccess)
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            onError(userIds,nil)
+                        }
+                    }
+                }else{
+                    if let statusCode = responseData.response?.statusCode {
+                        DispatchQueue.main.async {
+                            onError(userIds,statusCode)
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            onError(userIds,nil)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    public class func addParticipant(onRoom id: String, userIds: [String], onSuccess:@escaping (QRoom)->Void, onError: @escaping ([String],Int?)->Void) {
+        let url = QiscusConfig.ADD_ROOM_PARTICIPANT
+        let parameters = [
+            "room_id": id as AnyObject,
+            "emails" : userIds as AnyObject,
+            "token": Qiscus.shared.config.USER_TOKEN as AnyObject
+        ]
+        
+        QiscusService.session.request(url, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON { responseData in
+            QiscusBackgroundThread.async {
+                if let response = responseData.result.value{
+                    let json = JSON(response)
+                    let results = json["results"]
+                    
+                    let status = json["status"].intValue
+                    var successUids = [String]()
+                    var errorUids = [String]()
+                    
+                    if results != JSON.null && status == 200{
+                        let service = QRoomService()
+                        if let room = QRoom.threadSaveRoom(withId: id) {
+                            service.sync(onRoom: room, onSuccess: onSuccess)
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            onError(userIds,nil)
+                        }
+                    }
+                }else{
+                    if let statusCode = responseData.response?.statusCode {
+                        DispatchQueue.main.async {
+                            onError(userIds,statusCode)
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            onError(userIds,nil)
+                        }
+                    }
+                }
+            }
+        }
     }
     
     internal class func delete(messagesWith uniqueIds:[String], forMe:Bool, hardDelete:Bool, onSuccess:@escaping ([String])->Void, onError:@escaping ([String],Int?)->Void){

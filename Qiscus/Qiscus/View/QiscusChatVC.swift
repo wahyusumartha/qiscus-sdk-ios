@@ -55,6 +55,7 @@ import RealmSwift
     @objc optional func chatVC(onViewDidLoad viewController:QiscusChatVC)
     @objc optional func chatVC(viewController:QiscusChatVC, willAppear animated:Bool)
     @objc optional func chatVC(viewController:QiscusChatVC, willDisappear animated:Bool)
+    @objc optional func chatVC(didTapAttachment actionSheet: UIAlertController, viewController: QiscusChatVC, onRoom: QRoom?)
     
     @objc optional func chatVC(viewController:QiscusChatVC, willPostComment comment:QComment, room:QRoom?, data:Any?)->QComment?
     
