@@ -529,7 +529,6 @@ public class QRoom:Object {
     internal func resendPendingMessage(){
         let id = self.id
         let pendingMessages = self.rawComments.filter("statusRaw == %d", QCommentStatus.pending.rawValue)
-        print("pending message count \(pendingMessages.count)")
         if pendingMessages.count > 0 {
             if let pendingMessage = pendingMessages.first {
                 service.postComment(onRoom: id, comment: pendingMessage) {

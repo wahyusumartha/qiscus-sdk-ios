@@ -30,7 +30,6 @@ public class QRoomService:NSObject{
             "token"  : Qiscus.shared.config.USER_TOKEN as AnyObject
         ]
         
-        print("\(parameters)")
         QiscusService.session.request(loadURL, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: {responseData in
             self.isSyncing = false
             if let response = responseData.result.value {
@@ -865,7 +864,6 @@ public class QRoomService:NSObject{
             if let response = responseData.result.value{
                 let json = JSON(response)
                 let results = json["results"]
-                print("results: \(results)")
                 let status = json["status"].intValue
                 if results != JSON.null && status == 200{
                     QiscusBackgroundThread.async{

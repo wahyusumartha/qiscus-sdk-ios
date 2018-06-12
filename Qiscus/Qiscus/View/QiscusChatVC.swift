@@ -396,7 +396,6 @@ public class QiscusChatVC: UIViewController{
     }
     
     func checkSingleRoom()->Bool{
-        print("room typee \(self.chatRoom?.type)")
         if let room = self.chatRoom {
             if room.type == .single && flagPresence{
                 flagPresence = false

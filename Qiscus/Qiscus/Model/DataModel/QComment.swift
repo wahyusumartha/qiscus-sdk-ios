@@ -1274,7 +1274,6 @@ public class QComment:Object {
             realm.refresh()
             let data = realm.objects(QComment.self).filter("statusRaw == 1")
             
-            print("dataCount bro: \(data.count)")
             if let comment = data.first {
                 if Thread.isMainThread {
                     if let room = QRoom.room(withId: comment.roomId){
