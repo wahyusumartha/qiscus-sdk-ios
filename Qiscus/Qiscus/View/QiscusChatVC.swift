@@ -909,7 +909,6 @@ extension QiscusChatVC:QChatServiceDelegate{
         self.chatRoom = inRoom
         self.chatRoomUniqueId = inRoom.uniqueId
         self.isPublicChannel = inRoom.isPublicChannel
-        print("room \(inRoom)")
         self.loadTitle()
         self.loadSubtitle()
         self.unreadIndicator.isHidden = true
