@@ -93,8 +93,49 @@ extension QiscusChatVC: QConversationViewCellDelegate{
                             currentIndex = totalIndex
                         }
                         let urlString = "file://\(file.localPath)"
-                        if let url = URL(string: urlString){
+                        
+                        
+                        let allowedChar = CharacterSet(bitmapRepresentation: CharacterSet.urlPathAllowed.bitmapRepresentation)
+                        if let encoded = urlString.addingPercentEncoding(withAllowedCharacters: allowedChar),
+                            let url = URL(string: encoded)
+                        {
                             if let imageData = try? Data(contentsOf: url) {
+                                if file.type == .image {
+                                    if file.ext == "gif"{
+                                        if let image = UIImage.qiscusGIF(data: imageData){
+                                            let item = QiscusGalleryItem()
+                                            item.image = image
+                                            item.isVideo = false
+                                            self.galleryItems.append(item)
+                                            totalIndex += 1
+                                        }
+                                    }else{
+                                        if let image = UIImage(data: imageData) {
+                                            let item = QiscusGalleryItem()
+                                            item.image = image
+                                            item.isVideo = false
+                                            self.galleryItems.append(item)
+                                            totalIndex += 1
+                                        }
+                                    }
+                                }else if file.type == .video{
+                                    let urlString = "file://\(file.localPath)"
+                                    let urlThumb = "file://\(file.localThumbPath)"
+                                    if let url = URL(string: urlThumb) {
+                                        if let data = try? Data(contentsOf: url) {
+                                            if let image = UIImage(data: data){
+                                                let item = QiscusGalleryItem()
+                                                item.image = image
+                                                item.isVideo = true
+                                                item.url = urlString
+                                                self.galleryItems.append(item)
+                                                totalIndex += 1
+                                            }
+                                        }
+                                    }
+                                }
+                            } else if let originalUrl = URL(string: urlString) {
+                                guard let imageData = try? Data(contentsOf: originalUrl) else {return}
                                 if file.type == .image {
                                     if file.ext == "gif"{
                                         if let image = UIImage.qiscusGIF(data: imageData){

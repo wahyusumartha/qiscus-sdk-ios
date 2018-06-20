@@ -20,6 +20,12 @@
 "WELCOME"           = "Te damos la bienvenida";
 "EMPTY_MESSAGE"     = "Escribe un mensaje para iniciar una conversación";
 "AT"                = "a las";
+"FAILED"            = "ha fallado";
+"DELETING"          = "eliminando";
+"SENDING"           = "enviando";
+"DOWNLOADING"       = "descargando";
+"UPLOADING"         = "cargando";
+"NO_CONNECTION"     = "no se puede conectar a internet, verifique su conexión";
 
 //cell option:
 "COPY"              = "Copiar";
@@ -39,3 +45,8 @@
 "CURRENT_LOCATION"  = "Ubicación actual";
 "CANCEL"            = "Cancelar";
 
+//Alert Dialog:
+"CONFIRMATION"              = "CONFIRMACIÓN";
+"UPLOAD_IMAGE_CONFIRMATION" = "¿Estás seguro de enviar esta imagen?";
+"UPLOAD_FILE_CONFIRMATION"  = "¿Estás seguro de enviar";
+"SETTING"                   = "AJUSTE";

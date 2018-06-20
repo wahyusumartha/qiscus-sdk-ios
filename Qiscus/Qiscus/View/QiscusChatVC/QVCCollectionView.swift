@@ -205,7 +205,7 @@ extension QiscusChatVC: QConversationViewDelegate {
                         let rid = room.id
                         QiscusBackgroundThread.async {
                             if let rts = QRoom.threadSaveRoom(withId: rid){
-                                rts.readAll()
+//                                rts.readAll()
                             }
                         }
                     }

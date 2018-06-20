@@ -424,7 +424,7 @@ internal extension QRoom {
         }
     }
     // MARK: - Public Object method
-    internal func syncRoomData(withJSON json:JSON){
+    internal func syncRoomData(withJSON json:JSON, onSuccess: @escaping ((QRoom)->Void) = {_ in }){
         let id = self.id
         QiscusDBThread.async {
             if let room = QRoom.threadSaveRoom(withId: id) {
@@ -599,6 +599,7 @@ internal extension QRoom {
                         room.checkCommentStatus()
                     }
                 }
+                onSuccess(room)
             }
         }
     }

@@ -135,6 +135,11 @@ extension QiscusChatVC {
             }
             actionSheetController.addAction(contactActionButton)
         }
+        
+        if let delegate = self.delegate{
+            delegate.chatVC?(didTapAttachment: actionSheetController, viewController: self, onRoom: self.chatRoom)
+        }
+        
         self.present(actionSheetController, animated: true, completion: nil)
     }
     func shareCurrentLocation(){

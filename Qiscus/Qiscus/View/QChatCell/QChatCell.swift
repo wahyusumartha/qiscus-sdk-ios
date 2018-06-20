@@ -182,7 +182,7 @@ open class QChatCell: UICollectionViewCell, QCommentDelegate {
                                 }
                             }
                         }, onError: { (statusCode) in
-                            print("delete error: status code \(String(describing: statusCode))")
+                            Qiscus.printLog(text: "delete error: status code \(String(describing: statusCode))")
                         })
                     }
                 }
@@ -225,7 +225,7 @@ open class QChatCell: UICollectionViewCell, QCommentDelegate {
                                 }
                             }
                         }, onError: { (statusCode) in
-                            print("delete error: status code \(statusCode)")
+                            Qiscus.printLog(text: "delete error: status code \(statusCode)")
                         })
                     }
                 }

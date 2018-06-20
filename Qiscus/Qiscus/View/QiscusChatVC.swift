@@ -55,6 +55,7 @@ import RealmSwift
     @objc optional func chatVC(onViewDidLoad viewController:QiscusChatVC)
     @objc optional func chatVC(viewController:QiscusChatVC, willAppear animated:Bool)
     @objc optional func chatVC(viewController:QiscusChatVC, willDisappear animated:Bool)
+    @objc optional func chatVC(didTapAttachment actionSheet: UIAlertController, viewController: QiscusChatVC, onRoom: QRoom?)
     
     @objc optional func chatVC(viewController:QiscusChatVC, willPostComment comment:QComment, room:QRoom?, data:Any?)->QComment?
     
@@ -123,7 +124,7 @@ public class QiscusChatVC: UIViewController{
     var didFindLocation = true
     var prefetch:Bool = false
     var presentingLoading = false
-    
+    var flagPresence = true
     internal let currentNavbarTint = UINavigationBar.appearance().tintColor
     static let currentNavbarTint = UINavigationBar.appearance().tintColor
     
@@ -385,9 +386,26 @@ public class QiscusChatVC: UIViewController{
         
         let center: NotificationCenter = NotificationCenter.default
         center.addObserver(self, selector: #selector(QiscusChatVC.appDidEnterBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
-        
+       
         self.welcomeView.isHidden = false
         self.collectionView.isHidden = true
+    }
+    
+    @objc func appPresence(){
+         self.loadSubtitle()
+    }
+    
+    func checkSingleRoom()->Bool{
+        if let room = self.chatRoom {
+            if room.type == .single && flagPresence{
+                flagPresence = false
+                return true
+            }else{
+                return false
+            }
+        }else {
+            return false
+        }
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -418,6 +436,9 @@ public class QiscusChatVC: UIViewController{
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         NotificationCenter.default.removeObserver(self, name: .UIKeyboardWillChangeFrame, object: nil)
         NotificationCenter.default.removeObserver(self, name: .UIApplicationDidBecomeActive, object: nil)
+        if checkSingleRoom(){
+            NotificationCenter.default.removeObserver(self, name: QiscusNotification.USER_PRESENCE, object:nil)
+        }
         if let navBarTyping = self.configDelegate?.chatVCConfigDelegate?(usingNavigationSubtitleTyping: self){
             if navBarTyping {
                 if let roomId = self.chatRoom?.id {
@@ -888,7 +909,6 @@ extension QiscusChatVC:QChatServiceDelegate{
         self.chatRoom = inRoom
         self.chatRoomUniqueId = inRoom.uniqueId
         self.isPublicChannel = inRoom.isPublicChannel
-        print("room \(inRoom)")
         self.loadTitle()
         self.loadSubtitle()
         self.unreadIndicator.isHidden = true
@@ -912,6 +932,10 @@ extension QiscusChatVC:QChatServiceDelegate{
                 self.collectionView.scrollToBottom()
             }
         }
+        if checkSingleRoom(){
+            let presence: NotificationCenter = NotificationCenter.default
+            presence.addObserver(self, selector: #selector(QiscusChatVC.appPresence), name: QiscusNotification.USER_PRESENCE, object: nil)
+        }
         self.dismissLoading()
         
     }
@@ -921,7 +945,13 @@ extension QiscusChatVC:QChatServiceDelegate{
         DispatchQueue.main.asyncAfter(deadline: time, execute: {
             self.dismissLoading()
         })
-        QToasterSwift.toast(target: self, text: "Can't load chat room\n\(error)", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+        if chatRoom?.storedName == nil {
+            if !Qiscus.sharedInstance.connected {
+                QToasterSwift.toast(target: self, text: "No Internet Connection", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+            }else {
+                QToasterSwift.toast(target: self, text: "Can't load chat room\n\(error)", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+            }
+        }
         self.dataLoaded = false
         self.delegate?.chatVC?(viewController: self, didFailLoadRoom: error)
     }
