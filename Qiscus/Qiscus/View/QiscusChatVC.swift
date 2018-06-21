@@ -387,7 +387,7 @@ public class QiscusChatVC: UIViewController{
         let center: NotificationCenter = NotificationCenter.default
         center.addObserver(self, selector: #selector(QiscusChatVC.appDidEnterBackground), name: NSNotification.Name.UIApplicationDidEnterBackground, object: nil)
        
-        self.welcomeView.isHidden = false
+        self.welcomeView.isHidden = true
         self.collectionView.isHidden = true
     }
     

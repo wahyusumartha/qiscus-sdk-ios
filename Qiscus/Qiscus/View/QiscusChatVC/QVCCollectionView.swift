@@ -212,7 +212,7 @@ extension QiscusChatVC: QConversationViewDelegate {
                 }
             })
         }else{
-            self.welcomeView.isHidden = false
+            self.welcomeView.isHidden = true
             self.collectionView.isHidden = true
             self.dismissLoading()
         }
