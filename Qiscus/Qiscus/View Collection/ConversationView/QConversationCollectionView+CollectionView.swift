@@ -400,14 +400,21 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
             let group = self.messagesId[indexPath.section]
             if group.count > indexPath.item {
                 let uid = group[indexPath.item]
-                if let message = QComment.comment(withUniqueId: uid) {
-                    if let h = self.viewDelegate?.viewDelegate?(view: self, heightForComment: message) {
-                        return CGSize(width: QiscusHelper.screenWidth() - 16, height: h.height)
-                    }else{
-                        var size = message.textSize
-                        size.width = QiscusHelper.screenWidth() - 16
-                        size.height = self.cellHeightForComment(comment: message, defaultHeight: size.height, firstInSection: indexPath.item == 0)
-                        return size
+                if let cachedSize = self.cacheCellSize[uid] {
+                    return cachedSize
+                } else {
+                    if let message = QComment.comment(withUniqueId: uid) {
+                        if let h = self.viewDelegate?.viewDelegate?(view: self, heightForComment: message) {
+                            let size = CGSize(width: QiscusHelper.screenWidth() - 16, height: h.height)
+                            self.cacheCellSize[uid] = size
+                            return size
+                        }else{
+                            var size = message.textSize
+                            size.width = QiscusHelper.screenWidth() - 16
+                            size.height = self.cellHeightForComment(comment: message, defaultHeight: size.height, firstInSection: indexPath.item == 0)
+                            self.cacheCellSize[uid] = size
+                            return size
+                        }
                     }
                 }
             }

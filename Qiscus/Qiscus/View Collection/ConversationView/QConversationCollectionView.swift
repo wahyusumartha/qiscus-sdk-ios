@@ -94,6 +94,7 @@ public class QConversationCollectionView: UICollectionView {
     internal var targetIndexPath:IndexPath?
     internal var userTypingEmail: String = ""
     internal var isTyping: Bool = false
+    internal var cacheCellSize: [String: CGSize] = [:]
     
     var isLastRowVisible: Bool = false
     
@@ -217,7 +218,6 @@ public class QConversationCollectionView: UICollectionView {
             predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
         }
         
-        
         QiscusBackgroundThread.async {
             if let rts = QRoom.threadSaveRoom(withId: rid){
                 var messages = rts.grouppedCommentsUID(filter: predicate)
@@ -240,13 +240,16 @@ public class QConversationCollectionView: UICollectionView {
                 
                 if changed {
                     DispatchQueue.main.async {
-                        self.messagesId = messages
-                        self.reloadData()
                         
                         if comment.isInvalidated {return}
-                        if comment.senderEmail == Qiscus.client.email || self.isLastRowVisible {
+                        if comment.senderEmail == Qiscus.client.email || !self.isLastRowVisible {
                             self.layoutIfNeeded()
                             self.scrollToBottom(true)
+                        } else {
+                            self.messagesId = messages
+                            self.reloadData()
+                            
+                            if self.isLastRowVisible {self.scrollToBottom(true)}
                         }
                     }
                 }
@@ -571,6 +574,10 @@ public class QConversationCollectionView: UICollectionView {
             }
         }
     }
+    override public func reloadData() {
+        super.reloadData()
+    }
+    
     public func refreshData(withCompletion completion: (()->Void)? = nil){
         if let room = self.room {
             let rid = room.id

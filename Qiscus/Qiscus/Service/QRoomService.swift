@@ -58,11 +58,11 @@ public class QRoomService:NSObject{
                             }
                         }
                         if needSync {
-                            QChatService.syncProcess()
+//                            QChatService.syncProcess()
                         }
                         DispatchQueue.main.async {
                             if let mainRoom = QRoom.room(withId: roomId){
-                                mainRoom.delegate?.room?(didFinishSync: mainRoom)
+//                                mainRoom.delegate?.room?(didFinishSync: mainRoom)
                             }
                         }
                     }
