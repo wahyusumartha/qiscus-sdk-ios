@@ -847,7 +847,7 @@ internal extension QRoom {
     internal func saveNewComment(fromJSON json:JSON){
         let roomId = self.id
         
-        QiscusDBThread.sync {
+        QiscusDBThread.async {
             if let room = QRoom.threadSaveRoom(withId:  roomId){
                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                 realm.refresh()
