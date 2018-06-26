@@ -47,6 +47,10 @@ class QContactCell: BaseChatCell {
             }
             lbName.textAlignment = .left
         }
-        self.delegate?.onSaveContactCellDidTap(comment: self.comment)
     }
+    
+    @IBAction func saveContact(_ sender: Any) {
+     self.delegate?.onSaveContactCellDidTap(comment: self.comment)
+    }
+    
 }

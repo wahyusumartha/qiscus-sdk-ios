@@ -6,7 +6,8 @@
 //
 
 import UIKit
-
+import ContactsUI
+import SwiftyJSON
 open class QChatVC: UIViewController {
     
     @IBOutlet weak var tableViewConversation: UITableView!
@@ -355,10 +356,31 @@ extension QChatVC: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
-
+extension QChatVC:CNContactViewControllerDelegate{
+    
+}
 extension QChatVC: ChatCellDelegate {
     func onSaveContactCellDidTap(comment: CommentModel) {
+        let payloadString = comment.additionalData
+        let payload = JSON(parseJSON: payloadString)
+        let contactValue = payload["value"].stringValue
         
+        let con = CNMutableContact()
+        con.givenName = payload["name"].stringValue
+        if contactValue.contains("@"){
+            let email = CNLabeledValue(label: CNLabelHome, value: contactValue as NSString)
+            con.emailAddresses.append(email)
+        }else{
+            let phone = CNLabeledValue(label: CNLabelPhoneNumberMobile, value: CNPhoneNumber(stringValue: contactValue))
+            con.phoneNumbers.append(phone)
+        }
+      
+        let unkvc = CNContactViewController(forUnknownContact: con)
+        unkvc.message = "Kiwari contact"
+        unkvc.contactStore = CNContactStore()
+        unkvc.delegate = self
+        unkvc.allowsActions = false
+        self.navigationController?.pushViewController(unkvc, animated: true)
     }
     
     func onImageCellDidTap(imageSlideShow: UIViewController) {
