@@ -155,6 +155,7 @@ open class QChatVC: UIViewController {
         self.tableViewConversation.register(UINib(nibName: "LeftTextCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "LeftTextCell")
         self.tableViewConversation.register(UINib(nibName: "QImageCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QImageCell")
         self.tableViewConversation.register(UINib(nibName: "QSystemCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QSystemCell")
+        self.tableViewConversation.register(UINib(nibName: "QContactCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QContactCell")
     }
     
     @objc func goBack() {
@@ -290,6 +291,9 @@ extension QChatVC: UITableViewDataSource {
         case .system:
             cell = tableView.dequeueReusableCell(withIdentifier: "QSystemCell", for: indexPath) as! QSystemCell
             break
+        case .contact:
+            cell = tableView.dequeueReusableCell(withIdentifier: "QContactCell",for: indexPath) as! QContactCell
+            break
         default:
             cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
         }
@@ -353,6 +357,10 @@ extension QChatVC: UITableViewDelegate {
 }
 
 extension QChatVC: ChatCellDelegate {
+    func onSaveContactCellDidTap(comment: CommentModel) {
+        
+    }
+    
     func onImageCellDidTap(imageSlideShow: UIViewController) {
         self.navigationController?.present(imageSlideShow, animated: true, completion: nil)
     }

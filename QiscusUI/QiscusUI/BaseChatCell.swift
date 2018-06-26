@@ -10,6 +10,7 @@ import Qiscus
 
 protocol ChatCellDelegate {
     func onImageCellDidTap(imageSlideShow: UIViewController)
+    func onSaveContactCellDidTap(comment: CommentModel)
 }
 
 class BaseChatCell: UITableViewCell {
