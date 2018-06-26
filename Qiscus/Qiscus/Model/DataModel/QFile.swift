@@ -161,7 +161,7 @@ public class QFile:Object{
         let mediaUrlString = component2.first?.trimmingCharacters(in: CharacterSet.whitespaces)
         return mediaUrlString!.replacingOccurrences(of: " ", with: "%20")
     }
-    internal func updateLocalPath(path:String){
+    open func updateLocalPath(path:String){
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         realm.refresh()
         try! realm.write {

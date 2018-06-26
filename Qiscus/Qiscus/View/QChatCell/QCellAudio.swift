@@ -15,7 +15,6 @@ protocol ChatCellAudioDelegate {
     func didEndSeekTimeSlider(_ slider: UISlider, onCell cell: QCellAudio)
 }
 class QCellAudio: QChatCell {
-
     var audioCellDelegate: ChatCellAudioDelegate?
     var _timeFormatter: DateComponentsFormatter?
     var currentTime = TimeInterval()
