@@ -15,7 +15,7 @@ import RealmSwift
 
 public class QRoomService:NSObject{
     var isSyncing: Bool = false
-    public func sync(onRoom room:QRoom, onSuccess: @escaping ((QRoom)->Void) = {_ in }){
+    public func sync(onRoom room:QRoom, notifyUI: Bool = false, onSuccess: @escaping ((QRoom)->Void) = {_ in }){
         if self.isSyncing {
             return
         }
@@ -60,9 +60,12 @@ public class QRoomService:NSObject{
                         if needSync {
 //                            QChatService.syncProcess()
                         }
-                        DispatchQueue.main.async {
-                            if let mainRoom = QRoom.room(withId: roomId){
-//                                mainRoom.delegate?.room?(didFinishSync: mainRoom)
+                        
+                        if notifyUI {
+                            DispatchQueue.main.async {
+                                if let mainRoom = QRoom.room(withId: roomId){
+                                    mainRoom.delegate?.room?(didFinishSync: mainRoom)
+                                }
                             }
                         }
                     }
@@ -104,7 +107,7 @@ public class QRoomService:NSObject{
                                 if results != JSON.null{
                                     let comments = json["results"]["comments"].arrayValue
                                     if comments.count > 0 {
-                                        for newComment in comments {
+                                        for newComment in comments.reversed() {
                                             savedRoom.saveOldComment(fromJSON: newComment)
                                         }
                                         DispatchQueue.main.async {
@@ -293,7 +296,7 @@ public class QRoomService:NSObject{
                                 if c.status == QCommentStatus.sending || c.status == QCommentStatus.failed {
                                     room.updateCommentStatus(inComment: c, status: .sent)
                                 }
-                                self.sync(onRoom: room)
+                                self.sync(onRoom: room, notifyUI: room.rawComments.count < 2)
                             }
                         }
                     }else{

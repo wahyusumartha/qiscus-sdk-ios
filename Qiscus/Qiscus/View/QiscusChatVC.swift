@@ -428,6 +428,7 @@ public class QiscusChatVC: UIViewController{
         if let room = self.chatRoom {
             room.readAll()
             room.unsubscribeRoomChannel()
+//            room.clearRemain30()
         }
         self.isPresence = false
         self.dataLoaded = false

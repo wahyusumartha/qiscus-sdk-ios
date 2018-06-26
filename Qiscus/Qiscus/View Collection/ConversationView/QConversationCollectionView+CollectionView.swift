@@ -77,6 +77,8 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                 
                 cell.setData(onIndexPath: indexPath, comment: comment, showUserName: showName, userNameColor: color, hideAvatar: !showAvatar, delegate: self)
                 
+                
+                
                 if let audioCell = cell as? QCellAudio{
                     audioCell.audioCellDelegate = self
                     cell = audioCell
@@ -119,7 +121,7 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                     return headerCell
                 }
             } else {
-                let footerCell = self.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "emptyFooter", for: indexPath) as! QChatEmptyFooter
+                let footerCell = self.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "emptyHeader", for: indexPath)
                 return footerCell
             }
         }else{

@@ -1078,6 +1078,37 @@ public class QRoom:Object {
             onError(statusCode)
         }
     }
+    
+    internal func clearRemain30() {
+        if self.rawComments.count > 30 {
+            let id = self.id
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            
+            let tempRawComment = List<QComment>()
+            let commentToDelete = List<QComment>()
+            
+            var iteration = 0
+            for rawComment in self.rawComments.reversed() {
+                if iteration < 30 {
+                    tempRawComment.insert(rawComment, at: 0)
+                } else {
+                    commentToDelete.insert(rawComment, at: 0)
+                }
+                
+                iteration += 1
+            }
+            
+            try! realm.write {
+                realm.delete(commentToDelete)
+                self.rawComments.removeAll()
+                tempRawComment.last?.beforeId = 0
+                realm.add(tempRawComment, update: true)
+                self.rawComments.append(objectsIn: tempRawComment)
+//                self.sync()
+            }
+        }
+    }
+    
     internal func clearMessage(){
         let id = self.id
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
