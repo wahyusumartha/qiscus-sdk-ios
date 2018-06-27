@@ -158,6 +158,8 @@ open class QChatVC: UIViewController {
         self.tableViewConversation.register(UINib(nibName: "QSystemCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QSystemCell")
         self.tableViewConversation.register(UINib(nibName: "QContactCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QContactCell")
         self.tableViewConversation.register(UINib(nibName: "QAudioCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QAudioCell")
+        self.tableViewConversation.register(UINib(nibName: "QDocumentCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QDocumentCell")
+        
     }
     
     @objc func goBack() {
@@ -283,9 +285,7 @@ extension QChatVC: UITableViewDataSource {
         let commentType = comment.commentType
         
         tempSection = indexPath.section
-        
         var cell = BaseChatCell()
-        
         switch commentType {
         case .image:
             cell = tableView.dequeueReusableCell(withIdentifier: "QImageCell", for: indexPath) as! QImageCell
@@ -298,6 +298,9 @@ extension QChatVC: UITableViewDataSource {
             break
         case .audio:
             cell = tableView.dequeueReusableCell(withIdentifier: "QAudioCell",for: indexPath) as! QAudioCell
+            break
+        case .document:
+            cell = tableView.dequeueReusableCell(withIdentifier: "QDocumentCell",for: indexPath) as! QDocumentCell
             break
         default:
             cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
