@@ -16,6 +16,8 @@ open class QRoomListCell: UITableViewCell {
         }
     }
     
+    public var reusableCell : String! = ""
+    
     public var room:QRoom? {
         didSet{
             setupUI()
@@ -57,6 +59,10 @@ open class QRoomListCell: UITableViewCell {
 
         // Configure the view for the selected state
     }
+    
+    /**
+    Config Custom Cell
+    */
     open func setupUI(){}
     
     
