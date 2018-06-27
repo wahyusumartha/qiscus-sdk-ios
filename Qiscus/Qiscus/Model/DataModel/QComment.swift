@@ -976,6 +976,7 @@ public class QComment:Object {
         return nil
     }
     public func read(check:Bool = true){
+        if self.isInvalidated {return}
         let uniqueId = self.uniqueId
         if self.isRead {return}
         QiscusDBThread.async {

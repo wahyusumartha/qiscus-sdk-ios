@@ -162,14 +162,12 @@ public class QiscusChatVC: UIViewController{
                     self.dataLoaded = true
                 })
             }
-            if let navBarTyping = self.configDelegate?.chatVCConfigDelegate?(usingNavigationSubtitleTyping: self){
-                if navBarTyping {
-                    if let roomId = self.chatRoom?.id {
-                        let center: NotificationCenter = NotificationCenter.default
-                        center.addObserver(self, selector: #selector(QiscusChatVC.userTyping(_:)), name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
-                    }
-                }
+            
+            if let roomId = self.chatRoom?.id {
+                let center: NotificationCenter = NotificationCenter.default
+                center.addObserver(self, selector: #selector(QiscusChatVC.userTyping(_:)), name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
             }
+
         }
     }
     public var chatMessage:String?
@@ -440,13 +438,11 @@ public class QiscusChatVC: UIViewController{
         if checkSingleRoom(){
             NotificationCenter.default.removeObserver(self, name: QiscusNotification.USER_PRESENCE, object:nil)
         }
-        if let navBarTyping = self.configDelegate?.chatVCConfigDelegate?(usingNavigationSubtitleTyping: self){
-            if navBarTyping {
-                if let roomId = self.chatRoom?.id {
-                    NotificationCenter.default.removeObserver(self, name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
-                }
-            }
+        
+        if let roomId = self.chatRoom?.id {
+            NotificationCenter.default.removeObserver(self, name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
         }
+    
         view.endEditing(true)
         
         self.dismissLoading()
@@ -497,13 +493,11 @@ public class QiscusChatVC: UIViewController{
             center.addObserver(self, selector: #selector(QiscusChatVC.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
             center.addObserver(self, selector: #selector(QiscusChatVC.keyboardChange(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
             center.addObserver(self, selector: #selector(QiscusChatVC.applicationDidBecomeActive), name: .UIApplicationDidBecomeActive, object: nil)
-            if let navBarTyping = self.configDelegate?.chatVCConfigDelegate?(usingNavigationSubtitleTyping: self){
-                if navBarTyping {
-                    if let roomId = self.chatRoom?.id {
-                        center.addObserver(self, selector: #selector(QiscusChatVC.userTyping(_:)), name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
-                    }
-                }
+            
+            if let roomId = self.chatRoom?.id {
+                center.addObserver(self, selector: #selector(QiscusChatVC.userTyping(_:)), name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
             }
+
         }
         if self.loadMoreControl.isRefreshing {
             self.loadMoreControl.endRefreshing()

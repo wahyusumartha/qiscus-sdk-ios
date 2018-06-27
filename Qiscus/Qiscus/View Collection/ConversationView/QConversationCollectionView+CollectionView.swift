@@ -30,7 +30,7 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
     }
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
         var sectionNumber = 0
-        var usingTypingCell = true
+        var usingTypingCell = false
         if let config = self.configDelegate?.configDelegate?(usingTpingCellIndicator: self){
             usingTypingCell = config
         }
@@ -76,8 +76,6 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                 }
                 
                 cell.setData(onIndexPath: indexPath, comment: comment, showUserName: showName, userNameColor: color, hideAvatar: !showAvatar, delegate: self)
-                
-                
                 
                 if let audioCell = cell as? QCellAudio{
                     audioCell.audioCellDelegate = self

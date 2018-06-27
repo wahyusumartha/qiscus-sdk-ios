@@ -14,7 +14,7 @@ extension QiscusChatVC: QConversationViewConfigurationDelegate {
         if let config = self.configDelegate?.chatVCConfigDelegate?(usingTypingCell: self){
             return config
         }
-        return true
+        return false
     }
     public func configDelegate(userNameLabelColor collectionView:QConversationCollectionView, forUser user:QUser)->UIColor?{
         if let config = self.configDelegate{

@@ -156,7 +156,7 @@ public class QConversationCollectionView: UICollectionView {
     }
     public func subscribeEvent(roomId: String){
         let center: NotificationCenter = NotificationCenter.default
-        var usingTypingCell = true
+        var usingTypingCell = false
         if let config = self.configDelegate?.configDelegate?(usingTpingCellIndicator: self){
             usingTypingCell = config
         }
@@ -172,7 +172,7 @@ public class QConversationCollectionView: UICollectionView {
     public func unsubscribeEvent(roomId:String){
         let center: NotificationCenter = NotificationCenter.default
         
-        var usingTypingCell = true
+        var usingTypingCell = false
         if let config = self.configDelegate?.configDelegate?(usingTpingCellIndicator: self){
             usingTypingCell = config
         }
@@ -348,7 +348,7 @@ public class QConversationCollectionView: UICollectionView {
     
     // MARK: - Notification Listener
     @objc private func userTyping(_ notification: Notification){
-        var usingCellTyping = true
+        var usingCellTyping = false
         if let config = self.configDelegate?.configDelegate?(usingTpingCellIndicator: self){
             usingCellTyping = config
         }
