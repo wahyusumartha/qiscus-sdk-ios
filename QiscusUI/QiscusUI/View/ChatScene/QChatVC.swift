@@ -160,6 +160,8 @@ open class QChatVC: UIViewController {
         self.tableViewConversation.register(UINib(nibName: "QAudioCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QAudioCell")
         self.tableViewConversation.register(UINib(nibName: "QDocumentCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QDocumentCell")
         
+        self.tableViewConversation.register(UINib(nibName: "QLocationCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QLocationCell")
+
     }
     
     @objc func goBack() {
@@ -301,6 +303,9 @@ extension QChatVC: UITableViewDataSource {
             break
         case .document:
             cell = tableView.dequeueReusableCell(withIdentifier: "QDocumentCell",for: indexPath) as! QDocumentCell
+            break
+        case .location:
+            cell = tableView.dequeueReusableCell(withIdentifier: "QLocationCell",for: indexPath) as! QLocationCell
             break
         default:
             cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
