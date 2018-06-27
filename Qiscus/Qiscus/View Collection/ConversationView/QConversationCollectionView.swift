@@ -53,6 +53,29 @@ public class QConversationCollectionView: UICollectionView {
                             rts.sync()
                         }
                     }
+                } else {
+                    var hardDelete = false
+                    if let softDelete = self.viewDelegate?.viewDelegate?(usingSoftDeleteOnView: self){
+                        hardDelete = !softDelete
+                    }
+                    var predicate:NSPredicate?
+                    if hardDelete {
+                        predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
+                    }
+                    QiscusBackgroundThread.async {
+                        if let rts = QRoom.threadSaveRoom(withId: rid){
+                            var messages = rts.grouppedCommentsUID(filter: predicate)
+                            messages = self.checkHiddenMessage(messages: messages)
+                            
+                            DispatchQueue.main.async {
+                                self.messagesId = messages
+                                self.reloadData()
+                            }
+                            rts.resendPendingMessage()
+                            rts.redeletePendingDeletedMessage()
+                            rts.sync()
+                        }
+                    }
                 }
             }else{
                 self.messagesId = [[String]]()

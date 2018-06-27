@@ -985,13 +985,17 @@ public class QComment:Object {
                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                 realm.refresh()
                 try! realm.write {
-                    comment.isRead = true
+                    if !comment.isInvalidated {
+                        comment.isRead = true
+                    }
                 }
                 if check {
                     let data = realm.objects(QComment.self).filter("isRead == false AND createdAt < \(comment.createdAt) AND roomId == '\(comment.roomId)'")
                     for olderComment in data {
                         try! realm.write {
-                            olderComment.isRead = true
+                            if !olderComment.isInvalidated {
+                                olderComment.isRead = true
+                            }
                         }
                     }
                 }

@@ -912,7 +912,7 @@ internal extension QRoom {
                     }
                 }
                 else{
-                    self.addComment(newComment: newComment, onTop: true)
+                    self.addComment(newComment: newComment, onTop: false)
                 }
             }
         }
@@ -976,7 +976,7 @@ internal extension QRoom {
             }
         }
         let filteredComments = self.comments(withFilter: filter)
-        for comment in  filteredComments{
+        for comment in filteredComments{
             
             if !comment.isInvalidated {
                 if !uidList.contains(comment.uniqueId) {
@@ -1007,6 +1007,7 @@ internal extension QRoom {
             }
             count += 1
         }
+        
         return retVal
     }
 }
