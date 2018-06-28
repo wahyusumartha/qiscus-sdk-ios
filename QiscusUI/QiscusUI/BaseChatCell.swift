@@ -10,9 +10,38 @@ import Qiscus
 
 protocol ChatCellDelegate {
     func onImageCellDidTap(imageSlideShow: UIViewController)
+    func onSaveContactCellDidTap(comment: CommentModel)
+}
+
+protocol ChatCellAudioDelegate {
+    func didTapPlayButton(_ button: UIButton, onCell cell: BaseChatCell)
+    func didTapPauseButton(_ button: UIButton, onCell cell: BaseChatCell)
+    func didTapDownloadButton(_ button: UIButton, onCell cell: BaseChatCell)
+    func didStartSeekTimeSlider(_ slider: UISlider, onCell cell: BaseChatCell)
+    func didEndSeekTimeSlider(_ slider: UISlider, onCell cell: BaseChatCell)
 }
 
 class BaseChatCell: UITableViewCell {
+    var audioCellDelegate: ChatCellAudioDelegate?
+    var _timeFormatter: DateComponentsFormatter?
+    var currentTime = TimeInterval()
+    var timeFormatter: DateComponentsFormatter? {
+        get {
+            if _timeFormatter == nil {
+                _timeFormatter = DateComponentsFormatter()
+                _timeFormatter?.zeroFormattingBehavior = .pad;
+                _timeFormatter?.allowedUnits = [.minute, .second]
+                _timeFormatter?.unitsStyle = .positional;
+            }
+            
+            return _timeFormatter
+        }
+        
+        set {
+            _timeFormatter = newValue
+        }
+    }
+    
     // MARK: cell data source
     var comment: CommentModel! {
         didSet {

@@ -6,7 +6,8 @@
 //
 
 import UIKit
-
+import ContactsUI
+import SwiftyJSON
 open class QChatVC: UIViewController {
     
     @IBOutlet weak var tableViewConversation: UITableView!
@@ -155,6 +156,12 @@ open class QChatVC: UIViewController {
         self.tableViewConversation.register(UINib(nibName: "LeftTextCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "LeftTextCell")
         self.tableViewConversation.register(UINib(nibName: "QImageCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QImageCell")
         self.tableViewConversation.register(UINib(nibName: "QSystemCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QSystemCell")
+        self.tableViewConversation.register(UINib(nibName: "QContactCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QContactCell")
+        self.tableViewConversation.register(UINib(nibName: "QAudioCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QAudioCell")
+        self.tableViewConversation.register(UINib(nibName: "QDocumentCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QDocumentCell")
+        
+        self.tableViewConversation.register(UINib(nibName: "QLocationCell", bundle: QiscusUI.bundle), forCellReuseIdentifier: "QLocationCell")
+
     }
     
     @objc func goBack() {
@@ -280,15 +287,25 @@ extension QChatVC: UITableViewDataSource {
         let commentType = comment.commentType
         
         tempSection = indexPath.section
-        
         var cell = BaseChatCell()
-        
         switch commentType {
         case .image:
             cell = tableView.dequeueReusableCell(withIdentifier: "QImageCell", for: indexPath) as! QImageCell
             break
         case .system:
             cell = tableView.dequeueReusableCell(withIdentifier: "QSystemCell", for: indexPath) as! QSystemCell
+            break
+        case .contact:
+            cell = tableView.dequeueReusableCell(withIdentifier: "QContactCell",for: indexPath) as! QContactCell
+            break
+        case .audio:
+            cell = tableView.dequeueReusableCell(withIdentifier: "QAudioCell",for: indexPath) as! QAudioCell
+            break
+        case .document:
+            cell = tableView.dequeueReusableCell(withIdentifier: "QDocumentCell",for: indexPath) as! QDocumentCell
+            break
+        case .location:
+            cell = tableView.dequeueReusableCell(withIdentifier: "QLocationCell",for: indexPath) as! QLocationCell
             break
         default:
             cell = tableView.dequeueReusableCell(withIdentifier: "LeftTextCell", for: indexPath) as! LeftTextCell
@@ -314,7 +331,15 @@ extension QChatVC: UITableViewDataSource {
         
         return 1
     }
-    
+    public func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        var label = UILabel(frame: CGRect(x: 30, y: 30, width: 200, height: 150))
+        label.textAlignment = NSTextAlignment.center
+        self.presenter.getDate(section: section,labelView: label)
+        label.clipsToBounds = true
+        label.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
+        self.view.addSubview(label)
+        return label
+    }
     // MARK: chat avatar setup
     public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: QiscusHelper.screenWidth(), height: 0))
@@ -351,8 +376,33 @@ extension QChatVC: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
-
+extension QChatVC:CNContactViewControllerDelegate{
+    
+}
 extension QChatVC: ChatCellDelegate {
+    func onSaveContactCellDidTap(comment: CommentModel) {
+        let payloadString = comment.additionalData
+        let payload = JSON(parseJSON: payloadString)
+        let contactValue = payload["value"].stringValue
+        
+        let con = CNMutableContact()
+        con.givenName = payload["name"].stringValue
+        if contactValue.contains("@"){
+            let email = CNLabeledValue(label: CNLabelHome, value: contactValue as NSString)
+            con.emailAddresses.append(email)
+        }else{
+            let phone = CNLabeledValue(label: CNLabelPhoneNumberMobile, value: CNPhoneNumber(stringValue: contactValue))
+            con.phoneNumbers.append(phone)
+        }
+      
+        let unkvc = CNContactViewController(forUnknownContact: con)
+        unkvc.message = "Kiwari contact"
+        unkvc.contactStore = CNContactStore()
+        unkvc.delegate = self
+        unkvc.allowsActions = false
+        self.navigationController?.pushViewController(unkvc, animated: true)
+    }
+    
     func onImageCellDidTap(imageSlideShow: UIViewController) {
         self.navigationController?.present(imageSlideShow, animated: true, completion: nil)
     }

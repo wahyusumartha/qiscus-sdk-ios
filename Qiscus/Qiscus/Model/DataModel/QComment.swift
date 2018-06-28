@@ -809,7 +809,7 @@ public class QComment:Object {
             }
         }
     }
-    public func updateDurationLabel(label:String){
+    open func updateDurationLabel(label:String){
         let uId = self.uniqueId
         if self.durationLabel != label {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
