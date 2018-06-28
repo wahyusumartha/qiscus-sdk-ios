@@ -1031,6 +1031,7 @@ extension QiscusChatVC: CLLocationManagerDelegate {
                                 DispatchQueue.main.async { autoreleasepool{
                                     let comment = self.chatRoom!.newLocationComment(latitude: latitude, longitude: longitude, title: title, address: address)
                                     self.postComment(comment: comment)
+                                    self.addCommentToCollectionView(comment: comment)
                                 }}
                             }
                         }

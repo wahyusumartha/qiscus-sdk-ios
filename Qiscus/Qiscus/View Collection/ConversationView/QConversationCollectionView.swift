@@ -12,13 +12,14 @@ import AVFoundation
 
 public class QConversationCollectionView: UICollectionView {
     public var room:QRoom? {
-        didSet{
+        didSet {
             var oldRoomId = "0"
             if let oldRoom = oldValue {
 //                oldRoom.delegate = nil
                 oldRoomId = oldRoom.id
             }
             if let r = room {
+                self.comments = QComment.comments(onRoom: r.id)
                 let rid = r.id
                 if rid != oldRoomId {
                     Qiscus.chatRooms[r.id] = r
@@ -89,6 +90,8 @@ public class QConversationCollectionView: UICollectionView {
         }
     }
     
+    public var comments: [QComment] = []
+    
     public var typingUsers = [String:QUser]()
     
     public var viewDelegate:QConversationViewDelegate?
@@ -105,6 +108,10 @@ public class QConversationCollectionView: UICollectionView {
     public var messagesId = [[String]](){
         didSet{
             DispatchQueue.main.async {
+                if let r = self.room {
+                    self.comments = QComment.comments(onRoom: r.id)
+                }
+                
                 if oldValue.count == 0 {
                     self.layoutIfNeeded()
                     self.scrollToBottom()

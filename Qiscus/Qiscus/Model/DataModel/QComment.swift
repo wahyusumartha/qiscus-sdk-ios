@@ -539,6 +539,16 @@ public class QComment:Object {
         }
         return nil
     }
+    
+    public class func comments(onRoom roomId: String) -> [QComment] {
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
+        
+        let comments = realm.objects(QComment.self).filter("roomId == '\(roomId)'")
+        
+        return Array(comments)
+    }
+    
     public class func comment(withUniqueId uniqueId:String)->QComment?{
         if Thread.isMainThread {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
