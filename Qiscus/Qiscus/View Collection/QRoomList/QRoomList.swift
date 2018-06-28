@@ -228,7 +228,7 @@ extension QRoomList: UITableViewDelegate,UITableViewDataSource {
         if indexPath.section == 0 {
             let room = self.filteredRooms[indexPath.row]
             // New approach Custom Cell
-            if var cell = self.listDelegate?.tableviewCell!(for: room) {
+            if var cell = self.listDelegate?.tableviewCell?(for: room) {
                 cell = self.dequeueReusableCell(withIdentifier: cell.reuseIdentifier!, for: indexPath) as! QRoomListCell
                 cell.room = room
                 cell.searchText = searchText
