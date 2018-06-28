@@ -16,8 +16,6 @@ open class QRoomListCell: UITableViewCell {
         }
     }
     
-    public var reusableCell : String! = ""
-    
     public var room:QRoom? {
         didSet{
             setupUI()
