@@ -331,7 +331,15 @@ extension QChatVC: UITableViewDataSource {
         
         return 1
     }
-    
+    public func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        var label = UILabel(frame: CGRect(x: 30, y: 30, width: 200, height: 150))
+        label.textAlignment = NSTextAlignment.center
+        self.presenter.getDate(section: section,labelView: label)
+        label.clipsToBounds = true
+        label.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
+        self.view.addSubview(label)
+        return label
+    }
     // MARK: chat avatar setup
     public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let view = UIView(frame: CGRect(x: 0, y: 0, width: QiscusHelper.screenWidth(), height: 0))

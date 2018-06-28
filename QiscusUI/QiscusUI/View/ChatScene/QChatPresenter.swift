@@ -94,6 +94,13 @@ class QChatPresenter: QChatUserInteraction {
         self.chatService.room(withId: roomId)
     }
     
+    func getDate(section:Int, labelView : UILabel) {
+        if let comment = self.comments[section].first{
+            labelView.text = comment.date
+           
+        }
+    }
+    
     func getAvatarImage(section: Int, imageView: UIImageView) {
         if let comment  = self.comments[section].first {
             if comment.senderEmail == Qiscus.client.email {
