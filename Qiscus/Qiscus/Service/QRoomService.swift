@@ -1084,7 +1084,9 @@ public class QRoomService:NSObject{
                     var errorUids = [String]()
                     
                     if results != JSON.null && status == 200{
-                        onSuccess()
+                        DispatchQueue.main.async {
+                            onSuccess()
+                        }
                     }else{
                         DispatchQueue.main.async {
                             onError("Failed Block User")
