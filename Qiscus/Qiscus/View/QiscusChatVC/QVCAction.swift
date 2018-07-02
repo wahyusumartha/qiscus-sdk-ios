@@ -572,6 +572,11 @@ extension QiscusChatVC {
                 }
                 
                 
+            } else {
+                self.collectionView.messagesId.append([comment.uniqueId])
+                let newIndexPath = IndexPath(row: 0, section: 0)
+                comment.updateCellPos(cellPos: .single)
+                self.collectionView.reloadData()
             }
         }
     }
