@@ -414,7 +414,9 @@ public class QiscusChatVC: UIViewController{
     override public func viewDidLoad() {
         super.viewDidLoad()
         self.chatService.delegate = self
-        
+        if #available(iOS 9, *) {
+            self.collectionView.dataSource = self.collectionView
+        }
         if let delegate = self.delegate{
             delegate.chatVC?(onViewDidLoad: self)
         }

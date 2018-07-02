@@ -186,4 +186,9 @@ open class QiscusConfig: NSObject {
         Qiscus.client.rtKey = rtKey
         Qiscus.client.userData.set(rtKey, forKey: "qiscus_rt_key")
     }
+    
+    open class var BLOCK_USER:String{
+        let config = QiscusConfig.sharedInstance
+        return "\(config.BASE_API_URL)/block_user"
+    }
 }
