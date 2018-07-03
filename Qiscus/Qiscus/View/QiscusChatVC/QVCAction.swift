@@ -816,6 +816,7 @@ extension QiscusChatVC {
             
             let newComment = self.chatRoom!.newFileComment(type: .audio, filename: fileName, data: fileContent!)
             
+            self.addCommentToCollectionView(comment: newComment)
             self.chatRoom!.upload(comment: newComment, onSuccess: { (roomResult, commentResult) in
                 self.postComment(comment: commentResult)
             }, onError: { (roomResult, commentResult, error) in
