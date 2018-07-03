@@ -539,6 +539,16 @@ public class QComment:Object {
         }
         return nil
     }
+    
+    public class func comments(onRoom roomId: String) -> [QComment] {
+        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+        realm.refresh()
+        
+        let comments = realm.objects(QComment.self).filter("roomId == '\(roomId)'")
+        
+        return Array(comments)
+    }
+    
     public class func comment(withUniqueId uniqueId:String)->QComment?{
         if Thread.isMainThread {
             let realm = try! Realm(configuration: Qiscus.dbConfiguration)
@@ -985,13 +995,17 @@ public class QComment:Object {
                 let realm = try! Realm(configuration: Qiscus.dbConfiguration)
                 realm.refresh()
                 try! realm.write {
-                    comment.isRead = true
+                    if !comment.isInvalidated {
+                        comment.isRead = true
+                    }
                 }
                 if check {
                     let data = realm.objects(QComment.self).filter("isRead == false AND createdAt < \(comment.createdAt) AND roomId == '\(comment.roomId)'")
                     for olderComment in data {
                         try! realm.write {
-                            olderComment.isRead = true
+                            if !olderComment.isInvalidated {
+                                olderComment.isRead = true
+                            }
                         }
                     }
                 }

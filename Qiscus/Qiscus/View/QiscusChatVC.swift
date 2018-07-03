@@ -43,10 +43,11 @@ import RealmSwift
 }
 
 @objc public protocol QiscusChatVCDelegate{
+    // MARK : Review this
     func chatVC(enableForwardAction viewController:QiscusChatVC)->Bool
     func chatVC(enableInfoAction viewController:QiscusChatVC)->Bool
     func chatVC(overrideBackAction viewController:QiscusChatVC)->Bool
-    
+    //
     @objc optional func chatVC(backAction viewController:QiscusChatVC, room:QRoom?, data:Any?)
     @objc optional func chatVC(titleAction viewController:QiscusChatVC, room:QRoom?, data:Any?)
     @objc optional func chatVC(viewController:QiscusChatVC, onForwardComment comment:QComment, data:Any?)
@@ -414,7 +415,9 @@ public class QiscusChatVC: UIViewController{
     override public func viewDidLoad() {
         super.viewDidLoad()
         self.chatService.delegate = self
-        
+        if #available(iOS 9, *) {
+            self.collectionView.dataSource = self.collectionView
+        }
         if let delegate = self.delegate{
             delegate.chatVC?(onViewDidLoad: self)
         }
@@ -426,7 +429,7 @@ public class QiscusChatVC: UIViewController{
         if let room = self.chatRoom {
             room.readAll()
             room.unsubscribeRoomChannel()
-//            room.clearRemain30()
+            room.clearRemain30()
         }
         self.isPresence = false
         self.dataLoaded = false
@@ -945,6 +948,7 @@ extension QiscusChatVC:QChatServiceDelegate{
                 QToasterSwift.toast(target: self, text: "No Internet Connection", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
             }else {
                 QToasterSwift.toast(target: self, text: "Can't load chat room\n\(error)", backgroundColor: UIColor(red: 0.9, green: 0,blue: 0,alpha: 0.8), textColor: UIColor.white)
+                self.hideInputBar()
             }
         }
         self.dataLoaded = false
@@ -1031,6 +1035,7 @@ extension QiscusChatVC: CLLocationManagerDelegate {
                                 DispatchQueue.main.async { autoreleasepool{
                                     let comment = self.chatRoom!.newLocationComment(latitude: latitude, longitude: longitude, title: title, address: address)
                                     self.postComment(comment: comment)
+                                    self.addCommentToCollectionView(comment: comment)
                                 }}
                             }
                         }

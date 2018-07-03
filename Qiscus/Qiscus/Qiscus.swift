@@ -25,7 +25,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     static let sharedInstance = Qiscus()
 
     
-    static let qiscusVersionNumber:String = "2.8.22"
+    static let qiscusVersionNumber:String = "2.8.23"
     public static var client : QiscusClient {
         get { return QiscusClient.shared }
     }
@@ -1061,5 +1061,12 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     ///   - onError: completion when failed delete participant
     public class func removeParticipant(onRoom id: String, userIds: [String], onSuccess:@escaping (QRoom)->Void, onError: @escaping ([String],Int?)->Void) {
         QRoomService.removeParticipant(onRoom: id, userIds: userIds, onSuccess: onSuccess, onError: onError)
+    }
+    
+    /// block user
+    /// - Parameters:
+    ///   - user_email
+    public class func blockUser(user_email: String, onSuccess:@escaping()->Void, onError: @escaping (String)->Void) {
+        QRoomService.blockUser(sdk_email: user_email, onSuccess: onSuccess, onError: onError)
     }
 }

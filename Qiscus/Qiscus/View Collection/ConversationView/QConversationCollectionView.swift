@@ -12,13 +12,14 @@ import AVFoundation
 
 public class QConversationCollectionView: UICollectionView {
     public var room:QRoom? {
-        didSet{
+        didSet {
             var oldRoomId = "0"
             if let oldRoom = oldValue {
 //                oldRoom.delegate = nil
                 oldRoomId = oldRoom.id
             }
             if let r = room {
+                self.comments = QComment.comments(onRoom: r.id)
                 let rid = r.id
                 if rid != oldRoomId {
                     Qiscus.chatRooms[r.id] = r
@@ -31,6 +32,29 @@ public class QConversationCollectionView: UICollectionView {
                     self.subscribeEvent(roomId: rid)
                     self.delegate = self
                     self.dataSource = self
+                    var hardDelete = false
+                    if let softDelete = self.viewDelegate?.viewDelegate?(usingSoftDeleteOnView: self){
+                        hardDelete = !softDelete
+                    }
+                    var predicate:NSPredicate?
+                    if hardDelete {
+                        predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
+                    }
+                    QiscusBackgroundThread.async {
+                        if let rts = QRoom.threadSaveRoom(withId: rid){
+                            var messages = rts.grouppedCommentsUID(filter: predicate)
+                            messages = self.checkHiddenMessage(messages: messages)
+                            
+                            DispatchQueue.main.async {
+                                self.messagesId = messages
+                                self.reloadData()
+                            }
+                            rts.resendPendingMessage()
+                            rts.redeletePendingDeletedMessage()
+                            rts.sync()
+                        }
+                    }
+                } else {
                     var hardDelete = false
                     if let softDelete = self.viewDelegate?.viewDelegate?(usingSoftDeleteOnView: self){
                         hardDelete = !softDelete
@@ -66,6 +90,8 @@ public class QConversationCollectionView: UICollectionView {
         }
     }
     
+    public var comments: [QComment] = []
+    
     public var typingUsers = [String:QUser]()
     
     public var viewDelegate:QConversationViewDelegate?
@@ -82,6 +108,10 @@ public class QConversationCollectionView: UICollectionView {
     public var messagesId = [[String]](){
         didSet{
             DispatchQueue.main.async {
+                if let r = self.room {
+                    self.comments = QComment.comments(onRoom: r.id)
+                }
+                
                 if oldValue.count == 0 {
                     self.layoutIfNeeded()
                     self.scrollToBottom()

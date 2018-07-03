@@ -51,6 +51,7 @@ extension QConversationCollectionView: UICollectionViewDelegate, UICollectionVie
                     comment = c
                 }
             }
+            
             if let cell = self.viewDelegate?.viewDelegate?(view: self, cellForComment: comment, indexPath: indexPath){
                 return cell
             }else{

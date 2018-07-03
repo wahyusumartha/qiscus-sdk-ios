@@ -1092,10 +1092,10 @@ public class QRoom:Object {
             for rawComment in self.rawComments.sorted(by: { (q1, q2) -> Bool in
                 return q1.createdAt < q2.createdAt
                 }).reversed() {
-                
                 if iteration < 30 {
                     tempRawComment.insert(rawComment, at: 0)
                 } else {
+                    QComment.cache.removeValue(forKey: rawComment.uniqueId)
                     commentToDelete.insert(rawComment, at: 0)
                 }
                 

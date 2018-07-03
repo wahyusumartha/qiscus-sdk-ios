@@ -234,13 +234,15 @@ extension QiscusChatVC: QConversationViewCellDelegate{
             con.phoneNumbers.append(phone)
         }
         
-        let unkvc = CNContactViewController(forUnknownContact: con)
+        let unkvc = CNContactViewController.init(forNewContact: con)
         unkvc.message = "Kiwari contact"
         unkvc.contactStore = CNContactStore()
         unkvc.delegate = self
         unkvc.allowsActions = false
+        self.navigationController?.navigationBar.backgroundColor =  Qiscus.shared.styleConfiguration.color.topColor
         self.navigationController?.pushViewController(unkvc, animated: true)
     }
+    
     public func cellDelegate(didTapDocumentFile comment:QComment, room:QRoom){
         if let file = comment.file {
             if file.ext == "pdf" || file.ext == "pdf_" {
@@ -349,6 +351,12 @@ extension QiscusChatVC: QConversationViewCellDelegate{
 }
 
 extension QiscusChatVC: CNContactViewControllerDelegate{
-
+    public func contactViewController(_ viewController: CNContactViewController, shouldPerformDefaultActionFor property: CNContactProperty) -> Bool {
+        return true
+    }
+    
+    public func contactViewController(_ viewController: CNContactViewController, didCompleteWith contact: CNContact?) {
+        viewController.navigationController?.popViewController(animated: true)
+    }
 }
 

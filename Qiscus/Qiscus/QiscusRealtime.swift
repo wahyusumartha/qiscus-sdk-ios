@@ -79,8 +79,10 @@ extension Qiscus:CocoaMQTTDelegate{
                                         let comment = QComment.tempComment(fromJSON: json)
                                         
                                         if let roomDelegate = QiscusCommentClient.shared.roomDelegate {
-                                            
-                                            roomDelegate.gotNewComment(comment)
+                                            if !comment.isInvalidated{
+                                                 roomDelegate.gotNewComment(comment)
+                                            }
+                                           
                                         }
                                         Qiscus.chatDelegate?.qiscusChat?(gotNewComment: comment)
                                         
