@@ -239,8 +239,13 @@ extension QiscusChatVC: QConversationViewCellDelegate{
         unkvc.contactStore = CNContactStore()
         unkvc.delegate = self
         unkvc.allowsActions = false
+        self.navigationController?.navigationBar.isTranslucent = false
+        self.navigationController?.navigationBar.backgroundColor =  Qiscus.shared.styleConfiguration.color.topColor
+        
+        // MARK TODO: use present should be fix status bar and navigation color but you need to handle back/dissmiss button
         self.navigationController?.pushViewController(unkvc, animated: true)
     }
+    
     public func cellDelegate(didTapDocumentFile comment:QComment, room:QRoom){
         if let file = comment.file {
             if file.ext == "pdf" || file.ext == "pdf_" {
