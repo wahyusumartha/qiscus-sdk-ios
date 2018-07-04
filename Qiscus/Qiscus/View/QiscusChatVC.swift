@@ -43,10 +43,11 @@ import RealmSwift
 }
 
 @objc public protocol QiscusChatVCDelegate{
+    // MARK : Review this
     func chatVC(enableForwardAction viewController:QiscusChatVC)->Bool
     func chatVC(enableInfoAction viewController:QiscusChatVC)->Bool
     func chatVC(overrideBackAction viewController:QiscusChatVC)->Bool
-    
+    //
     @objc optional func chatVC(backAction viewController:QiscusChatVC, room:QRoom?, data:Any?)
     @objc optional func chatVC(titleAction viewController:QiscusChatVC, room:QRoom?, data:Any?)
     @objc optional func chatVC(viewController:QiscusChatVC, onForwardComment comment:QComment, data:Any?)
