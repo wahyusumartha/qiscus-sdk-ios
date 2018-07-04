@@ -309,7 +309,7 @@ public class QRoom:Object {
             
             let image = UIImage(data: data!)
             let gif = (fileExt == "gif" || fileExt == "gif_")
-            let jpeg = (fileExt == "jpg" || fileExt == "jpg_")
+            let jpeg = (fileExt == "jpg" || fileExt == "jpg_" || fileExt == "heic")
             let png = (fileExt == "png" || fileExt == "png_")
             
             var thumb = UIImage()

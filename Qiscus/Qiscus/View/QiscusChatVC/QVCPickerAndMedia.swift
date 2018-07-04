@@ -93,6 +93,7 @@ extension QiscusChatVC:UIImagePickerControllerDelegate, UINavigationControllerDe
                         let result = PHAsset.fetchAssets(withALAssetURLs: [imageURL], options: nil)
                         let asset = result.firstObject
                         imageName = "\((asset?.value(forKey: "filename"))!)"
+                        imageName = imageName.replacingOccurrences(of: "HEIC", with: "jpg")
                         let imageSize = image.size
                         var bigPart = CGFloat(0)
                         if(imageSize.width > imageSize.height){
