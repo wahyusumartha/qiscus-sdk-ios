@@ -191,4 +191,14 @@ open class QiscusConfig: NSObject {
         let config = QiscusConfig.sharedInstance
         return "\(config.BASE_API_URL)/block_user"
     }
+    
+    open class var UNBLOCK_USER:String{
+        let config = QiscusConfig.sharedInstance
+        return "\(config.BASE_API_URL)/unblock_user"
+    }
+    
+    open class var LIST_BLOCK_USER:String{
+        let config = QiscusConfig.sharedInstance
+        return "\(config.BASE_API_URL)/get_blocked_user"
+    }
 }
