@@ -974,12 +974,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }
     }
     
-    /**
- 
-     */
+    @available(*, deprecated, message: "no longer available ...")
     public class func cacheData(){
         QRoom.cacheAll()
-        QComment.cacheAll()
+        QComment().cacheAll()
         QUser.cacheAll()
         QParticipant.cacheAll()
     }
