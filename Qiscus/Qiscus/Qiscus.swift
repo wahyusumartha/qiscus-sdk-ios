@@ -1069,4 +1069,11 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     public class func blockUser(user_email: String, onSuccess:@escaping()->Void, onError: @escaping (String)->Void) {
         QRoomService.blockUser(sdk_email: user_email, onSuccess: onSuccess, onError: onError)
     }
+    
+    /// unblock user
+    /// - Parameters:
+    ///   - user_email
+    public class func unBlockUser(user_email: String, onSuccess:@escaping()->Void, onError: @escaping (String)->Void) {
+        QRoomService.unBlockUser(sdk_email: user_email, onSuccess: onSuccess, onError: onError)
+    }
 }

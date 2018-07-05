@@ -1106,4 +1106,46 @@ public class QRoomService:NSObject{
             }
         }
     }
+    
+    public class func unBlockUser(sdk_email: String, onSuccess:@escaping ()->Void, onError: @escaping (String)->Void) {
+        let url = QiscusConfig.UNBLOCK_USER
+        let parameters = [
+            "user_email" : sdk_email as AnyObject,
+            "token": Qiscus.shared.config.USER_TOKEN as AnyObject
+        ]
+        
+        QiscusService.session.request(url, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON { responseData in
+            QiscusBackgroundThread.async {
+                if let response = responseData.result.value{
+                    let json = JSON(response)
+                    let results = json["results"]
+                    
+                    let status = json["status"].intValue
+                    var successUids = [String]()
+                    var errorUids = [String]()
+                    
+                    if results != JSON.null && status == 200{
+                        DispatchQueue.main.async {
+                            onSuccess()
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            onError("Failed unBlock User")
+                        }
+                    }
+                }else{
+                    if let statusCode = responseData.response?.statusCode {
+                        DispatchQueue.main.async {
+                            onError("Failed unBlock User")
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            onError("Failed unBlock User")
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
 }
