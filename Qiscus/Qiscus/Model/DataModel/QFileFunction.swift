@@ -7,6 +7,7 @@
 
 import Foundation
 
+import RealmSwift
 extension QFile {
     internal func update(fileURL:String){
         if self.url != fileURL {

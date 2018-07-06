@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import RealmSwift
 
 extension QFile {
     public class func file(withURL url:String) -> QFile?{
