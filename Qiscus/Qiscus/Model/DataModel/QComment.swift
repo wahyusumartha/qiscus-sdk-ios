@@ -93,21 +93,7 @@ public enum QReplyType:Int{
     case deletePending
     case deleted
 }
-@objc public protocol QCommentDelegate {
-    func comment(didChangeStatus comment:QComment, status:QCommentStatus)
-    func comment(didChangePosition comment:QComment, position:QCellPosition)
-    
-    // Audio comment delegate
-    @objc optional func comment(didChangeDurationLabel comment:QComment, label:String)
-    @objc optional func comment(didChangeCurrentTimeSlider comment:QComment, value:Float)
-    @objc optional func comment(didChangeSeekTimeLabel comment:QComment, label:String)
-    @objc optional func comment(didChangeAudioPlaying comment:QComment, playing:Bool)
-    
-    // File comment delegate
-    @objc optional func comment(didDownload comment:QComment, downloading:Bool)
-    @objc optional func comment(didUpload comment:QComment, uploading:Bool)
-    @objc optional func comment(didChangeProgress comment:QComment, progress:CGFloat)
-}
+
 @objc public enum QCommentProperty:Int{
     case status
     case uploading
@@ -117,6 +103,7 @@ public enum QReplyType:Int{
     case cellPosition
     case cellSize
 }
+
 public class QComment:Object {
     static var cache = [String: QComment]()
     
