@@ -69,11 +69,11 @@ public class QiscusChatVC: UIViewController{
     // MARK: - IBOutlet Properties
     @IBOutlet weak var inputBar: UIView!
     @IBOutlet public weak var backgroundView: UIImageView!
-    @IBOutlet weak var inputText: ChatInputText!
+    @IBOutlet public weak var inputText: ChatInputText!
     @IBOutlet weak var welcomeView: UIView!
     @IBOutlet weak var welcomeText: UILabel!
     @IBOutlet weak var welcomeSubtitle: UILabel!
-    @IBOutlet weak var sendButton: UIButton!
+    @IBOutlet public weak var sendButton: UIButton!
     @IBOutlet weak var attachButton: UIButton!
     @IBOutlet weak var archievedNotifView: UIView!
     @IBOutlet weak var archievedNotifLabel: UILabel!
@@ -92,7 +92,7 @@ public class QiscusChatVC: UIViewController{
     @IBOutlet weak var cancelRecordButton: UIButton!
     
     // MARK: - Constrain
-    @IBOutlet weak var minInputHeight: NSLayoutConstraint!
+    @IBOutlet public weak var minInputHeight: NSLayoutConstraint!
     @IBOutlet weak var archievedNotifTop: NSLayoutConstraint!
     @IBOutlet weak var inputBarBottomMargin: NSLayoutConstraint!
     @IBOutlet weak var collectionViewBottomConstrain: NSLayoutConstraint!
