@@ -24,6 +24,22 @@ open class QiscusClient: NSObject {
             return false
         }
     }
+
+    public static var hasRegisteredDeviceToken: Bool {
+        set {
+            let userData = UserDefaults.standard
+            userData.set(hasRegisteredDeviceToken, forKey: "has_register_device_token")
+        }
+        
+        get {
+            let userData = UserDefaults.standard
+            if let hasRegisteredDeviceToken = userData.value(forKey: "has_register_device_token") as? Bool {
+                return hasRegisteredDeviceToken
+            }
+            return false
+        }
+    }
+    
     public static var needBackgroundSync:Bool{
         set{
             let userData = UserDefaults.standard

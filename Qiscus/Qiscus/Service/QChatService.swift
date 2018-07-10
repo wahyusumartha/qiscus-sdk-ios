@@ -1165,6 +1165,7 @@ public class QChatService:NSObject {
     
     internal class func registerDevice(withToken deviceToken: String){
         func register(){
+            QiscusCommentClient.isRegisteringDeviceToken = true
             let parameters:[String: AnyObject] = [
                 "token"  : qiscus.config.USER_TOKEN as AnyObject,
                 "device_token" : deviceToken as AnyObject,
@@ -1179,6 +1180,7 @@ public class QChatService:NSObject {
                 Qiscus.printLog(text: "registerDevice url: \(QiscusConfig.LOGIN_REGISTER)")
                 Qiscus.printLog(text: "registerDevice parameters: \(parameters)")
                 Qiscus.printLog(text: "registerDevice headers: \(QiscusConfig.sharedInstance.requestHeader)")
+                QiscusCommentClient.isRegisteringDeviceToken = false
                 switch response.result {
                 case .success:
                     if let result = response.result.value{
@@ -1186,6 +1188,7 @@ public class QChatService:NSObject {
                         let success:Bool = (json["status"].intValue == 200)
                         
                         if success {
+                            QiscusClient.hasRegisteredDeviceToken = true
                             let pnData = json["results"]
                             let configured = pnData["pn_ios_configured"].boolValue
                             if configured {
@@ -1217,6 +1220,7 @@ public class QChatService:NSObject {
                     }
                     break
                 case .failure(let error):
+                    QiscusClient.hasRegisteredDeviceToken = false
                     if let delegate = Qiscus.shared.delegate {
                         DispatchQueue.main.async {
                             delegate.qiscus?(didRegisterPushNotification: false, deviceToken: deviceToken, error: "unsuccessful register deviceToken: \(error)")
@@ -1226,11 +1230,13 @@ public class QChatService:NSObject {
                 }
             })
         }
-        if Qiscus.isLoggedIn {
+        if Qiscus.isLoggedIn && !QiscusClient.hasRegisteredDeviceToken && !QiscusCommentClient.isRegisteringDeviceToken {
             register()
         }else{
             QChatService.defaultService.reconnect {
-                register()
+                if !QiscusClient.hasRegisteredDeviceToken && !QiscusCommentClient.isRegisteringDeviceToken {
+                    register()
+                }
             }
         }
         

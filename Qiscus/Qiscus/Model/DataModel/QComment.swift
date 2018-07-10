@@ -1009,12 +1009,14 @@ public class QComment:Object {
                         }
                     }
                 }
-                if let room = QRoom.threadSaveRoom(withId: comment.roomId) {
-                    room.updateUnreadCommentCount()
-                    if comment.id > 0 {
-                        let roomId = room.id
-                        let commentId = comment.id
-                        QRoom.publishStatus(roomId: roomId, commentId: commentId, status: .read)
+                if !comment.isInvalidated {
+                    if let room = QRoom.threadSaveRoom(withId: comment.roomId) {
+                        room.updateUnreadCommentCount()
+                        if comment.id > 0 {
+                            let roomId = room.id
+                            let commentId = comment.id
+                            QRoom.publishStatus(roomId: roomId, commentId: commentId, status: .read)
+                        }
                     }
                 }
             }

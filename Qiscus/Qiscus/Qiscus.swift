@@ -259,6 +259,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.unRegisterPN()
         QiscusClient.clear()
         Qiscus.removeLogFile()
+        QiscusClient.hasRegisteredDeviceToken = false
     }
     
     /**
