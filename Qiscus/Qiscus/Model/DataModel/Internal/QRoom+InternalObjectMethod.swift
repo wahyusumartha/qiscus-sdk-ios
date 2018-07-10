@@ -246,43 +246,46 @@ internal extension QRoom {
                 
                 if onTop{
                     try! realm.write {
+                        // High Cost
                         realm.add(newComment, update: true)
                         room.rawComments.insert(newComment, at: 0)
                     }
                     if room.lastComment == nil {
-                        room.updateLastComentInfo(comment: newComment)
+                        //room.updateLastComentInfo(comment: newComment)
                     }
-                }
-                else{
+                }else{
                     try! realm.write {
+                        // High Cost
                         realm.add(newComment, update: true)
                         room.rawComments.append(newComment)
                     }
-                    room.updateLastComentInfo(comment: newComment)
+                    //room.updateLastComentInfo(comment: newComment)
                 }
                 let textMessage = newComment.text
+                
                 DispatchQueue.main.async{
                     if UIApplication.shared.applicationState != .active {
                         Qiscus.printLog(text: "sync qiscus added new message on background: \(textMessage)")
                     }
+                    
                 }
-                if !onTop {
-                    if Thread.isMainThread {
-                        if let r = QRoom.getRoom(withId: id){
-                            if let c = QComment.comment(withUniqueId: cUniqueId){
-                                QiscusNotification.publish(gotNewComment: c, room: r)
-                            }
-                        }
-                    }else{
-                        DispatchQueue.main.sync {
-                            if let r = QRoom.getRoom(withId: id){
-                                if let c = QComment.comment(withUniqueId: cUniqueId){
-                                    QiscusNotification.publish(gotNewComment: c, room: r)
-                                }
-                            }
-                        }
-                    }
-                }
+//                if !onTop {
+//                    if Thread.isMainThread {
+//                        if let r = QRoom.getRoom(withId: id){
+//                            if let c = QComment.comment(withUniqueId: cUniqueId){
+//                                QiscusNotification.publish(gotNewComment: c, room: r)
+//                            }
+//                        }
+//                    }else{
+//                        DispatchQueue.main.sync {
+//                            if let r = QRoom.getRoom(withId: id){
+//                                if let c = QComment.comment(withUniqueId: cUniqueId){
+//                                    QiscusNotification.publish(gotNewComment: c, room: r)
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
             }else{
                 Qiscus.printLog(text: "fail to add newComment, room not exist")
                 return
@@ -939,6 +942,34 @@ internal extension QRoom {
     internal func getParticipant(withEmail email:String)->QParticipant?{
         let data = self.participants.filter("email == '\(email)'")
         return data.first
+    }
+    
+    // MARK : Optimize getGrouppedCommentsUID, when triger got new comment
+    internal func add(CommentID: String, InGroupped Comments:[[String]]) -> [[String]] {
+        var retVal : [[String]] = Comments
+        if retVal.isEmpty {return [[String]]()}
+        
+        // get last array in array of comments
+        var lastArray = retVal.last
+        // get last id in last array
+        let lastCommentID = lastArray?.last
+        // get object comment with comment(lastid)
+        if let lastComment = QComment.threadSaveComment(withUniqueId: lastCommentID!){
+            // commpare comment sender or date
+            if let Comment = QComment.threadSaveComment(withUniqueId: CommentID) {
+                if Comment.date == lastComment.date && Comment.senderEmail == lastComment.senderEmail && Comment.type != .system  {
+                    // yes, append
+                    lastArray?.append(CommentID)
+                    retVal.removeLast()
+                    retVal.append(lastArray!)
+                }else{
+                    // No, create new array insert retVal
+                    retVal.append([CommentID])
+                }
+            }
+        }
+        
+        return retVal
     }
     
     internal func getGrouppedCommentsUID(filter:NSPredicate? = nil)->[[String]]{
