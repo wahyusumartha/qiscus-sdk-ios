@@ -272,14 +272,16 @@ public class QConversationCollectionView: UICollectionView {
                     DispatchQueue.main.async {
                         
                         if comment.isInvalidated {return}
-                        if comment.senderEmail == Qiscus.client.email || !self.isLastRowVisible {
+                        if comment.senderEmail == Qiscus.client.email && !self.isLastRowVisible {
                             self.layoutIfNeeded()
                             self.scrollToBottom(true)
                         } else {
                             self.messagesId = messages
                             self.reloadData()
                             
-                            if self.isLastRowVisible {self.scrollToBottom(true)}
+                            if self.isLastRowVisible {
+                                self.scrollToBottom(true)
+                            }
                         }
                     }
                 }
