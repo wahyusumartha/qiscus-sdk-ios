@@ -867,8 +867,9 @@ public class QChatService:NSObject {
                                                     }
                                                 }
                                                 room.updateUnreadCommentCount(count: unread)
-                                                let lastComment = QComment.tempComment(fromJSON: roomComments.last!)
-                                                room.updateLastComentInfo(comment: lastComment)
+                                                // already called room.updateLastCommentInfo in addComment
+//                                                let lastComment = QComment.tempComment(fromJSON: roomComments.last!)
+//                                                room.updateLastComentInfo(comment: lastComment)
                                             }else{
                                                 QChatService.getRoom(withId: roomId)
                                             }

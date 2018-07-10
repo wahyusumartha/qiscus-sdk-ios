@@ -269,23 +269,23 @@ internal extension QRoom {
                     }
                     
                 }
-//                if !onTop {
-//                    if Thread.isMainThread {
-//                        if let r = QRoom.getRoom(withId: id){
-//                            if let c = QComment.comment(withUniqueId: cUniqueId){
-//                                QiscusNotification.publish(gotNewComment: c, room: r)
-//                            }
-//                        }
-//                    }else{
-//                        DispatchQueue.main.sync {
-//                            if let r = QRoom.getRoom(withId: id){
-//                                if let c = QComment.comment(withUniqueId: cUniqueId){
-//                                    QiscusNotification.publish(gotNewComment: c, room: r)
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
+                if !onTop {
+                    if Thread.isMainThread {
+                        if let r = QRoom.getRoom(withId: id){
+                            if let c = QComment.comment(withUniqueId: cUniqueId){
+                                QiscusNotification.publish(gotNewComment: c, room: r)
+                            }
+                        }
+                    }else{
+                        DispatchQueue.main.sync {
+                            if let r = QRoom.getRoom(withId: id){
+                                if let c = QComment.comment(withUniqueId: cUniqueId){
+                                    QiscusNotification.publish(gotNewComment: c, room: r)
+                                }
+                            }
+                        }
+                    }
+                }
             }else{
                 Qiscus.printLog(text: "fail to add newComment, room not exist")
                 return
