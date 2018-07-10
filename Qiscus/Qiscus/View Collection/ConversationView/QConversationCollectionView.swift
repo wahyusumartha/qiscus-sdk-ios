@@ -141,6 +141,9 @@ public class QConversationCollectionView: UICollectionView {
     var loadMoreControl = UIRefreshControl()
     public var targetComment:QComment?
     
+    // patch lag receive message
+    var lastNewComment: QComment? = nil
+    
     override public func draw(_ rect: CGRect) {
         self.scrollsToTop = false
         if self.viewWithTag(1721) == nil {
@@ -237,8 +240,20 @@ public class QConversationCollectionView: UICollectionView {
             }
         }
     }
+    
+    // MARK : track, receive 1 message but trigered 3 times gotNewComment
     open func gotNewComment(comment: QComment, room:QRoom) {
+        print("new uniqueID: \(comment.uniqueId)")
+        // check nomComment already handle or not. fix 3 times called
+        if let lastComment = self.lastNewComment {
+            print("last uniqueID: \(lastComment.uniqueId)")
+            if lastComment.uniqueId == comment.uniqueId {
+                return
+            }
+        }
+        self.lastNewComment = comment
         let rid = room.id
+        let cid = comment.uniqueId
         var hardDelete = false
         if let softDelete = self.viewDelegate?.viewDelegate?(usingSoftDeleteOnView: self){
             hardDelete = !softDelete
@@ -247,12 +262,12 @@ public class QConversationCollectionView: UICollectionView {
         if hardDelete {
             predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
         }
-        
         QiscusBackgroundThread.async {
             if let rts = QRoom.threadSaveRoom(withId: rid){
-                var messages = rts.grouppedCommentsUID(filter: predicate)
+                var messages = rts.add(CommentID: cid, InGroupped: self.messagesId)
+                //var messages = rts.grouppedCommentsUID(filter: predicate)
                 messages = self.checkHiddenMessage(messages: messages)
-                
+
                 var section = 0
                 var changed = false
                 if messages.count != self.messagesId.count {
@@ -267,18 +282,21 @@ public class QConversationCollectionView: UICollectionView {
                         i += 1
                     }
                 }
-                
+
                 if changed {
                     DispatchQueue.main.async {
-                        
+
                         if comment.isInvalidated {return}
                         if comment.senderEmail == Qiscus.client.email || !self.isLastRowVisible {
                             self.layoutIfNeeded()
                             self.scrollToBottom(true)
                         } else {
                             self.messagesId = messages
+                            // MARK : TODO optimize reload data
+                            // 1. change access data db
+                            // or change reload with insert
                             self.reloadData()
-                            
+
                             if self.isLastRowVisible {self.scrollToBottom(true)}
                         }
                     }
