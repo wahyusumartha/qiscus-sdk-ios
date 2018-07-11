@@ -1107,6 +1107,48 @@ public class QRoomService:NSObject{
         }
     }
     
+
+    public class func getListBlockUser(onSuccess:@escaping ([String])->Void, onError: @escaping (String)->Void) {
+        let url = QiscusConfig.LIST_BLOCK_USER
+        let parameters = [
+            "token": Qiscus.shared.config.USER_TOKEN as AnyObject
+        ]
+        QiscusService.session.request(url, method: .get, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON { responseData in
+            QiscusBackgroundThread.async {
+                if let response = responseData.result.value{
+                    let json = JSON(response)
+                    let results = json["results"]
+                    var emailUserBlocked = [String]()
+                    let status = json["status"].intValue
+                    let blockedUser = json["blocked_user"].arrayValue
+                    for user in blockedUser{
+                        let userEmail = user["email"].stringValue
+                        emailUserBlocked.append(userEmail)
+                    }
+                    if results != JSON.null && status == 200{
+                        DispatchQueue.main.async {
+                            onSuccess(emailUserBlocked)
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            onError("Failed Get Block User")
+                        }
+                    }
+                }else{
+                    if let statusCode = responseData.response?.statusCode {
+                        DispatchQueue.main.async {
+                            onError("Failed Get Block User")
+                        }
+                    }else{
+                        DispatchQueue.main.async {
+                            onError("Failed Get Block User")
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     public class func unBlockUser(sdk_email: String, onSuccess:@escaping ()->Void, onError: @escaping (String)->Void) {
         let url = QiscusConfig.UNBLOCK_USER
         let parameters = [
