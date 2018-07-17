@@ -8,6 +8,8 @@
 
 import UIKit
 
+
+/// Qiscus ui style configuration
 open class QiscusUIConfiguration: NSObject {
     static var sharedInstance = QiscusUIConfiguration()
     

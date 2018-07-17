@@ -62,6 +62,8 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
      */
     public static var chatDelegate:QiscusChatDelegate?
     
+    
+    /// Disable language localization
     public static var disableLocalization: Bool = false
     
     /**
@@ -69,6 +71,8 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     */
     public static var maxUploadSizeInKB:Double = Double(100) * Double(1024)
     
+    
+    /// is realtime (mqtt) connected
     static var realtimeConnected:Bool = false
     internal static var publishStatustimer:Timer?
     internal static var realtimeChannel = [String]()
@@ -121,6 +125,8 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
      */
     public var locationShare = true
     
+    
+    
     var isPushed:Bool = false
     var reachability:QReachability?
     
@@ -168,40 +174,57 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     // never used
     // @objc public var httpRealTime:Bool = false
-    
     @objc public var toastMessageAct:((_ roomId:Int, _ comment:QComment)->Void)?
     
     let application = UIApplication.shared
     let appDelegate = UIApplication.shared.delegate
     
+    
+    /// cached qiscusChatVC : viewController that already opened will be chached here
     public var chatViews = [String:QiscusChatVC]()
     
+    
+    /// qiscus sdk version number
     @objc public class var versionNumber:String{
         get{
             return Qiscus.qiscusVersionNumber
         }
     }
+    
+    
+    /// shared instance of Qiscus.swift
     @objc public class var shared:Qiscus{
         get{
             return Qiscus.sharedInstance
         }
     }
+    
+    
+    /// check qiscus user login status
     @objc public class var isLoggedIn:Bool{
         get{
             return QiscusClient.isLoggedIn
         }
     }
+    
+    
+    /// device token for notification
     @objc public class var deviceToken:String{
         get{
             return Qiscus.qiscusDeviceToken
         }
     }
+    
+    
+    /// QiscusUIConfiguration class
     @objc public class var style:QiscusUIConfiguration{
         get{
             return Qiscus.sharedInstance.styleConfiguration
         }
     }
     
+    
+    /// qiscus comment rest service
     class var commentService:QiscusCommentClient{
         get{
             return QiscusCommentClient.sharedInstance
@@ -212,6 +235,8 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         
     }
     
+    
+    /// Qiscus bundle
     class var bundle:Bundle{
         get{
             let podBundle = Bundle(for: Qiscus.self)
@@ -303,6 +328,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }
     }
     
+    
+    /// connect to mqtt and setup reachability
+    ///
+    /// - Parameter delegate: QiscusConfigDelegate
     public class func connect(delegate:QiscusConfigDelegate? = nil){
         Qiscus.shared.RealtimeConnect()
         if delegate != nil {
@@ -336,6 +365,12 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     
+    /// setup custom mqtt server
+    ///
+    /// - Parameters:
+    ///   - server: server domain, example: 'qiscus.mqtt.com'
+    ///   - port: server port
+    ///   - enableSSL: true => enable SSL, false => disable SSL
     @objc public class func setRealtimeServer(withServer server:String, port:Int = 1883, enableSSL:Bool = false){
         Qiscus.client.realtimeServer = server
         Qiscus.client.realtimePort = port
@@ -345,9 +380,29 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.client.userData.set(enableSSL, forKey: "qiscus_realtimeSSL")
     }
     
+    
+    /// update qiscus user profile
+    ///
+    /// - Parameters:
+    ///   - username: String username
+    ///   - avatarURL: String avatar url
+    ///   - onSuccess: @escaping on success update user profile
+    ///   - onFailed: @escaping on error update user profile with error message
     public class func updateProfile(username:String? = nil, avatarURL:String? = nil, onSuccess:@escaping (()->Void), onFailed:@escaping ((String)->Void)) {
         QChatService.updateProfil(userName: username, userAvatarURL: avatarURL, onSuccess: onSuccess, onError: onFailed)
     }
+    
+    
+    /// setup qiscus
+    ///
+    /// - Parameters:
+    ///   - appId: qiscus app id
+    ///   - userEmail: client (username, userEmail, id)
+    ///   - userKey: client (key)
+    ///   - username: client username
+    ///   - avatarURL: client avatar url
+    ///   - delegate: QiscusConfigDelegate
+    ///   - secureURl: true => https, false => http
     @objc public class func setup(withAppId appId:String, userEmail:String, userKey:String, username:String, avatarURL:String? = nil, delegate:QiscusConfigDelegate? = nil, secureURl:Bool = true){
         var requestProtocol = "https"
         if !secureURl {
@@ -418,82 +473,10 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         return conf
     }
     
-    /**
-     No Documentation
-     */
-    @objc public class func chatView(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String = "", withMessage:String? = nil)->QiscusChatVC{
-        
-        if let room = QRoom.room(withUser: users.first!) {
-            return Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
-        }else{
-            if !Qiscus.sharedInstance.connected {
-                Qiscus.setupReachability()
-            }
-            Qiscus.sharedInstance.isPushed = true
-            
-            let chatVC = QiscusChatVC()
-            
-            chatVC.chatUser = users.first!
-            chatVC.chatTitle = title
-            chatVC.chatSubtitle = subtitle
-            chatVC.archived = readOnly
-            chatVC.chatMessage = withMessage
-            if chatVC.isPresence {
-                chatVC.goBack()
-            }
-            return chatVC
-        }
-    }
-    
-    /**
-     No Documentation
-     */
-    @objc public class func chatView(withRoomUniqueId uniqueId:String, readOnly:Bool = false, title:String = "", avatarUrl:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
-        if let room = QRoom.room(withUniqueId: uniqueId){
-            let chatVC = Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
-            chatVC.chatRoomUniqueId = uniqueId
-            chatVC.isPublicChannel = true
-            return chatVC
-        }else{
-            if !Qiscus.sharedInstance.connected {
-                Qiscus.setupReachability()
-            }
-            Qiscus.sharedInstance.isPushed = true
-            
-            let chatVC = QiscusChatVC()
-            
-            chatVC.chatMessage = withMessage
-            chatVC.chatRoomUniqueId = uniqueId
-            chatVC.chatAvatarURL = avatarUrl
-            chatVC.chatTitle = title
-            chatVC.isPublicChannel = true
-            
-            if chatVC.isPresence {
-                chatVC.goBack()
-            }
-            chatVC.archived = readOnly
-            return chatVC
-        }
-    }
-    @objc public class func chatView(withRoomId roomId:String, readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
-        if !Qiscus.sharedInstance.connected {
-            Qiscus.setupReachability()
-        }
-        
-        var chatVC = QiscusChatVC()
-        
-        if let chatView = Qiscus.shared.chatViews[roomId] {
-            chatVC = chatView
-        }else{
-            chatVC.chatRoomId = roomId
-        }
-        chatVC.chatTitle = title
-        chatVC.chatSubtitle = subtitle
-        chatVC.archived = readOnly
-        chatVC.chatMessage = withMessage
-        
-        return chatVC
-    }
+    /// get image assets on qiscus bundle
+    ///
+    /// - Parameter name: assets name
+    /// - Returns: UIImage
     @objc public class func image(named name:String)->UIImage?{
         return UIImage(named: name, in: Qiscus.bundle, compatibleWith: nil)?.localizedImage()
     }
@@ -565,6 +548,8 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         Qiscus.sharedInstance.iCloudUpload = active
     }
     
+    
+    /// setup reachability for network connection detection
     class func setupReachability(){
         QiscusBackgroundThread.async {autoreleasepool{
             Qiscus.sharedInstance.reachability = QReachability()
@@ -624,6 +609,9 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     
+    /// debug print
+    ///
+    /// - Parameter text: log message
     public class func printLog(text:String){
         if Qiscus.showDebugPrint{
             let logText = "[Qiscus]: \(text)"
@@ -657,7 +645,120 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     
     // MARK: - Create NEW Chat
     
+    /// get QiscusChatVC with array of username
+    ///
+    /// - Parameters:
+    ///   - users: with array of client (username used on Qiscus.setup)
+    ///   - readOnly: true => unable to access input view , false => able to access input view
+    ///   - title: chat title
+    ///   - subtitle: chat subtitle
+    ///   - distinctId: -
+    ///   - withMessage: predefined text message
+    /// - Returns: QiscusChatVC to be presented or pushed
+    @objc public class func chatView(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String = "", withMessage:String? = nil)->QiscusChatVC{
+        
+        if let room = QRoom.room(withUser: users.first!) {
+            return Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
+        }else{
+            if !Qiscus.sharedInstance.connected {
+                Qiscus.setupReachability()
+            }
+            Qiscus.sharedInstance.isPushed = true
+            
+            let chatVC = QiscusChatVC()
+            
+            chatVC.chatUser = users.first!
+            chatVC.chatTitle = title
+            chatVC.chatSubtitle = subtitle
+            chatVC.archived = readOnly
+            chatVC.chatMessage = withMessage
+            if chatVC.isPresence {
+                chatVC.goBack()
+            }
+            return chatVC
+        }
+    }
     
+    
+    /// get QiscusChatVC with room uniqueId
+    ///
+    /// - Parameters:
+    ///   - uniqueId: room uniqueId
+    ///   - readOnly: true => unable to access input view , false => able to access input view
+    ///   - title: chat title
+    ///   - subtitle: chat subtitle
+    ///   - distinctId: -
+    ///   - withMessage: predefined text message
+    /// - Returns: QiscusChatVC to be presented or pushed
+    @objc public class func chatView(withRoomUniqueId uniqueId:String, readOnly:Bool = false, title:String = "", avatarUrl:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
+        if let room = QRoom.room(withUniqueId: uniqueId){
+            let chatVC = Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
+            chatVC.chatRoomUniqueId = uniqueId
+            chatVC.isPublicChannel = true
+            return chatVC
+        }else{
+            if !Qiscus.sharedInstance.connected {
+                Qiscus.setupReachability()
+            }
+            Qiscus.sharedInstance.isPushed = true
+            
+            let chatVC = QiscusChatVC()
+            
+            chatVC.chatMessage = withMessage
+            chatVC.chatRoomUniqueId = uniqueId
+            chatVC.chatAvatarURL = avatarUrl
+            chatVC.chatTitle = title
+            chatVC.isPublicChannel = true
+            
+            if chatVC.isPresence {
+                chatVC.goBack()
+            }
+            chatVC.archived = readOnly
+            return chatVC
+        }
+    }
+    
+    /// get QiscusChatVC with room id
+    ///
+    /// - Parameters:
+    ///   - roomId: room id
+    ///   - readOnly: true => unable to access input view , false => able to access input view
+    ///   - title: chat title
+    ///   - subtitle: chat subtitle
+    ///   - distinctId: -
+    ///   - withMessage: predefined text message
+    /// - Returns: QiscusChatVC to be presented or pushed
+    @objc public class func chatView(withRoomId roomId:String, readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
+        if !Qiscus.sharedInstance.connected {
+            Qiscus.setupReachability()
+        }
+        
+        var chatVC = QiscusChatVC()
+        
+        if let chatView = Qiscus.shared.chatViews[roomId] {
+            chatVC = chatView
+        }else{
+            chatVC.chatRoomId = roomId
+        }
+        chatVC.chatTitle = title
+        chatVC.chatSubtitle = subtitle
+        chatVC.archived = readOnly
+        chatVC.chatMessage = withMessage
+        
+        return chatVC
+    }
+    
+    
+    /// get QiscusChatVC with room id
+    ///
+    /// - Parameters:
+    ///   - users: array of user id
+    ///   - readOnly: true => unable to access input view , false => able to access input view
+    ///   - title: chat title
+    ///   - subtitle: chat subtitle
+    ///   - distinctId: -
+    ///   - withMessage: predefined text message
+    /// - Returns: QiscusChatVC to be presented or pushed
     @objc public class func createChatView(withUsers users:[String], readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
         if !Qiscus.sharedInstance.connected {
             Qiscus.setupReachability()
@@ -722,6 +823,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     
+    /// trigger register notif delegate on appDelegate
     @objc public class func registerNotification(){
         let notificationSettings = UIUserNotificationSettings(types: [.badge, .sound, .alert], categories: nil)
         Qiscus.sharedInstance.application.registerUserNotificationSettings(notificationSettings)
@@ -729,6 +831,9 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     
+    /// register device token to sdk server
+    ///
+    /// - Parameter token: device token Data
     @objc public class func didRegisterUserNotification(withToken token: Data){
         if Qiscus.isLoggedIn{
             var tokenString: String = ""
@@ -762,6 +867,9 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     
+    /// notif banner action to open chatView
+    ///
+    /// - Parameter roomId: chat room id
     @objc public class func notificationAction(roomId: String){
         if let window = UIApplication.shared.keyWindow{
             if Qiscus.sharedInstance.notificationAction != nil{
@@ -811,6 +919,11 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
             self.mqtt!.connect()
         }
     }
+    
+    
+    /// connect mqtt
+    ///
+    /// - Parameter chatOnly: -
     class func mqttConnect(chatOnly:Bool = false){
         QiscusBackgroundThread.asyncAfter(deadline: .now() + 1.0) {
             Qiscus.shared.mqttConnect()
@@ -818,6 +931,13 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     
+    /// create banner natification
+    ///
+    /// - Parameters:
+    ///   - comment: QComment
+    ///   - alertTitle: banner title
+    ///   - alertBody: banner body
+    ///   - userInfo: userInfo
     public class func createLocalNotification(forComment comment:QComment, alertTitle:String? = nil, alertBody:String? = nil, userInfo:[AnyHashable : Any]? = nil){
         DispatchQueue.main.async {autoreleasepool{
             let localNotification = UILocalNotification()
@@ -852,6 +972,9 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     
+    /// didREceive localnotification
+    ///
+    /// - Parameter notification: UILocalNotification
     public class func didReceiveNotification(notification:UILocalNotification){
         if notification.userInfo != nil {
             if let comment = QComment.decodeDictionary(data: notification.userInfo!) {
@@ -871,6 +994,9 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     
+    /// handle tap usernotification
+    ///
+    /// - Parameter userInfo: userInfo
     public class func didReceiveUNUserNotification(withUserInfo userInfo:[AnyHashable:Any]){
         if let comment = QComment.decodeDictionary(data: userInfo) {
             var userData:[AnyHashable : Any]? = [AnyHashable : Any]()
@@ -888,6 +1014,9 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     
+    /// publish online or offline status
+    ///
+    /// - Parameter offline: false = offline, true = online
     class func publishUserStatus(offline:Bool = false){
         if Qiscus.isLoggedIn{
             DispatchQueue.main.async {
@@ -950,11 +1079,21 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
         }
         Qiscus.shared.stopPublishOnlineStatus()
     }
+    
+    
+    /// set banner click action
+    ///
+    /// - Parameter action: do something on @escaping when banner notif did tap
     @objc public class func setNotificationAction(onClick action:@escaping ((QiscusChatVC)->Void)){
         Qiscus.shared.notificationAction = action
     }
     
     // MARK: - register PushNotification
+    
+    
+    /// register device token to sdk service
+    ///
+    /// - Parameter deviceToken: device token in string
     @objc public class func registerDevice(withToken deviceToken: String){
         Qiscus.qiscusDeviceToken = deviceToken
         Qiscus.client.deviceToken = deviceToken
@@ -962,6 +1101,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     
+    /// unregister device token from sdk service
     @objc public class func unRegisterDevice(){
         Qiscus.qiscusDeviceToken = ""
         Qiscus.client.deviceToken = ""
@@ -969,15 +1109,17 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     
+    /// do message synchronize
+    ///
+    /// - Parameter cloud: -
     public class func sync(cloud:Bool = false){
         if Qiscus.isLoggedIn{
             QChatService.syncProcess(cloud: cloud)
         }
     }
     
-    /**
- 
-     */
+    
+    /// clear qiscus cached data
     public class func cacheData(){
         QRoom.cacheAll()
         QComment.cacheAll()
@@ -986,6 +1128,14 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     
+    /// get nonce from sdk server
+    ///
+    /// - Parameters:
+    ///   - appId: sdk app id
+    ///   - baseURL: custom base url sdk server (optional)
+    ///   - onSuccess: on success get nonce with string nonce
+    ///   - onFailed: on failed get nonce with string error message
+    ///   - secureURL: true = https, false = http (default value = true)
     @objc public class func getNonce(withAppId appId:String, baseURL:String? = nil, onSuccess:@escaping ((String)->Void), onFailed:@escaping ((String)->Void), secureURL:Bool = true){
         QChatService.getNonce(withAppId: appId, baseURL: baseURL, onSuccess: onSuccess, onFailed: onFailed, secureURL: secureURL)
     }
@@ -994,7 +1144,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
      Qiscus Setup with `identity token`, 2nd call method after you call getNounce. Response from you backend then putback in to Qiscus Server
      
      - parameter uidToken: token where you get from get nonce
-     - parameter delegate: asd
+     - parameter delegate: QiscusConfigDelegate
      
      */
     @objc public class func setup(withUserIdentityToken uidToken:String, delegate: QiscusConfigDelegate? = nil){
@@ -1007,6 +1157,7 @@ var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurre
     }
     
     
+    /// subscribe room notification
     public class func subscribeAllRoomNotification(){
         QiscusBackgroundThread.async { autoreleasepool {
             let rooms = QRoom.all()
