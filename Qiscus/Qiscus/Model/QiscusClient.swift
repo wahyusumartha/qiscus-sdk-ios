@@ -9,6 +9,8 @@
 import UIKit
 import SwiftyJSON
 
+
+/// contain sdk user information
 open class QiscusClient: NSObject {
     
     public static var inBackgroundSync:Bool{

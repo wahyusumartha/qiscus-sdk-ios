@@ -38,6 +38,9 @@ import AVFoundation
     @objc optional func room(didChangeUnread inRoom:QRoom)
     @objc optional func room(didClearMessages cleared:Bool)
 }
+
+
+/// Room of conversation (Realm object)
 public class QRoom:Object {
     @objc public dynamic var id:String = ""
     @objc public dynamic var uniqueId:String = ""

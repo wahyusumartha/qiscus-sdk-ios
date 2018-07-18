@@ -117,6 +117,9 @@ public enum QReplyType:Int{
     case cellPosition
     case cellSize
 }
+
+
+/// Comment (Realm object)
 public class QComment:Object {
     static var cache = [String: QComment]()
     
