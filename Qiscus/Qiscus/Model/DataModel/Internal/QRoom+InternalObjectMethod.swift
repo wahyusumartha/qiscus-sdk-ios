@@ -941,6 +941,36 @@ internal extension QRoom {
         return data.first
     }
     
+    // MARK : Optimize getGrouppedCommentsUID, when triger got new comment
+    internal func add(CommentID: String, InGroupped Comments:[[String]]) -> [[String]] {
+        var retVal : [[String]] = Comments
+        if retVal.isEmpty {return [[String]]()}
+        
+        // get last array in array of comments
+        var lastArray = retVal.last
+        // get last id in last array
+        let lastCommentID = lastArray?.last
+        // get object comment with comment(lastid)
+        if let lastComment = QComment.threadSaveComment(withUniqueId: lastCommentID!){
+            // commpare comment sender or date
+            if let Comment = QComment.threadSaveComment(withUniqueId: CommentID) {
+                if Comment.date == lastComment.date && Comment.senderEmail == lastComment.senderEmail && Comment.type != .system  {
+                    // yes, append
+                    lastArray?.append(CommentID)
+                    retVal.removeLast()
+                    retVal.append(lastArray!)
+                }else{
+                    // No, create new array insert retVal
+                    retVal.append([CommentID])
+                }
+            }
+        }
+        
+        return retVal
+    }
+    
+
+    
     internal func getGrouppedCommentsUID(filter:NSPredicate? = nil)->[[String]]{
         let realm = try! Realm(configuration: Qiscus.dbConfiguration)
         var retVal = [[String]]()

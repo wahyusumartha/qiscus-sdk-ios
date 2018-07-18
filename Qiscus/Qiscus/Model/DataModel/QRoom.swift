@@ -85,6 +85,8 @@ public class QRoom:Object {
     internal let rawComments = List<QComment>()
     internal let service = QRoomService()
     
+    
+    /// comments on a room
     public var comments:[QComment]{
         get{
             var comments = [QComment]()
@@ -94,6 +96,12 @@ public class QRoom:Object {
             return comments
         }
     }
+    
+    
+    /// comments on a room with filter
+    ///
+    /// - Parameter query: <#query description#>
+    /// - Returns: <#return value description#>
     public func comments(withFilter query:NSPredicate?)->[QComment]{
         var comments = [QComment]()
         var results = self.rawComments.sorted(byKeyPath: "createdAt", ascending: true)

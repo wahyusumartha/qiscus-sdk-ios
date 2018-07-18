@@ -70,7 +70,7 @@ public class QConversationCollectionView: UICollectionView {
                             
                             DispatchQueue.main.async {
                                 self.messagesId = messages
-                                self.reloadData()
+//                                self.reloadData()
                             }
                             rts.resendPendingMessage()
                             rts.redeletePendingDeletedMessage()
@@ -125,6 +125,8 @@ public class QConversationCollectionView: UICollectionView {
     internal var userTypingEmail: String = ""
     internal var isTyping: Bool = false
     internal var cacheCellSize: [String: CGSize] = [:]
+    internal var gotNewCommentTimer: Timer?
+    internal var tempNewComment: QComment?
     
     var isLastRowVisible: Bool = false
     
@@ -198,6 +200,7 @@ public class QConversationCollectionView: UICollectionView {
         center.addObserver(self, selector: #selector(QConversationCollectionView.newCommentNotif(_:)), name: QiscusNotification.ROOM_CHANGE(onRoom: roomId), object: nil)
         center.addObserver(self, selector: #selector(QConversationCollectionView.messageCleared(_:)), name: QiscusNotification.ROOM_CLEARMESSAGES(onRoom: roomId), object: nil)
         center.addObserver(self, selector: #selector(QConversationCollectionView.commentDeleted(_:)), name: QiscusNotification.COMMENT_DELETE(onRoom: roomId), object: nil)
+        center.addObserver(self, selector: #selector(QConversationCollectionView.gotNewCommentEvent(_:)), name: QiscusNotification.GOT_NEW_COMMENT, object: nil)
     }
     public func unsubscribeEvent(roomId:String){
         let center: NotificationCenter = NotificationCenter.default
@@ -237,50 +240,85 @@ public class QConversationCollectionView: UICollectionView {
             }
         }
     }
-    open func gotNewComment(comment: QComment, room:QRoom) {
-        let rid = room.id
-        var hardDelete = false
-        if let softDelete = self.viewDelegate?.viewDelegate?(usingSoftDeleteOnView: self){
-            hardDelete = !softDelete
-        }
-        var predicate:NSPredicate?
-        if hardDelete {
-            predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
-        }
+    @objc open func gotNewComment() {
+        guard let comment = self.tempNewComment else {return}
+        let rid = comment.room?.id
         
-        QiscusBackgroundThread.async {
-            if let rts = QRoom.threadSaveRoom(withId: rid){
-                var messages = rts.grouppedCommentsUID(filter: predicate)
-                messages = self.checkHiddenMessage(messages: messages)
-                
-                var section = 0
-                var changed = false
-                if messages.count != self.messagesId.count {
-                    changed = true
-                }else{
-                    var i = 0
-                    for group in messages {
-                        if group.count != self.messagesId[i].count {
-                            changed = true
-                            break
+        if rid == self.room?.id {
+            let cid = comment.uniqueId
+            var hardDelete = false
+            if let softDelete = self.viewDelegate?.viewDelegate?(usingSoftDeleteOnView: self){
+                hardDelete = !softDelete
+            }
+            var predicate:NSPredicate?
+            if hardDelete {
+                predicate = NSPredicate(format: "statusRaw != %d AND statusRaw != %d", QCommentStatus.deleted.rawValue, QCommentStatus.deleting.rawValue)
+            }
+            
+            QiscusBackgroundThread.async {
+                if let rts = QRoom.threadSaveRoom(withId: rid!){
+                    var messages = rts.grouppedCommentsUID(filter: predicate)
+//                    var messages = rts.add(CommentID: cid, InGroupped: self.messagesId)
+                    messages = self.checkHiddenMessage(messages: messages)
+                    
+                    var section = 0
+                    var changed = false
+                    if messages.count != self.messagesId.count {
+                        changed = true
+                    }else{
+                        var i = 0
+                        for group in messages {
+                            if group.count != self.messagesId[i].count {
+                                changed = true
+                                break
+                            }
+                            i += 1
                         }
-                        i += 1
                     }
-                }
-                
-                if changed {
-                    DispatchQueue.main.async {
-                        
-                        if comment.isInvalidated {return}
-                        if comment.senderEmail == Qiscus.client.email && !self.isLastRowVisible {
-                            self.layoutIfNeeded()
-                            self.scrollToBottom(true)
-                        } else {
-                            self.messagesId = messages
-                            self.reloadData()
+                    
+                    if changed {
+                        DispatchQueue.main.async {
                             
-                            if self.isLastRowVisible {
+                            if comment.isInvalidated {return}
+                            if comment.senderEmail == Qiscus.client.email && !self.isLastRowVisible {
+                                self.layoutIfNeeded()
                                 self.scrollToBottom(true)
+                            } else {
+//                                self.messagesId = messages
+//                                self.reloadData()
+//                                if self.isLastRowVisible {
+//                                    self.scrollToBottom(true)
+//                                }
+                                
+                                if self.messagesId.count != messages.count {
+                                    self.messagesId = messages
+                                    self.reloadData()
+                                    
+//                                    let newIndexPath = IndexPath(row: 0, section: self.messagesId.count - 1)
+//                                    self.performBatchUpdates({
+//                                        self.insertSections(IndexSet(integer: self.messagesId.count - 1))
+//                                        self.insertItems(at: [newIndexPath])
+//                                    }, completion: { (success) in
+//                                        self.layoutIfNeeded()
+//                                    })
+                                } else {
+                                    let messageDiff = (messages.last?.count)! - (self.messagesId.last?.count)!
+                                    if messageDiff <= 0 {return}
+                                    var indexPaths = [IndexPath]()
+
+                                    for i in 1...messageDiff {
+                                        let newIndexPath = IndexPath(row: (self.messagesId.last?.count)! + (i - 1), section: self.messagesId.count - 1)
+                                        indexPaths.append(newIndexPath)
+                                    }
+
+                                    self.messagesId = messages
+                                    self.insertItems(at: indexPaths)
+                                }
+
+
+                                if self.isLastRowVisible {
+                                    self.scrollToBottom(true)
+                                }
                             }
                         }
                     }
@@ -405,6 +443,20 @@ public class QConversationCollectionView: UICollectionView {
             self.userTypingChanged(userEmail: userEmail, typing: typing)            
         }
     }
+    
+    @objc private func gotNewCommentEvent(_ notification: Notification) {
+        if let userInfo = notification.userInfo {
+            guard let comment = userInfo["comment"] as? QComment else {return}
+            self.tempNewComment = comment
+            
+            
+            NSObject.cancelPreviousPerformRequests(withTarget: self,
+                                                   selector: #selector(self.gotNewComment),
+                                                   object: nil)
+            perform(#selector(self.gotNewComment), with: nil, afterDelay: 0.5)
+        }
+    }
+    
     @objc private func newCommentNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
             guard let property = userInfo["property"] as? QRoomProperty else {return}
@@ -417,7 +469,7 @@ public class QConversationCollectionView: UICollectionView {
                 }
                 
                 if room.isInvalidated { return }
-                self.gotNewComment(comment: comment, room: room)
+//                self.gotNewComment(comment: comment, room: room)
             }
         }
     }
