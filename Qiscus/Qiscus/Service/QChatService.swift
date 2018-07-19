@@ -1297,6 +1297,10 @@ public class QChatService:NSObject {
             }}
     }
     internal class func setup(withuserIdentityToken uidToken:String){
+        if uidToken == "" || uidToken == nil {
+            fatalError("user indetitiy token is empty or nil"
+            return
+        } else {
         QiscusRequestThread.async { autoreleasepool{
             
             let authURL = "\(QiscusConfig.sharedInstance.BASE_API_URL)/auth/verify_identity_token"
@@ -1353,6 +1357,7 @@ public class QChatService:NSObject {
                 }
             })
             }}
+        }
     }
     
     public class func roomList(withLimit limit:Int = 100, page:Int? = nil, showParticipant:Bool = true, onSuccess:@escaping (([QRoom],Int,Int,Int)->Void), onFailed: @escaping ((String)->Void), onProgress: ((Double,Int, Int)->Void)? = nil){
