@@ -530,12 +530,16 @@ public class QRoom:Object {
         self.post(comment: comment)
     }
     internal func resendPendingMessage(){
-        let id = self.id
-        let pendingMessages = self.rawComments.filter("statusRaw == %d", QCommentStatus.pending.rawValue)
-        if pendingMessages.count > 0 {
-            if let pendingMessage = pendingMessages.first {
-                service.postComment(onRoom: id, comment: pendingMessage) {
-                    self.resendPendingMessage()
+        if let room = QRoom.threadSaveRoom(withId: self.id){
+            print("cek uniqueId ini =\(uniqueId)")
+            if let c = QComment.threadSaveComment(withUniqueId: uniqueId){
+                let pendingMessages = self.rawComments.filter("statusRaw == %d", QCommentStatus.pending.rawValue)
+                if pendingMessages.count > 0 {
+                    if let pendingMessage = pendingMessages.first {
+                        service.postComment(onRoom: id, comment: pendingMessage) {
+                            self.resendPendingMessage()
+                        }
+                    }
                 }
             }
         }

@@ -319,11 +319,12 @@ public class QRoomService:NSObject{
                 break
             case .failure(let error):
                 var status = QCommentStatus.failed
-                if comment.type == .text || comment.type == .reply || comment.type == .custom {
-                    status = .pending
-                }
+               
                 if let room = QRoom.threadSaveRoom(withId: roomId){
                     if let c = QComment.threadSaveComment(withUniqueId: commentUniqueId){
+                        if c.type == .text || c.type == .reply || c.type == .custom {
+                            status = .pending
+                        }
                         room.updateCommentStatus(inComment: c, status: status)
                     }
                 }
