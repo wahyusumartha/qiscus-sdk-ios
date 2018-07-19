@@ -1298,7 +1298,9 @@ public class QChatService:NSObject {
     }
     internal class func setup(withuserIdentityToken uidToken:String){
         if uidToken == "" || uidToken == nil {
-            fatalError("user indetitiy token is empty or nil"
+            #if DEBUG
+            fatalError("user indetitiy token is empty or nil")
+            #endif
         } else {
         QiscusRequestThread.async { autoreleasepool{
             
