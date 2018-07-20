@@ -1354,68 +1354,68 @@ public class QChatService:NSObject {
             }}
     }
     internal class func setup(withuserIdentityToken uidToken:String){
-        if uidToken.isEmpty {
+        if uidToken.isEmpty || uidToken == nil {
             #if DEBUG
-                fatalError("identity token cant be empty")
+            fatalError("user indetitiy token is empty or nil")
             #endif
-            return
-        }
-        QiscusRequestThread.async { autoreleasepool{
-            
-            let authURL = "\(QiscusConfig.sharedInstance.BASE_API_URL)/auth/verify_identity_token"
-            let parameters:[String: AnyObject] = [
-                "identity_token"  : uidToken as AnyObject
-            ]
-            
-            QiscusService.session.request(authURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+        } else {
+            QiscusRequestThread.async { autoreleasepool{
                 
-                switch response.result {
-                case .success:
-                    if let result = response.result.value{
-                        let json = JSON(result)
-                        let success:Bool = (json["status"].intValue == 200)
-                        
-                        if success {
-                            let userData = json["results"]["user"]
-                            let _ = QiscusClient.saveData(fromJson: userData)
-                            Qiscus.setupReachability()
-                            if let delegate = Qiscus.shared.delegate {
-                                Qiscus.uiThread.async { autoreleasepool{
-                                    delegate.qiscus?(didConnect: true, error: nil)
-                                    delegate.qiscusConnected?()
-                                    }}
-                            }
-                            Qiscus.registerNotification()
+                let authURL = "\(QiscusConfig.sharedInstance.BASE_API_URL)/auth/verify_identity_token"
+                let parameters:[String: AnyObject] = [
+                    "identity_token"  : uidToken as AnyObject
+                ]
+                
+                QiscusService.session.request(authURL, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+                    
+                    switch response.result {
+                    case .success:
+                        if let result = response.result.value{
+                            let json = JSON(result)
+                            let success:Bool = (json["status"].intValue == 200)
                             
+                            if success {
+                                let userData = json["results"]["user"]
+                                let _ = QiscusClient.saveData(fromJson: userData)
+                                Qiscus.setupReachability()
+                                if let delegate = Qiscus.shared.delegate {
+                                    Qiscus.uiThread.async { autoreleasepool{
+                                        delegate.qiscus?(didConnect: true, error: nil)
+                                        delegate.qiscusConnected?()
+                                        }}
+                                }
+                                Qiscus.registerNotification()
+                                
+                            }else{
+                                if let delegate = Qiscus.shared.delegate {
+                                    Qiscus.uiThread.async { autoreleasepool{
+                                        delegate.qiscusFailToConnect?("\(json["error"]["message"].stringValue)")
+                                        delegate.qiscus?(didConnect: false, error: "\(json["error"]["message"].stringValue)")
+                                        }}
+                                }
+                            }
                         }else{
                             if let delegate = Qiscus.shared.delegate {
                                 Qiscus.uiThread.async { autoreleasepool{
-                                    delegate.qiscusFailToConnect?("\(json["error"]["message"].stringValue)")
-                                    delegate.qiscus?(didConnect: false, error: "\(json["error"]["message"].stringValue)")
+                                    let error = "Cant get data from qiscus server"
+                                    delegate.qiscusFailToConnect?(error)
+                                    delegate.qiscus?(didConnect: false, error: error)
                                     }}
                             }
                         }
-                    }else{
+                        break
+                    case .failure(let error):
                         if let delegate = Qiscus.shared.delegate {
-                            Qiscus.uiThread.async { autoreleasepool{
-                                let error = "Cant get data from qiscus server"
-                                delegate.qiscusFailToConnect?(error)
-                                delegate.qiscus?(didConnect: false, error: error)
+                            Qiscus.uiThread.async {autoreleasepool{
+                                delegate.qiscusFailToConnect?("\(error)")
+                                delegate.qiscus?(didConnect: false, error: "\(error)")
                                 }}
                         }
+                        break
                     }
-                    break
-                case .failure(let error):
-                    if let delegate = Qiscus.shared.delegate {
-                        Qiscus.uiThread.async {autoreleasepool{
-                            delegate.qiscusFailToConnect?("\(error)")
-                            delegate.qiscus?(didConnect: false, error: "\(error)")
-                            }}
-                    }
-                    break
-                }
-            })
-            }}
+                })
+                }}
+        }
     }
     
     public class func roomList(withLimit limit:Int = 100, page:Int? = nil, showParticipant:Bool = true, onSuccess:@escaping (([QRoom],Int,Int,Int)->Void), onFailed: @escaping ((String)->Void), onProgress: ((Double,Int, Int)->Void)? = nil){
