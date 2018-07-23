@@ -55,7 +55,13 @@ open class QiscusCommentClient: NSObject {
     
     
     // MARK: - Login or register
-    open func loginOrRegister(_ email:String = "", password:String = "", username:String? = nil, avatarURL:String? = nil, reconnect:Bool = false, onSuccess:(()->Void)? = nil){
+    open func loginOrRegister(_ email:String, password:String, username:String? = nil, avatarURL:String? = nil, reconnect:Bool = false, onSuccess:(()->Void)? = nil){
+        if email.isEmpty || password.isEmpty {
+            #if DEBUG
+                fatalError("parameters cant be empty")
+            #endif
+            Qiscus.printLog(text: "parameters cant be empty")
+        }
         
         var parameters:[String: AnyObject] = [String: AnyObject]()
         
