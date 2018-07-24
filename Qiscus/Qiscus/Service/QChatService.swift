@@ -45,15 +45,11 @@ public class QChatService:NSObject {
     internal class func updateProfil(userName: String? = nil, userAvatarURL: String? = nil, onSuccess: @escaping (()->Void),onError:@escaping ((String)->Void)){
         if Qiscus.isLoggedIn {
             var parameters:[String: AnyObject] = [String: AnyObject]()
-            let email = Qiscus.client.userData.value(forKey: "qiscus_param_email") as? String
-            let userKey = Qiscus.client.userData.value(forKey: "qiscus_param_pass") as? String
             let currentName = Qiscus.client.userData.value(forKey: "qiscus_param_username") as? String
             let currentAvatarURL = Qiscus.client.userData.value(forKey: "qiscus_param_avatar") as? String
             
-            parameters = [
-                "email"  : email as AnyObject,
-                "password" : userKey as AnyObject,
-            ]
+            parameters["token"] = qiscus.config.USER_TOKEN as AnyObject
+            
             var noChange = true
             if let name = userName{
                 if name != currentName {
@@ -72,7 +68,8 @@ public class QChatService:NSObject {
                 onError("no change")
             }else{
                 DispatchQueue.global().async(execute: {
-                    QiscusService.session.request(QiscusConfig.LOGIN_REGISTER, method: .post, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+                    QiscusService.session.request(QiscusConfig.UPDATE_PROFILE, method: .patch, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+                        print("update profile response \(response)")
                         switch response.result {
                         case .success:
                             if let result = response.result.value{
