@@ -45,72 +45,59 @@ public class QChatService:NSObject {
     internal class func updateProfil(userName: String? = nil, userAvatarURL: String? = nil, onSuccess: @escaping (()->Void),onError:@escaping ((String)->Void)){
         if Qiscus.isLoggedIn {
             var parameters:[String: AnyObject] = [String: AnyObject]()
-            let currentName = Qiscus.client.userData.value(forKey: "qiscus_param_username") as? String
-            let currentAvatarURL = Qiscus.client.userData.value(forKey: "qiscus_param_avatar") as? String
-            
             parameters["token"] = qiscus.config.USER_TOKEN as AnyObject
             
-            var noChange = true
             if let name = userName{
-                if name != currentName {
-                    parameters["username"] = name as AnyObject?
-                    noChange = false
-                }
+                parameters["name"] = name as AnyObject?
             }
             if let avatar =  userAvatarURL{
-                if avatar != currentAvatarURL {
-                    parameters["avatar_url"] = avatar as AnyObject?
-                    noChange = false
-                }
+                parameters["avatar_url"] = avatar as AnyObject?
             }
             
-            if noChange {
-                onError("no change")
-            }else{
-                DispatchQueue.global().async(execute: {
-                    QiscusService.session.request(QiscusConfig.UPDATE_PROFILE, method: .patch, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
-                        print("update profile response \(response)")
-                        switch response.result {
-                        case .success:
-                            if let result = response.result.value{
-                                let json = JSON(result)
-                                let success:Bool = (json["status"].intValue == 200)
-                                
-                                if success {
-                                    let userData = json["results"]["user"]
-                                    let _ = QiscusClient.saveData(fromJson: userData, reconnect: true)
-                                    Qiscus.setupReachability()
-                                    if let delegate = Qiscus.shared.delegate {
-                                        Qiscus.uiThread.async { autoreleasepool{
-                                            delegate.qiscus?(didConnect: true, error: nil)
-                                            delegate.qiscusConnected?()
-                                            }}
-                                    }
-                                    Qiscus.registerNotification()
+            
+            DispatchQueue.global().async(execute: {
+                QiscusService.session.request(QiscusConfig.UPDATE_PROFILE, method: .patch, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
+                    print("update profile response \(response)")
+                    switch response.result {
+                    case .success:
+                        if let result = response.result.value{
+                            let json = JSON(result)
+                            let success:Bool = (json["status"].intValue == 200)
+                            
+                            if success {
+                                let userData = json["results"]["user"]
+                                let _ = QiscusClient.saveData(fromJson: userData, reconnect: true)
+                                Qiscus.setupReachability()
+                                if let delegate = Qiscus.shared.delegate {
                                     Qiscus.uiThread.async { autoreleasepool{
-                                        onSuccess()
-                                        }}
-                                }else{
-                                    Qiscus.uiThread.async { autoreleasepool{
-                                        onError(json["message"].stringValue)
+                                        delegate.qiscus?(didConnect: true, error: nil)
+                                        delegate.qiscusConnected?()
                                         }}
                                 }
+                                Qiscus.registerNotification()
+                                Qiscus.uiThread.async { autoreleasepool{
+                                    onSuccess()
+                                    }}
                             }else{
                                 Qiscus.uiThread.async { autoreleasepool{
-                                    let error = "Cant get data from qiscus server"
-                                    onError(error)
+                                    onError(json["message"].stringValue)
                                     }}
                             }
-                            break
-                        case .failure(let error):
-                            Qiscus.uiThread.async {autoreleasepool{
-                                onError("\(error)")
+                        }else{
+                            Qiscus.uiThread.async { autoreleasepool{
+                                let error = "Cant get data from qiscus server"
+                                onError(error)
                                 }}
-                            break
                         }
-                    })
+                        break
+                    case .failure(let error):
+                        Qiscus.uiThread.async {autoreleasepool{
+                            onError("\(error)")
+                            }}
+                        break
+                    }
                 })
-            }
+            })
         }else{
             onError("Not logged in to Qiscus")
         }
