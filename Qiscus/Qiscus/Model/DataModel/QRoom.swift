@@ -538,13 +538,33 @@ public class QRoom:Object {
         self.post(comment: comment)
     }
     internal func resendPendingMessage(){
-        let id = self.id
-        let pendingMessages = self.rawComments.filter("statusRaw == %d", QCommentStatus.pending.rawValue)
-        if pendingMessages.count > 0 {
-            if let pendingMessage = pendingMessages.first {
-                service.postComment(onRoom: id, comment: pendingMessage, onSuccess: {
-                    self.resendPendingMessage()
-                })
+        QiscusDBThread.async {
+            let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+            realm.refresh()
+            var data = realm.objects(QComment.self).filter("statusRaw == 1")
+            
+            if let comment = data.first {
+                if Thread.isMainThread {
+                    if let room = QRoom.room(withId: comment.roomId){
+                        room.updateCommentStatus(inComment: comment, status: .sending)
+                        room.post(comment: comment) {
+                            self.resendPendingMessage()
+                        }
+                    }
+                }else{
+                    let commentTS = ThreadSafeReference(to: comment)
+                    DispatchQueue.main.sync {
+                        let realm = try! Realm(configuration: Qiscus.dbConfiguration)
+                        realm.refresh()
+                        guard let c = realm.resolve(commentTS) else { return }
+                        if let room = QRoom.room(withId: c.roomId){
+                            room.updateCommentStatus(inComment: c, status: .sending)
+                            room.post(comment: c) {
+                                self.resendPendingMessage()
+                            }
+                        }
+                    }
+                }
             }
         }
     }
