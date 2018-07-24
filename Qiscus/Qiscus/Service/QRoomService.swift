@@ -316,7 +316,7 @@ public class QRoomService:NSObject{
                             if let c = QComment.threadSaveComment(withUniqueId: commentUniqueId){
                                 c.update(commentId: commentId, beforeId: commentBeforeId)
                                 if let room = QRoom.threadSaveRoom(withId: roomId){
-                                    if c.status == QCommentStatus.sending || c.status == QCommentStatus.failed {
+                                    if c.status == QCommentStatus.sending || c.status == QCommentStatus.failed || c.status == QCommentStatus.pending {
                                         room.updateCommentStatus(inComment: c, status: .sent)
                                     }
                                     self.sync(onRoom: room, notifyUI: room.rawComments.count < 2)
@@ -342,11 +342,13 @@ public class QRoomService:NSObject{
                     break
                 case .failure(let error):
                     var status = QCommentStatus.failed
-                    if comment.type == .text || comment.type == .reply || comment.type == .custom {
-                        status = .pending
-                    }
+                    
                     if let room = QRoom.threadSaveRoom(withId: roomId){
                         if let c = QComment.threadSaveComment(withUniqueId: commentUniqueId){
+                            if c.type == .text || c.type == .reply || c.type == .custom {
+                                status = .pending
+                            }
+                            
                             room.updateCommentStatus(inComment: c, status: status)
                         }
                     }
