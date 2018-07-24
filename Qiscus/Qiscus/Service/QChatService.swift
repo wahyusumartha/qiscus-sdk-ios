@@ -57,7 +57,6 @@ public class QChatService:NSObject {
             
             DispatchQueue.global().async(execute: {
                 QiscusService.session.request(QiscusConfig.UPDATE_PROFILE, method: .patch, parameters: parameters, encoding: URLEncoding.default, headers: QiscusConfig.sharedInstance.requestHeader).responseJSON(completionHandler: { response in
-                    print("update profile response \(response)")
                     switch response.result {
                     case .success:
                         if let result = response.result.value{
