@@ -18,7 +18,11 @@ extension QiscusChatVC:CNContactPickerDelegate{
         func share(name:String, value:String){
             let newComment = self.chatRoom!.newContactComment(name: name, value: value)
             self.postComment(comment: newComment)
-            self.chatRoom!.post(comment: newComment)
+            self.chatRoom!.post(comment: newComment, onSuccess: {
+                
+            }, onError: { (error) in
+                Qiscus.printLog(text: "error \(error)")
+            })
             self.addCommentToCollectionView(comment: newComment)
         }
         let contactName = "\(contact.givenName) \(contact.familyName)".trimmingCharacters(in: .whitespacesAndNewlines)
@@ -1116,7 +1120,11 @@ extension QiscusChatVC {
                 
                 if let room = self.chatRoom {
                     let newComment = room.newComment(text: text)
-                    room.post(comment: newComment, type: type, payload: payload)
+                    room.post(comment: newComment, type: type, payload: payload, onSuccess: {
+                        
+                    }, onError: { (error) in
+                        Qiscus.printLog(text: "error \(error)")
+                    })
                 }
                 break
             }
