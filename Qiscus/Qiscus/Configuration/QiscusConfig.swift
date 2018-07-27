@@ -141,6 +141,9 @@ open class QiscusConfig: NSObject {
     internal class var UPDATE_COMMENT_STATUS_URL:String{
         return "\(QiscusConfig.sharedInstance.BASE_API_URL)/update_comment_status"
     }
+    internal class var UPDATE_PROFILE:String{
+        return "\(QiscusConfig.sharedInstance.BASE_API_URL)/my_profile"
+    }
     internal class var LOGIN_REGISTER:String{
         return "\(QiscusConfig.sharedInstance.BASE_API_URL)/login_or_register"
     }
