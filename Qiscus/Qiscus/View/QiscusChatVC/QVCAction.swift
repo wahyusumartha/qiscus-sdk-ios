@@ -477,7 +477,14 @@ extension QiscusChatVC {
             if value != "" {
                 var type:QCommentType = .text
                 var payload:JSON? = nil
+                
                 if let reply = self.replyData {
+                    if (reply.isInvalidated) {
+                        self.replyData = nil
+                        self.inputText.clearValue()
+                        return
+                    }
+                    
                     var senderName = reply.senderName
                     if let user = reply.sender{
                         senderName = user.fullname
