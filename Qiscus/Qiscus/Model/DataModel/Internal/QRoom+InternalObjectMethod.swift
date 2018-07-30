@@ -43,18 +43,21 @@ internal extension QRoom {
     }
     internal func publishStopTypingRoom(){
         let roomId = self.id
-        QiscusBackgroundThread.async { autoreleasepool{
-            let message: String = "0";
-            let channel = "r/\(roomId)/\(roomId)/\(Qiscus.client.email)/t"
-            
-            Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
-            }}
-        if self.selfTypingTimer != nil {
-            if self.typingTimer!.isValid {
-                self.typingTimer!.invalidate()
+        if(roomId != ""){
+            QiscusBackgroundThread.async { autoreleasepool{
+                let message: String = "0";
+                let channel = "r/\(roomId)/\(roomId)/\(Qiscus.client.email)/t"
+                
+                Qiscus.shared.mqtt?.publish(channel, withString: message, qos: .qos1, retained: false)
+                }}
+            if self.selfTypingTimer != nil {
+                if self.typingTimer!.isValid {
+                    self.typingTimer!.invalidate()
+                }
+                self.typingTimer = nil
             }
-            self.typingTimer = nil
         }
+       
     }
     internal func publishStartTypingRoom(){
         let roomId = self.id
