@@ -302,17 +302,62 @@ public class QConversationCollectionView: UICollectionView {
 //                                        self.layoutIfNeeded()
 //                                    })
                                 } else {
-                                    let messageDiff = (messages.last?.count)! - (self.messagesId.last?.count)!
-                                    if messageDiff <= 0 {return}
-                                    var indexPaths = [IndexPath]()
-
-                                    for i in 1...messageDiff {
-                                        let newIndexPath = IndexPath(row: (self.messagesId.last?.count)! + (i - 1), section: self.messagesId.count - 1)
-                                        indexPaths.append(newIndexPath)
+                                    var section = 0
+                                    var item = 0
+                                    if let lastUid = self.messagesId.last?.last {
+                                        if let lastComment = QComment.comment(withUniqueId: lastUid) {
+                                            section = self.messagesId.count - 1
+                                            item = (self.messagesId.last?.count)! - 1
+                                            
+                                            if lastComment.date == comment.date && lastComment.sender?.email == comment.sender?.email {
+                                                var lastGroup = self.messagesId.last
+                                                lastGroup?.append(comment.uniqueId)
+                                                
+                                                self.messagesId.removeLast()
+                                                self.messagesId.append(lastGroup!)
+                                                
+                                                let newIndexPath = IndexPath(row: item + 1, section: section)
+                                                
+                                                self.performBatchUpdates({
+                                                    self.insertItems(at: [newIndexPath])
+                                                }, completion: { (success) in
+                                                    self.layoutIfNeeded()
+                                                    
+                                                    if lastComment.cellPos == .single {
+                                                        lastComment.updateCellPos(cellPos: .first)
+                                                    }else if lastComment.cellPos == .last {
+                                                        lastComment.updateCellPos(cellPos: .middle)
+                                                    }
+                                                    let lastIndexPath = IndexPath(row: item, section: section)
+                                                    self.reloadItems(at: [lastIndexPath])
+                                                    
+                                                })
+                                                
+                                            } else {
+                                                self.messagesId.append([comment.uniqueId])
+                                                let newIndexPath = IndexPath(row: 0, section: section + 1)
+                                                comment.updateCellPos(cellPos: .single)
+                                                self.performBatchUpdates({
+                                                    self.insertSections(IndexSet(integer: section + 1))
+                                                    self.insertItems(at: [newIndexPath])
+                                                }, completion: { (success) in
+                                                    self.layoutIfNeeded()
+                                                })
+                                            }
+                                        }
                                     }
-
-                                    self.messagesId = messages
-                                    self.insertItems(at: indexPaths)
+                                    
+//                                    let messageDiff = (messages.last?.count)! - (self.messagesId.last?.count)!
+//                                    if messageDiff <= 0 {return}
+//                                    var indexPaths = [IndexPath]()
+//
+//                                    for i in 1...messageDiff {
+//                                        let newIndexPath = IndexPath(row: (self.messagesId.last?.count)! + (i - 1), section: self.messagesId.count - 1)
+//                                        indexPaths.append(newIndexPath)
+//                                    }
+//
+//                                    self.messagesId = messages
+//                                    self.insertItems(at: indexPaths)
                                 }
 
 
