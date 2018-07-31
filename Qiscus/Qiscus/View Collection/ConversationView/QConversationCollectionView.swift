@@ -317,7 +317,6 @@ public class QConversationCollectionView: UICollectionView {
                                                 self.messagesId.append(lastGroup!)
                                                 
                                                 let newIndexPath = IndexPath(row: item + 1, section: section)
-                                                
                                                 self.performBatchUpdates({
                                                     self.insertItems(at: [newIndexPath])
                                                 }, completion: { (success) in
@@ -558,16 +557,30 @@ public class QConversationCollectionView: UICollectionView {
     // MARK: public Method
     func scrollToBottom(_ animated:Bool = false){
         if self.room != nil {
-            if self.messagesId.count > 0 {
-                let lastSection = self.numberOfSections - 1
-                let lastItem = self.numberOfItems(inSection: lastSection) - 1
-                
-                if lastSection >= 0 && lastItem >= 0 {
-                    let indexPath = IndexPath(item: lastItem, section: lastSection)
+            var section = 0
+            var item = 0
+            if let lastUid = self.messagesId.last?.last {
+                if let lastComment = QComment.comment(withUniqueId: lastUid) {
+                    section = self.messagesId.count - 1
+                    item = (self.messagesId.last?.count)! - 1
+
+                    let indexPath = IndexPath(row: item, section: section)
                     self.layoutIfNeeded()
                     self.scrollToItem(at: indexPath, at: .bottom, animated: animated)
                 }
             }
+            
+            //old
+//            if self.messagesId.count > 0 {
+//            let lastSection = self.numberOfSections - 1
+//            let lastItem = self.numberOfItems(inSection: lastSection) - 1
+//
+//            if lastSection >= 0 && lastItem >= 0 {
+//                let indexPath = IndexPath(item: lastItem, section: lastSection)
+//                self.layoutIfNeeded()
+//                self.scrollToItem(at: indexPath, at: .bottom, animated: animated)
+//            }
+//          }
         }
     }
     
