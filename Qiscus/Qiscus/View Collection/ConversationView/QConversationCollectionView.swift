@@ -566,7 +566,10 @@ public class QConversationCollectionView: UICollectionView {
 
                     let indexPath = IndexPath(row: item, section: section)
                     self.layoutIfNeeded()
-                    self.scrollToItem(at: indexPath, at: .bottom, animated: animated)
+                    
+                    if(self.indexPathIsValid(indexPath: indexPath) == true){
+                        self.scrollToItem(at: indexPath, at: .bottom, animated: animated)
+                    }
                 }
             }
             
@@ -582,6 +585,10 @@ public class QConversationCollectionView: UICollectionView {
 //            }
 //          }
         }
+    }
+    
+    func indexPathIsValid(indexPath: IndexPath) -> Bool {
+        return indexPath.section < self.numberOfSections && indexPath.row < self.numberOfItems(inSection: indexPath.section)
     }
     
     open func cellHeightForComment (comment:QComment, defaultHeight height:CGFloat, firstInSection first:Bool)->CGFloat{
