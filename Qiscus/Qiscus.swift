@@ -5,27 +5,14 @@
 //  Copyright © 2016 qiscus. All rights reserved.
 //
 
-
-import UIKit
-import RealmSwift
 import Foundation
-import SwiftyJSON
-import PushKit
-import UserNotifications
-import CocoaMQTT
-
-var QiscusFileThread = DispatchQueue(label: "com.qiscus.file", attributes: .concurrent)
-var QiscusRequestThread = DispatchQueue(label: "com.qiscus.request", attributes: .concurrent)
-var QiscusUploadThread = DispatchQueue(label: "com.qiscus.upload", attributes: .concurrent)
-var QiscusBackgroundThread = DispatchQueue(label: "com.qiscus.background", attributes: .concurrent)
-var QiscusDBThread = DispatchQueue(label: "com.qiscus.db", attributes: .concurrent)
 
 @objc public class Qiscus: NSObject, PKPushRegistryDelegate, UNUserNotificationCenterDelegate {
     
     static let sharedInstance = Qiscus()
 
     
-    static let qiscusVersionNumber:String = "2.8.25"
+    static let qiscusVersionNumber:String = "2.9.1"
     
     
     /// shared instance of QiscusClient
