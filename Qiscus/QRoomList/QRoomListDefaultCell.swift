@@ -15,7 +15,6 @@ class QRoomListDefaultCell: QRoomListCell {
     @IBOutlet weak var avatarView: UIImageView!
     @IBOutlet weak var unreadLabel: UILabel!
     @IBOutlet weak var descriptionLabel: UILabel!
-    
     override func awakeFromNib() {
         super.awakeFromNib()
         self.avatarView.layer.cornerRadius = 25.0
@@ -83,7 +82,7 @@ class QRoomListDefaultCell: QRoomListCell {
                 self.avatarView.image = avatar
             }, onError: { (_) in
                 if let r = self.room {
-                    r.downloadRoomAvatar()
+                   // r.downloadRoomAvatar()
                 }
             })
         }
@@ -112,11 +111,7 @@ class QRoomListDefaultCell: QRoomListCell {
     func setupLastComment(){
         self.descriptionLabel.textColor = UIColor.black
         if let r = room {
-            if let lastComment = r.lastComment{
-                self.descriptionLabel.text = "\(lastComment.senderName): \(lastComment.text)"
-            }else{
-                self.descriptionLabel.text = ""
-            }
+            self.descriptionLabel.text = "\(r.lastCommentMessage.senderName): \(r.lastCommentMessage.text)"
         }else{
             self.descriptionLabel.text = ""
         }

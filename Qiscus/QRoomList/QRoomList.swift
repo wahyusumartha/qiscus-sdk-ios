@@ -7,19 +7,20 @@
 //
 
 import UIKit
-@objc public protocol QRoomListDelegate {
+
+public protocol QRoomListDelegate {
     /**
      Click Cell and redirect to chat view
      */
-    @objc optional func didSelect(room: QRoom)
-    @objc optional func didDeselect(room:QRoom)
-    @objc optional func didSelect(comment: QComment)
-    @objc optional func didDeselect(comment:QComment)
-    @objc optional func willLoad(rooms: [QRoom]) -> [QRoom]?
+    func didSelect(room: QRoom)
+    func didDeselect(room:QRoom)
+    func didSelect(comment: QComment)
+    func didDeselect(comment:QComment)
+    func willLoad(rooms: [QRoom]) -> [QRoom]?
     /**
      Return your custom table view cell as QRoomListCell
     */
-    @objc optional func tableviewCell(for room: QRoom) -> QRoomListCell?
+    func tableviewCell(for room: QRoom) -> QRoomListCell?
 }
 
 open class QRoomList: UITableView{
@@ -74,10 +75,10 @@ open class QRoomList: UITableView{
         self.register(UINib(nibName: "QSearchListDefaultCell", bundle: Qiscus.bundle), forCellReuseIdentifier: "searchDefaultCell")
     }
     internal func didSelectRoom(room: QRoom){
-        self.listDelegate?.didSelect?(room: room)
+        self.listDelegate?.didSelect(room: room)
     }
     internal func didSelectComment(comment: QComment){
-        self.listDelegate?.didSelect?(comment: comment)
+        self.listDelegate?.didSelect(comment: comment)
     }
     
     open func roomCell(at row: Int) -> QRoomListCell {
@@ -94,10 +95,10 @@ open class QRoomList: UITableView{
     public func reload(){
         if !self.clearingData {
             let roomsData = QRoom.all()
-            if let extRooms = self.listDelegate?.willLoad?(rooms: roomsData) {
+            if let extRooms = self.listDelegate?.willLoad(rooms: roomsData!) {
                 self.rooms = extRooms
             } else {
-                self.rooms = roomsData
+                self.rooms = roomsData!
             }
             
             let indexSet = IndexSet(integer: 0)
@@ -109,7 +110,7 @@ open class QRoomList: UITableView{
         self.searchText = text
         
         if !searchLocal {
-            QChatService.searchComment(withQuery: text, onSuccess: { (comments) in
+            Qiscus.searchCommentService(withQuery: text, onSuccess: { (comments) in
                 if text == self.searchText {
                     self.comments = comments
                 }
@@ -117,7 +118,7 @@ open class QRoomList: UITableView{
                 Qiscus.printLog(text: "test")
             }
         } else {
-            self.comments = Qiscus.searchComment(searchQuery: text)
+            self.comments = Qiscus.searchComment(searchQuery: text)!
         }
         
     }
@@ -128,11 +129,7 @@ open class QRoomList: UITableView{
     @objc private func newRoom(_ notification: Notification){
         if let userInfo = notification.userInfo {
             if let room = userInfo["room"] as? QRoom {
-                if room.isInvalidated {
-                    self.reload()
-                }else{
-                    self.gotNewRoom(room: room)
-                }
+                self.gotNewRoom(room: room)
             }
         }
         
@@ -147,7 +144,7 @@ open class QRoomList: UITableView{
         self.reload()
     }
     open func roomListChange(){
-        self.rooms = QRoom.all()
+        self.rooms = QRoom.all()!
         let indexSet = IndexSet(integer: 0)
         self.reloadSections(indexSet, with: .none)
     }
@@ -228,7 +225,7 @@ extension QRoomList: UITableViewDelegate,UITableViewDataSource {
         if indexPath.section == 0 {
             let room = self.filteredRooms[indexPath.row]
             // New approach Custom Cell
-            if var cell = self.listDelegate?.tableviewCell?(for: room) {
+            if var cell = self.listDelegate?.tableviewCell(for: room) {
                 cell = self.dequeueReusableCell(withIdentifier: cell.reuseIdentifier!, for: indexPath) as! QRoomListCell
                 cell.room = room
                 cell.searchText = searchText
@@ -256,9 +253,9 @@ extension QRoomList: UITableViewDelegate,UITableViewDataSource {
 
     open func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
         if indexPath.section == 0 {
-            self.listDelegate?.didDeselect?(room: self.filteredRooms[indexPath.row])
+            self.listDelegate?.didDeselect(room: self.filteredRooms[indexPath.row])
         }else{
-            self.listDelegate?.didDeselect?(comment: self.comments[indexPath.row])
+            self.listDelegate?.didDeselect(comment: self.comments[indexPath.row])
         }
     }
     
