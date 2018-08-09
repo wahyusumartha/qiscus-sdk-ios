@@ -117,7 +117,7 @@ public class QComment: CommentModel {
     
     public var typeMessage: QCommentType{
         get{
-            return QCommentType.init(name: type)
+            return QCommentType.init(name: type.rawValue)
         }
     }
     
@@ -190,7 +190,7 @@ public class QComment: CommentModel {
                     temp.status = statusRaw
                 }
                 if let typeRaw = data["qiscus_typeRaw"] as? String {
-                    temp.type = typeRaw
+                    temp.type = CommentType(rawValue: typeRaw)!
                 }
                 if let payload = data["qiscus_data"] as? String {
                     //temp.payloadData = payload

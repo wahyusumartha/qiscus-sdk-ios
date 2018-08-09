@@ -24,10 +24,10 @@ open class QRoomList: UIChatListViewController {
     
     override open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let room = self.rooms[indexPath.row]
-        self.chat(withRoom: room as! QRoom)
+        self.chat(withRoom: room)
     }
     
-    private func chat(withRoom room: QRoom) {
+    private func chat(withRoom room: RoomModel) {
         let target = QiscusChatVC()
         target.room = room
         self.navigationController?.pushViewController(target, animated: true)
