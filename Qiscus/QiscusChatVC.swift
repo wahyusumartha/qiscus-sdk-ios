@@ -80,4 +80,9 @@ public class QiscusChatVC: UIChatViewController {
             let _ = self.navigationController?.popViewController(animated: true)
         }
     }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+       self.tabBarController?.tabBar.isHidden = true
+    }
+   
 }

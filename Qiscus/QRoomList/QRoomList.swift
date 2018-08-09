@@ -32,4 +32,8 @@ open class QRoomList: UIChatListViewController {
         target.room = room
         self.navigationController?.pushViewController(target, animated: true)
     }
+    
+    open override func viewWillAppear(_ animated: Bool) {
+        self.tabBarController?.tabBar.isHidden = false
+    }
 }
