@@ -44,6 +44,7 @@ public class QRoom: RoomModel {
         }
     }
     
+    //Todo Need to be implement from qiscus core
     public func loadAvatar(onSuccess:  @escaping (UIImage)->Void, onError:  @escaping (String)->Void){
         
     }
@@ -63,9 +64,24 @@ public class QRoom: RoomModel {
     }
     
     
-    public class func getAllRoom(completion: @escaping ([QRoom]?, QError?) -> Void){
+    public class func getAllRoom(completion: @escaping ([QRoom]?, String) -> Void){
         QiscusCore.shared.getAllRoom() { (qRoom,error) in
-            completion(qRoom as! [QRoom],nil)
+            completion(qRoom as! [QRoom],"error")
+        }
+    }
+    
+    public func update(withID: String, roomName:String? = nil, roomAvatarURL:String? = nil, roomOptions:String? = nil, onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){
+        QiscusCore.shared.updateRoom(withID: withID, name: roomName, avatarURL: URL(string: roomAvatarURL!), options: roomOptions) { (qRoom, error) in
+            onSuccess(qRoom as! QRoom)
+        }
+    }
+    
+    //TODO Need to be implement get Qroom from local
+    public func room(withUser user:String) -> QRoom? {
+        if Thread.isMainThread {
+            return nil
+        }else{
+            return nil
         }
     }
     

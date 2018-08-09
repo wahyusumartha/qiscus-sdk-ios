@@ -16,7 +16,7 @@ public protocol QRoomListDelegate {
     func didDeselect(room:QRoom)
     func didSelect(comment: QComment)
     func didDeselect(comment:QComment)
-    func willLoad(rooms: [QRoom]) -> [QRoom]?
+    //func willLoad(rooms: [QRoom]) -> [QRoom]?
     /**
      Return your custom table view cell as QRoomListCell
     */
@@ -31,6 +31,7 @@ open class QRoomList: UITableView{
     
     public var filteredRooms: [QRoom] {
         get{
+            print("checkRoom =\(rooms.count)")
             let text = searchText.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             if text == "" {
                 return self.rooms
@@ -94,15 +95,19 @@ open class QRoomList: UITableView{
     }
     public func reload(){
         if !self.clearingData {
-            let roomsData = QRoom.all()
-            if let extRooms = self.listDelegate?.willLoad(rooms: roomsData!) {
-                self.rooms = extRooms
-            } else {
-                self.rooms = roomsData!
+            let roomsData = QRoom.getAllRoom { (qRoom, error) in
+                print("qRoom.count \(qRoom?.count)")
+//                if let extRooms = self.listDelegate?.willLoad(rooms: qRoom!) {
+//                    self.rooms = extRooms
+//                } else {
+//                    self.rooms = qRoom!
+//                }
+                self.rooms = qRoom!
+                
+                let indexSet = IndexSet(integer: 0)
+                self.reloadSections(indexSet, with: .none)
             }
-            
-            let indexSet = IndexSet(integer: 0)
-            self.reloadSections(indexSet, with: .none)
+           
         }
     }
 
@@ -118,7 +123,7 @@ open class QRoomList: UITableView{
                 Qiscus.printLog(text: "test")
             }
         } else {
-            self.comments = Qiscus.searchComment(searchQuery: text)!
+            self.comments = Qiscus.sharedInstance.searchComment(searchQuery: text)!
         }
         
     }
@@ -222,7 +227,9 @@ extension QRoomList: UITableViewDelegate,UITableViewDataSource {
     
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // When filter or search active, top section is room result then comment result
+        
         if indexPath.section == 0 {
+            print("self.filteredRooms")
             let room = self.filteredRooms[indexPath.row]
             // New approach Custom Cell
             if var cell = self.listDelegate?.tableviewCell(for: room) {

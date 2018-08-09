@@ -51,5 +51,33 @@ public protocol QiscusChatVCDelegate{
     func chatVC(viewController:QiscusChatVC, didFailLoadRoom error:String)
 }
 public class QiscusChatVC: UIChatViewController {
-   var isPresence:Bool = false
+    public var delegate:QiscusChatVCDelegate?
+    public var configDelegate:QiscusChatVCConfigDelegate?
+    public var cellDelegate:QiscusChatVCCellDelegate?
+    public var isPresence:Bool = false
+    public var chatDistinctId:String?
+    public var chatData:String?
+    public var chatMessage:String?
+    public var archived:Bool = QiscusUIConfiguration.sharedInstance.readOnly
+    public var chatNewRoomUsers:[String] = [String]()
+    public var chatTitle:String?
+    public var chatSubtitle:String?
+    public var chatUser:String?
+    public var data:Any?
+    public var chatRoomId:String?
+    public var chatTarget:QComment?
+    
+    func back() {
+        self.isPresence = false
+        view.endEditing(true)
+        if let delegate = self.delegate{
+            if delegate.chatVC(overrideBackAction: self){
+                delegate.chatVC(backAction: self, room: self.room as! QRoom, data: data)
+            }else{
+                let _ = self.navigationController?.popViewController(animated: true)
+            }
+        }else{
+            let _ = self.navigationController?.popViewController(animated: true)
+        }
+    }
 }

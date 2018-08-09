@@ -37,7 +37,7 @@ open class QRoomListCell: UITableViewCell {
 
     func subscribeEvent(roomId: String) {
         let center: NotificationCenter = NotificationCenter.default
-        center.addObserver(self, selector: #selector(QRoomListCell.userTyping(_:)), name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
+        //center.addObserver(self, selector: #selector(QRoomListCell.userTyping(_:)), name: QiscusNotification.USER_TYPING(onRoom: roomId), object: nil)
         center.addObserver(self, selector: #selector(QRoomListCell.roomChangeNotif(_:)), name: QiscusNotification.ROOM_CHANGE(onRoom: roomId), object: nil)
     }
     
@@ -65,7 +65,7 @@ open class QRoomListCell: UITableViewCell {
     open func setupUI(){}
     
     
-    open func onUserTyping(user:QUser, typing:Bool){}
+   // open func onUserTyping(user:QUser, typing:Bool){}
     
     open func onRoomChange(room: QRoom){
         self.room = room
@@ -77,17 +77,17 @@ open class QRoomListCell: UITableViewCell {
     
     
     open func searchTextChanged(){}
-    
-    @objc private func userTyping(_ notification: Notification){
-        if let userInfo = notification.userInfo {
-            let user = userInfo["user"] as! QUser
-            let typing = userInfo["typing"] as! Bool
-            let room = userInfo["room"] as! QRoom
-           
-            if self.room?.id != room.id { return}
-            self.onUserTyping(user: user, typing: typing)
-        }
-    }
+//
+//    @objc private func userTyping(_ notification: Notification){
+//        if let userInfo = notification.userInfo {
+//            let user = userInfo["user"] as! QUser
+//            let typing = userInfo["typing"] as! Bool
+//            let room = userInfo["room"] as! QRoom
+//
+//            if self.room?.id != room.id { return}
+//            self.onUserTyping(user: user, typing: typing)
+//        }
+//    }
     @objc private func newCommentNotif(_ notification: Notification){
         if let userInfo = notification.userInfo {
             if let currentRoom = self.room {

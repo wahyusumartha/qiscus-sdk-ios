@@ -23,21 +23,21 @@ class QRoomListDefaultCell: QRoomListCell {
         self.unreadLabel.clipsToBounds = true
     }
     
-    var typingUser:QUser?{
-        didSet{
-            if typingUser != nil {
-                // self.descriptionLabel.text = "\(typingUser!.fullname) is typing ..."
-                self.descriptionLabel.textColor = UIColor(red: 59/255, green: 147/255, blue: 61/255, alpha: 1)
-            }else{
-                if let lastComment = room!.lastComment{
-                   // self.descriptionLabel.text = "\(lastComment.senderName): \(lastComment.text)"
-                    self.descriptionLabel.textColor = UIColor.black
-                }
-            }
-        }
-    }
+//    var typingUser:QUser?{
+//        didSet{
+//            if typingUser != nil {
+//                // self.descriptionLabel.text = "\(typingUser!.fullname) is typing ..."
+//                self.descriptionLabel.textColor = UIColor(red: 59/255, green: 147/255, blue: 61/255, alpha: 1)
+//            }else{
+//                if let lastComment = room!.lastComment{
+//                   // self.descriptionLabel.text = "\(lastComment.senderName): \(lastComment.text)"
+//                    self.descriptionLabel.textColor = UIColor.black
+//                }
+//            }
+//        }
+//    }
     override func setupUI() {
-        self.typingUser = nil
+        //self.typingUser = nil
         setupAvatar()
         setupUnreadIndicator()
         setupName()
@@ -61,15 +61,15 @@ class QRoomListDefaultCell: QRoomListCell {
             self.titleLabel.attributedText = newLabelText
         }
     }
-    override func onUserTyping(user: QUser, typing: Bool) {
-        if typing {
-            self.typingUser = user
-        }else{
-            if user.email == self.typingUser?.email {
-                self.typingUser = nil
-            }
-        }
-    }
+//    override func onUserTyping(user: QUser, typing: Bool) {
+//        if typing {
+//            self.typingUser = user
+//        }else{
+//            if user.email == self.typingUser?.email {
+//                self.typingUser = nil
+//            }
+//        }
+//    }
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 

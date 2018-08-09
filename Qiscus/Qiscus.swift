@@ -47,6 +47,9 @@ public class Qiscus {
     static var qiscusDeviceToken: String = ""
     var notificationAction:((QiscusChatVC)->Void)? = nil
     var disableLocalization: Bool = false
+    var isPushed:Bool = false
+    /// cached qiscusChatVC : viewController that already opened will be chached here
+    public var chatViews = [String:QiscusChatVC]()
     /**
      Active Qiscus Print log, by default is disable/false
      */
@@ -119,9 +122,9 @@ public class Qiscus {
      - parameter appId: Qiscus App ID, please register or login in http://qiscus.com to find your App ID
      */
     
-    //Todo need implement
     public func setAppId(appId:String){
-    
+        QiscusCore.setup(WithAppID: appId)
+        QiscusCore.enableDebugPrint = true
     }
     
     /**
@@ -140,9 +143,10 @@ public class Qiscus {
         Qiscus.sharedInstance.RealtimeConnect()
     }
     
-    //Todo need to be implement /call api for setup withuserIdentityToken
     func setup(withuserIdentityToken: String){
-        
+        QiscusCore.connect(withIdentityToken: withuserIdentityToken) { (qUser, error) in
+            
+        }
     }
     
     
@@ -188,23 +192,34 @@ public class Qiscus {
         }
     }
     
-    //Todo need implement
     public func room(withId roomId:String, onSuccess:@escaping ((QRoom)->Void),onError:@escaping ((String)->Void)){
-        
+        return QiscusCore.shared.getRoom(withID: roomId, completion: { (qRoom, error) in
+            onSuccess(qRoom as! QRoom)
+        })
+    }
+    
+    public func room(withUserId: String, onSuccess:@escaping ((QRoom)->Void),onError:@escaping ((String)->Void)){
+        return QiscusCore.shared.getRoom(withUser: withUserId, completion: { (qRoom, error) in
+            onSuccess(qRoom as! QRoom)
+        })
     }
     
     public func chatView(withRoomId: String) -> QiscusChatVC {
-        return QiscusChatVC()
+        let chatRoom = QiscusChatVC()
+        chatRoom.chatRoomId = withRoomId
+        return chatRoom
     }
     
-    //Todo need implement
     public func getNonce(onSuccess:@escaping ((String)->Void), onFailed:@escaping ((String)->Void), secureURL:Bool = true){
-        
+        QiscusCore.getNonce { (nonceData, error) in
+            onSuccess((nonceData?.nonce)!)
+        }
     }
     
-    //Todo need implement
-    public func fetchAllRoom(onSuccess: @escaping (([QRoom]) -> Void), onError: @escaping ((String) -> Void)) {
-    
+    public func fetchAllRoom(onSuccess:@escaping (([QRoom])->Void)){
+        QRoom.getAllRoom { (qRoom, error) in
+            onSuccess(qRoom!)
+        }
     }
     
     /// get image assets on qiscus bundle
@@ -216,7 +231,7 @@ public class Qiscus {
     }
     
     /// subscribe room notification
-    public class func subscribeAllRoomNotification(){
+    public func subscribeAllRoomNotification(){
 //        QiscusBackgroundThread.async { autoreleasepool {
 //            let rooms = QRoom.all()
 //            for room in rooms {
@@ -229,7 +244,7 @@ public class Qiscus {
     ///
     /// - Parameter searchQuery: query to search
     /// - Returns: array of QComment obj
-    public class func searchComment(searchQuery: String) -> [QComment]? {
+    public func searchComment(searchQuery: String) -> [QComment]? {
         return nil
     }
     
@@ -564,6 +579,7 @@ public class Qiscus {
             }}
     }
     
+    //Todo call QiscusUI
     /// get QiscusChatVC with array of username
     ///
     /// - Parameters:
@@ -574,28 +590,95 @@ public class Qiscus {
     ///   - distinctId: -
     ///   - withMessage: predefined text message
     /// - Returns: QiscusChatVC to be presented or pushed
-    @objc public class func chatView(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String = "", withMessage:String? = nil)->QiscusChatVC{
+    public  func chatView(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String = "", withMessage:String? = nil)->QiscusChatVC{
         
-        if let room = QRoom.room(withUser: users.first!) {
-            return Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
-        }else{
-            if !Qiscus.sharedInstance.connected {
-                Qiscus.setupReachability()
-            }
-            Qiscus.sharedInstance.isPushed = true
-            
-            let chatVC = QiscusChatVC()
-            
-            chatVC.chatUser = users.first!
-            chatVC.chatTitle = title
-            chatVC.chatSubtitle = subtitle
-            chatVC.archived = readOnly
-            chatVC.chatMessage = withMessage
-            if chatVC.isPresence {
-                chatVC.goBack()
-            }
-            return chatVC
+        
+//        if let room = QRoom.room(withUser: users.first!) {
+//            return Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
+//        }else{
+//            if !Qiscus.sharedInstance.connected {
+//                Qiscus.setupReachability()
+//            }
+//            Qiscus.sharedInstance.isPushed = true
+//
+//            let chatVC = QiscusChatVC()
+//
+//            chatVC.chatUser = users.first!
+//            chatVC.chatTitle = title
+//            chatVC.chatSubtitle = subtitle
+//            chatVC.archived = readOnly
+//            chatVC.chatMessage = withMessage
+//            if chatVC.isPresence {
+//                chatVC.back()
+//            }
+//            return chatVC
+//        }
+        
+        let chatVC = QiscusChatVC()
+        return chatVC
+    }
+    
+    /// get QiscusChatVC with room id
+    ///
+    /// - Parameters:
+    ///   - users: array of user id
+    ///   - readOnly: true => unable to access input view , false => able to access input view
+    ///   - title: chat title
+    ///   - subtitle: chat subtitle
+    ///   - distinctId: -
+    ///   - withMessage: predefined text message
+    /// - Returns: QiscusChatVC to be presented or pushed
+    public func createChatView(withUsers users:[String], readOnly:Bool = false, title:String, subtitle:String = "", distinctId:String? = nil, optionalData:String?=nil, withMessage:String? = nil)->QiscusChatVC{
+        if !Qiscus.sharedInstance.connected {
+            Qiscus.setupReachability()
         }
+        
+        Qiscus.sharedInstance.isPushed = true
+        
+        let chatVC = QiscusChatVC()
+        //chatVC.reset()
+        if distinctId != nil{
+            chatVC.chatDistinctId = distinctId!
+        }else{
+            chatVC.chatDistinctId = ""
+        }
+        chatVC.chatData = optionalData
+        chatVC.chatMessage = withMessage
+        chatVC.archived = readOnly
+        chatVC.chatNewRoomUsers = users
+        chatVC.chatTitle = title
+        chatVC.chatSubtitle = subtitle
+        return chatVC
+    }
+    
+    /// get QiscusChatVC with room id
+    ///
+    /// - Parameters:
+    ///   - roomId: room id
+    ///   - readOnly: true => unable to access input view , false => able to access input view
+    ///   - title: chat title
+    ///   - subtitle: chat subtitle
+    ///   - distinctId: -
+    ///   - withMessage: predefined text message
+    /// - Returns: QiscusChatVC to be presented or pushed
+    public func chatView(withRoomId roomId:String, readOnly:Bool = false, title:String = "", subtitle:String = "", withMessage:String? = nil)->QiscusChatVC{
+        if !Qiscus.sharedInstance.connected {
+            Qiscus.setupReachability()
+        }
+        
+        var chatVC = QiscusChatVC()
+        
+        if let chatView = Qiscus.sharedInstance.chatViews[roomId] {
+            chatVC = chatView
+        }else{
+            chatVC.chatRoomId = roomId
+        }
+        chatVC.chatTitle = title
+        chatVC.chatSubtitle = subtitle
+        chatVC.archived = readOnly
+        chatVC.chatMessage = withMessage
+        
+        return chatVC
     }
     
     

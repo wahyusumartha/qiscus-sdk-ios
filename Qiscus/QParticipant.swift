@@ -6,3 +6,10 @@
 //
 
 import Foundation
+import QiscusCore
+import UIKit
+
+//toDo need QParticipant Model
+public class QParticipant: QRoom {
+
+}

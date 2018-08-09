@@ -6,3 +6,9 @@
 //
 
 import Foundation
+import QiscusCore
+import UIKit
+
+//public class QUser: UserModel {
+//
+//}
