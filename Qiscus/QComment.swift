@@ -117,7 +117,7 @@ public class QComment: CommentModel {
     
     public var typeMessage: QCommentType{
         get{
-            return QCommentType.init(name: type.rawValue)
+            return QCommentType(rawValue: type.hashValue)!
         }
     }
     

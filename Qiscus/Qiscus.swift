@@ -80,6 +80,11 @@ public class Qiscus {
         }
     }
     
+    /// shared instance of QiscusClient
+    public static var client : QiscusClient {
+        get { return QiscusClient.shared }
+    }
+    
     /**
      iCloud Config, by default is disable/false. You need to setup icloud capabilities then create container in your developer account.
      */
@@ -108,8 +113,11 @@ public class Qiscus {
         }
     }
     
-    public func isLoggedIn() -> Bool {
-        return false
+    ///check qiscus user login status
+    @objc public class var isLoggedIn:Bool{
+        get{
+            return QiscusClient.isLoggedIn
+        }
     }
     
     public func connect(delegate del: QiscusConfigDelegate) {
@@ -145,7 +153,11 @@ public class Qiscus {
     
     func setup(withuserIdentityToken: String){
         QiscusCore.connect(withIdentityToken: withuserIdentityToken) { (qUser, error) in
-            
+            if let user = qUser{
+                 QiscusClient.shared.token = user.token
+                 QiscusClient.shared.userData.set(user.token, forKey: "qiscus_token")
+            }
+           
         }
     }
     
@@ -158,7 +170,7 @@ public class Qiscus {
         center.addObserver(self, selector: #selector(Qiscus.applicationDidBecomeActife), name: .UIApplicationDidBecomeActive, object: nil)
         center.addObserver(self, selector: #selector(Qiscus.goToBackgroundMode), name: .UIApplicationDidEnterBackground, object: nil)
         
-        if self.isLoggedIn() {
+        if Qiscus.isLoggedIn {
             Qiscus.mqttConnect()
         }
     }
@@ -291,7 +303,7 @@ public class Qiscus {
     @objc public class func didReceive(RemoteNotification userInfo:[AnyHashable : Any], completionHandler: @escaping (UIBackgroundFetchResult) -> Void = {_ in}){
         completionHandler(.newData)
         
-        if Qiscus.sharedInstance.isLoggedIn(){
+        if Qiscus.isLoggedIn{
             if userInfo["qiscus_sdk"] != nil {
                 let state = Qiscus.sharedInstance.application.applicationState
                 if state != .active {
@@ -319,22 +331,37 @@ public class Qiscus {
     /// register device token to sdk server
     ///
     /// - Parameter token: device token Data
-    
-    //Todo need to implement register User Notification
     public func didRegisterUserNotification(withToken token: Data){
-        if Qiscus.sharedInstance.isLoggedIn(){
+        if Qiscus.isLoggedIn{
             var tokenString: String = ""
             for i in 0..<token.count {
                 tokenString += String(format: "%02.2hhx", token[i] as CVarArg)
             }
             
             //call service api to register notification
-            
+            QiscusCore.shared.register(deviceToken: tokenString) { (isRegister, erorr) in
+                
+            }
         }
     }
     
-    //Todo need to implement updateRoom
+    
+    /// this func to update room
+    ///
+    /// - Parameters:
+    ///   - roomId: roomId
+    ///   - roomName: roomName
+    ///   - avatar: avatarUrl
     public func updateRoom(roomId: String, roomName: String? = nil, avatar: String? = nil){
+        if(avatar != nil){
+            QiscusCore.shared.updateRoom(withID: roomId, name: roomName, avatarURL: URL(string: avatar!), options: nil) { (qRoom, error) in
+                
+            }
+        }else{
+            QiscusCore.shared.updateRoom(withID: roomId, name: roomName, avatarURL: nil, options: nil) { (qRoom, error) in
+                
+            }
+        }
         
     }
     
@@ -362,7 +389,7 @@ public class Qiscus {
    public func didReceive(RemoteNotification userInfo:[AnyHashable : Any], completionHandler: @escaping (UIBackgroundFetchResult) -> Void = {_ in}){
         completionHandler(.newData)
         
-        if Qiscus.sharedInstance.isLoggedIn(){
+        if Qiscus.isLoggedIn{
             if userInfo["qiscus_sdk"] != nil {
                 let state = Qiscus.sharedInstance.application.applicationState
                 if state != .active {
@@ -379,7 +406,7 @@ public class Qiscus {
     
     @objc func applicationDidBecomeActife(){
         Qiscus.setupReachability()
-        if Qiscus.sharedInstance.isLoggedIn(){
+        if Qiscus.isLoggedIn{
             Qiscus.sharedInstance.RealtimeConnect()
         }
         if !Qiscus.sharedInstance.styleConfiguration.rewriteChatFont {
@@ -397,7 +424,7 @@ public class Qiscus {
     ///
     /// - Parameter cloud: -
     public class func sync(cloud:Bool = false){
-        if Qiscus.sharedInstance.isLoggedIn(){
+        if Qiscus.isLoggedIn{
             Qiscus.sharedInstance.syncProcess(cloud: cloud)
         }
     }
@@ -415,7 +442,7 @@ public class Qiscus {
             if let reachable = Qiscus.sharedInstance.reachability {
                 if reachable.isReachable {
                     Qiscus.sharedInstance.connected = true
-                    if Qiscus.sharedInstance.isLoggedIn() {
+                    if Qiscus.isLoggedIn {
                         Qiscus.sharedInstance.RealtimeConnect()
                         DispatchQueue.main.async { autoreleasepool{
                             QComment.resendPendingMessage()
@@ -431,7 +458,7 @@ public class Qiscus {
                     Qiscus.printLog(text: "connected via cellular data")
                 }
                 Qiscus.sharedInstance.connected = true
-                if Qiscus.sharedInstance.isLoggedIn() {
+                if Qiscus.isLoggedIn {
                     Qiscus.sharedInstance.RealtimeConnect()
                     DispatchQueue.main.async { autoreleasepool{
                         QComment.resendPendingMessage()
@@ -505,7 +532,9 @@ public class Qiscus {
     //TODO Need to be implement,
     /// unregister device token from service
     public func unRegisterDevice(){
-        
+        QiscusCore.shared.remove(deviceToken: QiscusClient.shared.token) { (unRegister, error) in
+            
+        }
     }
     
     //Todo need to be fix
@@ -514,7 +543,8 @@ public class Qiscus {
      @func clearData()
      */
     public func clear(){
-       
+        QiscusClient.clear()
+        QiscusClient.hasRegisteredDeviceToken = false
     }
     
     //TODO Need TO Be Implement
@@ -523,6 +553,7 @@ public class Qiscus {
     /// - Parameter deviceToken: device token in string
    public func registerDevice(withToken deviceToken: String){
         Qiscus.qiscusDeviceToken = deviceToken
+        Qiscus.client.deviceToken = deviceToken
     
     }
     
@@ -535,7 +566,21 @@ public class Qiscus {
     ///   - onSuccess: @escaping on success update user profile
     ///   - onFailed: @escaping on error update user profile with error message
     public func updateProfile(username:String? = nil, avatarURL:String? = nil, onSuccess:@escaping (()->Void), onFailed:@escaping ((String)->Void)) {
-      onFailed("need to be implement")
+        
+        var userName = ""
+        if(userName != nil){
+            userName = username!
+        }
+        if(avatarURL != nil){
+            QiscusCore.shared.updateProfile(displayName: userName, avatarUrl: URL(string: avatarURL!)) { (qUser, error) in
+                
+            }
+        }else{
+            QiscusCore.shared.updateProfile(displayName: userName, avatarUrl: nil) { (qUser, error) in
+                
+            }
+        }
+        
         
     }
     
@@ -592,29 +637,20 @@ public class Qiscus {
     /// - Returns: QiscusChatVC to be presented or pushed
     public  func chatView(withUsers users:[String], readOnly:Bool = false, title:String = "", subtitle:String = "", distinctId:String = "", withMessage:String? = nil)->QiscusChatVC{
         
-        
-//        if let room = QRoom.room(withUser: users.first!) {
-//            return Qiscus.chatView(withRoomId: room.id, readOnly: readOnly, title: title, subtitle: subtitle, withMessage: withMessage)
-//        }else{
-//            if !Qiscus.sharedInstance.connected {
-//                Qiscus.setupReachability()
-//            }
-//            Qiscus.sharedInstance.isPushed = true
-//
-//            let chatVC = QiscusChatVC()
-//
-//            chatVC.chatUser = users.first!
-//            chatVC.chatTitle = title
-//            chatVC.chatSubtitle = subtitle
-//            chatVC.archived = readOnly
-//            chatVC.chatMessage = withMessage
-//            if chatVC.isPresence {
-//                chatVC.back()
-//            }
-//            return chatVC
-//        }
-        
         let chatVC = QiscusChatVC()
+        
+        QiscusCore.shared.getRoom(withUser: users.first!) { (qRoom, error) in
+            chatVC.room = qRoom
+            chatVC.chatUser = users.first!
+            chatVC.chatTitle = title
+            chatVC.chatSubtitle = subtitle
+            chatVC.archived = readOnly
+            chatVC.chatMessage = withMessage
+            if chatVC.isPresence {
+                chatVC.back()
+            }
+    
+        }
         return chatVC
     }
     
@@ -636,19 +672,26 @@ public class Qiscus {
         Qiscus.sharedInstance.isPushed = true
         
         let chatVC = QiscusChatVC()
-        //chatVC.reset()
-        if distinctId != nil{
-            chatVC.chatDistinctId = distinctId!
-        }else{
-            chatVC.chatDistinctId = ""
+        QiscusCore.shared.createGroup(withName: title, participants: users, avatarUrl: nil) { (qRoom, error) in
+            if distinctId != nil{
+                chatVC.chatDistinctId = distinctId!
+            }else{
+                chatVC.chatDistinctId = ""
+            }
+            chatVC.chatData         = optionalData
+            chatVC.chatMessage      = withMessage
+            chatVC.archived         = readOnly
+            chatVC.chatNewRoomUsers = users
+            chatVC.chatTitle        = title
+            chatVC.chatSubtitle     = subtitle
+            chatVC.room             = qRoom
+            if chatVC.isPresence {
+                chatVC.back()
+            }
         }
-        chatVC.chatData = optionalData
-        chatVC.chatMessage = withMessage
-        chatVC.archived = readOnly
-        chatVC.chatNewRoomUsers = users
-        chatVC.chatTitle = title
-        chatVC.chatSubtitle = subtitle
+        
         return chatVC
+        
     }
     
     /// get QiscusChatVC with room id

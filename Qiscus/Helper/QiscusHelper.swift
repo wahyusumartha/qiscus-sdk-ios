@@ -8,7 +8,7 @@
 
 import UIKit
 
-open class QiscusIndexPathData: NSObject{
+open class QIndexPathData: NSObject{
     open var row = 0
     open var section = 0
     open var newGroup:Bool = false

@@ -12,6 +12,7 @@ import QiscusCore
 
 open class QRoomList: UIChatListViewController {
     var roomData : [QRoom] = [QRoom]()
+    
     override open func viewDidLoad() {
         super.viewDidLoad()
         self.title = "Chat List"
@@ -27,7 +28,7 @@ open class QRoomList: UIChatListViewController {
         self.chat(withRoom: room)
     }
     
-    private func chat(withRoom room: RoomModel) {
+    open func chat(withRoom room: RoomModel){
         let target = QiscusChatVC()
         target.room = room
         self.navigationController?.pushViewController(target, animated: true)

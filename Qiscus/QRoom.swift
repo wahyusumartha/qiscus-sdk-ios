@@ -57,34 +57,51 @@ public class QRoom: RoomModel {
         return nil
     }
     
-    public class func getRoom(withId: String, completion: @escaping (QRoom?, QError?) -> Void) {
+    public class func getRoom(withId: String, completion: @escaping (QRoom?, String?) -> Void) {
         QiscusCore.shared.getRoom(withID: withId) { (qRoom,error) in
-            completion(qRoom as! QRoom,nil)
+            if let qRoomData = qRoom {
+                 completion(qRoom as! QRoom,nil)
+            }else{
+                completion(nil,error?.message)
+            }
         }
     }
     
     
     public class func getAllRoom(completion: @escaping ([QRoom]?, String) -> Void){
         QiscusCore.shared.getAllRoom() { (qRoom,error) in
-            completion(qRoom as! [QRoom],"error")
+            if let qRoomData = qRoom {
+                 completion(qRoomData as! [QRoom],"suceess")
+            }else{
+                completion(nil,(error?.message)!)
+            }
+           
+        }
+    }
+    
+    public class func getUnreadCount(completion: @escaping (Int) -> Void){
+        QiscusCore.shared.getAllRoom() { (qRoom,error) in
+            var countUnread = 0
+            if let qRoomData = qRoom {
+                for room in qRoomData.enumerated() {
+                    countUnread = countUnread + room.element.unreadCount
+                }
+            }
+            
+            completion(countUnread)
         }
     }
     
     public func update(withID: String, roomName:String? = nil, roomAvatarURL:String? = nil, roomOptions:String? = nil, onSuccess:@escaping ((_ room: QRoom)->Void),onError:@escaping ((_ error: String)->Void)){
         QiscusCore.shared.updateRoom(withID: withID, name: roomName, avatarURL: URL(string: roomAvatarURL!), options: roomOptions) { (qRoom, error) in
-            onSuccess(qRoom as! QRoom)
+            if let qRoomData = qRoom {
+                onSuccess(qRoom as! QRoom)
+            }else{
+                onError((error?.message)!)
+            }
+           
         }
     }
-    
-    //TODO Need to be implement get Qroom from local
-    public func room(withUser user:String) -> QRoom? {
-        if Thread.isMainThread {
-            return nil
-        }else{
-            return nil
-        }
-    }
-    
 }
 
 
