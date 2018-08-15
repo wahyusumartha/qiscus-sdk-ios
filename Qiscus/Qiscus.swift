@@ -116,7 +116,7 @@ public class Qiscus {
     ///check qiscus user login status
     @objc public class var isLoggedIn:Bool{
         get{
-            return QiscusClient.isLoggedIn
+            return QiscusCore.isLogined
         }
     }
     
