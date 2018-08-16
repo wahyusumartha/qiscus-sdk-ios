@@ -122,6 +122,9 @@ public class Qiscus {
     
     public func connect(delegate del: QiscusConfigDelegate) {
         self.configDelegate = del
+        if !QiscusCore.connect() {
+            print("Qiscus Realtime Filed to connect, please try again or relogin")
+        }
     }
     
     /**
